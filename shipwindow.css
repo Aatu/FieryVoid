@@ -1,0 +1,569 @@
+.shipwindow{
+    border:1px solid #496791;
+    background-color:#0a3340;
+    width:511px;
+    opacity:0.85;
+    color:white;
+    font-family:arial;
+    font-size:10px;
+    z-index:8000;
+    position:absolute;
+    top:50px;
+    display:none;
+    -moz-box-shadow: 5px 5px 10px black;
+    -webkit-box-shadow: 5px 5px 10px black;
+    box-shadow: 5px 5px 10px black;
+}
+
+.shipwindow .value{
+    margin-left:3px;
+    margin-right:3px;
+    color:#496791;
+}
+
+.shipwindow .valueheader{
+    margin-left:3px;
+    color:white;
+}
+
+
+.shipwindow .topbar{
+    height:24px;
+    background-color:#04161c;
+    border-bottom:1px solid #496791;
+    padding-top:5px;
+    font-size:14px;
+    position:relative;
+
+}
+
+.shipwindow .topbar .value.name{
+    font-style:italic;
+}
+
+
+
+.shipwindow .container{
+    position:relative;
+    margin-bottom:5px;
+}
+.visiblecontainer{
+    background-color:#072731;
+    border:1px solid #496791;
+    position:relative;
+    margin:3px;
+}
+
+
+
+.shipwindow .icon{
+    border:1px solid #496791;
+    background-color:black;
+    width:122px;
+    height:122px;
+    margin:0px;
+}
+
+.shipwindow .basicinfo{
+    position:absolute;
+    right:0px;
+    top:0px;
+    width:357px;
+    height:120px;
+    margin:0px;
+}
+
+.shipwindow .basicinfo table{
+    border-collapse:collapse;
+    margin:2px;
+}
+.shipwindow .basicinfo td{
+    border:1px solid #496791;
+    width:116px;
+}
+
+.shipwindow table.shipareas{
+    vertical-align:top;
+}
+
+.shipwindow .shipareas td{
+    width:102px;
+    border:1px solid #496791;
+    margin:0px;
+    padding:0px;
+    position:relative;
+    vertical-align:top;
+}
+
+.shipwindow .shipareas td.noborder{
+    width:106px;
+    border:none;
+}
+
+.shipwindow .shipareas td.four{
+    width:214px;
+
+}
+
+.shipwindow .shipareas .visiblecontainer.structure{
+    width:100%;
+    height:30px;
+    text-align:center;
+    margin:0px;
+    border:none;
+    border-bottom:1px solid #496791;
+}
+
+.shipwindow .shipareas .structure .value{
+    color:white;
+}
+
+.shipwindow .barcontainer{
+    margin-left:2px;
+    margin-right:2px;
+    border:1px solid #496791;
+    background-color:black;
+    position:relative;
+}
+
+.shipwindow .four .barcontainer{
+    width:227px;
+    
+}
+
+.shipwindow .two .barcontainer{
+    width:112px;
+    
+}
+
+.shipwindow .bar{
+    position:absolute;
+    top:0px;
+    left:0px;
+    background-color:#2f5123;
+    height:100%;
+    z-index:7001;
+}
+
+.shipwindow .close{
+    position:absolute;
+    border:1px solid #496791;
+    width:10px;
+    height:10px;
+    right:5px;
+    top:4px;
+    background-image:url(./img/close.png);
+    cursor:pointer;
+}
+
+
+.shipwindow .EW{
+    width:125px;
+    background-color:#072731;
+    border:1px solid #496791;
+    vertical-align:top;
+}
+
+.shipwindow .EW .EWcontainer{
+    height:170px;
+    overflow-y:auto;
+}
+
+.shipwindow .EW span{
+    margin: 0px 0px 0px 2px;
+}
+
+.shipwindow .EW .ewheader{
+    border:1px solid #496791;
+}
+
+.shipwindow .ewentry{
+    margin-top:2px;
+    position:relative;
+}
+
+.ewentry .button1{
+    border:1px solid #496791;
+    width:12px;
+    height:12px;
+    position:absolute;
+    right:18px;
+    top:1px;
+    display:none;
+    background-image:url(./img/minussquare.png);
+    cursor:pointer;
+}
+
+.shipwindow .ewentry .shiplink{
+    color:#496791;
+}
+
+.ewentry .button2{
+    border:1px solid #496791;
+    width:12px;
+    height:12px;
+    position:absolute;
+    right:1px;
+    top:1px;
+    display:none;
+    background-image:url(./img/plussquare.png);
+    cursor:pointer;
+}
+
+body.phase1 .shipwindow.owned .ewentry .button1{
+    display:block;
+}
+
+body.phase1 .shipwindow.owned .ewentry .button2{
+    display:block;
+}
+
+
+.shipwindow .divider td{
+    vertical-align:top;
+}
+
+/*SYSTEM
+*/
+
+.shipwindow .notes{
+    border:1px solid #496791;
+    margin-top:4px;
+    height:57px;
+    background-color:#072731;
+}
+
+.shipwindow .shipSection{
+    margin-top:5px;
+    
+}
+
+.shipwindow .shipSection table{
+    width:100%;
+}
+
+.shipwindow .col2{
+    border-left:2px dotted #496791;
+    border-right:2px dotted #496791;
+}
+
+.shipwindow .shipSection.primary{
+    border-top:2px dotted #496791;
+    border-bottom:2px dotted #496791;
+    padding: 5px 0px 5px 0px;
+}
+
+
+.shipwindow .structure {
+    text-align:center;
+
+}
+.structure.system  .name{
+    width:60px;
+    margin: 0px auto 0px auto;
+}
+
+.shipwindow .structure.system {
+
+    width:110px;
+    height:48px;
+
+}
+
+
+.structure.system .systembarcontainer{
+    width:104px;
+    height:15px;
+}
+
+.shipwindow .structure.system .bar{
+    height:17px;
+}
+
+
+.shipwindow .system{
+    border:1px solid #496791;
+    background-color:#072731;
+    width:50px;
+    margin-left:auto;
+    margin-right:auto;
+    padding:2px;
+    color:white;
+    font-family:arial;
+    font-size:9px;
+}
+
+.shipwindow .system .value{
+    color:white;
+}
+
+.shipwindow.phase3.owned .system.weapon {
+    cursor:pointer;
+}
+
+.shipwindow .system.selected {
+    border:1px solid #84a5ce !important;
+	background-color:#587aa5 !important;
+
+}
+
+.system.selected .systembarcontainer{
+    border:1px solid #84a5ce !important;
+}
+
+.system.selected .icon{
+    border:1px solid #84a5ce !important;
+}
+
+.system.firing .icon .value{
+	display:none;
+}
+
+.shipwindow .system.firing {
+   /*border:1px solid #b72929;*/
+    /*background-color:#3f0d0d;*/
+}
+
+.shipwindow .system.firing .iconmask{
+    background-image:url(./img/firing.png);
+	opacity:0.6 !important;
+
+}
+
+.shipwindow .system .holdfire{
+    background-image:url(./img/holdfire.png);
+}
+
+body.phase3 .shipwindow  .system.firing .holdfire{
+    display:block;
+}
+
+body.phase1 .shipwindow  .system.firing.ballistic .holdfire{
+    display:block;
+}
+
+body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
+    display:none;
+}
+
+.system.firing .systembarcontainer{
+    /*border:1px solid #b72929;*/
+}
+
+.system.firing .icon{
+    /*border:1px solid #b72929;*/
+}
+
+
+
+.shipwindow.phase3.owned.waiting .system.weapon {
+    cursor:auto;
+}
+
+
+
+.shipwindow .system .icon{
+    width:30px;
+    height:20px;
+    border:1px solid #496791;
+    margin:0px;
+    text-align:center;
+    padding-top:10px;
+    position:relative;
+}
+
+.shipwindow .system .icon .iconmask{
+    position:absolute;
+    left:0px;
+    top:0px;
+    width:30px;
+    height:30px;
+    background-color:transparent;
+    opacity:0.5;
+
+}
+
+.shipwindow .system.weapon.loading .iconmask{
+    background-color:orange;
+}
+
+.shipwindow .system.destroyed .iconmask{
+    background-color:black;
+}
+
+.shipwindow .system.offline .iconmask{
+    background-color:black;
+    background-image:url(./img/offline.png);
+    opacity:0.5;
+}
+
+.shipwindow .system.destroyed {
+    border:1px solid #3d4755;
+    background-color:#1f2836;
+}
+
+.shipwindow .system.destroyed .systembarcontainer{
+    border:1px solid #3d4755;
+}
+
+.shipwindow .system.destroyed .icon{
+    border:1px solid #3d4755;
+}
+
+.shipwindow .system .name{
+    width:50px;
+}
+
+.shipwindow .system .health{
+    
+
+}
+
+.shipwindow .system.offline .efficiency.value{
+    display:none;
+}
+
+.system .healthbar{
+    
+    background-color:#2f5123;
+    
+    
+}
+
+.shipwindow .system .bar{
+    z-index:7001;
+    position:absolute;
+    top:0px;
+    left:0px;
+    height:12px;
+}
+
+.shipwindow .system.critical .bar{
+    background-color:#b34119;
+}
+
+.shipwindow .valuecontainer{
+    z-index:7002;
+    position:relative;
+}
+
+.shipwindow  .system .UI{
+    position:absolute;
+    top:0px;
+    right:3px;
+    width:12px;
+    
+}
+.shipwindow .system .button{
+    border:1px solid #496791;
+    width:12px;
+    height:12px;
+    cursor:pointer;
+    display:none;
+    margin-bottom:3px;
+}
+
+.shipwindow .system .plus{
+    background-image:url(./img/plussquare.png);
+}
+
+.shipwindow .system.enableAssignThrust .plus{
+    display:block;
+}
+
+.shipwindow .system .off{
+    background-image:url(./img/off.png);
+}
+
+body.phase1 .shipwindow  .system.canoffline .off{
+    display:block;
+}
+
+.shipwindow .system .on{
+    background-image:url(./img/on.png);
+}
+
+body.phase1 .shipwindow  .system.offline .on{
+    display:block;
+}
+
+
+.shipwindow .system .overload{
+
+    background-image:url(./img/overload.png);
+
+}
+
+.shipwindow .system .stopoverload{
+
+    background-image:url(./img/overloading.png);
+
+}
+
+
+body.phase1 .shipwindow  .system.canoverload .overload{
+    display:block;
+}
+
+.shipwindow  .system.overload .stopoverload{
+    display:block;
+}
+
+
+body.phase1 .shipwindow  .system.canboost .plus{
+    display:block;
+}
+
+body.phase1 .shipwindow  .system.boosted .plus{
+    display:block;
+}
+
+body.phase1 .shipwindow  .system.boosted .minus{
+    display:block;
+}
+
+.shipwindow .system .minus{
+
+    background-image:url(./img/minussquare.png);
+
+}
+
+.shipwindow  .system.enableAssignThrust .minus{
+    display:block;
+}
+
+.system .systemcontainer{
+    position:relative;
+}
+
+.system .systembarcontainer{
+    width:44px;
+    border:1px solid #496791;
+    height:10px;
+    background-color:black;
+    margin-top:2px;
+    padding:1px 2px 1px 2px;
+    text-align:center;
+    position:relative;
+
+}
+
+
+.system .efficiency.barcontainer{
+    width:38px;
+
+}
+
+.system .efficiencybar{
+    background-color:#2f5123;
+}
+
+.system .critical{
+    background-color:#881c0d;
+    display:none;
+}
+
+
+
+
+

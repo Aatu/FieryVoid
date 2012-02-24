@@ -1,0 +1,812 @@
+
+jQuery(function(){
+	$(".shipwindow .close").bind("click", shipWindowManager.close);
+	$(".ewentry.CCEW .button1").bind("click", ew.buttonDeassignEW);
+	$(".ewentry.CCEW .button2").bind("click", ew.buttonAssignEW);
+	$(".shipwindow .system .plus").bind("click", shipWindowManager.clickPlus);
+	$(".shipwindow .system .minus").bind("click", shipWindowManager.clickMinus);
+	$(".shipwindow .system").bind("click", shipWindowManager.clickSystem);
+	$(".assignthrustcontainer .cancel").bind("click", shipWindowManager.cancelAssignThrustEvent);
+	$(".assignthrustcontainer .ok").bind("click", shipWindowManager.doneAssignThrust);
+	
+	
+	$(".shipwindow .system .off").bind("click", shipManager.power.onOfflineClicked);
+	$(".shipwindow .system .on").bind("click", shipManager.power.onOnlineClicked);
+	$(".shipwindow .system .overload").bind("click", shipManager.power.onOverloadClicked);
+	$(".shipwindow .system .stopoverload").bind("click", shipManager.power.onStopOverloadClicked);
+	$(".shipwindow .system .holdfire").bind("click", window.weaponManager.onHoldfireClicked);
+	
+});
+
+shipWindowManager = {
+
+	close: function(){
+		//shipWindowManager.cancelAssignThrust($(this).parent().parent());
+		$(this).parent().parent().hide();
+	},	
+	
+	open: function(ship){
+	
+		
+		var old;
+		if (ship.userid == gamedata.thisplayer){
+			old = $(".shipwindow.owned:visible");
+		}else{
+			old = $(".shipwindow.enemy:visible");
+		}
+		
+		
+		
+		var n = ship.shipStatusWindow;
+		
+		if (!n)
+			return;
+			
+		if (n.css("display") == "block")
+			return;
+			
+		if (old.length){
+			old.hide();
+			n.css("top", old.css("top")).css("left", old.css("left"));
+		}
+			
+		
+		n.show();
+		
+	
+	},
+
+	checkIfAnyStatusOpen: function(ship){
+		var old;
+		
+		if (ship.userid == gamedata.thisplayer){
+			old = $(".shipwindow.owned:visible");
+		}else{
+			old = $(".shipwindow.enemy:visible");
+		}
+
+		if (old.length)
+			shipWindowManager.open(ship);
+		
+		
+	},
+	
+	
+	createShipWindow: function(ship){
+
+		
+	
+		var template = $("#shipwindowtemplatecontainer .shipwindow");
+		shipwindow = template.clone(true).appendTo("body");
+		
+		shipwindow.draggable();
+		
+		if (ship.userid == gamedata.thisplayer){
+			shipwindow.addClass("owned");
+			shipwindow.css("left", "50px");
+		}else{
+			shipwindow.addClass("enemy");
+			shipwindow.css("right", "50px");
+		}
+				
+		
+		
+		shipwindow.data("ship", ship.id);
+		shipwindow.addClass("ship_"+ship.id);
+		shipWindowManager.populateShipWindow(ship, shipwindow);
+		
+		return shipwindow;
+		
+	},
+
+	populateShipWindow: function(ship, shipwindow){
+		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
+		
+		shipwindow.find(".topbar .value.name").html(ship.name);
+		shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
+		
+		shipWindowManager.addSystems(ship, shipwindow, 1);
+		shipWindowManager.addSystems(ship, shipwindow, 0);
+		shipWindowManager.addSystems(ship, shipwindow, 2);
+		shipWindowManager.addSystems(ship, shipwindow, 3);
+		shipWindowManager.addSystems(ship, shipwindow, 4);
+
+	},
+	
+	addSystems: function (ship, shipwindow, location){
+		
+		var systems = shipManager.systems.getSystemsForShipStatus(ship, location);
+		var structure = shipManager.systems.getStructureSystem(ship, location);
+		var destination = $(".shipwindow.ship_"+ship.id+" #shipSection_" + location + " table");
+		
+		if (systems.length == 0){
+			destination.css("display", "none");
+			return;
+		}
+		
+	
+		var arrangement;
+		var col2 = 2;
+		var col4 = 4;
+		if (location == 0){
+			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
+		}else if (location < 3){
+			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
+		}else{
+			col2 = 1;
+			col4 = 2;
+			arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure);
+		}
+		
+		var index = 0;
+		for (var i in arrangement){
+			var group = arrangement[i];
+			var row;
+			if (group.length == 1){	row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');}
+			if (group.length == 2){	
+			
+				if (location == 4){
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
+				}else{
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+				}
+				
+			}
+			
+			if (group.length == 3){	
+			
+				row = $('<tr><td class="systemcontainer_'+index+'"></td><td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
+				+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+			}
+				
+			if (group.length == 4){	
+				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
+				+'<td class="systemcontainer_'+(index+2)+'"></td><td class="systemcontainer_'+(index+3)+'"></td></tr>')
+			}
+			
+			if (location == 2){
+				row.prependTo(destination);
+			}else{
+				row.appendTo(destination);
+			}
+			
+	
+			for (var a in group){
+				var system = group[a];
+				shipWindowManager.addSystem(ship, system, $(".systemcontainer_"+index, destination));
+				index++;
+			}
+			
+			 
+			
+		}
+		
+		
+	},
+	
+	getFinalArrangementTwo: function(ship, systems, structure){
+				
+		var grouped = Array();
+		
+		var list = Array();
+		
+		for (var i= 0;i<systems.length;i++){
+			var system = systems[i];
+			if (systems.length % 2 == 1 && i == 0){
+				grouped.push(Array(system));
+			}else{
+				list.push(system);
+				if (list.length == 2){
+					grouped.push(list);
+					list = Array();
+				}
+			}
+			
+		}
+
+		if (structure){
+			grouped.push(Array(structure));
+		}
+		
+		return grouped;
+		
+		
+		
+	},
+	
+	
+	getFinalArrangementFour: function(ship, systems, structure){
+				
+		var grouped = shipManager.systems.groupSystems(systems);
+
+		grouped = shipWindowManager.combineGroups(grouped);
+		grouped = shipWindowManager.addStructure(grouped, structure);
+		
+		return grouped;
+		
+		
+		
+	},
+	
+	addStructure: function(grouped, structure){
+		
+		if (!structure)
+			return grouped;
+		
+		var ones = Array();
+		var deletes = Array();
+		
+		for (var i in grouped){
+			var group = grouped[i];
+		
+			if (group.length == 2){
+				grouped.push(Array(group[0],structure, group[1]));
+				grouped.splice(i, 1);
+				return grouped;
+			}
+			
+			if (group.lenght == 1 && ones.length < 2){
+				ones.push(group[i]);
+				deletes.push(i);
+				if (ones.length == 2){
+					grouped.push(Array(ones[0][0], structure, ones[1][0]));
+					for (var d in deletes){
+						grouped.splice(deletes[d], 1);
+					}
+					return grouped;
+				}
+			}
+			
+		}
+				
+		grouped.push(Array(structure));
+		
+		return grouped;
+	
+	},
+
+	
+	combineGroups: function(grouped){
+		var finals = Array();
+	
+		for (var i in grouped){
+			var group = grouped[i];
+			if (shipWindowManager.isInFinal(finals, group))
+				continue;
+				
+			if (group.length == 1 || group.length == 2){
+				var found = false;
+				for (var a in grouped){
+					var other = grouped[a];
+					if (!found && other.length == 2 && !shipWindowManager.isInFinal(finals, other) && group != other){
+						if (group.length == 1){
+							finals.push(Array(other[0],group[0],other[1]));
+						}else{	
+							finals.push(Array(other[0],group[0], group[1],other[1]));
+						}
+											
+						found = true;
+						break;
+					}
+				}
+				if (!found){
+					finals.push(group);
+				}
+				
+			}else{
+				finals.push(group);
+			}
+			
+				
+			
+		}
+		
+		return finals;
+		
+	
+	},
+	
+	isInFinal: function(finals, group){
+	
+		for (var i in group){
+			var system = group[i];
+			for (var a in finals){
+				for (var b in finals[a]){
+					var other = finals[a][b];
+					if (other == system)
+						return true;
+				}
+			}
+		}
+	
+		return false;
+	},
+	
+
+	getDestinationForSystem: function(ship, location){
+	
+		if (shipManager.movement.isRolled(ship)){
+			if (location == 3){
+				location = 4;
+			}else if (location == 4){
+				location = 3;
+			}
+		}
+		
+		return $(".shipwindow.ship_"+ship.id+" #shipSection_" + location + " table");
+		
+	},
+	
+	setDataForSystem: function(ship, system){
+		var shipwindow = ship.shipStatusWindow;
+		if (shipwindow){
+			shipWindowManager.setSystemData(ship, system, shipwindow);
+			if (system.name == "scanner"){
+				shipWindowManager.addEW(ship, shipwindow);
+			}
+		}
+		
+	},
+	
+	setData: function(ship){
+		var shipwindow = ship.shipStatusWindow;
+		if (shipwindow){
+			shipWindowManager.addEW(ship, shipwindow);
+			for (var i in ship.systems){
+				var system = ship.systems[i];
+				shipWindowManager.setSystemData(ship, system, shipwindow);
+			}
+		}
+	
+	},
+	
+	
+	addEW: function(ship, shipwindow){
+
+		var dew = (ship.userid != gamedata.thisplayer && gamedata.gamephase == 1) ? "?" : ew.getDefensiveEW(ship);
+		var ccew = (ship.userid != gamedata.thisplayer  && gamedata.gamephase == 1) ? "?": ew.getCCEW(ship);
+		
+		shipwindow.find(".value.DEW").html(dew);
+		shipwindow.find(".value.CCEW").html(ccew);
+		var ccew = ew.getCCEWentry(ship);
+		var ccewEntry = shipwindow.find(".value.CCEW").parent();
+		if (ccew == null){
+			ccewEntry.data("ship", ship).data("EW", "CCEW");
+		}else{
+			ccewEntry.data("ship", ship).data("EW", ccew);
+		}
+		
+	
+		
+		var template = $("#templatecontainer .ewentry");
+		shipwindow.find(".ewentry.deletable").remove();
+		
+		
+		
+		for (var i in ship.EW){
+			var entry = ship.EW[i];
+			if (entry.type=="CCEW" || entry.type =="DEW" || entry.turn != gamedata.turn)
+				continue;
+				
+			element = template.clone(true).appendTo(shipwindow.find(".EW .EWcontainer"));
+
+			element.data("EW", entry);
+			element.data("ship", ship);
+			
+			element.find(".button1").bind("click", ew.buttonDeassignEW);
+			element.find(".button2").bind("click", ew.buttonAssignEW);
+			var h = entry.type + ":";
+			if (entry.type == "OEW")
+				h = 'OEW (<span class="shiplink">' + gamedata.getShip(entry.targetid).name + '</span>):';
+			element.find(".valueheader").html(h);
+			element.find(".value").html(entry.amount);
+			
+		}
+			
+		
+	},
+	
+	
+	
+	
+	
+	addStructureSystem: function(ship, system, destination){
+		var template = $("#systemtemplatecontainer .structure.system");
+		var systemwindow = template.clone(true).appendTo(destination);
+		systemwindow.addClass(system.name);
+
+		systemwindow.find(".namevalue").html(shipManager.systems.getDisplayName(system).toUpperCase());
+
+		systemwindow.addClass(system.name);
+		systemwindow.addClass("system_" + system.id);
+		systemwindow.data("shipid", ship.id);
+		systemwindow.data("id", system.id);
+		
+		
+	},
+	
+	addSystem:function (ship, system, destination){
+		
+		//if (destination.find(".system_" + system.id))
+		if (system.name == "structure"){
+			shipWindowManager.addStructureSystem(ship, system, destination);
+			return;
+		}
+		
+		var template = $("#systemtemplatecontainer .system.regular");
+		var systemwindow = template.clone(true).appendTo(destination);
+		systemwindow.addClass(system.name);
+		systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
+		systemwindow.addClass(system.name);
+		systemwindow.addClass("system_" + system.id);
+		systemwindow.data("shipid", ship.id);
+		systemwindow.data("id", system.id);
+		
+		
+		if (system.weapon){
+			systemwindow.addClass("weapon");
+		}
+		
+		systemwindow.bind("mouseover", weaponManager.onWeaponMouseover);
+		systemwindow.bind("mouseout", weaponManager.onWeaponMouseout);
+			
+	},
+	
+	removeSystemClasses: function(systemwindow){
+		var classes = Array(
+			"destroyed",
+			"loading",
+			"selected",
+			"firing",
+			"critical",
+			"canoffline",
+			"offline",
+			"canboost",
+			"boosted",
+			"canoverload",
+			"overload"
+		);
+		
+		for (var i in classes){
+			systemwindow.removeClass(classes[i]);
+		}
+	},
+	
+	setSystemData: function(ship, system, shipwindow){
+		var systemwindow = shipwindow.find(".system_"+system.id);
+
+		var output = shipManager.systems.getOutput(ship, system);
+		var field = systemwindow.find(".efficiency.value");
+		
+		var healtWidth = 48;
+		if (system.name == "structure")
+			var healtWidth = 108;
+			
+		systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + system.armour);
+		systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*healtWidth) + "px");
+		
+		if (system.name == "thruster"){
+			systemwindow.data("direction", system.direction);
+			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster"+system.direction+".png)");
+		}
+		
+		shipWindowManager.removeSystemClasses(systemwindow);
+		
+		if (shipManager.systems.isDestroyed(ship, system)){
+			systemwindow.addClass("destroyed");
+			return;
+		}
+		
+		
+		
+		if (shipManager.criticals.hasCriticals(system)){
+			systemwindow.addClass("critical");
+		}
+		
+		if (shipManager.power.setPowerClasses(ship, system,  systemwindow))
+			return;
+		
+		
+		if (system.weapon){
+			var load = system.turnsloaded;
+			if (!systemwindow.hasClass("overload") && load > system.loadingtime)
+				load = system.loadingtime;
+			
+				
+			
+			var loadingtime = system.loadingtime;
+			if (system.normalload > 0)
+				loadingtime = system.normalload;
+				
+			field.html(load+ "/" + loadingtime);
+			
+				
+			if (system.ballistic)
+				systemwindow.addClass("ballistic");
+					
+			if (!weaponManager.isLoaded(system)){systemwindow.addClass("loading");}else{systemwindow.removeClass("loading");}
+			if (weaponManager.isSelectedWeapon(system)){systemwindow.addClass("selected");}else{systemwindow.removeClass("selected");}
+			if (weaponManager.hasFiringOrder(ship, system)){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
+			
+			
+		}else if (system.name == "thruster"){
+			systemwindow.data("direction", system.direction);
+			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster"+system.direction+".png)");
+		
+			var channeled = shipManager.movement.getAmountChanneled(ship, system);
+			
+			
+			if (channeled > output){
+				field.addClass("darkred");
+			}else{
+				field.removeClass("darkred");
+			}
+			if (channeled < 0)
+				channeled = 0;
+				
+			field.html(channeled + "/" + output);
+		}else if(system.name == "engine"){
+			var rem = shipManager.movement.getRemainingEngineThrust(ship);
+			field.html(rem + "/" + output);
+		}else if (system.name == "reactor"){
+			field.html(shipManager.power.getReactorPower(ship, system));
+		}else if (output > 0){
+		
+			field.html(output);
+		}
+	},
+	
+		
+	assignThrust: function(ship){
+		var movement = ship.movement[ship.movement.length-1];
+		if (movement.commit)
+			return false;
+			
+		var requiredThrust = movement.requiredThrust;
+		var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
+		var done = true;
+		var names = Array("either", "front", "aft", "port", "starboard");
+		if (movement.type == "roll"){
+			names[0] = "any";
+		}
+		
+		var additionally = "";
+		var objective = "";
+		var objectives = Array();
+		
+		for (var i in requiredThrust){
+		
+			if (stillReq[i] == null || stillReq[i] <= 0)
+				continue;
+		
+		/*
+			if (requiredThrust[i] == null || requiredThrust[i] <= 0 )
+				continue;
+		*/		
+		
+			if (objective == "")
+				objective = "You need to assign ";
+				
+			objectives.push(stillReq[i] + " thrust to " + names[i] + " thrusters");
+			if (stillReq[i] > 0)
+				done = false;
+		}
+		
+		for (var i in objectives){
+		
+		
+			if ( i < objectives.length-1 && i != 0 ){
+				objective += ", ";
+			}else if (i != 0){
+				objective += " and ";
+			}
+			
+			objective += objectives[i];
+			
+			if (i == objectives.length-1){
+				objective += ".";
+			}
+		}
+
+		
+		if (shipManager.movement.isTurn(movement)){
+			var turndelay = shipManager.movement.calculateTurndelay(ship, movement);
+			additionally = " Additionally, you can assign extra thrust to lower the turn delay to minimum of 1. Current turndelay of this turn will be " 
+			+ (turndelay) + ".";
+		}
+		
+		var shipwindow = ship.shipStatusWindow;
+		
+		
+		var obe = $("#logcontainer .assignthrustcontainer .thrustobjective");
+		obe.html(objective + additionally);
+		
+		var cont = $("#logcontainer .assignthrustcontainer");
+		cont.data("ship", ship.id);
+		if (done){
+			
+			cont.removeClass("red");
+			cont.addClass("green");
+		}else{
+			cont.removeClass("green");
+			cont.addClass("red");
+		}
+		cont.addClass("assignThrust");
+		$("#botPanel").addClass("assignThrust");
+		$("#logContainer").addClass("assignThrust");
+		//shipwindow.find(".assignthrustcontainer .thrustsituation").html(current);
+
+		$(".thruster", shipwindow).each(function(){
+			var direction = $(this).data("direction");
+			
+			if (requiredThrust[direction] != null){
+				$(this).addClass("enableAssignThrust");
+				
+			}
+			if (stillReq[direction] == null){
+				$(this).removeClass("enableAssignThrust");
+			}
+			
+		});
+		
+		botPanel.setSystemsForAssignThrust(ship, requiredThrust, stillReq);
+		
+		
+
+
+		shipwindow.addClass("assignThrust");
+		//shipWindowManager.open(ship);
+	},
+	
+	clickSystem: function(e){
+
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(this);
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = ship.systems[systemwindow.data("id")];
+		
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+			return;
+			
+		if (ship.userid != gamedata.thisplayer)
+			return;
+			
+		if (system.weapon){
+			
+			if (gamedata.gamephase != 3 && !system.ballistic)
+				return;
+			
+			if (gamedata.gamephase != 1 && system.ballistic)
+				return;
+		
+			if (weaponManager.isSelectedWeapon(system)){
+				weaponManager.unSelectWeapon(ship, system);
+			}else{
+				weaponManager.selectWeapon(ship, system);
+			}
+			
+		}
+	
+	},
+	
+	clickPlus: function(e){
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(".system").has($(this));
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = ship.systems[systemwindow.data("id")];
+
+
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+			return;
+		
+		if (ship.userid != gamedata.thisplayer)
+			return;
+		
+		if (gamedata.gamephase == 2 && shipwindow.hasClass("assignThrust") && system.name == "thruster"){
+			shipManager.movement.assignThrust(ship, system);
+			shipWindowManager.assignThrust(ship);
+		}
+		
+		if (gamedata.gamephase == 1){
+			shipManager.power.clickPlus(ship, system);
+		}
+		
+	},
+	
+	clickMinus: function(e){
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(".system").has($(this));
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = ship.systems[systemwindow.data("id")];
+		
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+			return;
+		
+		if (ship.userid != gamedata.thisplayer)
+			return;
+		
+		if (gamedata.gamephase == 2 && shipwindow.hasClass("assignThrust") && system.name == "thruster"){
+			shipManager.movement.unAssignThrust(ship, system);
+			shipWindowManager.assignThrust(ship);
+		}
+		
+		if (gamedata.gamephase == 1){
+			shipManager.power.clickMinus(ship, system);
+		}
+
+		
+	},
+	
+	doneAssignThrust: function(){
+
+		var shipwindow = $(".assignthrustcontainer").has($(this));
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var movement = ship.movement[ship.movement.length-1];;
+		var requiredThrust = movement.requiredThrust;
+		var stillReg = shipManager.movement.calculateThrustStillReq(ship, movement);
+		
+		var done = true;
+		for (var i in stillReg){
+
+			if (stillReg[i] > 0)
+				done = false;
+		}
+		
+		if (done){
+			movement.commit = true;
+			$(".assignThrust").removeClass("assignThrust");
+			$(".enableAssignThrust").removeClass("enableAssignThrust");
+			$("#botPanel .exists").removeClass("exists");
+			shipWindowManager.setData(ship);
+			shipManager.drawShip(ship);
+		}
+		
+		
+		
+		
+	},
+	
+	cancelAssignThrustEvent: function(){
+
+		var e = $(".shipwindow").has($(this));
+		
+		
+		
+			
+		if (!e.length)
+			e = $(".assignthrustcontainer").has($(this));
+			
+		if (!e.length || !e.hasClass("assignThrust"))
+			return;
+
+	
+		shipWindowManager.cancelAssignThrust(e);
+	},
+	
+	cancelAssignThrust: function(element){
+		if (!element || !element.hasClass("assignThrust"))
+			return;
+			
+		$(".assignThrust").removeClass("assignThrust");
+		$(".enableAssignThrust").removeClass("enableAssignThrust");
+		$("#botPanel .exists").removeClass("exists");
+		
+		var ship = gamedata.getShip(element.data("ship"));
+				
+		if (!ship)
+			return;
+
+		ship.movement.splice(ship.movement.length -1, 1);
+	
+		
+		shipWindowManager.setData(ship);
+		shipManager.drawShip(ship);
+	}
+
+
+
+
+}

@@ -1,0 +1,223 @@
+shipManager.systems = {
+
+
+
+    isDestroyed: function(ship, system){
+
+        var d = damageManager.getDamage(ship, system);
+        var stru = shipManager.systems.getStructureSystem(ship, system.location);
+        if (stru != system && shipManager.systems.isDestroyed(ship, stru))
+            return true;
+            
+        return (d >= system.maxhealth);
+    },
+    
+    isEngineDestroyed: function(ship){
+        return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "engine"));
+    },
+    
+    isReactorDestroyed: function(ship){
+        return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+    },
+
+    getOutput: function(ship, system){
+		if (!system){
+			console.log("ERROR: getOutput system missing");
+			console.trace();
+		}
+		
+		if (this.isDestroyed(ship, system))
+			return 0;
+		
+		if (shipManager.power.isOffline(ship, system))
+			return 0;
+		
+		var output = system.output + system.outputMod + shipManager.power.getBoost(ship, system);
+        
+        return output;
+    },
+    
+    getSystem: function(ship, id){
+    
+        for (var i in ship.systems){
+            if (ship.systems[i].id == id)
+                return ship.systems[i];
+        }
+    
+    },
+            
+    getSystemByName: function(ship, name){
+        for (var i in ship.systems){
+            var system = ship.systems[i];
+            if (system.name == name){
+                return system;
+            }
+            
+        
+        }
+        
+        return null;
+    
+    },
+    
+    getArcs: function (ship, weapon){
+        
+        if (shipManager.movement.isRolled(ship) && (weapon.location == 3 || weapon.location == 4)) {
+            return {start: mathlib.addToDirection(weapon.endArc, (weapon.endArc*-2)), end: mathlib.addToDirection(weapon.startArc, (weapon.startArc*-2))}
+        }else{
+            return {start:weapon.startArc, end:weapon.endArc};
+        }
+    
+        
+    },
+    
+    getDisplayName: function(system){
+    
+        if (system.name == "structure"){
+            if (system.location == 0)
+                return "Primary structure";
+            if (system.location == 1)
+                return "Forward structure";
+            if (system.location == 2)
+                return "Aft structure";
+            if (system.location == 3)
+                return "Port structure";
+            if (system.location == 4)
+                return "Starboard structure";
+        }
+    
+        return system.displayName;
+    },
+    
+    getLocationName: function(system){
+        
+        if (system.location == 0)
+            return "Primary";
+        if (system.location == 1)
+            return "Forward";
+        if (system.location == 2)
+            return "Aft";
+        if (system.location == 3)
+            return "Port";
+        if (system.location == 4)
+            return "Starboard";
+            
+        return "error, system location not defined";
+
+    },
+    
+    getSystemsInLocation: function(ship, location){
+        var systems = Array();
+        
+        for (var i in ship.systems){
+            if (ship.systems[i].location == location)
+                systems.push(ship.systems[i]);
+        }
+        
+        return systems;
+    
+    },
+    
+    getSystemsForShipStatus: function(ship, location){
+
+        var systems = Array();
+        
+        if (shipManager.movement.isRolled(ship) && location == 3) {
+            location = 4;
+        }else if (shipManager.movement.isRolled(ship) && location == 4) {
+            location = 3;
+        }
+        
+        for (var i in ship.systems){
+            if (ship.systems[i].location == location && ship.systems[i].name != "structure")
+                systems.push(ship.systems[i]);
+        }
+        
+        return systems;
+    
+    },
+    
+    getStructureSystem: function(ship, location){
+        
+        for (var i in ship.systems){
+            if (ship.systems[i].location == location && ship.systems[i].name == "structure")
+                return ship.systems[i];
+        }
+        
+        return null;
+    
+    },
+
+    
+    
+    
+    groupSystems: function(systems){
+        var grouped = Array();
+        var found = false;
+        
+        for (var i in systems){
+            var system = systems[i];
+            
+            var found = false;
+            for (var a in grouped){
+                for (var b in grouped[a]){
+                    if (!found && (grouped[a][b].name == system.name || (grouped[a][b].primary && system.primary) ) && grouped[a].length<4){
+                        grouped[a].push(system);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found){
+                var group = Array();
+                group.push(system);
+                grouped.push(group);
+            }
+            
+            
+        }
+        
+        grouped.sort(function(a, b){
+        
+            var al = a.length
+            var bl = b.length;
+            
+            if (al == 3 && bl == 2)
+                return -1;
+                
+            if (bl == 3 && al == 2)
+                return 1;
+                        
+            if (al > bl)
+                return 1;
+            
+            
+            
+            if (bl > al)
+                return -1;
+                
+            return 0;
+            
+        });
+        
+                
+        return grouped;
+        
+    },
+	
+	getThrusters: function(ship, direction){
+		var list = Array();
+		for (var i in ship.systems){
+			var system = ship.systems[i];
+			
+			if (system.name == "thruster" && system.direction == direction)
+				list.push(system);
+			
+		}
+		
+		return list;
+	
+	}
+    
+
+}

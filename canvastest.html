@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>canvas test</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<canvas id="testcanvas" width="400" height="400" style=";border:1px solid black;"></canvas>
+
+<script>
+	var canvas = document.getElementById("testcanvas").getContext("2d");
+	canvas.moveTo(10,10);
+	canvas.lineTo(20,20);
+	canvas.stroke();
+
+</script>
+
+</body>
+</html>

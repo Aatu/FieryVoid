@@ -1,0 +1,68 @@
+<html>
+<head>
+</head>
+<body>
+
+<img src="gvhran.png" id="img1">
+<img src="damage.png" id="img2">
+
+<p>Blended image<br><canvas id="canvas"></canvas></p>
+<script>
+window.onload = function () {
+    console.log(new Date().getTime());
+    
+    for (var i=0;i<4;i++){
+        var img1 = document.getElementById('img1');
+        var img2 = document.getElementById('img2');
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+        var width = img1.width;
+        var height = img1.height;
+        canvas.width = width;
+        canvas.height = height;
+
+        var pixels = 4 * width * height;
+        context.drawImage(img1, 0, 0);
+        var image1 = context.getImageData(0, 0, width, height);
+        var imageData1 = image1.data;
+        context.drawImage(img2, 0, 0);
+        var image2 = context.getImageData(0, 0, width, height);
+        var imageData2 = image2.data;
+        
+        
+        while (pixels) {
+            var r = pixels-4;
+            var g = pixels-3;
+            var b = pixels-2;
+            var a = pixels-1;
+            
+            var a1 = imageData1[a];
+            var a2 = imageData2[a];
+            if (a1 == 0 || a2 == 0){
+                    pixels -= 4;
+                    continue;
+            }
+           
+            if (a2 == 255 && imageData2[r] == 0 && imageData2[g] == 0 && imageData2[b] == 0){
+                imageData1[a] = 0;
+            }else{
+                
+                var m = a2 / 255;
+                //alphaComponent = imageData.data[((50*(imageData.width*4)) + (200*4)) + 3];
+                imageData1[r] = imageData1[r] * (1-m) + imageData2[r] * m;
+                imageData1[g] = imageData1[g] * (1-m) + imageData2[g] * m;
+                imageData1[b] = imageData1[b] * (1-m) + imageData2[b] * m;
+                pixels -= 4;
+            }
+            
+        }
+        image1.data = imageData1;
+        context.putImageData(image1, 0, 0);
+        
+    }
+    console.log(new Date().getTime());
+};
+</script>
+
+</body>
+</html>

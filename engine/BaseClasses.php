@@ -1,0 +1,802 @@
+<?php
+
+
+class TacticalPlayer{
+    public $id, $slot, $team, $lastturn, $lastphase, $name;
+    
+    function __construct($id, $slot, $team, $lastturn, $lastphase, $name){
+        $this->id = $id;
+        $this->team = $team;
+        $this->lastturn = $lastturn;
+        $this->lastphase = $lastphase;
+        $this->name = $name;
+        $this->slot = $slot;
+    }
+}
+
+class MovementOrder{
+
+    public $id, $type, $x, $y, $xOffset, $yOffset, $facing, $heading, $speed;
+    public $animating = false;
+    public $animated = true;
+    public $animationtics = 0;
+    public $preturn;
+    public $requiredThrust = array(0, 0, 0, 0, 0); //0:any, 1:front, 2:rear, 3:left, 4:right;
+    public $assignedThrust = array();
+    public $commit = true;
+    public $turn;
+    public $forced = false;
+    
+    function __construct($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn){
+        $this->id = (int)$id;
+        $this->x = (int)$x;
+        $this->y = (int)$y;
+        $this->type = $type;
+        $this->facing = (int)$facing;
+        $this->heading = (int)$heading;
+        $this->speed = (int)$speed;
+        $this->preturn = $pre;
+        $this->turn = (int)$turn;
+        $this->xOffset = $xOffset;
+        $this->yOffset = $yOffset;
+        
+
+    }
+    
+    public function getReqThrustJSON(){
+        return json_encode($this->requiredThrust);
+        
+    }
+    
+    public function getAssThrustJSON(){
+        return json_encode($this->assignedThrust);
+        
+    }
+    
+    public function setReqThrustJSON($json){
+        $this->requiredThrust = json_decode($json, true);
+    }
+    
+    public function setAssThrustJSON($json){
+        $this->assignedThrust = json_decode($json, true);
+    }
+    
+    public function getCoPos(){
+    
+        $hl = 50;
+        $a = $hl*0.5;
+        $b = $hl*0.8660254; //0.86602540378443864676372317075294
+        
+        $h = $this->x;
+        $v = $this->y;
+        $x  = 0;
+        $y = 0;
+        
+        if ($v%2 == 0){
+            $x = $h*$b*2;
+        }else{
+            $x = $h*$b*2+$b;
+        }
+        
+        $y = $v*$hl*2-($a*$v);
+        
+        $x -= $b*2;
+        $y -= $hl*1.5;
+                
+        $x += $b;
+        $y += $hl;
+        
+        return array("x"=>$x, "y"=>$y);
+    }
+    
+    public function getFacingAngle(){
+    
+        $d = $this->facing;
+        if ($d == 0){
+            return 0;
+        }
+        if ($d == 1){
+            return 60;
+        }
+        if ($d == 2){
+            return 120;
+        }
+        if ($d == 3){
+            return 180;
+        }
+        if ($d == 4){
+            return 240;
+        }
+        if ($d == 5){
+            return 300;
+        }
+        
+        return 0;
+    }
+
+}
+
+
+class DamageEntry{
+
+    public $id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed;
+    
+    public $updated = false;
+    
+    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed){
+        $this->id = $id;
+        $this->shipid = $shipid;
+        $this->gameid = $gameid;
+        $this->turn = $turn;
+        $this->systemid = $systemid;
+        $this->damage = $damage;
+        $this->armour = $armour;
+        $this->shields = $shields;
+        $this->fireorderid = $fireorderid;
+        $this->destroyed = $destroyed;
+    }
+
+}
+
+class EWentry{
+    
+    public $id, $shipid, $turn, $type, $amount, $targetid;
+    
+    function __construct($id, $shipid, $turn, $type, $amount, $targetid){
+         $this->id = $id;
+         $this->shipid = $shipid;
+         $this->turn = $turn;
+         $this->type = $type;
+         $this->amount = $amount;
+         $this->targetid = $targetid;
+    }
+}
+
+class FireOrder{
+    
+    public $id, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit;
+    public $notes = "";
+    public $updated = false;
+    
+    function __construct($id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0 ){
+         $this->id = $id;
+         $this->shooterid = $shooterid;
+         $this->targetid = $targetid;
+         $this->weaponid = $weaponid;
+         $this->calledid = $calledid;
+         $this->turn = $turn;
+         $this->firingmode = $firingmode;
+         $this->needed = $needed;
+         $this->rolled = $rolled;
+		 $this->shots = $shots;
+         $this->shotshit = $shotshit;
+        
+    }
+
+}
+
+
+
+class PowerManagementEntry{
+    
+    public $id, $shipid, $systemid, $type, $turn, $amount;
+    public $updated = false;
+    
+    //types: 1:offline 2:boost, 3:overload
+    
+    function __construct($id, $shipid, $systemid, $type, $turn, $amount){
+        $this->id = (int)$id;
+        $this->shipid = (int)$shipid;
+        $this->systemid = (int)$systemid;
+        $this->type = (int)$type;
+        $this->turn = (int)$turn;
+        $this->amount = (int)$amount;
+
+    }
+
+}
+
+class ShipSystem{
+
+    public $location; //0:primary, 1:front, 2:rear, 3:left, 4:right;
+    public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
+    public $damage = array();
+    public $outputMod = 0;
+    public $boostable = false;
+    public $power = array();
+    public $data = array();
+    public $critData = array();
+    
+    public $possibleCriticals = array();
+    
+        
+    public $criticals = array();
+    
+    function __construct($armour, $maxhealth, $location, $powerReq, $output){
+        $this->armour = (int)$armour;
+        $this->maxhealth = (int)$maxhealth;
+        $this->location = (int)$location;
+        $this->powerReq = (int)$powerReq;
+        $this->output = (int)$output;
+
+
+    }
+    
+    public function beforeTurn($ship, $turn, $phase){
+            
+        $this->setSystemDataWindow();
+    }
+    
+    public function setSystemDataWindow(){
+        $critDesc = array();
+        $counts = array();
+        
+        foreach ($this->criticals as $crit){
+            if (isset($counts[$crit->phpclass])){
+                $counts[$crit->phpclass]++;
+            }else{
+                $counts[$crit->phpclass] = 1;
+            }
+			
+			$this->critData[$crit->phpclass] = $crit->description;
+        }
+        /*
+        foreach ($this->criticals as $crit){
+            if (isset($critDesc[$crit->phpclass]))
+                continue;
+
+            if (!isset($this->criticalDescriptions[$crit->phpclass]))   
+                continue;
+
+            $c = $counts[$crit->phpclass];
+            
+            if ($c > 1){
+                $desc = $c . " x " + $this->criticalDescriptions[$crit->phpclass];
+            }else{
+                $desc = $this->criticalDescriptions[$crit->phpclass];
+            }
+            
+            $critDesc[] = $desc;
+                
+        }
+        
+        foreach ($critDesc as $desc){
+            $this->critData[] = $desc;
+        }
+		*/
+        
+        
+    }
+    
+    public function testCritical($ship, $turn, $crits, $add = 0){
+        
+        $roll = Dice::d(20)+$this->getTotalDamage() + $add;
+        $criticalTypes = -1;
+
+        foreach ($this->possibleCriticals as $i=>$value){
+        
+            //print("i: $i value: $value");
+            if ($roll >= $i){
+                $criticalTypes = $value;
+            }
+        }
+        
+        if ($criticalTypes != -1){
+            
+            if (is_array($criticalTypes)){
+                foreach ($criticalTypes as $phpclass){
+                    $crit = new $phpclass(-1, $ship->id, $this->id, $phpclass, $turn);
+                    $crit->updated = true;
+                    $this->criticals[] =  $crit;
+                    $crits[] = $crit;
+                }
+            }else{
+                        
+                $crit = new $criticalTypes(-1, $ship->id, $this->id, $criticalTypes, $turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+                $crits[] = $crit;
+            }
+            
+            
+            
+        }
+        
+        return $crits;
+         
+    }
+    
+    public function setCriticals($criticals){
+        $this->criticals = $criticals;
+        $this->effectCriticals();
+    }
+    
+    public function hasCritical($type){
+        $count = 0;
+        foreach ($this->criticals as $critical){
+            if ($critical->phpclass == $type)
+                $count++;
+        }
+    
+        return $count;
+    }
+    
+    public function effectCriticals(){
+           
+        foreach ($this->criticals as $crit){
+            $this->outputMod += $crit->outputMod;
+        }
+    
+    
+    }
+    
+    public function getTotalDamage(){
+        $totalDamage = 0;
+        
+        foreach ($this->damage as $damage){
+            $d = ($damage->damage - $damage->armour);
+            if ( $d < 0)
+                $d = 0;
+                
+            $totalDamage += $d;
+        }
+        
+        return $totalDamage;
+    
+    }
+    
+    public function isDestroyed(){
+        if ($this->getTotalDamage() >= $this->maxhealth)
+            return true;
+  
+        return false;
+        
+    }
+    
+    public function isDamagedOnTurn($turn){
+        
+        foreach ($this->damage as $damage){
+            if ($damage->turn == $turn || $damage->turn == -1){
+                if ($damage->damage > $damage->armour)
+                    return true;
+            }
+        }
+        
+        return false;
+        
+    
+    }
+    
+    public function getRemainingHealth(){
+        $damage = $this->getTotalDamage();
+        
+        $rem = $this->maxhealth - $damage;
+        if ($rem < 0 )
+            $rem = 0;
+            
+        return $rem;
+    }
+    
+    public function isDestroyedBeforeTurn($turn){
+        
+        foreach ($this->damage as $damage){
+            if ($damage->turn < $turn && $damage->destroyed)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    public function isOfflineOnTurn($turn){
+    
+        foreach ($this->power as $power){
+            if ($power->type == 1 && $power->turn == $turn){
+                return true;
+            }
+        }
+        
+        return false;
+    
+    }
+    
+    public function isOverloadingOnTurn($turn){
+        
+        foreach ($this->power as $power){
+            if ($power->type == 3 && $power->turn == $turn){
+                return true;
+            }
+        }
+        
+        return false;
+    
+    }
+
+}
+
+class Ballistic{
+	public $fireOrderId, $position;
+        
+    function __construct($id, $position){
+        $this->fireOrderId = (int)$id;
+        $this->position = $position;
+		
+   }
+
+}
+
+class TacGamedata{
+
+    public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
+    public $ships = array();
+    public $players = array();
+    public $waiting = false;
+    public $changed = false;
+    public $getDistanceHex = false;
+    public $forPlayer;
+	public $ballistics = array();
+    
+    
+    
+    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator){
+        $this->id = (int)$id;
+        $this->turn = (int)$turn;
+        $this->phase = (int)$phase;
+        $this->activeship = (int)$activeship;
+        $this->setForPlayer($forPlayer);
+        $this->name = $name;
+        $this->status = $status;
+        $this->points = (int)$points;
+        $this->background = $background;
+        $this->creator = $creator;
+   }
+   
+	public function onConstructed(){
+		
+		foreach ($this->ships as $ship){
+		
+			foreach($ship->fireOrders as $fire){
+				$weapon = $ship->getSystemById($fire->weaponid);
+				if (($this->phase == 2 || $this->phase == 3) && $weapon->ballistic && $fire->turn == $this->turn){
+					$movement = $ship->getLastTurnMovement($fire->turn);
+					$this->ballistics[] = new Ballistic($fire->id, array("x"=>$movement->x, "y"=>$movement->y));
+					//print(sizeof($this->ballistics));
+				}
+			
+			}
+		
+		}
+	
+	
+	}
+   
+    public function isFinished(){
+
+        foreach ($this->ships as $ship){
+            if ($ship->isDestroyed()){
+                //print($ship->name . " is destroyed");
+                continue;
+            }
+            
+            if ($ship->isPowerless()){
+                //print($ship->name . " is powerless");
+                continue;
+            }
+            
+                 
+            $pos = $ship->getCoPos();
+            foreach ($this->ships as $ship2){
+                if ($ship->team == $ship2->team)
+                    continue;
+                    
+                if ($ship2->isDestroyed()){
+                    continue;
+                }
+                
+                if ($ship2->isPowerless()){
+                    continue;
+                }
+                    
+                $pos2 = $ship2->getCoPos();
+                $dis = mathlib::getDistanceHex($pos, $pos2);
+                
+                if ($dis<70){
+                    //print($ship->name . " is on distance $dis from " . $ship2->name);
+                    return false;
+                }
+                    
+            }
+            
+            
+        }
+        
+        
+        return true;
+   
+    }   
+    
+    public function setShips($ships){
+    
+        if (isset($ships)){
+            usort ( $ships , "self::sortShips" );
+            $this->ships = $ships;
+        }
+    }
+    
+    public static function sortShips($a, $b){
+        
+        if ($a->iniative == $b->iniative){
+            if ($a->iniativebonus > $b->iniativebonus){
+                return -1;
+            }else{
+                return 1;
+            }
+        }else if ($a->iniative < $b->iniative){
+            return -1;
+        }
+        
+        return 1;
+    }
+    
+    
+    public function getUpdatedFireOrders(){
+        $list = array();
+        
+        foreach ($this->ships as $ship){
+            foreach($ship->fireOrders as $fire){
+                if ($fire->updated == true)
+                    $list[] = $fire;
+            }
+        }
+        
+        return $list;
+    
+    }
+    
+    public function getNewDamages(){
+        $list = array();
+        
+        foreach ($this->ships as $ship){
+            foreach($ship->systems as $system){
+                foreach($system->damage as $damage){
+                    if ($damage->updated == true)
+                        $list[] = $damage;
+                }
+                
+            }
+        }
+        
+        return $list;
+    
+    }
+    
+    public function addDamageEntry($damage){
+    
+        $ship = $this->getShipById($damage->shipid);
+        $ship->addDamageEntry($damage);
+    
+    }
+    
+    public function getFirstShip(){
+    
+        foreach ($this->ships as $ship){
+            if ($ship->isDestroyed())
+                continue;
+                
+            return $ship;
+        }
+        
+        return null;
+    }
+    
+    public function othersDone($userid){
+    
+        foreach ($this->players as $player){
+            if ($player->id == $userid)
+                continue;
+                
+            if ($player->lastturn != $this->turn || $player->lastphase != $this->phase)
+                return false;
+        
+        }
+        
+        return true;
+    
+    }
+    
+    public function hasAlreadySubmitted($userid){
+        $player = $this->getPlayerById($userid);
+        
+        if ($player == null)
+            return true;
+            
+        if ($player->lastturn < $this->turn || $player->lastphase < $this->phase)
+            return false;
+            
+        
+        return true;
+    
+    }
+    
+    public function getPlayerById($id){
+        foreach ($this->players as $player){
+            if ($player->id == $id){
+                return $player;
+            }
+        }
+        
+        return null;
+    }
+    
+    
+    private function setForPlayer($player){
+        $this->forPlayer = $player;
+        
+    }
+    
+    public function getActiveship(){
+        foreach ($this->ships as $ship){
+            if ($ship->id == $this->activeship){
+                return $ship;
+            }
+        }
+        
+        return null;
+    }
+    
+    public function getShipById($id){
+        foreach ($this->ships as $ship){
+            if ($ship->id == $id){
+                return $ship;
+            }
+        }
+        
+        return null;
+    }
+    
+    public function prepareForPlayer($turn, $phase, $activeship){
+        $this->setWaiting();
+        $this->checkChanged($turn, $phase, $activeship);
+        $this->unanimateMovements($activeship, $turn); 
+        $this->calculateTurndelays();
+        $this->deleteHiddenData();
+        $this->setPreTurnTasks();
+		
+		if ($this->status == "LOBBY"){
+			$this->ships = array();
+		}
+        
+        
+    }
+    
+    private function setPreTurnTasks(){
+        
+        foreach ($this->ships as $ship){
+            foreach ($ship->systems as $system){
+                $system->beforeTurn($ship, $this->turn, $this->phase);
+            }
+        
+        }
+    
+    }
+    
+    private function deleteHiddenData(){
+    
+        if ($this->phase == 1){
+            foreach ($this->ships as $ship){
+                if ($ship->userid != $this->forPlayer){
+                    $ship->EW = Array();
+                    
+                    foreach($ship->systems as $system){
+                        $system->power = array();
+                    }
+                }
+            }
+        }
+        
+        if ($this->phase == 3){
+            foreach ($this->ships as $ship){
+            
+                for ($i = sizeof($ship->fireOrders)-1; $i>=0; $i--){
+                    $fire = $ship->fireOrders[$i]; 
+                    if ($fire->turn == $this->turn){
+                        unset($ship->fireOrders[$i]);
+                    }
+                }
+                
+                
+                
+            }
+        }
+        
+    }
+    
+    private function calculateTurndelays(){
+    
+        foreach ($this->ships as $ship){
+            $ship->currentturndelay = Movement::getTurnDelay($ship);
+        }
+    }
+    
+    private function unanimateMovements($activeship, $turn){
+        $found = false;
+        
+        if ($this->phase == 4){ //|| $this->waiting == true){
+            return;
+        }
+        
+        if ($turn == -1)
+            return;
+        
+        $turn = $this->turn;
+            
+        if ($activeship == -1)
+            $found = true;
+        
+        $turnchanged = ($turn != $this->turn);
+        
+        for ( $i = $turn; $i <= $this->turn; $i++) {    
+            foreach ($this->ships as $ship){
+                if ($ship->id == $activeship && $i == $turn){
+                    $found = true;
+                }
+                
+                if ($ship->id == $this->activeship && $i == $this->turn){
+                    break;
+                }
+                    
+                    
+                    
+                if ($found){
+                    if ($ship->userid != $this->forPlayer){
+                        $ship->unanimateMovements($i);
+                    }
+                }
+            }
+        }
+    }
+    
+    private function setWaiting(){
+    
+        $player = $this->getPlayerById($this->forPlayer);
+        if ($player == null){
+            $this->waiting = false;
+            return;
+        }
+    
+        if ($this->phase == 1 || $this->phase == 3 || $this->phase == 4){
+                            
+            if ($player->lastturn == $this->turn && $player->lastphase == $this->phase){
+                $this->waiting = true;
+            }
+        
+        }else if ($this->phase == 2){
+            
+            $ship = $this->getActiveship();
+                            
+            if ($ship != null && $ship->userid == $this->forPlayer){
+                $this->waiting = false;
+            }else{
+                $this->waiting = true;
+            }
+        }else{
+            $this->waiting = false;
+        }
+        
+        
+    }
+    
+    private function checkChanged($turn, $phase, $activeship){
+    
+        if ($this->phase != $phase || $this->turn != $turn || $this->activeship != $activeship){
+            $this->changed = true;
+        }else{
+            $this->changed = false;
+        }
+    
+    }
+    
+
+}
+
+
+?>

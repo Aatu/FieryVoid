@@ -1,0 +1,65 @@
+.slot{
+	border:1px solid #DEEBFF;
+	color:#DEEBFF;
+	padding: 3px 5px;
+}
+
+.slot span{
+	padding-right:5px;
+}
+
+.slot .status{
+	display:none;
+}
+
+.slot.ready .status{
+	display:inline;
+}
+
+.slot .status{
+	color:darkgreen;
+}
+
+.slot .playername{
+	font-size:14px;
+	color:#496791;
+}
+
+.clickable{
+	cursor:pointer;
+}
+.clickable:hover{
+	text-decoration:underline;
+}
+
+.taken .takeslot{
+	display:none;
+}
+
+.store span{
+	padding-left:5px;
+
+}
+
+.store .ship{
+	margin-left:20px;
+}
+
+.store .factionname{
+	font-size:14px;
+	
+}
+
+.store .ship{
+	color:#496791;
+}
+.store .ship .clickable{
+	cursor:pointer;
+	color:#DEEBFF;
+}
+
+.store .ship .clickable:hover{
+	cursor:pointer;
+	color:#DEEBFF;
+	text-decoration:underline;
+}

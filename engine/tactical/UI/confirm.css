@@ -1,0 +1,61 @@
+
+.confirm {
+	padding:10px 10px 10px 10px;
+    background-color:black;
+	border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px;
+	position:fixed;
+	width:400px;
+	left:50%;
+	top:300px;
+	margin-left:-200px;
+	opacity:0.85;
+	z-index:999999;
+	display:none;
+}
+
+.confirm.error{
+	color:#b34119;
+	font-family: arial;
+	font-size:16px;
+}
+
+.ui{
+	
+	color:white;
+	text-decoration:none;
+	margin:10px 0px 0px 10px;
+	position:relative;
+	
+}
+
+.ui .confirmok{
+	background-image: url("../../../img/ok.png");
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+}
+
+
+
+.ui .confirmcancel{
+	position:absolute;
+	right:10px;
+	top:0px;
+	background-image: url("../../../img/cancel.png");
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+}
+
+.ui span{
+	cursor:pointer;
+}
+.ui span:hover{
+	text-decoration:underline;
+}
+
+input{
+	margin-left:10px;
+}
