@@ -87,6 +87,22 @@ window.hexgrid = {
 	
 	},
 	
+	positionToPixel: function(pos){
+		if (!pos)
+			return null;
+			
+		var pixpos = hexgrid.hexCoToPixel(pos.x, pos.y);
+		
+		if (pos.xO)
+			pixpos.x = pixpos.x + (pos.xO*gamedata.zoom);
+        
+        if (pos.yO)
+			pixpos.y = pixpos.y + (pos.yO*gamedata.zoom);
+		
+		return pixpos;
+		
+	},
+	
 	hexCoToPixel: function(hx, hy){
 		origoHexX = gamedata.scroll.x;
 		origoHexY = gamedata.scroll.y;
@@ -176,13 +192,12 @@ window.hexgrid = {
 			var otherpos = shipManager.getShipPosition(gamedata.ships[i]);
 			
 			if (otherpos.x == pos.x && otherpos.y == pos.y && otherpos.xO == pos.xO && otherpos.yO == pos.yO){
-				console.log("occupied")
 				return true;
 			}
 			
 		}
 		
-		console.log("unoccupied")
+		
 		return false;
 		
 	},
@@ -192,11 +207,12 @@ window.hexgrid = {
 		posPix = hexgrid.hexCoToPixel(pos.x, pos.y);
 		var dis = hexgrid.hexlenght*percentage;
 		
+		
 		var newpos = mathlib.getPointInDirection( dis, direction, posPix.x, posPix.y)
 		
 		pos.xO = Math.round(newpos.x - posPix.x);
 		pos.yO = Math.round(newpos.y - posPix.y);
-	
+		
 		var i = 0;
 		while (unoccupied && hexgrid.isOccupiedPos(pos)){
 			i++;	

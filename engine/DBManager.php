@@ -85,14 +85,19 @@ class DBManager {
 	}
     
     public function startTransaction(){
-        mysql_autocommit($this->connection, FALSE);
+		mysql_query("SET AUTOCOMMIT=0", $this->connection);
+		mysql_query("START TRANSACTION", $this->connection);
+        //mysql_autocommit($this->connection, FALSE);
     }
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-            mysql_rollback($this->connection); 
+			mysql_query("ROLLBACK", $this->connection);
+            //mysql_rollback($this->connection); 
         }else{
-            mysql_commit($this->connection);
+            //mysql_commit($this->connection);
+            mysql_query("COMMIT", $this->connection); 
+            mysql_query("SET AUTOCOMMIT=1", $this->connection);
         }
         
     }
@@ -346,7 +351,7 @@ class DBManager {
             catch(Exception $e) {
                 throw $e;
             }
-
+		
         return $orders;
     
     }

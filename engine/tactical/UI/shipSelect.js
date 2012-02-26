@@ -29,7 +29,7 @@ window.shipSelectList = {
 				fac = "enemy";
 			}
 			
-			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry '+fac+'" data-id="'+ship.id+'"><span class="name">'+ship.name+'</span></div>').appendTo(e);
+			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+ship.id+'"><span class="name '+fac+'">'+ship.name+'</span></div>').appendTo(e);
 			
 		}
 		

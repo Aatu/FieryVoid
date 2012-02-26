@@ -278,6 +278,7 @@ class Weapon extends ShipSystem{
     }
     
     public function firedOnTurn($ship, $turn){
+		
         foreach ($ship->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
@@ -370,9 +371,11 @@ class Weapon extends ShipSystem{
                 $turnsloaded = $this->overloadturns;
             }
                             
-            
+           
+			
+					
             if ($fired){
-                $turnsloaded -= $this->getNormalLoad();
+				$turnsloaded -= $this->getNormalLoad();
                 if ($turnsloaded < 0)
                     $turnsloaded = 0;
                 

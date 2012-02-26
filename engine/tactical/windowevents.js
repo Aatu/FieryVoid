@@ -31,6 +31,7 @@ function drawEntities(){
     
     hexgrid.drawHexGrid();
     shipManager.drawShips();
+    ballistics.drawBallistics();
     EWindicators.drawEWindicators();
 }
  

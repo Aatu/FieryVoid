@@ -275,6 +275,11 @@ body {
 	/*border:1px solid red;*/
 }
 
+.ballisticcanvas{
+	position:absolute;
+	
+}
+
 .hexshipcanvas{
     z-index:201;
 }
@@ -742,16 +747,23 @@ body.phase1 .ewentry .button2{
 
 }
 
+.shipSelectList .shiplistentry span{
+	 font-size:14px;
+	 padding-right:5px;
+
+}
+
 .shipSelectList .shiplistentry .name{
-   font-size:14px;
+  
    font-style:italic;
 
 }
 
-.shipSelectList .shiplistentry.enemy .name{
+
+.shipSelectList .shiplistentry .enemy.name{
     color:#b34119;
 }
 
-.shipSelectList .shiplistentry.ally .name{
+.shipSelectList .shiplistentry .ally.name{
     color:#2f5123;
 }

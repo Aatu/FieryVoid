@@ -440,6 +440,22 @@ window.weaponManager = {
 	
 	isLoaded: function(weapon){
 		return (weapon.loadingtime <= weapon.turnsloaded);
+	},
+	
+	getFireOrderById: function(id){
+		
+		for (var i in gamedata.ships){
+			for (var a in gamedata.ships[i].fireOrders){
+				var fire = gamedata.ships[i].fireOrders[a];
+				if (fire.id == id)
+					return fire;
+			}
+			
+			
+		}
+		
+		return false;
+		
 	}
 	
 }

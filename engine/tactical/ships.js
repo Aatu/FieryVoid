@@ -108,7 +108,7 @@ window.shipManager = {
         $(img).bind("load", function(){
             canvas.clearRect(0, 0, s, s);
             
-            if ((gamedata.isSelected(ship) && gamedata.gamephase != 2 && gamedata.mouseOverShipId == ship.id && gamedata.gamephase > 1)){
+            if (gamedata.mouseOverShipId == ship.id && gamedata.gamephase > 1){
                 if (gamedata.zoom > 0){
                     
                     var dew = ew.getDefensiveEW(ship);

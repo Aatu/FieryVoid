@@ -285,7 +285,7 @@ shipManager.movement = {
             turn:gamedata.turn,
             forced:false
         };
-        
+                
         shipManager.drawShip(ship);
         shipWindowManager.assignThrust(ship);
 

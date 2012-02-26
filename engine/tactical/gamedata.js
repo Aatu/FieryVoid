@@ -219,6 +219,7 @@ gamedata = {
     initPhase: function(){
     
         shipManager.initShips();
+        ballistics.initBallistics();
         
         gamedata.setPhaseClass();
         for (var i in gamedata.ships){

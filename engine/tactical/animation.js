@@ -67,8 +67,11 @@ window.animation = {
                     if (animation.checkAnimationDone(movement)){
                         movement.animated = true;
                         gamedata.shipStatusChanged(ship);
+                        ballistics.calculateBallisticLocations();
+                        ballistics.drawBallistics();
                         shipManager.drawShip(ship);
                     }else{
+						ballistics.hideBallistics();
                         movement.animationtics ++;
                         shipManager.drawShip(ship);
                         break;
