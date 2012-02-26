@@ -47,10 +47,7 @@ jQuery(function(){
 	$(".shipclickable").bind("mouseover", shipClickable.shipclickableMouseOver);
     $(".shipclickable").bind("mouseout", shipClickable.shipclickableMouseOut);
 	
-	$(".ballclickable").bind("dblclick", ballistics.onBallisticDblClick);
-    $(".ballclickable").bind("click", ballistics.onBallisticClick);
-	$(".ballclickable").bind("mouseover", ballistics.ballclickableMouseOver);
-    $(".ballclickable").bind("mouseout", ballistics.ballclickableMouseOut);
+	
 	
     
     

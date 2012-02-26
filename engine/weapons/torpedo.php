@@ -17,7 +17,15 @@
 		public $range = 50;
 		public $loadingtime = 2;
 		
+		public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
 		
+		public $trailColor = array(30, 170, 255);
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+		public $animationExplosionScale = 0.25;
+		public $projectilespeed = 12;
+        public $animationWidth = 3;
+		public $trailLength = 10;
 		
 		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);

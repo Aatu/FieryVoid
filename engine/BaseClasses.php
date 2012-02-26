@@ -120,10 +120,10 @@ class MovementOrder{
 class DamageEntry{
 
     public $id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed;
-    
+    public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed){
+    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes){
         $this->id = $id;
         $this->shipid = $shipid;
         $this->gameid = $gameid;
@@ -134,6 +134,7 @@ class DamageEntry{
         $this->shields = $shields;
         $this->fireorderid = $fireorderid;
         $this->destroyed = $destroyed;
+        $this->pubnotes = $pubnotes;
     }
 
 }
@@ -154,12 +155,14 @@ class EWentry{
 
 class FireOrder{
     
-    public $id, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit;
+    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit, $intercepted;
     public $notes = "";
+    public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0 ){
+    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = false){
          $this->id = $id;
+         $this->type = $type;
          $this->shooterid = $shooterid;
          $this->targetid = $targetid;
          $this->weaponid = $weaponid;
@@ -170,7 +173,7 @@ class FireOrder{
          $this->rolled = $rolled;
 		 $this->shots = $shots;
          $this->shotshit = $shotshit;
-        
+         $this->intercepted = $intercepted;
     }
 
 }

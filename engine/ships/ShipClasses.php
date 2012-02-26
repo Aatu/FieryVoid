@@ -203,6 +203,24 @@
 			return $movement->getFacingAngle();
 		}
 		
+		public function getDefenceValuePos($pos){
+			$tf = $this->getFacingAngle();
+			$shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+		  
+			if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
+			   return $this->forwardDefense;
+			}else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
+				return $this->forwardDefense;
+			}else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
+				return $this->sideDefense;
+			}  else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
+				return $this->sideDefense;
+			} 
+				
+			return $this->sideDefense;
+			
+		}
+		/*
 		public function getDefenceValue($shooter){
 			$tf = $this->getFacingAngle();
 			$shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
@@ -220,10 +238,11 @@
 			return $this->sideDefense;
 			
 		}
+		* */
 		   
-		public function getHitSection($shooter, $turn){
+		public function getHitSection($pos, $turn){
 			$tf = $this->getFacingAngle();
-			$shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+			$shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
 		  
 			$location = 0;
 			
@@ -323,7 +342,7 @@
 		}
 		
 		
-		public function getHitSystem($shooter, $turn, $location = null){
+		public function getHitSystem($shooter, $pos, $turn, $location = null){
 		
 			if ($location == null)
 				$location = $this->getHitSection($shooter, $turn);
@@ -381,11 +400,11 @@
 							if ($system->location == 0)
 								return null;
 								
-							return $this->getHitSystem($shooter, 0);
+							return $this->getHitSystem($shooter, $pos, 0);
 						}
 						$structure = $this->getStructureSystem($location);
 						if ($structure == null || $structure->isDestroyed()){
-							return $this->getHitSystem($shooter, 0);
+							return $this->getHitSystem($shooter, $pos, 0);
 						}else{
 							return $structure;
 						}

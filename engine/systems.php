@@ -207,6 +207,7 @@ class Weapon extends ShipSystem{
     public $overloadturns = 0;
 	
 	public $uninterceptable = false;
+	public $intercept = 0;
 	
 	public $ballistic = false;
     
@@ -310,6 +311,11 @@ class Weapon extends ShipSystem{
 		if ($this->shots > 1){
 			$this->data["Number of shots"] = $this->shots;
 		}
+		
+		if ($this->intercept > 0){
+			$this->data["Intercept"] = "-".$this->intercept*5;
+		}
+
 		
 		$misc = array();
 		
@@ -442,7 +448,7 @@ class Weapon extends ShipSystem{
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-               
+                       
         $rp = $this->calculateRangePenalty($shooter, $target);
         $rangePenalty = $rp["rp"];
         
@@ -450,20 +456,26 @@ class Weapon extends ShipSystem{
         $oew = $shooter->getOEW($target, $gamedata->turn);
         $mod = 0;
         
-        if (Movement::isRolling($shooter, null))
+        if (Movement::isRolling($shooter, null) && !$this->ballistic)
             $mod -=3;
         
-        if (Movement::isPivoting($shooter, null))
+        if (Movement::isPivoting($shooter, null) && !$this->ballistic)
             $mod -=3;
             
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
             
-        $defence = $target->getDefenceValue($shooter);
+        $defence = $target->getDefenceValuePos($shooter->getCoPos());
+        if ($this->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+			$defence = $target->getDefenceValuePos(array("x"=>$movement->x, "y"=>$movement->y));
+		}
         
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
+        
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
             
-        $goal = ($defence - $dew - $rangePenalty + $oew + $firecontrol + $mod);
+        $goal = ($defence - $dew - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         
@@ -472,14 +484,30 @@ class Weapon extends ShipSystem{
         
         
         
-        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, F/C: $firecontrol, goal: $goal, chance: $change";
+        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, intercept: $intercept, F/C: $firecontrol, goal: $goal, chance: $change";
         
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
     }
     
-    
+    public function getIntercept($gamedata, $fireOrder){
+	
+		$intercept = 0;
+	
+		foreach ($gamedata->ships as $ship){
+			foreach ($ship->fireOrders as $fire){
+				if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
+					$intercept += $ship->getSystemById($fire->weaponid)->intercept;
+					
+				}
+			}
+		}
+		
+		return $intercept;
+		
+	}
+      
     
     public function fire($gamedata, $fireOrder){
     
@@ -489,6 +517,12 @@ class Weapon extends ShipSystem{
         
         $this->calculateHit($gamedata, $fireOrder);
         $fireOrder->rolled = Dice::d(100);
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
+        
+        if ($fireOrder->rolled > $fireOrder->needed && $fireOrder->rolled <= $fireOrder->needed+ ($intercept*5)){
+			$fireOrder->pubnotes .= "Shot intercepted. ";
+			$fireOrder->intercepted = true;
+		}
 		
         if ($fireOrder->rolled <= $fireOrder->needed){
 			$fireOrder->shotshit = $fireOrder->shots;
@@ -518,7 +552,13 @@ class Weapon extends ShipSystem{
         if ($target->isDestroyed())
             return;
     
-        $system = $target->getHitSystem($shooter, $fireOrder->turn);
+		$pos = $shooter->getCoPos();
+		if ($this->ballistic){
+			$movement = $shooter->getLastTurnMovement($fire->turn);
+			$pos = array("x"=>$movement->x, "y"=>$movement->y);
+		}
+		
+        $system = $target->getHitSystem($shooter, $pos, $fireOrder->turn);
         
         if ($system == null)
             return;

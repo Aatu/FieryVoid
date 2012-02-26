@@ -27,6 +27,18 @@ class Mathlib{
 	}
 	
 	
+	public static function getCompassHeadingOfPos($observer, $pos){
+		
+		$oPos = $observer->getCoPos();
+		$tPos = $pos;
+		
+		if ($oPos["x"] == $tPos["x"] && $oPos["y"] == $tPos["y"]){
+			$oPos =  $observer->getPreviousCoPos();
+			
+		}
+		return self::getCompassHeadingOfPoint($oPos, $tPos);
+		
+	}
 	
 	
 	public static function getCompassHeadingOfShip($observer, $target){

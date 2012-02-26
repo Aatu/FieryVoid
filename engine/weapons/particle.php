@@ -32,6 +32,8 @@
 		public $projectilespeed = 12;
         public $animationWidth = 3;
 		public $trailLength = 10;
+		
+		public $intercept = 2;
         
         public $loadingtime = 1;
         public $guns = 2;
@@ -62,6 +64,8 @@
 		public $projectilespeed = 20;
         public $animationWidth = 4;
 		public $trailLength = 15;
+		
+		public $intercept = 2;
         
         public $loadingtime = 1;
         public $guns = 2;

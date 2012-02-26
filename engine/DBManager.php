@@ -292,7 +292,7 @@ class DBManager {
     
         foreach ($fireOrders as $fire){
             try {
-                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit."   WHERE id = ".$fire->id;
+                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes."', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = ".(int)$fire->intercepted." WHERE id = ".$fire->id;
 
                 $this->update($sql);
             }
@@ -304,7 +304,7 @@ class DBManager {
     
     }
         
-    public function submitFireorders($gameid, $fireOrders, $turn){
+    public function submitFireorders($gameid, $fireOrders, $turn, $phase){
         
         try {
             
@@ -312,11 +312,17 @@ class DBManager {
             foreach ($fireOrders as $fire){
                 if ($fire->turn != $turn)
                     continue;
+                    
+                if ($fire->type=="ballistic" && $phase != 1)
+					continue;
+					
+				if ($fire->type!="ballistic" && $phase == 1)
+					continue;
                             
                 //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0
                 
-                $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
-                        .$fire->firingmode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.")";
+                $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
+                        .$fire->firingmode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0)";
 
                 $this->update($sql);
             }
@@ -341,8 +347,9 @@ class DBManager {
                 return $orders;
                 
                 foreach ($result as $value) {
-                    $entry = new FireOrder($value->id, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit);
+                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted);
                     $entry->notes = $value->notes;
+                    $entry->pubnotes = $value->pubnotes;
                     $orders[] = $entry;
                 }
            
@@ -419,7 +426,7 @@ class DBManager {
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
-                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.")";
+                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.", '".$damage->pubnotes."')";
 
                 $this->update($sql);
             }
@@ -444,7 +451,7 @@ class DBManager {
                 return $damages;
                 
                 foreach ($result as $value) {
-                    $entry = new DamageEntry($value->id, $value->shipid, $value->gameid, $value->turn, $value->systemid, $value->damage, $value->armour, $value->shields, $value->fireorderid, $value->destroyed);
+                    $entry = new DamageEntry($value->id, $value->shipid, $value->gameid, $value->turn, $value->systemid, $value->damage, $value->armour, $value->shields, $value->fireorderid, $value->destroyed, $value->pubnotes);
         
                     $damages[] = $entry;
                 }

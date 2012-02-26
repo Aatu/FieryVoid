@@ -100,6 +100,14 @@ window.ballistics = {
             
             ball.ballclickableTarget = $('<div oncontextmenu="ballistics.onBallContextMenu(this);return false;" class="ballclickable target ballistic_'+ball.id+'"></div>').appendTo("#pagecontainer");
             ball.ballclickableTarget.data("id", ball.id);
+            
+			ball.ballclickableLaunch .bind("click", ballistics.onBallisticClick);
+			ball.ballclickableLaunch .bind("mouseover", ballistics.ballclickableMouseOver);
+			ball.ballclickableLaunch .bind("mouseout", ballistics.ballclickableMouseOut);
+			
+			ball.ballclickableTarget .bind("click", ballistics.onBallisticClick);
+			ball.ballclickableTarget .bind("mouseover", ballistics.ballclickableMouseOver);
+			ball.ballclickableTarget .bind("mouseout", ballistics.ballclickableMouseOut);
 			
         }else{
             ball.launchContainer = e;
@@ -124,7 +132,7 @@ window.ballistics = {
         if (!ball.launchContainer)
             ballistics.createHexBallistics(ball);
         
-		if (gamedata.animating){
+		if (gamedata.animating || gamedata.gamephase == 4){
 			ball.ballclickableLaunch.css("z-index", "1");
             ball.ballclickableTarget.css("z-index", "1");
 			ball.targetContainer.hide();
@@ -243,6 +251,12 @@ window.ballistics = {
 		var ball = ballistics.getBallisticById($(this).data("id"));
 		
 		var launch = $(this).hasClass("launch");
+		ballistics.doBallisticClick(ball, launch);
+		
+	},
+	
+	doBallisticClick: function(ball, launch){
+		
 		
 		var balls = Array();
 		
@@ -340,13 +354,17 @@ window.ballistics = {
 			pos = hexgrid.positionToPixel(balls[0].targetPos);
 		}
 		
-		var e = $('<div class="shipSelectList"></div>');
+		var e = $('<div class="shipSelectList ballistic"></div>');
 		for (var i in balls){
 			var ball = balls[i];
 			var ship = gamedata.getShip(ball.shooterid);
 			var weapon = shipManager.systems.getSystem(ship, ball.weaponid);
-						
-			var target = null;
+			
+			var type = "target";
+			if (launch)
+				type = "launch";	
+				
+			var target = "";
 			if (ball.targetid){
 				targetship = gamedata.getShip(ball.targetid);
 				
@@ -355,11 +373,20 @@ window.ballistics = {
 					fac = "enemy";
 				}
 				
-				target = '<span>&gt;</span><span class="name '+fac+'">'+targetship.name+'</span>';
+				var chance = weaponManager.calculataBallisticHitChange(ball);
+				
+				var intercept = weaponManager.getInterception(ball)*5;
+				
+				intercepttext = "";
+				
+				if (intercept)
+				intercepttext ='<span class="intercept">(intercept: '+intercept+'%)</span>';
+				
+				target = '<span>&gt;</span><span class="name '+fac+'">'+targetship.name+'</span><span>hit chance: '+chance+'%</span>'+intercepttext;
 			}
 			
 			
-			$('<div oncontextmenu="return false;" class="shiplistentry '+fac+'" data-id="'+ball.id+'"><span>'+weapon.displayName+'</span>'+target+'</div>').appendTo(e);
+			$('<div oncontextmenu="return false;" class="shiplistentry '+type+' '+fac+'" data-id="'+ball.id+'"><span>'+weapon.displayName+'</span>'+target+'</div>').appendTo(e);
 			
 		}
 		
@@ -370,15 +397,34 @@ window.ballistics = {
 		
 		e.appendTo("body");
 		
-		/*
-		$('.shiplistentry',e).bind('mouseover', shipClickable.shipclickableMouseOver);
-		$('.shiplistentry',e).bind('mouseout', shipClickable.shipclickableMouseOut);
-		$('.shiplistentry',e).bind('click', shipSelectList.onListClicked);
-		*/
+	
+		$('.shiplistentry',e).bind('click', ballistics.onBallisticSelected);
+		
 		e.show();
 		
 		
 	
+	},
+	
+	onBallisticSelected: function(){
+		
+		var ball = ballistics.getBallisticById($(this).data("id"));
+		
+		if (gamedata.gamephase == 3){
+           weaponManager.targetBallistic(ball);
+        }
+		var launch = $(this).hasClass("launch");
+		ballistics.doBallisticClick(ball, launch);
+		
+	}, 
+	
+	updateList: function(){
+		var list = $('.shipSelectList.ballistic .shiplistentry');
+		if (list.get(0)){
+			var ball = ballistics.getBallisticById($(list.get(0)).data("id"));
+			var launch = $(list.get(0)).hasClass("launch");
+			ballistics.doBallisticClick(ball, launch);
+		}
 	}
 
 

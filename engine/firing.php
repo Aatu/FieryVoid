@@ -20,6 +20,9 @@ class Firing{
 				if ($fire->turn != $gamedata->turn)
 					continue;
 					
+				if ($fire->type == "intercept")
+					continue;
+					
 				$weapon = $ship->getSystemById($fire->weaponid);
 				$weapon->setLoading($ship, $gamedata->turn-1, 3);
 				$weapon->fire($gamedata, $fire);

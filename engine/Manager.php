@@ -294,7 +294,7 @@ class Manager{
             
             
             if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn);
+                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
             }
             
         }
@@ -353,7 +353,7 @@ class Manager{
                 continue;
           		            
             if (Firing::validateFireOrders($ship->fireOrders, $gd)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn);
+				 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
             }else{
                 return "{error: \"Failed to validate Ballistic firing orders\"}";
             }
@@ -555,7 +555,7 @@ class Manager{
             if (is_array($value["fireOrders"])){
                 foreach($value["fireOrders"] as $i=>$fo){
                                                 //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode
-                    $fireOrder = new FireOrder(-1, $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0);
+                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0);
                     $fireOrders[$i] = $fireOrder;
                 }
             }

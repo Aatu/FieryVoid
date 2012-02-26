@@ -21,7 +21,7 @@
 				if ($target->isDestroyed())
 					return;
 			
-                $system = $target->getHitSystem($shooter, $fireOrder->turn);
+                $system = $target->getHitSystem($shooter, $shooter->getCoPos(), $fireOrder->turn);
 				
                 if ($system == null)
 					return;

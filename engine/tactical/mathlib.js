@@ -147,6 +147,26 @@ window.mathlib = {
 		return (angle / (180.0 / Math.PI));
 	},
 	
+	getCompassHeadingOfPosition: function(observer, position){
+	
+
+		var oPos = shipManager.getShipPosition(observer);
+		var tPos = position;
+
+		if (oPos.x == tPos.x && oPos.y == tPos.y){
+				oPos =  shipManager.movement.getPreviousLocation(observer);
+		}
+
+		
+		oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
+		tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
+		
+		
+		
+		return mathlib.getCompassHeadingOfPoint(oPos, tPos);
+		
+	},
+	
 	getCompassHeadingOfShip: function(observer, target){
 	
 
