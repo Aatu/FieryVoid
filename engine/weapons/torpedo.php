@@ -19,12 +19,12 @@
 		
 		public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals 
 		
-		public $trailColor = array(30, 170, 255);
-        public $animation = "trail";
+		public $trailColor = array(141, 240, 255);
+        public $animation = "torpedo";
         public $animationColor = array(30, 170, 255);
 		public $animationExplosionScale = 0.25;
 		public $projectilespeed = 12;
-        public $animationWidth = 3;
+        public $animationWidth = 10;
 		public $trailLength = 10;
 		
 		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
@@ -47,14 +47,99 @@
 		public $defaultShots = 1;
 		public $normalload = 6;
 		
+		public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals 
+		
+		public $trailColor = array(141, 240, 255);
+        public $animation = "trail";
+        public $animationColor = array(227, 148, 55);
+		public $animationExplosionScale = 0.25;
+		public $projectilespeed = 12;
+        public $animationWidth = 4;
+		public $trailLength = 40;
+		
+		public $grouping = 20;
+		
+		public $canChangeShots = true;
+		
 		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
 			
         }
+        
+        public function firedOnTurn($ship, $turn){
+			
+			foreach ($ship->fireOrders as $fire){
+				if ($fire->weaponid == $this->id && $fire->turn == $turn){
+					return  $fire->shots;
+				}
+			}
+			return 0;
+		}
+        
+        public function setLoading($ship, $turn, $phase){
+			$turnsloaded = 0;
+		
+		
+			for ($i = 0;$i<=$turn;$i++){
+				$step = 1;
+				$off = $this->isOfflineOnTurn($i);
+				$overload = $this->isOverloadingOnTurn($i-1);
+				$nowoverloading = $this->isOverloadingOnTurn($i);
+				if ($i == $turn && $phase == 1 && $overload){
+					$nowoverloading = true;
+				}           
+				$fired = $this->firedOnTurn($ship, $i);
+				
+						
+				if ($i == 0){
+					if (!$off){
+						$turnsloaded = $this->getNormalLoad();
+						if ($overload){
+							$turnsloaded = $this->overloadturns;
+						}
+					}
+					continue;
+				}
+				
+				if ($off){
+					$turnsloaded = 0;
+					continue;
+				}
+				
+				if ($overload){
+					$step = 2;
+				}
+				
+				$turnsloaded += $step;
+				
+				if (!$overload && $turnsloaded > $this->getNormalLoad()){
+					$turnsloaded = $this->getNormalLoad();
+				}
+		
+				if ($turnsloaded > $this->getNormalLoad() && !$nowoverloading){
+					$turnsloaded = $this->getNormalLoad();
+				}else if ($turnsloaded > $this->overloadturns && $nowoverloading){
+					$turnsloaded = $this->overloadturns;
+				}
+								
+			   
+				
+						
+				if ($fired){
+					$turnsloaded -= $fired;
+					if ($turnsloaded < 0)
+						$turnsloaded = 0;
+					
+				}
+				
+			}
+			
+			$this->turnsloaded = $turnsloaded;
+		}
 		
 		public function beforeTurn($ship, $turn, $phase){
-			$this->shots = $this->turnsloaded;
 			parent::beforeTurn($ship, $turn, $phase);
+			$this->shots = $this->turnsloaded;
 		}
 		
 		public function getDamage(){        return Dice::d(10,2);   }

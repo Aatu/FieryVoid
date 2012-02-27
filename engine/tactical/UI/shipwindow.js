@@ -508,25 +508,38 @@ shipWindowManager = {
 		
 		
 		if (system.weapon){
-			var load = system.turnsloaded;
-			if (!systemwindow.hasClass("overload") && load > system.loadingtime)
-				load = system.loadingtime;
-			
-				
-			
-			var loadingtime = system.loadingtime;
-			if (system.normalload > 0)
-				loadingtime = system.normalload;
-				
-			field.html(load+ "/" + loadingtime);
-			
-				
-			if (system.ballistic)
-				systemwindow.addClass("ballistic");
-					
+			var firing = weaponManager.hasFiringOrder(ship, system);
 			if (!weaponManager.isLoaded(system)){systemwindow.addClass("loading");}else{systemwindow.removeClass("loading");}
 			if (weaponManager.isSelectedWeapon(system)){systemwindow.addClass("selected");}else{systemwindow.removeClass("selected");}
-			if (weaponManager.hasFiringOrder(ship, system)){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
+			if (firing){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
+			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
+			
+			if (firing && system.canChangeShots){
+				
+				var fire = weaponManager.getFiringOrder(ship, system);
+			
+				if (fire.shots<system.shots){	systemwindow.addClass("canAddShots");	}else{	systemwindow.removeClass("canAddShots");	}
+				if (fire.shots>1){	systemwindow.addClass("canReduceShots");	}else{	systemwindow.removeClass("canReduceShots");	}
+				
+				field.html(fire.shots+ "/" + system.shots);
+				
+			}else if (!firing){
+				var load = system.turnsloaded;
+				//if (!systemwindow.hasClass("overload") && load > system.loadingtime)
+				//	load = system.loadingtime;
+				
+					
+				
+				var loadingtime = system.loadingtime;
+				if (system.normalload > 0)
+					loadingtime = system.normalload;
+					
+				field.html(load+ "/" + loadingtime);
+			}
+				
+			
+					
+			
 			
 			
 		}else if (system.name == "thruster"){
@@ -709,7 +722,9 @@ shipWindowManager = {
 			shipWindowManager.assignThrust(ship);
 		}
 		
-		if (gamedata.gamephase == 1){
+		if(system.weapon && system.canChangeShots && ((system.ballistic && gamedata.gamephase == 1) || (!system.ballistic && gamedata.gamephase == 3))){
+			weaponManager.changeShots(ship, system, 1);
+		}else if (gamedata.gamephase == 1){
 			shipManager.power.clickPlus(ship, system);
 		}
 		
@@ -733,7 +748,9 @@ shipWindowManager = {
 			shipWindowManager.assignThrust(ship);
 		}
 		
-		if (gamedata.gamephase == 1){
+		if(system.weapon && system.canChangeShots && ((system.ballistic && gamedata.gamephase == 1) || (!system.ballistic && gamedata.gamephase == 3))){
+			weaponManager.changeShots(ship, system, -1);
+		}else if (gamedata.gamephase == 1){
 			shipManager.power.clickMinus(ship, system);
 		}
 

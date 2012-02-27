@@ -9,23 +9,23 @@
         private $damages = array();
         
         public function damage( $target, $shooter, $fireOrder){
-			
-			
+            
+            
             $totalDamage = $this->getDamage();
             $this->damages = array();
             while(true){
                                 
                 if ($totalDamage <= 0)
-            		break;
+                    break;
             
-				if ($target->isDestroyed())
-					return;
-			
+                if ($target->isDestroyed())
+                    return;
+            
                 $system = $target->getHitSystem($shooter, $shooter->getCoPos(), $fireOrder->turn);
-				
+                
                 if ($system == null)
-					return;
-					
+                    return;
+                    
                 if ($totalDamage - $this->raking >= 0){
                     $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder);
                     $totalDamage -= $this->raking;
@@ -53,31 +53,31 @@
                 if ($previous->systemid == $system->id)
                     $armour -= $previous->damage;
             }
-			
-			$systemHealth = $system->getRemainingHealth();
-			$modifiedDamage = $damage;
+            
+            $systemHealth = $system->getRemainingHealth();
+            $modifiedDamage = $damage;
             
             if ($armour < 0)
                 $armour = 0;
-			
-			$destroyed = false;
+            
+            $destroyed = false;
             if ($damage-$armour >= $systemHealth){
-				$destroyed = true;
-				$modifiedDamage = $systemHealth + $armour;
+                $destroyed = true;
+                $modifiedDamage = $systemHealth + $armour;
             }
-			
-            $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed);
-			$damageEntry->updated = true;
-			$system->damage[] = $damageEntry;
-			$this->damages[] = $damageEntry;
-			
-			if ($damage-$armour > $systemHealth){
-			
-				$damage = $damage-$modifiedDamage;
-				 
-				$overkillSystem = $this->getOverkillSystem($target, $shooter, $system);
-				if ($overkillSystem != null)
-					$this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder);
+            
+            $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
+            $damageEntry->updated = true;
+            $system->damage[] = $damageEntry;
+            $this->damages[] = $damageEntry;
+            
+            if ($damage-$armour > $systemHealth){
+            
+                $damage = $damage-$modifiedDamage;
+                 
+                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system);
+                if ($overkillSystem != null)
+                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder);
             }
         
             
@@ -87,26 +87,26 @@
         
     
     }
-	
-	class Laser extends Raking{
-	
-		public $uninterceptable = true;
-	
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
+    
+    class Laser extends Raking{
+    
+        public $uninterceptable = true;
+    
+        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
         }
-		
-		public function setSystemDataWindow(){
+        
+        public function setSystemDataWindow(){
 
-			$this->data["Weapon type"] = "Laser";
-			$this->data["Damage type"] = "Raking";
-			
-			parent::setSystemDataWindow();
-		}
+            $this->data["Weapon type"] = "Laser";
+            $this->data["Damage type"] = "Raking";
+            
+            parent::setSystemDataWindow();
+        }
     
-		
-	
-	}
+        
+    
+    }
 
     class HeavyLaser extends Laser{
         
@@ -117,7 +117,7 @@
         public $animationWidth = 4;
         
         public $loadingtime = 4;
-		public $overloadturns = 8;
+        public $overloadturns = 8;
         
         public $damageType = "raking";
         public $raking = 10;
@@ -136,14 +136,14 @@
         
         
     }
-	
-	class MediumLaser extends Laser{
+    
+    class MediumLaser extends Laser{
         
         public $name = "mediumLaser";
         public $displayName = "Medium laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 11);
-		public $animationExplosionScale = 0.18;
+        public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         
         public $loadingtime = 3;
@@ -165,8 +165,8 @@
         
         
     }
-	
-	class BattleLaser extends Laser{
+    
+    class BattleLaser extends Laser{
         
         public $name = "battleLaser";
         public $displayName = "Battle laser";
@@ -175,11 +175,11 @@
         public $animationWidth = 4;
         
         public $loadingtime = 3;
-		public $overloadturns = 6;
+        public $overloadturns = 6;
         
         public $damageType = "raking";
         public $raking = 10;
-		
+        
         
         public $rangePenalty = 0.25;
         public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 

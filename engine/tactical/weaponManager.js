@@ -186,8 +186,8 @@ window.weaponManager = {
 		var change = Math.round((goal/20)*100);
 		//console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " goal: " +goal);
 		
-		if (change > 100)
-			change = 100;
+		//if (change > 100)
+		//	change = 100;
 		return change;
 		
 	},
@@ -455,14 +455,15 @@ window.weaponManager = {
 			
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
 				//$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
-				//TODO: range check!
-				weaponManager.removeFiringOrder(selectedShip, weapon);
-				for (var s=0;s<weapon.guns;s++){
-					
-					
-					selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ship.id, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots});
+				if (weapon.range == 0 || (mathlib.getDistance(shipManager.getShipPosition(selectedShip), shipManager.getShipPosition(ship))<=weapon.range)){
+					weaponManager.removeFiringOrder(selectedShip, weapon);
+					for (var s=0;s<weapon.guns;s++){
+						
+						
+						selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ship.id, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots});
+					}
+					toUnselect.push(weapon);
 				}
-				toUnselect.push(weapon);
 			}
 		}
 		
@@ -488,12 +489,40 @@ window.weaponManager = {
 		
 		for (var i in ship.fireOrders){
 			var fire = ship.fireOrders[i];
+			if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled){
+				if ((gamedata.gamephase == 1 && system.ballistic) || (gamedata.gamephase == 3 && !system.ballistic)){
+					return true;
+				}
+			}
+				
+		}
+		return false;
+	
+	},
+	
+	getFiringOrder: function(ship, system){
+		
+		for (var i in ship.fireOrders){
+			var fire = ship.fireOrders[i];
 			if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled)
-				return true;
+				return fire;
 		}
 		
 		return false;
 	
+	},
+	
+	changeShots: function(ship, system, mod){
+		for (var i in ship.fireOrders){
+			var fire = ship.fireOrders[i];
+			if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled){
+				if ((gamedata.gamephase == 1 && system.ballistic) || (gamedata.gamephase == 3 && !system.ballistic))
+					fire.shots += mod;
+			}
+				
+		}
+		
+		shipWindowManager.setDataForSystem(ship, system);
 	},
 	
 	getDamagesCausedBy: function(fire){
@@ -542,7 +571,7 @@ window.weaponManager = {
         var arcs = shipManager.systems.getArcs(ship, weapon);
 		var dis;
 		if (weapon.rangePenalty == 0){
-			dis =  hexgrid.hexWidth()*weapon.maxRange;
+			dis =  hexgrid.hexWidth()*weapon.range;
 		}else{
 			dis =  20*hexgrid.hexWidth()/weapon.rangePenalty;
 		}

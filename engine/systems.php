@@ -10,9 +10,9 @@ class Reactor extends ShipSystem{
     
     function __construct($armour, $maxhealth, $location, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
-		
-		
-		
+        
+        
+        
     }
     
    
@@ -83,17 +83,17 @@ class CnC extends ShipSystem{
     public $primary = true;
     
     public $possibleCriticals = array(
-	1=>"SensorsDisrupted", 
-	9=>"CommunicationsDisrupted", 
-	12=>"PenaltyToHit", 
-	15=>"RestrictedEW",
-	18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-	21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-	24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
+    1=>"SensorsDisrupted", 
+    9=>"CommunicationsDisrupted", 
+    12=>"PenaltyToHit", 
+    15=>"RestrictedEW",
+    18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+    21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+    24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
         
     function __construct($armour, $maxhealth, $location, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
-	
+    
 
     }
     
@@ -109,19 +109,19 @@ class Thruster extends ShipSystem{
     public $thrustwasted = 0;
     
     public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
-	
-	
-	public $criticalDescriptions = array(
-		
-	
-	);
+    
+    
+    public $criticalDescriptions = array(
+        
+    
+    );
     
     function __construct($armour, $maxhealth, $location, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
         $this->direction = (int)$direction;
-	
+    
     }
    
    
@@ -192,12 +192,12 @@ class Weapon extends ShipSystem{
     public $animationImgSprite = 0;
     public $animationColor = null;
     public $animationWidth = 3;
-	public $animationExplosionScale = 0.25;
-	public $trailLength = 40;
-	public $trailColor = array(248, 216, 65);
+    public $animationExplosionScale = 0.25;
+    public $trailLength = 40;
+    public $trailColor = array(248, 216, 65);
     public $rangePenalty = 0;
-	public $rangeDamagePenalty = 0;
-	public $dp = 0; //damage penalty per dice
+    public $rangeDamagePenalty = 0;
+    public $dp = 0; //damage penalty per dice
     public $range = 0;
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -205,24 +205,29 @@ class Weapon extends ShipSystem{
     public $turnsloaded;
     public $normalload = 0;
     public $overloadturns = 0;
-	
-	public $uninterceptable = false;
-	public $intercept = 0;
-	
-	public $ballistic = false;
+    
+    public $uninterceptable = false;
+    public $intercept = 0;
+    
+    public $ballistic = false;
     
     
     public $shots = 1;
-	public $defaultShots = 1;
-	public $guns = 1;
+    public $defaultShots = 1;
+    public $canChangeShots = false;
+    
+    public $grouping = 0;
+    public $guns = 1;
     public $projectilespeed = 17;
+    
+    public $rof = 2;
     
     public $firingMode = 1;
         
     public $damageType = "standard";
     public $minDamage, $maxDamage;
-	
-	
+    
+    
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
@@ -232,40 +237,40 @@ class Weapon extends ShipSystem{
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
        
-		$this->setMinDamage();
+        $this->setMinDamage();
         $this->setMaxDamage();
-		
+        
     }
-	
-	public function effectCriticals(){
+    
+    public function effectCriticals(){
         parent::effectCriticals();
         foreach ($this->criticals as $crit){
             if ($crit instanceof ReducedRange){
-				
-				if ($this->rangePenalty != 0){
-					if ($this->rangePenalty >= 1){
-						$this->rangePenalty += 1;
-					}else{
-						$this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
-					}
-					
-				}
-				
-				if ($this->range != 0){
-					$this->range = round($this->range *0.75);
-				}
-				
-			}
-			
-			if ($crit instanceof ReducedDamage){
-				$min = $this->minDamage * 0.25;
-				$max = $this->maxDamage/$this->defaultShots * 0.25;
-				$avg = round(($min+$max)/2);
-				$this->dp = $avg;
-			}
+                
+                if ($this->rangePenalty != 0){
+                    if ($this->rangePenalty >= 1){
+                        $this->rangePenalty += 1;
+                    }else{
+                        $this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
+                    }
+                    
+                }
+                
+                if ($this->range != 0){
+                    $this->range = round($this->range *0.75);
+                }
+                
+            }
+            
+            if ($crit instanceof ReducedDamage){
+                $min = $this->minDamage * 0.25;
+                $max = $this->maxDamage/$this->defaultShots * 0.25;
+                $avg = round(($min+$max)/2);
+                $this->dp = $avg;
+            }
         }
     
-		 
+         
         $this->setMinDamage();
         $this->setMaxDamage();
     
@@ -279,7 +284,7 @@ class Weapon extends ShipSystem{
     }
     
     public function firedOnTurn($ship, $turn){
-		
+        
         foreach ($ship->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
@@ -287,52 +292,52 @@ class Weapon extends ShipSystem{
         }
         return false;
     }
-	
-	public function setSystemDataWindow(){
+    
+    public function setSystemDataWindow(){
 
-		$this->data["Loading"] = $this->turnsloaded."/".$this->loadingtime;
-		
-		$dam = $this->minDamage."-".$this->maxDamage;
-		if ($this->minDamage == $this->maxDamage)
-			$dam = $this->maxDamage;
-			
-		$this->data["Damage"] = $dam;
-		
-		if ($this->rangePenalty > 0){
-			$this->data["Range penalty"] =$this->rangePenalty;
-		}else{
-			$this->data["Range"] = $this->range;
-		}
-		
-		if ($this->guns > 1){
-			$this->data["Number of guns"] = $this->guns;
-		}
-		
-		if ($this->shots > 1){
-			$this->data["Number of shots"] = $this->shots;
-		}
-		
-		if ($this->intercept > 0){
-			$this->data["Intercept"] = "-".$this->intercept*5;
-		}
+        $this->data["Loading"] = $this->turnsloaded."/".$this->getNormalLoad();
+        
+        $dam = $this->minDamage."-".$this->maxDamage;
+        if ($this->minDamage == $this->maxDamage)
+            $dam = $this->maxDamage;
+            
+        $this->data["Damage"] = $dam;
+        
+        if ($this->rangePenalty > 0){
+            $this->data["Range penalty"] =$this->rangePenalty;
+        }else{
+            $this->data["Range"] = $this->range;
+        }
+        
+        if ($this->guns > 1){
+            $this->data["Number of guns"] = $this->guns;
+        }
+        
+        if ($this->shots > 1){
+            $this->data["Number of shots"] = $this->shots;
+        }
+        
+        if ($this->intercept > 0){
+            $this->data["Intercept"] = "-".$this->intercept*5;
+        }
 
-		
-		$misc = array();
-		
-		if ($this->overloadturns > 0){
-			$misc[] = " OVERLOADABLE";
-		}
-		if ($this->uninterceptable)
-			$misc[] = " UNINTERCEPTABLE";
-		
-		//if (sizeof($misc)>0)
-			//$this->data["Misc"] = $misc;
-	
-		parent::setSystemDataWindow();
-	}
-	
-	public function setLoading($ship, $turn, $phase){
-		$turnsloaded = 0;
+        
+        $misc = array();
+        
+        if ($this->overloadturns > 0){
+            $misc[] = " OVERLOADABLE";
+        }
+        if ($this->uninterceptable)
+            $misc[] = " UNINTERCEPTABLE";
+        
+        //if (sizeof($misc)>0)
+            //$this->data["Misc"] = $misc;
+    
+        parent::setSystemDataWindow();
+    }
+    
+    public function setLoading($ship, $turn, $phase){
+        $turnsloaded = 0;
     
     
         for ($i = 0;$i<=$turn;$i++){
@@ -378,10 +383,10 @@ class Weapon extends ShipSystem{
             }
                             
            
-			
-					
+            
+                    
             if ($fired){
-				$turnsloaded -= $this->getNormalLoad();
+                $turnsloaded -= $this->getNormalLoad();
                 if ($turnsloaded < 0)
                     $turnsloaded = 0;
                 
@@ -390,13 +395,13 @@ class Weapon extends ShipSystem{
         }
         
         $this->turnsloaded = $turnsloaded;
-	}
+    }
     
     public function beforeTurn($ship, $turn, $phase){
         
-		$this->setLoading($ship, $turn, $phase);
+        $this->setLoading($ship, $turn, $phase);
         
-		parent::beforeTurn($ship, $turn, $phase);
+        parent::beforeTurn($ship, $turn, $phase);
     }
     /*
     
@@ -467,9 +472,9 @@ class Weapon extends ShipSystem{
             
         $defence = $target->getDefenceValuePos($shooter->getCoPos());
         if ($this->ballistic){
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-			$defence = $target->getDefenceValuePos(array("x"=>$movement->x, "y"=>$movement->y));
-		}
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $defence = $target->getDefenceValuePos(array("x"=>$movement->x, "y"=>$movement->y));
+        }
         
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
@@ -492,23 +497,50 @@ class Weapon extends ShipSystem{
     }
     
     public function getIntercept($gamedata, $fireOrder){
-	
-		$intercept = 0;
-	
-		foreach ($gamedata->ships as $ship){
-			foreach ($ship->fireOrders as $fire){
-				if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
-					$intercept += $ship->getSystemById($fire->weaponid)->intercept;
+    
+        $intercept = 0;
+        if ($this->uninterceptable)
+			return 0;
+    
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->fireOrders as $fire){
+                if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
+                    $intercept += $ship->getSystemById($fire->weaponid)->intercept;
+                    
+                }
+            }
+        }
+        
+        return $intercept;
+        
+    }
+    public function fire($gamedata, $fireOrder){
+    
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
 					
-				}
+		$this->calculateHit($gamedata, $fireOrder);
+		$intercept = $this->getIntercept($gamedata, $fireOrder);
+		
+		for ($i=0;$i<$fireOrder->shots;$i++){
+			$needed = $fireOrder->needed - ($this->grouping*$i);
+			$rolled = Dice::d(100);
+			if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
+				//$fireOrder->pubnotes .= "Shot intercepted. ";
+				$fireOrder->intercepted += 1;
+			}
+			
+			$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+			if ($rolled <= $needed){
+				$fireOrder->shotshit++;
+				$this->damage($target, $shooter, $fireOrder);
 			}
 		}
 		
-		return $intercept;
-		
+		$fireOrder->rolled = 1;//Marks that fire order has been handled
+				
 	}
-      
-    
+    /*
     public function fire($gamedata, $fireOrder){
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -520,17 +552,17 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
         
         if ($fireOrder->rolled > $fireOrder->needed && $fireOrder->rolled <= $fireOrder->needed+ ($intercept*5)){
-			$fireOrder->pubnotes .= "Shot intercepted. ";
-			$fireOrder->intercepted = true;
-		}
-		
+            //$fireOrder->pubnotes .= "Shot intercepted. ";
+            $fireOrder->intercepted = 1;
+        }
+        
         if ($fireOrder->rolled <= $fireOrder->needed){
-			$fireOrder->shotshit = $fireOrder->shots;
+            $fireOrder->shotshit = $fireOrder->shots;
             $this->damage($target, $shooter, $fireOrder);
         }
         
     
-    }
+    }*/
     
     protected function getOverkillSystem($target, $shooter, $system){
     
@@ -552,12 +584,12 @@ class Weapon extends ShipSystem{
         if ($target->isDestroyed())
             return;
     
-		$pos = $shooter->getCoPos();
-		if ($this->ballistic){
-			$movement = $shooter->getLastTurnMovement($fire->turn);
-			$pos = array("x"=>$movement->x, "y"=>$movement->y);
-		}
-		
+        $pos = $shooter->getCoPos();
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = array("x"=>$movement->x, "y"=>$movement->y);
+        }
+        
         $system = $target->getHitSystem($shooter, $pos, $fireOrder->turn);
         
         if ($system == null)
@@ -568,44 +600,44 @@ class Weapon extends ShipSystem{
         
         
     }
-	
-	protected function getSystemArmour($system){
-		return $system->armour;
-	}
-	
-	protected function getDamageMod($damage, $shooter, $target){
-		if ($this->rangeDamagePenalty > 0){
-			$shooterPos = $shooter->getCoPos();
-			$targetPos = $target->getCoPos();
-			$dis = round(mathlib::getDistanceHex($shooterPos, $targetPos));
-			
-			//print ("damage: $damage dis: $dis damagepen: " . $this->rangeDamagePenalty);
-			$damage -= ($dis * $this->rangeDamagePenalty);
-			//print ("damage: $damage \n\n");
-			if ($damage < 0)
-				return 0;
-		}
-		
-		$damage -= $this->dp;
-		if ($damage < 0)
-			return 0;
-		
-		return $damage;
-	}
-	
-	protected function getFinalDamage($shooter, $target){
-	
-		$damage = $this->getDamage();
-		return $this->getDamageMod($damage, $shooter, $target);
-	}
+    
+    protected function getSystemArmour($system){
+        return $system->armour;
+    }
+    
+    protected function getDamageMod($damage, $shooter, $target){
+        if ($this->rangeDamagePenalty > 0){
+            $shooterPos = $shooter->getCoPos();
+            $targetPos = $target->getCoPos();
+            $dis = round(mathlib::getDistanceHex($shooterPos, $targetPos));
+            
+            //print ("damage: $damage dis: $dis damagepen: " . $this->rangeDamagePenalty);
+            $damage -= ($dis * $this->rangeDamagePenalty);
+            //print ("damage: $damage \n\n");
+            if ($damage < 0)
+                return 0;
+        }
+        
+        $damage -= $this->dp;
+        if ($damage < 0)
+            return 0;
+        
+        return $damage;
+    }
+    
+    protected function getFinalDamage($shooter, $target){
+    
+        $damage = $this->getDamage();
+        return $this->getDamageMod($damage, $shooter, $target);
+    }
     
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder){
 
         $armour = $this->getSystemArmour($system);
         $systemHealth = $system->getRemainingHealth();
-		$modifiedDamage = $damage;
-		
-		
+        $modifiedDamage = $damage;
+        
+        
 
         //print("damage: $damage armour: $armour\n");
             
@@ -617,7 +649,7 @@ class Weapon extends ShipSystem{
         }
         
         
-        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed);
+        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         //print("damage: $damage armour: $armour destroyed: $destroyed \n");

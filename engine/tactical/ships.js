@@ -1,15 +1,15 @@
 window.shipManager = {
 
-	
+    shipImages: Array(),
 
-	initShips: function(){
-	
-		for (var i in gamedata.ships){
-			shipManager.createHexShipDiv(gamedata.ships[i]);
-		}
-	
-	},
-	
+    initShips: function(){
+    
+        for (var i in gamedata.ships){
+            shipManager.createHexShipDiv(gamedata.ships[i]);
+        }
+    
+    },
+    
     createHexShipDiv: function(ship){
     
         if (ship.htmlContainer)
@@ -31,19 +31,26 @@ window.shipManager = {
             ship.htmlContainer = $("#pagecontainer #hexship_"+ship.id);
             ship.shipclickableContainer = $('<div oncontextmenu="shipManager.onShipContextMenu(this);return false;" class="shipclickable ship_'+ship.id+'"></div>').appendTo("#pagecontainer");
             ship.shipclickableContainer.data("id", ship.id);
-			ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
-			shipWindowManager.setData(ship);
+            ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+            shipWindowManager.setData(ship);
             $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
             e.attr("id", "hexship_");
+            var img = new Image();
+            img.src = ship.imagePath; 
+            shipManager.shipImages[ship.id] = img;
+            $(shipManager.shipImages[ship.id]).bind("load", function(){
+				shipManager.shipImages[ship.id].loaded = true;
+			});
+            
         }else{
             ship.htmlContainer = e;
             ship.shipclickableContainer = $(".shipclickable.ship_"+ship.id);
-			ship.shipStatusWindow = $(".shipwindow.ship_"+ship.id);
-			shipWindowManager.setData(ship);
+            ship.shipStatusWindow = $(".shipwindow.ship_"+ship.id);
+            shipWindowManager.setData(ship);
         }
-		
-		if (shipManager.isDestroyed(ship))
-			ship.dontDraw = true;
+        
+        if (shipManager.isDestroyed(ship))
+            ship.dontDraw = true;
     },
     
     drawShips: function(){
@@ -57,11 +64,11 @@ window.shipManager = {
         if (!ship.htmlContainer)
             shipManager.createHexShipDiv(ship);
         
-		if (ship.dontDraw){
-			ship.shipclickableContainer.css("z-index", "1");
-			ship.htmlContainer.hide();
-			return;
-		}
+        if (ship.dontDraw){
+            ship.shipclickableContainer.css("z-index", "1");
+            ship.htmlContainer.hide();
+            return;
+        }
         //graphics.clearCanvas("shipcanvas_" + ship.id);         
         var canvas = window.graphics.getCanvas("shipcanvas_" + ship.id);
         
@@ -89,8 +96,8 @@ window.shipManager = {
         ship.htmlContainer.css("top", pos.y -h + "px").css("left", pos.x -h + "px").css("z-index", hexShipZ);
         
         
-        var img = new Image();
-        img.src = ship.imagePath; 
+        var img = shipManager.shipImages[ship.id];
+        
         var sc = ship.shipclickableContainer;
         scSize = s*0.15*gamedata.zoom;
         sc.css("width", scSize+"px");
@@ -104,9 +111,18 @@ window.shipManager = {
         //console.log("gamedata.gamephase: " + gamedata.gamephase + " gamedata.activeship: " + gamedata.activeship + " ship.id: " + ship.id);
         if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
             UI.shipMovement.drawShipMovementUI(ship);
+        if (img.loaded){
+			shipManager.doDrawShip(canvas, s, ship, img);
+		}else{
+			$(img).bind("load", function(){
+				shipManager.doDrawShip(canvas, s, ship, img);
+			});
+		}
         
-        $(img).bind("load", function(){
-            canvas.clearRect(0, 0, s, s);
+    },
+    
+    doDrawShip: function(canvas, s, ship, img){
+		canvas.clearRect(0, 0, s, s);
             
             if (gamedata.mouseOverShipId == ship.id && gamedata.gamephase > 1){
                 if (gamedata.zoom > 0){
@@ -126,39 +142,37 @@ window.shipManager = {
                 }
                 
             }
-			if (gamedata.isSelected(ship) && gamedata.mouseOverShipId != ship.id && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
-				canvas.strokeStyle = "rgba(144,185,208,0.40)";
+            if (gamedata.isSelected(ship) && gamedata.mouseOverShipId != ship.id && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
+                canvas.strokeStyle = "rgba(144,185,208,0.40)";
                 canvas.fillStyle = "rgba(255,255,255,0.18)";
                 
                 graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-			}else if ( gamedata.mouseOverShipId == ship.id ){
-			
-				if (ship.userid == gamedata.thisplayer){
-					canvas.strokeStyle = "rgba(86,200,45,0.60)";
-					canvas.fillStyle = "rgba(50,122,24,0.50)";
-                }else{
-					canvas.strokeStyle = "rgba(229,87,38,0.60)";
-					canvas.fillStyle = "rgba(179,65,25,0.50)";
-				
-				}
-				
-				graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-			
-			
-			}
+            }else if ( gamedata.mouseOverShipId == ship.id ){
             
-			if (gamedata.isTargeted(ship)) {
-				canvas.strokeStyle = "rgba(144,185,208,0.40)";
+                if (ship.userid == gamedata.thisplayer){
+                    canvas.strokeStyle = "rgba(86,200,45,0.60)";
+                    canvas.fillStyle = "rgba(50,122,24,0.50)";
+                }else{
+                    canvas.strokeStyle = "rgba(229,87,38,0.60)";
+                    canvas.fillStyle = "rgba(179,65,25,0.50)";
+                
+                }
+                
+                graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+            
+            
+            }
+            
+            if (gamedata.isTargeted(ship)) {
+                canvas.strokeStyle = "rgba(144,185,208,0.40)";
                 canvas.fillStyle = "rgba(255,255,255,0.18)";
                 
                 graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-			}
-			
+            }
+            
             graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipManager.getShipHeadingAngleForDrawing(ship), img);
             
-        });
-        
-    },
+	},
     
 
     getShipCanvasSize: function(ship){
@@ -308,7 +322,7 @@ window.shipManager = {
     
     getShipPosition: function(ship){
         var movement = shipManager.movement.getLastCommitedMove(ship);
-		var x = movement.x;
+        var x = movement.x;
         var y = movement.y;
         var xO = movement.xOffset;
         var yO = movement.yOffset;
@@ -329,17 +343,17 @@ window.shipManager = {
     
     getShipPositionForDrawing: function(ship){
         var movement = null;    
-		
+        
         for (var i in ship.movement){
             if (ship.movement[i].commit == false)
-				break;
-				
+                break;
+                
             movement = ship.movement[i];
-			
+            
             if (movement.animated == true)
                 continue;
-			
-			
+            
+            
                                 
             if (movement.type=="move" || movement.type=="slipright" || movement.type=="slipleft"){
                 var last = ship.movement[i-1];
@@ -373,33 +387,33 @@ window.shipManager = {
     onShipContextMenu: function(e){
         var id = $(e).data("id");
         var ship = gamedata.getShip(id);
-		
-		if (shipSelectList.haveToShowList(ship)){
-			shipSelectList.showList(ship);
-		}else{
-			shipManager.doShipContextMenu(ship);
-		}
-		
+        
+        if (shipSelectList.haveToShowList(ship)){
+            shipSelectList.showList(ship);
+        }else{
+            shipManager.doShipContextMenu(ship);
+        }
+        
     },
-	
-	doShipContextMenu: function(ship){
-	
-		shipSelectList.remove();
-	
-		if (shipManager.isDestroyed(ship))
-			return;
-		
-		if (ship.userid == gamedata.thisplayer && (gamedata.gamephase == 1 || gamedata.gamephase >2)){
-			shipWindowManager.open(ship);
-			gamedata.selectShip(ship, false);
-			gamedata.shipStatusChanged(ship);
-			drawEntities();
-		}else{
-			shipWindowManager.open(ship);
-		}
+    
+    doShipContextMenu: function(ship){
+    
+        shipSelectList.remove();
+    
+        if (shipManager.isDestroyed(ship))
+            return;
+        
+        if (ship.userid == gamedata.thisplayer && (gamedata.gamephase == 1 || gamedata.gamephase >2)){
+            shipWindowManager.open(ship);
+            gamedata.selectShip(ship, false);
+            gamedata.shipStatusChanged(ship);
+            drawEntities();
+        }else{
+            shipWindowManager.open(ship);
+        }
         return false;
-	
-	},
+    
+    },
     
     onShipDblClick: function(e){
         
@@ -410,147 +424,150 @@ window.shipManager = {
 
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
-		
-		if (shipSelectList.haveToShowList(ship)){
-			shipSelectList.showList(ship);
-		}else{
-			shipManager.doShipClick(ship);
-		}
-		
+        
+        if (shipSelectList.haveToShowList(ship)){
+            shipSelectList.showList(ship);
+        }else{
+            shipManager.doShipClick(ship);
+        }
+        
     },
-	
-	doShipClick: function(ship){
-		
-		shipSelectList.remove();
-	
-		if (gamedata.thisplayer == -1)
-			return;
-		
-		if (shipManager.isDestroyed(ship))
-			return;
-		
+    
+    doShipClick: function(ship){
+        
+        shipSelectList.remove();
+    
+        if (gamedata.thisplayer == -1)
+            return;
+        
+        if (shipManager.isDestroyed(ship))
+            return;
+        
         if (gamedata.gamephase == 2)
             return;
+            
+        if (gamedata.waiting)
+			return;
         
         if (ship.userid == gamedata.thisplayer){
             gamedata.selectShip(ship, false);
         }
-		
-		if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3){
+        
+        if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3){
            weaponManager.targetShip(ship);
         }
         
         if (gamedata.gamephase == 1 && ship.userid != gamedata.thisplayer){
-			if (gamedata.selectedSystems.length > 0){
-				weaponManager.targetShip(ship);
-			}else{
-				ew.AssignOEW(ship);
-			}
+            if (gamedata.selectedSystems.length > 0){
+                weaponManager.targetShip(ship);
+            }else{
+                ew.AssignOEW(ship);
+            }
         }
         gamedata.shipStatusChanged(ship);
         drawEntities();
-		//scrolling.scrollToShip(ship);
-	
-	},
-	
-	isDestroyed: function(ship){
-		
-		var stru = shipManager.systems.getStructureSystem(ship, 0);
-		if (shipManager.systems.isDestroyed(ship, stru))
-			return true;
-			
-		return false;
-		
-	},
-	
-	isAdrift: function(ship){
-		
-		
-		if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))
-			|| shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"))){
-			return true;
-		}
-		
-		if (shipManager.power.isPowerless(ship))
-			return true;
-		
-		return false;
-	},
-	
-	getTurnDestroyed: function(ship){
-		var stru = shipManager.systems.getStructureSystem(ship, 0);
-		var turn = damageManager.getTurnDestroyed(ship, stru);
-		
-		return turn;
-		
-	},
-	
-	getIniativeOrder: function(ship){
-		var order = 1;
-		
-		for (var i in gamedata.ships){
-			if (shipManager.isDestroyed(gamedata.ships[i]))
-				continue;
-			
-			if (gamedata.ships[i] == ship)
-				return order;
-			
-			order++;
-		}
-		
-		return 0;
-	},
-	
-	hasBetterInitive: function(a, b){
-		console.log(a.name);
-		if (a.iniative > b.iniative)
-			return true;
-		
-		if (a.iniative < b.iniative)
-			return false;
-			
-		if (a.iniative == b.iniative){
-			if (a.iniativebonus > b.iniativebonus)
-				return true;
-				
-			if (b.iniativebonus > a.iniativebonus)
-				return false;
-				
-			for (var i in gamedata.ships){
-				if (gamedata.ships[i] == a)
-					return false;
-				
-				if (gamedata.ships[i] == b)
-					return true;				
-					
-			}
-		}
-		
-		return false;
-		
-	},
-	
-	getShipsInSameHex: function(ship){
-		var shipsInHex = Array();
-		for (var i in gamedata.ships){
-			var ship2 = gamedata.ships[i];
-			
-			//if (ship.id = ship2.d)
-			//	continue;
-				
-			var pos1 = shipManager.getShipPosition(ship);
-			var pos2 = shipManager.getShipPosition(ship2);
-			
-			
-			if (pos1.x == pos2.x && pos1.y == pos2.y){
-				shipsInHex.push(ship2);
-			}
-		}
-		
-		return shipsInHex;
-	
-	}
-	
+        //scrolling.scrollToShip(ship);
+    
+    },
+    
+    isDestroyed: function(ship){
+        
+        var stru = shipManager.systems.getStructureSystem(ship, 0);
+        if (shipManager.systems.isDestroyed(ship, stru))
+            return true;
+            
+        return false;
+        
+    },
+    
+    isAdrift: function(ship){
+        
+        
+        if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))
+            || shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"))){
+            return true;
+        }
+        
+        if (shipManager.power.isPowerless(ship))
+            return true;
+        
+        return false;
+    },
+    
+    getTurnDestroyed: function(ship){
+        var stru = shipManager.systems.getStructureSystem(ship, 0);
+        var turn = damageManager.getTurnDestroyed(ship, stru);
+        
+        return turn;
+        
+    },
+    
+    getIniativeOrder: function(ship){
+        var order = 1;
+        
+        for (var i in gamedata.ships){
+            if (shipManager.isDestroyed(gamedata.ships[i]))
+                continue;
+            
+            if (gamedata.ships[i] == ship)
+                return order;
+            
+            order++;
+        }
+        
+        return 0;
+    },
+    
+    hasBetterInitive: function(a, b){
+        console.log(a.name);
+        if (a.iniative > b.iniative)
+            return true;
+        
+        if (a.iniative < b.iniative)
+            return false;
+            
+        if (a.iniative == b.iniative){
+            if (a.iniativebonus > b.iniativebonus)
+                return true;
+                
+            if (b.iniativebonus > a.iniativebonus)
+                return false;
+                
+            for (var i in gamedata.ships){
+                if (gamedata.ships[i] == a)
+                    return false;
+                
+                if (gamedata.ships[i] == b)
+                    return true;                
+                    
+            }
+        }
+        
+        return false;
+        
+    },
+    
+    getShipsInSameHex: function(ship){
+        var shipsInHex = Array();
+        for (var i in gamedata.ships){
+            var ship2 = gamedata.ships[i];
+            
+            //if (ship.id = ship2.d)
+            //  continue;
+                
+            var pos1 = shipManager.getShipPosition(ship);
+            var pos2 = shipManager.getShipPosition(ship2);
+            
+            
+            if (pos1.x == pos2.x && pos1.y == pos2.y){
+                shipsInHex.push(ship2);
+            }
+        }
+        
+        return shipsInHex;
+    
+    }
+    
     
     
 

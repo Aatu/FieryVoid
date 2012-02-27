@@ -292,7 +292,7 @@ class DBManager {
     
         foreach ($fireOrders as $fire){
             try {
-                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes."', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = ".(int)$fire->intercepted." WHERE id = ".$fire->id;
+                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes."', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = ".$fire->intercepted." WHERE id = ".$fire->id;
 
                 $this->update($sql);
             }

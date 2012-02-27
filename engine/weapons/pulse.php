@@ -16,27 +16,7 @@
 		
 		protected function getPulses(){}
 		
-		public function fire($gamedata, $fireOrder){
-    
-			$shooter = $gamedata->getShipById($fireOrder->shooterid);
-			$target = $gamedata->getShipById($fireOrder->targetid);
-						
-			$this->calculateHit($gamedata, $fireOrder);
-			
-			
-			for ($i=0;$i<$fireOrder->shots;$i++){
-				$needed = $fireOrder->needed - ($this->grouping*$i);
-				$rolled = Dice::d(100);
-				$fireOrder->notes .= " FIRING PULSE $i: rolled: $rolled, needed: $needed";
-				if ($rolled <= $needed){
-					$fireOrder->shotshit++;
-					$this->damage($target, $shooter, $fireOrder);
-				}
-			}
-			
-			$fireOrder->rolled = 1;
-					
-		}
+		
 		/*
 		public function damage($target, $shooter, $fireOrder){
 		
@@ -78,7 +58,7 @@
 
 		public $name = "lightPulse";
         public $displayName = "Light Pulse Cannon";
-        public $animation = "pulse";
+        public $animation = "trail";
         public $animationWidth = 3;
 		public $projectilespeed = 10;
 		public $animationExplosionScale = 0.15;
@@ -91,6 +71,8 @@
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
 		
 		public $grouping = 5;
+		
+		public $intercept = 2;
 		
 		
 		
@@ -112,7 +94,7 @@
 
 		public $name = "heavyPulse";
         public $displayName = "Heavy Pulse Cannon";
-        public $animation = "pulse";
+        public $animation = "trail";
         public $trailLength = 20;
         public $animationWidth = 5;
 		public $projectilespeed = 20;

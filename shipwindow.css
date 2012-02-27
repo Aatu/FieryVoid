@@ -315,9 +315,6 @@ body.phase1 .shipwindow.owned .ewentry .button2{
     border:1px solid #84a5ce !important;
 }
 
-.system.firing .icon .value{
-	display:none;
-}
 
 .shipwindow .system.firing {
    /*border:1px solid #b72929;*/
@@ -338,9 +335,36 @@ body.phase3 .shipwindow  .system.firing .holdfire{
     display:block;
 }
 
+body.phase1 .shipwindow  .system.firing.ballistic.canAddShots .plus{
+    display:block;
+}
+body.phase3 .shipwindow  .system.firing.canAddShots .plus{
+    display:block;
+}
+
+
+body.phase1 .shipwindow  .system.firing.ballistic.canReduceShots .minus{
+    display:block;
+}
+body.phase3 .shipwindow  .system.firing.canReduceShots .minus{
+    display:block;
+}
+
+
+
+body.phase1 .shipwindow  .system.firing.ballistic.canReduceShots .holdfire{
+    display:none;
+}
+body.phase3 .shipwindow  .system.firing.canReduceShots .holdfire{
+    display:none;
+}
+
+
 body.phase1 .shipwindow  .system.firing.ballistic .holdfire{
     display:block;
 }
+
+
 
 body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     display:none;

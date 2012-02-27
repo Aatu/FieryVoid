@@ -160,7 +160,7 @@ class FireOrder{
     public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = false){
+    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = 0){
          $this->id = $id;
          $this->type = $type;
          $this->shooterid = $shooterid;
@@ -171,7 +171,7 @@ class FireOrder{
          $this->firingmode = $firingmode;
          $this->needed = $needed;
          $this->rolled = $rolled;
-		 $this->shots = $shots;
+         $this->shots = $shots;
          $this->shotshit = $shotshit;
          $this->intercepted = $intercepted;
     }
@@ -240,8 +240,8 @@ class ShipSystem{
             }else{
                 $counts[$crit->phpclass] = 1;
             }
-			
-			$this->critData[$crit->phpclass] = $crit->description;
+            
+            $this->critData[$crit->phpclass] = $crit->description;
         }
         /*
         foreach ($this->criticals as $crit){
@@ -266,7 +266,7 @@ class ShipSystem{
         foreach ($critDesc as $desc){
             $this->critData[] = $desc;
         }
-		*/
+        */
         
         
     }
@@ -417,10 +417,10 @@ class ShipSystem{
 }
 
 class Ballistic{
-	public $fireOrderId, $position, $id, $facing, $targetpos, $targetid, $shooterid, $weaponid;
+    public $fireOrderId, $position, $id, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots;
         
-    function __construct($id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid){
-		$this->id = (int)$id;
+    function __construct($id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots){
+        $this->id = (int)$id;
         $this->fireOrderId = (int)$fireid;
         $this->facing = (int)$facing;
         $this->targetid = (int)$targetid;
@@ -428,7 +428,8 @@ class Ballistic{
         $this->weaponid = (int)$weaponid;
         $this->position = $position;
         $this->targetposition = $targetpos;
-		
+        $this->shots = $shots;
+        
    }
 
 }
@@ -442,7 +443,7 @@ class TacGamedata{
     public $changed = false;
     public $getDistanceHex = false;
     public $forPlayer;
-	public $ballistics = array();
+    public $ballistics = array();
     
     
     
@@ -459,36 +460,37 @@ class TacGamedata{
         $this->creator = $creator;
    }
    
-	public function onConstructed(){
-		$i = 0;
-		foreach ($this->ships as $ship){
-		
-			foreach($ship->fireOrders as $fire){
-				$weapon = $ship->getSystemById($fire->weaponid);
-				if (($this->phase == 2 || $this->phase == 3) && $weapon->ballistic && $fire->turn == $this->turn){
-					$movement = $ship->getLastTurnMovement($fire->turn);
-					$this->ballistics[$i] = new Ballistic(
-						$i,
-						$fire->id,
-						array("x"=>$movement->x, "y"=>$movement->y),
-						$movement->facing,
-						null,
-						$fire->targetid,
-						$fire->shooterid,
-						$fire->weaponid
-						);
-						
-						//$targetpos, $targetid, $shooterid, $weaponid
-					$i++;
-					//print(sizeof($this->ballistics));
-				}
-			
-			}
-		
-		}
-	
-	
-	}
+    public function onConstructed(){
+        $i = 0;
+        foreach ($this->ships as $ship){
+        
+            foreach($ship->fireOrders as $fire){
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
+                    $movement = $ship->getLastTurnMovement($fire->turn);
+                    $this->ballistics[$i] = new Ballistic(
+                        $i,
+                        $fire->id,
+                        array("x"=>$movement->x, "y"=>$movement->y),
+                        $movement->facing,
+                        null,
+                        $fire->targetid,
+                        $fire->shooterid,
+                        $fire->weaponid,
+                        $fire->shots
+                        );
+                        
+                        //$targetpos, $targetid, $shooterid, $weaponid
+                    $i++;
+                    //print(sizeof($this->ballistics));
+                }
+            
+            }
+        
+        }
+    
+    
+    }
    
     public function isFinished(){
 
@@ -681,10 +683,10 @@ class TacGamedata{
         $this->calculateTurndelays();
         $this->deleteHiddenData();
         $this->setPreTurnTasks();
-		
-		if ($this->status == "LOBBY"){
-			$this->ships = array();
-		}
+        
+        if ($this->status == "LOBBY"){
+            $this->ships = array();
+        }
         
         
     }
@@ -715,20 +717,20 @@ class TacGamedata{
         }
         
        
-		foreach ($this->ships as $ship){
-		
-			for ($i = sizeof($ship->fireOrders)-1; $i>=0; $i--){
-				$fire = $ship->fireOrders[$i]; 
-				$weapon = $ship->getSystemById($fire->weaponid);
-				if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3){
-					unset($ship->fireOrders[$i]);
-				}
-				if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
-					unset($ship->fireOrders[$i]);
-				}
-			}
-			 
-		}
+        foreach ($this->ships as $ship){
+        
+            for ($i = sizeof($ship->fireOrders)-1; $i>=0; $i--){
+                $fire = $ship->fireOrders[$i]; 
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3){
+                    unset($ship->fireOrders[$i]);
+                }
+                if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
+                    unset($ship->fireOrders[$i]);
+                }
+            }
+             
+        }
         
         
     }

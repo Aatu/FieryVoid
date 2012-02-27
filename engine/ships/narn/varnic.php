@@ -61,7 +61,7 @@ class Varnic extends BaseShip{
 		
 		
 		$this->addSystem(new TwinArray(3, 6, 4, 2, 300, 120));
-		$this->addSystem(new IonTorpedo(4, 5, 4, 4, 300, 120));
+		$this->addSystem(new IonTorpedo(4, 5, 4, 4, 0, 120));
 		$this->addSystem(new Thruster(4, 15, 4, 0, 5, 4));
         
 		

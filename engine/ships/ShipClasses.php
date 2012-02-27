@@ -345,7 +345,7 @@
 		public function getHitSystem($shooter, $pos, $turn, $location = null){
 		
 			if ($location == null)
-				$location = $this->getHitSection($shooter, $turn);
+				$location = $this->getHitSection($pos, $turn);
 			
 
 			//print("getHitSystem, location: $location ");
@@ -454,9 +454,9 @@
 			parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
 		}
 		
-		public function getHitSection($shooter, $turn){
+		public function getHitSection($pos, $turn){
 			$tf = $this->getFacingAngle();
-			$shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+			$shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
 		  
 			$location = 0;
 			
