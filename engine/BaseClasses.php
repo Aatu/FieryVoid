@@ -62,31 +62,7 @@ class MovementOrder{
     }
     
     public function getCoPos(){
-    
-        $hl = 50;
-        $a = $hl*0.5;
-        $b = $hl*0.8660254; //0.86602540378443864676372317075294
-        
-        $h = $this->x;
-        $v = $this->y;
-        $x  = 0;
-        $y = 0;
-        
-        if ($v%2 == 0){
-            $x = $h*$b*2;
-        }else{
-            $x = $h*$b*2+$b;
-        }
-        
-        $y = $v*$hl*2-($a*$v);
-        
-        $x -= $b*2;
-        $y -= $hl*1.5;
-                
-        $x += $b;
-        $y += $hl;
-        
-        return array("x"=>$x, "y"=>$y);
+        return mathlib::hexCoToPixel($this->x, $this->y);
     }
     
     public function getFacingAngle(){
@@ -155,12 +131,12 @@ class EWentry{
 
 class FireOrder{
     
-    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit, $intercepted;
+    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y;
     public $notes = "";
     public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = 0){
+    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = 0, $x, $y){
          $this->id = $id;
          $this->type = $type;
          $this->shooterid = $shooterid;
@@ -174,6 +150,8 @@ class FireOrder{
          $this->shots = $shots;
          $this->shotshit = $shotshit;
          $this->intercepted = $intercepted;
+         $this->x = $x;
+         $this->y = $y;
     }
 
 }
@@ -468,13 +446,18 @@ class TacGamedata{
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
                     $movement = $ship->getLastTurnMovement($fire->turn);
+                    $target = $fire->targetid;
+                    $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
+                    
+						
+                    
                     $this->ballistics[$i] = new Ballistic(
                         $i,
                         $fire->id,
                         array("x"=>$movement->x, "y"=>$movement->y),
                         $movement->facing,
-                        null,
-                        $fire->targetid,
+                        $targetpos,
+                        $target,
                         $fire->shooterid,
                         $fire->weaponid,
                         $fire->shots
@@ -676,6 +659,20 @@ class TacGamedata{
         return null;
     }
     
+    public function getShipsInDistance($pos, $dis = 0){
+		$ships = array();
+		foreach ($this->ships as $ship){
+			$shipPos = $ship->getCoPos();
+			if (mathlib::getDistance($pos, $shipPos)<=$dis){
+				$ships[] = $ship;
+			}
+		}
+		
+		return $ships;
+			 
+			 
+	}
+    
     public function prepareForPlayer($turn, $phase, $activeship){
         $this->setWaiting();
         $this->checkChanged($turn, $phase, $activeship);
@@ -728,9 +725,28 @@ class TacGamedata{
                 if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
                     unset($ship->fireOrders[$i]);
                 }
+                
+                if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 4 && $ship->userid != $this->forPlayer){
+					$fire->targetid = -1;
+					$fire->x = "null";
+					$fire->y = "null";
+					
+					foreach ($this->ballistics as $ball){
+						if ($ball->fireOrderId = $fire->id){
+							$ball->targetid = -1;
+							$ball->targetposition  = array("x"=>"null", "y"=>"null");
+							
+						}
+					}
+					
+				}
             }
              
         }
+        
+        
+        
+        
         
         
     }

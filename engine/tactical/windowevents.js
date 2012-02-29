@@ -42,6 +42,7 @@ jQuery(function(){
     $("#pagecontainer").bind("mouseup", scrolling.mouseup);
     $("#pagecontainer").bind("mousemove", scrolling.mousemove);
     $("#pagecontainer").bind("mouseout", scrolling.mouseout);
+    $("#pagecontainer").bind("click", hexgrid.onHexClicked);
     $(".shipclickable").bind("dblclick", shipManager.onShipDblClick);
     $(".shipclickable").bind("click", shipManager.onShipClick);
 	$(".shipclickable").bind("mouseover", shipClickable.shipclickableMouseOver);
@@ -203,6 +204,9 @@ window.scrolling = {
     },
     
     mouseup: function(event){
+		if ((((new Date()).getTime()) - scrolling.scrollingstarted ) <= 150){
+			//console.log("click on hex");
+		}
         //console.log(scrolling.scrolling);
         scrolling.scrolling = false;
         
@@ -287,6 +291,23 @@ window.scrolling = {
         var x = Math.ceil((gameWidth / hexWidth) /2);
         var y = Math.ceil((gameHeight / hexHeight) /2);
         var pos = shipManager.getShipPosition(ship);
+        gamedata.scroll.x = pos.x - x;
+        gamedata.scroll.y = pos.y - y;
+        gamedata.scrollOffset.x = 0;
+        gamedata.scrollOffset.y = 0;
+        
+        drawEntities();
+    },
+    
+    scrollToPos: function(pos){
+        //console.log("scrolling to ship: " + ship.name);
+        var gameWidth = gamedata.gamewidth;
+        var gameHeight = gamedata.gameheight;
+        var hexHeight = hexgrid.hexHeight();
+        var hexWidth = hexgrid.hexWidth();
+        
+        var x = Math.ceil((gameWidth / hexWidth) /2);
+        var y = Math.ceil((gameHeight / hexHeight) /2);
         gamedata.scroll.x = pos.x - x;
         gamedata.scroll.y = pos.y - y;
         gamedata.scrollOffset.x = 0;

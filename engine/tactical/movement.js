@@ -677,6 +677,9 @@ shipManager.movement = {
     
     getLastCommitedMove: function(ship){
         var lm;
+        if (!ship)
+			console.trace();
+			
         for (var i in ship.movement){
             if (ship.movement[i].commit==true && ship.movement[i].animated == true)
                 lm = ship.movement[i];

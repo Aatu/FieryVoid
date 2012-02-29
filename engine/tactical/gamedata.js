@@ -2,7 +2,7 @@ gamedata = {
 
     gamewidth: 1600,
     gameheight: 1000,
-    zoom:1.5,
+    zoom:1,
     zoomincrement: 0.1,
     scroll:  {x:0,y:0},
     scrollOffset: {x:0,y:0},

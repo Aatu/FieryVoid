@@ -1,6 +1,8 @@
 <?php
 class Mathlib{
 	
+	public static $hexWidth = 86.60254;
+	
 	public static function addToHexFacing($facing, $add){
 	
 		if (($facing + $add) > 5){
@@ -20,9 +22,11 @@ class Mathlib{
 	}
 	
 	public static function getDistanceHex($start, $end){
-		$hexWidth = 50*0.8660254*2;
+		//print(self::$hexWidth);
+		//var_dump($start);
+		//var_dump($end);
         $dis = sqrt(($end["x"]-$start["x"])*($end["x"]-$start["x"]) + ($end["y"]-$start["y"])*($end["y"]-$start["y"]));
-        $disInHex = $dis / $hexWidth;
+        $disInHex = $dis / self::$hexWidth;
 		return $disInHex;
 	}
 	
@@ -36,6 +40,8 @@ class Mathlib{
 			$oPos =  $observer->getPreviousCoPos();
 			
 		}
+		
+		//print($observer->name . " ".$oPos["x"] .", ". $oPos["x"]. " and ". $tPos["y"] .", ". $tPos["y"]);
 		return self::getCompassHeadingOfPoint($oPos, $tPos);
 		
 	}
@@ -128,8 +134,91 @@ class Mathlib{
 	
 		
 	}
+	
+	public static function getHexToDirection($d, $x, $y){
+		
+		if ($y%2==0){
+			return self::getHexToDirectionEven($d, $x, $y);
+		}else{
+			return self::getHexToDirectionUneven($d, $x, $y);
+		}
+		
+	}
+	
+	public static function getHexToDirectionEven($d, $x, $y){
+		if ($d == 0){
+			return array("x"=>$x+1, "y"=>$y, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 1){
+			return array("x"=>$x, "y"=>$y+1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 2){
+			return array("x"=>$x-1, "y"=>$y+1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 3){
+			return array("x"=>$x-1, "y"=>$y, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 4){
+			return array("x"=>$x-1, "y"=>$y-1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 5){
+			return array("x"=>$x, "y"=>$y-1, "xO"=>0, "yO"=>0);
+		}
+		
+		return array("x"=>$x, "y"=>$y, "xO"=>0, "yO"=>0);
+	
+	}
 
-
+	public static function getHexToDirectionUneven($d, $x, $y){
+		if ($d == 0){
+			return array("x"=>$x+1, "y"=>$y, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 1){
+			return array("x"=>$x+1, "y"=>$y+1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 2){
+			return array("x"=>$x, "y"=>$y+1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 3){
+			return array("x"=>$x-1, "y"=>$y, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 4){
+			return array("x"=>$x, "y"=>$y-1, "xO"=>0, "yO"=>0);
+		}
+		if ($d == 5){
+			return array("x"=>$x+1, "y"=>$y-1, "xO"=>0, "yO"=>0);
+		}
+		
+		return array("x"=>$x, "y"=>$y, "xO"=>0, "yO"=>0);
+	
+	}
+	
+	public static function hexCoToPixel($h, $v){
+		$hl = 50;
+        $a = $hl*0.5;
+        $b = $hl*0.8660254; //0.86602540378443864676372317075294
+                
+        $x  = 0;
+        $y = 0;
+      
+        if ($v%2 == 0){
+            $x = $h*$b*2;
+        }else{
+            $x = $h*$b*2+$b;
+        }
+        
+        $y = $v*$hl*2-($a*$v);
+        
+        $x -= $b*2;
+        $y -= $hl*1.5;
+                
+        $x += $b;
+        $y += $hl;
+        
+        return array("x"=>$x, "y"=>$y);
+	}
+	
+	
 }
 
 ?>

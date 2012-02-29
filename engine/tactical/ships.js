@@ -421,7 +421,8 @@ window.shipManager = {
     },
     
     onShipClick: function(e){
-
+		//console.log("click on ship");
+		e.stopPropagation();
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
         

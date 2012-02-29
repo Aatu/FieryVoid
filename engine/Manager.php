@@ -179,6 +179,9 @@ class Manager{
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships){
         try {
             $ships = self::getShipsFromJSON($ships);
+            
+            if (sizeof($ships)==0)
+				return "{error:\"Error, No gamedata submitted.\"}";
             //print(var_dump($ships));
             $gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
             $gamedata->ships = $ships;
@@ -527,7 +530,9 @@ class Manager{
     private static function getShipsFromJSON($json){
         $ships = array();
         $array = json_decode($json, true);
-        
+        if (!is_array($array))
+			return $ships;
+			
         foreach ($array as $value) {
                     
             $movements = array();
@@ -555,7 +560,7 @@ class Manager{
             if (is_array($value["fireOrders"])){
                 foreach($value["fireOrders"] as $i=>$fo){
                                                 //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode
-                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0);
+                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                     $fireOrders[$i] = $fireOrder;
                 }
             }

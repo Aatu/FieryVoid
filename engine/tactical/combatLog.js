@@ -82,7 +82,7 @@ window.combatLog = {
 					continue;
 					
 				totaldam += d.damage-d.armour;
-				var system = shipManager.systems.getSystem(target, d.systemid);	
+				var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid);	
 				var des = "";
 				if (d.destroyed){
 					des = " DESTROYED";
@@ -98,8 +98,8 @@ window.combatLog = {
 				damagehtml += '<span class="damage"> '+shipManager.systems.getDisplayName(system)+des+ '</span>'
 				
 			}
-			
-			html += '<span class="shiplink" data-id="'+target.id+'" >' + target.name + '</span>';
+			if (target)
+				html += '<span class="shiplink" data-id="'+target.id+'" >' + target.name + '</span>';
 			html += ' with ' + weapon.displayName + ' (chance: '+fire.needed+'%, '+fire.shotshit+'/'+fire.shots+' shots hit)  Total damage: ' + totaldam;
 			html += '<span class="notes"> '+fire.notes+'</span>';
 			html += damagehtml;

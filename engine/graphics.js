@@ -46,6 +46,8 @@ window.graphics = {
 	},
 
     drawCircle: function(canvas, x, y, r, w){
+		if (r<1)
+			r =1;
         canvas.lineWidth = w;
         canvas.beginPath();
         canvas.arc(x,y,r,0,Math.PI*2,true);

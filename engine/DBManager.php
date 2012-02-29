@@ -292,7 +292,9 @@ class DBManager {
     
         foreach ($fireOrders as $fire){
             try {
-                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes."', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = ".$fire->intercepted." WHERE id = ".$fire->id;
+                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes.
+                "', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = "
+                .$fire->intercepted.", `x` = '".$fire->x."', `y` = '".$fire->y."' WHERE id = ".$fire->id;
 
                 $this->update($sql);
             }
@@ -322,7 +324,7 @@ class DBManager {
                 //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0
                 
                 $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
-                        .$fire->firingmode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0)";
+                        .$fire->firingmode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."')";
 
                 $this->update($sql);
             }
@@ -347,7 +349,7 @@ class DBManager {
                 return $orders;
                 
                 foreach ($result as $value) {
-                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted);
+                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted, $value->x, $value->y);
                     $entry->notes = $value->notes;
                     $entry->pubnotes = $value->pubnotes;
                     $orders[] = $entry;

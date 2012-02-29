@@ -193,8 +193,11 @@ class Weapon extends ShipSystem{
     public $animationColor = null;
     public $animationWidth = 3;
     public $animationExplosionScale = 0.25;
+    public $animationExplosionType = "normal";
+    public $explosionColor = array(250, 230, 80);
     public $trailLength = 40;
     public $trailColor = array(248, 216, 65);
+    
     public $rangePenalty = 0;
     public $rangeDamagePenalty = 0;
     public $dp = 0; //damage penalty per dice
@@ -210,6 +213,8 @@ class Weapon extends ShipSystem{
     public $intercept = 0;
     
     public $ballistic = false;
+    public $hextarget = false;
+    public $hidetarget = false;
     
     
     public $shots = 1;
@@ -439,13 +444,10 @@ class Weapon extends ShipSystem{
     public function calculateRangePenalty($shooter, $target){
         $shooterPos = $shooter->getCoPos();
         $targetPos = $target->getCoPos();
-        $dis = mathlib::getDistance($shooterPos, $targetPos);
-        $hexWidth = 50*0.8660254*2;
+        $dis = mathlib::getDistanceHex($shooterPos, $targetPos);
         
-        $disInHex = $dis / $hexWidth;
-        
-        $rangePenalty = ($this->rangePenalty/$hexWidth*$dis);
-        $notes = "shooter: ".$shooterPos["x"].",".$shooterPos["y"]." target: ".$targetPos["x"].",".$targetPos["y"]." distance: $dis, disInHex: $disInHex, rangePenalty: $rangePenalty";
+        $rangePenalty = ($this->rangePenalty*$dis);
+        $notes = "shooter: ".$shooterPos["x"].",".$shooterPos["y"]." target: ".$targetPos["x"].",".$targetPos["y"]." dis: $dis, rangePenalty: $rangePenalty";
         return Array("rp"=>$rangePenalty, "notes"=>$notes);
     }
     
@@ -473,9 +475,9 @@ class Weapon extends ShipSystem{
         $defence = $target->getDefenceValuePos($shooter->getCoPos());
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $defence = $target->getDefenceValuePos(array("x"=>$movement->x, "y"=>$movement->y));
+            $defence = $target->getDefenceValuePos(mathlib::hexCoToPixel($movement->x, $movement->y));
         }
-        
+       
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
@@ -500,7 +502,7 @@ class Weapon extends ShipSystem{
     
         $intercept = 0;
         if ($this->uninterceptable)
-			return 0;
+            return 0;
     
         foreach ($gamedata->ships as $ship){
             foreach ($ship->fireOrders as $fire){
@@ -516,61 +518,44 @@ class Weapon extends ShipSystem{
     }
     public function fire($gamedata, $fireOrder){
     
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		$target = $gamedata->getShipById($fireOrder->targetid);
-					
-		$this->calculateHit($gamedata, $fireOrder);
-		$intercept = $this->getIntercept($gamedata, $fireOrder);
-		
-		for ($i=0;$i<$fireOrder->shots;$i++){
-			$needed = $fireOrder->needed - ($this->grouping*$i);
-			$rolled = Dice::d(100);
-			if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
-				//$fireOrder->pubnotes .= "Shot intercepted. ";
-				$fireOrder->intercepted += 1;
-			}
-			
-			$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
-			if ($rolled <= $needed){
-				$fireOrder->shotshit++;
-				$this->damage($target, $shooter, $fireOrder);
-			}
-		}
-		
-		$fireOrder->rolled = 1;//Marks that fire order has been handled
-				
-	}
-    /*
-    public function fire($gamedata, $fireOrder){
-    
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        $damages = array();
-        
+                    
         $this->calculateHit($gamedata, $fireOrder);
-        $fireOrder->rolled = Dice::d(100);
         $intercept = $this->getIntercept($gamedata, $fireOrder);
         
-        if ($fireOrder->rolled > $fireOrder->needed && $fireOrder->rolled <= $fireOrder->needed+ ($intercept*5)){
-            //$fireOrder->pubnotes .= "Shot intercepted. ";
-            $fireOrder->intercepted = 1;
+        for ($i=0;$i<$fireOrder->shots;$i++){
+            $needed = $fireOrder->needed - ($this->grouping*$i);
+            $rolled = Dice::d(100);
+            if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
+                //$fireOrder->pubnotes .= "Shot intercepted. ";
+                $fireOrder->intercepted += 1;
+            }
+            
+            $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+            if ($rolled <= $needed){
+                $fireOrder->shotshit++;
+                $this->damage($target, $shooter, $fireOrder);
+            }
         }
         
-        if ($fireOrder->rolled <= $fireOrder->needed){
-            $fireOrder->shotshit = $fireOrder->shots;
-            $this->damage($target, $shooter, $fireOrder);
-        }
-        
-    
-    }*/
+        $fireOrder->rolled = 1;//Marks that fire order has been handled
+                
+    }
+
     
     protected function getOverkillSystem($target, $shooter, $system){
     
             $okSystem = $target->getStructureSystem($system->location);
             
             if ($okSystem == null || $okSystem->isDestroyed()){
-                return $target->getStructureSystem(0);
+                $okSystem = $target->getStructureSystem(0);
             }
+            if ($okSystem == null || $okSystem->isDestroyed()){
+                return null;
+            }
+            
+            
             return $okSystem;
     
     }
@@ -587,10 +572,10 @@ class Weapon extends ShipSystem{
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = array("x"=>$movement->x, "y"=>$movement->y);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
         
-        $system = $target->getHitSystem($shooter, $pos, $fireOrder->turn);
+        $system = $target->getHitSystem($pos, $fireOrder->turn, $this);
         
         if ($system == null)
             return;

@@ -406,9 +406,10 @@ window.weaponManager = {
 							
 			
 			if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
+				
 				weaponManager.removeFiringOrder(selectedShip, weapon);
 				for (var s=0;s<weapon.guns;s++){
-					selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots});
+					selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
 				}
 				toUnselect.push(weapon);
 			}
@@ -458,9 +459,62 @@ window.weaponManager = {
 				if (weapon.range == 0 || (mathlib.getDistance(shipManager.getShipPosition(selectedShip), shipManager.getShipPosition(ship))<=weapon.range)){
 					weaponManager.removeFiringOrder(selectedShip, weapon);
 					for (var s=0;s<weapon.guns;s++){
+									
+						selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ship.id, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
+					}
+					toUnselect.push(weapon);
+				}
+			}
+		}
+		
+		for (var i in toUnselect){
+			weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
+		}
+		
+		gamedata.shipStatusChanged(selectedShip);
+	
+	},
+	
+	targetHex: function(hexpos){
+	
+		var selectedShip = gamedata.getSelectedShip();
+		if (shipManager.isDestroyed(selectedShip))
+			return;
+		
+		
+			
+		var toUnselect = Array();
+		for (var i in gamedata.selectedSystems){
+			var weapon = gamedata.selectedSystems[i];
+			
+			if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
+				continue;
+		
+			
+			if (weapon.ballistic && gamedata.gamephase != 1){
+				continue;
+			}
+			if (!weapon.ballistic && gamedata.gamephase != 3){
+				continue;
+			}
+			
+			if (!weapon.hextarget)
+				continue;
+			
+			var type = 'normal';
+			if (weapon.ballistic){
+				type = 'ballistic';
+			}
+						
+			
+			if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)){
+				//$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
+				if (weapon.range == 0 || (mathlib.getDistance(shipManager.getShipPosition(selectedShip), hexpos)<=weapon.range)){
+					weaponManager.removeFiringOrder(selectedShip, weapon);
+					for (var s=0;s<weapon.guns;s++){
 						
 						
-						selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ship.id, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots});
+						selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y});
 					}
 					toUnselect.push(weapon);
 				}
@@ -509,6 +563,22 @@ window.weaponManager = {
 		}
 		
 		return false;
+	
+	},
+	
+	getInterceptingFiringOrders: function(id){
+		var fires = Array();
+		
+		for (var a in gamedata.ships){
+			var ship = gamedata.ships[a];
+			for (var i in ship.fireOrders){
+				var fire = ship.fireOrders[i];
+				if (fire.targetid == id && fire.turn == gamedata.turn && fire.type == "intercept")
+					fires.push(fire);
+			}
+		}
+		
+		return fires;
 	
 	},
 	

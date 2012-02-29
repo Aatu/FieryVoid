@@ -39,7 +39,7 @@ window.ballistics = {
             ball.launchPos = hexgrid.getOffsetPositionInHex(ball.position, angle, 0, false);
         }
         
-        if (ball.targetid){
+        if (ball.targetid && ball.targetid != -1){
             var target = gamedata.getShip(ball.targetid);
             var targetPos = shipManager.getShipPosition(target);
             
@@ -47,6 +47,12 @@ window.ballistics = {
             ball.targetPos = hexgrid.getOffsetPositionInHex(targetPos, angle, 0.6, false);
         }
         
+        if (ball.targetposition){
+			var targetPos = ball.targetposition;
+            
+            var angle = mathlib.getCompassHeadingOfPoint(targetPos, ball.launchPos);
+            ball.targetPos = hexgrid.getOffsetPositionInHex(targetPos, angle, 0.6, false);
+		}
         
     
     },
@@ -394,7 +400,11 @@ window.ballistics = {
                 type = "launch";    
                 
             var target = "";
-            if (ball.targetid){
+            var amount = "";
+            if (ball.shots>1)
+				amount = ball.shots +"x ";
+					
+            if (ball.targetid && ball.targetid != -1){
                 targetship = gamedata.getShip(ball.targetid);
                 
                 var fac = "ally";
@@ -406,10 +416,9 @@ window.ballistics = {
                 
                 var intercept = weaponManager.getInterception(ball)*5;
                 
-                var amount = "";
                 
-                if (ball.shots>1)
-					amount = ball.shots +"x ";
+                
+                
                 
                 var intercepttext = "";
                 
