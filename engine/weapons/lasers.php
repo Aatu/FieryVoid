@@ -5,10 +5,10 @@
         function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
         }
-        
+        public $raking = 10;
         private $damages = array();
         
-        public function damage( $target, $shooter, $fireOrder){
+        public function damage( $target, $shooter, $fireOrder, $pos){
             
             
             $totalDamage = $this->getDamage();
@@ -21,16 +21,16 @@
                 if ($target->isDestroyed())
                     return;
             
-                $system = $target->getHitSystem($shooter->getCoPos(), $fireOrder->turn, $this);
+                $system = $target->getHitSystem($pos, $fireOrder->turn, $this);
                 
                 if ($system == null)
                     return;
                     
                 if ($totalDamage - $this->raking >= 0){
-                    $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder);
+                    $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder, $pos);
                     $totalDamage -= $this->raking;
                 }else if ($totalDamage > 0){
-                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder);
+                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos);
                     break;
                 }else{
                     break;
@@ -44,7 +44,7 @@
         
         }
         
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder){
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos){
 
             $damages = array();
             $armour = $this->getSystemArmour($system);
@@ -75,9 +75,9 @@
             
                 $damage = $damage-$modifiedDamage;
                  
-                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system);
+                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder);
                 if ($overkillSystem != null)
-                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder);
+                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos);
             }
         
             

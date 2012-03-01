@@ -75,13 +75,13 @@
 						continue;
 					
 					$fireOrder->notes .= $ship->name ." in adjacent hex. ";	
-					$this->AOEdamage($ship, $shooter, $pos, $fireOrder, 10);
+					$this->AOEdamage($ship, $shooter, $fireOrder, $pos, 10);
 				 }
 			}
 			      
 		}
 		
-		public function AOEdamage($target, $shooter, $pos, $fireOrder, $amount){
+		public function AOEdamage($target, $shooter, $fireOrder, $pos, $amount){
         
 			
 			if ($target->isDestroyed())
@@ -92,7 +92,7 @@
 			if ($system == null)
 				return;
 				
-			$this->doDamage($target, $shooter, $system, $amount, $fireOrder);
+			$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos);
 				
 			
         
@@ -109,6 +109,8 @@
 		public $ballistic = true;
 		public $hextarget = true;
 		public $hidetarget = true;
+		
+		public $flashDamage = true;
 		
 			
 		public $trailColor = array(141, 240, 255);

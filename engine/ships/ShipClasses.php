@@ -240,7 +240,7 @@
         }
         * */
            
-        public function getHitSection($pos, $turn){
+        public function getHitSection($pos, $turn, $weapon){
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
 			
@@ -266,7 +266,7 @@
             }   
                 
             if ($location != 0){
-                if (Dice::d(10)>9)
+                if (Dice::d(10)>9 && !$weapon->flashDamage)
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
@@ -345,7 +345,7 @@
         public function getHitSystem($pos, $turn, $weapon, $location = null){
         
             if ($location == null)
-                $location = $this->getHitSection($pos, $turn);
+                $location = $this->getHitSection($pos, $turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -457,7 +457,7 @@
             parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
         }
         
-        public function getHitSection($pos, $turn){
+        public function getHitSection($pos, $turn, $weapon){
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
 			
@@ -474,7 +474,7 @@
             
                             
             if ($location != 0){
-                if (Dice::d(10)>9)
+                if (Dice::d(10)>9 && !$weapon->flashDamage)
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);

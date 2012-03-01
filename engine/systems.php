@@ -228,7 +228,8 @@ class Weapon extends ShipSystem{
     public $rof = 2;
     
     public $firingMode = 1;
-        
+    
+    public $flashDamage = false;
     public $damageType = "standard";
     public $minDamage, $maxDamage;
     
@@ -441,22 +442,21 @@ class Weapon extends ShipSystem{
     
     }
     
-    public function calculateRangePenalty($shooter, $target){
-        $shooterPos = $shooter->getCoPos();
+    public function calculateRangePenalty($pos, $target){
         $targetPos = $target->getCoPos();
-        $dis = mathlib::getDistanceHex($shooterPos, $targetPos);
+        $dis = mathlib::getDistanceHex($pos, $targetPos);
         
         $rangePenalty = ($this->rangePenalty*$dis);
-        $notes = "shooter: ".$shooterPos["x"].",".$shooterPos["y"]." target: ".$targetPos["x"].",".$targetPos["y"]." dis: $dis, rangePenalty: $rangePenalty";
+        $notes = "shooter: ".$pos["x"].",".$pos["y"]." target: ".$targetPos["x"].",".$targetPos["y"]." dis: $dis, rangePenalty: $rangePenalty";
         return Array("rp"=>$rangePenalty, "notes"=>$notes);
     }
     
-    public function calculateHit($gamedata, $fireOrder){
+    public function calculateHit($gamedata, $fireOrder, $pos){
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
                        
-        $rp = $this->calculateRangePenalty($shooter, $target);
+        $rp = $this->calculateRangePenalty($pos, $target);
         $rangePenalty = $rp["rp"];
         
         $dew = $target->getDEW($gamedata->turn);
@@ -472,15 +472,12 @@ class Weapon extends ShipSystem{
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
             
-        $defence = $target->getDefenceValuePos($shooter->getCoPos());
-        if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $defence = $target->getDefenceValuePos(mathlib::hexCoToPixel($movement->x, $movement->y));
-        }
+        $defence = $target->getDefenceValuePos($pos);
+        
        
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
-        $intercept = $this->getIntercept($gamedata, $fireOrder);
+        $intercept = $this->getIntercept($gamedata, $fireOrder, $pos);
             
         $goal = ($defence - $dew - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
         
@@ -498,7 +495,7 @@ class Weapon extends ShipSystem{
         $fireOrder->updated = true;
     }
     
-    public function getIntercept($gamedata, $fireOrder){
+    public function getIntercept($gamedata, $fireOrder, $pos){
     
         $intercept = 0;
         if ($this->uninterceptable)
@@ -520,9 +517,15 @@ class Weapon extends ShipSystem{
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+        
+        $pos = $shooter->getCoPos();
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+        }
                     
-        $this->calculateHit($gamedata, $fireOrder);
-        $intercept = $this->getIntercept($gamedata, $fireOrder);
+        $this->calculateHit($gamedata, $fireOrder, $pos);
+        $intercept = $this->getIntercept($gamedata, $fireOrder, $pos);
         
         for ($i=0;$i<$fireOrder->shots;$i++){
             $needed = $fireOrder->needed - ($this->grouping*$i);
@@ -535,7 +538,7 @@ class Weapon extends ShipSystem{
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
                 $fireOrder->shotshit++;
-                $this->damage($target, $shooter, $fireOrder);
+                $this->damage($target, $shooter, $fireOrder, $pos);
             }
         }
         
@@ -544,43 +547,41 @@ class Weapon extends ShipSystem{
     }
 
     
-    protected function getOverkillSystem($target, $shooter, $system){
+    protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder){
     
-            $okSystem = $target->getStructureSystem($system->location);
-            
-            if ($okSystem == null || $okSystem->isDestroyed()){
-                $okSystem = $target->getStructureSystem(0);
-            }
-            if ($okSystem == null || $okSystem->isDestroyed()){
-                return null;
-            }
-            
-            
-            return $okSystem;
+		if ($this->flashDamage){
+			return $target->getHitSystem($pos, $fireOrder->turn, $this);
+		}else{
+			
+			$okSystem = $target->getStructureSystem($system->location);
+			
+			if ($okSystem == null || $okSystem->isDestroyed()){
+				$okSystem = $target->getStructureSystem(0);
+			}
+			if ($okSystem == null || $okSystem->isDestroyed()){
+				return null;
+			}
+		}
+		
+		return $okSystem;
     
     }
     
     
         
     
-    public function damage($target, $shooter, $fireOrder){
+    public function damage($target, $shooter, $fireOrder, $pos){
         
         
         if ($target->isDestroyed())
             return;
-    
-        $pos = $shooter->getCoPos();
-        if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-        }
-        
+            
         $system = $target->getHitSystem($pos, $fireOrder->turn, $this);
         
         if ($system == null)
             return;
             
-        $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target), $fireOrder);
+        $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target, $pos), $fireOrder, $pos);
             
         
         
@@ -590,11 +591,10 @@ class Weapon extends ShipSystem{
         return $system->armour;
     }
     
-    protected function getDamageMod($damage, $shooter, $target){
+    protected function getDamageMod($damage, $shooter, $target, $pos){
         if ($this->rangeDamagePenalty > 0){
-            $shooterPos = $shooter->getCoPos();
             $targetPos = $target->getCoPos();
-            $dis = round(mathlib::getDistanceHex($shooterPos, $targetPos));
+            $dis = round(mathlib::getDistanceHex($pos, $targetPos));
             
             //print ("damage: $damage dis: $dis damagepen: " . $this->rangeDamagePenalty);
             $damage -= ($dis * $this->rangeDamagePenalty);
@@ -610,13 +610,13 @@ class Weapon extends ShipSystem{
         return $damage;
     }
     
-    protected function getFinalDamage($shooter, $target){
+    protected function getFinalDamage($shooter, $target, $pos){
     
         $damage = $this->getDamage();
-        return $this->getDamageMod($damage, $shooter, $target);
+        return $this->getDamageMod($damage, $shooter, $target, $pos);
     }
     
-    protected function doDamage($target, $shooter, $system, $damage, $fireOrder){
+    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos){
 
         $armour = $this->getSystemArmour($system);
         $systemHealth = $system->getRemainingHealth();
@@ -641,9 +641,9 @@ class Weapon extends ShipSystem{
         if ($damage-$armour > $systemHealth){
             //print("overkilling!\n\n");
              $damage = $damage-$modifiedDamage;
-             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system);
+             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder);
              if ($overkillSystem != null)
-                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder);
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos);
         }
     
     
