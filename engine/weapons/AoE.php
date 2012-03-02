@@ -63,12 +63,12 @@
 					
 					
 				foreach($ships1 as $ship){
-					$this->AOEdamage($ship, $shooter, $shooterpos, $fireOrder, 30);
+					$this->AOEdamage($ship, $shooter, $fireOrder, $pos, 30);
 					$fireOrder->notes .= $ship->name ." in same hex. ";	
 				}
 				
 				
-				$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth);
+				$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
 				 
 				foreach($ships2 as $ship){
 					if (in_array($ship, $ships1))

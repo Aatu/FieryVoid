@@ -447,8 +447,10 @@ class TacGamedata{
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
                     $movement = $ship->getLastTurnMovement($fire->turn);
                     $target = $fire->targetid;
-                    $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
-                    
+                    if ($fire->x != "null" && $fire->y != "null")
+						$targetpos = array("x"=>$fire->x, "y"=>$fire->y);
+                    else
+						$targetpos = null;
 						
                     
                     $this->ballistics[$i] = new Ballistic(
@@ -663,7 +665,9 @@ class TacGamedata{
 		$ships = array();
 		foreach ($this->ships as $ship){
 			$shipPos = $ship->getCoPos();
-			if (mathlib::getDistance($pos, $shipPos)<=$dis){
+			$curDis = mathlib::getDistance($pos, $shipPos);
+		
+			if ($curDis <= $dis){
 				$ships[] = $ship;
 			}
 		}
@@ -732,14 +736,15 @@ class TacGamedata{
 					$fire->y = "null";
 					
 					foreach ($this->ballistics as $ball){
-						if ($ball->fireOrderId = $fire->id){
+						if ($ball->fireOrderId == $fire->id){
 							$ball->targetid = -1;
-							$ball->targetposition  = array("x"=>"null", "y"=>"null");
+							$ball->targetposition  = null;
 							
 						}
 					}
 					
 				}
+				
             }
              
         }

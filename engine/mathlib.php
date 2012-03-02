@@ -2,6 +2,8 @@
 class Mathlib{
 	
 	public static $hexWidth = 86.60254;
+	public static $hexSideLenght = 50;
+	public static $hexHeight = 75;
 	
 	public static function addToHexFacing($facing, $add){
 	
@@ -135,63 +137,23 @@ class Mathlib{
 		
 	}
 	
+	public static function getPointInDirection( $r, $a, $cx, $cy){
+            
+		$x = $cx + $r * cos($a* pi() / 180);
+		$y = $cy + $r * sin($a* pi() / 180);
+		
+		return array("x"=>$x, "y"=>$y);
+    }
+	
 	public static function getHexToDirection($d, $x, $y){
 		
-		if ($y%2==0){
-			return self::getHexToDirectionEven($d, $x, $y);
-		}else{
-			return self::getHexToDirectionUneven($d, $x, $y);
-		}
+		$pos = self::hexCoToPixel($x, $y);
+		$pos2 = self::getPointInDirection(self::$hexHeight, $d, $pos["x"], $pos["y"]);
+		return self::pixelCoToHex($pos2["x"], $pos2["y"]);
+		
 		
 	}
 	
-	public static function getHexToDirectionEven($d, $x, $y){
-		if ($d == 0){
-			return array("x"=>$x+1, "y"=>$y, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 1){
-			return array("x"=>$x, "y"=>$y+1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 2){
-			return array("x"=>$x-1, "y"=>$y+1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 3){
-			return array("x"=>$x-1, "y"=>$y, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 4){
-			return array("x"=>$x-1, "y"=>$y-1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 5){
-			return array("x"=>$x, "y"=>$y-1, "xO"=>0, "yO"=>0);
-		}
-		
-		return array("x"=>$x, "y"=>$y, "xO"=>0, "yO"=>0);
-	
-	}
-
-	public static function getHexToDirectionUneven($d, $x, $y){
-		if ($d == 0){
-			return array("x"=>$x+1, "y"=>$y, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 1){
-			return array("x"=>$x+1, "y"=>$y+1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 2){
-			return array("x"=>$x, "y"=>$y+1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 3){
-			return array("x"=>$x-1, "y"=>$y, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 4){
-			return array("x"=>$x, "y"=>$y-1, "xO"=>0, "yO"=>0);
-		}
-		if ($d == 5){
-			return array("x"=>$x+1, "y"=>$y-1, "xO"=>0, "yO"=>0);
-		}
-		
-		return array("x"=>$x, "y"=>$y, "xO"=>0, "yO"=>0);
-	
-	}
 	
 	public static function hexCoToPixel($h, $v){
 		$hl = 50;
@@ -204,7 +166,7 @@ class Mathlib{
         if ($v%2 == 0){
             $x = $h*$b*2;
         }else{
-            $x = $h*$b*2+$b;
+            $x = $h*$b*2-$b;
         }
         
         $y = $v*$hl*2-($a*$v);
@@ -216,6 +178,95 @@ class Mathlib{
         $y += $hl;
         
         return array("x"=>$x, "y"=>$y);
+	}
+	
+	//ATTENTION, this is bloody magic! (I don't really know how it works)
+	public static function pixelCoToHex($px, $py){
+				
+		$hl = self::$hexSideLenght;
+		$a = $hl*0.5;
+		$b = $hl*0.8660254; //0.86602540378443864676372317075294
+		
+		
+	
+		$x = $px-$b;
+		$y = $py-$hl;
+		
+		$x += $b*2;
+        $y += $hl*1.5;
+     
+		$h = ($x/($b*2))+1; 
+		
+		/*
+		if (gamedata.scroll.y % 2 == 0){
+			h = (x/(b*2))+0.5;
+			
+		}else{
+			
+			
+		}*/
+		$hx = $h;		
+		$xmod = $hx - floor($hx);
+		if ($xmod > 0.5){
+			$xmod -= 0.5;
+		}else{
+			$xmod = 0.5 -$xmod;
+		}
+		$xmod *= 2;
+		$ymod = $a*$xmod;
+		
+		$start = $a-$ymod;
+		$i = 0;
+		if ($py<=$start){
+			while (true){
+				
+				$hexl = 0;
+				if ($i%2==0){
+					$hexl = $hl +(($a-$ymod)*2);
+				}else{
+					$hexl = $hl +(($ymod)*2);
+				}
+				
+				$start -= $hexl;
+				if ($py>=$start){
+					$hy = $i;
+					break;
+				}
+				$i--;
+			}
+		}else{
+			
+			while (true){
+				
+				$hexl = 0;
+				if ($i%2==0){
+					$hexl = $hl +(($a-$ymod)*2);
+				}else{
+					$hexl = $hl +(($ymod)*2);
+				}
+				
+				$start += $hexl;
+				if ($py<=$start){
+					$hy = $i;
+					break;
+				}
+				$i++;
+			}
+		}
+	
+		if ($hy  % 2==0){
+			$hx = round($hx-1);
+		}else{
+			$hx = floor($hx);
+		}
+		
+		if ($hx == -0)
+			$hx = 0;
+	
+		if ($hy == -0)
+			$hy = 0;
+			
+		return array("x"=>$hx, "y"=>$hy);
 	}
 	
 	

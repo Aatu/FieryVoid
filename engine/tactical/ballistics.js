@@ -36,7 +36,7 @@ window.ballistics = {
     calculateBallisticLocation: function(ball){
         if (!ball.launchPos){
             var angle = shipManager.hexFacingToAngle(ball.facing);
-            ball.launchPos = hexgrid.getOffsetPositionInHex(ball.position, angle, 0, false);
+            ball.launchPos = hexgrid.getOffsetPositionInHex(ball.position, angle, 0.3, false);
         }
         
         if (ball.targetid && ball.targetid != -1){
@@ -45,9 +45,7 @@ window.ballistics = {
             
             var angle = mathlib.getCompassHeadingOfPoint(targetPos, ball.launchPos);
             ball.targetPos = hexgrid.getOffsetPositionInHex(targetPos, angle, 0.6, false);
-        }
-        
-        if (ball.targetposition){
+        }else if (ball.targetposition){
 			var targetPos = ball.targetposition;
             
             var angle = mathlib.getCompassHeadingOfPoint(targetPos, ball.launchPos);
@@ -67,21 +65,32 @@ window.ballistics = {
             var launchPos1 = hexgrid.positionToPixel(ball.launchPos);
             var targetPos1 = hexgrid.positionToPixel(ball.targetPos);
             
+           if (!targetPos1)
+           ball.drawTarget = false;
+           
             for (var a in gamedata.ballistics){
                 var ball2 = gamedata.ballistics[a];
                 if (i == a)
                     break;
-                    
+                   
+                
                 var launchPos2 = hexgrid.positionToPixel(ball2.launchPos);
-                var targetPos2 = hexgrid.positionToPixel(ball2.targetPos);
+                
                 
                                     
                 if (mathlib.getDistance(launchPos1, launchPos2)<(10*gamedata.zoom)){
                     ball.drawLaunch = false;
                 }
+                
+            
+                var targetPos2 = hexgrid.positionToPixel(ball2.targetPos);
+                
+                if (!targetPos2)
+                    continue;
                     
                 if (targetPos1 == null || (mathlib.getDistance(targetPos1, targetPos2)<(10*gamedata.zoom))){
                     ball.drawTarget = false;
+                    
                 }
                 
             }
@@ -259,7 +268,9 @@ window.ballistics = {
                 pos2 = ball2.targetPos;
             
             pos2 = hexgrid.positionToPixel(pos2);
-                
+            if (!pos2)
+				continue;
+				
             if (mathlib.getDistance(pos, pos2)<(10*gamedata.zoom)){
                 balls.push(ball2);
             }

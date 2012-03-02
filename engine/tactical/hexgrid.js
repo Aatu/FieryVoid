@@ -70,12 +70,12 @@ window.hexgrid = {
 					window.graphics.drawHexagon(canvas, x, y, hl, false, false, false);
 				}		
 				
-				/*
+				
 					
 					canvas.font         = 'italic 12px sans-serif';
 					canvas.textBaseline = 'top';
 					canvas.fillText  ((h+gamedata.scroll["x"])+","+(v+gamedata.scroll["y"]), x+b, y+hl);
-				*/
+				
 			}
 			
 			
@@ -194,19 +194,19 @@ window.hexgrid = {
 		var h = hx - origoHexX;
 		var v = hy - origoHexY;
 		var x, y;
-		
+		/*
 		if ((v+gamedata.scroll.y)%2 == 0){
 			x = h*b*2;
 		}else{
 			x = h*b*2+b;
 		}
-		/*
+		*/
 		if ((v+gamedata.scroll.y)%2 == 0){
-			x = h*b*2-b*2;
+			x = h*b*2; //-b*2;
 		}else{
 			x = h*b*2-b;
 		}
-		*/
+		
 		y = v*hl*2-(a*v);
 		
 		x -= gamedata.scrollOffset.x+hexgrid.hexWidth();
@@ -216,61 +216,14 @@ window.hexgrid = {
 	},
 	
 	getHexToDirection: function(d, x, y){
-		if (y%2==0)
-			return hexgrid.getHexToDirectionEven(d, x, y);
-		else
-			return hexgrid.getHexToDirectionUneven(d, x, y);
+		var pos = {x:x, y:y};
+		pos = hexgrid.positionToPixel(pos);
+		var pos2 = mathlib.getPointInDirection(hexgrid.hexHeight(), d, pos.x, pos.y);
+		return hexgrid.pixelCoToHex(pos2.x, pos2.y);
+		
 		
 	},
-	
-	getHexToDirectionEven: function(d, x, y){
-		if (d == 0){
-			return {x:x+1, y:y, xO:0, yO:0};
-		}
-		if (d == 60){
-			return {x:x, y:y+1, xO:0, yO:0};
-		}
-		if (d == 120){
-			return {x:x-1, y:y+1, xO:0, yO:0};
-		}
-		if (d == 180){
-			return {x:x-1, y:y, xO:0, yO:0};
-		}
-		if (d == 240){
-			return {x:x-1, y:y-1, xO:0, yO:0};
-		}
-		if (d == 300){
-			return {x:x, y:y-1, xO:0, yO:0};
-		}
 		
-		return {x:x, y:y, xO:0, yO:0}
-	
-	},
-	
-	getHexToDirectionUneven: function(d, x, y){
-		if (d == 0){
-			return {x:x+1, y:y, xO:0, yO:0};
-		}
-		if (d == 60){
-			return {x:x+1, y:y+1, xO:0, yO:0};
-		}
-		if (d == 120){
-			return {x:x, y:y+1, xO:0, yO:0};
-		}
-		if (d == 180){
-			return {x:x-1, y:y, xO:0, yO:0};
-		}
-		if (d == 240){
-			return {x:x, y:y-1, xO:0, yO:0};
-		}
-		if (d == 300){
-			return {x:x+1, y:y-1, xO:0, yO:0};
-		}
-		
-		return {x:x, y:y, xO:0, yO:0}
-	
-	},
-	
 	isOccupiedPos: function(pos){
 		var others = Array();
 		
