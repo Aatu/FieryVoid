@@ -63,7 +63,7 @@
 					
 					
 				foreach($ships1 as $ship){
-					$this->AOEdamage($ship, $shooter, $fireOrder, $pos, 30);
+					$this->AOEdamage($ship, $shooter, $fireOrder, $shooterpos, 30);
 					$fireOrder->notes .= $ship->name ." in same hex. ";	
 				}
 				

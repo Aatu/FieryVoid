@@ -176,17 +176,7 @@ window.shipManager = {
     
 
     getShipCanvasSize: function(ship){
-        if (ship.shipSizeClass == 4){
-            return 400;
-        }
-        
-        if (ship.shipSizeClass >= 2){
-            return 200;
-        }
-        
-        if (ship.shipSizeClass < 2){
-            return 100;
-        }
+       return ship.canvasSize;
         
         
         

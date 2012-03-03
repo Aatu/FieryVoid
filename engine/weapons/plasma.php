@@ -96,5 +96,34 @@
 		}
 
 	}
+	
+	class MagGun extends Plasma{
+
+		public $name = "magGun";
+        public $displayName = "Mag Gun";
+        public $animation = "trail";
+        public $animationColor = array(255, 105, 0);
+		public $trailColor = array(255, 140, 60);
+		public $projectilespeed = 15;
+        public $animationWidth = 6;
+		public $animationExplosionScale = 0.50;
+		public $trailLength = 30;
+		        
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(-20, 2, 6); // fighters, <=mediums, <=capitals 
+
+
+		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        }
+		
+		
+		public function getDamage(){        return Dice::d(10,6)+20;   }
+        public function setMinDamage(){     $this->minDamage = 26 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 80 - $this->dp;      }
+
+	}
 
 ?>

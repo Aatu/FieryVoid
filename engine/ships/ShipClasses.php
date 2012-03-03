@@ -18,6 +18,8 @@
         public $destroyed = false;
         public $pointCost = 0;
         public $faction = null;
+        
+        public $canvasSize = 200;
 
         public $fireOrders = array();
         
