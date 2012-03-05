@@ -203,6 +203,11 @@ class ShipSystem{
 
     }
     
+    public function onConstructed($ship, $turn, $phase){
+            
+     
+    }
+    
     public function beforeTurn($ship, $turn, $phase){
             
         $this->setSystemDataWindow();
@@ -448,10 +453,10 @@ class TacGamedata{
                     $movement = $ship->getLastTurnMovement($fire->turn);
                     $target = $fire->targetid;
                     if ($fire->x != "null" && $fire->y != "null")
-						$targetpos = array("x"=>$fire->x, "y"=>$fire->y);
+                        $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
                     else
-						$targetpos = null;
-						
+                        $targetpos = null;
+                        
                     
                     $this->ballistics[$i] = new Ballistic(
                         $i,
@@ -470,6 +475,10 @@ class TacGamedata{
                     //print(sizeof($this->ballistics));
                 }
             
+            }
+            
+            foreach ($ship->systems as $system){
+                $system->onConstructed($ship, $this->turn, $this->phase);
             }
         
         }
@@ -662,20 +671,20 @@ class TacGamedata{
     }
     
     public function getShipsInDistance($pos, $dis = 0){
-		$ships = array();
-		foreach ($this->ships as $ship){
-			$shipPos = $ship->getCoPos();
-			$curDis = mathlib::getDistance($pos, $shipPos);
-		
-			if ($curDis <= $dis){
-				$ships[] = $ship;
-			}
-		}
-		
-		return $ships;
-			 
-			 
-	}
+        $ships = array();
+        foreach ($this->ships as $ship){
+            $shipPos = $ship->getCoPos();
+            $curDis = mathlib::getDistance($pos, $shipPos);
+        
+            if ($curDis <= $dis){
+                $ships[] = $ship;
+            }
+        }
+        
+        return $ships;
+             
+             
+    }
     
     public function prepareForPlayer($turn, $phase, $activeship){
         $this->setWaiting();
@@ -731,20 +740,20 @@ class TacGamedata{
                 }
                 
                 if ($fire->turn == $this->turn && $weapon->hidetarget && $this->phase < 4 && $ship->userid != $this->forPlayer){
-					$fire->targetid = -1;
-					$fire->x = "null";
-					$fire->y = "null";
-					
-					foreach ($this->ballistics as $ball){
-						if ($ball->fireOrderId == $fire->id){
-							$ball->targetid = -1;
-							$ball->targetposition  = null;
-							
-						}
-					}
-					
-				}
-				
+                    $fire->targetid = -1;
+                    $fire->x = "null";
+                    $fire->y = "null";
+                    
+                    foreach ($this->ballistics as $ball){
+                        if ($ball->fireOrderId == $fire->id){
+                            $ball->targetid = -1;
+                            $ball->targetposition  = null;
+                            
+                        }
+                    }
+                    
+                }
+                
             }
              
         }

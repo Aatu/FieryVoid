@@ -9,7 +9,9 @@ window.ballistics = {
         var launchImg = new Image();
         launchImg.src = "img/ballisticLaunch.png";
         var targetImg = new Image();
-        targetImg.src = "img/ballisticTarget.png"; 
+        targetImg.src = "img/ballisticTarget.png";
+        
+       
         
         ballistics.launchImg = launchImg;
         ballistics.targetImg = targetImg;
@@ -46,11 +48,11 @@ window.ballistics = {
             var angle = mathlib.getCompassHeadingOfPoint(targetPos, ball.launchPos);
             ball.targetPos = hexgrid.getOffsetPositionInHex(targetPos, angle, 0.6, false);
         }else if (ball.targetposition){
-			var targetPos = ball.targetposition;
+            var targetPos = ball.targetposition;
             
             var angle = mathlib.getCompassHeadingOfPoint(targetPos, ball.launchPos);
             ball.targetPos = hexgrid.getOffsetPositionInHex(targetPos, angle, 0.6, false);
-		}
+        }
         
     
     },
@@ -269,8 +271,8 @@ window.ballistics = {
             
             pos2 = hexgrid.positionToPixel(pos2);
             if (!pos2)
-				continue;
-				
+                continue;
+                
             if (mathlib.getDistance(pos, pos2)<(10*gamedata.zoom)){
                 balls.push(ball2);
             }
@@ -413,8 +415,8 @@ window.ballistics = {
             var target = "";
             var amount = "";
             if (ball.shots>1)
-				amount = ball.shots +"x ";
-					
+                amount = ball.shots +"x ";
+                    
             if (ball.targetid && ball.targetid != -1){
                 targetship = gamedata.getShip(ball.targetid);
                 

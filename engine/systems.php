@@ -211,6 +211,7 @@ class Weapon extends ShipSystem{
     
     public $uninterceptable = false;
     public $intercept = 0;
+    public $freeintercept = false;
     
     public $ballistic = false;
     public $hextarget = false;
@@ -403,9 +404,14 @@ class Weapon extends ShipSystem{
         $this->turnsloaded = $turnsloaded;
     }
     
+    public function onConstructed($ship, $turn, $phase){
+            $this->setLoading($ship, $turn, $phase);
+     
+    }
+    
     public function beforeTurn($ship, $turn, $phase){
         
-        $this->setLoading($ship, $turn, $phase);
+        
         
         parent::beforeTurn($ship, $turn, $phase);
     }
@@ -451,10 +457,15 @@ class Weapon extends ShipSystem{
         return Array("rp"=>$rangePenalty, "notes"=>$notes);
     }
     
-    public function calculateHit($gamedata, $fireOrder, $pos){
+    public function calculateHit($gamedata, $fireOrder){
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+        $pos = $shooter->getCoPos();
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+        }
                        
         $rp = $this->calculateRangePenalty($pos, $target);
         $rangePenalty = $rp["rp"];
@@ -524,7 +535,7 @@ class Weapon extends ShipSystem{
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
                     
-        $this->calculateHit($gamedata, $fireOrder, $pos);
+        $this->calculateHit($gamedata, $fireOrder);
         $intercept = $this->getIntercept($gamedata, $fireOrder, $pos);
         
         for ($i=0;$i<$fireOrder->shots;$i++){
@@ -549,21 +560,21 @@ class Weapon extends ShipSystem{
     
     protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder){
     
-		if ($this->flashDamage){
-			return $target->getHitSystem($pos, $fireOrder->turn, $this);
-		}else{
-			
-			$okSystem = $target->getStructureSystem($system->location);
-			
-			if ($okSystem == null || $okSystem->isDestroyed()){
-				$okSystem = $target->getStructureSystem(0);
-			}
-			if ($okSystem == null || $okSystem->isDestroyed()){
-				return null;
-			}
-		}
-		
-		return $okSystem;
+        if ($this->flashDamage){
+            return $target->getHitSystem($pos, $fireOrder->turn, $this);
+        }else{
+            
+            $okSystem = $target->getStructureSystem($system->location);
+            
+            if ($okSystem == null || $okSystem->isDestroyed()){
+                $okSystem = $target->getStructureSystem(0);
+            }
+            if ($okSystem == null || $okSystem->isDestroyed()){
+                return null;
+            }
+        }
+        
+        return $okSystem;
     
     }
     

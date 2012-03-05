@@ -8,7 +8,7 @@ gamedata = {
     scrollOffset: {x:0,y:0},
     animating: false,
     ships: Array(),
-	ballistics: Array(),
+    ballistics: Array(),
     thisplayer: 1,
     waiting: false,
     selectedShips: Array(),
@@ -16,7 +16,7 @@ gamedata = {
     selectedSystems: Array,
     effectsDrawing: false,
     finished: false,
-	gamephase: 0,
+    gamephase: 0,
     
     mouseOverShipId: -1,
     
@@ -150,6 +150,8 @@ gamedata = {
                 ew.convertUnusedToDEW(ship);
                 
             }
+            $(".ballclickable").remove();
+            $(".ballisticcanvas").remove(); 
             ajaxInterface.submitGamedata();
             
         }else if (gamedata.gamephase == 2){
@@ -310,8 +312,8 @@ gamedata = {
             $("#phaseheader .finished").show();
             return;
         }
-		
-		
+        
+        
         
         if (gamedata.gamephase == 4){
             
@@ -346,12 +348,12 @@ gamedata = {
             commit.hide();
             cancel.hide();
         }
-		
-		if (!playerManager.isInGame()){
-			cancel.hide();
+        
+        if (!playerManager.isInGame()){
+            cancel.hide();
             commit.hide();
-			return;
-		}
+            return;
+        }
         
         if (gamedata.waiting){
             $("#phaseheader .waiting.value").show();
@@ -388,7 +390,7 @@ gamedata = {
             gamedata.thisplayer = serverdata.forPlayer;
             gamedata.waiting = serverdata.waiting;
             gamedata.status = serverdata.status;
-			gamedata.ballistics = serverdata.ballistics;
+            gamedata.ballistics = serverdata.ballistics;
             //combatLog.constructLog();
             
             gamedata.initPhase();
