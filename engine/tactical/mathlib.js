@@ -32,6 +32,11 @@ window.mathlib = {
 		return Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
 	},
 	
+	getDistanceHex: function(start, end){
+		var dis = Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
+		return (dis / hexgrid.hexWidth());
+	},
+	
 	getPointInDistanceBetween: function(start, end, distance){
 		var totalDist = mathlib.getDistance(start, end);
 		var perc = distance / totalDist;

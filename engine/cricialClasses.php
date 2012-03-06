@@ -82,7 +82,7 @@
 	
 	class ForcedOfflineOneTurn extends Critical{
 	
-		public $description = "Forced offline for this turn.";
+		public $description = "Forced offline for ";
 		public $oneturn = true;
 	
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -142,7 +142,7 @@
 	}
 	
 	class ReducedIniativeOneTurn extends Critical{
-		public $description = "-2 iniative for this turn [TODO]";
+		public $description = "[TODO] -2 iniative for  ";
 		public $oneturn = true;
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
@@ -158,7 +158,7 @@
 	}
 	
 	class ShipDisabledOneTurn extends Critical{
-		public $description = "Ship disabled for one turn.[TODO]";
+		public $description = "[TODO] Ship disabled for ";
 		public $oneturn = true;
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);

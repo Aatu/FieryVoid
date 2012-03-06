@@ -86,7 +86,7 @@
 
 		public function getDamage(){        return 8;   }
         public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 48 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 - $this->dp;      }
 
 	}
 	
@@ -120,7 +120,7 @@
 
 		public function getDamage(){        return 15;   }
         public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 90 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
 
 	}
 

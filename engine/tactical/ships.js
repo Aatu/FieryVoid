@@ -169,7 +169,7 @@ window.shipManager = {
                 
                 graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
             }
-            
+          
             graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipManager.getShipHeadingAngleForDrawing(ship), img);
             
 	},

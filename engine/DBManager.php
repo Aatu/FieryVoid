@@ -691,7 +691,7 @@ class DBManager {
                 foreach ($ship->systems as $system){
                     $system->damage = $this->getDamage($value->id, $gameid, $system->id);
                     $system->power = $this->getPower($value->id, $gameid, $system->id);
-                    $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id));
+                    $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
 					//$system->beforeTurn($ship, $turn, $phase);
                 }
                 

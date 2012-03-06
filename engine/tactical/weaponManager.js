@@ -358,7 +358,7 @@ window.weaponManager = {
         return target.sideDefense;
         
     },
-    
+    /*
     canIntercept: function(ball){
         var selectedShip = gamedata.getSelectedShip();
         if (shipManager.isDestroyed(selectedShip))
@@ -380,20 +380,37 @@ window.weaponManager = {
         
         return false;
     },
-    
+    */
     targetBallistic: function(ball){
+		
+		 if (gamedata.gamephase != 3)
+			return;
+            
+            
         var selectedShip = gamedata.getSelectedShip();
         if (shipManager.isDestroyed(selectedShip))
             return;
             
-        if (!ball.targetid || ball.targetid != selectedShip.id)
+        if (!ball.targetid) 
             return;
             
-        var pos = shipManager.getShipPosition(selectedShip);
+        var target = gamedata.getShip(ball.targetid);
+                    
         var toUnselect = Array();
         
         for (var i in gamedata.selectedSystems){
             var weapon = gamedata.selectedSystems[i];
+            
+            if (ball.targetid != selectedShip.id && !weapon.freeintercept )
+				continue;
+				
+			if (ball.targetid != selectedShip.id && weapon.freeintercept){
+				var ballpos = hexgrid.positionToPixel(ball.position);
+				var targetpos = shipManager.getShipPositionInWindowCo(target);
+				var selectedpos = shipManager.getShipPositionInWindowCo(selectedShip);
+				if (mathlib.getDistanceHex(ballpos, targetpos) <= mathlib.getDistanceHex(ballpos, selectedpos) || mathlib.getDistanceHex(targetpos, selectedpos) >3)
+					continue;
+			}
             
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
@@ -456,7 +473,7 @@ window.weaponManager = {
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
                 //$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
-                if (weapon.range == 0 || (mathlib.getDistance(shipManager.getShipPosition(selectedShip), shipManager.getShipPosition(ship))<=weapon.range)){
+                if (weapon.range == 0 || (mathlib.getDistanceHex(shipManager.getShipPositionInWindowCo(selectedShip), shipManager.getShipPositionInWindowCo(ship))<=weapon.range)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
@@ -526,7 +543,7 @@ window.weaponManager = {
             
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)){
                 //$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
-                if (weapon.range == 0 || (mathlib.getDistance(shipManager.getShipPosition(selectedShip), hexpos)<=weapon.range)){
+                if (weapon.range == 0 || (mathlib.getDistanceHex(shipManager.getShipPositionInWindowCo(selectedShip), hexgrid.positionToPixel(hexpos))<=weapon.range)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
@@ -565,18 +582,19 @@ window.weaponManager = {
        
     
     removeFiringOrder: function(ship, system){
-        
+       
         for(var i = ship.fireOrders.length-1; i >= 0; i--){  
             if(ship.fireOrders[i].weaponid == system.id){              
                   
                 for(var a = gamedata.ballistics.length-1; a >= 0; a--){
-                    if (gamedata.ballistics[a].fireid == ship.fireOrders[i].id)
+                    if (gamedata.ballistics[a].fireid == ship.fireOrders[i].id && gamedata.ballistics[a].shooterid == ship.id){
                         var id = gamedata.ballistics[a].id;
-                       
+						
                         $('#ballistic_launch_canvas_'+id).remove();
                         $('#ballistic_target_canvas_'+id).remove();
                         $('.ballistic_'+id).remove();
-                        gamedata.ballistics.splice(a,1);    
+                        gamedata.ballistics.splice(a,1);  
+					}
                 }  
                 ship.fireOrders.splice(i,1);               
             }

@@ -10,7 +10,7 @@ class Bintak extends BaseShip{
         $this->imagePath = "ships/bintak.png";
         $this->shipClass = "Bin'Tak";
         $this->shipSizeClass = 3;
-        $this->canvasSize = 275;
+        $this->canvasSize = 280;
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
