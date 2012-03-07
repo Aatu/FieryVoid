@@ -243,13 +243,13 @@ body.phase1 .shipwindow.owned .ewentry .button2{
 }
 
 .shipwindow .col2{
-    border-left:2px dotted #496791;
-    border-right:2px dotted #496791;
+    border-left:2px dotted #7e9dc7;
+    border-right:2px dotted #7e9dc7;
 }
 
 .shipwindow .shipSection.primary{
-    border-top:2px dotted #496791;
-    border-bottom:2px dotted #496791;
+    border-top:2px dotted #7e9dc7;
+    border-bottom:2px dotted #7e9dc7;
     padding: 5px 0px 5px 0px;
 }
 
@@ -416,6 +416,12 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
 }
 
 .shipwindow .system.offline .iconmask{
+    background-color:black;
+    background-image:url(./img/offline.png);
+    opacity:0.5;
+}
+
+.shipwindow .system.forcedoffline .iconmask{
     background-color:black;
     background-image:url(./img/offline.png);
     opacity:0.5;

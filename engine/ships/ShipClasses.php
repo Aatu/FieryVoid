@@ -126,6 +126,17 @@
             return null;
         }
         
+        public function getSystemByName($name){
+            foreach ($this->systems as $system){
+                if ($system instanceof $name){
+                    return $system;
+                }
+            }
+            
+            return null;
+        }
+
+        
         public function getLastTurnMovement($turn){
         
             $movement = null;
@@ -290,17 +301,8 @@
         }
         
         public function getFireControlIndex(){
-        
-            if ($this->shipSizeClass > 1){
-                return 2;
-            }
-            
-            if ($this->shipSizeClass < 2){
-                return 1;
-            }
-            
-            return 0;
-        
+              return 2;
+               
         }
         
         public function isDestroyed(){
@@ -453,11 +455,14 @@
     
     class HeavyCombatVessel extends BaseShip{
     
-        public $shipSizeClass = 3;
+        public $shipSizeClass = 2;
+        
+        
         
         function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
             parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
         }
+     
         
         public function getHitSection($pos, $turn, $weapon){
             $tf = $this->getFacingAngle();
@@ -486,6 +491,134 @@
                 
             return $location;
         }
+
+    
+    }
+    
+    class MediumShip extends BaseShip{
+    
+        public $shipSizeClass = 1;
+        
+        function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
+            parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
+        }
+        
+        public function getFireControlIndex(){
+              return 1;
+               
+        }
+        
+        public function getHitSection($pos, $turn, $weapon){
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+			
+            $location = 0;
+            
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(90,$tf) )){
+                $location = 1;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(90,$tf), Mathlib::addToDirection(270,$tf) )){
+                $location = 2;
+            }
+           
+            //print ("shootercompas: $shooterCompassHeading, targetfacing: $tf, location: $location \n");
+            $rolled = Movement::isRolled($this);
+            
+                            
+            if ($location != 0){
+                if (Dice::d(20)>17 && !$weapon->flashDamage)
+                    return 0;
+                   
+                foreach($this->systems as $system){
+					if ($system->location == $location && !$system->isDestroyed())
+						return $location;
+				} 
+				
+				return 0;
+            }
+                
+            return $location;
+        }
+        
+        public function getHitSystem($pos, $turn, $weapon, $location = null){
+        
+            if ($location == null)
+                $location = $this->getHitSection($pos, $turn, $weapon);
+            
+
+            //print("getHitSystem, location: $location ");
+            $systems = array();
+            $totalStructure = 0;
+
+            foreach ($this->systems as $system){
+                
+                if ($system->location == $location || $system instanceof Structure){
+                    //if ($system->isDestroyed())
+                    //  continue;
+                        
+                     $systems[] = $system;
+                        
+                    if ($system instanceof Structure){
+                        $multiply = 0.5;
+                        if ($location == 0)
+                            $multiply = 2;
+                            
+                        $totalStructure += round($system->maxhealth * $multiply);
+                    }else{
+                        $totalStructure += $system->maxhealth;
+                    }
+                    
+                }
+            
+                
+            }   
+            
+            $roll = Dice::d($totalStructure);
+            $goneTrough = 0;
+
+            
+            foreach ($systems as $system){
+                
+                $health = 0;
+            
+                if ($system->name == "structure"){
+                    $multiply = 0.5;
+                    if ($location == 0)
+                        $multiply = 2;
+                        
+                    $health = round($system->maxhealth * $multiply);
+                }else{
+                    $health = $system->maxhealth;
+                }
+                
+                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
+                    //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
+                    if ($system->isDestroyed()){
+                        if ($system instanceof Structure){
+							return null;
+                                
+                            return $this->getHitSystem($pos, $turn, $weapon, 0);
+                        }
+                        $structure = $this->getStructureSystem($location);
+                        if ($structure == null || $structure->isDestroyed()){
+							return null;
+                          
+                        }else{
+                            return $structure;
+                        }
+                            
+                        
+                    }
+                    return $system;
+                }
+                $goneTrough += $health;
+                
+            }
+            
+            return null;
+        
+        }
+        
+     
 
     
     }

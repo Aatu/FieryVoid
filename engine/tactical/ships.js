@@ -473,6 +473,9 @@ window.shipManager = {
     
     isAdrift: function(ship){
         
+        if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
+			return true;
+        
         
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))
             || shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"))){

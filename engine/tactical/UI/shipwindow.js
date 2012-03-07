@@ -464,7 +464,8 @@ shipWindowManager = {
 			"canboost",
 			"boosted",
 			"canoverload",
-			"overload"
+			"overload",
+			"forcedoffline"
 		);
 		
 		for (var i in classes){

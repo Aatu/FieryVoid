@@ -121,28 +121,28 @@
 	}
 	
 	class CommunicationsDisrupted extends Critical{
-		public $description = "Communications disrupted. -1 initiative.[TODO]";
+		public $description = "Communications disrupted. -5 initiative.";
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
 		}
 	}
 	
 	class PenaltyToHit extends Critical{
-		public $description = "-1 penalty to hit for all weapons. [TODO]";
+		public $description = "-1 penalty to hit for all weapons.";
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
 		}
 	}
 	
 	class RestrictedEW extends Critical{
-		public $description = "-2 EW. May use no more than half of its EW offensively. [TODO]";
+		public $description = "-2 EW. May use no more than half of its EW offensively.";
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
 		}
 	}
 	
 	class ReducedIniativeOneTurn extends Critical{
-		public $description = "[TODO] -2 iniative for  ";
+		public $description = "-10 iniative for  ";
 		public $oneturn = true;
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
@@ -150,7 +150,7 @@
 	}
 	
 	class ReducedIniative extends Critical{
-		public $description = "-2 iniative. [TODO]";
+		public $description = "-10 iniative.";
 		
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
@@ -158,7 +158,7 @@
 	}
 	
 	class ShipDisabledOneTurn extends Critical{
-		public $description = "[TODO] Ship disabled for ";
+		public $description = "Ship disabled for ";
 		public $oneturn = true;
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);

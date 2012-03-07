@@ -33,6 +33,7 @@ shipManager.systems = {
 			return 0;
 		
 		var output = system.output + system.outputMod + shipManager.power.getBoost(ship, system);
+		
         
         return output;
     },

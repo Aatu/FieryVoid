@@ -10,6 +10,9 @@ window.ew = {
             if (system.name == "scanner"){
                 ret += shipManager.systems.getOutput(ship, system);
             }
+            
+            if (shipManager.criticals.hasCritical(system, "RestrictedEW"))
+				ret -= 2;
         
         }
         
@@ -53,6 +56,21 @@ window.ew = {
 		}
 		
 		return 0;
+		
+	},
+	
+	getAllOffensiveEW: function(ship){
+		var amount = 0;
+		for (var i in ship.EW){
+			var entry = ship.EW[i];
+			if (entry.turn != gamedata.turn)
+				continue;
+			
+			if (entry.type == "OEW")
+				amount += entry.amount;
+		}
+		
+		return amount;
 		
 	},
 	
@@ -241,6 +259,15 @@ window.ew = {
         if (left < 1)
             return;
             
+		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
+			var allOEW = ew.getAllOffensiveEW(selected);
+			var all = ew.getScannerOutput(selected);
+			
+			if (allOEW+1 > all*0.5)
+				return false;
+		}
+			
+            
         selected.EW.push({shipid:selected.id, type:"OEW", amount:1, targetid:ship.id, turn:gamedata.turn});
         ew.adEWindicators(selected);
         gamedata.shipStatusChanged(selected);
@@ -261,7 +288,14 @@ window.ew = {
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});
         }else{
             
-            
+            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){
+				var allOEW = ew.getAllOffensiveEW(selected);
+				var all = ew.getScannerOutput(selected);
+				
+				if (allOEW+1 > all*0.5)
+					return false;
+			}
+           
             
                 
             entry.amount++;

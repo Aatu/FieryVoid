@@ -224,14 +224,14 @@ class ShipSystem{
                 $counts[$crit->phpclass] = 1;
             }
             
-            if (
+            
             $forturn = "";
             if ($crit->oneturn && $crit->turn == $turn)
-				$forturn = "next turn.";
-			
-			if ($crit->oneturn && $crit->turn == $turn)
-				$forturn = "this turn.";
-				
+                $forturn = "next turn.";
+            
+            if ($crit->oneturn && $crit->turn+1 == $turn)
+                $forturn = "this turn.";
+                
             $this->critData[$crit->phpclass] = $crit->description .$forturn;
         }
         /*
@@ -301,21 +301,24 @@ class ShipSystem{
     }
     
     public function setCriticals($criticals, $turn){
-		$crits = array();
-		foreach( $criticals as $crit){
-			if (!$crit->oneturn || ($crit->oneturn && $crit->turn >= $turn-1))
-				$crits[] = $crit;
-		}
-		
+        $crits = array();
+        foreach( $criticals as $crit){
+            if (!$crit->oneturn || ($crit->oneturn && $crit->turn >= $turn-1))
+                $crits[] = $crit;
+        }
+        
         $this->criticals = $crits;
         $this->effectCriticals();
     }
     
-    public function hasCritical($type){
+    public function hasCritical($type, $turn){
         $count = 0;
         foreach ($this->criticals as $critical){
-            if ($critical->phpclass == $type)
-                $count++;
+            if ($critical->phpclass == $type){
+				if (($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn)
+					$count++;
+			}
+                
         }
     
         return $count;

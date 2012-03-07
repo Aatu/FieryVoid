@@ -181,7 +181,10 @@ window.weaponManager = {
         
         var intercept = weaponManager.getInterception(ball);
         
-        var goal = (defence - dew - rangePenalty - intercept + oew + firecontrol);
+        var mod = 0;
+        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "PenaltyToHit");
+        
+        var goal = (defence - dew - rangePenalty - intercept + oew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
         //console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " goal: " +goal);
@@ -230,6 +233,8 @@ window.weaponManager = {
         if (shipManager.movement.isPivoting(shooter)){
             mod -= 3;
         }
+        
+        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "PenaltyToHit");
         
         if (oew == 0)
             rangePenalty = rangePenalty*2;

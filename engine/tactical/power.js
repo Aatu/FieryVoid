@@ -40,13 +40,18 @@ shipManager.power = {
 		
 		var off = shipManager.power.isOffline(ship, system);
 		
-		if (shipManager.power.isOverloading(ship, system)){
-			systemwindow.addClass("overload");
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			systemwindow.addClass("forcedoffline");
+			return true;		
 		}
 		
 		if (off){
 			systemwindow.addClass("offline");
 			return true;
+		}
+		
+		if (shipManager.power.isOverloading(ship, system)){
+			systemwindow.addClass("overload");
 		}
 		
 		if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer)
@@ -157,6 +162,10 @@ shipManager.power = {
 	},
 	
 	isOffline: function(ship, system){
+	
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			return true;		
+		}
 	
 		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship))
 			return true;

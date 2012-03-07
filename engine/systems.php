@@ -485,6 +485,8 @@ class Weapon extends ShipSystem{
             
         $defence = $target->getDefenceValuePos($pos);
         
+        $CnC = $shooter->getSystemByName("CnC");
+        $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn));
        
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
