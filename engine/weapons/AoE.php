@@ -2,8 +2,8 @@
 
 	class AoE extends Weapon{
 
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function calculateHit($gamedata, $fireOrder){
@@ -123,8 +123,8 @@
         public $animationWidth = 10;
 		public $trailLength = 10;
 		
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		public function getDamage(){        return 10;   }

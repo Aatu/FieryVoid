@@ -2,8 +2,8 @@
 
     class Raking extends Weapon{
         
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         public $raking = 10;
         private $damages = array();
@@ -92,8 +92,8 @@
     
         public $uninterceptable = true;
     
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function setSystemDataWindow(){
@@ -125,8 +125,8 @@
         public $rangePenalty = 0.33;
         public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 
     
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage(){        return Dice::d(10, 2)+30;   }
@@ -154,8 +154,8 @@
         public $rangePenalty = 0.5;
         public $fireControl = array(-3, 2, 3); // fighters, <mediums, <capitals 
     
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage(){        return Dice::d(10, 2)+17;   }
@@ -184,8 +184,8 @@
         public $rangePenalty = 0.25;
         public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 
     
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage(){        return Dice::d(10, 2)+22;   }

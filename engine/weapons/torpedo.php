@@ -4,8 +4,8 @@
     
         public $ballistic = true;
 
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
     }
@@ -27,8 +27,8 @@
         public $animationWidth = 10;
         public $trailLength = 10;
         
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage(){        return 15;   }
@@ -61,8 +61,8 @@
         
         public $canChangeShots = true;
         
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
             
         }
         

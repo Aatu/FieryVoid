@@ -4,8 +4,8 @@
 	
 		
 	
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		protected function getSystemArmour($system){
@@ -50,8 +50,8 @@
         public $fireControl = array(-4, 1, 3); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
@@ -115,8 +115,8 @@
         public $fireControl = array(-20, 2, 6); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		

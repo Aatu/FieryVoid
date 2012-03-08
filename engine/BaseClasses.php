@@ -193,7 +193,7 @@ class ShipSystem{
         
     public $criticals = array();
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $output){
+    function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = (int)$armour;
         $this->maxhealth = (int)$maxhealth;
         $this->location = (int)$location;

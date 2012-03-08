@@ -45,13 +45,30 @@
 
         }
         
-        protected function addSystem($system){
+        protected function addSystem($system, $loc){
             
             $i = sizeof($this->systems);
             $system->id = $i;
+            $system->location = $loc;
             $this->systems[$i] = $system;
             
         
+        }
+        
+        protected function addFrontSystem($system){
+            $this->addSystem($system, 1);
+        }
+        protected function addAftSystem($system){
+            $this->addSystem($system, 2);
+        }
+        protected function addPrimarySystem($system){
+            $this->addSystem($system, 0);
+        }
+        protected function addLeftSystem($system){
+            $this->addSystem($system, 3);
+        }
+        protected function addRightSystem($system){
+            $this->addSystem($system, 4);
         }
         
         public function addDamageEntry($damage){
@@ -558,9 +575,7 @@
                      $systems[] = $system;
                         
                     if ($system instanceof Structure){
-                        $multiply = 0.5;
-                        if ($location == 0)
-                            $multiply = 2;
+                        $multiply = 2;
                             
                         $totalStructure += round($system->maxhealth * $multiply);
                     }else{

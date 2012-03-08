@@ -104,6 +104,9 @@ shipManager.movement = {
     isRolling: function(ship){
         var rolling = false;
         
+        if (ship.agile)
+			return false;
+        
         for (var i in ship.movement){
             var m = ship.movement[i];
             if (m.turn != gamedata.turn)
@@ -120,20 +123,40 @@ shipManager.movement = {
     },
     
     isRolled: function(ship){
-            
-        for (var i in ship.movement){
-            var m = ship.movement[i];
-            if (m.turn != gamedata.turn)
-                continue;
-                
-            if (m.type == "isRolled"){
-				//console.log(ship.name + " is rolled");
-                return true;
+        var ret = false;
+        if (ship.agile){
+			for (var i in ship.movement){
+				var m = ship.movement[i];
+				if (m.turn != gamedata.turn)
+					continue;
+					
+				if (m.type == "isRolled"){
+					ret = true;
+				}
+				
+				if (m.type == "roll"){
+					ret = !ret;
+				}
+				
 			}
-            
-        }
+			
+		}else{
+			   
+			for (var i in ship.movement){
+				var m = ship.movement[i];
+				if (m.turn != gamedata.turn)
+					continue;
+					
+				if (m.type == "isRolled"){
+					//console.log(ship.name + " is rolled");
+					return true;
+				}
+				
+			}
+			return false;
+		}
         //console.log(ship.name + " is NOT rolled");
-        return false;
+        return ret;
     },
     
     hasRolled: function(ship){
@@ -323,15 +346,15 @@ shipManager.movement = {
         var hasPivoted = shipManager.movement.hasPivoted(ship);
         var isPivoting = shipManager.movement.isPivoting(ship);
         
-        if (hasPivoted.right && isPivoting != "right" && right)
+        if (hasPivoted.right && isPivoting != "right" && right && !ship.agile)
             return false;
             
-        if (hasPivoted.left && isPivoting != "left" && !right)
+        if (hasPivoted.left && isPivoting != "left" && !right && !ship.agile)
             return false;
             
         var isPivoting = shipManager.movement.isPivoting(ship);
         
-        if ((right && isPivoting == "left") || (!right && isPivoting == "right")){
+        if ((right && isPivoting == "left") || (!right && isPivoting == "right") && !ship.agile){
             return false;
         }
             
@@ -447,6 +470,9 @@ shipManager.movement = {
     isPivoting: function(ship){
         var pivoting = "no";
         
+        if (ship.agile)
+			return pivoting;
+        
         for (var i in ship.movement){
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
@@ -491,7 +517,9 @@ shipManager.movement = {
     },
     
     isTurningToPivot: function(ship, right){
-    
+		if (ship.agile)
+			return false;
+			
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
         if (shipManager.movement.isGoingBackwards(ship))
@@ -918,7 +946,15 @@ shipManager.movement = {
             
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         
-        if (turndelay > 0){
+        var previous = null;
+        if (ship.movement.length-1 > 0 )
+			previous = ship.movement[ship.movement.length-2];
+        
+        
+        
+        
+        
+        if (!(ship.agile && shipManager.movement.isTurn(previous)) && turndelay > 0){
             //console.log("has turn dealy, cant turn");
             return false;
         }

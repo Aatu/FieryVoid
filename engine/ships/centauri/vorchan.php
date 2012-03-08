@@ -22,27 +22,27 @@ class Vorchan extends HeavyCombatVessel{
 		$this->iniativebonus = 40;
         
          
-        $this->addSystem(new Reactor(7, 12, 0, 0, 4));
-        $this->addSystem(new CnC(6, 12, 0, 0, 0));
-        $this->addSystem(new Scanner(6, 20, 0, 4, 8));
-        $this->addSystem(new Engine(7, 11, 0, 0, 10, 2));
-		$this->addSystem(new Hangar(6, 2, 0));
-		$this->addSystem(new Thruster(5, 15, 0, 0, 5, 3));
-		$this->addSystem(new Thruster(5, 15, 0, 0, 5, 4));
+        $this->addPrimarySystem(new Reactor(7, 12, 0, 4));
+        $this->addPrimarySystem(new CnC(6, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
+        $this->addPrimarySystem(new Engine(7, 11, 0, 10, 2));
+		$this->addPrimarySystem(new Hangar(6, 2));
+		$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 3));
+		$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 4));
 		
         
 		
-        $this->addSystem(new Thruster(5, 10, 1, 0, 3, 1));
-        $this->addSystem(new Thruster(5, 10, 1, 0, 3, 1));
-        $this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
-        $this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
-		$this->addSystem(new PlasmaAccelerator(4, 10, 1, 5, 300, 60));
+        $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+		$this->addFrontSystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
 		
 		
 		
-        $this->addSystem(new Thruster(4, 8, 2, 0, 5, 2));
-        $this->addSystem(new Thruster(4, 8, 2, 0, 5, 2));
-		$this->addSystem(new JumpEngine(6, 16, 2, 3, 16));
+        $this->addAftSystem(new Thruster(4, 8, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 8, 0, 5, 2));
+		$this->addAftSystem(new JumpEngine(6, 16, 3, 16));
 	
 		
 
@@ -50,9 +50,9 @@ class Vorchan extends HeavyCombatVessel{
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addSystem(new Structure( 5, 48, 1));
-        $this->addSystem(new Structure( 4, 43, 2));
-        $this->addSystem(new Structure( 6, 28, 0));
+        $this->addFrontSystem(new Structure( 5, 48));
+        $this->addAftSystem(new Structure( 4, 43));
+        $this->addPrimarySystem(new Structure( 6, 28));
 		
 		
     }

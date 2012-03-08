@@ -4,8 +4,8 @@
 	
 		
 	
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		protected function getSystemArmour($system){
@@ -45,8 +45,8 @@
         public $fireControl = array(-2, 3, 3); // fighters, <mediums, <capitals 
 
 
-		function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
 		public function getDamage(){        return Dice::d(10, 2)+2;   }

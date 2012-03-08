@@ -7,7 +7,9 @@
         }
         
         public static function isPivoting($ship, $turn){
-
+			if ($ship->agile)
+				return 0;
+				
             $pivoting = 0; // 0: false, 1: left, 2:right
             $lastmove = $ship->getLastMovement();
             $movements = array();
@@ -44,6 +46,9 @@
         }
         
         public static function isRolling($ship, $turn){
+			if ($ship->agile)
+				return false;
+				
             $rolling = false;
             $lastmove = $ship->getLastMovement();
             $movements = array();
@@ -228,21 +233,42 @@
 			$turnwas = 0;
             $lastmove = $ship->getLastMovement();
             $movements = array();
-            foreach ($ship->movement as $move){
-                if ($move->turn != $turn && $turn != -1)
-                    continue;
+            if ($ship->agile){
+				foreach ($ship->movement as $move){
+					if ($move->turn != $turn && $turn != -1)
+						continue;
+					
+					if ($move->turn != $turnwas){
+						$ret = false;
+					}
+									
+					if ($move->type == "isRolled"){
+						$ret = true;
+						$turnwas = $move->turn;
+					}
+					
+					if ($move->type == "roll")
+						$ret = !$ret;
 				
-				if ($move->turn != $turnwas){
-					$ret = false;
+					
 				}
-                                
-                if ($move->type == "isRolled"){
-                    $ret = true;
-					$turnwas = $move->turn;
+			}else{
+				foreach ($ship->movement as $move){
+					if ($move->turn != $turn && $turn != -1)
+						continue;
+					
+					if ($move->turn != $turnwas){
+						$ret = false;
+					}
+									
+					if ($move->type == "isRolled"){
+						$ret = true;
+						$turnwas = $move->turn;
+					}
+				
+					
 				}
-            
-                
-            }
+			}
             
             return $ret;
         }

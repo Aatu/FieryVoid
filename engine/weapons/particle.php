@@ -4,8 +4,8 @@
     class Particle extends Weapon{
 
     
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function setSystemDataWindow(){
@@ -43,8 +43,8 @@
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals 
 
 
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage(){        return Dice::d(10)+4;   }
@@ -75,8 +75,8 @@
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
 
 
-        function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage(){        return Dice::d(10, 2)+6;   }

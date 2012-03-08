@@ -21,49 +21,49 @@ class Primus extends BaseShip{
         $this->pivotcost = 3;
         
          
-        $this->addSystem(new Reactor(8, 22, 0, 0, 0));
-        $this->addSystem(new CnC(7, 20, 0, 0, 0));
-        $this->addSystem(new Scanner(7, 20, 0, 5, 10));
-        $this->addSystem(new Engine(7, 18, 0, 0, 10, 2));
-		$this->addSystem(new Hangar(7, 14, 0));
+        $this->addPrimarySystem(new Reactor(8, 22, 0, 0));
+        $this->addPrimarySystem(new CnC(7, 20, 0, 0));
+        $this->addPrimarySystem(new Scanner(7, 20, 5, 10));
+        $this->addPrimarySystem(new Engine(7, 18, 0, 10, 2));
+		$this->addPrimarySystem(new Hangar(7, 14));
 		
         
-		$this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
-        $this->addSystem(new Thruster(6, 10, 1, 0, 3, 1));
-        $this->addSystem(new Thruster(6, 10, 1, 0, 3, 1));
-        $this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
-        $this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
-		$this->addSystem(new TwinArray(3, 6, 1, 2, 240, 120));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		
-        $this->addSystem(new Thruster(5, 8, 2, 0, 3, 2));
-        $this->addSystem(new Thruster(5, 8, 2, 0, 3, 2));
-        $this->addSystem(new Thruster(5, 8, 2, 0, 3, 2));
-        $this->addSystem(new Thruster(5, 8, 2, 0, 3, 2));
-		$this->addSystem(new JumpEngine(6, 25, 2, 3, 16));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
         
-		$this->addSystem(new Thruster(5, 15, 3, 0, 5, 3));
-		$this->addSystem(new BattleLaser(5, 6, 3, 6, 240, 0));
-		$this->addSystem(new BattleLaser(5, 6, 3, 6, 240, 0));
-		$this->addSystem(new TwinArray(3, 6, 3, 2, 180, 60));
-		$this->addSystem(new TwinArray(3, 6, 3, 2, 180, 60));
+		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
+		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
 		
         
         
 		
-		$this->addSystem(new Thruster(5, 15, 4, 0, 5, 4));
-		$this->addSystem(new BattleLaser(5, 6, 4, 6, 0, 120));
-		$this->addSystem(new BattleLaser(5, 6, 4, 6, 0, 120));
-		$this->addSystem(new TwinArray(3, 6, 4, 2, 300, 180));
-		$this->addSystem(new TwinArray(3, 6, 4, 2, 300, 180));
+		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
+		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
 		
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addSystem(new Structure( 5, 40, 1));
-        $this->addSystem(new Structure( 5, 40, 2));
-        $this->addSystem(new Structure( 5, 56, 3));
-        $this->addSystem(new Structure( 5, 56, 4));
-        $this->addSystem(new Structure( 7, 42, 0));
+        $this->addFrontSystem(new Structure( 5, 40));
+        $this->addAftSystem(new Structure( 5, 40));
+        $this->addLeftSystem(new Structure( 5, 56));
+        $this->addRightSystem(new Structure( 5, 56));
+        $this->addPrimarySystem(new Structure( 7, 42));
 		
 		
     }

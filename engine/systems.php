@@ -8,8 +8,8 @@ class Reactor extends ShipSystem{
     
     public $possibleCriticals = array(11=>"OutputReduced2", 15=>"OutputReduced4", 19=>"OutputReduced6", 27=>"OutputReduced8", 100=>"ForcedOfflineOneTurn");
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
         
         
         
@@ -32,8 +32,8 @@ class Engine extends ShipSystem{
     
     public $possibleCriticals = array(15=>"OutputReduced2", 21=>"OutputReduced4", 27=>"ForcedOfflineOneTurn");
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $output, $engineEfficiency, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
+    function __construct($armour, $maxhealth, $powerReq, $output, $engineEfficiency, $thrustused = 0 ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
         
         $this->thrustused = (int)$thrustused;
         $this->engineEfficiency = (int)$engineEfficiency;
@@ -50,8 +50,8 @@ class Scanner extends ShipSystem{
     
     public $possibleCriticals = array(15=>"OutputReduced2", 19=>"OutputReduced4", 23=>"OutputReduced6", 27=>"OutputReduced8");
         
-    function __construct($armour, $maxhealth, $location, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
 
     
@@ -91,8 +91,8 @@ class CnC extends ShipSystem{
     21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
     24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
         
-    function __construct($armour, $maxhealth, $location, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
     
 
     }
@@ -116,8 +116,8 @@ class Thruster extends ShipSystem{
     
     );
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $output, $direction, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, $output );
+    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->thrustused = (int)$thrustused;
         $this->direction = (int)$direction;
@@ -135,8 +135,8 @@ class Hangar extends ShipSystem{
     public $squadrons = Array();
     public $primary = true;
     
-    function __construct($armour, $maxhealth, $location, $output = 6){
-        parent::__construct($armour, $maxhealth, $location, 0, $output );
+    function __construct($armour, $maxhealth, $output = 6){
+        parent::__construct($armour, $maxhealth, 0, $output );
  
     }
 
@@ -151,8 +151,8 @@ class JumpEngine extends ShipSystem{
     public $delay = 0;
     public $primary = true;
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $delay){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, 0);
+    function __construct($armour, $maxhealth, $powerReq, $delay){
+        parent::__construct($armour, $maxhealth, $powerReq, 0);
     
         $this->delay = $delay;
     }
@@ -169,8 +169,8 @@ class Structure extends ShipSystem{
     public $displayName = "Structure";
 
     
-    function __construct($armour, $maxhealth, $location){
-        parent::__construct($armour, $maxhealth, $location, 0, 0);
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
          
     
     }
@@ -238,8 +238,8 @@ class Weapon extends ShipSystem{
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
-    function __construct($armour, $maxhealth, $location, $powerReq, $startArc, $endArc ){
-        parent::__construct($armour, $maxhealth, $location, $powerReq, 0 );
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc ){
+        parent::__construct($armour, $maxhealth, $powerReq, 0 );
          
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
