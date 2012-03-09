@@ -178,7 +178,7 @@ window.hexgrid = {
 		}
 		
 		console.log("this hex is: " + hx +","+hy);
-		return {x:hx, y:hy};
+		return {x:hx, y:hy, xO:0, yO:0};
 	},
 	
 	
@@ -235,7 +235,6 @@ window.hexgrid = {
 			}
 			
 		}
-		
 		
 		return false;
 		

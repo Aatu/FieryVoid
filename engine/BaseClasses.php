@@ -196,7 +196,6 @@ class ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = (int)$armour;
         $this->maxhealth = (int)$maxhealth;
-        $this->location = (int)$location;
         $this->powerReq = (int)$powerReq;
         $this->output = (int)$output;
 
@@ -210,10 +209,10 @@ class ShipSystem{
     
     public function beforeTurn($ship, $turn, $phase){
             
-        $this->setSystemDataWindow();
+        $this->setSystemDataWindow($turn);
     }
     
-    public function setSystemDataWindow(){
+    public function setSystemDataWindow($turn){
         $critDesc = array();
         $counts = array();
         
@@ -315,9 +314,9 @@ class ShipSystem{
         $count = 0;
         foreach ($this->criticals as $critical){
             if ($critical->phpclass == $type){
-				if (($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn)
-					$count++;
-			}
+                if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn)
+                    $count++;
+            }
                 
         }
     
@@ -579,6 +578,23 @@ class TacGamedata{
             foreach($ship->fireOrders as $fire){
                 if ($fire->updated == true)
                     $list[] = $fire;
+            }
+        }
+        
+        return $list;
+    
+    }
+    
+    public function getUpdatedCriticals(){
+        $list = array();
+        
+        foreach ($this->ships as $ship){
+            foreach($ship->systems as $system){
+				foreach($system->criticals as $crit){
+					if ($crit->updated == true)
+						$list[] = $crit;
+				}
+                
             }
         }
         

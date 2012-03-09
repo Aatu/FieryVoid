@@ -182,12 +182,12 @@ window.weaponManager = {
         var intercept = weaponManager.getInterception(ball);
         
         var mod = 0;
-        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "PenaltyToHit");
+        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         
         var goal = (defence - dew - rangePenalty - intercept + oew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        //console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         //if (change > 100)
         //  change = 100;
@@ -227,14 +227,16 @@ window.weaponManager = {
         var mod = 0;
         
         if (shipManager.movement.isRolling(shooter)){
+			console.log("rolling");
             mod -= 3;
         }
         
-        if (shipManager.movement.isPivoting(shooter)){
+        if (shipManager.movement.isPivoting(shooter) != "no"){
+			console.log("pivoting");
             mod -= 3;
         }
         
-        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "PenaltyToHit");
+        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         
         if (oew == 0)
             rangePenalty = rangePenalty*2;
@@ -247,7 +249,7 @@ window.weaponManager = {
         var goal = (defence - dew - rangePenalty + oew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        //console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         if (change > 100)
             change = 100;
@@ -735,7 +737,7 @@ window.weaponManager = {
             canvas.strokeStyle = "rgba(20,80,128,0.2)";
             canvas.fillStyle = "rgba(20,80,128,0.2)";
             if (arcs.start == arcs.end){
-                graphics.drawCircle(canvas, pos.x, pos.y, self.dis, 1);
+                graphics.drawCircleAndFill(canvas, pos.x, pos.y, self.dis, 1);
             }else{
             
                 

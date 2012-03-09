@@ -30,7 +30,7 @@ class Criticals{
 				}
 					
 				$stru = $ship->getStructureSystem($system->location);
-				if ($stru->isDestroyed())
+				if ($stru && $stru->isDestroyed())
 					continue;
 					
 				

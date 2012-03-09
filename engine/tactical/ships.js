@@ -39,8 +39,8 @@ window.shipManager = {
             img.src = ship.imagePath; 
             shipManager.shipImages[ship.id] = img;
             $(shipManager.shipImages[ship.id]).bind("load", function(){
-				shipManager.shipImages[ship.id].loaded = true;
-			});
+                shipManager.shipImages[ship.id].loaded = true;
+            });
             
         }else{
             ship.htmlContainer = e;
@@ -112,19 +112,27 @@ window.shipManager = {
         if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
             UI.shipMovement.drawShipMovementUI(ship);
         if (img.loaded){
-			shipManager.doDrawShip(canvas, s, ship, img);
-		}else{
-			$(img).bind("load", function(){
-				shipManager.doDrawShip(canvas, s, ship, img);
-			});
-		}
+            shipManager.doDrawShip(canvas, s, ship, img);
+        }else{
+            $(img).bind("load", function(){
+                shipManager.doDrawShip(canvas, s, ship, img);
+            });
+        }
         
     },
     
     doDrawShip: function(canvas, s, ship, img){
-		canvas.clearRect(0, 0, s, s);
+        var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
+        var selected = gamedata.isSelected(ship);
+        var mouseover = (gamedata.mouseOverShipId == ship.id);
+        if (ship.drawn && shipdrawangle == ship.shipdrawangle && ship.drawnzoom == gamedata.zoom
+         && ship.drawmouseover == mouseover && ship.drawselected == selected)
+            return;
+         
+        //console.log("draw");
+        canvas.clearRect(0, 0, s, s);
             
-            if (gamedata.mouseOverShipId == ship.id && gamedata.gamephase > 1){
+            if (mouseover && gamedata.gamephase > 1){
                 if (gamedata.zoom > 0){
                     
                     var dew = ew.getDefensiveEW(ship);
@@ -142,12 +150,12 @@ window.shipManager = {
                 }
                 
             }
-            if (gamedata.isSelected(ship) && gamedata.mouseOverShipId != ship.id && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
+            if (selected && !mouseover && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
                 canvas.strokeStyle = "rgba(144,185,208,0.40)";
                 canvas.fillStyle = "rgba(255,255,255,0.18)";
                 
                 graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-            }else if ( gamedata.mouseOverShipId == ship.id ){
+            }else if ( mouseover ){
             
                 if (ship.userid == gamedata.thisplayer){
                     canvas.strokeStyle = "rgba(86,200,45,0.60)";
@@ -170,9 +178,13 @@ window.shipManager = {
                 graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
             }
           
-            graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipManager.getShipHeadingAngleForDrawing(ship), img);
-            
-	},
+            graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
+            ship.shipdrawangle = shipdrawangle;
+            ship.drawn = true;
+            ship.drawnzoom = gamedata.zoom;
+            ship.drawselected = selected;
+            ship.drawmouseover = mouseover;
+    },
     
 
     getShipCanvasSize: function(ship){
@@ -411,8 +423,8 @@ window.shipManager = {
     },
     
     onShipClick: function(e){
-		//console.log("click on ship");
-		e.stopPropagation();
+        //console.log("click on ship");
+        e.stopPropagation();
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
         
@@ -438,7 +450,7 @@ window.shipManager = {
             return;
             
         if (gamedata.waiting)
-			return;
+            return;
         
         if (ship.userid == gamedata.thisplayer){
             gamedata.selectShip(ship, false);
@@ -474,7 +486,7 @@ window.shipManager = {
     isAdrift: function(ship){
         
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
-			return true;
+            return true;
         
         
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))

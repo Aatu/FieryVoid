@@ -8,16 +8,17 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		protected function getSystemArmour($system){
-			return round($system->armour / 2);
+		protected function getSystemArmour($system, $gamedata){
+			$armor = parent::getSystemArmour($system, $gamedata);
+			return round($armor / 2);
 		}
 	
-		public function setSystemDataWindow(){
+		public function setSystemDataWindow($turn){
 
 			$this->data["Weapon type"] = "Plasma";
 			$this->data["Damage type"] = "Standard";
 			
-			parent::setSystemDataWindow();
+			parent::setSystemDataWindow($turn);
 		}
 		
 		public function setLoading($ship, $turn, $phase){

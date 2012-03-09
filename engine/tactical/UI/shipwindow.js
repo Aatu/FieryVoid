@@ -483,7 +483,9 @@ shipWindowManager = {
 		if (system.name == "structure")
 			var healtWidth = 108;
 			
-		systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + system.armour);
+		
+			
+		systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
 		systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*healtWidth) + "px");
 		
 		if (system.name == "thruster"){
@@ -780,6 +782,7 @@ shipWindowManager = {
 			$("#botPanel .exists").removeClass("exists");
 			shipWindowManager.setData(ship);
 			shipManager.drawShip(ship);
+			gamedata.shipStatusChanged(ship);
 		}
 		
 		

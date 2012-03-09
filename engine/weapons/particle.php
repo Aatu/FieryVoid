@@ -8,12 +8,12 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function setSystemDataWindow(){
+        public function setSystemDataWindow($turn){
 
             $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Standard";
             
-            parent::setSystemDataWindow();
+            parent::setSystemDataWindow($turn);
         }
     
         

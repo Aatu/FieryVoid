@@ -1,12 +1,19 @@
 shipManager.systems = {
 
-
+	getArmour: function(ship, system){
+		var armour = system.armour - shipManager.criticals.hasCritical(system, "ArmorReduced");
+		if (armour<0)
+			armour=0;
+			
+		return armour;
+		
+	},
 
     isDestroyed: function(ship, system){
 
         var d = damageManager.getDamage(ship, system);
         var stru = shipManager.systems.getStructureSystem(ship, system.location);
-        if (stru != system && shipManager.systems.isDestroyed(ship, stru))
+        if (stru && stru != system && shipManager.systems.isDestroyed(ship, stru))
             return true;
             
         return (d >= system.maxhealth);

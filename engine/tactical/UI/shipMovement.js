@@ -43,6 +43,8 @@ window.UI = {
                 
                 UI.shipMovement.accElement.bind("click", UI.shipMovement.accelCallback);
                 UI.shipMovement.deaccElement.bind("click", UI.shipMovement.deaccCallback);
+                
+                UI.shipMovement.iniated = true;
         },
         
         checkUITimeout: function(){

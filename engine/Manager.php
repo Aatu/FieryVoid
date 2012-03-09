@@ -448,7 +448,7 @@ class Manager{
 
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
-        self::$dbManager->submitCriticals($servergamedata->id,  $criticals, $servergamedata->turn);
+        self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
     }
     
     private static function handleMovement( $ships, $gamedata ){

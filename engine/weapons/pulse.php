@@ -42,13 +42,13 @@
                   
         }
 		*/
-		public function setSystemDataWindow(){
+		public function setSystemDataWindow($turn){
 
 			$this->data["Weapon type"] = "Pulse";
 			$this->data["Damage type"] = "Standard";
 			$this->data["Grouping range"] = $this->grouping + "%";
 			
-			parent::setSystemDataWindow();
+			parent::setSystemDataWindow($turn);
 		}
 	
 	
@@ -87,6 +87,40 @@
 		public function getDamage(){        return 8;   }
         public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 8 - $this->dp;      }
+
+	}
+	
+	class MediumPulse extends Pulse{
+
+		public $name = "mediumPulse";
+        public $displayName = "Medium Pulse Cannon";
+        public $animation = "trail";
+        public $trailLength = 15;
+        public $animationWidth = 4;
+		public $projectilespeed = 15;
+		public $animationExplosionScale = 0.17;
+		public $rof = 2;
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 3, 4); // fighters, <mediums, <capitals 
+		
+		public $grouping = 5;
+		
+		
+		
+		
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		protected function getPulses(){ return Dice::d(5); }
+
+		public function getDamage(){        return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 - $this->dp;      }
 
 	}
 	

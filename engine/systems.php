@@ -300,7 +300,7 @@ class Weapon extends ShipSystem{
         return false;
     }
     
-    public function setSystemDataWindow(){
+    public function setSystemDataWindow($turn){
 
         $this->data["Loading"] = $this->turnsloaded."/".$this->getNormalLoad();
         
@@ -340,7 +340,7 @@ class Weapon extends ShipSystem{
         //if (sizeof($misc)>0)
             //$this->data["Misc"] = $misc;
     
-        parent::setSystemDataWindow();
+        parent::setSystemDataWindow($turn);
     }
     
     public function setLoading($ship, $turn, $phase){
@@ -486,7 +486,7 @@ class Weapon extends ShipSystem{
         $defence = $target->getDefenceValuePos($pos);
         
         $CnC = $shooter->getSystemByName("CnC");
-        $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn));
+        $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
        
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
@@ -551,7 +551,7 @@ class Weapon extends ShipSystem{
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
                 $fireOrder->shotshit++;
-                $this->damage($target, $shooter, $fireOrder, $pos);
+                $this->damage($target, $shooter, $fireOrder, $pos, $gamedata);
             }
         }
         
@@ -560,7 +560,7 @@ class Weapon extends ShipSystem{
     }
 
     
-    protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder){
+    protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata){
     
         if ($this->flashDamage){
             return $target->getHitSystem($pos, $fireOrder->turn, $this);
@@ -583,7 +583,7 @@ class Weapon extends ShipSystem{
     
         
     
-    public function damage($target, $shooter, $fireOrder, $pos){
+    public function damage($target, $shooter, $fireOrder, $pos, $gamedata){
         
         
         if ($target->isDestroyed())
@@ -594,17 +594,22 @@ class Weapon extends ShipSystem{
         if ($system == null)
             return;
             
-        $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target, $pos), $fireOrder, $pos);
+        $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target, $pos, $gamedata), $fireOrder, $pos, $gamedata);
             
         
         
     }
     
-    protected function getSystemArmour($system){
-        return $system->armour;
+    protected function getSystemArmour($system, $gamedata){
+		$mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
+		$armor = $system->armour - $mod;
+		if ($armor<0)
+			$armor = 0;
+			
+        return $armor;
     }
     
-    protected function getDamageMod($damage, $shooter, $target, $pos){
+    protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata){
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
             $dis = round(mathlib::getDistanceHex($pos, $targetPos));
@@ -623,15 +628,15 @@ class Weapon extends ShipSystem{
         return $damage;
     }
     
-    protected function getFinalDamage($shooter, $target, $pos){
+    protected function getFinalDamage($shooter, $target, $pos, $gamedata){
     
         $damage = $this->getDamage();
-        return $this->getDamageMod($damage, $shooter, $target, $pos);
+        return $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
     }
     
-    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos){
+    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
-        $armour = $this->getSystemArmour($system);
+        $armour = $this->getSystemArmour($system, $gamedata);
         $systemHealth = $system->getRemainingHealth();
         $modifiedDamage = $damage;
         
@@ -650,19 +655,24 @@ class Weapon extends ShipSystem{
         $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
+        $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata);
         //print("damage: $damage armour: $armour destroyed: $destroyed \n");
         if ($damage-$armour > $systemHealth){
             //print("overkilling!\n\n");
              $damage = $damage-$modifiedDamage;
-             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder);
+             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata);
              if ($overkillSystem != null)
-                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos);
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
         }
     
     
         
         
     }
+    
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+		return;
+	}
     
     
 

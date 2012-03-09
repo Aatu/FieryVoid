@@ -8,7 +8,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		protected function getSystemArmour($system){
+		protected function getSystemArmour($system, $gamedata){
 			return 0;
 		}
 		
@@ -16,12 +16,12 @@
 			return null;
 		}
 		
-		public function setSystemDataWindow(){
+		public function setSystemDataWindow($turn){
 
 			$this->data["Weapon type"] = "Matter";
 			$this->data["Damage type"] = "Standard";
 			
-			parent::setSystemDataWindow();
+			parent::setSystemDataWindow($turn);
 		}
     
 	

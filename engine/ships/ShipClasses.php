@@ -596,9 +596,7 @@
                 $health = 0;
             
                 if ($system->name == "structure"){
-                    $multiply = 0.5;
-                    if ($location == 0)
-                        $multiply = 2;
+                    $multiply = 2;
                         
                     $health = round($system->maxhealth * $multiply);
                 }else{

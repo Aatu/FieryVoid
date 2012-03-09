@@ -63,7 +63,7 @@
 					
 					
 				foreach($ships1 as $ship){
-					$this->AOEdamage($ship, $shooter, $fireOrder, $shooterpos, 30);
+					$this->AOEdamage($ship, $shooter, $fireOrder, $shooterpos, 30, $gamedata);
 					$fireOrder->notes .= $ship->name ." in same hex. ";	
 				}
 				
@@ -75,13 +75,13 @@
 						continue;
 					
 					$fireOrder->notes .= $ship->name ." in adjacent hex. ";	
-					$this->AOEdamage($ship, $shooter, $fireOrder, $pos, 10);
+					$this->AOEdamage($ship, $shooter, $fireOrder, $pos, 10, $gamedata);
 				 }
 			}
 			      
 		}
 		
-		public function AOEdamage($target, $shooter, $fireOrder, $pos, $amount){
+		public function AOEdamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
         
 			
 			if ($target->isDestroyed())
@@ -92,7 +92,7 @@
 			if ($system == null)
 				return;
 				
-			$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos);
+			$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata);
 				
 			
         

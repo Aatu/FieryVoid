@@ -25,6 +25,17 @@
 
 	}
 	
+	class OutputReduced1 extends Critical{
+	
+		public $description = "Output reduced.";
+		public $outputMod = -1;
+	
+		function __construct($id, $shipid, $systemid, $phpclass, $turn){
+			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+		}
+	
+	}
+	
 	
 	class OutputReduced2 extends Critical{
 	
@@ -175,6 +186,14 @@
 	
 	class ReducedDamage extends Critical{
 		public $description = "Damage reduced.";
+		
+		function __construct($id, $shipid, $systemid, $phpclass, $turn){
+			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+		}
+	}
+	
+	class ArmorReduced extends Critical{
+		public $description = "Armor reduced.";
 		
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);

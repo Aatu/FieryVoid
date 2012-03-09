@@ -8,10 +8,10 @@
         public $raking = 10;
         private $damages = array();
         
-        public function damage( $target, $shooter, $fireOrder, $pos){
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata){
             
             
-            $totalDamage = $this->getDamage();
+            $totalDamage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
             $this->damages = array();
             while(true){
                                 
@@ -27,10 +27,10 @@
                     return;
                     
                 if ($totalDamage - $this->raking >= 0){
-                    $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder, $pos);
+                    $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder, $pos, $gamedata);
                     $totalDamage -= $this->raking;
                 }else if ($totalDamage > 0){
-                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos);
+                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
                     break;
                 }else{
                     break;
@@ -44,10 +44,10 @@
         
         }
         
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos){
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
             $damages = array();
-            $armour = $this->getSystemArmour($system);
+            $armour = $this->getSystemArmour($system, $gamedata);
             
             foreach ($this->damages as $previous){
                 if ($previous->systemid == $system->id)
@@ -70,14 +70,14 @@
             $damageEntry->updated = true;
             $system->damage[] = $damageEntry;
             $this->damages[] = $damageEntry;
-            
+            $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata);
             if ($damage-$armour > $systemHealth){
             
                 $damage = $damage-$modifiedDamage;
                  
-                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder);
+                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata);
                 if ($overkillSystem != null)
-                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos);
+                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
             }
         
             

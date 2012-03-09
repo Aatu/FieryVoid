@@ -4,6 +4,7 @@ shipManager.movement = {
     
 
     isMovementReady: function(ship){
+		//console.log("movement ready: " + shipManager.movement.getRemainingMovement(ship));
         return (shipManager.movement.getRemainingMovement(ship) == 0);
     },
     
@@ -67,7 +68,7 @@ shipManager.movement = {
     },
     
     doRoll: function(ship){
-        
+       
         if (!shipManager.movement.canRoll(ship))
             return false;
             
@@ -600,9 +601,8 @@ shipManager.movement = {
         
         if (shipManager.movement.isGoingBackwards(ship)){
             direction = (accel) ? 1 : 2;
-        }
-        if ( heading == facing){
-                direction = (accel) ? 2 : 1;
+        }else{
+             direction = (accel) ? 2 : 1;
         }
                 
         var step = (accel) ? 1: -1;
@@ -920,7 +920,12 @@ shipManager.movement = {
     isGoingBackwards: function(ship){
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-        return (mathlib.addToHexFacing(heading, 3) == facing)
+        if (facing == heading || mathlib.addToHexFacing(facing, 1) == heading || mathlib.addToHexFacing(facing, -1) == heading)
+			return false;
+		
+		return true;
+		
+        //return (mathlib.addToHexFacing(heading, 3) == facing)
             
     },
     
@@ -946,16 +951,11 @@ shipManager.movement = {
             
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         
-        var previous = null;
-        if (ship.movement.length-1 > 0 )
-			previous = ship.movement[ship.movement.length-2];
-        
-        
-        
-        
-        
-        if (!(ship.agile && shipManager.movement.isTurn(previous)) && turndelay > 0){
-            //console.log("has turn dealy, cant turn");
+        var previous = shipManager.movement.getLastCommitedMove(ship);
+               
+       
+        if (!(ship.agile && previous && shipManager.movement.isTurn(previous)) && turndelay > 0){
+            //console.log("has turn delay, cant turn");
             return false;
         }
         
@@ -1250,6 +1250,9 @@ shipManager.movement = {
     },
     
     isTurn: function(movement){
+		if (!movement)
+			console.trace();
+			
         return (movement.type == "turnright" || movement.type == "turnleft");
     },
     
