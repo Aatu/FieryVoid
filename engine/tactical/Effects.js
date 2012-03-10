@@ -315,11 +315,13 @@ window.effects = {
             tics:0,
             totalTics:80+Math.floor(Math.random()*25),
             pos:pos,
+            variance: ship.canvasSize / 4*gamedata.zoom,
             draw:function(self){
                
 				if (Math.random()*self.totalTics < self.totalTics && Math.random()>0.8 && self.tics < Math.floor(self.totalTics*0.5) ){
 					var tPos = {};
-					tPos ={x:self.pos.x + Math.floor((Math.random()*30-15))*gamedata.zoom, y:self.pos.y + Math.floor((Math.random()*30-15))*gamedata.zoom};
+					tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom, 
+					y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
 					
 					effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.15)+0.15});
 					
@@ -328,7 +330,8 @@ window.effects = {
 				
 				if (self.tics > Math.floor(self.totalTics*0.3) && Math.random()>0.8){
 					var tPos = {};
-					tPos ={x:self.pos.x + Math.floor((Math.random()*30-15))*gamedata.zoom, y:self.pos.y + Math.floor((Math.random()*30-15))*gamedata.zoom};
+					tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom,
+					 y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
 					effects.addBigExplosion(tPos, {animationExplosionScale:(Math.random()*0.20)+0.40});
 				}
 				
@@ -336,7 +339,9 @@ window.effects = {
 				
 					for (var i = Math.floor(Math.random()*3+1); i>0;i--){
 						sPos = self.pos;
-						var tPos = mathlib.getPointInDirection((Math.round(Math.random()*50)+50)*gamedata.zoom, Math.floor(Math.random()*360), sPos.x, sPos.y);
+						var tPos = mathlib.getPointInDirection(
+						(Math.round(Math.random()*50)+50)*gamedata.zoom, Math.floor(Math.random()*360),
+						 sPos.x, sPos.y);
 						
 						effects.makeTrailAnimation(sPos, tPos, {projectilespeed:Math.floor(Math.random()*3+2), trailLength:40, animationColor:Array(160, 95, 10), trailColor:Array(248, 216, 65), animationWidth:Math.floor(Math.random()*3+1)}, false);
 					}
@@ -523,6 +528,9 @@ window.effects = {
 		if (weapon.animation == "torpedo"){
 			effects.makeTorpedoAnimation(sPos, tPos, weapon, hit, cur);
 		}
+		if (weapon.animation == "beam"){
+			effects.makeBeamAnimation(sPos, tPos, weapon, hit, cur);
+		}
 	},
 	
 	animateShots: function(fire, weapon){
@@ -579,22 +587,28 @@ window.effects = {
 							var cur = {x:0, y:0};
 							effects.makeShotAnimation(self.sPos, tPos, self.weapon, true, cur);
 							
-							effects.animateIntercept(fire, self.weapon, tPos, cur);
+							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, true);
 							
 							self.cMiss++;
 							self.cIntercepted++;
 						}else if (self.cHit < self.hit){
                             
                             var bPos = jQuery.extend({}, tPos);
-                            effects.makeShotAnimation(self.sPos, bPos, self.weapon, true);
+                            var cur = {x:0, y:0}
+                            effects.makeShotAnimation(self.sPos, bPos, self.weapon, true, cur);
                             self.cHit++;
+                            effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false);
+
                         }else{
                             						
 							tPos.x = tPos.x + self.step.x*(self.tics - self.startedtic)*gamedata.zoom;
 							tPos.y = tPos.y + self.step.y*(self.tics - self.startedtic)*gamedata.zoom;
 							tPos = mathlib.getPointInDistanceBetween(self.sPos, tPos, mathlib.getDistance(self.sPos, tPos)+(((Math.random()*101)+200)*gamedata.zoom));
-							effects.makeShotAnimation(self.sPos, tPos, self.weapon, false);
+							var cur = {x:0, y:0}
+							effects.makeShotAnimation(self.sPos, tPos, self.weapon, false, cur);
 							self.cMiss++;
+							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false);
+
 						}
 					}
 				
@@ -602,7 +616,7 @@ window.effects = {
                 
                 
                 if (self.cHit + self.cMiss == self.fired){
-                    self.totalTics = self.tics;
+				    self.totalTics = self.tics;
                     return;
                 }
                     
@@ -620,7 +634,7 @@ window.effects = {
     
     },
     
-    animateIntercept: function(fire, weapon, tPos, currentlocation){
+    animateIntercept: function(fire, weapon, tPos, currentlocation, shotPos, succesfull){
 		
 		
 		var intercepts = weaponManager.getInterceptingFiringOrders(fire.id);
@@ -629,56 +643,234 @@ window.effects = {
 		
 		for (var i in intercepts){
 			var inter = intercepts[i];
-			if (!inter.used)
+			if (!inter.used || inter.used < inter.shots){
+				inter.used = 0;
 				unUsedIntercepts.push(inter)
+			}
 		}
 		
 		if (unUsedIntercepts.lenght ==0)
 			unUsedIntercepts = intercepts;
+		var chosens = Array();
 		
-		var chosen = unUsedIntercepts[Math.floor(Math.random()*intercepts.length)];
-		
-		chosen.used = true;
-		
-		var shooter = gamedata.getShip(chosen.shooterid);
-		var InterWeapon = shipManager.systems.getSystem(shooter, chosen.weaponid);
-		var sPos = effects.getWeaponLocation(shooter, InterWeapon);
-		
-		
-		
-		var animation = {
-            tics:0,
-            totalTics:5000,
-            weapon:weapon,
-            interWeapon:InterWeapon,
-            cur: currentlocation,
-            tPos: tPos,
-            sPos: sPos,
-            draw: function(self){
-	
-				var shottime = Math.ceil(mathlib.getDistance(self.cur, self.tPos)/(self.weapon.projectilespeed*gamedata.zoom));
-				var intertime = Math.ceil(mathlib.getDistance(self.sPos, self.tPos)/(self.interWeapon.projectilespeed*gamedata.zoom));
+		if (succesfull)
+			chosens.push(unUsedIntercepts[Math.floor(Math.random()*intercepts.length)]);
+		else
+			chosens = unUsedIntercepts;
+			
+		for (var i in chosens){
+			var chosen = chosens[i];
+			
+			var shots = 1;
+			
+			if (!succesfull){
+				shots = chosen.shots - chosen.used;
+				chosen.used = chosen.shots;
+			}else{
+				chosen.used++;
+			}
+			
+			
+			
+			var shooter = gamedata.getShip(chosen.shooterid);
+			var InterWeapon = shipManager.systems.getSystem(shooter, chosen.weaponid);
+			var sPos = effects.getWeaponLocation(shooter, InterWeapon);
+			
+			for (var a = 0; a<shots;a++){
 				
-				if(shottime <= intertime){
-					if (self.interWeapon.animation == "laser"){
-						effects.makeShotAnimation(self.sPos, self.cur, self.interWeapon, false);
-					}else{
-						effects.makeShotAnimation(self.sPos, self.tPos, self.interWeapon, false);
-					}
+				var tsPos = {x:sPos.x, y:sPos.y};
+				var finPos = {x:tPos.x, y:tPos.y};
+				if (succesfull){
 					
-					self.totalTics = self.tics;
-                    return;
+					
+				
+			
+				}else{
+					finPos = {x:0, y:0};
+					var iDistance = ((Math.random()*30)+100)*gamedata.zoom;
+					
+					if (mathlib.getDistance(shotPos, tPos)<iDistance){
+						finPos = mathlib.getPointBetween(tPos, shotPos, 0.5);
+					
+					}else{
+						finPos = mathlib.getPointInDistanceBetween(tPos, shotPos, iDistance);
+					}
+					finPos = {x:finPos.x+(Math.round((Math.random()*20)-10)*gamedata.zoom), y:finPos.y+(Math.round((Math.random()*20)-10)*gamedata.zoom)};
 				}
 				
-				self.tics++;
+							
+				var animation = {
+					tics:0,
+					totalTics:5000,
+					weapon:weapon,
+					interWeapon:InterWeapon,
+					cur: currentlocation,
+					tPos: finPos,
+					sPos: tsPos,
+					succesfull: succesfull,
+					draw: function(self){
+						
+						var shottime = Math.ceil(mathlib.getDistance(self.cur, self.tPos)/(self.weapon.projectilespeed*gamedata.zoom));
+						var intertime = Math.ceil(mathlib.getDistance(self.sPos, self.tPos)/(self.interWeapon.projectilespeed*gamedata.zoom));
+										
+						if (!self.succesfull){
+							intertime += (Math.round((Math.random()*20)-10));
+						}
+						/*
+						var canvas = effects.getCanvas();
+						graphics.drawCircleNoStroke(canvas, self.tPos.x, self.tPos.y, 5, 0);
+						
+						
+						graphics.drawCircleNoStroke(canvas, self.sPos.x, self.sPos.y, 5, 0);
+						*/
+						 
+						
+						if(shottime <= intertime){
+								
+							if (self.interWeapon.animation == "laser" && self.succesfull){
+								
+								effects.makeShotAnimation(self.sPos, self.cur, self.interWeapon, false);
+							}else{
+								effects.makeShotAnimation(self.sPos, self.tPos, self.interWeapon, false);
+							}
+							
+													
+							self.totalTics = self.tics;
+							return;
+						}
+						
+						self.tics++;
+					},
+					callback: effects.doneDisplayingWeaponFire
+				};
+			
+				
+				effects.backAnimations.push(animation);
+			}
+		}
+		
+	},
+	
+	makeBeamAnimation: function(sPos, tPos, weapon, hit, currentlocation){
+         
+		var tTics = Math.ceil(mathlib.getDistance(sPos, tPos)/(weapon.projectilespeed*gamedata.zoom))+20;
+		if (hit)
+			tTics = 5000;
+        var animation = {
+            tics:0,
+            totalTics:tTics,
+            weapon:weapon,
+            sPos: sPos,
+            tPos: tPos,
+            distance: mathlib.getDistance(tPos, sPos),
+            hit: hit,
+            draw: function(self){
+				
+                var canvas = effects.getCanvas();
+                var sPos = self.sPos;
+                var tPos = self.tPos;
+				var cur;
+				var distanceTraveled = self.tics*weapon.projectilespeed*gamedata.zoom;
+				
+				if (distanceTraveled >= self.distance)
+					cur = tPos;
+				else
+					cur = mathlib.getPointInDistanceBetween(sPos, tPos, distanceTraveled);
+                
+                if (currentlocation){
+					currentlocation.x = cur.x;
+					currentlocation.y = cur.y;
+				}
+                
+                
+				var trailLength = weapon.trailLength*gamedata.zoom;
+				if (mathlib.getDistance(cur, sPos)<trailLength){
+					trailLength = mathlib.getDistance(cur, sPos);
+				}
+				
+				var trailPos;
+				if (cur.x == tPos.x && cur.y == tPos.y){
+					trailPos = mathlib.getPointInDistanceBetween(mathlib.getPointInDistanceBetween(sPos, tPos, distanceTraveled), cur, trailLength);
+				}else{
+					trailPos = mathlib.getPointInDistanceBetween(cur, sPos, trailLength);
+				}
+				
+				
+				var a = getAlpha();
+				
+			
+                var c = self.weapon.animationColor;
+                //graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5, 0);
+				//graphics.drawCircleNoStroke(canvas, sPos.x, sPos.y, 5, 0);
+				//graphics.drawCircleNoStroke(canvas, trailPos.x, trailPos.y, 5, 0);
+                if (cur.x == tPos.x && cur.y == tPos.y){
+					if (self.hit){
+						if (!self.expodone){
+                        effects.addExplosion(cur, weapon);
+                        self.expodone = true;
+						}
+						
+						if (Math.random()<0.1)
+							effects.addExplosion(cur, weapon);
+                     }
+                                  
+                }
+                
+                if (mathlib.isOver(sPos,tPos,trailPos)){
+					self.totalTics = self.tics;
+					return;
+				}
+                
+                //canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.02)";
+                //graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5*gamedata.zoom, 0);
+                
+				
+				c = self.weapon.trailColor;
+				canvas.lineCap = "round";
+				for (var i = self.weapon.animationWidth; i>=1; i--){
+				
+					if (i==1){
+						canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+0.5*a+")";
+						graphics.drawLine(canvas, trailPos.x, trailPos.y, cur.x, cur.y, i);
+					}else{
+						canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+0.06*a+")";
+						graphics.drawLine(canvas, trailPos.x, trailPos.y, cur.x, cur.y, i);
+					}
+					
+					
+				}
+				canvas.lineCap = "butt";				
+                
+                self.tics++;
+				
+				function getAlpha(){
+                    var a = 0.0;
+                    if (self.tics < 10){
+                        a = (0.1*self.tics);
+                    }else if (self.tics > (self.totalTics - 20) && !hit){
+                        var t = self.tics - (self.totalTics - 20);
+                        a = 1-(0.1*t);
+                        
+                    }else{
+                        a = 1;
+                    }
+                                       
+                    if (a < 0)
+                        a = 0.0;
+
+                    return a;
+                    
+                }
+                
+                
+            
             },
             callback: effects.doneDisplayingWeaponFire
         };
         
         effects.backAnimations.push(animation);
-		
-		
-	},
+    
+    },
     
     makeLaserAnimation: function(sPos, tPos, weapon, hit){
         
@@ -772,7 +964,9 @@ window.effects = {
 	makeTrailAnimation: function(sPos, tPos, weapon, hit, currentlocation){
         //console.log(weapon);
          
-		var tTics = Math.ceil(mathlib.getDistance(sPos, tPos)/(weapon.projectilespeed*gamedata.zoom))+5;
+		var tTics = Math.ceil(mathlib.getDistance(sPos, tPos)/(weapon.projectilespeed*gamedata.zoom))+20;
+		if (hit)
+			tTics = 5000;
         var animation = {
             tics:0,
             totalTics:tTics,
@@ -780,39 +974,58 @@ window.effects = {
             sPos: sPos,
             tPos: tPos,
             hit: hit,
+            distance: mathlib.getDistance(tPos, sPos),
             draw: function(self){
             
                 var canvas = effects.getCanvas();
                 var sPos = self.sPos;
                 var tPos = self.tPos;
-               
-                var cur = mathlib.getPointInDistanceBetween(sPos, tPos, self.tics*weapon.projectilespeed*gamedata.zoom);
+				var cur;
+				var distanceTraveled = self.tics*weapon.projectilespeed*gamedata.zoom;
+				
+				if (distanceTraveled >= self.distance)
+					cur = tPos;
+				else
+					cur = mathlib.getPointInDistanceBetween(sPos, tPos, distanceTraveled);
                 
                 if (currentlocation){
 					currentlocation.x = cur.x;
 					currentlocation.y = cur.y;
 				}
                 
+                
 				var trailLength = weapon.trailLength*gamedata.zoom;
 				if (mathlib.getDistance(cur, sPos)<trailLength){
 					trailLength = mathlib.getDistance(cur, sPos);
 				}
 				
+				var trailPos;
+				if (cur.x == tPos.x && cur.y == tPos.y){
+					trailPos = mathlib.getPointInDistanceBetween(mathlib.getPointInDistanceBetween(sPos, tPos, distanceTraveled), cur, trailLength);
+				}else{
+					trailPos = mathlib.getPointInDistanceBetween(cur, sPos, trailLength);
+				}
+				
+				
 				var a = getAlpha();
-				var trailPos = mathlib.getPointInDistanceBetween(cur, sPos, trailLength);
+				
 			
                 var c = self.weapon.animationColor;
                 //graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5, 0);
 				//graphics.drawCircleNoStroke(canvas, sPos.x, sPos.y, 5, 0);
 				//graphics.drawCircleNoStroke(canvas, trailPos.x, trailPos.y, 5, 0);
-                if (mathlib.isOver(sPos,tPos,cur)){
+                if (cur.x == tPos.x && cur.y == tPos.y && !self.expodone){
 					if (self.hit){
                         effects.addExplosion(cur, weapon);
-                    }
-                    
-                    self.totalTics = self.tics;
-                    return;
+                        self.expodone = true;
+                     }
+                                  
                 }
+                if (mathlib.isOver(sPos,tPos,trailPos)){
+					self.totalTics = self.tics;
+					return;
+				}
+               
                 
                 //canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.02)";
                 //graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5*gamedata.zoom, 0);
@@ -853,8 +1066,8 @@ window.effects = {
                     var a = 0.0;
                     if (self.tics < 10){
                         a = (0.1*self.tics);
-                    }else if (self.tics > (self.totalTics - 10)){
-                        var t = self.tics - (self.totalTics - 10);
+                    }else if (self.tics > (self.totalTics - 20)){
+                        var t = self.tics - (self.totalTics - 20);
                         a = 1-(0.1*t);
                         
                     }else{
@@ -954,7 +1167,7 @@ window.effects = {
         for (var i=0;i<conecount;i++){
 			var startAngle = mathlib.addToDirection(startAngle, 30*(i+1) + Math.floor((Math.random()*10)));
 			
-			var coneLength = Math.floor((Math.random()*15)+15);
+			var coneLength = Math.floor((Math.random()*weapon.animationWidth)+weapon.animationWidth);
 			angleMod += (Math.random());
 			var angleWidth = Math.floor((Math.random()*3)+2);
 			cones.push({angle:startAngle*gamedata.zoom, mod:angleMod*gamedata.zoom, len:coneLength*gamedata.zoom, width:angleWidth*gamedata.zoom});

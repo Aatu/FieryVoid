@@ -19,7 +19,7 @@ class Firing{
                     continue;
                     
                 $weapon->setLoading($ship, $gd->turn-1, 3);
-                if ($weapon->turnsloaded < $weapon->loadingtime)
+                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime)
                     continue;
                     
                 if ($weapon->intercept == 0)
