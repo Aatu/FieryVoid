@@ -249,6 +249,14 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function getAvgDamage(){
+		$min = $this->minDamage;
+		$max = $this->maxDamage;
+		$avg = round(($min+$max)/2);
+		return $avg;
+	}
+   
+    
     public function effectCriticals(){
         parent::effectCriticals();
         foreach ($this->criticals as $crit){
@@ -270,9 +278,9 @@ class Weapon extends ShipSystem{
             }
             
             if ($crit instanceof ReducedDamage){
-                $min = $this->minDamage * 0.25;
-                $max = $this->maxDamage/$this->defaultShots * 0.25;
-                $avg = round(($min+$max)/2);
+				$min = $this->minDamage * 0.25;
+				$max = $this->maxDamage * 0.25;
+				$avg = round(($min+$max)/2);
                 $this->dp = $avg;
             }
         }
@@ -490,7 +498,7 @@ class Weapon extends ShipSystem{
        
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
-        $intercept = $this->getIntercept($gamedata, $fireOrder, $pos);
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
             
         $goal = ($defence - $dew - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
         
@@ -508,8 +516,9 @@ class Weapon extends ShipSystem{
         $fireOrder->updated = true;
     }
     
-    public function getIntercept($gamedata, $fireOrder, $pos){
+    public function getIntercept($gamedata, $fireOrder){
     
+		$count = 0;
         $intercept = 0;
         if ($this->uninterceptable)
             return 0;
@@ -517,8 +526,17 @@ class Weapon extends ShipSystem{
         foreach ($gamedata->ships as $ship){
             foreach ($ship->fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
-                    $intercept += $ship->getSystemById($fire->weaponid)->intercept;
-                    
+					
+					$deg = $count;
+					if ($this->ballistic)
+						$deg = 0;
+					
+					$i = ($ship->getSystemById($fire->weaponid)->intercept - $deg);
+					if ($i<0)
+						$i = 0;
+						
+                    $intercept += $i;
+                    $count++;
                 }
             }
         }
@@ -526,6 +544,22 @@ class Weapon extends ShipSystem{
         return $intercept;
         
     }
+    
+    public function getNumberOfIntercepts($gamedata, $fireOrder){
+		$count = 0;
+            
+        foreach ($gamedata->ships as $ship){
+            foreach ($ship->fireOrders as $fire){
+                if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
+                    $count++;
+                    
+                }
+            }
+        }
+        
+        return $count;
+	}
+    
     public function fire($gamedata, $fireOrder){
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -538,7 +572,7 @@ class Weapon extends ShipSystem{
         }
                     
         $this->calculateHit($gamedata, $fireOrder);
-        $intercept = $this->getIntercept($gamedata, $fireOrder, $pos);
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
         
         for ($i=0;$i<$fireOrder->shots;$i++){
             $needed = $fireOrder->needed - ($this->grouping*$i);

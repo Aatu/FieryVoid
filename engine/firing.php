@@ -1,7 +1,77 @@
 <?php
-class Firing{
+	class Intercept{
+		
+		public $weapon, $intercepts, $done, $ship;
+		
+		function __construct($ship, $weapon, $intercepts ){
+			
+			$this->ship = $ship;			 
+			$this->weapon = $weapon;
+			$this->intercepts = $intercepts;
+		   
+        
+		}
+		
+		public function chooseTarget($gd){
+			$best = null;
+			
+			foreach ($this->intercepts as $candidate){
+				$fire = $candidate->fire;
+				$shooter = $gd->getShipById($fire->shooterid);
+				$target = $gd->getShipById($fire->targetid);
+				$firingweapon = $shooter->getSystemById($fire->weaponid);
+							
+				
+				$damage = $firingweapon->getAvgDamage() * ceil($fire->shots/2);
+				$hitChance = $firingweapon->calculateHit($gd, $fire);
+				$numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
+				
+				$perc = 0;
+				for ($i = 0; $i<$this->weapon->guns;$i++){
+					$perc += (($this->weapon->intercept*5) - (($numInter+$i)*5));
+				}
+				$perc *= 0.01;
+				
+				if ($perc<=0)
+					$candidate->blocked = 0;
+				else
+					$candidate->blocked = $damage*$perc;
+					
+				if (!$best || $best->blocked < $candidate->blocked )
+					$best = $candidate;
+				
+			}
+			
+			if ($best){
+				for ($i = 0; $i<$this->weapon->guns;$i++){
+					$interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
+					$gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
+					$interceptFire->addToDB = true;
+					$this->ship->fireOrders[] = $interceptFire;
+				}
+				
+			}
+		}
+		
+	}
+	
+	class InterceptCandidate{
+		public $fire;
+		public $blocked = 0;
+		
+		function __construct($fire ){
+			
+			$this->fire = $fire;			 
+			
+		   
+        
+		}
+		
+	}
 
-    public static function validateFireOrders($fireOrders, $gamedata){
+
+class Firing{
+	public static function validateFireOrders($fireOrders, $gamedata){
     
         return true;
     
@@ -10,11 +80,15 @@ class Firing{
     public static function automateIntercept($gd){
         
         foreach ($gd->ships as $ship){
+			$intercepts = Array(); 
             foreach($ship->systems as $weapon){
                         
                 if (!($weapon instanceof Weapon))
                     continue;
-                       
+                    
+                if ($weapon->isOfflineOnTurn($gd->turn))
+					continue;
+                
                 if ($weapon->ballistic)
                     continue;
                     
@@ -24,14 +98,41 @@ class Firing{
                     
                 if ($weapon->intercept == 0)
                     continue;
-                    
+                   
+                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon);
+                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
                     
             }
+            
+            self::doIntercept($gd, $ship, $intercepts);
             
             
         }
         
     }
+    
+    public static function doIntercept($gd, $ship, $intercepts){
+		
+		if (sizeof($intercepts)==0)
+			return;
+			
+		usort ( $intercepts , "self::compareIntercepts" );
+		
+		foreach ($intercepts as $intercept){
+			$intercept->chooseTarget($gd);
+			
+		}
+	}
+    
+    public static function compareIntercepts($a, $b){
+		if (sizeof($a->intercepts)>sizeof($b->intercepts)){
+			return -1;
+		}else if (sizeof($b->intercepts)>sizeof($a->intercepts)){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
     
     public static function getPossibleIntercept($gd, $ship, $weapon){
         
@@ -43,13 +144,18 @@ class Firing{
             
             if ($shooter->team == $ship->team)
                 continue;
-                
+                      
             foreach($shooter->fireOrders as $fire){
+				if ($fire->type == "ballistic")
+						continue;
+				
                 if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
-                    $intercepts[] = $fire;
+				    $intercepts[] = new InterceptCandidate($fire);
                 }
             }
         }
+        
+        return $intercepts;
                 
                
             
@@ -58,14 +164,15 @@ class Firing{
     
     public static function isLegalIntercept($gd, $ship, $weapon, $fire){
         
-        
+        if ($fire->type=="intercept")
+			return false;
             
         if ($weapon->intercept == 0)
             return false;
         
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
-        $firingweapon = $ship->getSystemById($fire->weaponid);
+        $firingweapon = $shooter->getSystemById($fire->weaponid);
         
         if ($firingweapon->uninterceptable)
             return false;
@@ -77,17 +184,19 @@ class Firing{
             return false;
             
         $pos = $shooter->getCoPos();
-        if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        if ($firingweapon->ballistic){
+            $movement = $shooter->getLastTurnMovement($fire->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
-            
+        
+		$tf = $ship->getFacingAngle();
+		$shooterCompassHeading = mathlib::getCompassHeadingOfPos($ship, $pos);
+	  
+		if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($weapon->startArc,$tf), Mathlib::addToDirection($weapon->endArc,$tf) ))
+			return false;
+		
         if ($target->id == $ship->id){
-            $tf = $ship->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-          
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($weapon->startArc,$tf), Mathlib::addToDirection($weapon->endArc,$tf) ))
-                return true;
+            return true;
         }else{
             if (!$weapon->freeintercept)
                 return false;

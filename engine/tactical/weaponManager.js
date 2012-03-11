@@ -669,22 +669,42 @@ window.weaponManager = {
         shipWindowManager.setDataForSystem(ship, system);
     },
     
-    getDamagesCausedBy: function(fire){
-        var list = Array();
+    getDamagesCausedBy: function(damages, fire){
+        
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
+            var list = Array();
+            
             for (var a in ship.systems){
                 var system = ship.systems[a];
                 for (var b in system.damage){
                     var d = system.damage[b];
-                    if (d.fireorderid == fire.id)
-                        list.push(d);
+                    if (d.fireorderid == fire.id){
+						list.push(d);
+					}
+                        
                 }
             
             }
+            
+            if (list.length>0){
+				var found = false;
+				for (var a in damages){
+					var entry = damages[a];
+					if (entry.ship.id == ship.id){
+						found = true;
+						entry.damages.concat(list);
+					}
+				}
+				if (!found)
+					damages.push({ship:ship, damages:list});
+			}
+			
         }
         
-        return list;
+        return damages;
+        
+      
         
     },
     

@@ -443,9 +443,12 @@ class Manager{
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
+        Firing::automateIntercept($servergamedata);
         Firing::fireWeapons($servergamedata);
         $criticals = Criticals::setCriticals($servergamedata);
-
+		//var_dump($servergamedata->getNewFireOrders());
+		//throw new Exception();
+		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);

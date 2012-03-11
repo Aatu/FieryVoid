@@ -264,8 +264,10 @@ window.effects = {
                         if (weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
 							if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
 							|| (fire.x != "null" && otherFire.x == fire.x && fire.y != "null" && otherFire.y == fire.y)){
-								otherFire.animated = true;
-								fires.push(otherFire);
+								if (fire.pubnotes == otherFire.pubnotes){
+									otherFire.animated = true;
+									fires.push(otherFire);
+								}
 							}
                         }
                         
@@ -587,7 +589,7 @@ window.effects = {
 							var cur = {x:0, y:0};
 							effects.makeShotAnimation(self.sPos, tPos, self.weapon, true, cur);
 							
-							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, true);
+							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, true, true);
 							
 							self.cMiss++;
 							self.cIntercepted++;
@@ -597,7 +599,7 @@ window.effects = {
                             var cur = {x:0, y:0}
                             effects.makeShotAnimation(self.sPos, bPos, self.weapon, true, cur);
                             self.cHit++;
-                            effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false);
+                            effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false, true);
 
                         }else{
                             						
@@ -607,7 +609,7 @@ window.effects = {
 							var cur = {x:0, y:0}
 							effects.makeShotAnimation(self.sPos, tPos, self.weapon, false, cur);
 							self.cMiss++;
-							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false);
+							effects.animateIntercept(fire, self.weapon, tPos, cur, self.sPos, false, false);
 
 						}
 					}
@@ -634,7 +636,7 @@ window.effects = {
     
     },
     
-    animateIntercept: function(fire, weapon, tPos, currentlocation, shotPos, succesfull){
+    animateIntercept: function(fire, weapon, tPos, currentlocation, shotPos, succesfull, targethit){
 		
 		
 		var intercepts = weaponManager.getInterceptingFiringOrders(fire.id);
@@ -689,13 +691,14 @@ window.effects = {
 					finPos = {x:0, y:0};
 					var iDistance = ((Math.random()*30)+100)*gamedata.zoom;
 					
-					if (mathlib.getDistance(shotPos, tPos)<iDistance){
-						finPos = mathlib.getPointBetween(tPos, shotPos, 0.5);
+					if (mathlib.getDistance(shotPos, sPos)<iDistance){
+						finPos = mathlib.getPointBetween(sPos, shotPos, 0.5);
 					
 					}else{
-						finPos = mathlib.getPointInDistanceBetween(tPos, shotPos, iDistance);
+						finPos = mathlib.getPointInDistanceBetween(sPos, shotPos, iDistance);
 					}
 					finPos = {x:finPos.x+(Math.round((Math.random()*20)-10)*gamedata.zoom), y:finPos.y+(Math.round((Math.random()*20)-10)*gamedata.zoom)};
+					
 				}
 				
 							
@@ -726,7 +729,7 @@ window.effects = {
 						 
 						
 						if(shottime <= intertime){
-								
+							//self.interWeapon.animation = "laser";
 							if (self.interWeapon.animation == "laser" && self.succesfull){
 								
 								effects.makeShotAnimation(self.sPos, self.cur, self.interWeapon, false);
@@ -830,11 +833,13 @@ window.effects = {
 				for (var i = self.weapon.animationWidth; i>=1; i--){
 				
 					if (i==1){
-						canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+0.5*a+")";
+						canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+0.7*a+")";
 						graphics.drawLine(canvas, trailPos.x, trailPos.y, cur.x, cur.y, i);
+						
 					}else{
 						canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+0.06*a+")";
 						graphics.drawLine(canvas, trailPos.x, trailPos.y, cur.x, cur.y, i);
+						
 					}
 					
 					

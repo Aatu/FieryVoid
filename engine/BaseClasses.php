@@ -135,6 +135,7 @@ class FireOrder{
     public $notes = "";
     public $pubnotes = "";
     public $updated = false;
+    public $addToDB = false;
     
     function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = 0, $x, $y){
          $this->id = $id;
@@ -570,6 +571,20 @@ class TacGamedata{
         return 1;
     }
     
+    
+    public function getNewFireOrders(){
+        $list = array();
+        
+        foreach ($this->ships as $ship){
+            foreach($ship->fireOrders as $fire){
+                if ($fire->addToDB == true)
+                    $list[] = $fire;
+            }
+        }
+        
+        return $list;
+    
+    }
     
     public function getUpdatedFireOrders(){
         $list = array();
