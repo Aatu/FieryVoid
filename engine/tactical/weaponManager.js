@@ -227,12 +227,12 @@ window.weaponManager = {
         var mod = 0;
         
         if (shipManager.movement.isRolling(shooter)){
-			console.log("rolling");
+            console.log("rolling");
             mod -= 3;
         }
         
         if (shipManager.movement.isPivoting(shooter) != "no"){
-			console.log("pivoting");
+            console.log("pivoting");
             mod -= 3;
         }
         
@@ -389,9 +389,9 @@ window.weaponManager = {
     },
     */
     targetBallistic: function(ball){
-		
-		 if (gamedata.gamephase != 3)
-			return;
+        
+         if (gamedata.gamephase != 3)
+            return;
             
             
         var selectedShip = gamedata.getSelectedShip();
@@ -409,15 +409,15 @@ window.weaponManager = {
             var weapon = gamedata.selectedSystems[i];
             
             if (ball.targetid != selectedShip.id && !weapon.freeintercept )
-				continue;
-				
-			if (ball.targetid != selectedShip.id && weapon.freeintercept){
-				var ballpos = hexgrid.positionToPixel(ball.position);
-				var targetpos = shipManager.getShipPositionInWindowCo(target);
-				var selectedpos = shipManager.getShipPositionInWindowCo(selectedShip);
-				if (mathlib.getDistanceHex(ballpos, targetpos) <= mathlib.getDistanceHex(ballpos, selectedpos) || mathlib.getDistanceHex(targetpos, selectedpos) >3)
-					continue;
-			}
+                continue;
+                
+            if (ball.targetid != selectedShip.id && weapon.freeintercept){
+                var ballpos = hexgrid.positionToPixel(ball.position);
+                var targetpos = shipManager.getShipPositionInWindowCo(target);
+                var selectedpos = shipManager.getShipPositionInWindowCo(selectedShip);
+                if (mathlib.getDistanceHex(ballpos, targetpos) <= mathlib.getDistanceHex(ballpos, selectedpos) || mathlib.getDistanceHex(targetpos, selectedpos) >3)
+                    continue;
+            }
             
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
@@ -596,12 +596,12 @@ window.weaponManager = {
                 for(var a = gamedata.ballistics.length-1; a >= 0; a--){
                     if (gamedata.ballistics[a].fireid == ship.fireOrders[i].id && gamedata.ballistics[a].shooterid == ship.id){
                         var id = gamedata.ballistics[a].id;
-						
+                        
                         $('#ballistic_launch_canvas_'+id).remove();
                         $('#ballistic_target_canvas_'+id).remove();
                         $('.ballistic_'+id).remove();
                         gamedata.ballistics.splice(a,1);  
-					}
+                    }
                 }  
                 ship.fireOrders.splice(i,1);               
             }
@@ -680,26 +680,27 @@ window.weaponManager = {
                 for (var b in system.damage){
                     var d = system.damage[b];
                     if (d.fireorderid == fire.id){
-						list.push(d);
-					}
+                        list.push(d);
+                    }
                         
                 }
             
             }
             
             if (list.length>0){
-				var found = false;
-				for (var a in damages){
-					var entry = damages[a];
-					if (entry.ship.id == ship.id){
-						found = true;
-						entry.damages.concat(list);
-					}
-				}
-				if (!found)
-					damages.push({ship:ship, damages:list});
-			}
-			
+                console.log(list);
+                var found = false;
+                for (var a in damages){
+                    var entry = damages[a];
+                    if (entry.ship.id == ship.id){
+                        found = true;
+                        entry.damages = entry.damages.concat(list);
+                    }
+                }
+                if (!found)
+                    damages.push({ship:ship, damages:list});
+            }
+            
         }
         
         return damages;
