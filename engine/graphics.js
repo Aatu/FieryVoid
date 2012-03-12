@@ -145,11 +145,12 @@ window.graphics = {
     },
     
     drawAndRotate: function(canvas, w, h, iw, ih, angle, img){
-    
+		
         var x = Math.round(w/2);
         var y = Math.round(h/2);
         var width = iw/2;
         var height = ih/2;
+        
         
         var angle = angle * Math.PI / 180;              
         canvas.save();

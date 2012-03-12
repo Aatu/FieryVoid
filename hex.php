@@ -94,6 +94,7 @@
 	<script src="./engine/tactical/UI/confirm.js"></script>
 	<script src="./engine/tactical/UI/shipSelect.js"></script>
 	<script src="./engine/tactical/ballistics.js"></script>
+	<script src="./engine/tactical/damageDrawer.js"></script>
 	
 </head>
 

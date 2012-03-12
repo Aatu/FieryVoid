@@ -37,9 +37,9 @@ window.shipManager = {
             e.attr("id", "hexship_");
             var img = new Image();
             img.src = ship.imagePath; 
-            shipManager.shipImages[ship.id] = img;
-            $(shipManager.shipImages[ship.id]).bind("load", function(){
-                shipManager.shipImages[ship.id].loaded = true;
+            shipManager.shipImages[ship.id] = {orginal:img, modified:null};
+            $(shipManager.shipImages[ship.id].orginal).bind("load", function(){
+                shipManager.shipImages[ship.id].orginal.loaded = true;
             });
             
         }else{
@@ -96,7 +96,7 @@ window.shipManager = {
         ship.htmlContainer.css("top", pos.y -h + "px").css("left", pos.x -h + "px").css("z-index", hexShipZ);
         
         
-        var img = shipManager.shipImages[ship.id];
+        var img = damageDrawer.getShipImage(ship);
         
         var sc = ship.shipclickableContainer;
         scSize = s*0.15*gamedata.zoom;
@@ -115,13 +115,24 @@ window.shipManager = {
             shipManager.doDrawShip(canvas, s, ship, img);
         }else{
             $(img).bind("load", function(){
-                shipManager.doDrawShip(canvas, s, ship, img);
+				img = damageDrawer.getShipImage(ship);
+		        if (img.loaded){
+					shipManager.doDrawShip(canvas, s, ship, img);
+				}else{
+					$(img).bind("load", function(){
+						img = damageDrawer.getShipImage(ship);
+						shipManager.doDrawShip(canvas, s, ship, img);
+					});
+				}
             });
         }
         
     },
     
     doDrawShip: function(canvas, s, ship, img){
+		
+		
+		
         var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
         var selected = gamedata.isSelected(ship);
         var mouseover = (gamedata.mouseOverShipId == ship.id);

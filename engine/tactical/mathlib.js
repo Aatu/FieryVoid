@@ -182,11 +182,11 @@ window.mathlib = {
 
 		if (oPos.x == tPos.x && oPos.y == tPos.y){
 			if (shipManager.hasBetterInitive(observer, target)){
-
-				tPos =  shipManager.movement.getPreviousLocation(target);
-			}else{
-
 				oPos =  shipManager.movement.getPreviousLocation(observer);
+				
+			}else{
+				tPos =  shipManager.movement.getPreviousLocation(target);
+				
 			}
 		
 		}

@@ -688,7 +688,7 @@ window.weaponManager = {
             }
             
             if (list.length>0){
-                console.log(list);
+                //console.log(list);
                 var found = false;
                 for (var a in damages){
                     var entry = damages[a];
