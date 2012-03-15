@@ -237,24 +237,19 @@
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
           
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-               return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
-                return $this->sideDefense;
-            }  else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
-                return $this->sideDefense;
-            } 
-                
-            return $this->sideDefense;
-            
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
         }
-        /*
+        
         public function getDefenceValue($shooter){
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
           
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
+            
+        }
+        
+        
+        public function doGetDefenceValue($tf, $shooterCompassHeading){
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
                return $this->forwardDefense;
             }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
@@ -266,14 +261,9 @@
             } 
                 
             return $this->sideDefense;
-            
         }
-        * */
-           
-        public function getHitSection($pos, $turn, $weapon){
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-			
+        
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
             $location = 0;
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
@@ -305,6 +295,27 @@
             }
                 
             return $location;
+        }
+           
+        
+        
+        public function getHitSection($shooter, $turn, $weapon){
+            
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = null;
+            
+            if ($weapon->ballistic){
+                $movement = $shooter->getLastTurnMovement($turn);
+                $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+                
+                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            }else{
+                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+            }
+                       
+            
+            return $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+            
         }
         
         public function getStructureSystem($location){
@@ -363,10 +374,10 @@
         }
         
         
-        public function getHitSystem($pos, $turn, $weapon, $location = null){
+        public function getHitSystem($pos, $shooter, $turn, $weapon, $location = null){
         
             if ($location == null)
-                $location = $this->getHitSection($pos, $turn, $weapon);
+                $location = $this->getHitSection($shooter, $turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -421,14 +432,14 @@
                             if ($system->location == 0)
                                 return null;
                                 
-                            return $this->getHitSystem($pos, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
                         }
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
                             if ($structure->location == 0)
                                 return null;
                                 
-                            return $this->getHitSystem($pos, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
                         }else{
                             return $structure;
                         }
@@ -480,11 +491,9 @@
             parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
         }
      
-        
-        public function getHitSection($pos, $turn, $weapon){
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-			
+            
+         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            
             $location = 0;
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(90,$tf) )){
@@ -525,10 +534,8 @@
                
         }
         
-        public function getHitSection($pos, $turn, $weapon){
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-			
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            
             $location = 0;
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(90,$tf) )){
@@ -546,20 +553,20 @@
                     return 0;
                    
                 foreach($this->systems as $system){
-					if ($system->location == $location && !$system->isDestroyed())
-						return $location;
-				} 
-				
-				return 0;
+                    if ($system->location == $location && !$system->isDestroyed())
+                        return $location;
+                } 
+                
+                return 0;
             }
                 
             return $location;
         }
         
-        public function getHitSystem($pos, $turn, $weapon, $location = null){
+        public function getHitSystem($pos, $shooter, $turn, $weapon, $location = null){
         
             if ($location == null)
-                $location = $this->getHitSection($pos, $turn, $weapon);
+                $location = $this->getHitSection($shooter, $turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -607,13 +614,13 @@
                     //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
                     if ($system->isDestroyed()){
                         if ($system instanceof Structure){
-							return null;
+                            return null;
                                 
-                            return $this->getHitSystem($pos, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
                         }
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
-							return null;
+                            return null;
                           
                         }else{
                             return $structure;

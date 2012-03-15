@@ -196,7 +196,7 @@ window.combatLog = {
         
         if (damages.length > 0){
             html += "<ul>";
-            console.dir(damages);
+           
             for (var i in damages){
                 var victim = damages[i].ship;
                 var totaldam = 0; 
@@ -208,20 +208,24 @@ window.combatLog = {
                         
                     totaldam += d.damage-d.armour;
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid); 
-                    var des = "";
-                    if (d.destroyed){
-                        des = " DESTROYED";
-                        
-                    }else{
+                    
+                    if (!d.destroyed){
                         continue;
                     }
                     
-                    damagehtml += '<span class="damage"> '+shipManager.systems.getDisplayName(system)+'</span>'
+                    var first = "";
+                    var comma = ",";
+                    if (damagehtml.length == 0){
+                        first = " Systems destroyed: "
+                        comma = "";
+                    }
+                    
+                    damagehtml += first + '<span class="damage">'+comma+' '+shipManager.systems.getDisplayName(system)+'</span>'
                     
                 }
                 
                 if (totaldam > 0){
-                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for '+totaldam + damagehtml+'</li>';   
+                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for '+totaldam +'. '+ damagehtml+'</li>';   
                 }
                 
             }

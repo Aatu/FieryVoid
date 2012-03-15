@@ -126,5 +126,35 @@
         public function setMaxDamage(){     $this->maxDamage = 80 - $this->dp;      }
 
 	}
+	
+	class HeavyPlasma extends Plasma{
+
+		public $name = "heavyPlasma";
+        public $displayName = "Heavy Plasma";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+		public $trailColor = array(75, 250, 90);
+		public $projectilespeed = 15;
+        public $animationWidth = 5;
+		public $animationExplosionScale = 0.30;
+		public $trailLength = 20;
+		public $rangeDamagePenalty = 0.5;
+		        
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 0.66;
+        public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+		public function getDamage(){        return Dice::d(10,3)+13;   }
+        public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 43 - $this->dp;      }
+
+	}
 
 ?>

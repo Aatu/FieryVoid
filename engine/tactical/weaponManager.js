@@ -144,6 +144,11 @@ window.weaponManager = {
         var arcs = shipManager.systems.getArcs(shooter, weapon);
         arcs.start = mathlib.addToDirection(arcs.start, shooterFacing);
         arcs.end = mathlib.addToDirection(arcs.end, shooterFacing);
+        var oPos = shipManager.getShipPosition(shooter);
+        var tPos = shipManager.getShipPosition(target);
+        
+        if (weapon.ballistic && oPos.x == tPos.x && oPos.y == tPos.y)
+            return true;
         
         //console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
         
@@ -453,7 +458,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip))
             return;
         
-        
+        console.log("targetship");
             
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems){

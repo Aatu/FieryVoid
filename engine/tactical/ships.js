@@ -37,7 +37,7 @@ window.shipManager = {
             e.attr("id", "hexship_");
             var img = new Image();
             img.src = ship.imagePath; 
-            shipManager.shipImages[ship.id] = {orginal:img, modified:null};
+            shipManager.shipImages[ship.id] = {orginal:img, modified:null, turn:null, phase:null};
             $(shipManager.shipImages[ship.id].orginal).bind("load", function(){
                 shipManager.shipImages[ship.id].orginal.loaded = true;
             });
@@ -115,29 +115,29 @@ window.shipManager = {
             shipManager.doDrawShip(canvas, s, ship, img);
         }else{
             $(img).bind("load", function(){
-				img = damageDrawer.getShipImage(ship);
-		        if (img.loaded){
-					shipManager.doDrawShip(canvas, s, ship, img);
-				}else{
-					$(img).bind("load", function(){
-						img = damageDrawer.getShipImage(ship);
-						shipManager.doDrawShip(canvas, s, ship, img);
-					});
-				}
+                img = damageDrawer.getShipImage(ship);
+                if (img.loaded){
+                    shipManager.doDrawShip(canvas, s, ship, img);
+                }else{
+                    $(img).bind("load", function(){
+                        img = damageDrawer.getShipImage(ship);
+                        shipManager.doDrawShip(canvas, s, ship, img);
+                    });
+                }
             });
         }
         
     },
     
     doDrawShip: function(canvas, s, ship, img){
-		
-		
-		
+        
+        
+        
         var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
         var selected = gamedata.isSelected(ship);
         var mouseover = (gamedata.mouseOverShipId == ship.id);
         if (ship.drawn && shipdrawangle == ship.shipdrawangle && ship.drawnzoom == gamedata.zoom
-         && ship.drawmouseover == mouseover && ship.drawselected == selected)
+         && ship.drawmouseover == mouseover && ship.drawselected == selected && ship.drawDamage == false)
             return;
          
         //console.log("draw");
@@ -195,6 +195,7 @@ window.shipManager = {
             ship.drawnzoom = gamedata.zoom;
             ship.drawselected = selected;
             ship.drawmouseover = mouseover;
+            ship.drawDamage = false;
     },
     
 
@@ -536,7 +537,7 @@ window.shipManager = {
     },
     
     hasBetterInitive: function(a, b){
-        console.log(a.name);
+        //console.log(a.name);
         if (a.iniative > b.iniative)
             return true;
         

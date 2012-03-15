@@ -230,7 +230,11 @@ gamedata = {
         
          if (gamedata.gamephase == 4){
             if (gamedata.waiting == false){
-                effects.displayAllWeaponFire(function(){infowindow.informPhase(5000, null);});
+                effects.displayAllWeaponFire(function(){
+                    damageDrawer.checkDamages();
+                    infowindow.informPhase(5000, null);
+                    
+                    });
             }
                            
         }

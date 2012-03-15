@@ -19,6 +19,39 @@
         
     
     }
+    
+    class StdParticleBeam extends Particle{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "stdParticleBeam";
+        public $displayName = "Standard Particle Beam";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+        
+        public $intercept = 2;
+   
+        
+        public $loadingtime = 1;
+      
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage(){        return Dice::d(10)+6;   }
+        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 16 - $this->dp;      }
+
+    }
 
     class TwinArray extends Particle{
 
