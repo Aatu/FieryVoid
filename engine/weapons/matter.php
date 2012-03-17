@@ -8,7 +8,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		protected function getSystemArmour($system, $gamedata){
+		protected function getSystemArmour($system, $gamedata, $fireOrder){
 			return 0;
 		}
 		

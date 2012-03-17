@@ -105,7 +105,7 @@ window.mathlib = {
 		x = cx + r * Math.cos(a* Math.PI / 180);
 		y = cy + r * Math.sin(a* Math.PI / 180);
 		
-		return {x:x, y:y};
+		return {x:Math.round(x), y:Math.round(y)};
     },
 	
 	getSizeArc: function(start, end){

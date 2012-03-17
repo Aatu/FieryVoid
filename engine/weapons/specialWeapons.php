@@ -35,6 +35,7 @@
 		}
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+						
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
             $system->criticals[] =  $crit;
@@ -80,6 +81,11 @@
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
 			$crit = null;
+			
+			if ($system instanceof Fighter){
+				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+				return;
+			}
 			
 			if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");

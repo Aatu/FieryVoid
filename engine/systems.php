@@ -633,9 +633,23 @@ class Weapon extends ShipSystem{
         
     }
     
-    protected function getSystemArmour($system, $gamedata){
+    protected function getSystemArmour($system, $gamedata, $fireOrder){
+		
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
+     
+		$armor = 0;
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $armor = $system->getArmourPos($target, $pos);
+        }else{
+            $armor = $system->getArmour($target, $shooter);
+        }
+		
+		
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
-        $armor = $system->armour - $mod;
+        $armor -= $mod;
         if ($armor<0)
             $armor = 0;
             
@@ -669,7 +683,7 @@ class Weapon extends ShipSystem{
     
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
-        $armour = $this->getSystemArmour($system, $gamedata);
+        $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();
         $modifiedDamage = $damage;
         

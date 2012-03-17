@@ -47,7 +47,7 @@
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
             $damages = array();
-            $armour = $this->getSystemArmour($system, $gamedata);
+            $armour = $this->getSystemArmour($system, $gamedata, $fireOrder);
             
             foreach ($this->damages as $previous){
                 if ($previous->systemid == $system->id)

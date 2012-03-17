@@ -188,6 +188,7 @@ class ShipSystem{
     public $power = array();
     public $data = array();
     public $critData = array();
+    public $imagePath, $iconPath;
     
     public $possibleCriticals = array();
     
@@ -208,10 +209,20 @@ class ShipSystem{
      
     }
     
+    public function getArmour($target, $shooter){
+		return $this->armour;
+	}
+	
+	public function getArmourPos($target, $pos){
+		return $this->armour;
+	}
+    
     public function beforeTurn($ship, $turn, $phase){
             
         $this->setSystemDataWindow($turn);
     }
+    
+    
     
     public function setSystemDataWindow($turn){
         $critDesc = array();

@@ -525,10 +525,12 @@ class Manager{
             }
             
             $CnC = $ship->getSystemByName("CnC");
-            $mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
-			$mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-			$mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
             
+            if ($CnC){
+				$mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
+				$mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
+				$mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+			}
             
             
                         

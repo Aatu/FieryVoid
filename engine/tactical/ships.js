@@ -487,9 +487,24 @@ window.shipManager = {
     
     isDestroyed: function(ship){
         
-        var stru = shipManager.systems.getStructureSystem(ship, 0);
-        if (shipManager.systems.isDestroyed(ship, stru))
-            return true;
+        
+        if (ship.fighter){
+			
+			for (var i in ship.systems){
+				var fighter = ship.systems[i];
+				if (!shipManager.systems.isDestroyed(ship, fighter))
+					return false;
+				
+			}
+			return true;
+			
+			
+		}else{
+			
+			var stru = shipManager.systems.getStructureSystem(ship, 0);
+			if (shipManager.systems.isDestroyed(ship, stru))
+				return true;
+        }
             
         return false;
         
@@ -584,7 +599,42 @@ window.shipManager = {
         
         return shipsInHex;
     
-    }
+    },
+    
+    getFighterPosition: function(pos, angle, zoom){
+		
+		var dir = 0;
+		if (pos == 0){
+			dir = mathlib.addToDirection(0, angle);
+			return mathlib.getPointInDirection(10*zoom, dir, 0, 0 );
+		}
+		if (pos == 1){
+			dir = mathlib.addToDirection(270, angle);
+			return mathlib.getPointInDirection(7*zoom, dir, 0, 0 );
+		}
+		
+		if (pos == 2){
+			dir = mathlib.addToDirection(90, angle);
+			return mathlib.getPointInDirection(7*zoom, dir, 0, 0 );
+		}
+		
+		if (pos == 3){
+			dir = mathlib.addToDirection(180, angle);
+			return mathlib.getPointInDirection(10*zoom, dir, 0, 0 );
+		}
+		if (pos == 4){
+			dir = mathlib.addToDirection(240, angle);
+			return mathlib.getPointInDirection(17*zoom, dir, 0, 0 );
+		}
+		if (pos == 5){
+			dir = mathlib.addToDirection(120, angle);
+			return mathlib.getPointInDirection(17*zoom, dir, 0, 0 );
+		}
+		
+		
+		return {x:0, y:0};
+		
+	}
     
     
     

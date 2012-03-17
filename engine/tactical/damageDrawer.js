@@ -15,8 +15,8 @@ window.damageDrawer = {
         var images = shipManager.shipImages[ship.id];
         if (!images.modified){
 
-            var width = images.orginal.width;
-            var height = images.orginal.height;
+            var width = ship.canvasSize;
+			var height = ship.canvasSize;
             var canvas  = $('<canvas id="constcan" width="'+width+'" height="'+height+'"></canvas>');
             var context = canvas.get(0).getContext("2d");
             var orginal = images.orginal;
@@ -100,35 +100,40 @@ window.damageDrawer = {
         
         if (images.turn == gamedata.turn && images.phase == gamedata.gamephase)
             return image;
+            
+        if (ship.fighter){
+			//return image;
+			image = damageDrawer.drawFlight(ship, image);
+		}else{
         
-        var stru = shipManager.systems.getStructureSystem(ship, 1);
-        var desTurn = damageManager.getTurnDestroyed(ship, stru);
-                
-        if (stru && desTurn && (desTurn >= images.turn || all)){
-            image = damageDrawer.applyDamage(ship, 1, image);
-        }
-        
-        stru = shipManager.systems.getStructureSystem(ship, 2);
-        desTurn = damageManager.getTurnDestroyed(ship, stru);
-                
-        if (stru && desTurn && (desTurn >= images.turn || all)){
-            image = damageDrawer.applyDamage(ship, 2, image);
-        }
-        
-        stru = shipManager.systems.getStructureSystem(ship, 3);
-        desTurn = damageManager.getTurnDestroyed(ship, stru);
-                
-        if (stru && desTurn && (desTurn >= images.turn || all)){
-            image = damageDrawer.applyDamage(ship, 3, image);
-        }
-        
-        stru = shipManager.systems.getStructureSystem(ship, 4);
-        desTurn = damageManager.getTurnDestroyed(ship, stru);
-                
-        if (stru && desTurn && (desTurn >= images.turn || all)){
-            image = damageDrawer.applyDamage(ship, 4, image);
-        }
-        
+			var stru = shipManager.systems.getStructureSystem(ship, 1);
+			var desTurn = damageManager.getTurnDestroyed(ship, stru);
+					
+			if (stru && desTurn && (desTurn >= images.turn || all)){
+				image = damageDrawer.applyDamage(ship, 1, image);
+			}
+			
+			stru = shipManager.systems.getStructureSystem(ship, 2);
+			desTurn = damageManager.getTurnDestroyed(ship, stru);
+					
+			if (stru && desTurn && (desTurn >= images.turn || all)){
+				image = damageDrawer.applyDamage(ship, 2, image);
+			}
+			
+			stru = shipManager.systems.getStructureSystem(ship, 3);
+			desTurn = damageManager.getTurnDestroyed(ship, stru);
+					
+			if (stru && desTurn && (desTurn >= images.turn || all)){
+				image = damageDrawer.applyDamage(ship, 3, image);
+			}
+			
+			stru = shipManager.systems.getStructureSystem(ship, 4);
+			desTurn = damageManager.getTurnDestroyed(ship, stru);
+					
+			if (stru && desTurn && (desTurn >= images.turn || all)){
+				image = damageDrawer.applyDamage(ship, 4, image);
+			}
+		}
         images.turn = gamedata.turn;
         images.phase = gamedata.gamephase;
         
@@ -223,7 +228,46 @@ window.damageDrawer = {
         
         return image;
 
-    }   
+    },
+    
+    drawFlight: function(flight, image){
+		var images = shipManager.shipImages[flight.id];
+        var width = flight.canvasSize;
+        var height = flight.canvasSize;
+        var canvas  = $('<canvas id="constcanFlight" width="'+width+'" height="'+height+'"></canvas>');
+        var context = canvas.get(0).getContext("2d");
+        
+        
+        
+        
+        for (var i in flight.systems){
+			var x = 50;
+			var y = 50;
+			
+			//if (i != 2)
+			//	continue;
+				
+			var fighter = flight.systems[i];
+			var offset = shipManager.getFighterPosition(i, 0, 2);
+			console.log(i);
+			console.dir(offset);
+			x += offset.x;
+			y += offset.y;
+			
+			
+			
+			var w = images.orginal.width;
+			var h = images.orginal.height;
+			
+			x -= Math.round(w/2);
+			y -= Math.round(h/2);
+			
+			context.drawImage(images.orginal, x, y, w, h);
+		}
+        
+        return context.getImageData(0, 0, width, height);
+        
+	}  
     
     
     

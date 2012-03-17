@@ -8,8 +8,8 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		protected function getSystemArmour($system, $gamedata){
-			$armor = parent::getSystemArmour($system, $gamedata);
+		protected function getSystemArmour($system, $gamedata, $fireOrder){
+			$armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
 			return round($armor / 2);
 		}
 	
