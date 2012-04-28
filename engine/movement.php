@@ -7,7 +7,7 @@
         }
         
         public static function isPivoting($ship, $turn){
-			if ($ship->agile)
+			if ($ship->agile || $ship instanceof FighterFlight)
 				return 0;
 				
             $pivoting = 0; // 0: false, 1: left, 2:right
@@ -46,7 +46,7 @@
         }
         
         public static function isRolling($ship, $turn){
-			if ($ship->agile)
+			if ($ship->agile || $ship instanceof FighterFlight)
 				return false;
 				
             $rolling = false;
@@ -137,7 +137,7 @@
             $stillReq[0] -= $any;
             
             
-            if ($move->type == "pivotright" || $move->type == "pivotleft"){
+            if ($move->type == "pivotright" || $move->type == "pivotleft" && !($ship instanceof FighterFlight)) {
             
                 $reversed = self::hasSidesReversedForMovement($ship);
                 $right = ($move->type == "pivotright");

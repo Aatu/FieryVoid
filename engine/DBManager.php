@@ -4,33 +4,34 @@ class DBManager {
     private $connection;
     
     function __construct($host, $port = 3306, $database, $username, $password) {
-        if (!$this->connection = mysql_connect($host, $username, $password, $database, $port))
-            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysql_connect_error(), mysql_connect_errno(), null);
+        if (!$this->connection = mysqli_connect($host, $username, $password, $database, $port))
+            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_connect_error(), mysqli_connect_errno(), null);
             
-        if (!mysql_select_db($database, $this->connection))
-            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysql_error($this->connection), mysql_errno(), null);
+        if (!mysqli_select_db($this->connection, $database ))
+            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_error($this->connection), mysqli_errno(), null);
             
-        mysql_set_charset('utf8', $this->connection);
+        mysqli_set_charset($this->connection, 'utf8');
     }
     
     private function DBEscape($string) {
             
-        return mysql_real_escape_string((String)$string, $this->connection);
+        return mysqli_real_escape_string($this->connection, (String)$string);
     }
     
+       
     private function query($sql) {
 
     
         if (!$this->connection)
             throw new Exception("DBManager:query, connection failed");
             
-        if (!$answer = mysql_query($sql, $this->connection)){
+        if (!$answer = mysqli_query($this->connection, $sql)){
             throw new Exception("DBManager:query, SQL error: ".mysql_error($this->connection)."\n sql: $sql error:", mysql_errno($this->connection));
         }
             
         $result = array();
 				
-		while ($row = mysql_fetch_object($answer)) {
+		while ($row = mysqli_fetch_object($answer)) {
 			$result[] = $row;
 		}
 		
@@ -43,16 +44,16 @@ class DBManager {
         if (!$this->connection)
             throw new exception("DBManager:insert, connection failed");
             
-        if (!$answer = mysql_query($sql, $this->connection))
-            throw new exception("DBManager:insert, SQL error: ".mysql_error($this->connection)."\n sql: $sql". mysql_errno($this->connection));
+        if (!$answer = mysqli_query($this->connection, $sql))
+            throw new exception("DBManager:insert, SQL error: ".mysqli_error($this->connection)."\n sql: $sql". mysqli_errno($this->connection));
             
         $sql = "select LAST_INSERT_ID() as id";
         
-        if (!$answer = mysql_query($sql, $this->connection))
-           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysql_error($this->connection)."\n sql: $sql", mysql_errno($this->connection));
+        if (!$answer = mysqli_query($this->connection, $sql))
+           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
 
             
-        while ($row = mysql_fetch_object($answer)) {
+        while ($row = mysqli_fetch_object($answer)) {
             return $row->id;
         }
         
@@ -67,9 +68,9 @@ class DBManager {
         if (!$this->connection)
             throw new exception("DBManager:update, connection failed");
             
-        if (!$answer = mysql_query($sql, $this->connection)){
+        if (!$answer = mysqli_query($this->connection, $sql)){
             $this->endTransaction(true);
-            throw new exception("DBManager:update, SQL error: ".mysql_error($this->connection)."\n sql: $sql", mysql_errno($this->connection));
+            throw new exception("DBManager:update, SQL error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
         }
 
             
@@ -85,26 +86,26 @@ class DBManager {
 	}
     
     public function startTransaction(){
-		mysql_query("SET AUTOCOMMIT=0", $this->connection);
-		mysql_query("START TRANSACTION", $this->connection);
-        //mysql_autocommit($this->connection, FALSE);
+		//mysqlii_query("SET AUTOCOMMIT=0", $this->connection);
+		//mysqlii_query("START TRANSACTION", $this->connection);
+        mysqli_autocommit($this->connection, FALSE);
     }
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-			mysql_query("ROLLBACK", $this->connection);
-            //mysql_rollback($this->connection); 
+			//mysqli_query("ROLLBACK", $this->connection);
+            mysqli_rollback($this->connection); 
         }else{
-            //mysql_commit($this->connection);
-            mysql_query("COMMIT", $this->connection); 
-            mysql_query("SET AUTOCOMMIT=1", $this->connection);
+            mysqli_commit($this->connection);
+            //mysql_query("COMMIT", $this->connection); 
+            //mysql_query("SET AUTOCOMMIT=1", $this->connection);
         }
         
     }
     
     public function close() {
 		if(is_resource($this->connection)){
-			mysql_close($this->connection);
+			mysqli_close($this->connection);
 		}
 		
 		
@@ -586,9 +587,14 @@ class DBManager {
 	}
 	
     public function getTacGamedata($playerid, $gameid){
+		
+		if ($gameid <=0)
+			return null;
+		
         $gamedata = $this->getTacGame($gameid, $playerid);
 		if ($gamedata == null)
 			return null;
+
 			
         $gamedata->players = $this->getPlayersInGame($playerid, $gameid);
         $gamedata->setShips( $this->getTacShips($gameid, $gamedata->players, $gamedata->turn, $gamedata->phase) );
@@ -773,9 +779,35 @@ class DBManager {
     
     
   
-    
+    public function authenticatePlayer($username, $password){
+	
+        $id = false;
+        try {
+			if ($stmt = $this->connection->prepare("SELECT id FROM player where username = ? and password = password(?)")) {
+				var_dump($stmt);
+				$stmt->bind_param('ss', $username, $password);
+				$stmt->execute();
+				$stmt->bind_result($id);
+				$stmt->fetch();
+				
+				/* close statement */
+				$stmt->close();
+			}
+            
+            $this->close();
+            
+            if (!$id)
+				return false;
+           
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return $id;
+    }    
       
-    
+    /*
     public function authenticatePlayer($username, $password){
 		$username = $this->DBEscape($username);	
 		$password = $this->DBEscape($password);	
@@ -800,7 +832,7 @@ class DBManager {
         
         return $id;
     }
-    
+    */
 
     
     //UTILS

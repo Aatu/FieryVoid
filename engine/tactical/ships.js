@@ -31,7 +31,11 @@ window.shipManager = {
             ship.htmlContainer = $("#pagecontainer #hexship_"+ship.id);
             ship.shipclickableContainer = $('<div oncontextmenu="shipManager.onShipContextMenu(this);return false;" class="shipclickable ship_'+ship.id+'"></div>').appendTo("#pagecontainer");
             ship.shipclickableContainer.data("id", ship.id);
-            ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+            if (ship.flight){
+				ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
+			}else{
+				ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+			}
             shipWindowManager.setData(ship);
             $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
             e.attr("id", "hexship_");
@@ -488,7 +492,7 @@ window.shipManager = {
     isDestroyed: function(ship){
         
         
-        if (ship.fighter){
+        if (ship.flight){
 			
 			for (var i in ship.systems){
 				var fighter = ship.systems[i];
@@ -511,6 +515,9 @@ window.shipManager = {
     },
     
     isAdrift: function(ship){
+        
+        if (ship.flight)
+			return false;
         
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
             return true;

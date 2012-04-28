@@ -45,6 +45,9 @@ shipManager.movement = {
     },
     
     canRoll: function(ship){
+		
+		if (ship.flight)
+			return false;
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
@@ -284,10 +287,21 @@ shipManager.movement = {
             
         var requiredThrust = Array(null, null, null, null, null);
         
-        if (right)
-            requiredThrust[3] = slipcost;
-        else
-            requiredThrust[4] = slipcost;
+        var commit = false;
+        var assignedThrust = Array();
+        if (ship.flight){
+			commit = true;
+			requiredThrust[0] = slipcost;
+			assignedThrust[0] = slipcost;
+		}else{
+			if (right)
+				requiredThrust[3] = slipcost;
+			else
+				requiredThrust[4] = slipcost;
+			
+		}
+        
+        
         
 		var off = shipManager.movement.getMovementOffsetPos(ship, newheading, pos);
         ship.movement[ship.movement.length] = {
@@ -303,15 +317,16 @@ shipManager.movement = {
             animated:false,
             animationtics:0,
             requiredThrust:requiredThrust,
-            assignedThrust:Array(),
-            commit:false,
+            assignedThrust:assignedThrust,
+            commit:commit,
             preturn:false,
             turn:gamedata.turn,
             forced:false
         };
                 
         shipManager.drawShip(ship);
-        shipWindowManager.assignThrust(ship);
+        if (!ship.flight)
+			shipWindowManager.assignThrust(ship);
 
     },
     
@@ -391,13 +406,19 @@ shipManager.movement = {
             step = -1;
             name = "pivotleft";
         }
-        
-        side = Math.floor(ship.pivotcost / 2);
-        rear = Math.floor(ship.pivotcost / 2);
-        any = ship.pivotcost % 2;
-        
-        requiredThrust = Array(any, rear, rear, side, side);
-        
+        var commit = false;
+        var assignedThrust = Array();
+        if (ship.flight){
+			commit = true;
+			requiredThrust[0] = ship.pivotcost;
+			assignedThrust[0] = ship.pivotcost;
+		}else{
+			side = Math.floor(ship.pivotcost / 2);
+			rear = Math.floor(ship.pivotcost / 2);
+			any = ship.pivotcost % 2;
+			
+			requiredThrust = Array(any, rear, rear, side, side);
+		}
         if (pivoting == "no") 
             newfacing = mathlib.addToHexFacing(lm.facing, step);
                 
@@ -414,15 +435,16 @@ shipManager.movement = {
             animated:false,
             animationtics:0,
             requiredThrust:requiredThrust,
-            assignedThrust:Array(),
-            commit:false,
+            assignedThrust:assignedThrust,
+            commit:commit,
             preturn:false,
             turn:gamedata.turn,
             forced:false
         }
         
         shipManager.drawShip(ship);
-        shipWindowManager.assignThrust(ship);
+        if (!ship.flight)
+			shipWindowManager.assignThrust(ship);
     },
     
     doForcedPivot: function(ship){
@@ -614,7 +636,17 @@ shipManager.movement = {
             speed = speed *-1;
         }
         
-        requiredThrust[direction] = ship.accelcost;
+        var commit = false;
+        var assignedThrust = Array();
+        if (ship.flight){
+			commit = true;
+			requiredThrust[0] = ship.accelcost;
+			assignedThrust[0] = ship.accelcost;
+		}else{
+			 requiredThrust[direction] = ship.accelcost;
+		}
+        
+       
         
         var lm = shipManager.movement.getLastCommitedMove(ship);
         ship.movement[ship.movement.length] = {
@@ -630,8 +662,8 @@ shipManager.movement = {
             animated:true,
             animationtics:0,
             requiredThrust:requiredThrust,
-            assignedThrust:Array(),
-            commit:false,
+            assignedThrust:assignedThrust,
+            commit:commit,
             preturn:false,
             turn:gamedata.turn,
             forced:false
@@ -639,27 +671,31 @@ shipManager.movement = {
         
 		gamedata.shipStatusChanged(ship);
         shipManager.drawShip(ship);
-        shipWindowManager.assignThrust(ship);
+        if (!ship.flight)
+			shipWindowManager.assignThrust(ship);
     },
         
             
     getRemainingEngineThrust: function(ship){
         
         var rem = 0;
-        
-        for (var i in ship.systems){
-            var system = ship.systems[i];
-			if (shipManager.systems.isDestroyed(ship, system))
-				continue;
-				
-            if (system.name == "engine"){
-                rem += shipManager.systems.getOutput(ship, system);
-            }
-            if (system.name == "thruster"){
-                rem -= system.thrustwasted;
-            }
-        
-        }
+        if (ship.flight){
+			rem = ship.freethrust;
+		}else{
+			for (var i in ship.systems){
+				var system = ship.systems[i];
+				if (shipManager.systems.isDestroyed(ship, system))
+					continue;
+					
+				if (system.name == "engine"){
+					rem += shipManager.systems.getOutput(ship, system);
+				}
+				if (system.name == "thruster"){
+					rem -= system.thrustwasted;
+				}
+			
+			}
+		}
         
         for (var i in ship.movement){
             var movement = ship.movement[i];
@@ -962,6 +998,7 @@ shipManager.movement = {
         var speed = shipManager.movement.getSpeed(ship);        
         var turncost = Math.ceil(speed * ship.turncost);
         
+        //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost){
             //console.log("does not have enough thrust");
             return false;
@@ -1008,6 +1045,13 @@ shipManager.movement = {
             newfacing = lm.facing;
         }
         
+        var commit = false;
+        var assignedThrust = Array();
+        if (ship.flight){
+			commit = true;
+			assignedThrust[0] = requiredThrust[0];
+		}
+        
         ship.movement[ship.movement.length] = {
             type:name,
             x:lm.x,
@@ -1021,13 +1065,14 @@ shipManager.movement = {
             animated:false,
             animationtics:0,
             requiredThrust:requiredThrust,
-            assignedThrust:Array(),
-            commit:false,
+            assignedThrust:assignedThrust,
+            commit:commit,
             preturn:false,
             turn:gamedata.turn,
             forced:false
         }
-        shipWindowManager.assignThrust(ship);
+        if (!ship.flight)
+			shipWindowManager.assignThrust(ship);
             
     },
     
@@ -1038,6 +1083,14 @@ shipManager.movement = {
         var turncost = Math.ceil(speed * ship.turncost);
         
         var side, sideindex, rear, rearindex, any;
+        
+        if (ship.flight){
+			if (turncost == 0)
+				turncost = 1;
+				
+			requiredThrust[0] = turncost;
+			return requiredThrust;
+		}
         
         side = Math.floor(turncost / 2);
         rear = Math.floor(turncost / 2);
@@ -1078,7 +1131,7 @@ shipManager.movement = {
 			requiredThrust[0] = 1;
 		}
 		
-        return requiredThrust
+        return requiredThrust;
     },
         
     calculateAssignedThrust: function(ship, movement){
@@ -1230,6 +1283,10 @@ shipManager.movement = {
 		if (speed == 0)
 			return 0;
         var turndelay = Math.ceil(speed * ship.turndelaycost);
+        
+        if (ship.flight)
+			return turndelay;
+        
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 1)
             turndelay = 1;

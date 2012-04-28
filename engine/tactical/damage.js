@@ -3,6 +3,7 @@ window.damageManager = {
     getDamage: function(ship, system){
         var damage = 0;
         if (system == null){
+			console.log("system is null");
             console.trace();
         }
         for (var i in system.damage){

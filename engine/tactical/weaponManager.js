@@ -45,7 +45,14 @@ window.weaponManager = {
         var t = weaponManager.mouseoverSystem;
         
         var ship = gamedata.getShip(t.data("shipid"));
-        var system = shipManager.systems.getSystem(ship, t.data("id"));
+        var system = null;
+        
+        if (t.hasClass("fightersystem")){
+			system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
+		}else{
+			system = shipManager.systems.getSystem(ship, t.data("id"));
+		}
+        
     
         weaponManager.addArcIndicators(ship, system);
         systemInfo.showSystemInfo(t, system, ship);

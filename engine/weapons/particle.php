@@ -117,5 +117,40 @@
         public function setMaxDamage(){     $this->maxDamage = 26 - $this->dp;      }
 
     }
+    
+    class PairedParticleGun extends Particle{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "pairedParticleGun";
+        public $displayName = "Paired Particle guns";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 20;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        
+        public $intercept = 2;
+        
+        public $loadingtime = 1;
+        public $shots = 2;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+        private $damagebonus = 0;
+
+
+        function __construct($startArc, $endArc, $damagebonus){
+			$this->damagebonus = $damagebonus;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+           
+        }
+
+        public function getDamage(){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+
+    }
 
 ?>

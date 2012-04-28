@@ -22,7 +22,7 @@
         public $destroyed = false;
         public $pointCost = 0;
         public $faction = null;
-        public $fighter = true;
+        public $flight = true;
         
         public $offensivebonus, $freethrust;
         public $jinkinglimit = 0;
@@ -54,12 +54,24 @@
 
         }
         
-        protected function addSystem($system){
+        private $autoid = 1;
+        
+        protected function addSystem($fighter){
             
-            $i = sizeof($this->systems);
-            $system->id = $i;
-            $system->location = 0;
-            $this->systems[$i] = $system;
+           
+            $fighter->id = $this->autoid;
+            $fighter->location = sizeof($this->systems);
+            
+            $this->autoid++;
+            
+            foreach ($fighter->systems as $system){
+				
+				$system->id  = $this->autoid;
+				$this->autoid++;
+				
+			}
+            
+            $this->systems[$fighter->id] = $fighter;
             
         
         }

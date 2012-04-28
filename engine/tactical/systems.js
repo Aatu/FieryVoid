@@ -20,10 +20,16 @@ shipManager.systems = {
     },
     
     isEngineDestroyed: function(ship){
+		if (ship.flight)
+			return false;
+		
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "engine"));
     },
     
     isReactorDestroyed: function(ship){
+		if (ship.flight)
+			return false;
+			
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
     },
 
@@ -45,12 +51,34 @@ shipManager.systems = {
         return output;
     },
     
+    getFighterSystem: function(ship, fighterid, systemid){
+		for (var i in ship.systems){
+			var fighter = ship.systems[i];
+			if (fighter.id == fighterid){
+				for (var a in fighter.systems){
+					if (fighter.systems[a].id == systemid)
+						return fighter.systems[a];
+				}
+			}
+		}
+	},
+    
     getSystem: function(ship, id){
     
         for (var i in ship.systems){
             if (ship.systems[i].id == id)
                 return ship.systems[i];
+            
+            if (ship.flight){
+				for (var a in ship.systems[i].systems){
+					var system = ship.systems[i].systems[a];
+					if (system.id == id)
+						return system;
+				}
+			}
         }
+        
+       
     
     },
             

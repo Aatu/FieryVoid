@@ -76,7 +76,7 @@ shipWindowManager = {
 
 		
 	
-		var template = $("#shipwindowtemplatecontainer .shipwindow");
+		var template = $("#shipwindowtemplatecontainer .shipwindow.ship");
 		shipwindow = template.clone(true).appendTo("body");
 		
 		shipwindow.draggable();
@@ -340,21 +340,35 @@ shipWindowManager = {
 	setDataForSystem: function(ship, system){
 		var shipwindow = ship.shipStatusWindow;
 		if (shipwindow){
-			shipWindowManager.setSystemData(ship, system, shipwindow);
-			if (system.name == "scanner"){
-				shipWindowManager.addEW(ship, shipwindow);
+			if (ship.flight){
+				flightWindowManager.setData(ship, system, shipwindow);
+			
+			}else{
+			
+				shipWindowManager.setSystemData(ship, system, shipwindow);
+				if (system.name == "scanner"){
+					shipWindowManager.addEW(ship, shipwindow);
+				}
 			}
 		}
 		
 	},
 	
 	setData: function(ship){
+		
 		var shipwindow = ship.shipStatusWindow;
 		if (shipwindow){
-			shipWindowManager.addEW(ship, shipwindow);
-			for (var i in ship.systems){
-				var system = ship.systems[i];
-				shipWindowManager.setSystemData(ship, system, shipwindow);
+			if (ship.flight){
+				for (var i in ship.systems){
+					var fighter = ship.systems[i];
+					flightWindowManager.setData(ship, fighter, shipwindow);
+				}
+			}else{
+				shipWindowManager.addEW(ship, shipwindow);
+				for (var i in ship.systems){
+					var system = ship.systems[i];
+					shipWindowManager.setSystemData(ship, system, shipwindow);
+				}
 			}
 		}
 	

@@ -593,6 +593,85 @@ body.phase1 .shipwindow  .system.boosted .minus{
     display:none;
 }
 
+.shipwindow.flight {
+    width:320px;
+}
+
+.shipwindow.flight .fightercontainer{
+    background-color: #072731;
+    border: 0px;
+    width:100px;
+
+    overflow:hidden;
+}
+
+.shipwindow.flight .icon{
+	width:90px;
+	height:auto;
+	margin:auto;
+	background-repeat:no-repeat;
+	background-position:center; 
+	
+}
+
+.shipwindow.flight .divider{
+	border-spacing:5px;
+	width:320px;
+}
+.shipwindow.flight .divider tr{
+	
+}
+
+.fighter .systembarcontainer {
+    background-color: black;
+    border: 1px solid #496791;
+    height: 14px;
+    margin: 2px auto 2px auto;
+    padding: 1px 2px;
+    position: relative;
+    text-align: center;
+    width: 86px;
+}
+
+.shipwindow .fighter .value{
+    color: white;
+    font-family: arial;
+    font-size: 9px;
+}
+
+.shipwindow.flight .fightersystem{
+	width:30px;
+	height:30px;
+	margin:auto;
+}
+
+.shipwindow.flight .fightersystem .icon{
+	width:26px;
+	height:26px;
+	background-color:transparent;
+	border:1px solid #496791;
+	background-position:center; 
+	margin:1px;
+	text-align: center;
+}
+
+.fightersystemcontainer td{
+	width:100%;
+	padding:0px;
+	margin:0px;
+}
+.fightersystemcontainer tr{
+	width:90px;
+	padding:0px;
+	margin:0px;
+}
+
+.fightersystemcontainer{
+	width:90px;
+	padding:0px;
+	margin:0px;
+	border-spacing:0;
+}
 
 
 

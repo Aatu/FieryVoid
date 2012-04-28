@@ -9,6 +9,8 @@
 		public $power = array();
 		public $data = array();
 		public $critData = array();
+		public $fighter = true;
+		public $systems = array();
 		
 		
 		public $possibleCriticals = array();
@@ -23,10 +25,45 @@
 			
 			
 		}
+		
+		
+		public function addFrontSystem($system){
+            
+			$this->addSystem($system, 1);
+            
+        
+        }
+        
+        public function addAftSystem($system){
+            
+			$this->addSystem($system, 2);
+            
+        
+        }
+		
+		
+		protected function addSystem($system, $loc){
+            
+            $i = sizeof($this->systems);
+            $system->location = $loc;
+            $this->systems[$i] = $system;
+            
+        
+        }
 			
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);			
-			
+			foreach ($this->systems as $system){
+				$system->setSystemDataWindow($turn);	
+			}
+		}
+		
+		public function onConstructed($ship, $turn, $phase){
+			parent::onConstructed($ship, $turn, $phase);	
+			foreach ($this->systems as $system){
+				$system->onConstructed($ship, $turn, $phase);
+			}
+     
 		}
 		
 		public function testCritical($ship, $turn, $crits, $add = 0){

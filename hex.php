@@ -90,6 +90,7 @@
 	<script src="./engine/tactical/UI/systemInfo.js"></script>
     <script src="./engine/tactical/animation.js"></script>
     <script src="./engine/tactical/UI/shipwindow.js"></script>
+    <script src="./engine/tactical/UI/flightwindow.js"></script>
     <script src="./engine/tactical/UI/shipclickable.js"></script>
 	<script src="./engine/tactical/UI/confirm.js"></script>
 	<script src="./engine/tactical/UI/shipSelect.js"></script>
@@ -135,6 +136,12 @@
         </div>
     </div>
 	
+	<div class="fightersystem">
+		<div class="icon">
+			<span class="efficiency value"></span>
+			<div class="iconmask"></div>
+        </div>
+	</div>
 
     <div class="system regular">
         <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
@@ -168,12 +175,36 @@
             
         </div>
     </div>
+    
+    <div class="fighter">
+        <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
+        <div class="systemcontainer">
+            <div class="icon">
+				<table class="fightersystemcontainer 1"><tr></tr></table>
+				<div style="height:90px;"></div>
+				<table class="fightersystemcontainer 2"><tr></tr></table>
+            </div>
+			
+            <div class="health systembarcontainer">
+                <div class="healthbar bar" style="width:90px;"></div>
+                <div class="valuecontainer"><span class="healthvalue value"></span></div>
+            </div>
+            <!--
+            <div class="systembarcontainer">
+                <div class="efficiencybar bar" style="width:30px;"></div>
+                <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
+            </div>
+            -->
+            
+            
+        </div>
+    </div>
 
 </div>
 
 <div id="shipwindowtemplatecontainer" style="display:none;">
     
-    <div class="shipwindow">
+    <div class="shipwindow ship">
         <div class="topbar">
 			<span class="valueheader name">Name:</span><span class="value name">name here</span>
             <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
@@ -214,6 +245,37 @@
 				</div>
 				
 			</td></tr>
+		</table>
+            
+            
+        
+       
+        
+        
+    </div>
+    
+    <div class="shipwindow flight">
+        <div class="topbar">
+			<span class="valueheader name">Name:</span><span class="value name">name here</span>
+            <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
+            <div class="close"></div>
+        </div>
+      
+               
+            
+                        
+            
+		<table class="divider">
+			<tr>
+				<td class="fightercontainer 0"></td>
+				<td class="fightercontainer 1"></td>
+				<td class="fightercontainer 2"></td>
+			</tr>
+			<tr>
+				<td class="fightercontainer 3"></td>
+				<td class="fightercontainer 4"></td>
+				<td class="fightercontainer 5"></td>
+			</tr>
 		</table>
             
             

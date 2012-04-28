@@ -86,6 +86,10 @@ shipManager.power = {
 	
 		for (var i in gamedata.ships){
 			var ship = gamedata.ships[i];
+			
+			if (ship.flight)
+				continue;
+			
 			if (ship.userid != gamedata.thisplayer)
 				continue; 
 				

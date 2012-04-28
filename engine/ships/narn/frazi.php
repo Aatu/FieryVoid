@@ -7,7 +7,7 @@ class Frazi extends FighterFlight{
 		$this->pointCost = 348;
 		$this->faction = "Narn";
         $this->phpclass = "Frazi";
-        $this->shipClass = "Frazi Heavy fighters";
+        $this->shipClass = "Frazi flight";
 		$this->imagePath = "ships/frazi.png";
         
         $this->forwardDefense = 6;
@@ -15,6 +15,7 @@ class Frazi extends FighterFlight{
         $this->freethrust = 10;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
+        $this->turncost = 0.33;
         
 		$this->iniativebonus = 80;
         
@@ -22,9 +23,13 @@ class Frazi extends FighterFlight{
 			
 			$armour = array(2, 2, 3, 3);
 			$frazi = new Fighter($armour, 12);
-			
+			$frazi->displayName = "Frazi Heavy Fighter";
 			$frazi->imagePath = "ships/frazi.png";
 			$frazi->iconPath = "ships/frazi_large.png";
+			
+			
+			$frazi->addFrontSystem(new PairedParticleGun(300, 60, 5));
+			
 			
 			$this->addSystem($frazi);
 			

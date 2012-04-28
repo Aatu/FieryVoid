@@ -24,7 +24,7 @@ class Manager{
         try {
             self::initDBManager();
             
-            if ($targetGameId)
+            if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 )
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
             
             $gameid = self::$dbManager->shouldBeInGameLobby($userid);
@@ -42,6 +42,10 @@ class Manager{
     
     public static function getTacGames($userid){
         $gamedata = null;
+        
+        if (!is_numeric($userid))
+			return null;
+        
         try {
             self::initDBManager();
             $games = self::$dbManager->getTacGames($userid);
@@ -61,6 +65,9 @@ class Manager{
     }
     
     public static function shouldBeInGame($userid){
+		if (!is_numeric($userid))
+			return null;
+			
         try {
             self::initDBManager();
             return self::$dbManager->shouldBeInGameLobby($userid);
@@ -139,6 +146,10 @@ class Manager{
     }
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
+    
+		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
+			return null;
+		
     
         $gamedata = null;
         try {
