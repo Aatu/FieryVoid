@@ -27,8 +27,8 @@ window.botPanel = {
 	
 	setMovement: function(ship){
 		var speed = shipManager.movement.getSpeed(ship);        
-        var turncost = Math.ceil(speed * ship.turncost);
-		var turndelay = Math.ceil(speed * ship.turndelaycost);
+        var turncost = Math.round(speed * ship.turncost);
+		var turndelay = Math.round(speed * ship.turndelaycost);
 		
 		$("#botPanel .value.currentturndelay").html(shipManager.movement.calculateCurrentTurndelay(ship));
 		$("#botPanel .value.turndelay").html(turndelay);

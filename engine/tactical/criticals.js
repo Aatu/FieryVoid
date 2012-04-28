@@ -2,6 +2,10 @@ window.shipManager.criticals = {
 
     hasCritical: function(system, name){
         var amount = 0;
+        if (!system)
+			console.trace();
+     
+		
         for (var i in system.criticals){
             var crit = system.criticals[i];
             if (crit.phpclass == name)

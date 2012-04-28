@@ -311,7 +311,7 @@ body.phase1 .shipwindow.owned .ewentry .button2{
     border:1px solid #84a5ce !important;
 }
 
-.system.selected .icon{
+.system.selected .icon, .fightersystem.selected .icon{
     border:1px solid #84a5ce !important;
 }
 
@@ -322,6 +322,12 @@ body.phase1 .shipwindow.owned .ewentry .button2{
 }
 
 .shipwindow .system.firing .iconmask{
+    background-image:url(./img/firing.png);
+	opacity:0.6 !important;
+
+}
+
+.shipwindow  .fightersystem.firing .iconmask{
     background-image:url(./img/firing.png);
 	opacity:0.6 !important;
 
@@ -647,12 +653,26 @@ body.phase1 .shipwindow  .system.boosted .minus{
 
 .shipwindow.flight .fightersystem .icon{
 	width:26px;
-	height:26px;
+	height:20px;
+	padding-top:6px;
 	background-color:transparent;
 	border:1px solid #496791;
 	background-position:center; 
 	margin:1px;
 	text-align: center;
+	position:relative;
+	overflow:hidden;
+}
+
+.shipwindow.flight .fightersystem .icon .iconmask{
+    position:absolute;
+    left:-2px;
+    top:-2px;
+    width:30px;
+    height:30px;
+    background-color:transparent;
+    opacity:0.5;
+
 }
 
 .fightersystemcontainer td{

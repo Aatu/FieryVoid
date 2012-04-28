@@ -15,15 +15,17 @@ window.weaponManager = {
             return;
         
         if (ship.userid == gamedata.thisplayer){
-            window.weaponManager.removeFiringOrder(ship, system);
+            weaponManager.cancelFire(ship, system);
             
         }
-        ballistics.updateList();
-        shipWindowManager.setDataForSystem(ship, system);
         
     },
     
-    
+    cancelFire: function(ship, system){
+		weaponManager.removeFiringOrder(ship, system);
+		ballistics.updateList();
+        shipWindowManager.setDataForSystem(ship, system);
+	},    
     
     mouseoverTimer: null,
     mouseoverSystem: null,
@@ -194,7 +196,8 @@ window.weaponManager = {
         var intercept = weaponManager.getInterception(ball);
         
         var mod = 0;
-        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+        if (!shooter.flight)
+			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         
         var goal = (defence - dew - rangePenalty - intercept + oew + firecontrol + mod);
         
@@ -235,7 +238,14 @@ window.weaponManager = {
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
         
         var dew = ew.getDefensiveEW(target);
+        if (shooter.flight)
+			dew = 0;
+			
         var oew = ew.getOffensiveEW(shooter, target);
+        
+        if (shooter.flight)
+			oew = shooter.offensivebonus;
+        
         var mod = 0;
         
         if (shipManager.movement.isRolling(shooter)){
@@ -247,8 +257,8 @@ window.weaponManager = {
             console.log("pivoting");
             mod -= 3;
         }
-        
-        mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+        if (!shooter.flight)
+			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         
         if (oew == 0)
             rangePenalty = rangePenalty*2;

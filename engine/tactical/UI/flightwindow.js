@@ -256,7 +256,10 @@ flightWindowManager = {
 			if (gamedata.gamephase != 1 && system.ballistic)
 				return;
 		
-			if (weaponManager.isSelectedWeapon(system)){
+			if (weaponManager.hasFiringOrder(flight, system)){
+				weaponManager.cancelFire(flight, system);
+				
+			} else if (weaponManager.isSelectedWeapon(system)){
 				weaponManager.unSelectWeapon(flight, system);
 			}else{
 				weaponManager.selectWeapon(flight, system);

@@ -135,6 +135,7 @@
         
         public $loadingtime = 1;
         public $shots = 2;
+        public $defaultShots = 2;
         
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 

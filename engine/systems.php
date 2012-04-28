@@ -483,7 +483,14 @@ class Weapon extends ShipSystem{
         $rangePenalty = $rp["rp"];
         
         $dew = $target->getDEW($gamedata->turn);
+        if ($shooter instanceof FighterFlight)
+			$dew = 0;
+			
+		
         $oew = $shooter->getOEW($target, $gamedata->turn);
+        if ($shooter instanceof FighterFlight)
+			$oew = $shooter->offensivebonus;
+        
         $mod = 0;
         
         if (Movement::isRolling($shooter, null) && !$this->ballistic)
@@ -495,10 +502,10 @@ class Weapon extends ShipSystem{
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
             
-        
-        $CnC = $shooter->getSystemByName("CnC");
-        $mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
-       
+        if (!($shooter instanceof FighterFlight)){
+			$CnC = $shooter->getSystemByName("CnC");
+			$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
+		}
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
@@ -522,6 +529,7 @@ class Weapon extends ShipSystem{
         if ($this->uninterceptable)
             return 0;
     
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
         foreach ($gamedata->ships as $ship){
             foreach ($ship->fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
@@ -533,7 +541,10 @@ class Weapon extends ShipSystem{
                     $i = ($ship->getSystemById($fire->weaponid)->intercept - $deg);
                     if ($i<0)
                         $i = 0;
-                        
+                    
+                    if ($shooter instanceof FighterFlight)
+						$deg--;
+                    
                     $intercept += $i;
                     $count++;
                 }

@@ -56,6 +56,21 @@
         
         private $autoid = 1;
         
+        public function getSystemById($id){
+            foreach ($this->systems as $system){
+                if ($system->id == $id){
+                    return $system;
+                }
+                foreach ($system->systems as $fs){
+					if ($fs->id == $id){
+						return $fs;
+					}
+				}
+            }
+            
+            return null;
+        }
+        
         protected function addSystem($fighter){
             
            

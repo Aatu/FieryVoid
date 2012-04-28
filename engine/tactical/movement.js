@@ -996,7 +996,7 @@ shipManager.movement = {
         }
         
         var speed = shipManager.movement.getSpeed(ship);        
-        var turncost = Math.ceil(speed * ship.turncost);
+        var turncost = Math.round(speed * ship.turncost);
         
         //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost){
@@ -1080,7 +1080,7 @@ shipManager.movement = {
         var requiredThrust = Array(null,null,null,null,null);
         
         var speed = shipManager.movement.getSpeed(ship);        
-        var turncost = Math.ceil(speed * ship.turncost);
+        var turncost = Math.round(speed * ship.turncost);
         
         var side, sideindex, rear, rearindex, any;
         
@@ -1282,7 +1282,7 @@ shipManager.movement = {
         var speed = movement.speed;
 		if (speed == 0)
 			return 0;
-        var turndelay = Math.ceil(speed * ship.turndelaycost);
+        var turndelay = Math.round(speed * ship.turndelaycost);
         
         if (ship.flight)
 			return turndelay;

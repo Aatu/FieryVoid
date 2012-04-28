@@ -179,12 +179,20 @@
         public static function calculateAssignedThrust($ship, $move){
             $assignedarray = array(0,0,0,0,0);
             
+             
+            
             foreach ($move->assignedThrust as $i=>$value){
 				if (empty($value))
 					continue;
 					
-				$direction = $ship->systems[$i]->direction;
-                $assignedarray[$direction] += $value;
+				 if ($ship instanceof FighterFlight){
+									
+					$assignedarray[0] += $value;
+
+				}else{
+					$direction = $ship->systems[$i]->direction;
+					$assignedarray[$direction] += $value;
+				}
             }
 
             return $assignedarray;
