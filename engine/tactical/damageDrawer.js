@@ -250,6 +250,10 @@ window.damageDrawer = {
 			//	continue;
 				
 			var fighter = flight.systems[i];
+			
+			if (shipManager.systems.isDestroyed(flight, fighter)){
+				continue;
+			}
 			var offset = shipManager.getFighterPosition(fighter.location, 0, 2);
 		
 			x += offset.x;

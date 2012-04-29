@@ -215,10 +215,19 @@
         
         public function getOEW($target, $turn){
         
-            foreach ($this->EW as $EW){
-                if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
-                    return $EW->amount;
-            }
+			if ($target instanceof FighterFlight){
+				foreach ($this->EW as $EW){
+					if ($EW->type == "CCEW" && $EW->turn == $turn)
+						return $EW->amount;
+				}
+			}else{
+				foreach ($this->EW as $EW){
+					if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
+						return $EW->amount;
+				}
+			}
+        
+            
             
             return 0;
         }

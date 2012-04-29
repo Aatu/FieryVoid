@@ -1,6 +1,8 @@
 <?php
 	class Fighter extends ShipSystem{
-
+		
+		
+		public $flightid;
 		public $location = 0;
 		public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
 		public $damage = array();
@@ -19,9 +21,10 @@
 		public $criticals = array();
 		
 		
-		function __construct($armour, $maxhealth){
+		function __construct($armour, $maxhealth, $flight){
 			parent::__construct($armour, $maxhealth, 0, 0 );
 			
+			$this->flightid = $flight;
 			
 			
 		}
@@ -87,21 +90,21 @@
 		
 		 public function getArmourPos($target, $pos){
             $tf = $target->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($target, $pos);
           
             return $this->doGetArmour($tf,  $shooterCompassHeading);
         }
         
         public function getArmour($target, $shooter){
             $tf = $target->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
           
             return $this->doGetArmour($tf,  $shooterCompassHeading);
             
         }
         
         
-        public function doGetDefenceValue($tf, $shooterCompassHeading){
+        public function doGetArmour($tf, $shooterCompassHeading){
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
                return $this->armour[0];
             }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){

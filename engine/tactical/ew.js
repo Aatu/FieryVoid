@@ -43,6 +43,16 @@ window.ew = {
     
 		return listed;
     },
+    
+    getTargetingEW: function(ship, target){
+		
+		if (target.flight){
+			return we.getCCEW(ship);
+		}else{
+			return ew.getOffensiveEW(ship, target);
+		}
+		
+	},
 	
 	getOffensiveEW: function(ship, target){
 	

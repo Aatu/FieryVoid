@@ -26,7 +26,8 @@
 	
 	$serverdataJSON = json_encode($serverdata, JSON_NUMERIC_CHECK);
 	
-	//print($serverdata );
+	
+	//print($serverdataJSON );
 
 	//phpinfo();
 

@@ -196,7 +196,8 @@ class Firing{
             
         if ($shooter->team == $ship->team)
             return false;
-            
+         
+        $pos = $shooter->getCoPos();   
         $shooterCompassHeading = null;
         if ($firingweapon->ballistic){
             $movement = $shooter->getLastTurnMovement($fire->turn);

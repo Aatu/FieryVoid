@@ -485,8 +485,7 @@ class Weapon extends ShipSystem{
         $dew = $target->getDEW($gamedata->turn);
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
-			
-		
+				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight)
 			$oew = $shooter->offensivebonus;
@@ -606,6 +605,10 @@ class Weapon extends ShipSystem{
     
     protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata){
     
+		if ($target instanceof FighterFlight){
+			return null;
+		}
+		
         if ($this->flashDamage){
             return $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
         }else{

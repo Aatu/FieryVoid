@@ -126,8 +126,8 @@
         public $displayName = "Paired Particle guns";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 20;
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
         

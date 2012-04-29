@@ -22,7 +22,7 @@ class Frazi extends FighterFlight{
         for ($i = 0; $i<6; $i++){
 			
 			$armour = array(2, 2, 3, 3);
-			$frazi = new Fighter($armour, 12);
+			$frazi = new Fighter($armour, 12, $this->id);
 			$frazi->displayName = "Frazi Heavy Fighter";
 			$frazi->imagePath = "ships/frazi.png";
 			$frazi->iconPath = "ships/frazi_large.png";

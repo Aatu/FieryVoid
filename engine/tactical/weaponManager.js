@@ -187,7 +187,7 @@ window.weaponManager = {
         var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
         
         var dew = ew.getDefensiveEW(target);
-        var oew = ew.getOffensiveEW(shooter, target);
+        var oew = ew.getTargetingEW(shooter, target);
         
         var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
         
@@ -241,7 +241,7 @@ window.weaponManager = {
         if (shooter.flight)
 			dew = 0;
 			
-        var oew = ew.getOffensiveEW(shooter, target);
+        var oew = ew.getTargetingEW(shooter, target);
         
         if (shooter.flight)
 			oew = shooter.offensivebonus;
