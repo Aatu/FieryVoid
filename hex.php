@@ -178,6 +178,7 @@
     </div>
     
     <div class="fighter">
+		<div class="destroyedtext"><span>DESTROYED</span></div>
         <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
         <div class="systemcontainer">
             <div class="icon">

@@ -1317,11 +1317,12 @@ window.effects = {
         var sPos = effects.getWeaponLocation(shooter, weapon);
         
         if (fire.rolled > fire.needed){
-            tPos = mathlib.getPointInDistanceBetween(sPos, tPos, mathlib.getDistance(sPos, tPos)+(((Math.random()*101)+200)*gamedata.zoom));
+			tPos = mathlib.getPointInDistanceBetween(sPos, tPos, mathlib.getDistance(sPos, tPos)+(((Math.random()*101)+200)*gamedata.zoom));
             tPos.x += Math.floor((Math.random()*51+40)*gamedata.zoom)-65*gamedata.zoom;
             tPos.y += Math.floor((Math.random()*51+40)*gamedata.zoom)-65*gamedata.zoom;
         }else{
-            tPos ={x:tPos.x + Math.floor((Math.random()*20-10))*gamedata.zoom, y:tPos.y + Math.floor((Math.random()*20-10))*gamedata.zoom};
+			tPos ={x:tPos.x + Math.floor((Math.random()*20-10))*gamedata.zoom, y:tPos.y + Math.floor((Math.random()*20-10))*gamedata.zoom};
+			
         }
         
         
@@ -1332,6 +1333,17 @@ window.effects = {
     getWeaponLocation: function(ship, weapon){
         var a = shipManager.getShipHeadingAngle(ship);
         var shippos = shipManager.getShipPositionInWindowCo(ship);
+        
+        if (ship.flight){
+			
+			var fighter = shipManager.systems.getFighterBySystem(ship, weapon.id);
+			var offset = shipManager.getFighterPosition(fighter.location, 0, 1);
+		
+			shippos.x += offset.x;
+			shippos.y += offset.y;
+			
+			return shippos;
+		}
         
         
         if (weapon.location == 0)

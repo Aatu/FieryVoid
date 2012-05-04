@@ -63,6 +63,18 @@ shipManager.systems = {
 		}
 	},
     
+    getFighterBySystem: function(ship, systemid){
+		for (var i in ship.systems){
+			var fighter = ship.systems[i];
+	
+			for (var a in fighter.systems){
+				if (fighter.systems[a].id == systemid)
+					return fighter;
+			}
+			
+		}
+	},
+    
     getSystem: function(ship, id){
     
         for (var i in ship.systems){

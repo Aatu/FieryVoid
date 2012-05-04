@@ -602,21 +602,39 @@ body.phase1 .shipwindow  .system.boosted .minus{
 .shipwindow.flight {
     width:320px;
 }
+.shipwindow.flight .fighter{
+	position:relative;
+}
 
 .shipwindow.flight .fightercontainer{
     background-color: #072731;
     border: 0px;
     width:100px;
-
+	position:relative;
     overflow:hidden;
+}
+
+.shipwindow.flight .fighter .destroyedtext{
+	position:absolute;
+	width:96px;
+	text-align:center;
+	left:0px;
+	top:55px;
+	font-size:12px;
+	padding-top:5px;
+	display:none;
+	color:red;
+	background-color:black;
+	height:20px;
 }
 
 .shipwindow.flight .icon{
 	width:90px;
-	height:auto;
+	height:121px;
 	margin:auto;
 	background-repeat:no-repeat;
-	background-position:center; 
+	background-position:center;
+	
 	
 }
 
@@ -626,6 +644,27 @@ body.phase1 .shipwindow  .system.boosted .minus{
 }
 .shipwindow.flight .divider tr{
 	
+}
+
+.fighter.destroyed, .fighter.destroyed .icon  {
+	background-color: #1F2836 !important;
+    border: 1px solid #3D4755 !important;
+}
+
+.fighter.destroyed .icon{
+	opacity:0.5;
+}
+
+.fighter.destroyed .health{
+	border: 1px solid #3D4755 !important;
+}
+
+.shipwindow.flight .fighter.destroyed .destroyedtext{
+	display:block;
+}
+
+.fighter.destroyed .fightersystem{
+	display:none;
 }
 
 .fighter .systembarcontainer {
