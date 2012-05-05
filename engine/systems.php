@@ -485,6 +485,10 @@ class Weapon extends ShipSystem{
         $dew = $target->getDEW($gamedata->turn);
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
+			
+		if ($target instanceof FighterFlight){
+			$dew = Movement::getJinking($target, $gamedata->turn);
+		}
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight)
@@ -498,6 +502,10 @@ class Weapon extends ShipSystem{
         if (Movement::isPivoting($shooter, null) && !$this->ballistic)
             $mod -=3;
             
+        if ($fireOrder->calledid != -1){
+			$mod -= 8;
+		}
+		
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
             
@@ -514,7 +522,7 @@ class Weapon extends ShipSystem{
         $change = round(($goal/20)*100);
         
         
-        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, intercept: $intercept, F/C: $firecontrol, goal: $goal, chance: $change";
+        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -635,8 +643,16 @@ class Weapon extends ShipSystem{
         
         if ($target->isDestroyed())
             return;
-            
-        $system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+        
+        $system = null;
+        if ($fireOrder->calledid != -1){
+			$system = $target->getSystemById($fireOrder->calledid);
+		}
+		if ($system == null || $system->isDestroyed())
+			$system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+		
+         
+        
         
         if ($system == null)
             return;

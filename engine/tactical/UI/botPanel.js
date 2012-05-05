@@ -37,6 +37,13 @@ window.botPanel = {
 		$("#botPanel .value.accelcost").html(ship.accelcost);
 		$("#botPanel .value.pivotcost").html(ship.pivotcost);
 		$("#botPanel .value.rollcost").html(ship.rollcost);
+		if (ship.flight){
+			$("#botPanel .value.evasion").html(shipManager.movement.getJinking(ship));
+			$("#botPanel .entry.evasion").show();
+		}else{
+			$("#botPanel .entry.evasion").hide();
+		}
+		
 		$("#botPanel .value.unusedthrust").html(shipManager.movement.getRemainingEngineThrust(ship));
 		
 		

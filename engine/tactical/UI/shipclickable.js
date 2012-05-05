@@ -129,7 +129,7 @@ window.shipClickable = {
 		}else{
 			if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
 						
-				weaponManager.targetingShipTooltip(ship, e);
+				weaponManager.targetingShipTooltip(ship, e, null);
 				$(".fire",e).show();
 			}else{
 			

@@ -27,9 +27,14 @@ window.UI = {
                 UI.shipMovement.pivotleftElement =  $("#pivotleft", ui);
                 UI.shipMovement.pivotrightElement = $("#pivotright", ui);
                 UI.shipMovement.rollElement = $("#roll", ui);
+                UI.shipMovement.jinkElement = $("#jink", ui);
+                UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
                 
                 UI.shipMovement.accElement = $("#accelerate", ui);
                 UI.shipMovement.deaccElement = $("#deaccelerate", ui);
+                
+                UI.shipMovement.morejinkElement = $("#morejink", ui);
+                UI.shipMovement.lessjinkElement = $("#lessjink", ui);
                 
                 UI.shipMovement.moveElement.bind("click", UI.shipMovement.moveCallback);
                 UI.shipMovement.turnrightElement.bind("click", UI.shipMovement.turnrightCallback);
@@ -43,6 +48,9 @@ window.UI = {
                 
                 UI.shipMovement.accElement.bind("click", UI.shipMovement.accelCallback);
                 UI.shipMovement.deaccElement.bind("click", UI.shipMovement.deaccCallback);
+                
+                UI.shipMovement.morejinkElement.bind("click", UI.shipMovement.morejinkCallback);
+                UI.shipMovement.lessjinkElement.bind("click", UI.shipMovement.lessjinkCallback);
                 
                 UI.shipMovement.iniated = true;
         },
@@ -67,6 +75,19 @@ window.UI = {
             cancelEvent(e);
         },
         
+        morejinkCallback: function(e){
+			e.stopPropagation();
+                
+            var ship = gamedata.getActiveShip();
+            shipManager.movement.doJink(ship, 1);
+		},
+		
+        lessjinkCallback: function(e){
+			e.stopPropagation();
+                
+            var ship = gamedata.getActiveShip();
+            shipManager.movement.doJink(ship, -1);
+		},        
         
         accelCallback: function(e){
             e.stopPropagation();
@@ -284,6 +305,33 @@ window.UI = {
                 UI.shipMovement.drawUIElement(roll, pos.x, pos.y, s, dis*1.4, angle, icon, "rollcanvas", shipHeading);
             }else{
                 roll.hide();
+            }
+            
+            var jink = UI.shipMovement.jinkElement;
+            if (shipManager.movement.canJink(ship, 0)){
+                var icon = "img/jink.png";
+           
+                           
+                UI.shipMovement.jinkvalueElement.html(shipManager.movement.getJinking(ship));
+                UI.shipMovement.drawUIElement(jink, pos.x, pos.y, s, dis*1.4, angle, icon, "jinkcanvas", shipHeading);
+            }else{
+                jink.hide();
+            }
+            
+            dis = 40;
+            var morejink = UI.shipMovement.morejinkElement;
+            if (shipManager.movement.canJink(ship, 1)){
+                UI.shipMovement.drawUIElement(morejink, pos.x, pos.y, 16, dis*1.4, angle, "img/plus.png", "morejinkcanvas", 0);
+            }else{
+                morejink.hide();
+            }
+            
+            dis = 83;
+            var lessjink = UI.shipMovement.lessjinkElement;
+            if (shipManager.movement.canJink(ship, -1)){
+                UI.shipMovement.drawUIElement(lessjink, pos.x, pos.y, 16, dis*1.4, angle, "img/minus.png", "lessjinkcanvas", 0);
+            }else{
+                lessjink.hide();
             }
             
             ui.show();

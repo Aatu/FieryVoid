@@ -124,6 +124,11 @@ gamedata = {
         return (ship.userid == gamedata.thisplayer);
     },
     
+    isEnemy: function(target, shooter){
+		var ret = (target.team != shooter.team); 
+		return ret;
+	},
+    
     shipStatusChanged: function(ship){
         botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
@@ -263,7 +268,7 @@ gamedata = {
             if (gamedata.waiting == false){
                 for (var i in gamedata.ships){
                     var ship = gamedata.ships[i];
-                    if (ship.userid == gamedata.thisplayer && !ship.destroyed){
+                    if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
                         gamedata.selectShip(ship, false);
                         scrolling.scrollToShip(ship);
                         break;
@@ -281,7 +286,7 @@ gamedata = {
                 if (gamedata.waiting == false){
                     for (var i in gamedata.ships){
                         var ship = gamedata.ships[i];
-                        if (ship.userid == gamedata.thisplayer){
+                        if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
                             gamedata.selectShip(ship, false);
                             scrolling.scrollToShip(ship);
                             break;

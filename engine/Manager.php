@@ -562,7 +562,20 @@ class Manager{
             $movements = array();
             if (is_array($value["movement"])){
                 foreach($value["movement"] as $i=>$move){
-                    $movement = new MovementOrder(-1, $move["type"], $move["x"], $move["y"], $move["xOffset"], $move["yOffset"], $move["speed"], $move["heading"], $move["facing"], $move["preturn"], $move["turn"]);
+                    $movement = new MovementOrder(
+						-1,
+						$move["type"],
+						$move["x"],
+						$move["y"],
+						$move["xOffset"], 
+						$move["yOffset"], 
+						$move["speed"], 
+						$move["heading"], 
+						$move["facing"], 
+						$move["preturn"], 
+						$move["turn"],
+						$move["value"]
+					);
                     $movement->requiredThrust = $move["requiredThrust"];
                     $movement->assignedThrust = $move["assignedThrust"];
                     

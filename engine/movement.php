@@ -68,6 +68,20 @@
             return $rolling;
         }
         
+        public static function getJinking($ship, $turn){
+			$jinking = 0;
+			
+			foreach ($ship->movement as $move){
+           
+                if ($move->type == "jink" && $move->turn == $turn){
+                    $jinking += $move->value;
+                }
+                                   
+                           
+            }
+            
+            return $jinking;
+		}        
        
         public static function getTurnDelay($ship){
             $turndelay = 0;

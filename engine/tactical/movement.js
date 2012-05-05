@@ -44,6 +44,108 @@ shipManager.movement = {
         }
     },
     
+    canJink: function(ship, accel){
+		if (!ship.flight)
+			return false;
+	
+		if (accel == 0)
+			return true;
+	
+		if (shipManager.movement.getRemainingEngineThrust(ship) <= 0)
+			return false;
+		
+		var jinking = shipManager.movement.getJinking(ship);
+		if (( (jinking+accel) > ship.jinkinglimit) || (jinking+accel < 0))
+			return false;
+			
+		
+			
+			
+		
+		return true;
+	},
+	
+	getJinking: function(ship){
+		
+		var j = 0;
+		
+		for (var i in ship.movement){
+			var move = ship.movement[i];
+			if (move.turn != gamedata.turn)
+				continue;
+			
+			if (move.type =="jink")
+				j += move.value;
+		}
+		return j;
+	},
+	
+	doJink: function(ship, accel){
+		
+		if (!shipManager.movement.canJink(ship, accel))
+			return;
+			
+		var commit = false;
+		var requiredThrust = Array();
+        var assignedThrust = Array();
+        if (ship.flight){
+			commit = true;
+			requiredThrust[0] = 1;
+			assignedThrust[0] = 1;
+		}else{
+			requiredThrust[0] = 1;
+		}
+        
+    
+        
+        if (accel<0){
+			for (var i in ship.movement){
+				var move = ship.movement[i];
+				if (move.turn != gamedata.turn)
+					continue;
+					
+				if (move.type == "jink"){
+					ship.movement.splice(i, 1);
+					break;
+				}
+					
+			}
+			
+			gamedata.shipStatusChanged(ship);
+			shipManager.drawShip(ship);
+              
+		}else{
+			var lm = shipManager.movement.getLastCommitedMove(ship);
+			ship.movement[ship.movement.length] = {
+				type:"jink",
+				x:lm.x,
+				y:lm.y,
+				xOffset:lm.xOffset,
+				yOffset:lm.yOffset,
+				facing:lm.facing,
+				heading:lm.heading,
+				speed:lm.speed,
+				animating:false,
+				animated:true,
+				animationtics:0,
+				requiredThrust:requiredThrust,
+				assignedThrust:assignedThrust,
+				commit:commit,
+				preturn:false,
+				turn:gamedata.turn,
+				forced:false,
+				value:accel
+			};
+			
+			gamedata.shipStatusChanged(ship);
+			shipManager.drawShip(ship);
+			if (!ship.flight)
+				shipWindowManager.assignThrust(ship);
+        
+		}
+		
+	},
+    
     canRoll: function(ship){
 		
 		if (ship.flight)
@@ -96,7 +198,8 @@ shipManager.movement = {
             commit:false,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
         };
         
         shipManager.drawShip(ship);
@@ -215,7 +318,8 @@ shipManager.movement = {
             commit:true,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
         };
         
         //gamedata.shipStatusChanged(ship);
@@ -321,7 +425,8 @@ shipManager.movement = {
             commit:commit,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
         };
                 
         shipManager.drawShip(ship);
@@ -408,6 +513,7 @@ shipManager.movement = {
         }
         var commit = false;
         var assignedThrust = Array();
+        var requiredThrust = Array();
         if (ship.flight){
 			commit = true;
 			requiredThrust[0] = ship.pivotcost;
@@ -439,7 +545,8 @@ shipManager.movement = {
             commit:commit,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
         }
         
         shipManager.drawShip(ship);
@@ -480,7 +587,8 @@ shipManager.movement = {
             commit:true,
             preturn:false,
             turn:gamedata.turn,
-            forced:true
+            forced:true,
+            value:0
         }
         
         
@@ -666,7 +774,8 @@ shipManager.movement = {
             commit:commit,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
             };
         
 		gamedata.shipStatusChanged(ship);
@@ -1069,7 +1178,8 @@ shipManager.movement = {
             commit:commit,
             preturn:false,
             turn:gamedata.turn,
-            forced:false
+            forced:false,
+            value:0
         }
         if (!ship.flight)
 			shipWindowManager.assignThrust(ship);
@@ -1341,7 +1451,8 @@ shipManager.movement = {
             commit:commit,
             preturn:preturn,
             turn:gamedata.turn,
-            forced:forced
+            forced:forced,
+            value:0
         }
     },
     

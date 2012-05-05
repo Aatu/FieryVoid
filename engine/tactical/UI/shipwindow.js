@@ -695,14 +695,15 @@ shipWindowManager = {
 		var systemwindow = $(this);
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = ship.systems[systemwindow.data("id")];
+		var selectedShip = gamedata.getSelectedShip();
+		
+		if (gamedata.waiting)
+			return
 		
 		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
 			return;
-			
-		if (ship.userid != gamedata.thisplayer)
-			return;
-			
-		if (system.weapon){
+					
+		if (system.weapon && selectedShip.id == ship.id){
 			
 			if (gamedata.gamephase != 3 && !system.ballistic)
 				return;
@@ -716,6 +717,16 @@ shipWindowManager = {
 				weaponManager.selectWeapon(ship, system);
 			}
 			
+		}
+		
+		if (gamedata.isEnemy(ship, selectedShip) 
+			&& gamedata.gamephase == 3 
+			&& gamedata.selectedSystems.length > 0 
+			&& weaponManager.canCalledshot(ship, system))
+		{
+			
+			weaponManager.targetShip(ship, system);
+									
 		}
 	
 	},

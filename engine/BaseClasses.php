@@ -16,7 +16,7 @@ class TacticalPlayer{
 
 class MovementOrder{
 
-    public $id, $type, $x, $y, $xOffset, $yOffset, $facing, $heading, $speed;
+    public $id, $type, $x, $y, $xOffset, $yOffset, $facing, $heading, $speed, $value;
     public $animating = false;
     public $animated = true;
     public $animationtics = 0;
@@ -27,7 +27,8 @@ class MovementOrder{
     public $turn;
     public $forced = false;
     
-    function __construct($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn){
+    
+    function __construct($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value){
         $this->id = (int)$id;
         $this->x = (int)$x;
         $this->y = (int)$y;
@@ -39,6 +40,7 @@ class MovementOrder{
         $this->turn = (int)$turn;
         $this->xOffset = $xOffset;
         $this->yOffset = $yOffset;
+        $this->value = $value;
         
 
     }

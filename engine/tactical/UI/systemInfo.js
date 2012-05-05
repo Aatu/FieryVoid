@@ -27,7 +27,24 @@ window.systemInfo = {
 			h += "</ul>"
 		}
 		
+		
+		
 		$(".datacontainer", w).html(h);
+		
+		
+		
+		if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
+			if (weaponManager.canCalledshot(ship, system)){
+							
+				e = $('<div class="calledtargeting"><span>CALLED SHOT</span></div><div class="targeting"></div>');
+				var datac = $(".datacontainer", w);
+				datac.append(e);
+				weaponManager.targetingShipTooltip(ship, datac, system.id);
+			}else{
+				e = $('<div class="calledtargeting"><span>CANNOT TARGET</span>');
+				$(".datacontainer", w).append(e);
+			}
+		}
 		
 		
 		

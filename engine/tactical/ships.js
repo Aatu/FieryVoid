@@ -135,71 +135,85 @@ window.shipManager = {
     
     doDrawShip: function(canvas, s, ship, img){
         
-        
+        var dew = ew.getDefensiveEW(ship);
+        if (ship.flight)
+			dew = shipManager.movement.getJinking(ship);
+						
+        var ccew = ew.getCCEW(ship);
         
         var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
         var selected = gamedata.isSelected(ship);
         var mouseover = (gamedata.mouseOverShipId == ship.id);
+        
         if (ship.drawn && shipdrawangle == ship.shipdrawangle && ship.drawnzoom == gamedata.zoom
-         && ship.drawmouseover == mouseover && ship.drawselected == selected && ship.drawDamage == false)
-            return;
-         
+			&& ship.drawmouseover == mouseover && ship.drawselected == selected && ship.drawDamage == false
+			&& ship.drawDEW == dew && ship.drawCCEW == ccew)
+		{
+			return;
+        }
+        
+        var myship = gamedata.isMyShip(ship);
         //console.log("draw");
         canvas.clearRect(0, 0, s, s);
-            
-            if (mouseover && gamedata.gamephase > 1){
-                if (gamedata.zoom > 0){
-                    
-                    var dew = ew.getDefensiveEW(ship);
-                    if (dew > 0){
-                        dew = Math.ceil(( dew )*gamedata.zoom*0.5);
-                        canvas.strokeStyle = "rgba(144,185,208,0.40)";
-                        graphics.drawCircle(canvas, s/2, s/2, s*0.18*gamedata.zoom, dew);
-                    }
-                    var ccew = ew.getCCEW(ship);
-                    if (ccew > 0){
-                        ccew = Math.ceil(( ccew )*gamedata.zoom*0.5);
-                        canvas.strokeStyle = "rgba(20,80,128,0.50)";
-                        graphics.drawCircle(canvas, s/2, s/2, ((s*0.18*gamedata.zoom)+(dew*0.5) + (ccew*0.5) + 2), ccew);
-                    }
-                }
-                
-            }
-            if (selected && !mouseover && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
-                canvas.strokeStyle = "rgba(144,185,208,0.40)";
-                canvas.fillStyle = "rgba(255,255,255,0.18)";
-                
-                graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-            }else if ( mouseover ){
-            
-                if (ship.userid == gamedata.thisplayer){
-                    canvas.strokeStyle = "rgba(86,200,45,0.60)";
-                    canvas.fillStyle = "rgba(50,122,24,0.50)";
-                }else{
-                    canvas.strokeStyle = "rgba(229,87,38,0.60)";
-                    canvas.fillStyle = "rgba(179,65,25,0.50)";
-                
-                }
-                
-                graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-            
-            
-            }
-            
-            if (gamedata.isTargeted(ship)) {
-                canvas.strokeStyle = "rgba(144,185,208,0.40)";
-                canvas.fillStyle = "rgba(255,255,255,0.18)";
-                
-                graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-            }
-          
-            graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
-            ship.shipdrawangle = shipdrawangle;
-            ship.drawn = true;
-            ship.drawnzoom = gamedata.zoom;
-            ship.drawselected = selected;
-            ship.drawmouseover = mouseover;
-            ship.drawDamage = false;
+        
+        
+		if ((selected && myship && gamedata.gamephase == 1) || (mouseover && gamedata.gamephase > 1) || (mouseover && myship)){
+			if (gamedata.zoom > 0){
+						
+				if (dew > 0){
+					dew = Math.ceil(( dew )*gamedata.zoom*0.5);
+					canvas.strokeStyle = "rgba(144,185,208,0.40)";
+					graphics.drawCircle(canvas, s/2, s/2, s*0.18*gamedata.zoom, dew);
+				}
+				
+				if (ccew > 0){
+					ccew = Math.ceil(( ccew )*gamedata.zoom*0.5);
+					canvas.strokeStyle = "rgba(20,80,128,0.50)";
+					graphics.drawCircle(canvas, s/2, s/2, ((s*0.18*gamedata.zoom)+(dew*0.5) + (ccew*0.5) + 2), ccew);
+				}
+			}
+			
+		}
+		
+		if (selected && !mouseover && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
+			canvas.strokeStyle = "rgba(144,185,208,0.40)";
+			canvas.fillStyle = "rgba(255,255,255,0.18)";
+			
+			graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+		}else if ( mouseover ){
+		
+			if (ship.userid == gamedata.thisplayer){
+				canvas.strokeStyle = "rgba(86,200,45,0.60)";
+				canvas.fillStyle = "rgba(50,122,24,0.50)";
+			}else{
+				canvas.strokeStyle = "rgba(229,87,38,0.60)";
+				canvas.fillStyle = "rgba(179,65,25,0.50)";
+			
+			}
+			
+			graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+		
+		
+		}
+		
+		if (gamedata.isTargeted(ship)) {
+			canvas.strokeStyle = "rgba(144,185,208,0.40)";
+			canvas.fillStyle = "rgba(255,255,255,0.18)";
+			
+			graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+		}
+		
+		graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
+		ship.shipdrawangle = shipdrawangle;
+		ship.drawn = true;
+		ship.drawnzoom = gamedata.zoom;
+		ship.drawselected = selected;
+		ship.drawmouseover = mouseover;
+		ship.drawDamage = false;
+		ship.drawDEW = dew;
+		ship.drawCCEW = ccew;
+		
+		
     },
     
 
@@ -473,12 +487,12 @@ window.shipManager = {
         }
         
         if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3){
-           weaponManager.targetShip(ship);
+           weaponManager.targetShip(ship, false);
         }
         
         if (gamedata.gamephase == 1 && ship.userid != gamedata.thisplayer){
             if (gamedata.selectedSystems.length > 0){
-                weaponManager.targetShip(ship);
+                weaponManager.targetShip(ship, false);
             }else{
                 ew.AssignOEW(ship);
             }

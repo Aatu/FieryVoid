@@ -535,7 +535,7 @@ class DBManager {
            	
 			$preturn = ($movement->preturn) ? 1 : 0;
 			
-			$sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', 0)";
+			$sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', 0, 0)";
 			
 			//throw new exception("sql: ".$movement->preturn . var_dump($movement));
 			$this->insert($sql);
@@ -561,7 +561,7 @@ class DBManager {
                 if ($acceptPreturn == false && $preturn)
                     continue;
                 
-                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn)";
+                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, ".$movement->value.")";
                 
                 //throw new exception("sql: ".$movement->preturn . var_dump($movement));
                 $this->insert($sql);
@@ -758,7 +758,7 @@ class DBManager {
                 return null;
                 
             foreach ($result as $value) {
-                $move = new MovementOrder($value->id, $value->type, $value->x, $value->y, $value->xOffset, $value->yOffset, $value->speed, $value->heading, $value->facing, $value->preturn, $value->turn);
+                $move = new MovementOrder($value->id, $value->type, $value->x, $value->y, $value->xOffset, $value->yOffset, $value->speed, $value->heading, $value->facing, $value->preturn, $value->turn, $value->value);
 
                 $move->setReqThrustJSON($value->requiredthrust);
                 $move->setAssThrustJSON($value->assignedthrust);

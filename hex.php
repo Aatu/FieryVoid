@@ -324,7 +324,7 @@
     <div id="shipMovementUI">
         <div id="move">
             <div class="centercontainer">
-                <span class="speedvalue centercontent">00</span>
+                <span class="speedvalue value centercontent">00</span>
             </div>
             <canvas id="movecanvas" width="50" height="50"></canvas>
         </div>
@@ -361,8 +361,23 @@
             <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
         </div>
         
+        <div id="morejink">
+            <canvas id="morejinkcanvas" width="16" height="16"></canvas>
+        </div>
+        
+        <div id="lessjink">
+            <canvas id="lessjinkcanvas" width="16" height="16"></canvas>
+        </div>
+        
         <div id="roll">
             <canvas id="rollcanvas" width="40" height="40"></canvas>
+        </div>
+        
+        <div id="jink">
+			<div class="centercontainer">
+                <span class="jinkvalue value centercontent">0</span>
+            </div>
+            <canvas id="jinkcanvas" width="40" height="40"></canvas>
         </div>
         
     </div>
@@ -404,6 +419,7 @@
 		<div class="entry"><span class="valueheader">Accel/Deccel cost:</span><span class="value accelcost"></span></div>
 		<div class="entry"><span class="valueheader">Pivot cost:</span><span class="value pivotcost"></span></div>
 		<div class="entry"><span class="valueheader">Roll cost:</span><span class="value rollcost"></span></div>
+		<div class="entry evasion"><span class="valueheader">Evasion:</span><span class="value evasion"></span></div>
 		<div class="entry"><span class="valueheader">Unused thrust:</span><span class="value unusedthrust"></span></div>
 	</div>
 	
