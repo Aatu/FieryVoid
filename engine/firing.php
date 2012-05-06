@@ -262,34 +262,88 @@ class Firing{
         }
         
         foreach ($gamedata->ships as $ship){
-			//TODO: FIRING order! Ships, fighters vs fighters, fighters vs ships
+			
+			
+			//FIRE all ships
             foreach($ship->fireOrders as $fire){
+							
+				if ($ship instanceof FighterFlight)
+					continue;
 
-                if ($fire->turn != $gamedata->turn)
-                    continue;
-                    
-                if ($fire->type == "intercept")
-                    continue;
+                self::fire($ship, $fire, $gamedata);
                 
-                $weapon = $ship->getSystemById($fire->weaponid);
                 
-                if ($weapon->ballistic)
-                    continue;
-                    
-                if ($fire->rolled>0)
-                    continue;
-                    
+            }
+            //FIRE fighters at other fighters
+            foreach($ship->fireOrders as $fire){
+				
+				if ($ship->isDestroyed())
+					continue;
+				
+				if (!($ship instanceof FighterFlight))
+					continue;
+					
+				$target = $gamedata->getShipById($fireOrder->targetid);
+
+				if ($target == null || ($target instanceof FighterFlight)){
+					
+					
+					$weapon = $ship->getSystemById($fire->weaponid);
+					if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
+						continue;
+						
+					self::fire($ship, $fire, $gamedata);
+				}
+					
                 
-                $weapon->setLoading($ship, $gamedata->turn-1, 3);
-                $weapon->fire($gamedata, $fire);
+                
+            }
+            
+            foreach($ship->fireOrders as $fire){
+				
+				if ($ship->isDestroyed())
+					continue;
+				
+				if (!($ship instanceof FighterFlight))
+					continue;
+					
+				$weapon = $ship->getSystemById($fire->weaponid);
+				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
+					continue;
+				
+				self::fire($ship, $fire, $gamedata);
                 
                 
             }
         }
         
-
-    
+           
     }
+    
+    private static function fire($ship, $fire, $gamedata){
+		
+		if ($fire->turn != $gamedata->turn)
+			return;
+			
+		if ($fire->type == "intercept")
+			return;
+			
+		if ($fire->rolled > 0)
+			return;
+		
+		$weapon = $ship->getSystemById($fire->weaponid);
+		
+		if ($weapon->ballistic)
+			return;
+			
+		if ($fire->rolled>0)
+			return;
+			
+		
+		$weapon->setLoading($ship, $gamedata->turn-1, 3);
+		$weapon->fire($gamedata, $fire);
+		
+	}
 }
 
 ?>

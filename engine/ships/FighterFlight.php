@@ -71,6 +71,17 @@
             return null;
         }
         
+        public function getFighterBySystem($id){
+			foreach ($this->systems as $fighter){
+                
+                foreach ($fighter->systems as $fs){
+					if ($fs->id == $id){
+						return $fighter;
+					}
+				}
+            }
+		}
+        
         protected function addSystem($fighter){
             
            
