@@ -88,11 +88,12 @@
 		
 		}
 		
-		 public function getArmourPos($target, $pos){
-            $tf = $target->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($target, $pos);
-          
-            return $this->doGetArmour($tf,  $shooterCompassHeading);
+		 public function getArmourPos($gamedata, $pos){
+			$target = $gamedata->getShipById($this->flightid); 
+			$tf = $target->getFacingAngle();
+			$shooterCompassHeading = mathlib::getCompassHeadingOfPos($target, $pos);
+			
+			return $this->doGetArmour($tf,  $shooterCompassHeading);
         }
         
         public function getArmour($target, $shooter){

@@ -211,11 +211,11 @@ class ShipSystem{
      
     }
     
-    public function getArmour($target, $shooter){
+    public function getArmour($gamedata, $shooter){
 		return $this->armour;
 	}
 	
-	public function getArmourPos($target, $pos){
+	public function getArmourPos($gamedata, $pos){
 		return $this->armour;
 	}
     

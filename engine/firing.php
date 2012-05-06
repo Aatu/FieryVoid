@@ -262,7 +262,7 @@ class Firing{
         }
         
         foreach ($gamedata->ships as $ship){
-        
+			//TODO: FIRING order! Ships, fighters vs fighters, fighters vs ships
             foreach($ship->fireOrders as $fire){
 
                 if ($fire->turn != $gamedata->turn)

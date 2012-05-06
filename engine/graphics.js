@@ -25,8 +25,15 @@ window.graphics = {
 
     getCanvas: function(canvasid){
         //console.log(canvasid);
-        var canvas = document.getElementById(canvasid).getContext("2d");
-        return canvas;
+        var canvas = document.getElementById(canvasid);
+        if (!canvas){
+			console.log("Canvas is null");
+			console.trace();
+			return null;
+		}
+			
+        var context = canvas.getContext("2d");
+        return context;
     },
 	
 	drawCone: function(canvas, start, p1, p2, arcs, w){

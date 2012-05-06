@@ -86,17 +86,36 @@
             
             if ($target->isDestroyed())
                 return;
-                    
-            $system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
             
-            if ($system == null)
-                return;
-                
-            $this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata);
-                
+            if ($target instanceof FighterFlight){
+				$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
+			}else{
+				
+						
+				$system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+				
+				if ($system == null)
+					return;
+					
+				$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata);
+			}  
             
         
         }
+        
+        public function fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
+			
+			foreach ($target->systems as $fighter){
+				
+				if ($fighter == null || $fighter->isDestroyed()){
+					continue;
+				}
+				
+				$this->doDamage($target, $shooter, $fighter, $amount, $fireOrder, $pos, $gamedata);
+				
+			}
+			
+		}
 
     }
     

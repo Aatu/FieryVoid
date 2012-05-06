@@ -439,7 +439,7 @@ class Manager{
             
             
             
-            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1);
+            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0);
             self::$dbManager->deploy($servergamedata->id, $ship->id, $move);
             
         }
