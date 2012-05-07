@@ -283,7 +283,7 @@ class Firing{
 				if (!($ship instanceof FighterFlight))
 					continue;
 					
-				$target = $gamedata->getShipById($fireOrder->targetid);
+				$target = $gamedata->getShipById($fire->targetid);
 
 				if ($target == null || ($target instanceof FighterFlight)){
 					

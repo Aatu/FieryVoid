@@ -133,6 +133,8 @@ window.weaponManager = {
 		var shooter = gamedata.getSelectedShip();
 		var loc = weaponManager.getShipHittingSide(shooter, target);
 		
+		if (target.flight)
+			return false;
 		
 		if (system.location == loc || (system.location == 0 && (system.weapon || (system.name == "thruster") && system.direction == loc))){
 
@@ -571,7 +573,7 @@ window.weaponManager = {
                         selectedShip.fireOrders.push(fire);            
                         
                     }
-                    if (weapon.ballisti){
+                    if (weapon.ballistic){
                         gamedata.ballistics.push({id:(gamedata.ballistics.length), fireid:fireid, position:shipManager.getShipPosition(selectedShip),
                         facing:shipManager.movement.getLastCommitedMove(selectedShip).facing,
                         targetposition:{x:null, y:null},

@@ -17,6 +17,7 @@ gamedata = {
     effectsDrawing: false,
     finished: false,
     gamephase: 0,
+    subphase: 0,
     
     mouseOverShipId: -1,
     
@@ -95,6 +96,8 @@ gamedata = {
             return gamedata.selectedShips[i];
             
         }
+        
+        return false;
     },
     
     getTargetedShip: function(){
@@ -125,6 +128,15 @@ gamedata = {
     },
     
     isEnemy: function(target, shooter){
+		if (!shooter && gamedata.getSelectedShip()){
+			shooter = gamedata.getSelectedShip();
+		}else if(!shooter){
+			//console.log("isEnemy called. shooter is null and no ship selected");
+			//console.trace();
+			return false;
+		}
+		
+		
 		var ret = (target.team != shooter.team); 
 		return ret;
 	},
@@ -155,8 +167,7 @@ gamedata = {
                 ew.convertUnusedToDEW(ship);
                 
             }
-            $(".ballclickable").remove();
-            $(".ballisticcanvas").remove(); 
+            
             ajaxInterface.submitGamedata();
             
         }else if (gamedata.gamephase == 2){
@@ -224,9 +235,9 @@ gamedata = {
     },
     
     initPhase: function(){
-    
+		gamedata.subphase = 0;
         shipManager.initShips();
-        ballistics.initBallistics();
+        
         
         gamedata.setPhaseClass();
         for (var i in gamedata.ships){
@@ -236,6 +247,7 @@ gamedata = {
          if (gamedata.gamephase == 4){
             if (gamedata.waiting == false){
                 effects.displayAllWeaponFire(function(){
+					gamedata.subphase = 1;
                     damageDrawer.checkDamages();
                     infowindow.informPhase(5000, null);
                     
@@ -246,6 +258,8 @@ gamedata = {
         
                
         if (gamedata.gamephase == 2){
+			$(".ballclickable").remove();
+			$(".ballisticcanvas").remove();
             ew.RemoveEWEffects();
             animation.setAnimating(animation.animateShipMoves, function(){
                 infowindow.informPhase(5000, null);
@@ -299,7 +313,7 @@ gamedata = {
 
             
         }
-        
+        ballistics.initBallistics();
        
         
         if (gamedata.waiting){
@@ -401,6 +415,8 @@ gamedata = {
             gamedata.status = serverdata.status;
             gamedata.ballistics = serverdata.ballistics;
             //combatLog.constructLog();
+            
+            
             
             gamedata.initPhase();
             drawEntities();

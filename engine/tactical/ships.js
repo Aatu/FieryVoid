@@ -549,8 +549,19 @@ window.shipManager = {
     },
     
     getTurnDestroyed: function(ship){
-        var stru = shipManager.systems.getStructureSystem(ship, 0);
-        var turn = damageManager.getTurnDestroyed(ship, stru);
+		var turn = 0;
+		if (ship.flight){
+			for (var i in ship.systems){
+				var fighter = ship.systems[i];
+				var dturn = damageManager.getTurnDestroyed(ship, fighter);
+				if (dturn > turn)
+					turn = dturn;
+			}
+					
+		}else{
+			var stru = shipManager.systems.getStructureSystem(ship, 0);
+			turn = damageManager.getTurnDestroyed(ship, stru);
+		}
         
         return turn;
         

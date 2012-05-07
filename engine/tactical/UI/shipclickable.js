@@ -127,7 +127,10 @@ window.shipClickable = {
 		if (shipSelectList.haveToShowList(ship) && shipClickable.testStacked){
 			$(".fire",e).hide();
 		}else{
-			if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
+			if (gamedata.isEnemy(ship) 
+				&& ((gamedata.gamephase == 3 && shipManager.systems.selectedShipHasSelectedWeapons())
+				|| (gamedata.gamephase == 1 && shipManager.systems.selectedShipHasSelectedWeapons(true)))
+				&& gamedata.waiting == false){
 						
 				weaponManager.targetingShipTooltip(ship, e, null);
 				$(".fire",e).show();

@@ -383,10 +383,17 @@
         }
         
         
-        public function getHitSystem($pos, $shooter, $turn, $weapon, $location = null){
+        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+        
+			$system = null;
+			if ($fire->calledid != -1){
+				$system = $this->getSystemById($fire->calledid);
+			}
+			if ($system != null && !$system->isDestroyed())
+				return $system;
         
             if ($location == null)
-                $location = $this->getHitSection($shooter, $turn, $weapon);
+                $location = $this->getHitSection($shooter, $fire->turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -441,14 +448,14 @@
                             if ($system->location == 0)
                                 return null;
                                 
-                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                         }
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
                             if ($structure->location == 0)
                                 return null;
                                 
-                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                         }else{
                             return $structure;
                         }
@@ -572,10 +579,17 @@
             return $location;
         }
         
-        public function getHitSystem($pos, $shooter, $turn, $weapon, $location = null){
+        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+        
+			$system = null;
+			if ($fire->calledid != -1){
+				$system = $this->getSystemById($fire->calledid);
+			}
+			if ($system != null && !$system->isDestroyed())
+				return $system;
         
             if ($location == null)
-                $location = $this->getHitSection($shooter, $turn, $weapon);
+                $location = $this->getHitSection($shooter, $fire->turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -625,7 +639,7 @@
                         if ($system instanceof Structure){
                             return null;
                                 
-                            return $this->getHitSystem($pos, $shooter, $turn, $weapon, 0);
+                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                         }
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){

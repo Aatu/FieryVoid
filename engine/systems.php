@@ -486,15 +486,19 @@ class Weapon extends ShipSystem{
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
 			
-		if ($target instanceof FighterFlight){
+		if ($target instanceof FighterFlight && (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0)){
 			$dew = Movement::getJinking($target, $gamedata->turn);
 		}
+		
+		$mod = 0;
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
-        if ($shooter instanceof FighterFlight)
+        if ($shooter instanceof FighterFlight){
 			$oew = $shooter->offensivebonus;
+			$mod -= Movement::getJinking($shooter, $gamedata->turn);
+		}
         
-        $mod = 0;
+       
         
         if (Movement::isRolling($shooter, null) && !$this->ballistic)
             $mod -=3;
@@ -618,7 +622,7 @@ class Weapon extends ShipSystem{
 		}
 		
         if ($this->flashDamage){
-            return $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+            return $target->getHitSystem($pos, $shooter, $fireOrder, $this);
         }else{
             
             $okSystem = $target->getStructureSystem($system->location);
@@ -644,16 +648,9 @@ class Weapon extends ShipSystem{
         if ($target->isDestroyed())
             return;
         
-        $system = null;
-        if ($fireOrder->calledid != -1){
-			$system = $target->getSystemById($fireOrder->calledid);
-		}
-		if ($system == null || $system->isDestroyed())
-			$system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+       
+		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
 		
-         
-        
-        
         if ($system == null)
             return;
             

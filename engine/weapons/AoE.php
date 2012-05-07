@@ -92,7 +92,7 @@
 			}else{
 				
 						
-				$system = $target->getHitSystem($pos, $shooter, $fireOrder->turn, $this);
+				$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
 				
 				if ($system == null)
 					return;

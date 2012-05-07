@@ -240,7 +240,7 @@ window.effects = {
             
             for (var a in ship.fireOrders){
                 var fire = ship.fireOrders[a];
-                if (fire.turn != gamedata.turn || fire.type=='intercept')
+                if (fire.turn != gamedata.turn || fire.type=='intercept' || !fire.rolled)
                     continue;
                 
                 if (fire.animated){

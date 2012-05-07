@@ -34,6 +34,9 @@ shipManager.movement = {
     },
     
     deleteMove: function(ship){
+		
+      
+		
         var movement = ship.movement[ship.movement.length -1];
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn){
             ship.movement.splice(ship.movement.length -1, 1);
@@ -42,6 +45,38 @@ shipManager.movement = {
             shipManager.drawShip(ship);
             gamedata.shipStatusChanged(ship);
         }
+    },
+    
+    deleteSpeedChange: function(ship, accel){
+		var oheading = null;
+        var oaccel = accel;
+        var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
+        
+		for (var i in ship.movement){
+			var movement = ship.movement[i];
+			if (movement.turn != gamedata.turn || movement.type != "speedchange")
+				continue;
+			
+			
+			if (oheading === null){
+				oheading = movement.heading;
+				if (curheading != oheading)
+					oaccel = !oaccel;
+			}
+			
+			
+			
+			if (movement.value != oaccel){
+				ship.movement.splice(ship.movement.length -1, 1);
+				var shipwindow = $(".shipwindow_"+ship.id);
+				shipWindowManager.cancelAssignThrust(shipwindow);
+				shipManager.drawShip(ship);
+				gamedata.shipStatusChanged(ship);
+				return true;
+			}
+		}
+		
+		return false;
     },
     
     canJink: function(ship, accel){
@@ -691,12 +726,14 @@ shipManager.movement = {
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
-        
-		if (shipManager.systems.isEngineDestroyed(ship))
-			return false;
-			
+        			
         if (shipManager.movement.checkHasUncommitted(ship))
             return false;
+            
+        
+            
+        if (shipManager.systems.isEngineDestroyed(ship))
+			return false;
         
         for (var i in ship.movement){
             var movement = ship.movement[i];
@@ -705,6 +742,27 @@ shipManager.movement = {
             
             if (movement.preturn == false && movement.forced == false && movement.type != "speedchange")
                 return false;
+        
+        }
+        
+        var oheading = null;
+        var oaccel = accel;
+        var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
+        for (var i in ship.movement){
+			var movement = ship.movement[i];
+			if (movement.turn != gamedata.turn || movement.type != "speedchange")
+				continue;
+				
+			if (oheading === null){
+				oheading = movement.heading;
+				if (curheading != oheading)
+					oaccel = !oaccel;
+			}
+			
+			
+			            
+            if (movement.type == "speedchange" && oaccel != movement.value)
+                return true;
         
         }
         
@@ -719,11 +777,16 @@ shipManager.movement = {
     
     changeSpeed: function(ship, accel){
 
-    
         if (!shipManager.movement.canChangeSpeed(ship, accel))
             return false;
 
-        
+		if (shipManager.movement.deleteSpeedChange(ship, accel))
+			return;
+
+        var value = 0;
+        if (accel)
+			value = 1;
+			
         requiredThrust = Array(null,null,null,null,null);
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
@@ -775,7 +838,7 @@ shipManager.movement = {
             preturn:false,
             turn:gamedata.turn,
             forced:false,
-            value:0
+            value:value
             };
         
 		gamedata.shipStatusChanged(ship);

@@ -1,5 +1,22 @@
 shipManager.systems = {
 
+	selectedShipHasSelectedWeapons: function(ballistic){
+		var selectedShip = gamedata.getSelectedShip();
+		
+		for (var i in gamedata.selectedSystems){
+			var system = gamedata.selectedSystems[i];
+			if (!ballistic && system.weapon)
+				return true;
+			if (ballistic && system.weapon && system.ballistic)
+				return true;
+		}
+		
+		
+	},
+	
+	
+
+
 	getArmour: function(ship, system){
 		var armour = system.armour - shipManager.criticals.hasCritical(system, "ArmorReduced");
 		if (armour<0)
@@ -8,7 +25,25 @@ shipManager.systems = {
 		return armour;
 		
 	},
-
+	
+	isDestroyedBeforeTurn: function(ship, system, turn){
+		if (!turn)
+			turn = gamedata.turn;
+		
+		 for (var i in system.damage){
+            var damageEntry = system.damage[i];
+			if (damageEntry.destroyed && damageEntry.turn < turn)
+				return true;
+        }
+        
+        var stru = shipManager.systems.getStructureSystem(ship, system.location);
+        if (stru && stru != system && shipManager.systems.isDestroyedBeforeTurn(ship, stru, turn))
+            return true;
+                
+        return false;	
+		
+	},
+	
     isDestroyed: function(ship, system){
 
         var d = damageManager.getDamage(ship, system);

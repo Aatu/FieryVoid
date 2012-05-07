@@ -69,7 +69,7 @@ window.damageDrawer = {
         var context = canvas.get(0).getContext("2d");
         var image = images.modified;
         if (!image){
-            console.log("checkDamage: modified image not ready");
+            console.log(ship.name +" checkDamage: modified image not ready");
             return;
         }
             
@@ -98,9 +98,10 @@ window.damageDrawer = {
     drawDamage: function(ship, image, all){
         var images = shipManager.shipImages[ship.id];
         
-        if (images.turn == gamedata.turn && images.phase == gamedata.gamephase)
+        if (images.turn == gamedata.turn && images.phase == gamedata.gamephase && images.subphase == gamedata.subphase)
             return image;
-            
+        
+        
         if (ship.flight){
 			//return image;
 			image = damageDrawer.drawFlight(ship, image);
@@ -136,6 +137,7 @@ window.damageDrawer = {
 		}
         images.turn = gamedata.turn;
         images.phase = gamedata.gamephase;
+        images.subphase = gamedata.subphase;
         
         return image;
         
@@ -143,7 +145,7 @@ window.damageDrawer = {
     },
     
     applyDamage: function(ship, location, image){
-		console.log("apply damage: " + ship.name);
+		//console.log("apply damage: " + ship.name);
         var images = shipManager.shipImages[ship.id];
         var width = images.orginal.width;
         var height = images.orginal.height;
@@ -172,7 +174,7 @@ window.damageDrawer = {
             
             y = height-100 - range;
         }
-        console.log("r: " +range+"x: " + x + " y: " + y + " loc: " + location);
+        //console.log("r: " +range+"x: " + x + " y: " + y + " loc: " + location);
         
         context.drawImage(damageDrawer.damageimg, x, y);
         var damage = context.getImageData(0, 0, width, height);
@@ -232,7 +234,7 @@ window.damageDrawer = {
     },
     
     drawFlight: function(flight, image){
-		console.log("Draw flight: " + flight.name);
+		//console.log("Draw flight: " + flight.name);
 		var images = shipManager.shipImages[flight.id];
         var width = flight.canvasSize;
         var height = flight.canvasSize;
@@ -248,12 +250,18 @@ window.damageDrawer = {
 			
 			//if (i != 2)
 			//	continue;
-				
 			var fighter = flight.systems[i];
+		
+			if (gamedata.gamephase == 4 && gamedata.subphase == 0){
 			
-			if (shipManager.systems.isDestroyed(flight, fighter)){
-				continue;
+				if (shipManager.systems.isDestroyedBeforeTurn(flight, fighter))
+					continue;
+			}else{
+			
+				if (shipManager.systems.isDestroyed(flight, fighter))
+					continue;
 			}
+			
 			var offset = shipManager.getFighterPosition(fighter.location, 0, 2);
 		
 			x += offset.x;
