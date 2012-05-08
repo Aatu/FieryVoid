@@ -1480,15 +1480,16 @@ shipManager.movement = {
     },
     
     calculateTurndelay: function(ship, movement){
+
         var speed = movement.speed;
 		if (speed == 0)
 			return 0;
+			
         var turndelay = Math.round(speed * ship.turndelaycost);
-        console.log(ship.name + " turn delay: " + turndelay);
+  
         if (ship.flight)
 			return turndelay;
-        
-        console.log("tämän ei pitäisi näkyä ");
+   
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 1)
             turndelay = 1;

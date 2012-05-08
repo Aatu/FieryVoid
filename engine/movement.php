@@ -149,7 +149,11 @@
 			if ($speed == 0)
 				return 0;
 				
-            $turndelay = ceil($speed * $ship->turndelaycost);
+            $turndelay = round($speed * $ship->turndelaycost);
+            
+            if ($ship instanceof FighterFlight)
+				return $turndelay;
+            
             $turndelay -= self::calculateExtraThrustSpent($ship, $move);
             if ($turndelay < 1)
                 $turndelay = 1;
