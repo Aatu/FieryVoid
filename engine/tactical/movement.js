@@ -80,6 +80,10 @@ shipManager.movement = {
     },
     
     canJink: function(ship, accel){
+        
+        if (!gamedata.gamephase != 2)
+            return false;
+        
 		if (!ship.flight)
 			return false;
 	
@@ -183,6 +187,9 @@ shipManager.movement = {
     
     canRoll: function(ship){
 		
+        if (!gamedata.gamephase != 2)
+            return false;
+        
 		if (ship.flight)
 			return false;
 	
@@ -315,6 +322,9 @@ shipManager.movement = {
     },
     
     canMove: function(ship){
+        
+        if (!gamedata.gamephase != 2)
+            return false;
 	
 		if (shipManager.isDestroyed(ship))
 			return false;
@@ -361,6 +371,9 @@ shipManager.movement = {
     },
     
     canSlip: function(ship, right){
+        
+        if (!gamedata.gamephase != 2)
+            return false;
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
@@ -486,6 +499,8 @@ shipManager.movement = {
     },
     
     canPivot: function(ship, right){
+        
+        
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
@@ -516,6 +531,14 @@ shipManager.movement = {
             
         if (ship.pivotcost > shipManager.movement.getRemainingEngineThrust(ship))
             return false;
+        
+        if (ship.flight && gamedata.gamephase == 3){
+            
+            if (ship.pivotcost*2 > shipManager.movement.getRemainingEngineThrust(ship))
+            return false;
+        
+        }else if (!gamedata.gamephase != 2)
+            return false;
             
         return true;
         
@@ -533,12 +556,11 @@ shipManager.movement = {
         var newfacing = lm.facing;
         var step = 1;
         var pivoting = shipManager.movement.isPivoting(ship);
+        var pivotcost = ship.pivotcost;
         
         if (pivoting != "no"){
             right = !right;
         }
-            
-        
             
         name = "pivotright";
         
@@ -551,11 +573,11 @@ shipManager.movement = {
         var requiredThrust = Array();
         if (ship.flight){
 			commit = true;
-			requiredThrust[0] = ship.pivotcost;
-			assignedThrust[0] = ship.pivotcost;
+			requiredThrust[0] = pivotcost;
+			assignedThrust[0] = pivotcost;
 		}else{
-			side = Math.floor(ship.pivotcost / 2);
-			rear = Math.floor(ship.pivotcost / 2);
+			side = Math.floor(pivotcost / 2);
+			rear = Math.floor(pivotcost / 2);
 			any = ship.pivotcost % 2;
 			
 			requiredThrust = Array(any, rear, rear, side, side);
@@ -723,6 +745,9 @@ shipManager.movement = {
     },
     
     canChangeSpeed: function(ship, accel){
+        
+        if (!gamedata.gamephase != 2)
+            return false;
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
@@ -1140,6 +1165,9 @@ shipManager.movement = {
     //TURN
     
     canTurn: function(ship, right){
+        
+        if (!gamedata.gamephase != 2)
+            return false;
         
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;

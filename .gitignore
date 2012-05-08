@@ -1,1 +1,4 @@
 ./makefile
+/nbproject/private/
+/nbproject
+.DS_Store

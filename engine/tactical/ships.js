@@ -115,6 +115,10 @@ window.shipManager = {
         //console.log("gamedata.gamephase: " + gamedata.gamephase + " gamedata.activeship: " + gamedata.activeship + " ship.id: " + ship.id);
         if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
             UI.shipMovement.drawShipMovementUI(ship);
+        
+        if (gamedata.gamephase == 3 && ship.flight)
+            UI.shipMovement.drawShipMovementUI(ship);
+        
         if (img.loaded){
             shipManager.doDrawShip(canvas, s, ship, img);
         }else{

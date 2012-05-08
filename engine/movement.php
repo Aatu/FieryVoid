@@ -1,9 +1,47 @@
 <?php
     class Movement{
+        
+        private static function checkIsNewMove($gamedata, $ship, $move){
+            
+            $newship = $gamedata->getShipById($ship->id);
+            
+            $newmove = $ship->getMovementById($move->id);
+            
+            if (!$newmove)
+                return true;
+            
+            return false;
+            
+        }
 
-        public static function validateMovement($gamedata, $ships){
+        public static function validateMovement($gamedata, $ship){
+            
+            if ($gamedata->phase == 3){
+                    
+                if (!(ship instanceof FighterFlight))
+                    $ship->movement = array();
+
+                for ($i=count($ship->movement)-1;$i>=0;$i--){
+                    $move = $ship->movement[$i];
+
+                    if (($move->type != "pivotright" 
+                        && $move->type != "pivotleft" )
+                        || $move->turn != $gamedata->turn 
+                        || !self::checkIsNewMove($gamedata, $ship, $move)){
+                        unset($ship->movement[$i]);
+                    }
+
+                }
+                
+            }else{
+                
             $ship = $gamedata->ships[$gamedata->activeship];
-            $moves = $ships[$gamedata->activeship]->movement;
+            $moves = $ships[$gamedata->activeship]->movement;   
+                
+            }
+            
+            return true;
+            
         }
         
         public static function isPivoting($ship, $turn){

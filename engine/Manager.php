@@ -306,6 +306,9 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
             
+            if (Movement::validateMovement($gamedata, $ship)){
+                self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
+            }
             
             if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
                 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
