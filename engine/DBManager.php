@@ -784,7 +784,7 @@ class DBManager {
         $id = false;
         try {
 			if ($stmt = $this->connection->prepare("SELECT id FROM player where username = ? and password = password(?)")) {
-				var_dump($stmt);
+				
 				$stmt->bind_param('ss', $username, $password);
 				$stmt->execute();
 				$stmt->bind_result($id);
