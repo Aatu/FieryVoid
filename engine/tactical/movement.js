@@ -81,7 +81,7 @@ shipManager.movement = {
     
     canJink: function(ship, accel){
         
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
         
 		if (!ship.flight)
@@ -187,7 +187,7 @@ shipManager.movement = {
     
     canRoll: function(ship){
 		
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
         
 		if (ship.flight)
@@ -323,7 +323,7 @@ shipManager.movement = {
     
     canMove: function(ship){
         
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
 	
 		if (shipManager.isDestroyed(ship))
@@ -372,7 +372,7 @@ shipManager.movement = {
     
     canSlip: function(ship, right){
         
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
@@ -537,7 +537,7 @@ shipManager.movement = {
             if (ship.pivotcost*2 > shipManager.movement.getRemainingEngineThrust(ship))
             return false;
         
-        }else if (!gamedata.gamephase != 2)
+        }else if (gamedata.gamephase != 2)
             return false;
             
         return true;
@@ -746,7 +746,7 @@ shipManager.movement = {
     
     canChangeSpeed: function(ship, accel){
         
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
@@ -1166,7 +1166,7 @@ shipManager.movement = {
     
     canTurn: function(ship, right){
         
-        if (!gamedata.gamephase != 2)
+        if (gamedata.gamephase != 2)
             return false;
         
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
@@ -1484,10 +1484,11 @@ shipManager.movement = {
 		if (speed == 0)
 			return 0;
         var turndelay = Math.round(speed * ship.turndelaycost);
-        
+        console.log(ship.name + " turn delay: " + turndelay);
         if (ship.flight)
 			return turndelay;
         
+        console.log("tämän ei pitäisi näkyä ");
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 1)
             turndelay = 1;
