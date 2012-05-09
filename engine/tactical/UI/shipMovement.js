@@ -35,6 +35,9 @@ window.UI = {
                 
                 UI.shipMovement.morejinkElement = $("#morejink", ui);
                 UI.shipMovement.lessjinkElement = $("#lessjink", ui);
+                UI.shipMovement.cancelElement = $("#cancel", ui);
+                
+                UI.shipMovement.cancelElement.bind("click", UI.shipMovement.cancelCallback);
                 
                 UI.shipMovement.moveElement.bind("click", UI.shipMovement.moveCallback);
                 UI.shipMovement.turnrightElement.bind("click", UI.shipMovement.turnrightCallback);
@@ -51,6 +54,8 @@ window.UI = {
                 
                 UI.shipMovement.morejinkElement.bind("click", UI.shipMovement.morejinkCallback);
                 UI.shipMovement.lessjinkElement.bind("click", UI.shipMovement.lessjinkCallback);
+                
+                
                 
                 UI.shipMovement.iniated = true;
         },
@@ -74,6 +79,20 @@ window.UI = {
             e.handled = true;
             cancelEvent(e);
         },
+        
+        cancelCallback: function(e){
+			e.stopPropagation();
+                
+            if (gamedata.gamephase == 2){
+                var ship = gamedata.getActiveShip();
+                shipManager.movement.deleteMove(ship);
+            }
+
+            if (gamedata.gamephase == 3){
+                var ship = gamedata.getSelectedShip();
+                shipManager.movement.deleteMove(ship);
+            }
+		},
         
         morejinkCallback: function(e){
 			e.stopPropagation();
@@ -129,6 +148,9 @@ window.UI = {
 			//console.log("pivotCallback2");
                 
             var ship = gamedata.getActiveShip();
+            
+            if (gamedata.gamephase == 3)
+                ship = gamedata.getSelectedShip();
             
             shipManager.movement.doPivot(ship, right);
             
@@ -295,13 +317,17 @@ window.UI = {
                 pivotright.hide();
             }
             
+            
+            
+            dis = 30;
             angle = mathlib.addToDirection(shipHeading, 180);
             var roll = UI.shipMovement.rollElement;
             if (shipManager.movement.canRoll(ship)){
                 var icon = "img/rotate.png";
                 if (shipManager.movement.isRolling(ship))
                     icon = "img/rotate_active.png";
-                    
+                
+                dis += 30;
                 UI.shipMovement.drawUIElement(roll, pos.x, pos.y, s, dis*1.4, angle, icon, "rollcanvas", shipHeading);
             }else{
                 roll.hide();
@@ -310,12 +336,21 @@ window.UI = {
             var jink = UI.shipMovement.jinkElement;
             if (shipManager.movement.canJink(ship, 0)){
                 var icon = "img/jink.png";
-           
+                dis += 30;
                            
                 UI.shipMovement.jinkvalueElement.html(shipManager.movement.getJinking(ship));
                 UI.shipMovement.drawUIElement(jink, pos.x, pos.y, s, dis*1.4, angle, icon, "jinkcanvas", shipHeading);
             }else{
                 jink.hide();
+            }
+            
+            
+            var cancel = UI.shipMovement.cancelElement;
+            if (shipManager.movement.hasDeletableMovements(ship)){
+                dis += 30;
+                UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis*1.4, angle, "img/cancel.png", "cancelcanvas", 0);
+            }else{
+                cancel.hide();
             }
             
             dis = 40;
@@ -333,6 +368,8 @@ window.UI = {
             }else{
                 lessjink.hide();
             }
+            
+            
             
             ui.show();
         },

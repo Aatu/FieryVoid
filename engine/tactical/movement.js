@@ -24,10 +24,16 @@ shipManager.movement = {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
                 continue;
-
-            if (!movement.preturn && !movement.forced)
-                return true;
-                        
+            
+            if (gamedata.gamephase == 3){
+                if (!movement.id && (movement.type == "pivotleft" || movement.type == "pivotright" )){
+                   return true;
+                }
+                    
+            }else{
+                if (!movement.preturn && !movement.forced)
+                    return true;
+            }
         }
         
         return false;
@@ -39,6 +45,10 @@ shipManager.movement = {
 		
         var movement = ship.movement[ship.movement.length -1];
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn){
+            
+            if (gamedata.gamephase == 3 && (movement.id || (movement.type != "pivotleft" && movement.type != "pivotright" )))
+                return;
+            
             ship.movement.splice(ship.movement.length -1, 1);
             var shipwindow = $(".shipwindow_"+ship.id);
             shipWindowManager.cancelAssignThrust(shipwindow);
@@ -525,8 +535,11 @@ shipManager.movement = {
         
         if (ship.flight && gamedata.gamephase == 3){
             
+            if (!weaponManager.canCombatTurn(ship))
+                return false;
+            
             if (ship.pivotcost*2 > shipManager.movement.getRemainingEngineThrust(ship))
-            return false;
+                return false;
         
         }else if (gamedata.gamephase != 2)
             return false;
@@ -536,11 +549,10 @@ shipManager.movement = {
     },
     
     doPivot: function(ship, right){
-    
+        
         if (!shipManager.movement.canPivot(ship, right))
             return false;
-
-		
+        
         var lm = ship.movement[ship.movement.length-1];
                 
         var name;

@@ -54,6 +54,10 @@ window.animation = {
                 
             var ship = gamedata.getActiveShip();
             
+            if (ship == null){
+                ship = gamedata.getSelectedShip();
+            }
+            
             if (ship == null)
                 return;
             

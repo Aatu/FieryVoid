@@ -45,6 +45,7 @@ gamedata = {
            
         } 
         
+        
     },
     
     targetShip: function(ship, add){
@@ -193,8 +194,11 @@ gamedata = {
         if (gamedata.gamephase == 2){
             var ship = gamedata.getActiveShip();
             shipManager.movement.deleteMove(ship);
-            
-            
+        }
+        
+        if (gamedata.gamephase == 3){
+            var ship = gamedata.getSelectedShip();
+            shipManager.movement.deleteMove(ship);
         }
     },
     
@@ -346,7 +350,9 @@ gamedata = {
         }else if (gamedata.gamephase == 3){
             
             commit.show();
-            cancel.hide();
+            var ship = gamedata.getSelectedShip();
+           
+                
             
         }else if (gamedata.gamephase == 2){
             var ship = gamedata.getActiveShip();
@@ -356,11 +362,6 @@ gamedata = {
                 commit.hide();
             }
             
-            if (shipManager.movement.hasDeletableMovements(ship) && ship.userid == gamedata.thisplayer){
-                cancel.show();
-            }else{
-                cancel.hide();
-            }
             
         }else if (gamedata.gamephase == 1){
             
@@ -385,6 +386,8 @@ gamedata = {
         }else{
             $("#phaseheader .waiting.value").hide();
         }
+        
+        cancel.hide();
     },
     
     

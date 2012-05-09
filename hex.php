@@ -377,7 +377,12 @@
 			<div class="centercontainer">
                 <span class="jinkvalue value centercontent">0</span>
             </div>
-            <canvas id="jinkcanvas" width="40" height="40"></canvas>
+            <canvas id="jinkcanvas" width="30" height="30"></canvas>
+        </div>
+        
+        
+        <div id="cancel">
+            <canvas id="cancelcanvas" width="30" height="30"></canvas>
         </div>
         
     </div>
