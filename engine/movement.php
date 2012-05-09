@@ -119,7 +119,7 @@
                                    
                            
             }
-            print($ship->name . " jinking $jinking\n");
+          
             return $jinking;
 		}    
 		
@@ -134,7 +134,7 @@
                                    
                            
             }
-            print($ship->name . " pivots $pivots\n");
+           
             return $pivots;
 		}        
        
