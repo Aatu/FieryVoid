@@ -3,6 +3,8 @@
         
         private static function checkIsNewMove($gamedata, $ship, $move){
             
+            
+            
             $newship = $gamedata->getShipById($ship->id);
             
             $newmove = $ship->getMovementById($move->id);
@@ -17,13 +19,13 @@
         public static function validateMovement($gamedata, $ship){
             
             if ($gamedata->phase == 3){
-                    
+                print($ship->name."\n");
                 if (!($ship instanceof FighterFlight))
                     $ship->movement = array();
 
                 for ($i=count($ship->movement)-1;$i>=0;$i--){
                     $move = $ship->movement[$i];
-
+                    print($move->type."\n");
                     if (($move->type != "pivotright" 
                         && $move->type != "pivotleft" )
                         || $move->turn != $gamedata->turn 

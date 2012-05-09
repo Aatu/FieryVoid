@@ -157,6 +157,7 @@ shipManager.movement = {
 		}else{
 			var lm = shipManager.movement.getLastCommitedMove(ship);
 			ship.movement[ship.movement.length] = {
+                id:-1,
 				type:"jink",
 				x:lm.x,
 				y:lm.y,
@@ -225,6 +226,7 @@ shipManager.movement = {
         
         
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:"roll",
             x:lm.x,
             y:lm.y,
@@ -348,6 +350,7 @@ shipManager.movement = {
         var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
 		var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:"move",
             x:pos.x,
             y:pos.y,
@@ -458,6 +461,7 @@ shipManager.movement = {
         
 		var off = shipManager.movement.getMovementOffsetPos(ship, newheading, pos);
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:name,
             x:pos.x,
             y:pos.y,
@@ -589,6 +593,7 @@ shipManager.movement = {
             newfacing = mathlib.addToHexFacing(lm.facing, step);
                 
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:name,
             x:lm.x,
             y:lm.y,
@@ -631,6 +636,7 @@ shipManager.movement = {
         var facing = mathlib.addToHexFacing(lm.facing, step);
         
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:name,
             x:lm.x,
             y:lm.y,
@@ -841,6 +847,7 @@ shipManager.movement = {
         
         var lm = shipManager.movement.getLastCommitedMove(ship);
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:"speedchange",
             x:lm.x,
             y:lm.y,
@@ -1248,6 +1255,7 @@ shipManager.movement = {
 		}
         
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:name,
             x:lm.x,
             y:lm.y,
@@ -1523,6 +1531,7 @@ shipManager.movement = {
     addMove: function(ship, name, x, y, facing, heading, speed, animated, requiredThrust, commit, preturn, forced){
         
         ship.movement[ship.movement.length] = {
+            id:-1,
             type:name,
             x:lm.x,
             y:lm.y,

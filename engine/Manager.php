@@ -306,8 +306,13 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
             
+            if ($ship->isDestroyed())
+                continue;
+            
             if (Movement::validateMovement($gamedata, $ship)){
-                self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
+                print($ship->name." validated\n");
+                if (count($ship->movement)>0)   
+                    self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
             }
             
             if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
@@ -566,7 +571,7 @@ class Manager{
             if (is_array($value["movement"])){
                 foreach($value["movement"] as $i=>$move){
                     $movement = new MovementOrder(
-						-1,
+						$move["id"],
 						$move["type"],
 						$move["x"],
 						$move["y"],
