@@ -114,13 +114,28 @@
 			foreach ($ship->movement as $move){
            
                 if ($move->type == "jink" && $move->turn == $turn){
-                    $jinking += $move->value;
+                    $jinking += (int)$move->value;
                 }
                                    
                            
             }
-            
+            print($ship->name . " jinking $jinking\n");
             return $jinking;
+		}    
+		
+		public static function getCombatPivots($ship, $turn){
+			$pivots = 0;
+			
+			foreach ($ship->movement as $move){
+           
+                if (($move->type == "pivotleft" || $move->type == "pivotright" ) && $move->value == "combatpivot" && $move->turn == $turn){
+					$pivots++;
+                }
+                                   
+                           
+            }
+            print($ship->name . " pivots $pivots\n");
+            return $pivots;
 		}        
        
         public static function getTurnDelay($ship){

@@ -31,7 +31,7 @@ shipManager.systems = {
         if (stru && stru != system && shipManager.systems.isDestroyed(ship, stru))
             return true;
             
-        if (system.fighter && shipManager.hasCritical(system, "DisengagedFighter")
+        if (system.fighter && shipManager.criticals.hasCritical(system, "DisengagedFighter"))
 			return true;
             
         return (d >= system.maxhealth);

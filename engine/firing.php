@@ -235,21 +235,17 @@ class Firing{
         
         
         foreach ($gamedata->ships as $ship){
-			
+			if ($ship instanceof FighterFlight)
+				continue;
 			
 			//FIRE all ships
             foreach($ship->fireOrders as $fire){
-							
-				if ($ship instanceof FighterFlight)
-					continue;
-
-                self::fire($ship, $fire, $gamedata);
-                
-                
-            }
+				self::fire($ship, $fire, $gamedata);
+			}
             
         }
-		$chosenships = array();
+        
+		$chosenfiress = array();
 		foreach($gamedata->ships as $ship){
 			if ($ship->isDestroyed())
 				continue;
@@ -257,30 +253,31 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			$chosenships[] = $ship;
+			foreach($ship->fireOrders as $fire){
+							
+				$weapon = $ship->getSystemById($fire->weaponid);
+				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
+					continue;
+					
+				$chosenfires[] = $fire;
+			}
 		}
 		
 		//FIRE fighters at other fighters
 		
-		foreach ($chosenships as $ship){
-			foreach($ship->fireOrders as $fire){
-					
-				$target = $gamedata->getShipById($fire->targetid);
+		foreach ($chosenfires as $fire){
+			$shooter = $gamedata->getShipById($fire->shooterid);
+			$target = $gamedata->getShipById($fire->targetid);
 
-				if ($target == null || ($target instanceof FighterFlight)){
-					
-					
-					$weapon = $ship->getSystemById($fire->weaponid);
-					if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
-						continue;
-						
-					self::fire($ship, $fire, $gamedata);
-				}
-				
+			if ($target == null || ($target instanceof FighterFlight)){
+									
+				self::fire($shooter, $fire, $gamedata);
 			}
+				
+			
 		}
 		
-		$chosenships = array();
+		$chosenfiress = array();
 		foreach($gamedata->ships as $ship){
 			if ($ship->isDestroyed())
 				continue;
@@ -288,23 +285,21 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			$chosenships[] = $ship;
-		}
-		
-
-		
-		foreach ($chosenships as $ship){
-			
 			foreach($ship->fireOrders as $fire){
-			
+							
 				$weapon = $ship->getSystemById($fire->weaponid);
 				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
 					continue;
-				
-				self::fire($ship, $fire, $gamedata);
-				
-				
+					
+				$chosenfires[] = $fire;
 			}
+		}
+		
+		//FIRE rest of fighters
+		foreach ($chosenfires as $fire){
+			$shooter = $gamedata->getShipById($fire->shooterid);
+			self::fire($shooter, $fire, $gamedata);
+			
 		}
 	}
     

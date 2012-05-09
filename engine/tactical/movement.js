@@ -26,7 +26,7 @@ shipManager.movement = {
                 continue;
             
             if (gamedata.gamephase == 3){
-                if (!movement.id && (movement.type == "pivotleft" || movement.type == "pivotright" )){
+                if (movement.value == "combatpivot" && (movement.type == "pivotleft" || movement.type == "pivotright" )){
                    return true;
                 }
                     
@@ -46,7 +46,7 @@ shipManager.movement = {
         var movement = ship.movement[ship.movement.length -1];
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn){
             
-            if (gamedata.gamephase == 3 && (movement.id || (movement.type != "pivotleft" && movement.type != "pivotright" )))
+            if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || (movement.type != "pivotleft" && movement.type != "pivotright" )))
                 return;
             
             ship.movement.splice(ship.movement.length -1, 1);
@@ -629,7 +629,7 @@ shipManager.movement = {
             preturn:false,
             turn:gamedata.turn,
             forced:false,
-            value:0
+            value:value
         }
         
         shipManager.drawShip(ship);

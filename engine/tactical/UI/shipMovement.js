@@ -363,7 +363,7 @@ window.UI = {
             
             
             var cancel = UI.shipMovement.cancelElement;
-            if (shipManager.movement.hasDeletableMovements(ship)){
+            if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)){
                 dis += 26;
                 UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis*1.4, angle, "img/cancel.png", "cancelcanvas", 0);
             }else{

@@ -188,6 +188,9 @@ flightWindowManager = {
 		
 		if (shipManager.systems.isDestroyed(flight, fighter)){
 			systemwindow.addClass("destroyed");
+			if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter"))
+				systemwindow.addClass("disengaged");
+			
 			return;
 		}
 		
@@ -205,13 +208,10 @@ flightWindowManager = {
 	
 		var field = systemwindow.find(".efficiency.value");
 		
-		if (shipManager.systems.isDestroyed(flight, system) || shipManager.systems.isDestroyed(flight, fighter)){
+		if (shipManager.systems.isDestroyed(flight, fighter)){
 			systemwindow.addClass("destroyed");
 			
-			if (shipManager.hasCritical(system, "DisengagedFighter"))
-				systemwindow.addClass("disengaged");
 			
-			return;
 		}
 		
 		if (system.weapon){

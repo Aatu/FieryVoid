@@ -22,7 +22,7 @@ window.shipManager.criticals = {
         }
 		
 		return null;
-	}
+	},
     
     hasCriticals: function(system){
     

@@ -253,8 +253,8 @@ window.damageDrawer = {
 			var fighter = flight.systems[i];
 		
 			if (gamedata.gamephase == 4 && gamedata.subphase == 0){
-			
-				if (shipManager.damage.getTurnDestroyed(flight, fighter) < gamedata.turn)
+				var turndest = damageManager.getTurnDestroyed(flight, fighter);
+				if ( turndest && turndest < gamedata.turn)
 					continue;
 			}else{
 			

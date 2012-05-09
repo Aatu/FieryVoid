@@ -486,8 +486,12 @@ class Weapon extends ShipSystem{
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
 			
-		if ($target instanceof FighterFlight && (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0)){
-			$dew = Movement::getJinking($target, $gamedata->turn);
+		if ($target instanceof FighterFlight){
+			if (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 
+				||  Movement::getCombatPivots($shooter, $gamedata->turn) > 0){
+				$dew = Movement::getJinking($target, $gamedata->turn);
+			}
+			
 		}
 		
 		$mod = 0;
@@ -496,6 +500,7 @@ class Weapon extends ShipSystem{
         if ($shooter instanceof FighterFlight){
 			$oew = $shooter->offensivebonus;
 			$mod -= Movement::getJinking($shooter, $gamedata->turn);
+			$mod -= Movement::getCombatPivots($shooter, $gamedata->turn);
 		}
         
        

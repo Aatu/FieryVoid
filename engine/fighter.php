@@ -29,6 +29,14 @@
 			
 		}
 		
+		public function isDestroyed(){
+			if ($this->hasCritical("DisengagedFighter"))
+				return true;
+				
+			return parent::isDestroyed();
+			
+		}
+		
 		
 		public function addFrontSystem($system){
             
@@ -70,9 +78,16 @@
 		}
 		
 		public function testCritical($ship, $turn, $crits, $add = 0){
+			$d = Dice::d(10);
 			
-			if (Dice::d(10) > $this->getRemainingHealth())
-				$crits[] = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $turn);
+			print("Testing critical " . $ship->name . " dice: " . $d . "\n");
+			if ($d > $this->getRemainingHealth()){
+				$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $turn);
+				$crit->updated = true;
+                $this->criticals[] =  $crit;
+                $crits[] = $crit;
+				print("ADDING CRIT\n");
+			}
 						
 			return $crits;
 			 

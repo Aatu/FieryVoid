@@ -198,7 +198,7 @@ class ShipSystem{
     public $criticals = array();
     
     function __construct($armour, $maxhealth, $powerReq, $output){
-        $this->armour = (int)$armour;
+        $this->armour = $armour;
         $this->maxhealth = (int)$maxhealth;
         $this->powerReq = (int)$powerReq;
         $this->output = (int)$output;
@@ -324,11 +324,14 @@ class ShipSystem{
         $this->effectCriticals();
     }
     
-    public function hasCritical($type, $turn){
+    public function hasCritical($type, $turn = false){
         $count = 0;
         foreach ($this->criticals as $critical){
             if ($critical->phpclass == $type){
-                if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn)
+				
+				if ($turn === false){
+					$count++;
+				else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn)
                     $count++;
             }
                 
