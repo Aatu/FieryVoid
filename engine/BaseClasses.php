@@ -331,9 +331,10 @@ class ShipSystem{
 				
 				if ($turn === false){
 					$count++;
-				else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn)
+				}else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
                     $count++;
-            }
+				}
+			}
                 
         }
     
