@@ -14,8 +14,6 @@ shipManager.systems = {
 		
 	},
 	
-	
-
 
 	getArmour: function(ship, system){
 		var armour = system.armour - shipManager.criticals.hasCritical(system, "ArmorReduced");
@@ -26,30 +24,15 @@ shipManager.systems = {
 		
 	},
 	
-	isDestroyedBeforeTurn: function(ship, system, turn){
-		if (!turn)
-			turn = gamedata.turn;
-		
-		 for (var i in system.damage){
-            var damageEntry = system.damage[i];
-			if (damageEntry.destroyed && damageEntry.turn < turn)
-				return true;
-        }
-        
-        var stru = shipManager.systems.getStructureSystem(ship, system.location);
-        if (stru && stru != system && shipManager.systems.isDestroyedBeforeTurn(ship, stru, turn))
-            return true;
-                
-        return false;	
-		
-	},
-	
-    isDestroyed: function(ship, system){
+	isDestroyed: function(ship, system){
 
         var d = damageManager.getDamage(ship, system);
         var stru = shipManager.systems.getStructureSystem(ship, system.location);
         if (stru && stru != system && shipManager.systems.isDestroyed(ship, stru))
             return true;
+            
+        if (system.fighter && shipManager.hasCritical(system, "DisengagedFighter")
+			return true;
             
         return (d >= system.maxhealth);
     },

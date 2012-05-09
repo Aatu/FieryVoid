@@ -70,6 +70,9 @@
 		}
 		
 		public function testCritical($ship, $turn, $crits, $add = 0){
+			
+			if (Dice::d(10) > $this->getRemainingHealth())
+				$crits[] = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $turn);
 						
 			return $crits;
 			 

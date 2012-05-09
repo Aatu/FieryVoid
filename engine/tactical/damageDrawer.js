@@ -254,7 +254,7 @@ window.damageDrawer = {
 		
 			if (gamedata.gamephase == 4 && gamedata.subphase == 0){
 			
-				if (shipManager.systems.isDestroyedBeforeTurn(flight, fighter))
+				if (shipManager.damage.getTurnDestroyed(flight, fighter) < gamedata.turn)
 					continue;
 			}else{
 			

@@ -38,6 +38,21 @@ window.damageManager = {
                 if (damageEntry.destroyed)
                     return damageEntry.turn;
         }
+        
+        if (system.fighter){
+			var crit = shipManager.getCritical(system, "DisengagedFighter");
+			if (crit)
+				return crit.turn;
+		}else{
+			return null;
+		}
+        
+        var stru = shipManager.systems.getStructureSystem(ship, system.location);
+        if (stru && stru != system){
+			return damageManager.getTurnDestroyed(ship, stru);
+		}
+           
+        
     
         return null;
     }

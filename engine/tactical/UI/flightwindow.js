@@ -154,7 +154,8 @@ flightWindowManager = {
 			"loading",
 			"droppedout",
 			"selected",
-			"firing"
+			"firing",
+			"disengaged"
 			
 		);
 		
@@ -206,6 +207,10 @@ flightWindowManager = {
 		
 		if (shipManager.systems.isDestroyed(flight, system) || shipManager.systems.isDestroyed(flight, fighter)){
 			systemwindow.addClass("destroyed");
+			
+			if (shipManager.hasCritical(system, "DisengagedFighter"))
+				systemwindow.addClass("disengaged");
+			
 			return;
 		}
 		

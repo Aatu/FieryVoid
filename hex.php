@@ -179,6 +179,7 @@
     
     <div class="fighter">
 		<div class="destroyedtext"><span>DESTROYED</span></div>
+		<div class="disengagedtext"><span>DISENGAGED</span></div>
         <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
         <div class="systemcontainer">
             <div class="icon">
@@ -377,7 +378,7 @@
 			<div class="centercontainer">
                 <span class="jinkvalue value centercontent">0</span>
             </div>
-            <canvas id="jinkcanvas" width="30" height="30"></canvas>
+            <canvas id="jinkcanvas" width="40" height="40"></canvas>
         </div>
         
         

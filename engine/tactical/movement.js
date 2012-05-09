@@ -552,6 +552,19 @@ shipManager.movement = {
         
     },
     
+    countCombatPivot: function (ship){
+		var c = 0;
+		
+		for (var i in ship.movement){
+			var move = ship.movement[i];
+		
+			if (move.value == "combatpivot")
+				c++;
+		}
+		
+		return c;
+	},
+    
     doPivot: function(ship, right){
         
         if (!shipManager.movement.canPivot(ship, right))
@@ -564,6 +577,11 @@ shipManager.movement = {
         var step = 1;
         var pivoting = shipManager.movement.isPivoting(ship);
         var pivotcost = ship.pivotcost;
+        var value = 0;
+        if (gamedata.gamephase == 3){
+			pivotcost *= 2;
+			value = "combatpivot";
+		}
         
         if (pivoting != "no"){
             right = !right;

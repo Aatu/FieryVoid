@@ -310,7 +310,6 @@ class Manager{
                 continue;
             
             if (Movement::validateMovement($gamedata, $ship)){
-                print($ship->name." validated\n");
                 if (count($ship->movement)>0)   
                     self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
             }
@@ -320,6 +319,7 @@ class Manager{
             }
             
         }
+        
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
         

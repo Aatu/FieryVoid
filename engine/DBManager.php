@@ -550,10 +550,7 @@ class DBManager {
 	
     public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false){
         try {
-            
-            var_dump($movements);
-            //throw new Exception("kaadu");
-            
+                  
             foreach ($movements as $movement){
                 
                 if($movement->type == "start" || $movement->turn != $turn)

@@ -14,6 +14,16 @@ window.shipManager.criticals = {
         return amount;
     },
     
+    getCritical: function(system, name){
+		for (var i in system.criticals){
+            var crit = system.criticals[i];
+            if (crit.phpclass == name)
+                return crit;
+        }
+		
+		return null;
+	}
+    
     hasCriticals: function(system){
     
         return (system.criticals.length > 0);

@@ -333,10 +333,19 @@ window.UI = {
                 roll.hide();
             }
             
+            var morejink = UI.shipMovement.morejinkElement;
+            if (shipManager.movement.canJink(ship, 1)){
+				dis += 10;
+                UI.shipMovement.drawUIElement(morejink, pos.x, pos.y, 16, dis*1.4, angle, "img/plus.png", "morejinkcanvas", 0);
+            }else{
+                morejink.hide();
+            }
+            
+            
             var jink = UI.shipMovement.jinkElement;
             if (shipManager.movement.canJink(ship, 0)){
                 var icon = "img/jink.png";
-                dis += 30;
+                dis += 20;
                            
                 UI.shipMovement.jinkvalueElement.html(shipManager.movement.getJinking(ship));
                 UI.shipMovement.drawUIElement(jink, pos.x, pos.y, s, dis*1.4, angle, icon, "jinkcanvas", shipHeading);
@@ -344,30 +353,24 @@ window.UI = {
                 jink.hide();
             }
             
+            var lessjink = UI.shipMovement.lessjinkElement;
+            if (shipManager.movement.canJink(ship, -1)){
+				dis += 22;
+                UI.shipMovement.drawUIElement(lessjink, pos.x, pos.y, 16, dis*1.4, angle, "img/minus.png", "lessjinkcanvas", 0);
+            }else{
+                lessjink.hide();
+            }
+            
             
             var cancel = UI.shipMovement.cancelElement;
             if (shipManager.movement.hasDeletableMovements(ship)){
-                dis += 30;
+                dis += 26;
                 UI.shipMovement.drawUIElement(cancel, pos.x, pos.y, 30, dis*1.4, angle, "img/cancel.png", "cancelcanvas", 0);
             }else{
                 cancel.hide();
             }
             
-            dis = 40;
-            var morejink = UI.shipMovement.morejinkElement;
-            if (shipManager.movement.canJink(ship, 1)){
-                UI.shipMovement.drawUIElement(morejink, pos.x, pos.y, 16, dis*1.4, angle, "img/plus.png", "morejinkcanvas", 0);
-            }else{
-                morejink.hide();
-            }
             
-            dis = 83;
-            var lessjink = UI.shipMovement.lessjinkElement;
-            if (shipManager.movement.canJink(ship, -1)){
-                UI.shipMovement.drawUIElement(lessjink, pos.x, pos.y, 16, dis*1.4, angle, "img/minus.png", "lessjinkcanvas", 0);
-            }else{
-                lessjink.hide();
-            }
             
             
             

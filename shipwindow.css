@@ -649,6 +649,20 @@ body.phase1 .shipwindow  .system.boosted .minus{
 	height:20px;
 }
 
+.shipwindow.flight .fighter .disengagedtext{
+	position:absolute;
+	width:96px;
+	text-align:center;
+	left:0px;
+	top:55px;
+	font-size:12px;
+	padding-top:5px;
+	display:none;
+	color:red;
+	background-color:black;
+	height:20px;
+}
+
 .shipwindow.flight .icon{
 	width:90px;
 	height:121px;
@@ -682,6 +696,14 @@ body.phase1 .shipwindow  .system.boosted .minus{
 
 .shipwindow.flight .fighter.destroyed .destroyedtext{
 	display:block;
+}
+
+.shipwindow.flight .fighter.disengaged.destroyed .disengagedtext{
+	display:block;
+}
+
+.shipwindow.flight .fighter.disengaged.destroyed .destroyedtext{
+	display:none;
 }
 
 .fighter.destroyed .fightersystem{

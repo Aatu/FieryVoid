@@ -25,6 +25,17 @@
 
 	}
 	
+	class DisengagedFighter extends Critical{
+	
+		public $description = "DISENGAGED";
+
+	
+		function __construct($id, $shipid, $systemid, $phpclass, $turn){
+			parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+		}
+	
+	}
+	
 	class OutputReduced1 extends Critical{
 	
 		public $description = "Output reduced.";
