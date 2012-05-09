@@ -48,30 +48,21 @@ shipManager.movement = {
     },
     
     deleteSpeedChange: function(ship, accel){
-		var oheading = null;
-        var oaccel = accel;
+
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
         
 		for (var i in ship.movement){
 			var movement = ship.movement[i];
 			if (movement.turn != gamedata.turn || movement.type != "speedchange")
 				continue;
-			
-			
-			if (oheading === null){
-				oheading = movement.heading;
-				if (curheading != oheading)
-					oaccel = !oaccel;
-			}
-			
-			
-			
-			if (movement.value != oaccel){
+	
+			if ((movement.value != accel && movement.heading == curheading) || (movement.value == accel && movement.heading != curheading)){
 				ship.movement.splice(ship.movement.length -1, 1);
 				var shipwindow = $(".shipwindow_"+ship.id);
 				shipWindowManager.cancelAssignThrust(shipwindow);
 				shipManager.drawShip(ship);
 				gamedata.shipStatusChanged(ship);
+                
 				return true;
 			}
 		}
@@ -770,26 +761,17 @@ shipManager.movement = {
         
         }
         
-        var oheading = null;
-        var oaccel = accel;
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
-        for (var i in ship.movement){
+        
+		for (var i in ship.movement){
 			var movement = ship.movement[i];
 			if (movement.turn != gamedata.turn || movement.type != "speedchange")
 				continue;
-				
-			if (oheading === null){
-				oheading = movement.heading;
-				if (curheading != oheading)
-					oaccel = !oaccel;
+	
+			if ((movement.value != accel && movement.heading == curheading) || (movement.value == accel && movement.heading != curheading)){
+				return true;
 			}
-			
-			
-			            
-            if (movement.type == "speedchange" && oaccel != movement.value)
-                return true;
-        
-        }
+		}
         
         if ( ship.accelcost <= shipManager.movement.getRemainingEngineThrust(ship)){
             return true;
@@ -830,6 +812,7 @@ shipManager.movement = {
         if (speed < 0){
             heading = mathlib.addToHexFacing(heading, 3);
             speed = speed *-1;
+            value = 1;
         }
         
         var commit = false;
