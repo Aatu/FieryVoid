@@ -18,7 +18,7 @@
             
             if ($gamedata->phase == 3){
                     
-                if (!(ship instanceof FighterFlight))
+                if (!($ship instanceof FighterFlight))
                     $ship->movement = array();
 
                 for ($i=count($ship->movement)-1;$i>=0;$i--){

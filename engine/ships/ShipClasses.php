@@ -88,6 +88,15 @@
             return $turn;
         }
         
+        public function getMovementById($id){
+			foreach ($this->movement as $move){
+				if ($move->id === $id)
+					return $move;
+			}
+			
+			return null;
+		}
+        
         public function getLastMovement(){
             $m = 0;
             

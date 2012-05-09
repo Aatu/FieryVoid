@@ -181,6 +181,7 @@ gamedata = {
                 return false;
             }
         }else if (gamedata.gamephase == 3){
+			UI.shipMovement.hide();
             ajaxInterface.submitGamedata();
         }else if (gamedata.gamephase == 4){
             ajaxInterface.submitGamedata();

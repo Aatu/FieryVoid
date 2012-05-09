@@ -232,34 +232,7 @@ class Firing{
     public static function fireWeapons($gamedata){
 
         $turn = $gamedata->turn;
-        $updates = array();
-        $damages = array();
         
-        foreach ($gamedata->ships as $ship){
-        
-            foreach($ship->fireOrders as $fire){
-
-                if ($fire->turn != $gamedata->turn)
-                    continue;
-                    
-                if ($fire->type == "intercept")
-                    continue;
-                
-                $weapon = $ship->getSystemById($fire->weaponid);
-                    
-                if (!$weapon->ballistic)
-                    continue;
-                
-                if ($fire->rolled>0)
-                    continue;
-                    
-               
-                $weapon->setLoading($ship, $gamedata->turn-1, 3);
-                $weapon->fire($gamedata, $fire);
-                
-                
-            }
-        }
         
         foreach ($gamedata->ships as $ship){
 			
@@ -274,14 +247,23 @@ class Firing{
                 
                 
             }
-            //FIRE fighters at other fighters
-            foreach($ship->fireOrders as $fire){
+            
+        }
+		$chosenships = array();
+		foreach($gamedata->ships as $ship){
+			if ($ship->isDestroyed())
+				continue;
+			
+			if (!($ship instanceof FighterFlight))
+				continue;
 				
-				if ($ship->isDestroyed())
-					continue;
-				
-				if (!($ship instanceof FighterFlight))
-					continue;
+			$chosenships[] = $ship;
+		}
+		
+		//FIRE fighters at other fighters
+		
+		foreach ($chosenships as $ship){
+			foreach($ship->fireOrders as $fire){
 					
 				$target = $gamedata->getShipById($fire->targetid);
 
@@ -294,31 +276,38 @@ class Firing{
 						
 					self::fire($ship, $fire, $gamedata);
 				}
-					
-                
-                
-            }
-            
-            foreach($ship->fireOrders as $fire){
 				
-				if ($ship->isDestroyed())
-					continue;
+			}
+		}
+		
+		$chosenships = array();
+		foreach($gamedata->ships as $ship){
+			if ($ship->isDestroyed())
+				continue;
+			
+			if (!($ship instanceof FighterFlight))
+				continue;
 				
-				if (!($ship instanceof FighterFlight))
-					continue;
-					
+			$chosenships[] = $ship;
+		}
+		
+
+		
+		foreach ($chosenships as $ship){
+			
+			foreach($ship->fireOrders as $fire){
+			
 				$weapon = $ship->getSystemById($fire->weaponid);
 				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
 					continue;
 				
 				self::fire($ship, $fire, $gamedata);
-                
-                
-            }
-        }
-        
-           
-    }
+				
+				
+			}
+		}
+	}
+    
     
     private static function fire($ship, $fire, $gamedata){
 		
