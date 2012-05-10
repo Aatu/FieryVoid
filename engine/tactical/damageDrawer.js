@@ -147,8 +147,8 @@ window.damageDrawer = {
     applyDamage: function(ship, location, image){
 		//console.log("apply damage: " + ship.name);
         var images = shipManager.shipImages[ship.id];
-        var width = images.orginal.width;
-        var height = images.orginal.height;
+        var width = ship.canvasSize;
+        var height = ship.canvasSize;
         var canvas  = $('<canvas id="constcanDam" width="'+width+'" height="'+height+'"></canvas>');
         var context = canvas.get(0).getContext("2d");
         var x = 0;
@@ -174,14 +174,14 @@ window.damageDrawer = {
             
             y = height-100 - range;
         }
-        //console.log("r: " +range+"x: " + x + " y: " + y + " loc: " + location);
         
-        context.drawImage(damageDrawer.damageimg, x, y);
+        
+        context.drawImage(damageDrawer.damageimg, x, y, 200, 200);
         var damage = context.getImageData(0, 0, width, height);
         var damageData = damage.data;
         context.clearRect ( 0 , 0 , width, height );
         
-        context.drawImage(damageDrawer.damagemaskimg, x, y);
+        context.drawImage(damageDrawer.damagemaskimg, x, y, 200, 200);
         var mask = context.getImageData(0, 0, width, height);
         var maskData = mask.data;
         context.clearRect ( 0 , 0 , width, height );
