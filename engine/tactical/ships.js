@@ -208,12 +208,17 @@ window.shipManager = {
 		
 		graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
         
-        if (mouseover && (gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
+        if (mouseover && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
+            
+            canvas.strokeStyle = "rgba(86,200,45,0.90)";
+            canvas.fillStyle = "rgba(50,122,24,0.70)";
+            
             var c = Math.floor(s/2);
             var a = shipManager.getShipHeadingAngle(ship);
             var r = s*0.18*gamedata.zoom;
             var p = mathlib.getPointInDirection(r, a , c, c);
-            graphics.drawCircleAndFill(canvas, p.x, p.y, 5*gamedata.zoom, 2);
+            //graphics.drawCircleAndFill(canvas, p.x, p.y, 5*gamedata.zoom, 2);
+            graphics.drawArrow(canvas, p.x, p.y, a, 30, 1);
         }
         
 		ship.shipdrawangle = shipdrawangle;
