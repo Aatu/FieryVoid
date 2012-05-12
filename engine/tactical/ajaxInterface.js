@@ -21,6 +21,7 @@ window.ajaxInterface = {
             success : ajaxInterface.successSubmit,
             error : ajaxInterface.errorSubmit
         });
+        
     },
     
     construcGamedata: function(){
@@ -60,8 +61,8 @@ window.ajaxInterface = {
     },
     
     errorAjax: function(data){
-        console.log("error " + data.error);
-        if (data.error = "Not logged in."){
+        console.log("error !");
+        if (data.error == "Not logged in."){
 			$(".notlogged").show();
 			$(".waiting").hide();
 			gamedata.waiting = false;
@@ -101,8 +102,8 @@ window.ajaxInterface = {
             //console.log("polling for gamedata...");
             animation.animateWaiting();
         
-	
-            ajaxInterface.requestGamedata();
+            if (!ajaxInterface.submiting)
+                ajaxInterface.requestGamedata();
 			
         }
         
@@ -143,6 +144,9 @@ window.ajaxInterface = {
     },
     
     requestGamedata: function(){
+        
+        ajaxInterface.submiting = true;
+        
         $.ajax({
             type : 'GET',
             url : 'gamedata.php',
@@ -161,6 +165,9 @@ window.ajaxInterface = {
     },
     
     requestAllGames: function(){
+        
+        ajaxInterface.submiting = true;
+        
         $.ajax({
             type : 'GET',
             url : 'allgames.php',
@@ -172,6 +179,7 @@ window.ajaxInterface = {
     },
     
     successRequest: function(data){
+        ajaxInterface.submiting = false;
         //console.log("success request" + $(data));
         gamedata.parseServerData(data);
     }

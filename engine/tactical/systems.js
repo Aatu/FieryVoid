@@ -204,8 +204,6 @@ shipManager.systems = {
     },
     
     getStructureSystem: function(ship, location){
-        if (ship === undefined)
-			console.trace;
 			
         for (var i in ship.systems){
             if (ship.systems[i].location == location && ship.systems[i].name == "structure")

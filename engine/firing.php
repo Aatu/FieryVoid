@@ -233,7 +233,6 @@ class Firing{
 
         $turn = $gamedata->turn;
         
-        
         foreach ($gamedata->ships as $ship){
 			if ($ship instanceof FighterFlight)
 				continue;
@@ -245,7 +244,7 @@ class Firing{
             
         }
         
-		$chosenfiress = array();
+		$chosenfires = array();
 		foreach($gamedata->ships as $ship){
 			if ($ship->isDestroyed())
 				continue;
@@ -277,7 +276,7 @@ class Firing{
 			
 		}
 		
-		$chosenfiress = array();
+		$chosenfires = array();
 		foreach($gamedata->ships as $ship){
 			if ($ship->isDestroyed())
 				continue;
@@ -301,6 +300,8 @@ class Firing{
 			self::fire($shooter, $fire, $gamedata);
 			
 		}
+        
+        //throw new Exception("kaadu");
 	}
     
     
@@ -317,13 +318,13 @@ class Firing{
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
 		
-		if ($weapon->ballistic)
-			return;
+		//if ($weapon->ballistic)
+		//	return;
 			
 		if ($fire->rolled>0)
 			return;
 			
-		
+		//print("Firing " . $fire->id . "\n");
 		$weapon->setLoading($ship, $gamedata->turn-1, 3);
 		$weapon->fire($gamedata, $fire);
 		

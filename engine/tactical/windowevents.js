@@ -33,6 +33,7 @@ function drawEntities(){
     shipManager.drawShips();
     ballistics.drawBallistics();
     EWindicators.drawEWindicators();
+    
 }
  
 jQuery(function(){
@@ -228,7 +229,7 @@ window.scrolling = {
 		if (gamedata.effectsDrawing)
 			return;
     
-        //console.log(event);
+        hexgrid.onMouseOnHex(event, this);
         if (scrolling.scrolling == false){
             return;
         }

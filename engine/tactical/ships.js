@@ -185,7 +185,7 @@ window.shipManager = {
 			graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
 		}else if ( mouseover ){
 		
-			if (ship.userid == gamedata.thisplayer){
+			if (gamedata.isMyShip(ship)){
 				canvas.strokeStyle = "rgba(86,200,45,0.60)";
 				canvas.fillStyle = "rgba(50,122,24,0.50)";
 			}else{

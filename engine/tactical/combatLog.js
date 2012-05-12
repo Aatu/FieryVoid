@@ -134,6 +134,8 @@ window.combatLog = {
         var notes = "";
         
         for (var a in orders){
+            
+                        
             count++;
             var fire = orders[a];
             

@@ -261,7 +261,7 @@ window.effects = {
                     for (var b in ship.fireOrders){
                         var otherFire = ship.fireOrders[b];
                         var weapon2 = shipManager.systems.getSystem(ship, otherFire.weaponid);
-                        if (weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
+                        if (otherFire.rolled && weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
                             || (fire.x != "null" && otherFire.x == fire.x && fire.y != "null" && otherFire.y == fire.y)){
                                 if (fire.pubnotes == otherFire.pubnotes){

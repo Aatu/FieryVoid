@@ -6,7 +6,7 @@ jQuery(function($){
 
 window.animation = {
 
-    movementspeed: 20,
+    movementspeed: 10,
     turningspeed: 15,
     waitingElement: null,
     animating:null,
@@ -75,7 +75,7 @@ window.animation = {
                         ballistics.drawBallistics();
                         shipManager.drawShip(ship);
                     }else{
-						ballistics.hideBallistics();
+                        ballistics.hideBallistics();
                         movement.animationtics ++;
                         shipManager.drawShip(ship);
                         break;

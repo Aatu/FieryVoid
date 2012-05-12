@@ -222,6 +222,7 @@ window.ew = {
 			var canvas = EWindicators.getEwCanvas();
 			
 			var pos = shipManager.getShipPositionForDrawing(ship);
+            
 
 			if (EW.type == "OEW"){
 				var posE = shipManager.getShipPositionForDrawing(gamedata.getShip(EW.targetid));

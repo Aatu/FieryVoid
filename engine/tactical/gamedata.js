@@ -146,6 +146,7 @@ gamedata = {
         botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
+        hexgrid.unSelectHex();
     },
     
     onCommitClicked: function(e){
@@ -176,6 +177,7 @@ gamedata = {
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
                 gamedata.waiting = true;
+                shipManager.movement.RemoveMovementIndicators();
                 ajaxInterface.submitGamedata();
             }else{
                 return false;
