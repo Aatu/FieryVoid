@@ -25,7 +25,7 @@
 		if ($points > 5000)
 			$points = 5000;
 	
-		$id = Manager::createGame($_POST["name"], $_POST["background"], $_POST["maxplayers"], $points, $_SESSION["user"]);
+		$id = Manager::createGame($_POST["name"], $_POST["background"], 2, $points, $_SESSION["user"]);
 		if ($id){
 			header('Location: gamelobby.php');
 		}

@@ -4,8 +4,13 @@ window.ew = {
     getScannerOutput: function(ship){
         var ret = 0;
         
+        if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
+			return 0;
+        
         for (var i in ship.systems){
             var system = ship.systems[i];
+            
+            
 			            
             if (system.name == "scanner"){
                 ret += shipManager.systems.getOutput(ship, system);

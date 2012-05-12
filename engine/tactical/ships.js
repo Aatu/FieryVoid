@@ -634,6 +634,9 @@ window.shipManager = {
         for (var i in gamedata.ships){
             var ship2 = gamedata.ships[i];
             
+            if (shipManager.isDestroyed(ship2))
+				continue;
+				
             //if (ship.id = ship2.d)
             //  continue;
                 

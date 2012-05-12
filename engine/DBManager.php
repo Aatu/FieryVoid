@@ -227,7 +227,7 @@ class DBManager {
 			}
 					
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3)";
+			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now())";
 			
 			$this->insert($sql);
 			
@@ -495,7 +495,8 @@ class DBManager {
     
     public function updatePlayerStatus($gameid, $userid, $phase, $turn){
         try {
-            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase WHERE gameid = $gameid AND playerid = $userid";
+            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
+            ." gameid = $gameid AND playerid = $userid";
 
             $this->update($sql);
         }
