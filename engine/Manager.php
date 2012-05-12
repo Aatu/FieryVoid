@@ -617,8 +617,7 @@ class Manager{
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $value["campaignX"], $value["campaignY"], $value["rolled"],
-                $value["rolling"], $movements );
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
                 
             $ship->EW = $EW;
             $ship->fireOrders = $fireOrders;

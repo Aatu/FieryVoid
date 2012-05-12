@@ -51,8 +51,6 @@
 				return 0;
 				
             $pivoting = 0; // 0: false, 1: left, 2:right
-            $lastmove = $ship->getLastMovement();
-            $movements = array();
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn || $turn == null)
                     continue;
@@ -90,8 +88,6 @@
 				return false;
 				
             $rolling = false;
-            $lastmove = $ship->getLastMovement();
-            $movements = array();
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn || $turn == null)
                     continue;

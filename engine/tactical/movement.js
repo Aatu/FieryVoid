@@ -1646,7 +1646,7 @@ shipManager.movement = {
         
         var a = mathlib.getCompassHeadingOfPoint(pos, tpos);
         
-        if (a !== shipManager.getShipHeadingAngle(ship))
+        if (a !== shipManager.getShipDoMAngle(ship))
             return;
         
         if (selected){

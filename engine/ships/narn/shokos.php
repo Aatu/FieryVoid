@@ -1,8 +1,8 @@
 <?php
 class Shokos extends MediumShip{
     
-    function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
-        parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
+    function __construct($id, $userid, $name,  $movement){
+        parent::__construct($id, $userid, $name,  $movement);
         
 		$this->pointCost = 325;
 		$this->faction = "Narn";

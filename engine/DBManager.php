@@ -700,7 +700,7 @@ class DBManager {
         
                 
                 
-                $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $value->campaignX, $value->campaignY, $value->rolled, $value->rolling, $moves);
+                $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $moves);
                 
                 foreach ($ship->systems as $system){
                     $system->damage = $this->getDamage($value->id, $gameid, $system->id);
