@@ -54,8 +54,7 @@ class Manager{
             
             foreach ($games as $game)
                 $game->prepareForPlayer(0, 0, -1);
-                
-            self::$dbManager->close();
+    
         }
         catch(exception $e) {
             throw $e;
@@ -135,8 +134,7 @@ class Manager{
         try {
             self::initDBManager();
             $ret =  self::$dbManager->authenticatePlayer($username, $password);
-            self::$dbManager->close();
-            
+                      
             return $ret;
         }
         catch(exception $e) {
@@ -150,16 +148,21 @@ class Manager{
 		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
 			return null;
 		
+        
+        
     
         $gamedata = null;
         try {
             self::initDBManager();
-            $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
-            if ($gamedata == null)
+            if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
+                $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
+                if ($gamedata == null)
+                    return null;
+                //print(var_dump($gamedata));
+                $gamedata->prepareForPlayer($turn, $phase, $activeship);
+            }else{
                 return null;
-            //print(var_dump($gamedata));
-            $gamedata->prepareForPlayer($turn, $phase, $activeship);
-            self::$dbManager->close();
+            }
         }
         catch(exception $e) {
             throw $e;
@@ -174,6 +177,8 @@ class Manager{
         
         $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
         
+        if (!$gdS)
+            return "{}";
         
         if ($gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
             return "{}";
@@ -241,8 +246,7 @@ class Manager{
             $gdS = json_encode($gdS, JSON_NUMERIC_CHECK);
             
             self::$dbManager->endTransaction(false);
-            self::$dbManager->close();
-            
+                   
             return $gdS;
             
         }catch(exception $e) {
@@ -613,8 +617,7 @@ class Manager{
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $value["campaignX"], $value["campaignY"], $value["rolled"],
-                $value["rolling"], $movements );
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
                 
             $ship->EW = $EW;
             $ship->fireOrders = $fireOrders;

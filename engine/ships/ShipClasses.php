@@ -29,18 +29,14 @@
         public $rolling = false;
         public $team;
         
-
+        public $slotid;
 
         public $movement = array();
         
-        function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
+        function __construct($id, $userid, $name, $movement){
             $this->id = (int)$id;
             $this->userid = (int)$userid;
             $this->name = $name;
-            $this->campaignX = (int)$campaignX;
-            $this->campaignY = (int)$campaignY;
-            $this->rolled = $rolled;
-            $this->rolling = $rolling;
             $this->movement = $movement;
 
         }
@@ -512,8 +508,8 @@
         
         
         
-        function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
-            parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
+        function __construct($id, $userid, $name, $movement){
+            parent::__construct($id, $userid, $name,$movement);
         }
      
             
@@ -550,8 +546,8 @@
     
         public $shipSizeClass = 1;
         
-        function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
-            parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
+        function __construct($id, $userid, $name, $movement){
+            parent::__construct($id, $userid, $name, $movement);
         }
         
         public function getFireControlIndex(){

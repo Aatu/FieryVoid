@@ -42,14 +42,10 @@
 
         public $movement = array();
         
-        function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
+        function __construct($id, $userid, $name, $movement){
             $this->id = (int)$id;
             $this->userid = (int)$userid;
             $this->name = $name;
-            $this->campaignX = (int)$campaignX;
-            $this->campaignY = (int)$campaignY;
-            $this->rolled = $rolled;
-            $this->rolling = $rolling;
             $this->movement = $movement;
 
         }

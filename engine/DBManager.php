@@ -1,32 +1,40 @@
 <?php 
 class DBManager {
 
-    private $connection;
+    private static $connection = null;
     
     function __construct($host, $port = 3306, $database, $username, $password) {
-        if (!$this->connection = mysqli_connect($host, $username, $password, $database, $port))
+        
+        if (self::$connection !== null)
+            return self::$connection;
+        
+        if (!self::$connection = mysqli_connect($host, $username, $password, $database, $port))
             throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_connect_error(), mysqli_connect_errno(), null);
             
-        if (!mysqli_select_db($this->connection, $database ))
-            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_error($this->connection), mysqli_errno(), null);
+        if (!mysqli_select_db(self::$connection, $database ))
+            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_error(self::$connection), mysqli_errno(), null);
             
-        mysqli_set_charset($this->connection, 'utf8');
+        mysqli_set_charset(self::$connection, 'utf8');
     }
     
     private function DBEscape($string) {
             
-        return mysqli_real_escape_string($this->connection, (String)$string);
+        return mysqli_real_escape_string(self::$connection, (String)$string);
     }
     
+    
+    public function __destruct() {
+        $this->close();
+    }
        
     private function query($sql) {
 
     
-        if (!$this->connection)
+        if (!self::$connection)
             throw new Exception("DBManager:query, connection failed");
             
-        if (!$answer = mysqli_query($this->connection, $sql)){
-            throw new Exception("DBManager:query, SQL error: ".mysql_error($this->connection)."\n sql: $sql error:", mysql_errno($this->connection));
+        if (!$answer = mysqli_query(self::$connection, $sql)){
+            throw new Exception("DBManager:query, SQL error: ".mysql_error(self::$connection)."\n sql: $sql error:", mysql_errno(self::$connection));
         }
             
         $result = array();
@@ -41,16 +49,16 @@ class DBManager {
     private function insert($sql) {
 
     
-        if (!$this->connection)
+        if (!self::$connection)
             throw new exception("DBManager:insert, connection failed");
             
-        if (!$answer = mysqli_query($this->connection, $sql))
-            throw new exception("DBManager:insert, SQL error: ".mysqli_error($this->connection)."\n sql: $sql". mysqli_errno($this->connection));
+        if (!$answer = mysqli_query(self::$connection, $sql))
+            throw new exception("DBManager:insert, SQL error: ".mysqli_error(self::$connection)."\n sql: $sql". mysqli_errno(self::$connection));
             
         $sql = "select LAST_INSERT_ID() as id";
         
-        if (!$answer = mysqli_query($this->connection, $sql))
-           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
+        if (!$answer = mysqli_query(self::$connection, $sql))
+           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysqli_error(self::$connection)."\n sql: $sql", mysqli_errno(self::$connection));
 
             
         while ($row = mysqli_fetch_object($answer)) {
@@ -65,12 +73,12 @@ class DBManager {
     public function update($sql) {
 
     
-        if (!$this->connection)
+        if (!self::$connection)
             throw new exception("DBManager:update, connection failed");
             
-        if (!$answer = mysqli_query($this->connection, $sql)){
+        if (!$answer = mysqli_query(self::$connection, $sql)){
             $this->endTransaction(true);
-            throw new exception("DBManager:update, SQL error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
+            throw new exception("DBManager:update, SQL error: ".mysqli_error(self::$connection)."\n sql: $sql", mysqli_errno(self::$connection));
         }
 
             
@@ -86,27 +94,27 @@ class DBManager {
 	}
     
     public function startTransaction(){
-		//mysqlii_query("SET AUTOCOMMIT=0", $this->connection);
-		//mysqlii_query("START TRANSACTION", $this->connection);
-        mysqli_autocommit($this->connection, FALSE);
+		//mysqlii_query("SET AUTOCOMMIT=0", self::$connection);
+		//mysqlii_query("START TRANSACTION", self::$connection);
+        mysqli_autocommit(self::$connection, FALSE);
     }
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-			//mysqli_query("ROLLBACK", $this->connection);
-            mysqli_rollback($this->connection); 
+			//mysqli_query("ROLLBACK", self::$connection);
+            mysqli_rollback(self::$connection); 
         }else{
-            mysqli_commit($this->connection);
-            //mysql_query("COMMIT", $this->connection); 
-            //mysql_query("SET AUTOCOMMIT=1", $this->connection);
+            mysqli_commit(self::$connection);
+            //mysql_query("COMMIT", self::$connection); 
+            //mysql_query("SET AUTOCOMMIT=1", self::$connection);
         }
         
     }
     
     public function close() {
-		if(is_resource($this->connection)){
-			mysqli_close($this->connection);
-		}
+		
+		mysqli_close(self::$connection);
+		
 		
 		
     }
@@ -219,7 +227,7 @@ class DBManager {
 			}
 					
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3)";
+			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now())";
 			
 			$this->insert($sql);
 			
@@ -487,7 +495,8 @@ class DBManager {
     
     public function updatePlayerStatus($gameid, $userid, $phase, $turn){
         try {
-            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase WHERE gameid = $gameid AND playerid = $userid";
+            $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
+            ." gameid = $gameid AND playerid = $userid";
 
             $this->update($sql);
         }
@@ -692,7 +701,7 @@ class DBManager {
         
                 
                 
-                $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $value->campaignX, $value->campaignY, $value->rolled, $value->rolling, $moves);
+                $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $moves);
                 
                 foreach ($ship->systems as $system){
                     $system->damage = $this->getDamage($value->id, $gameid, $system->id);
@@ -777,13 +786,48 @@ class DBManager {
     }
     
     
-    
+    public function isNewGamedata($gameid, $turn, $phase, $activeship){
+        try {
+			if ($stmt = self::$connection->prepare("
+                SELECT 
+                    turn, phase, activeship, status
+                FROM 
+                    tac_game
+                WHERE 
+                    id = ? 
+                
+                ")) {
+				
+				$stmt->bind_param('i', $gameid);
+                $stmt->execute();
+                
+				$stmt->bind_result($dbturn, $dbphase, $dbactiveship, $dbstatus);
+				$stmt->fetch();
+
+				$stmt->close();
+                
+                if ($dbstatus === "LOBBY")
+                    return true;
+                
+                if ($dbphase != $phase || $dbturn != $turn || $dbactiveship != $activeship)
+                    return true;
+                
+			}
+                     
+            return false;
+           
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+    }
   
     public function authenticatePlayer($username, $password){
 	
         $id = false;
         try {
-			if ($stmt = $this->connection->prepare("SELECT id FROM player where username = ? and password = password(?)")) {
+			if ($stmt = self::$connection->prepare("SELECT id FROM player where username = ? and password = password(?)")) {
 				
 				$stmt->bind_param('ss', $username, $password);
 				$stmt->execute();
@@ -793,9 +837,7 @@ class DBManager {
 				/* close statement */
 				$stmt->close();
 			}
-            
-            $this->close();
-            
+                     
             if (!$id)
 				return false;
            
@@ -846,10 +888,7 @@ class DBManager {
             if ($result == null || sizeof($result) == 0)
                 return false;
                 
-            
-            if ($close)
-                $this->close();
-            
+                   
         }
         catch(Exception $e) {
             throw $e;
@@ -869,8 +908,7 @@ class DBManager {
                         
                 $this->update(trim($line));
             }
-            
-            $this->close();
+       
         }catch(Exception $e) {
             throw $e;
         }

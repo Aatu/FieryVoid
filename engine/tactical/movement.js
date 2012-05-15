@@ -247,6 +247,7 @@ shipManager.movement = {
             value:0
         };
         
+        hexgrid.unSelectHex();
         shipManager.drawShip(ship);
         shipWindowManager.assignThrust(ship);
             
@@ -370,7 +371,7 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-        
+        hexgrid.unSelectHex();
         //gamedata.shipStatusChanged(ship);
     },
     
@@ -481,7 +482,8 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-                
+        
+        hexgrid.unSelectHex();
         shipManager.drawShip(ship);
         if (!ship.flight)
 			shipWindowManager.assignThrust(ship);
@@ -632,6 +634,7 @@ shipManager.movement = {
             value:value
         }
         
+        hexgrid.unSelectHex();
         shipManager.drawShip(ship);
         if (!ship.flight)
 			shipWindowManager.assignThrust(ship);
@@ -1099,6 +1102,27 @@ shipManager.movement = {
 
             step++;
         }
+        
+        var assigned = shipManager.movement.calculateAssignedThrust(ship, movement);
+        var oreg = movement.requiredThrust;
+        
+        var maxreg = 0;
+        var maxassigned = 0;
+        
+        for (var i = 0;i<=4;i++){
+            if (oreg[i] && oreg[i]>maxreg)
+                maxreg = oreg[i];
+            
+            if (system.direction != i && assigned[i] && assigned[i]>maxassigned)
+                maxassigned = assigned[i];
+        
+        }
+        //console.log(oreg);
+        //console.log("maxreg: "+ maxreg +" maxassigned: "+ maxassigned);
+        if (assigned[system.direction]>maxreg && assigned[system.direction]>maxassigned )
+            return false;
+        
+       
 
         if ( remainingThrust < step)
             return false;
@@ -1293,6 +1317,9 @@ shipManager.movement = {
             forced:false,
             value:0
         }
+        
+        hexgrid.unSelectHex();
+        
         if (!ship.flight)
 			shipWindowManager.assignThrust(ship);
             
@@ -1588,6 +1615,128 @@ shipManager.movement = {
 				
 	
 	
-	}
+	},
+    
+    moveToHex: function(ship, hex, hexpos, shippos){
+        
+        var movedist = Math.round(shipManager.movement.getRemainingMovement(ship)*hexgrid.hexWidth());
+        var drawmore = false;
+
+        if (Math.round(mathlib.getDistance(shippos, hexpos)) < movedist){
+           movedist = Math.round(mathlib.getDistance(shippos, hexpos));
+        }
+        
+        var moves = Math.round(movedist/hexgrid.hexWidth());
+        
+        for (var i = 0;i<moves;i++)
+            shipManager.movement.doMove(ship);
+
+    },
+
+    moveStraightForwardHex: function(hex, selected){
+        var ship = gamedata.getActiveShip();
+        
+        if (!shipManager.movement.canMove(ship))
+            return;
+        
+        var pos = shipManager.getShipPosition(ship);
+        pos = hexgrid.hexCoToPixel(pos.x, pos.y);
+        
+        var tpos = hexgrid.hexCoToPixel(hex.x, hex.y);
+        
+        var a = mathlib.getCompassHeadingOfPoint(pos, tpos);
+        
+        if (a !== shipManager.getShipDoMAngle(ship))
+            return;
+        
+        if (selected){
+            shipManager.movement.moveToHex(ship, hex, tpos, pos);
+            
+
+        }else{
+            shipManager.movement.adMovementIndicators(ship, hex);
+        }
+        
+    },
+    
+    
+    RemoveMovementIndicators: function(){
+        for(var i = EWindicators.indicators.length-1; i >= 0; i--){  
+            if(EWindicators.indicators[i].type == "movement"){              
+                EWindicators.indicators.splice(i,1);                 
+            }
+        }
+        EWindicators.drawEWindicators();                
+        
+    },
+    
+    adMovementIndicators: function(ship, hex){
+        
+        
+        
+        var indicators = Array(); 
+        
+        var indi = shipManager.movement.makeMovementIndicator(ship, hex);
+        if (indi)
+            indicators.push(indi);
+        
+              
+        if (indicators.length > 0)
+            EWindicators.indicators = EWindicators.indicators.concat(indicators);
+      
+        EWindicators.drawEWindicators();
+    }, 
+    
+    
+    
+    makeMovementIndicator: function(ship, hex){
+       
+        var effect = {};
+            
+         
+        effect.ship = ship;
+        effect.type = "movement";
+        effect.hex = hex;
+        //console.log(ball.launchPos + " " + ball.targetPos );
+        effect.draw = function(self){
+            var ship = self.ship;
+            var start = shipManager.getShipPosition(ship);
+            start = hexgrid.hexCoToPixel(start.x, start.y);
+            
+            var end = hexgrid.hexCoToPixel(self.hex.x, self.hex.y);
+            var linestart = mathlib.getPointInDistanceBetween(start, end, 38*gamedata.zoom);
+           
+            var posmove = null;
+            var movedist = Math.round(shipManager.movement.getRemainingMovement(ship)*hexgrid.hexWidth());
+            var drawmore = false;
+            
+            if (Math.round(mathlib.getDistance(start, end)) > movedist){
+                posmove = mathlib.getPointInDistanceBetween(start, end, movedist);
+                drawmore = true;
+            }else{
+                posmove = end;
+            }
+            
+            var canvas = EWindicators.getEwCanvas();
+
+            
+            
+            if (drawmore){
+                canvas.strokeStyle = "rgba(229,87,38,0.40)";
+				canvas.fillStyle = "rgba(179,65,25,0.40)";
+                graphics.drawLine(canvas, posmove.x, posmove.y, end.x, end.y, 4*gamedata.zoom);            
+                graphics.drawCircleAndFill(canvas, end.x, end.y, 5*gamedata.zoom, 0 );
+            }
+            
+            canvas.strokeStyle = "rgba(86,200,45,0.40)";
+            canvas.fillStyle = "rgba(50,122,24,0.40)";
+            graphics.drawLine(canvas, linestart.x, linestart.y, posmove.x, posmove.y, 4*gamedata.zoom);            
+            graphics.drawCircleAndFill(canvas, posmove.x, posmove.y, 5*gamedata.zoom, 0 );
+        };
+        
+        return effect;
+    
+    }
+    
 
 }

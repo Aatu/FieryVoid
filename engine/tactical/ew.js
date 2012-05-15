@@ -4,8 +4,13 @@ window.ew = {
     getScannerOutput: function(ship){
         var ret = 0;
         
+        if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
+			return 0;
+        
         for (var i in ship.systems){
             var system = ship.systems[i];
+            
+            
 			            
             if (system.name == "scanner"){
                 ret += shipManager.systems.getOutput(ship, system);
@@ -222,6 +227,7 @@ window.ew = {
 			var canvas = EWindicators.getEwCanvas();
 			
 			var pos = shipManager.getShipPositionForDrawing(ship);
+            
 
 			if (EW.type == "OEW"){
 				var posE = shipManager.getShipPositionForDrawing(gamedata.getShip(EW.targetid));

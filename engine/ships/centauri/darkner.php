@@ -1,8 +1,8 @@
 <?php
 class Darkner extends HeavyCombatVessel{
     
-    function __construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement){
-        parent::__construct($id, $userid, $name, $campaignX, $campaignY, $rolled, $rolling, $movement);
+    function __construct($id, $userid, $name,  $movement){
+        parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 525;
         $this->faction = "Centauri";

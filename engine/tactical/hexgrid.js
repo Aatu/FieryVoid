@@ -5,7 +5,8 @@ window.hexgrid = {
     hexlinewidth: 1,
     hexlinecolor: "rgba(255,255,255,0.18)",
     hexHeight: function(){return hexgrid.hexlenght*gamedata.zoom*1.5;},
-    hexWidth: function(){return hexgrid.hexlenght*gamedata.zoom*0.8660254*2}, 
+    hexWidth: function(){return hexgrid.hexlenght*gamedata.zoom*0.8660254*2},
+    selectedHex: null,
     
     drawHexGrid: function(){
     
@@ -275,8 +276,15 @@ window.hexgrid = {
     
     },
     
+    unSelectHex: function(){
+        shipManager.movement.RemoveMovementIndicators();
+        hexgrid.selectedHex = null;
+    },
+    
     onHexClicked: function(e){
-        if ((((new Date()).getTime()) - scrolling.scrollingstarted ) <= 150){
+       
+        if ((((new Date()).getTime()) - scrolling.scrollingstarted ) <= 200){
+            shipManager.movement.RemoveMovementIndicators();
             
             var location = $(this).elementlocation();
             var x = e.pageX - location.x;
@@ -290,6 +298,21 @@ window.hexgrid = {
             if (gamedata.waiting)
                 return;
             
+            if (gamedata.gamephase == 2 && !gamedata.waiting && gamedata.isMyShip(gamedata.getActiveShip()) 
+                && !shipManager.movement.checkHasUncommitted(gamedata.getActiveShip())){
+                var s = hexgrid.selectedHex;
+                if (s && hexpos.x == s.x && hexpos.y == s.y){
+                    shipManager.movement.moveStraightForwardHex(hexpos, true);
+                    hexgrid.selectedHex = null;
+                }else{
+                    shipManager.movement.moveStraightForwardHex(hexpos, false);
+                    hexgrid.selectedHex = hexpos;
+                }
+                
+            }else{
+                hexgrid.selectedHex = null;
+            }
+           
             var selectedShip = gamedata.getSelectedShip();
             if (!selectedShip || shipManager.isDestroyed(selectedShip))
                 return;
@@ -300,12 +323,34 @@ window.hexgrid = {
         }
         
     },
+    mouseOnHexCount: 0,
     
+    onMouseOnHex: function(event, t){
+        
+        return;
+        
+        if (gamedata.gamephase != 2 || !gamedata.isMyShip(gamedata.getActiveShip()))
+            return;
+        
+        this.mouseOnHexCount++;
+        
+        if (this.mouseOnHexCount % 4 != 0)
+           return;
+       
+        this.mouseOnHexCount = 0;
+        
+        var location = $(t).elementlocation();
+        var x = event.pageX - location.x;
+        var y = event.pageY - location.y;
+        
+       
+        
+        var hex = hexgrid.pixelCoToHex(x, y);
+        shipManager.movement.isStraightForwardHex(hex);
+         
+            
+        
     
-    
-    
-
-
-
+    }
 
 }

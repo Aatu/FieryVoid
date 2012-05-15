@@ -464,7 +464,6 @@ window.weaponManager = {
     },
     */
     targetBallistic: function(ball){
-        
          if (gamedata.gamephase != 3)
             return;
             
@@ -493,19 +492,15 @@ window.weaponManager = {
                 if (mathlib.getDistanceHex(ballpos, targetpos) <= mathlib.getDistanceHex(ballpos, selectedpos) || mathlib.getDistanceHex(targetpos, selectedpos) >3)
                     continue;
             }
-            
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
-                
             if (weapon.intercept == 0)
                 continue;
                 
             var type = 'intercept';
             
                             
-            
             if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
-                
                 weaponManager.removeFiringOrder(selectedShip, weapon);
                 for (var s=0;s<weapon.guns;s++){
                     selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
