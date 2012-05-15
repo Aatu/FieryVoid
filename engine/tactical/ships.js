@@ -208,7 +208,8 @@ window.shipManager = {
 		
 		graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
         
-        if (mouseover && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
+        if (mouseover 
+            && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
             
             canvas.strokeStyle = "rgba(86,200,45,0.90)";
             canvas.fillStyle = "rgba(50,122,24,0.70)";
