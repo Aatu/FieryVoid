@@ -117,7 +117,7 @@
         public $animationWidth = 4;
         
         public $loadingtime = 4;
-        public $overloadturns = 8;
+        //public $overloadturns = 8;
         
         public $damageType = "raking";
         public $raking = 10;
@@ -175,7 +175,7 @@
         public $animationWidth = 4;
         
         public $loadingtime = 3;
-        public $overloadturns = 6;
+        //public $overloadturns = 6;
         
         public $damageType = "raking";
         public $raking = 10;
