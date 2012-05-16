@@ -275,7 +275,7 @@ window.ew = {
         if (left < 1)
             return;
             
-		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
+		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
 			var allOEW = ew.getAllOffensiveEW(selected);
 			var all = ew.getScannerOutput(selected);
 			
@@ -305,8 +305,8 @@ window.ew = {
         }else{
             
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){
-				var allOEW = ew.getAllOffensiveEW(selected);
-				var all = ew.getScannerOutput(selected);
+				var allOEW = ew.getAllOffensiveEW(ship);
+				var all = ew.getScannerOutput(ship);
 				
 				if (allOEW+1 > all*0.5)
 					return false;
