@@ -337,16 +337,27 @@ shipManager.power = {
 	},
 	
 	clickPlus: function(ship, system){
+        if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+			
+            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            
+            return;
+		}
 		shipManager.power.setBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	}, 
 	
 	clickMinus: function(ship, system){
-		shipManager.power.unsetBoost(ship, system);
-		if (system.name=="scanner"){
-			ew.removeEW(ship);
+		
+		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+			
+            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            
+            return;
 		}
+        
+        shipManager.power.unsetBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		
@@ -376,8 +387,11 @@ shipManager.power = {
 		
 		system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
 		
-		if (system.name=="scanner"){
-			ew.removeEW(ship);
+		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+			
+            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            
+            return;
 		}
 		
 		shipManager.power.stopOverloading(ship, system);
@@ -458,6 +472,6 @@ shipManager.power = {
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-	},
+	}
 
 }

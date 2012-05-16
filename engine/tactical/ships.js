@@ -215,7 +215,7 @@ window.shipManager = {
             canvas.fillStyle = "rgba(50,122,24,0.70)";
             
             var c = Math.floor(s/2);
-            var a = shipManager.getShipHeadingAngle(ship);
+            var a = shipManager.getShipDoMAngle(ship);
             var r = s*0.18*gamedata.zoom;
             var p = mathlib.getPointInDirection(r, a , c, c);
             //graphics.drawCircleAndFill(canvas, p.x, p.y, 5*gamedata.zoom, 2);

@@ -157,6 +157,14 @@ gamedata = {
         if(gamedata.status == "FINISHED")
             return;
         
+        confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+        
+    
+            
+    },
+    
+    doCommit: function(){
+        
         if (gamedata.gamephase == 1){
         
             if (!shipManager.power.checkPowerPositive()){
