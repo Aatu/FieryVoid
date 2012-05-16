@@ -112,7 +112,7 @@ window.effects = {
                 var pos = self.pos;
                 
                 var color = weapon.explosionColor;
-                canvas.strokeStyle = "rgba("+color[0]+","+(color[1]+self.green)+","+color[2]+","+0.08*a+")";
+                canvas.strokeStyle = "rgba("+color[0]+","+(color[1]+self.green)+","+color[2]+","+0.18*a+")";
                 //canvas.fillStyle = "rgba("+color[0]+","+(color[1]+self.green)+","+color[2]+","+0.08*a+")";
                 
                 graphics.drawCircle(canvas, pos.x, pos.y, size-20, 40);
