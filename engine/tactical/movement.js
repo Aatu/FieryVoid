@@ -752,6 +752,25 @@ shipManager.movement = {
         }
     },
     
+    canTurnToPivot: function(ship, right){
+		if (ship.agile)
+			return false;
+			
+        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
+        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
+        
+        if (heading === facing)
+            return false;
+        
+        var step = (right) ? 1 : -1;
+        
+        if (mathlib.addToHexFacing(step, heading) === facing)
+            return true;
+        
+        return false;
+        
+    },
+    
     hasPivoted: function(ship){
     
         var left = false;
@@ -1285,10 +1304,13 @@ shipManager.movement = {
         newfacing = mathlib.addToHexFacing(lm.facing, step);
         newheading = mathlib.addToHexFacing(lm.heading, step);
         
+        /*
         if (shipManager.movement.isTurningToPivot(ship, right)){
+            console.log("turning to pivot");
             newfacing = lm.facing;
+            newheading = lm.facing;
         }
-        
+        */
         var commit = false;
         var assignedThrust = Array();
         if (ship.flight){
