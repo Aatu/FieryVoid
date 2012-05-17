@@ -25,7 +25,6 @@ window.confirm = {
 	}, 
 	
 	error: function(msg, callback){
-	
 		var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
 		$('<span>'+msg+'</span>').prependTo(e);
 		//$('<span>ERROR</span></br>').prependTo(e);
@@ -50,9 +49,9 @@ window.confirm = {
 		
 		
 		$(".ok", e).bind("click", callback);
+		$(".confirmok", e).bind("click", function(){$(".confirm").remove();});
 		$(".confirmok", e).bind("click", callback);
-        $(".confirmok", e).bind("click", function(){$(".confirm").remove();});
-		$(".confirmcancel",e).bind("click", function(){$(".confirm").remove();});
+        $(".confirmcancel",e).bind("click", function(){$(".confirm").remove();});
 		$(".ok",e).css("left", "45%");
 		var a = e.appendTo("body");
 		a.fadeIn(250);

@@ -844,8 +844,8 @@ class TacGamedata{
             return;
         }
         
-        if ($turn == -1)
-            return;
+        //if ($turn == -1)
+        //    return;
         
         $turn = $this->turn;
             

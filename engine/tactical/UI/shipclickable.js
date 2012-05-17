@@ -113,6 +113,13 @@ window.shipClickable = {
 			}else{
 				$(".pivoting.value", e).html("");
 			}
+			
+			if (ship.flight){
+				$(".unused.value", e).html("Unused thrust: " + 
+					shipManager.movement.getRemainingEngineThrust(ship));
+			}else{
+				$(".unused.value", e).html("");
+			}
 		}
 		
 		var dis = 10 + (40*gamedata.zoom);
