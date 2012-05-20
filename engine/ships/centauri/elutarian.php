@@ -40,11 +40,13 @@ class Elutarian extends HeavyCombatVessel{
         $this->addFrontSystem(new BallisticTorpedo(4, 5, 6, 240, 0));
         $this->addFrontSystem(new BallisticTorpedo(4, 5, 6, 0, 120));
         
-        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
         $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         
 

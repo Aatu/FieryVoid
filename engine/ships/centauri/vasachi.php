@@ -36,9 +36,10 @@ class Vasachi extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
        
         $this->addFrontSystem(new HeavyArray(3, 8, 4, 300, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 60));
         
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+        
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new GuardianArray(3, 4, 2, 180, 0));
         $this->addFrontSystem(new GuardianArray(3, 4, 2, 0,180));
