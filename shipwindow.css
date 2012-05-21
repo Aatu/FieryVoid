@@ -776,5 +776,25 @@ body.phase1 .shipwindow  .system.boosted .minus{
 }
 
 
+.shipwindow .system .mode{
+    border:1px solid #496791;
+    text-align:center;
+    padding-top:1px;
+    height:11px;
+}
 
+body.phase1 .shipwindow  .system.modes.ballistic .mode,
+body.phase3 .shipwindow  .system.modes .mode
+{
+    display:block;
+}
 
+body.phase3 .shipwindow .system.modes.ballistic .mode
+{
+    display:none !important;
+}
+
+body .shipwindow .system.modes.firing .mode
+{
+    display:none !important;
+}

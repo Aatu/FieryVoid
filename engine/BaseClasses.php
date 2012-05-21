@@ -147,7 +147,7 @@ class FireOrder{
          $this->weaponid = $weaponid;
          $this->calledid = $calledid;
          $this->turn = $turn;
-         $this->firingmode = $firingmode;
+         $this->firingMode = $firingmode;
          $this->needed = $needed;
          $this->rolled = $rolled;
          $this->shots = $shots;

@@ -8,10 +8,15 @@
         public $raking = 10;
         private $damages = array();
         
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata){
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
             
+            $rake = $this->raking;
             
-            $totalDamage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
+            $totalDamage = $damage;
+            
+            if ($this->piercing && $fireOrder->firingMode == 2)
+                $rake = $totalDamage;
+            
             $this->damages = array();
             while(true){
                                 
@@ -21,13 +26,13 @@
                 if ($target->isDestroyed())
                     return;
             
-                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
+                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
                 
                 if ($system == null)
                     return;
                     
                 if ($totalDamage - $this->raking >= 0){
-                    $this->doDamage($target, $shooter, $system, $this->raking, $fireOrder, $pos, $gamedata);
+                    $this->doDamage($target, $shooter, $system, $rake, $fireOrder, $pos, $gamedata);
                     $totalDamage -= $this->raking;
                 }else if ($totalDamage > 0){
                     $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
@@ -46,7 +51,6 @@
         
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
-            $damages = array();
             $armour = $this->getSystemArmour($system, $gamedata, $fireOrder);
             
             foreach ($this->damages as $previous){
@@ -180,6 +184,11 @@
         public $damageType = "raking";
         public $raking = 10;
         
+        public $firingModes = array(
+            1 => "Standard",
+            2 => "Piercing"
+            );
+        public $piercing = true;
         
         public $rangePenalty = 0.25;
         public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 

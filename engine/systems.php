@@ -203,6 +203,7 @@ class Weapon extends ShipSystem{
     public $dp = 0; //damage penalty per dice
     public $range = 0;
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals 
+    public $piercing = false;
     
     public $loadingtime = 1;
     public $turnsloaded;
@@ -229,6 +230,7 @@ class Weapon extends ShipSystem{
     public $rof = 2;
     
     public $firingMode = 1;
+    public $firingModes = array( 1 => "Standard");
     
     public $flashDamage = false;
     public $damageType = "standard";
@@ -423,26 +425,6 @@ class Weapon extends ShipSystem{
         
         parent::beforeTurn($ship, $turn, $phase);
     }
-    /*
-    
-    public function beforeTurn($ship, $turn){
-        $lastfireturn = -1;
-        
-        foreach ($ship->fireOrders as $fire){
-            if ($fire->weaponid == $this->id && $fire->rolled > 0 && $fire->turn > $lastfireturn){
-                $lastfireturn = $fire->turn;
-            }
-        }
-        if ($lastfireturn == -1){
-            $this->turnsloaded = $this->loadingtime;
-        }else{
-            $this->turnsloaded = $turn - $lastfireturn;
-        }
-    
-        if ($this->turnsloaded > $this->loadingtime)
-            $this->turnsloaded = $this->loadingtime;
-    }
-    */
     
     public function getDamage(){
         return 0;
@@ -503,6 +485,8 @@ class Weapon extends ShipSystem{
 			$mod -= Movement::getCombatPivots($shooter, $gamedata->turn);
 		}
         
+        if ($this->piercing && $this->firingMode == 2)
+            $mod -= 4;
        
         
         if (Movement::isRolling($shooter, null) && !$this->ballistic)
@@ -590,6 +574,7 @@ class Weapon extends ShipSystem{
     
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+        $this->firingMode = $fireOrder->firingMode;
         
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
@@ -618,10 +603,63 @@ class Weapon extends ShipSystem{
         $fireOrder->rolled = 1;//Marks that fire order has been handled
                 
     }
-
+    
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
+    {
+        //TODO: piercing here!
+        if ($this->piercing && $this->firingMode == 2){
+            $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+        }else{
+            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
+            $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
+        }
+        
+        
+    }
+    
+    protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
+    {
+        
+        if ($target->isDestroyed())
+            return;
+        
+        $location = $taqrget->getHitSection($shooter, $gamedata->turn, $this);
+        $locs = array();
+        
+        if ($location == 1 || $location == 2){
+            $locs[] = 1;
+            $locs[] = 0;
+            $locs[] = 2;
+        }else if ($location == 3 || $location == 4){
+            $locs[] = 3;
+            $locs[] = 0;
+            $locs[] = 4;
+        }
+        
+        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
+        if ( $target instanceof MediumShip )
+            $damage = round($damage * 0.8);
+        
+        $damage = count($locs);
+        
+        foreach ($locs as $loc){
+            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $loc);
+            
+            if (!$system)
+                continue;
+            
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+        }
+        
+        
+        
+        
+    }
     
     protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata){
-    
+        if ($this->piercing && $this->firingMode == 2)
+            return null;
+        
 		if ($target instanceof FighterFlight){
 			return null;
 		}
@@ -643,23 +681,20 @@ class Weapon extends ShipSystem{
         return $okSystem;
     
     }
+   
     
-    
-        
-    
-    public function damage($target, $shooter, $fireOrder, $pos, $gamedata){
+    public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
         
         
         if ($target->isDestroyed())
             return;
-        
        
-		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
+		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
 		
         if ($system == null)
             return;
             
-        $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target, $pos, $gamedata), $fireOrder, $pos, $gamedata);
+        $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
             
         
         

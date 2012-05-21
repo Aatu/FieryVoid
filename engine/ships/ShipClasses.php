@@ -300,11 +300,13 @@
             }   
                 
             if ($location != 0){
-                if (Dice::d(10)>9 && !$weapon->flashDamage)
+                if (Dice::d(10)>9 && !$weapon->flashDamage
+                    && !($this->piercing && $this->firingMode == 2))
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
-                if ($structure->isDestroyedBeforeTurn($turn))
+                if ($structure->isDestroyedBeforeTurn($turn)
+                    && !($this->piercing && $this->firingMode == 2))
                     return 0;
             }
                 
@@ -523,16 +525,15 @@
                 $location = 2;
             }
            
-            //print ("shootercompas: $shooterCompassHeading, targetfacing: $tf, location: $location \n");
-            $rolled = Movement::isRolled($this);
-            
                             
             if ($location != 0){
-                if (Dice::d(10)>9 && !$weapon->flashDamage)
+                if (Dice::d(10)>9 && !$weapon->flashDamage
+                    && !($this->piercing && $this->firingMode == 2))
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
-                if ($structure->isDestroyedBeforeTurn($turn))
+                if ($structure->isDestroyedBeforeTurn($turn)
+                    && !($this->piercing && $this->firingMode == 2))
                     return 0;
             }
                 

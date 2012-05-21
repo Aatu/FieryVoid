@@ -647,11 +647,11 @@ window.effects = {
             var inter = intercepts[i];
             if (!inter.used || inter.used < inter.shots){
                 inter.used = 0;
-                unUsedIntercepts.push(inter)
+                unUsedIntercepts.push(inter);
             }
         }
         
-        if (unUsedIntercepts.lenght ==0)
+        if (unUsedIntercepts.length === 0)
             unUsedIntercepts = intercepts;
         var chosens = Array();
         
@@ -664,8 +664,6 @@ window.effects = {
             chosens = unUsedIntercepts;
         }
             
-        
-        
         
         for (var i in chosens){
             var chosen = chosens[i];

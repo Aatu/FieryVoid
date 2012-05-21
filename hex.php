@@ -159,6 +159,7 @@
 				<div class="button off"></div>
 				<div class="button on"></div>
 				<div class="button holdfire"></div>
+                <div class="button mode"></div>
 			</div>
             <div class="health systembarcontainer">
                 <div class="healthbar bar" style="width:40px;"></div>

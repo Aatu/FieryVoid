@@ -1,5 +1,33 @@
 window.weaponManager = {
 
+    onModeClicked: function(e)
+    {
+        e.stopPropagation();
+        var shipwindow = $(".shipwindow").has($(this));
+        var systemwindow = $(".system").has($(this));
+        var ship = gamedata.getShip(shipwindow.data("ship"));
+        var system = ship.systems[systemwindow.data("id")];
+
+        if (gamedata.gamephase != 3 && !system.ballistic)
+            return;
+            
+        if (gamedata.gamephase != 1 && system.ballistic)
+            return;
+        
+        if (weaponManager.hasFiringOrder(ship, system))
+            return;
+        
+        if (gamedata.isMyShip(ship)){
+            var mode = system.firingMode+1;
+            if (system.firingModes[mode]){
+                system.firingMode = mode;
+            }else{
+                system.firingMode = 1;
+            }
+            
+            shipWindowManager.setDataForSystem(ship, system);
+        }
+    },
     
     onHoldfireClicked: function(e){
         e.stopPropagation();
@@ -564,7 +592,19 @@ window.weaponManager = {
                         if (system)
 							calledid = system.id;
 							
-                        var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:ship.id, weaponid:weapon.id, calledid:calledid, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"};
+                        var fire = {
+                            id:fireid,
+                            type:type,
+                            shooterid:selectedShip.id,
+                            targetid:ship.id,
+                            weaponid:weapon.id,
+                            calledid:calledid,
+                            turn:gamedata.turn,
+                            firingmode:weapon.firingMode,
+                            shots:weapon.defaultShots,
+                            x:"null",
+                            y:"null"
+                        };
                         selectedShip.fireOrders.push(fire);            
                         
                     }

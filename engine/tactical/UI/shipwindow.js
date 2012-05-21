@@ -15,7 +15,7 @@ jQuery(function(){
 	$(".shipwindow .system .overload").bind("click", shipManager.power.onOverloadClicked);
 	$(".shipwindow .system .stopoverload").bind("click", shipManager.power.onStopOverloadClicked);
 	$(".shipwindow .system .holdfire").bind("click", window.weaponManager.onHoldfireClicked);
-	
+	$(".shipwindow .system .mode").bind("click", window.weaponManager.onModeClicked);
 });
 
 shipWindowManager = {
@@ -479,7 +479,9 @@ shipWindowManager = {
 			"boosted",
 			"canoverload",
 			"overload",
-			"forcedoffline"
+			"forcedoffline",
+            "modes",
+            "ballistic"
 		);
 		
 		for (var i in classes){
@@ -531,6 +533,16 @@ shipWindowManager = {
 			if (firing){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
 			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
 			
+            if (!firing && Object.keys(system.firingModes).length > 1)
+            {
+                systemwindow.addClass("modes");
+                var modebutton =  $(".mode", systemwindow);
+                modebutton.html("<span>"
+                    +system.firingModes[system.firingMode].substring(0, 1)
+                    +"</span>");
+                
+            }
+            
 			if (firing && system.canChangeShots){
 				
 				var fire = weaponManager.getFiringOrder(ship, system);
