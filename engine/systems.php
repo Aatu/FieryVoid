@@ -489,10 +489,10 @@ class Weapon extends ShipSystem{
             $mod -= 4;
        
         
-        if (Movement::isRolling($shooter, null) && !$this->ballistic)
+        if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
             $mod -=3;
         
-        if (Movement::isPivoting($shooter, null) && !$this->ballistic)
+        if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
             $mod -=3;
             
         if ($fireOrder->calledid != -1){
@@ -596,7 +596,7 @@ class Weapon extends ShipSystem{
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
                 $fireOrder->shotshit++;
-                $this->damage($target, $shooter, $fireOrder, $pos, $gamedata);
+                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
             }
         }
         
@@ -623,24 +623,11 @@ class Weapon extends ShipSystem{
         if ($target->isDestroyed())
             return;
         
-        $location = $taqrget->getHitSection($shooter, $gamedata->turn, $this);
-        $locs = array();
-        
-        if ($location == 1 || $location == 2){
-            $locs[] = 1;
-            $locs[] = 0;
-            $locs[] = 2;
-        }else if ($location == 3 || $location == 4){
-            $locs[] = 3;
-            $locs[] = 0;
-            $locs[] = 4;
-        }
-        
-        $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
-        if ( $target instanceof MediumShip )
-            $damage = round($damage * 0.8);
-        
-        $damage = count($locs);
+        $damage = $target->getPiercingDamagePerLoc(
+                $this->getFinalDamage($shooter, $target, $pos, $gamedata)
+            );
+
+        $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
         
         foreach ($locs as $loc){
             $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $loc);

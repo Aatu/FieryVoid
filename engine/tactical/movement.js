@@ -318,7 +318,7 @@ shipManager.movement = {
             if (m.turn != gamedata.turn)
                 continue;
                 
-            if (m.type == "roll")
+            if (m.type == "roll" || m.type == "isRoling")
                 return true;
         }
         
@@ -791,6 +791,27 @@ shipManager.movement = {
         }
         
         return {left:left, right:right};
+    },
+    
+    hasPivotedForShooting: function(ship){
+  
+        for (var i in ship.movement){
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn)
+                continue;
+                
+            if ( movement.type == "pivotleft" || movement.type == "pivotright"){
+                return true;
+            }
+            
+            if ( movement.type == "isPivotingRight" || movement.type == "isPivotingLeft"){
+                return true;
+            }
+            
+            
+        }
+        
+        return false;
     },
     
     canChangeSpeed: function(ship, accel){

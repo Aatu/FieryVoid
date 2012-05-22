@@ -301,12 +301,12 @@
                 
             if ($location != 0){
                 if (Dice::d(10)>9 && !$weapon->flashDamage
-                    && !($this->piercing && $this->firingMode == 2))
+                    && !($weapon->piercing && $weapon->firingMode == 2))
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
                 if ($structure->isDestroyedBeforeTurn($turn)
-                    && !($this->piercing && $this->firingMode == 2))
+                    && !($weapon->piercing && $weapon->firingMode == 2))
                     return 0;
             }
                 
@@ -479,6 +479,36 @@
         
         }
         
+        public function getPiercingDamagePerLoc($damage){
+            return ceil($damage/3);
+        }
+        
+        public function getPiercingLocations($shooter, $pos, $turn, $weapon){
+            $location = $this->getHitSection($shooter, $turn, $weapon);
+            $locs = array();
+            $finallocs = array();
+
+            if ($location == 1 || $location == 2){
+                $locs[] = 1;
+                $locs[] = 0;
+                $locs[] = 2;
+            }else if ($location == 3 || $location == 4){
+                $locs[] = 3;
+                $locs[] = 0;
+                $locs[] = 4;
+            }
+            
+            foreach ($locs as $loc){
+                $structure = $this->getStructureSystem($loc);
+                if ($structure != null && !$structure->isDestroyed()){
+                    $finallocs[] = $loc;
+                }
+            }
+            
+            return $finallocs;
+            
+        }
+        
         
         public static function hasBetterIniative($a, $b){
             if ($a->iniative > $b->iniative)
@@ -501,7 +531,6 @@
             return false;
         }
         
-       
     }
     
     class HeavyCombatVessel extends BaseShip{
@@ -528,12 +557,12 @@
                             
             if ($location != 0){
                 if (Dice::d(10)>9 && !$weapon->flashDamage
-                    && !($this->piercing && $this->firingMode == 2))
+                    && !($weapon->piercing && $weapon->firingMode == 2))
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
                 if ($structure->isDestroyedBeforeTurn($turn)
-                    && !($this->piercing && $this->firingMode == 2))
+                    && !($weapon->piercing && $weapon->firingMode == 2))
                     return 0;
             }
                 

@@ -303,12 +303,15 @@ window.weaponManager = {
         
         var mod = 0;
         
-        if (shipManager.movement.isRolling(shooter)){
-            console.log("rolling");
+        if (weapon.piercing && weapon.firingMode == 2)
+            mod -= 4;
+        
+        if (shipManager.movement.hasRolled(shooter)){
+            console.log("rolled");
             mod -= 3;
         }
         
-        if (shipManager.movement.isPivoting(shooter) != "no"){
+        if (shipManager.movement.hasPivotedForShooting(shooter)){
             console.log("pivoting");
             mod -= 3;
         }

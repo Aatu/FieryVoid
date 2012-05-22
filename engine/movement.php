@@ -83,6 +83,33 @@
             return $pivoting;
         }
         
+        public static function hasPivoted($ship, $turn){
+            foreach ($ship->movement as $move){
+                if ($move->turn != $turn)
+                    continue;
+
+                if ($move->type == "pivotleft" || $move->type == "pivotright" )
+                    return true;
+                
+                if ($move->type == "isPivotingRight" || $move->type == "isPivotingLeft" )
+                    return true;
+            }
+
+            return false;
+        }
+        
+        public static function hasRolled($ship, $turn){
+            foreach ($ship->movement as $move){
+                if ($move->turn != $turn)
+                    continue;
+
+                if ($move->type == "roll" || $move->type == "isRolling" )
+                    return true;
+            }
+
+            return false;
+        }
+        
         public static function isRolling($ship, $turn){
 			if ($ship->agile || $ship instanceof FighterFlight)
 				return false;

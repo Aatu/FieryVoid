@@ -42,11 +42,6 @@
                 }
                     
             }
-            
-       
-            
-            
-        
         }
         
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
