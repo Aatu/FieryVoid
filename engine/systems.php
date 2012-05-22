@@ -606,7 +606,6 @@ class Weapon extends ShipSystem{
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
-        //TODO: piercing here!
         if ($this->piercing && $this->firingMode == 2){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
@@ -635,6 +634,7 @@ class Weapon extends ShipSystem{
             if (!$system)
                 continue;
             
+                
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
         }
         

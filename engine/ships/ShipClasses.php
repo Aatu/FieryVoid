@@ -291,24 +291,7 @@
             } 
            
             //print ($this->name ." shootercompas: $shooterCompassHeading, targetfacing: $tf, location: $location \n");
-            $rolled = Movement::isRolled($this);
             
-            if ($rolled && $location == 3){
-                $location = 4;
-            }else if ($rolled && $location == 4){
-                $location = 3;
-            }   
-                
-            if ($location != 0){
-                if (Dice::d(10)>9 && !$weapon->flashDamage
-                    && !($weapon->piercing && $weapon->firingMode == 2))
-                    return 0;
-                    
-                $structure = $this->getStructureSystem($location);
-                if ($structure->isDestroyedBeforeTurn($turn)
-                    && !($weapon->piercing && $weapon->firingMode == 2))
-                    return 0;
-            }
                 
             return $location;
         }
@@ -330,7 +313,27 @@
             }
                        
             
-            return $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+            
+            $rolled = Movement::isRolled($this);
+            
+            if ($rolled && $location == 3){
+                $location = 4;
+            }else if ($rolled && $location == 4){
+                $location = 3;
+            }   
+            
+            if ($location != 0){
+                if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) 
+					&& !$weapon->flashDamage)
+                    return 0;
+                    
+                $structure = $this->getStructureSystem($location);
+                if ($structure->isDestroyedBeforeTurn($turn))
+                    return 0;
+            }
+            
+            return $location;
             
         }
         
@@ -399,10 +402,9 @@
 			if ($system != null && !$system->isDestroyed())
 				return $system;
         
-            if ($location == null)
+            if ($location === null)
                 $location = $this->getHitSection($shooter, $fire->turn, $weapon);
             
-
             //print("getHitSystem, location: $location ");
             $systems = array();
             $totalStructure = 0;
@@ -484,7 +486,11 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            $location = $this->getHitSection($shooter, $turn, $weapon);
+						
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+            
             $locs = array();
             $finallocs = array();
 
@@ -554,17 +560,6 @@
                 $location = 2;
             }
            
-                            
-            if ($location != 0){
-                if (Dice::d(10)>9 && !$weapon->flashDamage
-                    && !($weapon->piercing && $weapon->firingMode == 2))
-                    return 0;
-                    
-                $structure = $this->getStructureSystem($location);
-                if ($structure->isDestroyedBeforeTurn($turn)
-                    && !($weapon->piercing && $weapon->firingMode == 2))
-                    return 0;
-            }
                 
             return $location;
         }
@@ -595,21 +590,7 @@
                 $location = 2;
             }
            
-            //print ("shootercompas: $shooterCompassHeading, targetfacing: $tf, location: $location \n");
-            $rolled = Movement::isRolled($this);
-            
-                            
-            if ($location != 0){
-                if (Dice::d(20)>17 && !$weapon->flashDamage)
-                    return 0;
-                   
-                foreach($this->systems as $system){
-                    if ($system->location == $location && !$system->isDestroyed())
-                        return $location;
-                } 
-                
-                return 0;
-            }
+          
                 
             return $location;
         }
