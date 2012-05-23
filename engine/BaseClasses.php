@@ -211,6 +211,22 @@ class ShipSystem{
      
     }
     
+    public function beforeTurn($ship, $turn, $phase){
+            
+        $this->setSystemDataWindow($turn);
+    }
+    
+    public function setCriticals($criticals, $turn){
+        $crits = array();
+        foreach( $criticals as $crit){
+            if (!$crit->oneturn || ($crit->oneturn && $crit->turn >= $turn-1))
+                $crits[] = $crit;
+        }
+        
+        $this->criticals = $crits;
+        $this->effectCriticals();
+    }
+    
     public function getArmour($gamedata, $shooter){
 		return $this->armour;
 	}
@@ -218,13 +234,6 @@ class ShipSystem{
 	public function getArmourPos($gamedata, $pos){
 		return $this->armour;
 	}
-    
-    public function beforeTurn($ship, $turn, $phase){
-            
-        $this->setSystemDataWindow($turn);
-    }
-    
-    
     
     public function setSystemDataWindow($turn){
         $critDesc = array();
@@ -313,16 +322,6 @@ class ShipSystem{
          
     }
     
-    public function setCriticals($criticals, $turn){
-        $crits = array();
-        foreach( $criticals as $crit){
-            if (!$crit->oneturn || ($crit->oneturn && $crit->turn >= $turn-1))
-                $crits[] = $crit;
-        }
-        
-        $this->criticals = $crits;
-        $this->effectCriticals();
-    }
     
     public function hasCritical($type, $turn = false){
         $count = 0;

@@ -89,6 +89,8 @@ class Firing{
                 if (!($weapon instanceof Weapon))
                     continue;
                 
+                if ($weapon->intercept == 0)
+                    continue;
                     
                 if ($weapon->isDestroyed()){
                     //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
@@ -108,9 +110,6 @@ class Firing{
                     
                 $weapon->setLoading($ship, $gd->turn-1, 3);
                 if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime)
-                    continue;
-                    
-                if ($weapon->intercept == 0)
                     continue;
                    
                 $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon);
