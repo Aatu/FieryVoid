@@ -4,7 +4,7 @@ class Mogratti extends MediumShip{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-		$this->pointCost = 450;
+		$this->pointCost = 575;
 		$this->faction = "Centauri";
         $this->phpclass = "Mogratti";
         $this->imagePath = "ships/mograth.png";
