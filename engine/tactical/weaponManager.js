@@ -159,6 +159,10 @@ window.weaponManager = {
     
     canCalledshot: function(target, system){
 		var shooter = gamedata.getSelectedShip();
+        
+        if (!shooter)
+            return false;
+        
 		var loc = weaponManager.getShipHittingSide(shooter, target);
 		
 		if (target.flight)

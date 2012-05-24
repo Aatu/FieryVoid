@@ -32,8 +32,7 @@ window.systemInfo = {
 		$(".datacontainer", w).html(h);
 		
 		
-		
-		if (ship.userid != gamedata.thisplayer && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
+		if (!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
 			if (weaponManager.canCalledshot(ship, system)){
 							
 				e = $('<div class="calledtargeting"><span>CALLED SHOT</span></div><div class="targeting"></div>');

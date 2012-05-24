@@ -13,7 +13,7 @@ gamedata = {
     waiting: false,
     selectedShips: Array(),
     targetedShips: Array(),
-    selectedSystems: Array,
+    selectedSystems: Array(),
     effectsDrawing: false,
     finished: false,
     gamephase: 0,

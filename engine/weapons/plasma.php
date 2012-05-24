@@ -109,6 +109,7 @@
         public $animationWidth = 6;
 		public $animationExplosionScale = 0.50;
 		public $trailLength = 30;
+        public $flashDamage = true;
 		        
         public $loadingtime = 3;
 			

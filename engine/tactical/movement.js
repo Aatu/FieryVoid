@@ -1001,12 +1001,16 @@ shipManager.movement = {
     
     getLastCommitedMove: function(ship){
         var lm;
-        if (!ship)
-			console.trace();
+        if (!ship){
+            console.log("movement.getLastCommitedMove, ship is undefined");
+            console.trace();
+        }
+			
 			
         for (var i in ship.movement){
             if (ship.movement[i].commit==true && ship.movement[i].animated == true)
                 lm = ship.movement[i];
+           
         }
         return lm;
     },
@@ -1442,7 +1446,7 @@ shipManager.movement = {
 			for (var a in movement.assignedThrust){
 				var system = ship.systems[a];
 				if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")){
-					if ($.inArray(a, seenThrusters) == 0)
+					if ($.inArray(a, seenThrusters) === -1)
 						seenThrusters.push(a);
 				
 				}
@@ -1462,7 +1466,7 @@ shipManager.movement = {
 			
 
 			var sub = 0;
-			if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored") && $.inArray(i, seenThrusters) == -1){
+			if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored") && $.inArray(i, seenThrusters) === -1){
 				seenThrusters.push(i);
 				sub =1;
 			}
