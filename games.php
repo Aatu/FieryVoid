@@ -7,8 +7,9 @@
 	array_walk(glob('./engine/tactical/*.php'), create_function('$v,$i', 'return require_once($v);'));
 	session_start();
 	
-	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
+	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false || $_SESSION["user"] == null){
 		header('Location: index.php');
+        return;
 	}
 	
 	$gameid = Manager::shouldBeInGame($_SESSION["user"]);

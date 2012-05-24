@@ -14,11 +14,6 @@ class Reactor extends ShipSystem{
         
         
     }
-    
-   
-
-    
-    
 }
 
 class Engine extends ShipSystem{
