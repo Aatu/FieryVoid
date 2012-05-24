@@ -2,6 +2,8 @@
 
 class dualWeapon extends Weapon{
     
+    
+    public $dualWeapon = true;
     public $weapons = array();
     
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
@@ -32,6 +34,26 @@ class dualWeapon extends Weapon{
         foreach ($this->weapons as $weapon){
             $weapon->setCriticals($criticals, $turn);
         }  
+    }
+}
+
+class PulseLaserArray extends dualWeapon{
+	
+	public $firingModes = array( 
+		1 => "Pulse",
+		2 => "Laser"
+	);
+	
+	public $displayName = "Pulse/Laser array";
+	
+	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+		$weapons = array(
+			1 => new MediumPulse($armour, $maxhealth, $powerReq, $startArc, $endArc),
+			2 => new MediumLaser($armour, $maxhealth, $powerReq, $startArc, $endArc)
+		);
+		
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
+        
     }
 }
 

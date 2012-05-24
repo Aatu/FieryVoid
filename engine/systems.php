@@ -499,6 +499,8 @@ class Weapon extends ShipSystem{
 			$mod -= 8;
 		}
 		
+		$mod += $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
+		
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
             

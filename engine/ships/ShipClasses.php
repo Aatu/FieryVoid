@@ -157,6 +157,13 @@
             
             return null;
         }
+        
+        public function getHitChangeMod($shooter, $pos, $turn){
+			
+			//TODO: interceptors
+			
+			return 0;
+		}
 
         
         public function getLastTurnMovement($turn){
@@ -329,7 +336,7 @@
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
-                if ($structure->isDestroyedBeforeTurn($turn))
+                if ($structure != null && $structure->isDestroyedBeforeTurn($turn))
                     return 0;
             }
             

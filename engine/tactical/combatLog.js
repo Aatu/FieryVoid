@@ -144,10 +144,14 @@ window.combatLog = {
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
             weaponManager.getDamagesCausedBy(damages, fire);
-            if (fire.needed < lowC)
-                lowC = fire.needed;
-            if (fire.needed >highC)
-                highC = fire.needed;
+            var needed = fire.needed;
+            if (needed < 0)
+				needed = 0;
+				
+            if (needed < lowC)
+                lowC = needed;
+            if (needed >highC)
+                highC = needed;
                 
             if (fire.pubnotes)
                 notes += fire.pubnotes + " ";
