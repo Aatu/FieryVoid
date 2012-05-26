@@ -83,11 +83,10 @@
 			$crit = null;
 			
 			if ($system instanceof Fighter){
-				parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
-				return;
-			}
-			
-			if ($system instanceof Structure){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$system->criticals[] =  $crit;
+            }else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 				$crit->updated = true;
@@ -108,4 +107,15 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
 	}
+    
+    class TractorBeam extends ShipSystem{
+
+        public $name = "tractorBeam";
+        public $displayName = "Tractor Beam";
+      
+        function __construct($armour, $maxhealth, $powerReq, $output ){
+            parent::__construct($armour, $maxhealth, $powerReq, $output );
+        }
+
+    }
 ?>

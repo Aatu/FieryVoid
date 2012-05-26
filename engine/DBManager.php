@@ -704,8 +704,8 @@ class DBManager {
                 $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $moves);
                 
                 foreach ($ship->systems as $system){
-                    $system->damage = $this->getDamage($value->id, $gameid, $system->id);
-                    $system->power = $this->getPower($value->id, $gameid, $system->id);
+                    $system->setDamage($this->getDamage($value->id, $gameid, $system->id));
+                    $system->setPower($this->getPower($value->id, $gameid, $system->id));
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
 					//$system->beforeTurn($ship, $turn, $phase);
                 }

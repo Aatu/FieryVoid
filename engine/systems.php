@@ -246,6 +246,10 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function getWeaponForIntercept(){
+        return $this;
+    }
+    
     public function getAvgDamage(){
         $min = $this->minDamage;
         $max = $this->maxDamage;

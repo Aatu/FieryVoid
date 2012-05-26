@@ -6,8 +6,11 @@ window.weaponManager = {
         var shipwindow = $(".shipwindow").has($(this));
         var systemwindow = $(".system").has($(this));
         var ship = gamedata.getShip(shipwindow.data("ship"));
-        var system = ship.systems[systemwindow.data("id")];
-
+        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+        
+        if (!system)
+            return;
+        
         if (gamedata.gamephase != 3 && !system.ballistic)
             return;
             
@@ -25,6 +28,9 @@ window.weaponManager = {
                 system.firingMode = 1;
             }
             
+            weaponManager.unSelectWeapon(ship, system);
+  
+            
             shipWindowManager.setDataForSystem(ship, system);
         }
     },
@@ -34,8 +40,8 @@ window.weaponManager = {
         var shipwindow = $(".shipwindow").has($(this));
         var systemwindow = $(".system").has($(this));
         var ship = gamedata.getShip(shipwindow.data("ship"));
-        var system = ship.systems[systemwindow.data("id")];
-
+        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+        
         if (gamedata.gamephase != 3 && !system.ballistic)
             return;
             
@@ -861,6 +867,7 @@ window.weaponManager = {
     },
     
     addArcIndicators: function(ship, weapon){
+        weapon = shipManager.systems.initializeSystem(weapon);
         weaponManager.removeArcIndicators(ship);
         var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
         
@@ -954,6 +961,15 @@ window.weaponManager = {
         
         return false;
         
+    },
+    
+    getFiringWeapon: function(weapon, fire){
+        //console.dir(weapon);
+        if (weapon.dualWeapon){
+            return weapon.weapons[fire.firingMode];
+        }
+        
+        return weapon;
     }
     
 }

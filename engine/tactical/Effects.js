@@ -258,9 +258,13 @@ window.effects = {
                     fires.push(fire);
                     
                     var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+                    weapon = weaponManager.getFiringWeapon(weapon, fire);
+                    
                     for (var b in ship.fireOrders){
                         var otherFire = ship.fireOrders[b];
                         var weapon2 = shipManager.systems.getSystem(ship, otherFire.weaponid);
+                        weapon2 = weaponManager.getFiringWeapon(weapon2, otherFire);
+                        
                         if (otherFire.rolled && weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
                             || (fire.x != "null" && otherFire.x == fire.x && fire.y != "null" && otherFire.y == fire.y)){
@@ -287,7 +291,7 @@ window.effects = {
         }
         
         for (var i in gamedata.ships){
-            var ship = gamedata.ships[i];
+            ship = gamedata.ships[i];
             
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn && ship.destructionAnimated == false){
                 scrolling.scrollToShip(ship);
@@ -457,8 +461,7 @@ window.effects = {
 
             
             var weapon = shipManager.systems.getSystem(shooter, fire.weaponid);
-            
-    
+            weapon = weaponManager.getFiringWeapon(weapon, fire);
             effects.animateShots(fire, weapon);
        
         }
@@ -466,6 +469,7 @@ window.effects = {
     },
     
     doneDisplayingWeaponFire: function(){
+        
         if (effects.backAnimations.length == 0 && effects.frontAnimations.length == 0){
             effects.animationcallback();
         }
@@ -638,6 +642,8 @@ window.effects = {
     
     animateIntercept: function(fire, weapon, tPos, currentlocation, shotPos, succesfull, targethit){
         
+        if (weapon.animation == "laser")
+            return;
         
         var intercepts = weaponManager.getInterceptingFiringOrders(fire.id);
         
@@ -681,6 +687,8 @@ window.effects = {
             
             var shooter = gamedata.getShip(chosen.shooterid);
             var InterWeapon = shipManager.systems.getSystem(shooter, chosen.weaponid);
+            InterWeapon = shipManager.systems.initializeSystem(InterWeapon);
+            
             var sPos = effects.getWeaponLocation(shooter, InterWeapon);
             
             for (var a = 0; a<shots;a++){
@@ -706,7 +714,6 @@ window.effects = {
                     
                 }
                 
-                            
                 var animation = {
                     tics:0,
                     totalTics:5000,

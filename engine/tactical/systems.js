@@ -103,13 +103,29 @@ shipManager.systems = {
 				for (var a in ship.systems[i].systems){
 					var system = ship.systems[i].systems[a];
 					if (system.id == id)
-						return system;
+                        return system;
 				}
 			}
         }
-        
-       
+        return null;
     
+    },
+
+    initializeSystem: function(system){
+        
+        if (system.dualWeapon && !system.initialized){
+            var selectedWeapon = system.weapons[system.firingMode];
+            selectedWeapon.firingMode = system.firingMode;
+            selectedWeapon.firingModes = system.firingModes;
+            selectedWeapon.power = system.power;
+            selectedWeapon.displayName = system.displayName;
+            selectedWeapon.id = system.id;
+            selectedWeapon.dualWeapon = true;
+            selectedWeapon.initialized = true;
+            return selectedWeapon;
+        }
+        
+        return system;
     },
             
     getSystemByName: function(ship, name){

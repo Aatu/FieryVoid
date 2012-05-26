@@ -734,37 +734,20 @@ shipManager.movement = {
         return pivoting;
     },
     
-    isTurningToPivot: function(ship, right){
-		if (ship.agile)
-			return false;
-			
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-        if (shipManager.movement.isGoingBackwards(ship))
-            right = !right;
-        var step = (right) ? 1 : -1;
-        var pivoting = shipManager.movement.isPivoting(ship);
-        if (pivoting != "no"){
-            if (mathlib.addToHexFacing(heading, step) == facing || mathlib.addToHexFacing(heading, (step+3)) == facing )
-                return true;
-                        
-            return false;
-        }
-    },
-    
     canTurnToPivot: function(ship, right){
 		if (ship.agile)
 			return false;
 			
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
+        var reverseheading = mathlib.addToHexFacing(heading, 3);
         
         if (heading === facing)
             return false;
         
         var step = (right) ? 1 : -1;
         
-        if (mathlib.addToHexFacing(step, heading) === facing)
+        if (mathlib.addToHexFacing(step, heading) === facing || mathlib.addToHexFacing(step, heading) === reverseheading)
             return true;
         
         return false;
@@ -1030,13 +1013,16 @@ shipManager.movement = {
 		return oPos;
 	},
     
-	getAmountChanneledReal: function(ship, system){
+	getAmountChanneledReal: function(ship, system, ignoreUncommitted){
 		var used = 0;
         for (var i in ship.movement){
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
                 continue;
-                
+            
+            if (ignoreUncommitted && !movement.commit)
+                continue;
+            
             var assigned = movement.assignedThrust[system.id];
             
             if (assigned != undefined){
@@ -1048,9 +1034,11 @@ shipManager.movement = {
         
         return used;
 	},
+    
 	
     countAmountChanneled: function(ship, system){
         var used = 0;
+
         for (var i in ship.movement){
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
@@ -1297,6 +1285,8 @@ shipManager.movement = {
         if (pivoting != "no" && !ship.gravitic ){ //&& !shipManager.movement.isTurningToPivot(ship, right) && !ship.gravitic){
             return false;
         }
+        if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) && !ship.gravitic)
+            return false;
         
         return true;
         
@@ -1329,13 +1319,13 @@ shipManager.movement = {
         newfacing = mathlib.addToHexFacing(lm.facing, step);
         newheading = mathlib.addToHexFacing(lm.heading, step);
         
-        /*
-        if (shipManager.movement.isTurningToPivot(ship, right)){
+        
+        if (shipManager.movement.canTurnToPivot(ship, right)){
             console.log("turning to pivot");
             newfacing = lm.facing;
             newheading = lm.facing;
         }
-        */
+        
         var commit = false;
         var assignedThrust = Array();
         if (ship.flight){
@@ -1430,34 +1420,16 @@ shipManager.movement = {
         return requiredThrust;
     },
         
-    calculateAssignedThrust: function(ship, movement){
+    calculateAssignedThrust:    function(ship, movement){
         var assignedarray = Array(null,null,null,null,null);
-        var seenThrusters = Array();
-		
-		for (var i in ship.movement){
-			var move = ship.movement[i];
-			
-			if (move.turn != gamedata.turn)
-				continue;
-				
-			if (move == movement)
-				break;
-				
-			for (var a in movement.assignedThrust){
-				var system = ship.systems[a];
-				if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")){
-					if ($.inArray(a, seenThrusters) === -1)
-						seenThrusters.push(a);
-				
-				}
-			}
-		}
-		
+        
+   
         for (var i in movement.assignedThrust){
 			if (!ship.systems[i])
 				continue;
 			var system = ship.systems[i];
 			
+            
 			var mod = 1;
 			var crits = shipManager.criticals.hasCritical(system, "HalfEfficiency");
 			if (crits > 0){
@@ -1466,17 +1438,15 @@ shipManager.movement = {
 			
 
 			var sub = 0;
-			if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored") && $.inArray(i, seenThrusters) === -1){
-				seenThrusters.push(i);
-				sub =1;
+			if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored")){
+				if (shipManager.movement.getAmountChanneledReal(ship, system, true) ===0 )
+                    sub =1;
 			}
 
-			
             assignedarray[ship.systems[i].direction] += (Math.round(movement.assignedThrust[i]*mod)-sub);
 			if (assignedarray[ship.systems[i].direction] < 0)
 				assignedarray[ship.systems[i].direction] = 0;
         }
-
         return assignedarray;
     },
     

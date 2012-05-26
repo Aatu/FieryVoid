@@ -44,7 +44,7 @@
         protected function addSystem($system, $loc){
             
             $i = sizeof($this->systems);
-            $system->id = $i;
+            $system->setId($i);
             $system->location = $loc;
             $this->systems[$i] = $system;
             

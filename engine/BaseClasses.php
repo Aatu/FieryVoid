@@ -216,6 +216,18 @@ class ShipSystem{
         $this->setSystemDataWindow($turn);
     }
     
+    public function setDamage($damages){
+        $this->damage = $damages;
+    }
+    
+    public function setPower($power){
+        $this->power = $power;
+    }
+    
+    public function setId($id){
+        $this->id = $id;
+    }
+    
     public function setCriticals($criticals, $turn){
         $crits = array();
         foreach( $criticals as $crit){

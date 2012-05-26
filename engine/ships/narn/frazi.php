@@ -28,7 +28,7 @@ class Frazi extends FighterFlight{
 			$frazi->iconPath = "ships/frazi_large.png";
 			
 			
-			$frazi->addFrontSystem(new PairedParticleGun(300, 60, 5));
+			$frazi->addFrontSystem(new PairedParticleGun(330, 30, 5));
 			
 			
 			$this->addSystem($frazi);

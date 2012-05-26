@@ -54,14 +54,14 @@ class Gquonth extends BaseShip{
 		//left
 		
 		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
-		$this->addLeftSystem(new MediumPulse(2, 6, 3, 270, 90));
+		$this->addLeftSystem(new LightPulse(2, 4, 2, 270, 90));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 270, 90));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
               
 
 		//right
 		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
-		$this->addRightSystem(new MediumPulse(2, 6, 3, 270, 90));
+		$this->addRightSystem(new LightPulse(2, 4, 2, 270, 90));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 270, 90));	
 		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         

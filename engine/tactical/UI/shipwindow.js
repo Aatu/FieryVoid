@@ -142,7 +142,7 @@ shipWindowManager = {
 		for (var i in arrangement){
 			var group = arrangement[i];
 			var row;
-			if (group.length == 1){	row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');}
+			if (group.length == 1){row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');}
 			if (group.length == 2){	
 			
 				if (location == 4){
@@ -450,7 +450,8 @@ shipWindowManager = {
 		var template = $("#systemtemplatecontainer .system.regular");
 		var systemwindow = template.clone(true).appendTo(destination);
 		systemwindow.addClass(system.name);
-		systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
+        if (system.name)
+            systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
 		systemwindow.addClass(system.name);
 		systemwindow.addClass("system_" + system.id);
 		systemwindow.data("shipid", ship.id);
@@ -490,16 +491,20 @@ shipWindowManager = {
 	},
 	
 	setSystemData: function(ship, system, shipwindow){
+        system = shipManager.systems.initializeSystem(system);
 		var systemwindow = shipwindow.find(".system_"+system.id);
+
+ 
+        if (system.dualWeapon)
+            systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
+
 
 		var output = shipManager.systems.getOutput(ship, system);
 		var field = systemwindow.find(".efficiency.value");
 		
 		var healtWidth = 48;
 		if (system.name == "structure")
-			var healtWidth = 108;
-			
-		
+			healtWidth = 108;
 			
 		systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
 		systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*healtWidth) + "px");
@@ -527,11 +532,12 @@ shipWindowManager = {
 		
 		
 		if (system.weapon){
+           
 			var firing = weaponManager.hasFiringOrder(ship, system);
 			if (!weaponManager.isLoaded(system)){systemwindow.addClass("loading");}else{systemwindow.removeClass("loading");}
 			if (weaponManager.isSelectedWeapon(system)){systemwindow.addClass("selected");}else{systemwindow.removeClass("selected");}
 			if (firing){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
-			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
+			if (system.ballistic){systemwindow.addClass("ballistic");}else{systemwindow.removeClass("ballistic");}
 			
             if (!firing && Object.keys(system.firingModes).length > 1)
             {
@@ -547,8 +553,8 @@ shipWindowManager = {
 				
 				var fire = weaponManager.getFiringOrder(ship, system);
 			
-				if (fire.shots<system.shots){	systemwindow.addClass("canAddShots");	}else{	systemwindow.removeClass("canAddShots");	}
-				if (fire.shots>1){	systemwindow.addClass("canReduceShots");	}else{	systemwindow.removeClass("canReduceShots");	}
+				if (fire.shots<system.shots){systemwindow.addClass("canAddShots");}else{systemwindow.removeClass("canAddShots");}
+				if (fire.shots>1){systemwindow.addClass("canReduceShots");}else{systemwindow.removeClass("canReduceShots");}
 				
 				field.html(fire.shots+ "/" + system.shots);
 				
@@ -707,6 +713,8 @@ shipWindowManager = {
 		var systemwindow = $(this);
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = ship.systems[systemwindow.data("id")];
+        system = shipManager.systems.initializeSystem(system);
+        
 		var selectedShip = gamedata.getSelectedShip();
 		
 		if (gamedata.waiting)

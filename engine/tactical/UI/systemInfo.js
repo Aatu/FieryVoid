@@ -2,6 +2,7 @@ window.systemInfo = {
 
 
 	showSystemInfo: function(t, system, ship){
+        system = shipManager.systems.initializeSystem(system);
 		var w = $("#systemInfo");
 		var offs = t.offset();
 
@@ -13,6 +14,10 @@ window.systemInfo = {
 		
 		var h = "";
 		
+        if (system.firingModes)
+            h += '<div><span class="header">Firing mode:</span><span class="value">' + system.firingModes[system.firingMode]+"</span></div>";
+		
+        
 		for (var i in system.data){
 			h += '<div><span class="header">'+i+':</span><span class="value">' + system.data[i]+"</span></div>";
 		}

@@ -85,8 +85,13 @@ class Firing{
         foreach ($gd->ships as $ship){
             $intercepts = Array(); 
             foreach($ship->systems as $weapon){
-                        
+                                
                 if (!($weapon instanceof Weapon))
+                    continue;
+                
+                $weapon = $weapon->getWeaponForIntercept();
+                
+                if (!$weapon)
                     continue;
                 
                 if ($weapon->intercept == 0)
@@ -179,7 +184,10 @@ class Firing{
         
         if ($fire->type=="intercept")
             return false;
-            
+        
+        if ($weapon instanceof DualWeapon)
+            $weapon->getFiringWeapon($fire);
+        
         if ($weapon->intercept == 0)
             return false;
         
