@@ -85,6 +85,7 @@
 			if ($system instanceof Fighter){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
+                $crit->inEffect = false;
 				$system->criticals[] =  $crit;
             }else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");

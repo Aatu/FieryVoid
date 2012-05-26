@@ -338,7 +338,7 @@ class ShipSystem{
     public function hasCritical($type, $turn = false){
         $count = 0;
         foreach ($this->criticals as $critical){
-            if ($critical->phpclass == $type){
+            if ($critical->phpclass == $type && $critical->inEffect){
 				
 				if ($turn === false){
 					$count++;
@@ -352,6 +352,7 @@ class ShipSystem{
         return $count;
     }
     
+    
     public function effectCriticals(){
            
         foreach ($this->criticals as $crit){
@@ -361,12 +362,12 @@ class ShipSystem{
     
     }
     
-    public function getTotalDamage(){
+    public function getTotalDamage($turn = false){
         $totalDamage = 0;
         
         foreach ($this->damage as $damage){
             $d = ($damage->damage - $damage->armour);
-            if ( $d < 0)
+            if ( $d < 0 && ($d->turn <=$turn || $turn === false))
                 $d = 0;
                 
             $totalDamage += $d;
@@ -376,9 +377,12 @@ class ShipSystem{
     
     }
     
-    public function isDestroyed(){
-        if ($this->getTotalDamage() >= $this->maxhealth)
-            return true;
+    public function isDestroyed($turn = false){
+
+        foreach ($this->damage as $damage){
+            if (($turn === false || $damage->turn <= $turn) && $damage->destroyed)
+                return true;
+        }
   
         return false;
         
@@ -407,17 +411,7 @@ class ShipSystem{
             
         return $rem;
     }
-    
-    public function isDestroyedBeforeTurn($turn){
-        
-        foreach ($this->damage as $damage){
-            if ($damage->turn < $turn && $damage->destroyed)
-                return true;
-        }
-        
-        return false;
-    }
-    
+      
     public function isOfflineOnTurn($turn){
     
         foreach ($this->power as $power){

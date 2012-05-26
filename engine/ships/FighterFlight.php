@@ -181,10 +181,10 @@
                
         }
         
-        public function isDestroyed(){
+        public function isDestroyed($turn = false){
         
             foreach($this->systems as $system){
-                if (!$system->isDestroyed()){
+                if (!$system->isDestroyed($turn = false) && !$system->isDisengaged($turn)){
                     return false;
                 }
                 

@@ -336,7 +336,7 @@
                     return 0;
                     
                 $structure = $this->getStructureSystem($location);
-                if ($structure != null && $structure->isDestroyedBeforeTurn($turn))
+                if ($structure != null && $structure->isDestroyed($turn-1))
                     return 0;
             }
             
@@ -359,7 +359,7 @@
                
         }
         
-        public function isDestroyed(){
+        public function isDestroyed($turn = false){
         
             foreach($this->systems as $system){
                 /*
@@ -367,7 +367,7 @@
                     return true;
                 }
                 */
-                if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed()){
+                if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                     return true;
                 }
                 
@@ -628,7 +628,7 @@
                      $systems[] = $system;
                         
                     if ($system instanceof Structure){
-                        $multiply = 2;
+                        $multiply = 1;
                             
                         $totalStructure += round($system->maxhealth * $multiply);
                     }else{
@@ -649,7 +649,7 @@
                 $health = 0;
             
                 if ($system->name == "structure"){
-                    $multiply = 2;
+                    $multiply = 1;
                         
                     $health = round($system->maxhealth * $multiply);
                 }else{

@@ -28,15 +28,18 @@
 			
 			
 		}
-		
-		public function isDestroyed(){
-			if ($this->hasCritical("DisengagedFighter"))
+        
+        public function isDisengaged($turn){
+            if ($this->hasCritical("DisengagedFighter", $turn))
 				return true;
-				
-			return parent::isDestroyed();
+        }
 			
-		}
-		
+        public function isDestroyed($turn = false){
+            if ($this->isDisengaged($turn))
+                return true;
+            
+            return parent::isDestroyed();
+        }
 		
 		public function addFrontSystem($system){
             

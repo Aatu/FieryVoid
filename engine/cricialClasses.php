@@ -7,6 +7,7 @@
 		public $outputMod = 0;
 		public $description = "";
 		public $oneturn = false;
+        public $inEffect = true;
 		
 		function __construct($id, $shipid, $systemid, $phpclass, $turn){
 			$this->id = (int)$id;
