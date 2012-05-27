@@ -4,12 +4,12 @@ class Tishat extends FighterFlight{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
 
-	$this->pointCost = 510;
-	$this->faction = "Minbari";
-        $this->phpclass = "Tishat";
-        $this->shipClass = "Tishat flight";
-        // need picture
-	$this->imagePath = "ships/frazi.png";
+		$this->pointCost = 510;
+		$this->faction = "Minbari";
+		$this->phpclass = "Tishat";
+		$this->shipClass = "Tishat flight";
+		// need picture
+		$this->imagePath = "ships/frazi.png";
 
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
