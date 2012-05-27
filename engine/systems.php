@@ -1,4 +1,16 @@
 <?php
+class Jammer extends ShipSystem{
+    
+    public $name = "jammer";
+    public $displayName = "Jammer";
+    public $primary = true;
+    
+    public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 2);
+     }
+}
 
 class Reactor extends ShipSystem{
 
