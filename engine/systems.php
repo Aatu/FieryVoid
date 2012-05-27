@@ -9,7 +9,8 @@ class Jammer extends ShipSystem{
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 2);
-     }
+    }
+     
 }
 
 class Reactor extends ShipSystem{
