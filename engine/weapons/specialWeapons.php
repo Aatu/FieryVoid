@@ -85,7 +85,6 @@
 			if ($system instanceof Fighter){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
-                $crit->inEffect = false;
 				$system->criticals[] =  $crit;
             }else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
@@ -118,5 +117,66 @@
             parent::__construct($armour, $maxhealth, $powerReq, $output );
         }
 
+
+    }
+
+    class ElectroPulseGun extends Weapon{
+
+        public $name = "electroPulseGun";
+        public $displayName = "Electro-Pulse Gun";
+        // You have to take a look at this.
+        public $animation = "laser";
+        // You have to take a look at this.
+        public $animationColor = array(158, 240, 255);
+        // You have to take a look at this.
+        public $trailColor = array(158, 240, 255);
+        // You have to take a look at this.
+        public $projectilespeed = 15;
+        // You have to take a look at this.
+        public $animationWidth = 2;
+        // You have to take a look at this.
+        public $animationExplosionScale = 0.10;
+        // You have to take a look at this.
+        public $trailLength = 30;
+
+        public $loadingtime = 2;
+        public $rangePenalty = 3;
+        public $fireControl = array(0, 0, 3); // fighters, <=mediums, <=capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Electromagnetic";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+
+            // On a hit, make fighters drop out, but if this weapon had
+            // a ReducedDamage crit, roll a d6 and substract 2 for each
+            // ReducedDamage crit. If the result is less than 1, the hit
+            // has no effect on the fighter.
+            $crit = null;
+            $affect = Dice::d(6);
+
+            foreach ($this->criticals as $crit){
+                if ($crit instanceof ReducedDamage){
+                    $affect = $affect - 2;
+                }
+            }
+
+            if ($system instanceof Fighter && $affect > 0){
+                parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+            }
+        }
+
+
+        public function getDamage(){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
     }
 ?>
