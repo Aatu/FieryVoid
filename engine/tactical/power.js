@@ -61,7 +61,7 @@ shipManager.power = {
 		
 		
 		
-		if (system.weapon && system.overloadturns && !shipManager.power.isOverloading(ship, system)){
+		if (system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system)){
 			systemwindow.addClass("canoverload");
 		}
 		
@@ -250,7 +250,8 @@ shipManager.power = {
 	},
 	
 	canOverload: function(ship, system){
-		if (!system.overloadturns)
+        
+		if (!system.overloadable)
 			return false;
 		
 		return (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) >= system.powerReq);
@@ -296,12 +297,15 @@ shipManager.power = {
 	},
 	
 	setOverloading: function(ship, system){
-				
+        console.log("trying to overload");
+        
 		if (shipManager.power.isOverloading(ship, system))
 			return;
 			
 		if (!shipManager.power.canOverload(ship, system))
 			return;
+        
+        console.log("overload 2");
 			
 		system.power.push({id:null, shipid:ship.id, systemid:system.id, type:3, turn:gamedata.turn, amount:0});
 	},

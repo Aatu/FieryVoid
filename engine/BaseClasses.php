@@ -367,7 +367,7 @@ class ShipSystem{
         
         foreach ($this->damage as $damage){
             $d = ($damage->damage - $damage->armour);
-            if ( $d < 0 && ($d->turn <=$turn || $turn === false))
+            if ( $d < 0 && ($damage->turn <=$turn || $turn === false))
                 $d = 0;
                 
             $totalDamage += $d;

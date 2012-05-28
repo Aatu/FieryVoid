@@ -922,29 +922,10 @@ window.weaponManager = {
     
     },
     
-    /*
-    getHitPulses: function(weapon, target, fire){
-        var pulses = 0;
-        
-        for (var i in target.systems){
-            for (var b in target.systems[i].damage){
-                var d = target.systems[i].damage[b];
-                
-                if (d.fireorderid == fire.id && d.damage == weapon.minDamage)
-                    pulses++;
-                
-            }
-        }
-        
-        
-        return pulses;
-        
-        
-    },
-    */
     
     isLoaded: function(weapon){
-        return (weapon.loadingtime <= weapon.turnsloaded);
+        return (weapon.loadingtime <= weapon.turnsloaded
+            || weapon.loadingtime <= weapon.overloadturns );
     },
     
     getFireOrderById: function(id){

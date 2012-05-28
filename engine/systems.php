@@ -215,6 +215,9 @@ class Weapon extends ShipSystem{
     
     public $loadingtime = 1;
     public $turnsloaded;
+    
+    public $overloadable = false;
+    
     public $normalload = 0;
     public $overloadturns = 0;
     
@@ -367,16 +370,15 @@ class Weapon extends ShipSystem{
     
     public function setLoading($ship, $turn, $phase){
         $turnsloaded = 0;
-    
+        $turnsOverloaded = 0;
     
         for ($i = 0;$i<=$turn;$i++){
             $step = 1;
             $off = $this->isOfflineOnTurn($i);
-            $overload = $this->isOverloadingOnTurn($i-1);
-            $nowoverloading = $this->isOverloadingOnTurn($i);
-            if ($i == $turn && $phase == 1 && $overload){
-                $nowoverloading = true;
-            }           
+            $overload = $this->isOverloadingOnTurn($i);
+            if ($phase == 1 && !$overload && $this->isOverloadingOnTurn($i-1) && $turnsOverloaded > 0)
+                $overload = true;
+               
             $fired = $this->firedOnTurn($ship, $i);
             
                     
@@ -384,45 +386,58 @@ class Weapon extends ShipSystem{
                 if (!$off){
                     $turnsloaded = $this->getNormalLoad();
                     if ($overload){
-                        $turnsloaded = $this->overloadturns;
+                        $turnsOverloaded = $this->getNormalLoad();
                     }
                 }
                 continue;
             }
             
-            if ($off){
+            if ($this->firedOnTurn($ship, $i-1) && $this->isOverloadingOnTurn($i-1) && $turnsOverloaded == 0){
                 $turnsloaded = 0;
+                $turnsOverloaded = 0;
                 continue;
             }
             
+            if ($off){
+                $turnsloaded = 0;
+                $turnsOverloaded = 0;
+                continue;
+            }
+            
+                        
             if ($overload){
-                $step = 2;
+                $turnsOverloaded += $step;
+            }else{
+                $turnsOverloaded = 0;
             }
             
             $turnsloaded += $step;
             
-            if (!$overload && $turnsloaded > $this->getNormalLoad()){
+            if ($turnsloaded > $this->getNormalLoad()){
                 $turnsloaded = $this->getNormalLoad();
             }
-    
-            if ($turnsloaded > $this->getNormalLoad() && !$nowoverloading){
-                $turnsloaded = $this->getNormalLoad();
-            }else if ($turnsloaded > $this->overloadturns && $nowoverloading){
-                $turnsloaded = $this->overloadturns;
-            }
-                            
-           
             
-                    
-            if ($fired){
-                $turnsloaded -= $this->getNormalLoad();
-                if ($turnsloaded < 0)
-                    $turnsloaded = 0;
-                
+            if ($turnsOverloaded > $this->getNormalLoad()){
+                $turnsOverloaded = $this->getNormalLoad();
             }
+            
+                        
+            if ($fired && $turnsOverloaded == $this->getNormalLoad()){
+                if ($turnsloaded < $this->getNormalLoad()){
+                    $turnsloaded = 0;
+                    $turnsOverloaded = 0;
+                }else{
+                    $turnsloaded = 0;
+                }
+            }else if ($fired){
+                $turnsloaded = 0;
+                $turnsOverloaded = 0;
+            }
+            
             
         }
         
+        $this->overloadturns = $turnsOverloaded;
         $this->turnsloaded = $turnsloaded;
     }
     

@@ -568,8 +568,13 @@ shipWindowManager = {
 				var loadingtime = system.loadingtime;
 				if (system.normalload > 0)
 					loadingtime = system.normalload;
+                
+                var overloadturns = "";
+                
+                if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system))
+                    overloadturns = "("+system.overloadturns+")";       
 					
-				field.html(load+ "/" + loadingtime);
+				field.html(load+overloadturns+ "/" + loadingtime);
 			}
 				
 			
