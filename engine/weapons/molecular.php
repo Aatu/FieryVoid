@@ -25,7 +25,7 @@
         // needs to be looked into
         public $trailColor = array(30, 170, 255);
 
-        public $name = "FusionCannon";
+        public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
         // needs to be looked into
         public $animation = "beam";
