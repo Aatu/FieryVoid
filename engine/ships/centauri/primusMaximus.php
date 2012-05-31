@@ -7,7 +7,7 @@ class PrimusMaximus extends BaseShip{
 		$this->pointCost = 1000;
 		$this->faction = "Centauri";
         $this->phpclass = "PrimusMaximus";
-        $this->imagePath = "ships/primus.png";
+        $this->imagePath = "ships/primusMaximus.png";
         $this->shipClass = "Primus Maximus";
         $this->shipSizeClass = 3;
         
