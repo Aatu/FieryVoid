@@ -75,6 +75,7 @@ window.shipClickable = {
 			$(".speed.value", e).html("");
 			$(".iniative.value", e).html("");
 			$(".rolled.value", e).html("");
+            $(".unused.value", e).html("");
 		}else{
 				
 			$('<span class="name value '+fac+'">'+ship.name+'</span>').appendTo('#shipNameContainer .namecontainer');

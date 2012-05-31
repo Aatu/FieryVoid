@@ -194,6 +194,7 @@ class Manager{
             
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships){
         try {
+            //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             $ships = self::getShipsFromJSON($ships);
             
             if (sizeof($ships)==0)
@@ -623,6 +624,9 @@ class Manager{
             $ship->fireOrders = $fireOrders;
             
             foreach($value["systems"] as $i=>$system){
+                if (!is_array($system["power"]))
+                    continue;
+                    
                 foreach ($system["power"] as $a=>$power){
                                                     
                     $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);

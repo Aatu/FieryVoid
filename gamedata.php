@@ -24,6 +24,8 @@
 			$activeship = $_POST["activeship"];
 			$ships = $_POST["ships"];
 			
+            //file_put_contents('/tmp/fierylog', "Gameid: $gameid gamedata.php ships:". var_export($_POST["ships"], true) ."\n\n", FILE_APPEND);
+            
 			$ret = Manager::submitTacGamedata($gameid, $playerid, $turn, $phase, $activeship, $ships);
 			
 			

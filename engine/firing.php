@@ -182,27 +182,40 @@ class Firing{
     
     public static function isLegalIntercept($gd, $ship, $weapon, $fire){
         
-        if ($fire->type=="intercept")
+        //Debug::log("\n\nIS LEGAL INTERCEPT: ". $ship->name . ' weapon: ' . $weapon->name . '(' .$weapon->id . ")\n");
+        
+        if ($fire->type=="intercept"){
+            //Debug::log("Fire is intercept\n");
             return false;
+        }
+           
         
         if ($weapon instanceof DualWeapon)
             $weapon->getFiringWeapon($fire);
         
-        if ($weapon->intercept == 0)
+        if ($weapon->intercept == 0){
+            //Debug::log("Weapon has intercept of zero\n");
             return false;
+        }
         
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
         $firingweapon = $shooter->getSystemById($fire->weaponid);
         
-        if ($firingweapon->uninterceptable)
+        if ($firingweapon->uninterceptable){
+            //Debug::log("Target weapon is uninterceptable\n");
             return false;
+        }
                 
-        if ($shooter->id == $ship->id)
+        if ($shooter->id == $ship->id){
+            //Debug::log("Fire is my own\n");
             return false;
+        }
             
-        if ($shooter->team == $ship->team)
+        if ($shooter->team == $ship->team){
+            //Debug::log("Fire is friendly\n");
             return false;
+        }
          
         $pos = $shooter->getCoPos();   
         $shooterCompassHeading = null;
@@ -217,21 +230,35 @@ class Firing{
         $tf = $ship->getFacingAngle();
         
       
-        if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($weapon->startArc,$tf), Mathlib::addToDirection($weapon->endArc,$tf) ))
+        if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($weapon->startArc,$tf), Mathlib::addToDirection($weapon->endArc,$tf) )){
+            //Debug::log("Fire is not on weapon arc\n");
             return false;
+        }
         
         if ($target->id == $ship->id){
+            //Debug::log("Target is this ship\n");
+            //Debug::log("VALID INTERCEPT\n");
             return true;
         }else{
-            if (!$weapon->freeintercept)
+            if (!$weapon->freeintercept){
+                //Debug::log("Target is another ship, and this weapon is not freeintercept \n");
                 return false;
-                
-            if (mathlib::getDistanceHex($target->getCoPos(), $ship->getCoPos())<=3 &&  (mathlib::getDistance($pos, $ship->getCoPos()) < (mathlib::getDistance($target->getCoPos(), $pos))))
+            }
+            //Debug::log("Target is this another ship\n");
+            $distanceShipTarget = mathlib::getDistanceHex($target->getCoPos(), $ship->getCoPos());
+            $distancePosShip = mathlib::getDistance($pos, $ship->getCoPos());
+            $distancePosTarget = (mathlib::getDistance($target->getCoPos(), $pos));
+            
+            //Debug::log("distanceShipTarget: $distanceShipTarget, distancePosShip: $distancePosShip, distancePosTarget: $distancePosTarget \n");
+            
+            if ($distanceShipTarget<=3 &&  ($distancePosShip < $distancePosTarget)){
+                //Debug::log("VALID INTERCEPT\n");
                 return true;
+            }
             
         }
-            
-            
+         //Debug::log("INVALID INTERCEPT\n");   
+         return false;   
         
     }
     

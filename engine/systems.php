@@ -404,7 +404,11 @@ class Weapon extends ShipSystem{
                 continue;
             }
             
-                        
+            //TODO: if overloaded weapon is not fired next turn after firing first time, lose overloading
+            if ($turnsOverloaded > $turnsloaded && !$this->firedOnTurn($ship, $i-1)){
+                $turnsOverloaded = 0;
+            }
+            
             if ($overload){
                 $turnsOverloaded += $step;
             }else{
