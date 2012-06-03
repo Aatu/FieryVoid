@@ -1,23 +1,24 @@
 <?php
-class DefensiveSystem extends ShipSystem{
+interface DefensiveSystem{
+
+    public function getHitChangeMod($shooter, $pos, $turn);
     
-    public $defensiveType;
+    public function getDamageMod($shooter, $pos, $turn);
     
-    public function getHitChangeMod($shooter, $pos, $turn){
-       return 0;
-    }
     
-    public function getDamageMod($shooter, $pos, $turn){
-       return 0;
-    }
 }
 
-class Shield extends DefensiveSystem{
+class Shield implements DefensiveSystem{
     public $name = "shield";
     public $displayName = "Shield";
     public $startArc = 0;
     public $endArc = 0;
+    
+    //defensive system
     public $defensiveType = "Shield";
+    public $defensiveSystem = true;
+    public $tohitPenalty = 0;
+    public $damagePenalty = 0;
     
     public $possibleCriticals = array(16=>"StrReduced", 20=>"EffReduced", 25=>array("StrReduced", "EffReduced"));
 
@@ -27,6 +28,12 @@ class Shield extends DefensiveSystem{
         
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+    }
+    
+    public function onConstructed($ship, $turn, $phase){
+		$this->tohitPenalty = $this->output;
+		$this->damagePenalty = $this->output;
+     
     }
     
     private function checkIsFighterUnderShield($shooter){
