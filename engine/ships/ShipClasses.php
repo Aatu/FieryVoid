@@ -160,11 +160,70 @@
         }
         
         public function getHitChangeMod($shooter, $pos, $turn){
-			
-			//TODO: interceptors
-			
-			return 0;
+			$affectingSystems = array();
+            foreach($this->systems as $system){
+                
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
+                    continue;
+                
+                $mod = $systems->getHitChangeMod($shooter, $pos, $turn);
+                
+                if ( !$affectingSystems[$system->$defensiveType]
+                    || $affectingSystems[$system->$defensiveType] < mod){
+                    $affectingSystems[$system->$defensiveType] = mod;
+                }
+                
+            }
+            return array_sum($affectingSystems);
 		}
+        
+        public function getDamageMod($shooter, $pos, $turn){
+			$affectingSystems = array();
+            foreach($this->systems as $system){
+                
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
+                    continue;
+                
+                $mod = $systems->getDamageMod($shooter, $pos, $turn);
+                
+                if ( !$affectingSystems[$system->$defensiveType]
+                    || $affectingSystems[$system->$defensiveType] < mod){
+                    $affectingSystems[$system->$defensiveType] = mod;
+                }
+                
+            }
+            return array_sum($affectingSystems);
+		}
+        
+        private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn){
+            if (!($system instanceof DefensiveSystem))
+                return false;
+                
+            //If the system was destroyed last turn continue 
+            //(If it has been destroyed during this turn, it is still usable)
+            if ($system->isDestroyed($turn-1))
+               return false;
+
+            //If the system is offline either because of a critical or power management, continue
+            if (isOfflineOnTurn($turn))
+                return false;
+
+            //if the system has arcs, check that the position is on arc
+            if($system->startArc && $system->endArc){
+
+                $tf = $this->getFacingAngle();
+
+                //get the heading of position, not ship (in case ballistic)
+                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+
+                //if not on arc, continue!
+                if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($system->startArc,$tf), Mathlib::addToDirection($system->endArc,$tf) )){
+                    return false;
+                }
+            }
+            
+            return true;
+        }
 
         
         public function getLastTurnMovement($turn){

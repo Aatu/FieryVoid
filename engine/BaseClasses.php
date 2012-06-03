@@ -182,6 +182,7 @@ class PowerManagementEntry{
 
 class ShipSystem{
 
+    public $startArc, $endArc;
     public $location; //0:primary, 1:front, 2:rear, 3:left, 4:right;
     public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
     public $damage = array();
@@ -268,31 +269,6 @@ class ShipSystem{
                 
             $this->critData[$crit->phpclass] = $crit->description .$forturn;
         }
-        /*
-        foreach ($this->criticals as $crit){
-            if (isset($critDesc[$crit->phpclass]))
-                continue;
-
-            if (!isset($this->criticalDescriptions[$crit->phpclass]))   
-                continue;
-
-            $c = $counts[$crit->phpclass];
-            
-            if ($c > 1){
-                $desc = $c . " x " + $this->criticalDescriptions[$crit->phpclass];
-            }else{
-                $desc = $this->criticalDescriptions[$crit->phpclass];
-            }
-            
-            $critDesc[] = $desc;
-                
-        }
-        
-        foreach ($critDesc as $desc){
-            $this->critData[] = $desc;
-        }
-        */
-        
         
     }
     
@@ -419,6 +395,9 @@ class ShipSystem{
                 return true;
             }
         }
+        
+        if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1))
+            return true;
         
         return false;
     

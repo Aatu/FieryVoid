@@ -1,4 +1,60 @@
 <?php
+class DefensiveSystem extends ShipSystem{
+    
+    public $defensiveType;
+    
+    public function getHitChangeMod($shooter, $pos, $turn){
+       return 0;
+    }
+    
+    public function getDamageMod($shooter, $pos, $turn){
+       return 0;
+    }
+}
+
+class Shield extends DefensiveSystem{
+    public $name = "shield";
+    public $displayName = "Shield";
+    public $startArc = 0;
+    public $endArc = 0;
+    public $defensiveType = "Shield";
+    
+    public $possibleCriticals = array(16=>"StrReduced", 20=>"EffReduced", 25=>array("StrReduced", "EffReduced"));
+
+    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor);
+        
+        $this->startArc = (int)$startArc;
+        $this->endArc = (int)$endArc;
+    }
+    
+    private function checkIsFighterUnderShield($shooter){
+        $dis = mathlib::getDistanceHex($this->getCoPos(), $shooter->getCoPos());
+            
+        if ( $dis == 0 && ($shooter instanceof FighterFlight)){
+            // If shooter are fighers and range is 0, they are under the shield
+            return true;
+        }
+        return false;
+    }
+    
+    public function getHitChangeMod($shooter, $pos, $turn){
+        
+        if ($this->checkIsFighterUnderShield($shooter))
+            return 0;
+        
+        return $this->output;
+    }
+    
+    public function getDamageMod($shooter, $pos, $turn){
+        if ($this->checkIsFighterUnderShield($shooter))
+            return 0;
+        
+        return $this->output;
+    }
+}
+
 class Jammer extends ShipSystem{
     
     public $name = "jammer";
@@ -189,7 +245,6 @@ class Structure extends ShipSystem{
 
 class Weapon extends ShipSystem{
 
-    public $startArc, $endArc;
     public $weapon = true;
     
     public $name = null;
@@ -483,6 +538,8 @@ class Weapon extends ShipSystem{
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
+        $jammermod = 0;
+        
         $defence = 0;
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -508,6 +565,8 @@ class Weapon extends ShipSystem{
 		}
 		
 		$mod = 0;
+        
+        $mod = $target->getHitChangeMod($shooter, $pos, $turn);
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight){
@@ -534,6 +593,27 @@ class Weapon extends ShipSystem{
 		
         if ($oew == 0)
             $rangePenalty = $rangePenalty*2;
+        else if ($shooter->faction != $target->faction){
+            // Calculate jammer impact only if a ship has a lock-on
+            // AND only if the target and shooter are of different
+            // races. A race is able to bypass its own jammer technology.
+            $jammer = $target->getSystemByName("jammer");
+
+            if ( $jammer != null){
+                $jammermod = $rangePenalty*$jammer->output;
+            }
+
+            // Make certain fighters have either their jammer benefits
+            // or their jinxing, whichever is higher.
+            if ($target instanceof FighterFlight){
+                if ( $dew > $jammermod){
+                    $jammermod = 0;
+                }
+                else{
+                    $dew = 0;
+                }
+            }
+        }
             
         if (!($shooter instanceof FighterFlight)){
 			$CnC = $shooter->getSystemByName("CnC");
@@ -765,7 +845,8 @@ class Weapon extends ShipSystem{
     protected function getFinalDamage($shooter, $target, $pos, $gamedata){
     
         $damage = $this->getDamage();
-        return $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
     }
     
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
