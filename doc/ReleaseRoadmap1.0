@@ -11,7 +11,7 @@ UI improvements
 * Ship list
 * Display all allocated fire
 * Display all EW
-* Display movment path for single ship
+* Display movement path for single ship
 
 Game mechanics
 * ELINT
@@ -26,6 +26,10 @@ Game mechanics
 	- Ships that come available to deploy during the game
 	- Ships that come available in hyperspace during the game
 * Hangar actions
+
+SERVER
+* Server side validation for ship orders (Power, EW, Movement, Fire etc..)
+* Lock system preventing simultaenous submitting of turns (Currently results the game becoming stuck)
 	
 Factions
 	- Fully implemented Minbari, Narn, EA and Centauri
@@ -40,3 +44,4 @@ Misc
 	- Registration 
 	- Password change
 	- Archiving inactive games
+    - Calculating victory points

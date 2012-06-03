@@ -8,8 +8,6 @@
             $this->ship = $ship;             
             $this->weapon = $weapon;
             $this->intercepts = $intercepts;
-           
-        
         }
         
         public function chooseTarget($gd){
@@ -77,8 +75,6 @@ class Firing{
         return true;
     
     }
-    
-   
     
     public static function automateIntercept($gd){
         
@@ -174,9 +170,6 @@ class Firing{
         }
         
         return $intercepts;
-                
-               
-            
         
     }
     

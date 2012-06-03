@@ -43,5 +43,21 @@
 			return $output;
 				
 		}
+        
+        public static function getBlanketDEW($gamedata, $target)
+        {
+            $FDEW = 0;
+            foreach ($gamedata->ships as $ship)
+            {
+                if ($ship->team == $target->team && $ship->elint
+                     && Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) <= 20){
+                    $blanket = $ship->getBlanketDEW($gamedata->turn);
+                    
+                    if ( $blanket > $FDEW )
+                        $FDEW += $ship->getBlanketDEW($gamedata->turn);
+                }
+            }
+            
+            return $FDEW;
+        }
 	}
-?>
