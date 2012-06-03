@@ -4,14 +4,15 @@ class Sharlin extends BaseShip{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
 
-	$this->pointCost = 1825;
-	$this->faction = "Minbari";
+		$this->pointCost = 1825;
+		$this->faction = "Minbari";
         $this->phpclass = "Sharlin";
         $this->imagePath = "ships/sharlin.png";
         $this->shipClass = "Sharlin";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-
+		$this->canvasSize = 280;
+		
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
 
