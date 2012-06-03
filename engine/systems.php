@@ -573,7 +573,7 @@ class Weapon extends ShipSystem{
 		
 		$mod = 0;
         
-        $mod = $target->getHitChangeMod($shooter, $pos, $turn);
+        $mod = $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight){
@@ -854,6 +854,8 @@ class Weapon extends ShipSystem{
         $damage = $this->getDamage();
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
+        
+        return $damage;
     }
     
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
