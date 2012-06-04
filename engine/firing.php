@@ -113,7 +113,7 @@ class Firing{
                 if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime)
                     continue;
                    
-                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon);
+                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
                 $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
                     
             }
@@ -148,7 +148,7 @@ class Firing{
         }
     }
     
-    public static function getPossibleIntercept($gd, $ship, $weapon){
+    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
         
         $intercepts = array();
         
@@ -160,8 +160,11 @@ class Firing{
                 continue;
                       
             foreach($shooter->fireOrders as $fire){
+                if ($fire->turn != $turn)
+                    continue;
+                
                 if ($fire->type == "ballistic")
-                        continue;
+                    continue;
                 
                 if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
                     $intercepts[] = new InterceptCandidate($fire);
