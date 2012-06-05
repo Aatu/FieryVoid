@@ -573,7 +573,7 @@ class Weapon extends ShipSystem{
 		
 		$mod = 0;
         
-        $mod = $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
+        $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight){
@@ -630,7 +630,7 @@ class Weapon extends ShipSystem{
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
             
-        $goal = ($defence - $dew - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
+        $goal = ($defence - $dew - $jammermod - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         

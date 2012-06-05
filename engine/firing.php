@@ -283,7 +283,9 @@ class Firing{
 				continue;
 				
 			foreach($ship->fireOrders as $fire){
-							
+				if ($fire->turn != $gamedata->turn)
+                    continue;
+                
 				$weapon = $ship->getSystemById($fire->weaponid);
 				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
 					continue;
@@ -315,6 +317,8 @@ class Firing{
 				continue;
 				
 			foreach($ship->fireOrders as $fire){
+                if ($fire->turn != $gamedata->turn)
+                    continue;
 							
 				$weapon = $ship->getSystemById($fire->weaponid);
 				if ($ship->getFighterBySystem($weapon->id)->isDestroyed())
