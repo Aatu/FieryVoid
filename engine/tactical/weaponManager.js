@@ -338,7 +338,16 @@ window.weaponManager = {
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
             if (jammer)
-                jammermod = rangePenalty*shipManager.systems.getOutput(shooter, jammer);
+                jammermod = rangePenalty*(shipManager.systems.getOutput(shooter, jammer)-1);
+
+            if (t.hasClass("fightersystem")){
+                if (dew > jammermod){
+                    jammermod = 0;
+                }
+                else{
+                    dew = 0;
+                }
+            }
         }
             
         var defence = weaponManager.getShipDefenceValue(shooter, target);
