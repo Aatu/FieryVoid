@@ -607,7 +607,7 @@ class Weapon extends ShipSystem{
             $jammer = $target->getSystemByName("jammer");
 
             if ( $jammer != null){
-                $jammermod = $rangePenalty*$jammer->output;
+                $jammermod = $rangePenalty*($jammer->output-1);
             }
 
             // Make certain fighters have either their jammer benefits
@@ -630,7 +630,7 @@ class Weapon extends ShipSystem{
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
             
-        $goal = ($defence - $dew - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
+        $goal = ($defence - $dew - $jammermod - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         
