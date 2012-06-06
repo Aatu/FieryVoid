@@ -331,15 +331,22 @@ window.weaponManager = {
         if (calledid)
 			mod -= 8;
         
-        if (oew == 0)
+        var jammermod = 0;
+        if (oew == 0){
             rangePenalty = rangePenalty*2;
+         }else{
+            var jammer = shipManager.systems.getSystemByName(target, "jammer");
+        
+            if (jammer)
+                jammermod = rangePenalty*shipManager.systems.getOutput(shooter, jammer);
+        }
             
         var defence = weaponManager.getShipDefenceValue(shooter, target);
         
         var firecontrol =  weaponManager.getFireControl(target, weapon);
             
         
-        var goal = (defence - dew - rangePenalty + oew + firecontrol + mod);
+        var goal = (defence - dew - jammermod - rangePenalty + oew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
         console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
@@ -595,7 +602,7 @@ window.weaponManager = {
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
                 //$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
-                if (weapon.range == 0 || (mathlib.getDistanceHex(shipManager.getShipPositionInWindowCo(selectedShip), shipManager.getShipPositionInWindowCo(ship))<=weapon.range)){
+                if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
@@ -646,6 +653,24 @@ window.weaponManager = {
         
         gamedata.shipStatusChanged(selectedShip);
     
+    },
+    
+    checkIsInRange: function(shooter, target, weapon){
+        
+        var range = weapon.range;
+        
+        if (range === 0)
+            return true;
+        
+        var shooterPos = shipManager.getShipPositionInWindowCo(shooter);
+        var targetPos = shipManager.getShipPositionInWindowCo(target)
+        
+        var jammer = shipManager.systems.getSystemByName(target, "jammer");
+        
+        if (jammer)
+            range = range / shipManager.systems.getOutput(target, jammer);
+        
+        return (mathlib.getDistanceHex(shooterPos, targetPos)<=weapon.range);
     },
     
     targetHex: function(hexpos){

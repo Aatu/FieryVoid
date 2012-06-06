@@ -573,7 +573,7 @@ class Weapon extends ShipSystem{
 		
 		$mod = 0;
         
-        $mod = $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
+        $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 				
         $oew = $shooter->getOEW($target, $gamedata->turn);
         if ($shooter instanceof FighterFlight){
