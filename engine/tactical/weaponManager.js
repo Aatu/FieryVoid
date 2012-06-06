@@ -340,7 +340,7 @@ window.weaponManager = {
             if (jammer)
                 jammermod = rangePenalty*(shipManager.systems.getOutput(shooter, jammer)-1);
 
-            if (t.hasClass("fightersystem")){
+            if (target.hasClass("fightersystem")){
                 if (dew > jammermod){
                     jammermod = 0;
                 }
