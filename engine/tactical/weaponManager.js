@@ -338,7 +338,7 @@ window.weaponManager = {
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
             if (jammer)
-                jammermod = rangePenalty*(shipManager.systems.getOutput(shooter, jammer)-1);
+                jammermod = rangePenalty*shipManager.systems.getOutput(shooter, jammer);
 
             if (target.flight){
                 if (dew > jammermod){

@@ -71,7 +71,7 @@ class Jammer extends ShipSystem{
     public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
     
     function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 2);
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
     }
      
 }
@@ -607,7 +607,7 @@ class Weapon extends ShipSystem{
             $jammer = $target->getSystemByName("jammer");
 
             if ( $jammer != null){
-                $jammermod = $rangePenalty*($jammer->output-1);
+                $jammermod = $rangePenalty*($jammer->output);
             }
 
             // Make certain fighters have either their jammer benefits
