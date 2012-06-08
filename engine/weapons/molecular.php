@@ -54,7 +54,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage(){        return Dice::d(10)+9;   }
+        public function getDamage($fireOrder){        return Dice::d(10)+9;   }
         public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 19 - $this->dp;      }
 
@@ -88,7 +88,7 @@
 
         }
 
-        public function getDamage(){        return Dice::d(6)+$this->damagebonus;   }
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
 
@@ -154,17 +154,32 @@
 
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
 
-            $locTarget = $target->getHitSection($shooter, $fireOrder, $this);
-            $structTarget = $target->getStructureSystem($locTarget);
+            if ( $target instanceof FighterFlight)
+            {
+                return;
+            }
+
+            $structTarget = null;
+
+            if ( $target instanceof MediumShip ){
+                $structTarget = $target->getStructureSystem(0);
+            }
+            else{
+                $locTarget = $target->getHitSection($shooter, $fireOrder->turn, $this);
+                $structTarget = $target->getStructureSystem($locTarget);
+            }
 
             $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
             $crit->updated = true;
             $crit->inEffect = false;
-            $structTarget->setCriticals($crit, $gamedata->turn);
 
+            if ( $structTarget != null ){
+                $structTarget->criticals[] = $crit;
+            }
+            //$structTarget->setCriticals($crit, $gamedata->turn);
         }
 
-        public function getDamage(){        return Dice::d(10, 2)+$this->damagebonus;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20+$this->damagebonus - $this->dp;      }
     }

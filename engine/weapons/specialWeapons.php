@@ -43,7 +43,7 @@
 		}
 		
 		
-		public function getDamage(){        return Dice::d(10,3)+4;   }
+		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
         public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
 
@@ -103,7 +103,7 @@
 		}
 		
 		
-		public function getDamage(){        return 0;   }
+		public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
@@ -181,7 +181,7 @@
         }
 
 
-        public function getDamage(){        return 0;   }
+        public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
     }

@@ -57,7 +57,7 @@
 		
 		
 
-		public function getDamage(){ 
+		public function getDamage($fireOrder){
 		
 			if ($this->turnsloaded+1 == 1){
 				//print("Plasma: turnsloaded 1 \n");
@@ -122,7 +122,7 @@
         }
 		
 		
-		public function getDamage(){        return Dice::d(10,6)+20;   }
+		public function getDamage($fireOrder){        return Dice::d(10,6)+20;   }
         public function setMinDamage(){     $this->minDamage = 26 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 80 - $this->dp;      }
 
@@ -152,7 +152,7 @@
         }
 		
 		
-		public function getDamage(){        return Dice::d(10,3)+13;   }
+		public function getDamage($fireOrder){        return Dice::d(10,3)+13;   }
         public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 43 - $this->dp;      }
 

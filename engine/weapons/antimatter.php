@@ -20,13 +20,12 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
-        }
-        
-       	public function getDamage(){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
+       	public function getDamage($fireOrder){
+                return $damage = 2 + 4*round(($fireOrder->needed - $fireOrder->rolled)/5);
+            }
+
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 82;      }
     }
 
 ?>

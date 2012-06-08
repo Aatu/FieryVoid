@@ -519,7 +519,7 @@ class Weapon extends ShipSystem{
         parent::beforeTurn($ship, $turn, $phase);
     }
     
-    public function getDamage(){
+    public function getDamage($fireOrder){
         return 0;
     }
     
@@ -708,6 +708,7 @@ class Weapon extends ShipSystem{
         for ($i=0;$i<$fireOrder->shots;$i++){
             $needed = $fireOrder->needed - ($this->grouping*$i);
             $rolled = Dice::d(100);
+            $fireOrder->rolled = $rolled;
             if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
                 //$fireOrder->pubnotes .= "Shot intercepted. ";
                 $fireOrder->intercepted += 1;
@@ -720,8 +721,7 @@ class Weapon extends ShipSystem{
             }
         }
         
-        $fireOrder->rolled = 1;//Marks that fire order has been handled
-                
+        //$fireOrder->rolled = 1;//Marks that fire order has been handled
     }
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
@@ -729,7 +729,7 @@ class Weapon extends ShipSystem{
         if ($this->piercing && $this->firingMode == 2){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
-            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
+            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
         }
         
@@ -743,7 +743,7 @@ class Weapon extends ShipSystem{
             return;
         
         $damage = $target->getPiercingDamagePerLoc(
-                $this->getFinalDamage($shooter, $target, $pos, $gamedata)
+                $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
             );
 
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
@@ -849,9 +849,9 @@ class Weapon extends ShipSystem{
         return $damage;
     }
     
-    protected function getFinalDamage($shooter, $target, $pos, $gamedata){
+    protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
     
-        $damage = $this->getDamage();
+        $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
         

@@ -31,7 +31,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage(){        return 15;   }
+        public function getDamage($fireOrder){        return 15;   }
         public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
     
@@ -142,7 +142,7 @@
             $this->shots = $this->turnsloaded;
         }
         
-        public function getDamage(){        return Dice::d(10,2);   }
+        public function getDamage($fireOrder){        return Dice::d(10,2);   }
         public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
     
