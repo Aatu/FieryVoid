@@ -30,17 +30,17 @@ class Octurion extends BaseShip{
 		$this->addPrimarySystem(new Hangar(7, 26));
 
         
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 225, 45));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 315, 135));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 225, 45));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 315, 135));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 225, 45));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 315, 135));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 		$this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(6, 15, 0, 4, 1));
-        $this->addFrontSystem(new MatterCannon(4, 7, 4, 225, 0));
-		$this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 135));
+        $this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
+		$this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
 
 		
         $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
@@ -48,26 +48,27 @@ class Octurion extends BaseShip{
         $this->addAftSystem(new Thruster(5, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(5, 16, 0, 3, 2));
 		$this->addAftSystem(new JumpEngine(6, 30, 4, 16));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 315, 135));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 45, 225));
-        $this->addAftSystem(new MatterCannon(4, 7, 4, 315, 180));
-		$this->addAftSystem(new MatterCannon(4, 7, 4, 45, 180));
-		$this->addAftSystem(new BattleLaser(5, 6, 6, 315, 180));
-		$this->addAftSystem(new BattleLaser(5, 6, 6, 45, 180));
+        
+		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
+		$this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
+        $this->addAftSystem(new MatterCannon(4, 7, 4, 180, 300));
+		$this->addAftSystem(new MatterCannon(4, 7, 4, 60, 180));
+		$this->addAftSystem(new BattleLaser(5, 6, 6, 180, 300));
+		$this->addAftSystem(new BattleLaser(5, 6, 6, 60, 180));
 		
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
-		$this->addLeftSystem(new BattleLaser(5, 6, 6, 225, 0));
-		$this->addLeftSystem(new BattleLaser(5, 6, 6, 225, 0));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
-		$this->addLeftSystem(new MatterCannon(4, 7, 4, 225, 0));
+		$this->addLeftSystem(new MatterCannon(4, 7, 4, 240, 0));
 
 		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
-		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 135));
-		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 135));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
-		$this->addRightSystem(new MatterCannon(4, 7, 4, 0, 135));
+		$this->addRightSystem(new MatterCannon(4, 7, 4, 0, 120));
 
         
         
