@@ -540,6 +540,10 @@ window.shipManager = {
 			var stru = shipManager.systems.getStructureSystem(ship, 0);
 			if (shipManager.systems.isDestroyed(ship, stru))
 				return true;
+
+                        var react = shipManager.systems.getSystemByName(ship, "reactor");
+                        if (shipManager.systems.isDestroyed(ship, react))
+                            return true;
         }
             
         return false;
