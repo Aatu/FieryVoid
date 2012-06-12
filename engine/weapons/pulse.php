@@ -84,7 +84,7 @@
         
         public $grouping = 5;
         
-        
+        public $intercept = 2;
         
         
 
