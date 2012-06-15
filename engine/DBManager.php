@@ -847,36 +847,174 @@ class DBManager {
         }
         
         return $id;
-    }    
-      
-    /*
-    public function authenticatePlayer($username, $password){
-		$username = $this->DBEscape($username);	
-		$password = $this->DBEscape($password);	
-		
-        $sql ="SELECT * FROM player where username = '$username' and password = password('$password')";
-        $id = false;
+    }  
+    
+    public function releaseGameSubmitLock($gameid)
+    {
         try {
-            $result = $this->query($sql);
-            $this->close();
-            
-            if ($result == null || sizeof($result) == 0)
-                return false;
-                
-            $value = $result[0];   
-            $id = $value->id;
-            
-           
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_game 
+                SET
+                    submitLock = 0
+                WHERE 
+                    id = ?
+                "
+            ))
+            {
+				
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function releasePlayerSubmitLock($gameid, $playerid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_playeringame 
+                SET
+                    submitLock = 0
+                WHERE 
+                    gameid = ?
+                AND
+                    playerid = ?
+                "
+            ))
+            {
+				
+				$stmt->bind_param('ii', $gameid, $playerid);
+				$stmt->execute();
+				
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function getGameSubmitLock($gameid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_game
+                SET
+                    submitLock = now()
+                WHERE 
+                    id = ?
+                AND
+                (  
+                    DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
+                OR
+                    submitLock = 0
+                )"
+            ))
+            {
+				
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+                if (self::$connection->affected_rows == 1)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
         }
         catch(Exception $e) {
             throw $e;
         }
         
-        return $id;
+        return false;
     }
-    */
-
     
+    public function getPlayerSubmitLock($gameid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_playeringame
+                SET
+                    submitLock = now()
+                WHERE 
+                    gameid = ?
+                AND
+                    playerid = ?
+                AND
+                (  
+                    DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
+                OR
+                    submitLock = 0
+                )"
+            ))
+            {
+				
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+                if (self::$connection->affected_rows == 1)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return false;
+    }
+    
+    public function checkIfPhaseReady($gameid)
+    {
+        try {
+            $stmt = self::$connection->prepare(
+                "SELECT 
+                    g.*
+                FROM 
+                    tac_playeringame p
+                INNER JOIN tac_game g on g.id = p.gameid
+                WHERE 
+                    p.lastphase = g.phase
+                AND 
+                    p.lastturn = g.turn
+                AND 
+                    g.id = ?
+                GROUP BY p.gameid
+                HAVING 
+                    count(p.playerid) = g.slots;"
+            );
+            
+			if ($stmt)
+            {
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+                if (self::$connection->affected_rows == 1)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return false;
+        
+    }
+  
     //UTILS
     
     public function chekcIfTableExists($name, $close = true){
