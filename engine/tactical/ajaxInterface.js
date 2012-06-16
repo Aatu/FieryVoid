@@ -24,6 +24,7 @@ window.ajaxInterface = {
             error : ajaxInterface.errorSubmit
         });
         
+        gamedata.goToWaiting();
     },
     
     construcGamedata: function(){
@@ -79,10 +80,7 @@ window.ajaxInterface = {
             playerid: gamedata.thisplayer,
             ships: JSON.stringify(tidyships)
         };
-        
-        
-        
-        
+  
         return gd;
     },
     
@@ -92,7 +90,7 @@ window.ajaxInterface = {
 		if (data.error){
 			ajaxInterface.errorAjax(data);
 		}else{
-			gamedata.parseServerData(data);
+			//gamedata.parseServerData(data);
 		}
     },
     
@@ -108,7 +106,7 @@ window.ajaxInterface = {
 	errorSubmit: function(data){
 		ajaxInterface.submiting = false;
         console.log("error " + data.error);
-        if (data.error = "Not logged in."){
+        if (data.error == "Not logged in."){
 			$(".notlogged").show();
 			$(".waiting").hide();
 			gamedata.waiting = false;
@@ -145,7 +143,7 @@ window.ajaxInterface = {
         
         ajaxInterface.pollcount++;
         
-        var time = 3000;
+        var time = 6000;
         
         if (ajaxInterface.pollcount > 100){
             time = 30000;

@@ -1,4 +1,6 @@
 <?php 
+mysqli_report(MYSQLI_REPORT_ERROR);
+
 class DBManager {
 
     private static $connection = null;
@@ -101,13 +103,11 @@ class DBManager {
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-			//mysqli_query("ROLLBACK", self::$connection);
             mysqli_rollback(self::$connection); 
         }else{
             mysqli_commit(self::$connection);
-            //mysql_query("COMMIT", self::$connection); 
-            //mysql_query("SET AUTOCOMMIT=1", self::$connection);
         }
+        mysqli_autocommit(self::$connection, TRUE);
         
     }
     
@@ -227,7 +227,7 @@ class DBManager {
 			}
 					
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now())";
+			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now(), '0000-00-00 00:00:00')";
 			
 			$this->insert($sql);
 			
@@ -240,7 +240,7 @@ class DBManager {
 	public function createGame($name, $background, $maxplayers, $points, $userid){
 	
 		try{
-			$sql = "INSERT INTO `B5CGM`.`tac_game` VALUES (	null,'".$this->DBEscape($name)."',0,-2,-1,'$background',$points, 'LOBBY', 2, $userid)";
+			$sql = "INSERT INTO `B5CGM`.`tac_game` VALUES (	null,'".$this->DBEscape($name)."',0,-2,-1,'$background',$points, 'LOBBY', 2, $userid, 0)";
 			$id = $this->insert($sql);
 			
 			return $id;
@@ -856,7 +856,7 @@ class DBManager {
                 "UPDATE 
                     tac_game 
                 SET
-                    submitLock = 0
+                    submitLock = '0000-00-00 00:00:00'
                 WHERE 
                     id = ?
                 "
@@ -881,7 +881,7 @@ class DBManager {
                 "UPDATE 
                     tac_playeringame 
                 SET
-                    submitLock = 0
+                    submitLock = '0000-00-00 00:00:00'
                 WHERE 
                     gameid = ?
                 AND
@@ -889,10 +889,8 @@ class DBManager {
                 "
             ))
             {
-				
 				$stmt->bind_param('ii', $gameid, $playerid);
 				$stmt->execute();
-				
 				$stmt->close();
 			}
         }
@@ -915,7 +913,7 @@ class DBManager {
                 (  
                     DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
                 OR
-                    submitLock = 0
+                    submitLock = '0000-00-00 00:00:00'
                 )"
             ))
             {
@@ -937,7 +935,7 @@ class DBManager {
         return false;
     }
     
-    public function getPlayerSubmitLock($gameid)
+    public function getPlayerSubmitLock($gameid, $playerid)
     {
         try {
 			if ($stmt = self::$connection->prepare(
@@ -953,12 +951,12 @@ class DBManager {
                 (  
                     DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
                 OR
-                    submitLock = 0
+                    submitLock = '0000-00-00 00:00:00'
                 )"
             ))
             {
 				
-				$stmt->bind_param('i', $gameid);
+				$stmt->bind_param('ii', $gameid, $playerid);
 				$stmt->execute();
 				
                 if (self::$connection->affected_rows == 1)
@@ -980,7 +978,7 @@ class DBManager {
         try {
             $stmt = self::$connection->prepare(
                 "SELECT 
-                    g.*
+                    g.id, g.slots
                 FROM 
                     tac_playeringame p
                 INNER JOIN tac_game g on g.id = p.gameid
@@ -999,8 +997,10 @@ class DBManager {
             {
 				$stmt->bind_param('i', $gameid);
 				$stmt->execute();
+                $stmt->bind_result($id, $slots);
+				$stmt->fetch();
 				
-                if (self::$connection->affected_rows == 1)
+                if ($id)
                     return true;
 				
 				/* close statement */

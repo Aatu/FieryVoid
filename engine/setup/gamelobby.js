@@ -75,6 +75,10 @@ window.gamedata = {
 		$(".addship").bind("click", this.buyShip);
 	
 	},
+    
+    goToWaiting: function(){
+        
+    },
 	
 	parseServerData: function(serverdata){
 
