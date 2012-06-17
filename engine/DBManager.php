@@ -986,7 +986,9 @@ class DBManager {
                     p.lastphase = g.phase
                 AND 
                     p.lastturn = g.turn
-                AND 
+                AND
+                    g.phase != 2
+                AND
                     g.id = ?
                 GROUP BY p.gameid
                 HAVING 
@@ -999,12 +1001,10 @@ class DBManager {
 				$stmt->execute();
                 $stmt->bind_result($id, $slots);
 				$stmt->fetch();
-				
+				$stmt->close();
+                
                 if ($id)
                     return true;
-				
-				/* close statement */
-				$stmt->close();
 			}
         }
         catch(Exception $e) {
