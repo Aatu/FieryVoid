@@ -41,7 +41,6 @@ class Manager{
     }
     
     public static function getTacGames($userid){
-        $gamedata = null;
         
         if (!is_numeric($userid))
 			return null;
@@ -147,13 +146,14 @@ class Manager{
     
 		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
 			return null;
-		
-        
         
     
         $gamedata = null;
         try {
             self::initDBManager();
+            
+            self::advanceGameState($userid, $gameid);
+            
             if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
                 $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
                 if ($gamedata == null)
@@ -165,7 +165,7 @@ class Manager{
             }
         }
         catch(exception $e) {
-            throw $e;
+            Debug::error($e);
         }
         
         return $gamedata;
@@ -195,67 +195,66 @@ class Manager{
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships){
         try {
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
+            
+            self::initDBManager();  
+            
+            
+            
             $ships = self::getShipsFromJSON($ships);
             
             if (sizeof($ships)==0)
-				return "{error:\"Error, No gamedata submitted.\"}";
+				throw new Exception("Gamedata missing");
             //print(var_dump($ships));
             $gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
             $gamedata->ships = $ships;
             
-            self::initDBManager();  
+            if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
+                return "{'error': 'Failed to get player lock'}";
+            
             self::$dbManager->startTransaction();
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
-                return "{error:\"Error, we were not expecting this.\"}";
+                throw new Exception("Unexpected orders");
                 
             if ($gdS->hasAlreadySubmitted($userid))
-                return "{error: \"Error, turn already submitted. Or player not found\"}";
+                throw new Exception("Turn already submitted or wrong user");
                 
             if ($gdS->status == "FINISHED")
-                return "{error: \"Error, game is finished\"}";
+                throw new Exception("Game is finished");
             
             //print(var_dump($ships));
             
             if ($gdS->phase == 1){
-                 if (!($ret = self::handleInitialActions($ships, $gdS)))
-                        return $ret;
-                        
+                 $ret = self::handleInitialActions($ships, $gdS);
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
-                    if (!($ret = self::handleMovement($ships, $gdS)))
-                        return $ret;
+                    $ret = self::handleMovement($ships, $gdS);
                 }else{
-                    return "{error: \"phase and active ship does not match\"}";
+                    throw new Exception("phase and active ship does not match");
                 }
             }else if ($gdS->phase == 3){
-                if (!($ret = self::handleFiringOrders($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleFiringOrders($ships, $gdS);
             }else if ($gdS->phase == 4){
-                if (!($ret = self::handleFinalOrders($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
-                if (!($ret = self::handleBuying($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleBuying($ships, $gdS);
             }
-            
-            $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-            $gdS->prepareForPlayer($turn, $phase, $activeship);
-                      
-            $gdS = json_encode($gdS, JSON_NUMERIC_CHECK);
-            
+                        
             self::$dbManager->endTransaction(false);
-                   
-            return $gdS;
+            
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            
+            return '{}';
             
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
-            return $e->getMessage();
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            return "{'error': '" .$e->getMessage() . "'}";
         }
+       
         
-        return "error";
     }
     
     private static function handleBuying(  $ships, $gamedata ){
@@ -267,7 +266,7 @@ class Manager{
         }
         
         if ($points > $gamedata->points)    
-            return "Error, fleet too expensive.";
+            throw new Exception("Fleet too expensive.");
     
             
         foreach ($ships as $ship){
@@ -283,11 +282,6 @@ class Manager{
             return true;
         }
         
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-            self::startGame($servergamedata);
-        
-        }
         
         return true;
         
@@ -296,12 +290,7 @@ class Manager{
     
     private static function handleFinalOrders(  $ships, $gamedata ){
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::changeTurn($gamedata);
-        
-        }
-        
+       
         return true;
     }
     
@@ -328,10 +317,6 @@ class Manager{
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
         
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::startEndPhase($gamedata);
-        
-        }
         //print("firing");
         return true;
     
@@ -364,7 +349,7 @@ class Manager{
             if (EW::validateEW($ship->EW, $gd)){
                 self::$dbManager->submitEW($gamedata->id, $ship->id, $ship->EW, $gamedata->turn);
             }else{
-                return "{error: \"Failed to validate EW\"}";
+                throw new Exception("Failed to validate EW");
             }
 		   			
             
@@ -382,7 +367,7 @@ class Manager{
             if (Firing::validateFireOrders($ship->fireOrders, $gd)){
 				 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
             }else{
-                return "{error: \"Failed to validate Ballistic firing orders\"}";
+                throw new Exception("Failed to validate Ballistic firing orders");
             }
 			
             
@@ -391,14 +376,41 @@ class Manager{
         }
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::startMovement($gamedata);
-        
-        }
-        
+                
         return true;
     
+    }
+    
+    public static function advanceGameState($playerid, $gameid)
+    {
+        try{
+            if (!self::$dbManager->checkIfPhaseReady($gameid))
+                return;
+            
+            if (!self::$dbManager->getGameSubmitLock($gameid))
+                return;
+            
+            $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
+            $phase = $gamedata->phase;
+            
+            if ($phase == 1){
+                 self::startMovement($gamedata);
+            }else if ($phase == 2){
+                //Because movement does not have simultaenous orders, this is handled in handleMovement
+            }else if ($phase == 3){
+                   self::startEndPhase($gamedata);
+            }else if ($phase == 4){
+                self::changeTurn($gamedata);
+            }else if ($phase == -2){
+                self::startGame($gamedata);
+            }
+            
+            self::$dbManager->releaseGameSubmitLock($gameid);
+        }
+        catch(Exception $e)
+        {
+            self::$dbManager->releaseGameSubmitLock($gameid);
+        }
     }
     
     private static function startMovement($gamedata){
@@ -482,7 +494,7 @@ class Manager{
     
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
-            return "Already moved";
+            throw new Exception("The ship has already moved");
         
             
         self::$dbManager->submitMovement($gamedata->id, $ships[$gamedata->activeship]->id, $gamedata->turn, $ships[$gamedata->activeship]->movement);

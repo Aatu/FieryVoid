@@ -184,7 +184,6 @@ gamedata = {
             UI.shipMovement.hide();
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
-                gamedata.waiting = true;
                 shipManager.movement.RemoveMovementIndicators();
                 ajaxInterface.submitGamedata();
             }else{
@@ -401,7 +400,13 @@ gamedata = {
         cancel.hide();
     },
     
-    
+    goToWaiting: function(){
+        if (gamedata.waiting == false){
+            gamedata.waiting = true;
+            ajaxInterface.startPollingGamedata();
+            gamedata.checkGameStatus();
+        }
+    },
 
     parseServerData: function(serverdata){
     

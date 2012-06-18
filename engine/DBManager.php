@@ -1,4 +1,6 @@
 <?php 
+mysqli_report(MYSQLI_REPORT_ERROR);
+
 class DBManager {
 
     private static $connection = null;
@@ -101,13 +103,11 @@ class DBManager {
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-			//mysqli_query("ROLLBACK", self::$connection);
             mysqli_rollback(self::$connection); 
         }else{
             mysqli_commit(self::$connection);
-            //mysql_query("COMMIT", self::$connection); 
-            //mysql_query("SET AUTOCOMMIT=1", self::$connection);
         }
+        mysqli_autocommit(self::$connection, TRUE);
         
     }
     
@@ -227,7 +227,7 @@ class DBManager {
 			}
 					
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now())";
+			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now(), '0000-00-00 00:00:00')";
 			
 			$this->insert($sql);
 			
@@ -240,7 +240,7 @@ class DBManager {
 	public function createGame($name, $background, $maxplayers, $points, $userid){
 	
 		try{
-			$sql = "INSERT INTO `B5CGM`.`tac_game` VALUES (	null,'".$this->DBEscape($name)."',0,-2,-1,'$background',$points, 'LOBBY', 2, $userid)";
+			$sql = "INSERT INTO `B5CGM`.`tac_game` VALUES (	null,'".$this->DBEscape($name)."',0,-2,-1,'$background',$points, 'LOBBY', 2, $userid, 0)";
 			$id = $this->insert($sql);
 			
 			return $id;
@@ -847,36 +847,174 @@ class DBManager {
         }
         
         return $id;
-    }    
-      
-    /*
-    public function authenticatePlayer($username, $password){
-		$username = $this->DBEscape($username);	
-		$password = $this->DBEscape($password);	
-		
-        $sql ="SELECT * FROM player where username = '$username' and password = password('$password')";
-        $id = false;
+    }  
+    
+    public function releaseGameSubmitLock($gameid)
+    {
         try {
-            $result = $this->query($sql);
-            $this->close();
-            
-            if ($result == null || sizeof($result) == 0)
-                return false;
-                
-            $value = $result[0];   
-            $id = $value->id;
-            
-           
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_game 
+                SET
+                    submitLock = '0000-00-00 00:00:00'
+                WHERE 
+                    id = ?
+                "
+            ))
+            {
+				
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function releasePlayerSubmitLock($gameid, $playerid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_playeringame 
+                SET
+                    submitLock = '0000-00-00 00:00:00'
+                WHERE 
+                    gameid = ?
+                AND
+                    playerid = ?
+                "
+            ))
+            {
+				$stmt->bind_param('ii', $gameid, $playerid);
+				$stmt->execute();
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function getGameSubmitLock($gameid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_game
+                SET
+                    submitLock = now()
+                WHERE 
+                    id = ?
+                AND
+                (  
+                    DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
+                OR
+                    submitLock = '0000-00-00 00:00:00'
+                )"
+            ))
+            {
+				
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+				
+                if (self::$connection->affected_rows == 1)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
         }
         catch(Exception $e) {
             throw $e;
         }
         
-        return $id;
+        return false;
     }
-    */
-
     
+    public function getPlayerSubmitLock($gameid, $playerid)
+    {
+        try {
+			if ($stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_playeringame
+                SET
+                    submitLock = now()
+                WHERE 
+                    gameid = ?
+                AND
+                    playerid = ?
+                AND
+                (  
+                    DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
+                OR
+                    submitLock = '0000-00-00 00:00:00'
+                )"
+            ))
+            {
+				
+				$stmt->bind_param('ii', $gameid, $playerid);
+				$stmt->execute();
+				
+                if (self::$connection->affected_rows == 1)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return false;
+    }
+    
+    public function checkIfPhaseReady($gameid)
+    {
+        try {
+            $stmt = self::$connection->prepare(
+                "SELECT 
+                    g.id, g.slots
+                FROM 
+                    tac_playeringame p
+                INNER JOIN tac_game g on g.id = p.gameid
+                WHERE 
+                    p.lastphase = g.phase
+                AND 
+                    p.lastturn = g.turn
+                AND 
+                    g.id = ?
+                GROUP BY p.gameid
+                HAVING 
+                    count(p.playerid) = g.slots;"
+            );
+            
+			if ($stmt)
+            {
+				$stmt->bind_param('i', $gameid);
+				$stmt->execute();
+                $stmt->bind_result($id, $slots);
+				$stmt->fetch();
+				
+                if ($id)
+                    return true;
+				
+				/* close statement */
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return false;
+        
+    }
+  
     //UTILS
     
     public function chekcIfTableExists($name, $close = true){
