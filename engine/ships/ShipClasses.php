@@ -22,8 +22,6 @@
         
         public $canvasSize = 200;
 
-        public $fireOrders = array();
-        
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
@@ -611,6 +609,18 @@
             }
             
             return false;
+        }
+        
+        public function getAllFireOrders()
+        {
+            $orders = array();
+            
+            foreach ($this->systems as $system)
+            {
+                $orders = array_merge($orders, $system->fireOrders);
+            }
+            
+            return $orders;
         }
         
     }

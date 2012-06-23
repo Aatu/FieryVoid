@@ -224,7 +224,6 @@ window.weaponManager = {
         var sPos = shipManager.getShipPositionInWindowCo(shooter);
         var tPos = shipManager.getShipPositionInWindowCo(target);
         var dis = mathlib.getDistance(sPos, tPos);
-        var disInHex = dis / hexgrid.hexWidth();
         var rangePenalty = (weapon.rangePenalty/hexgrid.hexWidth()*dis);
     
         return rangePenalty;
@@ -551,7 +550,7 @@ window.weaponManager = {
             if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
                 weaponManager.removeFiringOrder(selectedShip, weapon);
                 for (var s=0;s<weapon.guns;s++){
-                    selectedShip.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
+                    weapon.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
                 }
                 toUnselect.push(weapon);
             }
@@ -747,11 +746,11 @@ window.weaponManager = {
     
     removeFiringOrder: function(ship, system){
        
-        for(var i = ship.fireOrders.length-1; i >= 0; i--){  
-            if(ship.fireOrders[i].weaponid == system.id){              
+        for(var i = system.fireOrders.length-1; i >= 0; i--){  
+            if(system.fireOrders[i].weaponid == system.id){              
                   
                 for(var a = gamedata.ballistics.length-1; a >= 0; a--){
-                    if (gamedata.ballistics[a].fireid == ship.fireOrders[i].id && gamedata.ballistics[a].shooterid == ship.id){
+                    if (gamedata.ballistics[a].fireid == system.fireOrders[i].id && gamedata.ballistics[a].shooterid == ship.id){
                         var id = gamedata.ballistics[a].id;
                         
                         $('#ballistic_launch_canvas_'+id).remove();
@@ -760,7 +759,7 @@ window.weaponManager = {
                         gamedata.ballistics.splice(a,1);  
                     }
                 }  
-                ship.fireOrders.splice(i,1);               
+                system.fireOrders.splice(i,1);               
             }
         }
         ballistics.calculateBallisticLocations();
@@ -772,8 +771,8 @@ window.weaponManager = {
     
     hasFiringOrder: function(ship, system){
         
-        for (var i in ship.fireOrders){
-            var fire = ship.fireOrders[i];
+        for (var i in system.fireOrders){
+            var fire = system.fireOrders[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled){
                 if ((gamedata.gamephase == 1 && system.ballistic) || (gamedata.gamephase == 3 && !system.ballistic)){
                     return true;
@@ -783,6 +782,11 @@ window.weaponManager = {
         }
         return false;
     
+    },
+    
+    shipHasFiringOrder: function(ship)
+    {
+      //TODO:implement  
     },
     
     canCombatTurn: function(ship){

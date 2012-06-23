@@ -379,7 +379,7 @@ class Weapon extends ShipSystem{
     
     public function firedOnTurn($ship, $turn){
         
-        foreach ($ship->fireOrders as $fire){
+        foreach ($this->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
             }
@@ -651,7 +651,8 @@ class Weapon extends ShipSystem{
     
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
         foreach ($gamedata->ships as $ship){
-            foreach ($ship->fireOrders as $fire){
+            $fireOrders = $ship->getAllFireOrders();
+            foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     
                     $deg = $count;
@@ -679,7 +680,8 @@ class Weapon extends ShipSystem{
         $count = 0;
             
         foreach ($gamedata->ships as $ship){
-            foreach ($ship->fireOrders as $fire){
+            $fireOrders = $ship->getAllFireOrders();
+            foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     $count++;
                     

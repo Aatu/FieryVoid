@@ -346,6 +346,7 @@ class DBManager {
     
     }
     
+    /*
     public function getFireorders($shipid, $gameid){
         $sql = "SELECT * FROM `B5CGM`.`tac_fireorder` WHERE gameid = $gameid AND shooterid = $shipid";
 
@@ -373,7 +374,7 @@ class DBManager {
         return $orders;
     
     }
-    
+    */
     public function submitPower($gameid, $turn, $powers){
         
         try {
@@ -396,6 +397,47 @@ class DBManager {
             throw $e;
         }
     
+    }
+    
+    public function getFireOrders($shipid, $gameid, $systemid)
+    {
+        $orders = array();
+        try {
+            $stmt = self::$connection->prepare(
+                "SELECT 
+                    *
+                FROM 
+                    tac_fireorder
+                WHERE 
+                    gameid = ? 
+                AND 
+                    shooterid = ?
+                AND 
+                    weaponid = ?"
+            
+                
+            );
+            
+			if ($stmt)
+            {
+				$stmt->bind_param('iii', $gameid, $shipid, $systemid);
+				$stmt->execute();
+                $result = $stmt->get_result();
+                while( $value = $result->fetch_array())
+                {
+                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted, $value->x, $value->y);
+                    $entry->notes = $value->notes;
+                    $entry->pubnotes = $value->pubnotes;
+                    $orders[] = $entry;
+                }
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return $orders;
     }
     
     public function getPower($shipid, $gameid, $systemid){
@@ -697,15 +739,13 @@ class DBManager {
                                                
                 $moves = $this->getMoves($value->id, $gameid, $turn);
                 $EW = $this->getEW($value->id, $gameid, $turn);
-                $fireOrders = $this->getFireOrders($value->id, $gameid);
-        
-                
                 
                 $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $moves);
                 
                 foreach ($ship->systems as $system){
                     $system->setDamage($this->getDamage($value->id, $gameid, $system->id));
                     $system->setPower($this->getPower($value->id, $gameid, $system->id));
+                    $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id));
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
 					//$system->beforeTurn($ship, $turn, $phase);
                 }
@@ -713,9 +753,8 @@ class DBManager {
                 $ship->EW = $EW;
                 $ship->team = $players[$value->playerid]->team;
                 $ship->iniative = $value->iniative;
-                $ship->fireOrders = $fireOrders;
-                
-				$ships[] = $ship;
+
+                $ships[] = $ship;
                 
             }
             
@@ -901,6 +940,7 @@ class DBManager {
     
     public function getGameSubmitLock($gameid)
     {
+        $result = false;
         try {
 			if ($stmt = self::$connection->prepare(
                 "UPDATE 
@@ -921,8 +961,8 @@ class DBManager {
 				$stmt->bind_param('i', $gameid);
 				$stmt->execute();
 				
-                if (self::$connection->affected_rows == 1)
-                    return true;
+                if ($stmt->affected_rows == 1)
+                    $result = true;
 				
 				/* close statement */
 				$stmt->close();
@@ -932,11 +972,12 @@ class DBManager {
             throw $e;
         }
         
-        return false;
+        return $result;
     }
     
     public function getPlayerSubmitLock($gameid, $playerid)
     {
+        $result = false;
         try {
 			if ($stmt = self::$connection->prepare(
                 "UPDATE 
@@ -959,8 +1000,8 @@ class DBManager {
 				$stmt->bind_param('ii', $gameid, $playerid);
 				$stmt->execute();
 				
-                if (self::$connection->affected_rows == 1)
-                    return true;
+                if ($stmt->affected_rows === 1)
+                    $rsult =  true;
 				
 				/* close statement */
 				$stmt->close();
@@ -970,7 +1011,7 @@ class DBManager {
             throw $e;
         }
         
-        return false;
+        return $result;
     }
     
     public function checkIfPhaseReady($gameid)
@@ -988,6 +1029,8 @@ class DBManager {
                     p.lastturn = g.turn
                 AND 
                     g.id = ?
+                AND
+                    g.phase != 2
                 GROUP BY p.gameid
                 HAVING 
                     count(p.playerid) = g.slots;"
@@ -999,12 +1042,12 @@ class DBManager {
 				$stmt->execute();
                 $stmt->bind_result($id, $slots);
 				$stmt->fetch();
-				
+				$stmt->close();
+                
                 if ($id)
                     return true;
 				
-				/* close statement */
-				$stmt->close();
+				
 			}
         }
         catch(Exception $e) {

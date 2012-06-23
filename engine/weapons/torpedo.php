@@ -68,7 +68,7 @@
         
         public function firedOnTurn($ship, $turn){
             
-            foreach ($ship->fireOrders as $fire){
+            foreach ($this->fireOrders as $fire){
                 if ($fire->weaponid == $this->id && $fire->turn == $turn){
                     return  $fire->shots;
                 }

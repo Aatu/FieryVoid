@@ -45,7 +45,7 @@
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
                     $interceptFire->addToDB = true;
-                    $this->ship->fireOrders[] = $interceptFire;
+                    $this->weapon->fireOrders[] = $interceptFire;
                 }
                 
             }
@@ -158,8 +158,9 @@ class Firing{
             
             if ($shooter->team == $ship->team)
                 continue;
-                      
-            foreach($shooter->fireOrders as $fire){
+            
+            $fireOrders = $shooter->getAllFireOrders();
+            foreach($fireOrders as $fire){
                 if ($fire->turn != $turn)
                     continue;
                 
@@ -268,7 +269,7 @@ class Firing{
 				continue;
 			
 			//FIRE all ships
-            foreach($ship->fireOrders as $fire){
+            foreach($ship->getAllFireOrders() as $fire){
 				self::fire($ship, $fire, $gamedata);
 			}
             
@@ -282,7 +283,7 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			foreach($ship->fireOrders as $fire){
+			foreach($ship->getAllFireOrders() as $fire){
 				if ($fire->turn != $gamedata->turn)
                     continue;
                 
@@ -316,7 +317,7 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			foreach($ship->fireOrders as $fire){
+			foreach($ship->getAllFireOrders() as $fire){
                 if ($fire->turn != $gamedata->turn)
                     continue;
 							
