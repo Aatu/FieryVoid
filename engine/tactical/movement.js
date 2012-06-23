@@ -1241,6 +1241,7 @@ shipManager.movement = {
     //TURN
     
     canTurn: function(ship, right){
+        //console.log(ship.name + " checking turn");
         
         if (gamedata.gamephase != 2)
             return false;
@@ -1267,7 +1268,7 @@ shipManager.movement = {
                
        
         if (!(ship.agile && previous && shipManager.movement.isTurn(previous)) && turndelay > 0){
-            //console.log("has turn delay, cant turn");
+            //console.log(ship.name + " has turn delay, cant turn");
             return false;
         }
         
@@ -1276,18 +1277,25 @@ shipManager.movement = {
         
         //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost){
-            //console.log("does not have enough thrust");
+            //console.log(ship.name + " does not have enough thrust");
             return false;
         }
         
         
         var pivoting = shipManager.movement.isPivoting(ship);
         if (pivoting != "no" && !ship.gravitic ){ //&& !shipManager.movement.isTurningToPivot(ship, right) && !ship.gravitic){
+            //console.log(ship.name + " pivoting and not gravitic");
             return false;
         }
-        if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) && !ship.gravitic)
+        if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) 
+            && !ship.gravitic && speed != 0)
+        {
+            //console.log(ship.name + " heading is not facing, and cant turn to pivot");
             return false;
+        }
+            
         
+        //console.log(ship.name + " can turn");
         return true;
         
         
