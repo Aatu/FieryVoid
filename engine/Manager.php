@@ -617,15 +617,7 @@ class Manager{
                 }
             }
             
-            $fireOrders = array();
             
-            if (is_array($value["fireOrders"])){
-                foreach($value["fireOrders"] as $i=>$fo){
-                                                //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode
-                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
-                    $fireOrders[$i] = $fireOrder;
-                }
-            }
             
             
             
@@ -633,19 +625,29 @@ class Manager{
             $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
                 
             $ship->EW = $EW;
-            $ship->fireOrders = $fireOrders;
             
             foreach($value["systems"] as $i=>$system){
-                if (!is_array($system["power"]))
-                    continue;
-                    
-                foreach ($system["power"] as $a=>$power){
-                                                    
-                    $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
-                    $sys = $ship->getSystemById($powerEntry->systemid);
-                    
-                    if (isset($sys)){
-                        $sys->power[] = $powerEntry;
+                $sys = $ship->getSystemById($system['id']);
+                
+                if (is_array($system["power"]))
+                {
+                    foreach ($system["power"] as $a=>$power)
+                    {
+                        $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
+                        if (isset($sys)){
+                            $sys->power[] = $powerEntry;
+                        }
+                    }
+                }
+
+                if (is_array($system["fireOrders"]))
+                {
+                    foreach($system["fireOrders"] as $i=>$fo)
+                    {
+                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                        if (isset($sys)){
+                            $sys->fireOrders[] = $fireOrder;
+                        }
                     }
                 }
             

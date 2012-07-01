@@ -1001,7 +1001,7 @@ class DBManager {
 				$stmt->execute();
 				
                 if ($stmt->affected_rows === 1)
-                    $rsult =  true;
+                    $result =  true;
 				
 				/* close statement */
 				$stmt->close();
