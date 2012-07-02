@@ -275,10 +275,11 @@ window.weaponManager = {
         var intercept = 0;
         
         for (var i in gamedata.ships){
-            for (var a in gamedata.ships[i].fireOrders){
-                var fire = gamedata.ships[i].fireOrders[a];
+            var ship = gamedata.ships[i];
+            var fires = weaponManager.getAllFireOrders(ship);
+            for (var a in fires){
+                var fire = fires[a];
                 if (fire.type == "intercept" && fire.targetid == ball.fireOrderId){
-                    var ship = gamedata.getShip(fire.shooterid);
                     var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
                     intercept += weapon.intercept;
                 }
@@ -550,7 +551,7 @@ window.weaponManager = {
             if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
                 weaponManager.removeFiringOrder(selectedShip, weapon);
                 for (var s=0;s<weapon.guns;s++){
-                    weapon.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
+                    weapon.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
                 }
                 toUnselect.push(weapon);
             }
@@ -600,7 +601,6 @@ window.weaponManager = {
             
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
-                //$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
@@ -619,7 +619,7 @@ window.weaponManager = {
                             weaponid:weapon.id,
                             calledid:calledid,
                             turn:gamedata.turn,
-                            firingmode:weapon.firingMode,
+                            firingMode:weapon.firingMode,
                             shots:weapon.defaultShots,
                             x:"null",
                             y:"null"
@@ -705,13 +705,12 @@ window.weaponManager = {
                         
             
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)){
-                //$id, $shooterid, $targetid, $calledid, $turn, $firingmode;
                 if (weapon.range == 0 || (mathlib.getDistanceHex(shipManager.getShipPositionInWindowCo(selectedShip), hexgrid.positionToPixel(hexpos))<=weapon.range)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
                         var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
-                        var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y};
+                        var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y};
                         weapon.fireOrders.push(fire);
                         
                     }

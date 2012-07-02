@@ -1,5 +1,20 @@
 <?php
 
+class WeaponLoading
+{
+    public $systemid, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading;
+    
+    public function __construct($systemid, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading)
+    {
+        $this->systemid = $systemid;
+        $this->gameid = $gameid;
+        $this->shipid = $shipid;
+        $this->loading = $loading;
+        $this->extrashots = $extrashots;
+        $this->loadedammo = $loadedammo;
+        $this->overloading = $overloading;
+    }
+}
 
 class TacticalPlayer{
     public $id, $slot, $team, $lastturn, $lastphase, $name;

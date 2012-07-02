@@ -405,6 +405,21 @@ class Manager{
                 self::startGame($gamedata);
             }
             
+            $loadings = Array();
+            foreach ($gamedata->ships as $ship)
+            {
+                foreach ($ship->systems as $system)
+                {
+                    if ($system instanceof Weapon)
+                    {
+                        $loading = $system->calculateLoading($gamedata->id, $gamedata->phase, $ship, $gamedata->turn);
+                        if ($loading)
+                            $loadings[] = $loading;
+                    }
+                }
+            }
+            
+            self::$dbManager->updateWeaponLoading($loadings);
             self::$dbManager->releaseGameSubmitLock($gameid);
         }
         catch(Exception $e)
@@ -465,9 +480,10 @@ class Manager{
             
             
             $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0);
-            self::$dbManager->deploy($servergamedata->id, $ship->id, $move);
-            
+            $ship->movement = array($move);
         }
+        
+        self::$dbManager->insertShips($servergamedata->ships);
         
         self::changeTurn($gamedata);
     }
@@ -644,7 +660,7 @@ class Manager{
                 {
                     foreach($system["fireOrders"] as $i=>$fo)
                     {
-                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                         if (isset($sys)){
                             $sys->fireOrders[] = $fireOrder;
                         }

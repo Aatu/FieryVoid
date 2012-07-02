@@ -330,8 +330,6 @@ class DBManager {
 				if ($fire->type!="ballistic" && $phase == 1)
 					continue;
                             
-                //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0
-                
                 $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
                         .$fire->firingMode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."')";
 
@@ -346,35 +344,6 @@ class DBManager {
     
     }
     
-    /*
-    public function getFireorders($shipid, $gameid){
-        $sql = "SELECT * FROM `B5CGM`.`tac_fireorder` WHERE gameid = $gameid AND shooterid = $shipid";
-
-        $orders = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return $orders;
-                
-                foreach ($result as $value) {
-                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted, $value->x, $value->y);
-                    $entry->notes = $value->notes;
-                    $entry->pubnotes = $value->pubnotes;
-                    $orders[] = $entry;
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-		
-        return $orders;
-    
-    }
-    */
     public function submitPower($gameid, $turn, $powers){
         
         try {
@@ -397,6 +366,133 @@ class DBManager {
             throw $e;
         }
     
+    }
+    
+    public function insertWeaponLoading($input)
+    {
+        $loadings = array();
+        if (is_array($input))
+            $loadings = $input;
+        else 
+            $loadings[] = $input;
+        
+        try {
+            $stmt = self::$connection->prepare(
+                "INSERT INTO  
+                    tac_loading
+                VALUES 
+                ( 
+                    ?,?,?,?,?,?,?
+                )"
+            );
+            
+			if ($stmt)
+            {
+                foreach ($loadings as $loading)
+                {
+                    $stmt->bind_param(
+                        'iiiiiii', 
+                        $loading->gameid,
+                        $loading->systemid,
+                        $loading->shipid,
+                        $loading->loading,
+                        $loading->extrashots,
+                        $loading->loadedammo,
+                        $loading->overloading
+                    );
+                    $stmt->execute();
+                }
+                $stmt->close();
+                
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function updateWeaponLoading($input)
+    {
+        $loadings = array();
+        if (is_array($input))
+            $loadings = $input;
+        else 
+            $loadings[] = $input;
+        
+        try {
+            $stmt = self::$connection->prepare(
+                "UPDATE 
+                    tac_loading
+                SET 
+                    loading = ?, 
+                    extrashots = ?,
+                    loadedammo = ?,
+                    overloading = ?
+                WHERE 
+                    gameid = ? 
+                AND 
+                    systemid = ?
+                AND 
+                    shipid = ?
+                "
+            );
+            
+			if ($stmt)
+            {
+                foreach ($loadings as $loading)
+                {
+                    $stmt->bind_param('iii', $loading->gameid, $loading->systemid, $loading->shipid);
+                    $stmt->execute();
+                }
+                $stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    
+    public function getWeaponLoading($shipid, $gameid, $systemid)
+    {
+        $loading = null;
+        try {
+            $stmt = self::$connection->prepare(
+                "SELECT 
+                    *
+                FROM 
+                    tac_loading
+                WHERE 
+                    gameid = ? 
+                AND 
+                    systemid = ?
+                AND 
+                    shipid = ?"
+            
+                
+            );
+            
+			if ($stmt)
+            {
+				$stmt->bind_param('iii', $gameid, $systemid, $shipid);
+				$stmt->execute();
+                $stmt->bind_result(
+                    $systemid, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading
+                );
+                
+                while( $stmt->fetch())
+                {
+                    $loading = new WeaponLoading($systemid, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading);
+                    
+                }
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return $loading;
     }
     
     public function getFireOrders($shipid, $gameid, $systemid)
@@ -430,7 +526,7 @@ class DBManager {
                     $weaponid,
                     $calledid,
                     $turn,
-                    $firingmode,
+                    $firingMode,
                     $needed,
                     $rolled,
                     $gameid,
@@ -447,7 +543,7 @@ class DBManager {
                 {
                     $entry = new FireOrder(
                         $id, $type, $shooterid, $targetid,
-                        $weaponid, $calledid, $turn, $firingmode, $needed, 
+                        $weaponid, $calledid, $turn, $firingMode, $needed, 
                         $rolled, $shots, $shotshit, $intercepted, $x, $y
                     );
                     
@@ -606,12 +702,37 @@ class DBManager {
         
     }
     
-	public function deploy($gameid, $shipid, $movement){
+    public function insertShips($gameid, $ships)
+    {
+        foreach ($ships as $ship)
+        {
+            $move = $ship->movement[0];
+            $this->insertMovement($gameid, $move);
+        }
+        foreach ($ships as $ship)
+        {
+            foreach ($ship->systems as $system)
+            {
+                if ($system instanceof Weapon)
+                {
+                    $loading = new WeaponLoading($system->id, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 0);
+                    $this->insertWeaponLoading($loading);
+                }
+            }
+
+        }
+    }
+    
+    /*
+	public function deploy($gameid, $shipid, $movement)
+    {
 		try {
            	
 			$preturn = ($movement->preturn) ? 1 : 0;
 			
-			$sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', 0, 0)";
+			$sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.
+                ", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading
+                .", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', 0, 0)";
 			
 			//throw new exception("sql: ".$movement->preturn . var_dump($movement));
 			$this->insert($sql);
@@ -622,7 +743,58 @@ class DBManager {
 
             throw $e;
         }
-	}
+	}*/
+    
+    public function insertMovement($input, $move)
+    {
+        $moves = array();
+        if (is_array($input))
+            $moves = $input;
+        else 
+            $moves[] = $input;
+         try {
+            $stmt = self::$connection->prepare(
+                "INSERT INTO  
+                    tac_shipmovement
+                VALUES 
+                ( 
+                    null,?,?,?,?,?,?,?
+                )"
+            );
+            
+			if ($stmt)
+            {
+                foreach ($moves as $move)
+                {
+                    $preturn = ($move->preturn) ? 1 : 0;
+
+                    $stmt->bind_param(
+                        'iisiiiiiiiiissii',
+                        $move->shipid,
+                        $gameid,
+                        $move->type,
+                        $move->x,
+                        $move->y,
+                        $move->xOffset,
+                        $move->yOffset,
+                        $move->speed,
+                        $move->heading,
+                        $move->facing,
+                        $preturn,
+                        $move->getReqThrustJSON(),
+                        $move->getAssThrustJSON(),
+                        $move->turn,
+                        $move->value
+                    );
+                    $stmt->execute();
+                }
+                $stmt->close();
+            }
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
 	
     public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false){
         try {
@@ -772,6 +944,9 @@ class DBManager {
                     $system->setPower($this->getPower($value->id, $gameid, $system->id));
                     $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id));
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
+                    if ($system instanceof Weapon){
+                        $system->setLoading($this->getWeaponLoading($shipid, $gameid, $systemid));
+                    }
 					//$system->beforeTurn($ship, $turn, $phase);
                 }
                 
