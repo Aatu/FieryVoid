@@ -258,7 +258,7 @@ gamedata = {
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
         
-         if (gamedata.gamephase == 4){
+        if (gamedata.gamephase == 4){
             if (gamedata.waiting == false){
                 effects.displayAllWeaponFire(function(){
 					gamedata.subphase = 1;

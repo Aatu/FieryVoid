@@ -308,8 +308,8 @@ class Manager{
                     self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
             }
             
-            if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata)){
+                self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }
             
         }
@@ -363,9 +363,9 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
-          		            
-            if (Firing::validateFireOrders($ship->fireOrders, $gd)){
-				 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
+				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }

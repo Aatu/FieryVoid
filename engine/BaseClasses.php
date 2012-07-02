@@ -133,7 +133,7 @@ class EWentry{
 
 class FireOrder{
     
-    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingmode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y;
+    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingMode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y;
     public $notes = "";
     public $pubnotes = "";
     public $updated = false;

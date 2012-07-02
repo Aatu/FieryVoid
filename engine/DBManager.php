@@ -422,12 +422,37 @@ class DBManager {
             {
 				$stmt->bind_param('iii', $gameid, $shipid, $systemid);
 				$stmt->execute();
-                $result = $stmt->get_result();
-                while( $value = $result->fetch_array())
+                $stmt->bind_result(
+                    $id,
+                    $type,
+                    $shooterid,
+                    $targetid,
+                    $weaponid,
+                    $calledid,
+                    $turn,
+                    $firingmode,
+                    $needed,
+                    $rolled,
+                    $gameid,
+                    $notes,
+                    $shotshit,
+                    $shots,
+                    $pubnotes,
+                    $intercepted,
+                    $x,
+                    $y
+                );
+                
+                while( $stmt->fetch())
                 {
-                    $entry = new FireOrder($value->id, $value->type, $value->shooterid, $value->targetid, $value->weaponid, $value->calledid, $value->turn, $value->firingmode, $value->needed, $value->rolled, $value->shots, $value->shotshit, $value->intercepted, $value->x, $value->y);
-                    $entry->notes = $value->notes;
-                    $entry->pubnotes = $value->pubnotes;
+                    $entry = new FireOrder(
+                        $id, $type, $shooterid, $targetid,
+                        $weaponid, $calledid, $turn, $firingmode, $needed, 
+                        $rolled, $shots, $shotshit, $intercepted, $x, $y
+                    );
+                    
+                    $entry->notes = $notes;
+                    $entry->pubnotes = $pubnotes;
                     $orders[] = $entry;
                 }
 				$stmt->close();
@@ -1001,7 +1026,7 @@ class DBManager {
 				$stmt->execute();
 				
                 if ($stmt->affected_rows === 1)
-                    $result =  true;
+                    $result = true;
 				
 				/* close statement */
 				$stmt->close();

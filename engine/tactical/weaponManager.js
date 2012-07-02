@@ -605,7 +605,7 @@ window.weaponManager = {
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
-                        var fireid = selectedShip.id+"_"+(selectedShip.fireOrders.length+1);
+                        var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
                         
                         var	calledid = -1;
                         if (system)
@@ -624,7 +624,7 @@ window.weaponManager = {
                             x:"null",
                             y:"null"
                         };
-                        selectedShip.fireOrders.push(fire);            
+                        weapon.fireOrders.push(fire);            
                         
                     }
                     if (weapon.ballistic){
@@ -710,9 +710,9 @@ window.weaponManager = {
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
                         
-                        var fireid = selectedShip.id+"_"+(selectedShip.fireOrders.length+1);
+                        var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
                         var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingmode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y};
-                        selectedShip.fireOrders.push(fire);
+                        weapon.fireOrders.push(fire);
                         
                     }
                     if (weapon.ballistic){
@@ -791,8 +791,9 @@ window.weaponManager = {
     
     canCombatTurn: function(ship){
         
-        for (var i in ship.fireOrders){
-            var fire = ship.fireOrders[i];
+        var fires = weaponManager.getAllFireOrders(ship);
+        for (var i in fires){
+            var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid)
             if (fire.turn == gamedata.turn && !fire.rolled && !weapon.ballistic){
                 return false;
@@ -805,8 +806,9 @@ window.weaponManager = {
     
     getFiringOrder: function(ship, system){
         
-        for (var i in ship.fireOrders){
-            var fire = ship.fireOrders[i];
+        var fires = weaponManager.getAllFireOrders(ship);
+        for (var i in fires){
+            var fire = fires[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled)
                 return fire;
         }
@@ -815,25 +817,38 @@ window.weaponManager = {
     
     },
     
+    getAllFireOrders: function(ship)
+    {
+        var fires = new Array();
+        for (var i in ship.systems)
+        {
+            var system = ship.systems[i];
+            fires = fires.concat(system.fireOrders);
+        }
+        return fires;
+    },
+    
     getInterceptingFiringOrders: function(id){
-        var fires = Array();
+        var intercepts = Array();
         
         for (var a in gamedata.ships){
             var ship = gamedata.ships[a];
-            for (var i in ship.fireOrders){
-                var fire = ship.fireOrders[i];
+            var fires = weaponManager.getAllFireOrders(ship);
+            for (var i in fires){
+                var fire = fires[i];
                 if (fire.targetid == id && fire.turn == gamedata.turn && fire.type == "intercept")
-                    fires.push(fire);
+                    intercepts.push(fire);
             }
         }
         
-        return fires;
+        return intercepts;
     
     },
     
     changeShots: function(ship, system, mod){
-        for (var i in ship.fireOrders){
-            var fire = ship.fireOrders[i];
+        var fires = weaponManager.getAllFireOrders(ship);
+        for (var i in fires){
+            var fire = fires[i];
             if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled){
                 if ((gamedata.gamephase == 1 && system.ballistic) || (gamedata.gamephase == 3 && !system.ballistic))
                     fire.shots += mod;
