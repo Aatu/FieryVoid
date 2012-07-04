@@ -504,7 +504,7 @@ class DBManager {
         return $loading;
     }
     
-    public function getFireOrders($shipid, $gameid, $systemid)
+    public function getFireOrders($shipid, $gameid, $systemid, $turn)
     {
         $orders = array();
         try {
@@ -518,14 +518,14 @@ class DBManager {
                 AND 
                     shooterid = ?
                 AND 
-                    weaponid = ?"
-            
-                
+                    weaponid = ?
+                AND 
+                    turn = ?"
             );
             
 			if ($stmt)
             {
-				$stmt->bind_param('iii', $gameid, $shipid, $systemid);
+				$stmt->bind_param('iiii', $gameid, $shipid, $systemid, $turn);
 				$stmt->execute();
                 $stmt->bind_result(
                     $id,
@@ -570,8 +570,9 @@ class DBManager {
         return $orders;
     }
     
-    public function getPower($shipid, $gameid, $systemid){
-        $sql = "SELECT * FROM `B5CGM`.`tac_power` WHERE gameid = $gameid AND shipid = $shipid AND systemid = $systemid";
+    public function getPower($shipid, $gameid, $systemid, $turn){
+        $turn--;
+        $sql = "SELECT * FROM `B5CGM`.`tac_power` WHERE gameid = $gameid AND shipid = $shipid AND systemid = $systemid AND turn >= $turn";
 
         $powers = array();
          
@@ -724,7 +725,7 @@ class DBManager {
             {
                 if ($system instanceof Weapon)
                 {
-                    $loading = new WeaponLoading($system->id, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 0);
+                    $loading = new WeaponLoading($system->id, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 1);
                     $this->insertWeaponLoading($loading);
                 }
             }
@@ -950,8 +951,8 @@ class DBManager {
                 
                 foreach ($ship->systems as $system){
                     $system->setDamage($this->getDamage($value->id, $gameid, $system->id));
-                    $system->setPower($this->getPower($value->id, $gameid, $system->id));
-                    $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id));
+                    $system->setPower($this->getPower($value->id, $gameid, $system->id, $turn));
+                    $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id, $turn));
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
                     if ($system instanceof Weapon){
                         $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));

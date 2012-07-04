@@ -267,23 +267,27 @@ class Weapon extends ShipSystem{
             if ($this->overloadshots > 0)
             {
                 $newExtraShots = $this->overloadshots-1;
+                //if you have extra shots use them
                 if ($newExtraShots === 0)
                 {
+                    //if extra shots are reduced to zero, go to cooldown
                     return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
                 }
                 else
                 {
+                    //if you didn't use the last extra shot, keep on going.
                     return new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded, $newExtraShots, 0, $this->overloadturns);
                 }
             }
             else
             {
+                //Situation normal, no overloading -> lose loading
                 return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
             }
             
         }else{
-              //overloadaa ja extrashotit EI ole maksmisissa -> extrashotit -1 (cooldown) (Overloadin toista shottia ei voi säästää)
-            if ($this->overloadshots < $this->extraoverloadshots)
+              //cannot save the extra shots from everload -> lose loading and cooldown
+            if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots)
                 return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
         }
         
