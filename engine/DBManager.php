@@ -391,9 +391,9 @@ class DBManager {
                 foreach ($loadings as $loading)
                 {
                     $stmt->bind_param(
-                        'iiiiiii', 
-                        $loading->gameid,
+                        'iiiiiii',
                         $loading->systemid,
+                        $loading->gameid,
                         $loading->shipid,
                         $loading->loading,
                         $loading->extrashots,
@@ -441,7 +441,16 @@ class DBManager {
             {
                 foreach ($loadings as $loading)
                 {
-                    $stmt->bind_param('iii', $loading->gameid, $loading->systemid, $loading->shipid);
+                    $stmt->bind_param(
+                        'iiiiiii', 
+                        $loading->loading,
+                        $loading->extrashots,
+                        $loading->loadedammo,
+                        $loading->overloading,
+                        $loading->gameid,
+                        $loading->systemid,
+                        $loading->shipid
+                    );
                     $stmt->execute();
                 }
                 $stmt->close();
@@ -707,7 +716,7 @@ class DBManager {
         foreach ($ships as $ship)
         {
             $move = $ship->movement[0];
-            $this->insertMovement($gameid, $move);
+            $this->insertMovement($gameid, $ship->id, $move);
         }
         foreach ($ships as $ship)
         {
@@ -745,7 +754,7 @@ class DBManager {
         }
 	}*/
     
-    public function insertMovement($input, $move)
+    public function insertMovement($gameid, $shipid, $input)
     {
         $moves = array();
         if (is_array($input))
@@ -758,7 +767,7 @@ class DBManager {
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
             
@@ -769,8 +778,8 @@ class DBManager {
                     $preturn = ($move->preturn) ? 1 : 0;
 
                     $stmt->bind_param(
-                        'iisiiiiiiiiissii',
-                        $move->shipid,
+                        'iisiiiiiiiissii',
+                        $shipid,
                         $gameid,
                         $move->type,
                         $move->x,
@@ -945,7 +954,7 @@ class DBManager {
                     $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id));
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
                     if ($system instanceof Weapon){
-                        $system->setLoading($this->getWeaponLoading($shipid, $gameid, $systemid));
+                        $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
                     }
 					//$system->beforeTurn($ship, $turn, $phase);
                 }

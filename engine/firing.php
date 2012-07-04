@@ -109,8 +109,7 @@ class Firing{
                 if ($weapon->ballistic)
                     continue;
                     
-                $weapon->setLoading($ship, $gd->turn-1, 3);
-                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime)
+                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime || $weapon->firedOnTurn($ship, $gd->turn))
                     continue;
                    
                 $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
@@ -360,7 +359,6 @@ class Firing{
 			return;
 			
 		//print("Firing " . $fire->id . "\n");
-		$weapon->setLoading($ship, $gamedata->turn-1, 3);
 		$weapon->fire($gamedata, $fire);
 		
 	}

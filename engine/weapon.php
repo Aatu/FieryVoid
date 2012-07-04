@@ -33,6 +33,8 @@ class Weapon extends ShipSystem{
     
     public $normalload = 0;
     public $overloadturns = 0;
+    public $overloadshots = 0;
+    public $extraoverloadshots = 2;
     
     public $uninterceptable = false;
     public $intercept = 0;
@@ -181,45 +183,111 @@ class Weapon extends ShipSystem{
         parent::setSystemDataWindow($turn);
     }
     
-    public function setLoading( WeaponLoading $loading )
+    public function setLoading( $loading )
     {
         if ($loading === null)
         {
             $this->overloadturns = 0;
+            $this->overloadshots = 0;
             $this->turnsloaded = $this->getNormalLoad();
         }
         else
         {
             $this->overloadturns = $loading->overloading;
+            $this->overloadshots = $loading->extrashots;
             $this->turnsloaded = $loading->loading;
         }
     }
     
     public function calculateLoading( $gameid, $phase, $ship, $turn )
     {
-        $loading = null;
-        if ($phase === 1)
+        $normalload = $this->getNormalLoad();
+        if ($phase === 2)
         {
-            if  
-            (
-                ($this->ballistic && $this->firedOnTurn($ship, $turn) )
-                || 
-                $this->isOfflineOnTurn($turn)
-            )
+            if ( $this->isOfflineOnTurn($turn) )
             {
-                $loading = new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
             }
-        }
-        else if ($phase === 3 && !$this->ballistic && $this->firedOnTurn($ship, $turn))
-        {
-            $loading = new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            else if ($this->ballistic && $this->firedOnTurn($ship, $turn) )
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            else if (!$this->isOverloadingOnTurn($turn))
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded, 0, 0, 0);
+            }
         }
         else if ($phase === 4)
         {
-            $loading = new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded+1, 0, 0, 0);
+           return $this->calculatePhase4Loading($gameid, $ship, $turn);
+        }
+        else if ($phase === 1)
+        {
+            if ($this->overloadshots === -1)
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            else
+            {
+                $newloading = $this->turnsloaded+1;
+                if ($newloading > $normalload)
+                    $newloading = $normalload;
+                
+                $newExtraShots = 0;
+                $overloading = $this->overloadturns+1;
+                if ($overloading === $normalload)
+                    $newExtraShots == $this->extraoverloadshots;
+
+                if ($overloading > $normalload)
+                    $overloading = $normalload;
+
+                return new WeaponLoading($this->id, $gameid, $ship->id, $newloading, $newExtraShots, 0, $overloading);
+            }
+            
         }
         
-        return $loading;
+        return null;
+    }
+    
+    private function calculatePhase4Loading($gameid, $ship, $turn )
+    {
+        if ($this->ballistic)   
+            return null;
+        
+            
+        if ($this->firedOnTurn($ship, $turn)){
+            /* if overloading ja ampuu:
+             
+                    JOS ON EXTRASHOTTEJA laske extrashotteja. Jos extrashotit menee nollaan, pistä -1 (cooldown)
+                    ja loading ja overloading 0
+             * 
+             *      JOS EI OLE EXTRASHOTTEJA: laske overloading ja loading 0
+           */
+            
+            if ($this->overloadshots > 0)
+            {
+                $newExtraShots = $this->overloadshots-1;
+                if ($newExtraShots === 0)
+                {
+                    return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
+                }
+                else
+                {
+                    return new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded, $newExtraShots, 0, $this->overloadturns);
+                }
+            }
+            else
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            
+        }else{
+              //overloadaa ja extrashotit EI ole maksmisissa -> extrashotit -1 (cooldown) (Overloadin toista shottia ei voi säästää)
+            if ($this->overloadshots < $this->extraoverloadshots)
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
+        }
+        
+        return null;
     }
     
     /*

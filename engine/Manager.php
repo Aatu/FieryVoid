@@ -483,7 +483,7 @@ class Manager{
             $ship->movement = array($move);
         }
         
-        self::$dbManager->insertShips($servergamedata->ships);
+        self::$dbManager->insertShips($servergamedata->id, $servergamedata->ships);
         
         self::changeTurn($gamedata);
     }
