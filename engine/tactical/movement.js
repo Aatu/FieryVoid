@@ -1290,6 +1290,7 @@ shipManager.movement = {
         if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) 
             && !ship.gravitic && speed != 0)
         {
+            //TODO: Turning while moving backwards!
             //console.log(ship.name + " heading is not facing, and cant turn to pivot");
             return false;
         }
