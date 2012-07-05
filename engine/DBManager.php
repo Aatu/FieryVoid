@@ -1267,6 +1267,156 @@ class DBManager {
         return false;
         
     }
+    
+    public function getGamesToBeDeleted( )
+    {
+        $ids = array();
+        try {
+            $stmt = self::$connection->prepare(
+                "SELECT 
+                    g.id
+                FROM 
+                    tac_game g
+                JOIN 
+                    tac_playeringame p
+                ON
+                    p.gameid = g.id
+                WHERE
+                    DATE_ADD(p.lastactivity, INTERVAL 1 MONTH) < NOW()
+                OR
+                    (DATE_ADD(p.lastactivity, INTERVAL 1 DAY) < NOW() 
+                    AND
+                    g.status = 'LOBBY')
+                "
+            );
+            
+			if ($stmt)
+            {
+				$stmt->execute();
+				while ($stmt->fetch())
+                {
+                   $ids[] = $id; 
+                }
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        return $ids;
+        
+    }
+    
+    public function deleteGames($ids)
+    {
+        try {
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_game
+                WHERE
+                    id = ?"
+            );
+			$this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_playeringame
+                WHERE
+                    gameid = ?"
+            );
+			$this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_critical
+                WHERE
+                    gameid = ?"
+            );
+			$this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_ew
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_damage
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_fireorder
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_iniative
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_loading
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_ship
+                WHERE
+                    tacgameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_shipmovement
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+            
+            $stmt = self::$connection->prepare(
+                "DELETE FROM 
+                    tac_power
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
+			
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    private function executeGameDeleteStatement($stmt, $ids)
+    {
+        if ($stmt)
+        {
+            foreach ($ids as $id)
+            {
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+            }
+            $stmt->close();
+        }
+    }
   
     //UTILS
     

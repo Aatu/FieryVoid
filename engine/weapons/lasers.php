@@ -117,6 +117,7 @@
         
         public $loadingtime = 4;
         public $overloadable = true;
+        public $extraoverloadshots = 2;
         
         public $damageType = "raking";
         public $raking = 10;
@@ -175,6 +176,7 @@
         
         public $loadingtime = 3;
         public $overloadable = true;
+        public $extraoverloadshots = 2;
         
         public $damageType = "raking";
         public $raking = 10;

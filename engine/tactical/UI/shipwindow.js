@@ -573,8 +573,13 @@ shipWindowManager = {
                 
                 if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system))
                     overloadturns = "("+system.overloadturns+")";       
-					
-				field.html(load+overloadturns+ "/" + loadingtime);
+				
+                if (system.overloadshots >0){
+                    field.html("S"+system.overloadshots);
+                }else{
+                    field.html(load+overloadturns+ "/" + loadingtime);
+                }
+				
 			}
 				
 			

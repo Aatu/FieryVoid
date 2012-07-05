@@ -8,6 +8,21 @@ class Manager{
             self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
     }
     
+    private static function deleteOldGames()
+    {
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
+            $ids = self::$dbManager->getGamesToBeDeleted();
+            self::$dbManager->deleteGames($ids);
+                
+            self::$dbManager->endTransaction(false);
+        }catch(exception $e) {
+            self::$dbManager->endTransaction(true);
+            throw $e;
+        }
+    }
+    
     public static function leaveLobbySlot($user){
         try {
             self::initDBManager();
@@ -147,10 +162,12 @@ class Manager{
 		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
 			return null;
         
-    
         $gamedata = null;
         try {
             self::initDBManager();
+            
+            if ($turn === -1)
+                self::deleteOldGames ();
             
             self::advanceGameState($userid, $gameid);
             
