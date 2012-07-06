@@ -1292,6 +1292,7 @@ class DBManager {
             
 			if ($stmt)
             {
+                $stmt->bind_result($id);
 				$stmt->execute();
 				while ($stmt->fetch())
                 {
