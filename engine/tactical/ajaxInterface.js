@@ -54,21 +54,40 @@ window.ajaxInterface = {
             for (var a in ship.systems){
                 var system = ship.systems[a];
                 
-                for (var b = system.fireOrders.length-1; b>=0; b--){
-                    var fire = system.fireOrders[b];
-                    if (fire.turn < gamedata.turn){
-                        system.fireOrders.splice(b,1);
+                if (ship.flight){
+                    var fighterSystems = Array();
+                    for (var c in system.systems){
+                        var fightersystem = system.systems[c];
+                        
+                        for (var b = fightersystem.fireOrders.length-1; b>=0; b--){
+                            var fire = fightersystem.fireOrders[b];
+                            if (fire.turn < gamedata.turn){
+                                fightersystem.fireOrders.splice(b,1);
+                            }
+                        }
+                        fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders};
                     }
-                }
-            
-                for (var b = system.power.length-1; b>=0; b--){
-                    var power = system.power[b];
-                    if (power.turn < gamedata.turn){
-                        system.power.splice(b,1);
+                    
+                    systems[a] = {'id': system.id, 'systems': fighterSystems};
+             
+                    
+                }else{
+                    for (var b = system.fireOrders.length-1; b>=0; b--){
+                        var fire = system.fireOrders[b];
+                        if (fire.turn < gamedata.turn){
+                            system.fireOrders.splice(b,1);
+                        }
                     }
+
+                    for (var b = system.power.length-1; b>=0; b--){
+                        var power = system.power[b];
+                        if (power.turn < gamedata.turn){
+                            system.power.splice(b,1);
+                        }
+                    }
+                    systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': system.fireOrders};
                 }
                 
-                systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': system.fireOrders};
             }
             
             ship.systems = systems;

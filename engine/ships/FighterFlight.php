@@ -218,6 +218,21 @@
 			
         
         }
+        
+        public function getAllFireOrders()
+        {
+            $orders = array();
+            
+            foreach ($this->systems as $fighter)
+            {
+                foreach ($fighter->systems as $system)
+                {
+                    $orders = array_merge($orders, $system->fireOrders);
+                }
+            }
+            
+            return $orders;
+        }
              
     }
   

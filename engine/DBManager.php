@@ -728,6 +728,19 @@ class DBManager {
                     $loading = new WeaponLoading($system->id, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 1);
                     $this->insertWeaponLoading($loading);
                 }
+                
+                if ($system instanceof Fighter)
+                {
+                    foreach ($system->systems as $fighterSystem)
+                    {
+                        if ($fighterSystem instanceof Weapon)
+                        {
+                            $loading = new WeaponLoading($fighterSystem->id, $gameid, $ship->id, $fighterSystem->getNormalLoad(), 0, 0, 1);
+                            $this->insertWeaponLoading($loading); 
+                        }
+                     
+                    }
+                }
             }
 
         }
@@ -952,10 +965,24 @@ class DBManager {
                 foreach ($ship->systems as $system){
                     $system->setDamage($this->getDamage($value->id, $gameid, $system->id));
                     $system->setPower($this->getPower($value->id, $gameid, $system->id, $turn));
-                    $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id, $turn));
+                    
                     $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
                     if ($system instanceof Weapon){
                         $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
+                    }
+                    if ($system instanceof Fighter)
+                    {
+                        foreach ($system->systems as $fighterSystem)
+                        {
+                            if ($fighterSystem instanceof Weapon)
+                            {
+                                $fighterSystem->setLoading($this->getWeaponLoading($ship->id, $gameid, $fighterSystem->id));
+                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $turn));
+                            }
+                                
+                        }
+                    }else if ($system instanceof Weapon){
+                        $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id, $turn));
                     }
 					//$system->beforeTurn($ship, $turn, $phase);
                 }

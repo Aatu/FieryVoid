@@ -433,6 +433,7 @@ class Manager{
                         if ($loading)
                             $loadings[] = $loading;
                     }
+                    
                 }
             }
             
@@ -662,7 +663,7 @@ class Manager{
             foreach($value["systems"] as $i=>$system){
                 $sys = $ship->getSystemById($system['id']);
                 
-                if (is_array($system["power"]))
+                if (isset($system["power"]) &&is_array($system["power"]))
                 {
                     foreach ($system["power"] as $a=>$power)
                     {
@@ -673,7 +674,7 @@ class Manager{
                     }
                 }
 
-                if (is_array($system["fireOrders"]))
+                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
                 {
                     foreach($system["fireOrders"] as $i=>$fo)
                     {
@@ -682,6 +683,25 @@ class Manager{
                             $sys->fireOrders[] = $fireOrder;
                         }
                     }
+                }
+                
+                if (isset($system["systems"]) && is_array($system["systems"]))
+                {
+                    foreach ($system["systems"] as $fighter)
+                    {
+                        $fig = $sys->getSystemById($fighter['id']);
+                        if (isset($fighter["fireOrders"]) && is_array($fighter["fireOrders"]))
+                        {
+                            foreach($fighter["fireOrders"] as $i=>$fo)
+                            {
+                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                                if (isset($fig)){
+                                    $fig->fireOrders[] = $fireOrder;
+                                }
+                            }
+                        }
+                    }
+                    
                 }
             
             }
