@@ -1103,7 +1103,8 @@ class DBManager {
 	
         $id = false;
         try {
-			if ($stmt = self::$connection->prepare("SELECT id FROM player where username = ? and password = password(?)")) {
+			if ($stmt = self::$connection->prepare(
+                "SELECT id FROM player where username = ? and password = password(?)")) {
 				
 				$stmt->bind_param('ss', $username, $password);
 				$stmt->execute();

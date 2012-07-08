@@ -1,4 +1,15 @@
 <?php
+
+class ElintArray{
+    public $name = "elintArray";
+    public $displayName = "ELINT array";
+    public $primary = true;
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 2);
+    }
+}
+
 interface DefensiveSystem{
 
     public function getHitChangeMod($shooter, $pos, $turn);

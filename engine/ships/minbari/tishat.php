@@ -9,7 +9,7 @@ class Tishat extends FighterFlight{
 		$this->phpclass = "Tishat";
 		$this->shipClass = "Tishat flight";
 		// need picture
-		$this->imagePath = "ships/frazi.png";
+		$this->imagePath = "ships/tishat.png";
 
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
@@ -25,10 +25,10 @@ class Tishat extends FighterFlight{
             $tishat = new Fighter($armour, 9, $this->id);
             $tishat->displayName = "Tishat Medium Fighter";
         // need picture
-            $tishat->imagePath = "ships/frazi.png";
+            $tishat->imagePath = "ships/tishat.png";
         // need picture
-            $tishat->iconPath = "ships/frazi_large.png";
-            $tishat->addFrontSystem(new LightFusionCannon2(300, 60, 4));
+            $tishat->iconPath = "ships/tishat-large.png";
+            $tishat->addFrontSystem(new LightFusionCannon(300, 60, 4, 2));
             $this->addSystem($tishat);
 	}
     }

@@ -82,8 +82,10 @@
         private $damagebonus = 0;
 
 
-        function __construct($startArc, $endArc, $damagebonus){
+        function __construct($startArc, $endArc, $damagebonus, $shots){
 			$this->damagebonus = $damagebonus;
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
 
         }
@@ -94,27 +96,4 @@
 
     }
 
-    class LightFusionCannon3 extends LightFusionCannon
-    {
-        public $shots = 3;
-        public $defaultShots = 3;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
-    }
-
-    class LightFusionCannon2 extends LightFusionCannon
-    {
-        public $shots = 2;
-        public $defaultShots = 2;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
-    }
 ?>
