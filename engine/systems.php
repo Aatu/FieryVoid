@@ -1,12 +1,12 @@
 <?php
 
-class ElintArray{
+class ElintArray extends ShipSystem{
     public $name = "elintArray";
     public $displayName = "ELINT array";
     public $primary = true;
     
     function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 2);
+        parent::__construct($armour, $maxhealth, $powerReq, 0);
     }
 }
 

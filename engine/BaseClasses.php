@@ -516,9 +516,7 @@ class TacGamedata{
             
             }
             
-            foreach ($ship->systems as $system){
-                $system->onConstructed($ship, $this->turn, $this->phase);
-            }
+            $ship->onConstructed($this->turn, $this->phase);
         
         }
     

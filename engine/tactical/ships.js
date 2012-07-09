@@ -687,9 +687,13 @@ window.shipManager = {
 		
 		return {x:0, y:0};
 		
-	}
+	},
     
-    
-    
-
+    isElint: function(ship){
+        var elint = shipManager.systems.getSystemByName(ship, "elintArray");
+        if (!elint || shipManager.systems.isDestroyed(ship, elint))
+            return false;
+        
+        return true;
+    }
 }

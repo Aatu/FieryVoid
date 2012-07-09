@@ -115,6 +115,35 @@ window.ew = {
 		return 0;
 	},
     
+    getBDEW: function(ship){
+        for (var i in ship.EW){
+            var EWentry = ship.EW[i];
+			if (EWentry.turn != gamedata.turn)
+				continue;
+				
+            if (EWentry.type == "BDEW"){
+                return EWentry.amount;
+            }        
+        }
+        
+        return 0;
+    },
+    
+    getBDEWentry: function(ship){
+    
+        for (var i in ship.EW){
+            var EWentry = ship.EW[i];
+			if (EWentry.turn != gamedata.turn)
+				continue;
+				
+            if (EWentry.type == "BDEW"){
+                return EWentry;
+            }        
+        }
+        
+        return null;
+    },
+    
     getCCEW: function(ship){
         
         for (var i in ship.EW){
@@ -245,6 +274,19 @@ window.ew = {
 				graphics.drawLine(canvas, start.x, start.y, posE.x, posE.y, w);
 				graphics.drawCircleAndFill(canvas, posE.x, posE.y, 5*gamedata.zoom, 0 );
 			}
+            
+            if (EW.type == "BDEW"){
+                var a = EW.amount *0.025;
+				if (ship.userid == gamedata.thisplayer){
+					canvas.strokeStyle = "rgba(225,225,250,0.5)";
+					canvas.fillStyle = "rgba(225,225,250,"+a+")";
+				}else{
+					canvas.strokeStyle = "rgba(125,12,12,0.5)";
+					canvas.fillStyle = "rgba(125,12,12,"+a+")";
+				}
+				
+				graphics.drawCircleAndFill(canvas, pos.x, pos.y, 10.5*hexgrid.hexWidth(), 2 );
+			}
 		};
 		
 		return effect;
@@ -302,6 +344,9 @@ window.ew = {
 		
         if (entry == "CCEW"){
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});
+        }else if (entry == "BDEW"){
+            ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
+            ew.adEWindicators(ship);
         }else{
             
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){

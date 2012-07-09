@@ -427,7 +427,9 @@ class Weapon extends ShipSystem{
 				$dew = Movement::getJinking($target, $gamedata->turn);
 			}
 			
-		}
+		}else{
+            $dew += EW::getBlanketDEW($gamedata, $target);
+        }
 		
 		$mod = 0;
         

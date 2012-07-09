@@ -50,11 +50,11 @@
             foreach ($gamedata->ships as $ship)
             {
                 if ($ship->team == $target->team && $ship->elint
-                     && Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) <= 20){
+                     && Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) <= 10){
                     $blanket = $ship->getBlanketDEW($gamedata->turn);
                     
-                    if ( $blanket > $FDEW )
-                        $FDEW += $ship->getBlanketDEW($gamedata->turn);
+                    //if ( $blanket > $FDEW )
+                    $FDEW += $blanket*0.5;
                 }
             }
             

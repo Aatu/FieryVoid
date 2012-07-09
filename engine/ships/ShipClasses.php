@@ -40,6 +40,16 @@
 
         }
         
+        public function onConstructed($turn, $phase)
+        {
+            foreach ($this->systems as $system){
+                $system->onConstructed($this, $turn, $phase);
+                
+                if ($system instanceof ElintArray)
+                    $this->elint = true;
+            }
+        }
+        
         protected function addSystem($system, $loc){
             
             $i = sizeof($this->systems);

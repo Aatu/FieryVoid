@@ -7,7 +7,10 @@ window.shipSelectList = {
 		
 		if (list.length > 1)
 			return true;
-			
+        
+        if (shipManager.isElint(ship)){
+            return true;
+		}
 		return false;
 		
 	
@@ -22,15 +25,23 @@ window.shipSelectList = {
 		
 		var e = $('<div class="shipSelectList"></div>');
 		for (var i in list){
-			var ship = list[i];
+			var listship = list[i];
 			
 			var fac = "ally";
-			if (ship.userid != gamedata.thisplayer){
+			if (listship.userid != gamedata.thisplayer){
 				fac = "enemy";
 			}
 			
-			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+ship.id+'"><span class="name '+fac+'">'+ship.name+'</span></div>').appendTo(e);
+			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
+            if (shipManager.isElint(ship)){
+                if (gamedata.isEnemy(ship, listship)){
+                    
+                }else{
+                    $('<div style="margin-left:20px;" oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-action="FOEW" data-id="'+listship.id+'"><span class="name '+fac+'">Assign support OEW</span></div>').appendTo(e);
+                    $('<div style="margin-left:20px;" oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-action="FDEW" data-id="'+listship.id+'"><span class="name '+fac+'">Assign support DEW</span></div>').appendTo(e);
+                }
+            }
 		}
 		
 		var dis = 10 + (40*gamedata.zoom);
