@@ -1,16 +1,19 @@
 window.shipSelectList = {
 
 
-	haveToShowList: function(ship){
+	haveToShowList: function(ship, event){
 	
 		var list = shipManager.getShipsInSameHex(ship);
 		
 		if (list.length > 1)
 			return true;
         
-        if (shipManager.isElint(ship)){
-            return true;
-		}
+        if (event && event.which === 1){
+            var selectedShip = gamedata.getSelectedShip();
+            if (selectedShip != ship && shipManager.isElint(selectedShip) && ew.checkInELINTDistance(selectedShip, ship)){
+                return true;
+            }
+        }
 		return false;
 		
 	
@@ -22,11 +25,14 @@ window.shipSelectList = {
 		
 		var list = shipManager.getShipsInSameHex(ship);
 		var pos = shipManager.getShipPositionForDrawing(ship);
-		
+		var selectedShip = gamedata.getSelectedShip();
+        
+       
+       
+        
 		var e = $('<div class="shipSelectList"></div>');
 		for (var i in list){
 			var listship = list[i];
-			
 			var fac = "ally";
 			if (listship.userid != gamedata.thisplayer){
 				fac = "enemy";
@@ -34,12 +40,12 @@ window.shipSelectList = {
 			
 			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
-            if (shipManager.isElint(ship)){
-                if (gamedata.isEnemy(ship, listship)){
+            if (selectedShip != listship && shipManager.isElint(selectedShip)){
+                if (gamedata.isEnemy(selectedShip, listship) && ew.checkInELINTDistance(selectedShip, listship)){
                     
                 }else{
-                    $('<div style="margin-left:20px;" oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-action="FOEW" data-id="'+listship.id+'"><span class="name '+fac+'">Assign support OEW</span></div>').appendTo(e);
-                    $('<div style="margin-left:20px;" oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-action="FDEW" data-id="'+listship.id+'"><span class="name '+fac+'">Assign support DEW</span></div>').appendTo(e);
+                    $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
+                    $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
                 }
             }
 		}
@@ -68,9 +74,14 @@ window.shipSelectList = {
 		var id = $(this).data("id");
         var ship = gamedata.getShip(id);
 		
-		
-		shipManager.doShipClick(ship);
-		
+		var action = $(this).data("action");
+        if (!action){
+            shipManager.doShipClick(ship);
+		}else if (action == "SOEW"){
+            ew.AssignOEW(ship, "SOEW");
+        }else if (action == "SDEW"){
+            ew.AssignOEW(ship, "SDEW");
+        }
 	
 	},
 	
