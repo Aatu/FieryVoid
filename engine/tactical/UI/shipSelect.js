@@ -8,10 +8,15 @@ window.shipSelectList = {
 		if (list.length > 1)
 			return true;
         
-        if (event && event.which === 1){
+        if (event && event.which === 1 && gamedata.gamephase == 1){
             var selectedShip = gamedata.getSelectedShip();
-            if (selectedShip != ship && shipManager.isElint(selectedShip) && ew.checkInELINTDistance(selectedShip, ship)){
-                return true;
+            if (shipManager.isElint(selectedShip)){
+                if (selectedShip != ship && ew.checkInELINTDistance(selectedShip, ship)){
+                    return true;
+                }
+                if (!gamedata.isMyShip(ship) && ew.checkInELINTDistance(selectedShip, ship, 50)){
+                    return true;
+                }
             }
         }
 		return false;
@@ -41,11 +46,15 @@ window.shipSelectList = {
 			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
             if (selectedShip != listship && shipManager.isElint(selectedShip)){
-                if (gamedata.isEnemy(selectedShip, listship) && ew.checkInELINTDistance(selectedShip, listship)){
-                    
+                if (gamedata.isEnemy(selectedShip, listship)){
+                    if (ew.checkInELINTDistance(selectedShip, listship, 50)){
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="DIST" data-id="'+listship.id+'"><span class="'+fac+'">Assign disruption EW</span></div>').appendTo(e);
+                    }
                 }else{
-                    $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
-                    $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
+                    if (ew.checkInELINTDistance(selectedShip, listship, 30)){
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
+                    }
                 }
             }
 		}

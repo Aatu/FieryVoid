@@ -430,6 +430,8 @@ shipWindowManager = {
                 element.find(".value").html(entry.amount);
             }else if (entry.type == "SDEW"){
                 element.find(".value").html(entry.amount*0.5);
+            }else if (entry.type == "DIST"){
+                element.find(".value").html((entry.amount/3).toFixed(2));
             }else{
                 element.find(".value").html(entry.amount);
             }

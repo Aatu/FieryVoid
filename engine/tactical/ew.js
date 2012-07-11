@@ -89,6 +89,21 @@ window.ew = {
 		
 	},
     
+    getNumOfOffensiveTargets: function(ship){
+		var amount = 0;
+		for (var i in ship.EW){
+			var entry = ship.EW[i];
+			if (entry.turn != gamedata.turn)
+				continue;
+			
+			if (entry.type == "OEW")
+				amount ++;
+		}
+		
+		return amount;
+		
+	},
+    
     getEWByType: function(type, ship, target){
         for (var i in ship.EW){
 			var entry = ship.EW[i];
@@ -459,6 +474,9 @@ window.ew = {
             if (elint == ship || !shipManager.isElint(elint))
                 continue;
             
+            if (!ew.checkInELINTDistance(target, elint, 30))
+                continue;
+            
             if (!ew.getEWByType("SOEW", elint, ship))
                 continue;
             
@@ -477,7 +495,7 @@ window.ew = {
             if (elint == ship || !shipManager.isElint(elint))
                 continue;
             
-            var fdew = ew.getEWByType("SDEW", elint, ship);
+            var fdew = ew.getEWByType("SDEW", elint, ship)*0.5;
 
             if (fdew > amount)
                amount = fdew;
@@ -490,14 +508,34 @@ window.ew = {
         var amount = 0;
         for (var i in gamedata.ships){
             var elint = gamedata.ships[i];
-            if (elint == ship || !shipManager.isElint(elint) || ew.checkInELINTDistance(ship, elint, 20))
+            if (elint == ship || !shipManager.isElint(elint) || !ew.checkInELINTDistance(ship, elint, 20))
                 continue;
             
-            var fdew = ew.getEWByType("BDEW", elint);
+            var fdew = ew.getEWByType("BDEW", elint)*0.25;
 
             if (fdew > amount)
                amount = fdew;
         }
+        return amount;
+    },
+    
+    getDistruptionEW: function(ship){
+        
+        var amount = 0;
+        for (var i in gamedata.ships){
+            var elint = gamedata.ships[i];
+            if (elint == ship || !shipManager.isElint(elint))
+                continue;
+            
+            var fdew = ew.getEWByType("DIST", elint, ship)/3;
+
+            //if (fdew > amount)
+            amount += fdew;
+        }
+        
+        var num = ew.getNumOfOffensiveTargets(ship);
+        if (num > 0)
+            return amount/num;
         
         return amount;
     }

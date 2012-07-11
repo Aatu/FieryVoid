@@ -420,7 +420,9 @@ class Weapon extends ShipSystem{
         $dew = $target->getDEW($gamedata->turn);
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
-			
+		
+        $bdew = 0;
+        
 		if ($target instanceof FighterFlight){
 			if (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 
 				||  Movement::getCombatPivots($shooter, $gamedata->turn) > 0){
@@ -428,14 +430,23 @@ class Weapon extends ShipSystem{
 			}
 			
 		}else{
-            $dew += EW::getBlanketDEW($gamedata, $target);
+            $bdew += EW::getBlanketDEW($gamedata, $target);
         }
 		
 		$mod = 0;
         
         $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
-				
+        
+        $sdew = EW::getSupportedDEW($gamedata, $target);
+        $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+        $dist = EW::getDistruptionEW($gamedata, $shooter);
+        
         $oew = $shooter->getOEW($target, $gamedata->turn);
+        $oew -= $dist;
+        
+        if ($oew < 0)
+            $oew = 0;
+        
         if ($shooter instanceof FighterFlight){
 			$oew = $shooter->offensivebonus;
 			$mod -= Movement::getJinking($shooter, $gamedata->turn);
@@ -458,7 +469,7 @@ class Weapon extends ShipSystem{
 		
 		$mod += $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 		
-        if ($oew == 0)
+        if ($oew < 1)
             $rangePenalty = $rangePenalty*2;
         else if ($shooter->faction != $target->faction){
             // Calculate jammer impact only if a ship has a lock-on
@@ -490,12 +501,12 @@ class Weapon extends ShipSystem{
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
             
-        $goal = ($defence - $dew - $jammermod - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
+        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         
         
-        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;

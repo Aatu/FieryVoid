@@ -155,7 +155,6 @@ window.weaponManager = {
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
                 $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
-                //<span class="hitinfo">'+weaponManager.calculateHitInfo(selectedShip, ship, weapon)+'</span></div>').appendTo(f);
             }else{
                 $('<div><span class="weapon">'+weapon.displayName+':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
             }
@@ -243,8 +242,16 @@ window.weaponManager = {
         if (target.flight)
 			dew = shipManager.movement.getJinking(target);
         
+        var bdew = ew.getSupportedBDEW(target);
+        if (target.flight)
+            bdew = 0;
+        
+        var sdew = ew.getSupportedDEW(target);
+        var soew = ew.getSupportedOEW(shooter, target);
+        var dist = ew.getDistruptionEW(shooter);
         
         var oew = ew.getTargetingEW(shooter, target);
+        oew -= dist;
         
         var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
         
@@ -259,7 +266,7 @@ window.weaponManager = {
 		if (calledid)
 			mod -= 8;
         
-        var goal = (defence - dew - rangePenalty - intercept + oew + firecontrol + mod);
+        var goal = (defence - dew - bdew - sdew - rangePenalty - intercept + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
         console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
@@ -305,9 +312,17 @@ window.weaponManager = {
 		if (target.flight)
 			dew = shipManager.movement.getJinking(target);
 		
-		
-        var oew = ew.getTargetingEW(shooter, target);
+        var bdew = ew.getSupportedBDEW(target);
+        if (target.flight)
+            bdew = 0;
         
+        var sdew = ew.getSupportedDEW(target);
+        var soew = ew.getSupportedOEW(shooter, target);
+        var dist = ew.getDistruptionEW(shooter);
+        
+        var oew = ew.getTargetingEW(shooter, target);
+        oew -= dist;
+		
         if (shooter.flight)
 			oew = shooter.offensivebonus;
         
@@ -332,7 +347,7 @@ window.weaponManager = {
 			mod -= 8;
         
         var jammermod = 0;
-        if (oew == 0){
+        if (oew < 1){
             rangePenalty = rangePenalty*2;
          }else{
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
@@ -346,52 +361,14 @@ window.weaponManager = {
         var firecontrol =  weaponManager.getFireControl(target, weapon);
             
         
-        var goal = (defence - dew - jammermod - rangePenalty + oew + firecontrol + mod);
+        var goal = (defence - dew - bdew - sdew - jammermod - rangePenalty + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " bdew: " +bdew+ " sdew: " +sdew+ " oew: " + oew + " soew: "+soew+" defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         if (change > 100)
             change = 100;
         return change;
-        
-    
-    },
-    
-    calculateHitInfo: function(shooter, target, weapon){
-    
-        var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
-        
-        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        
-        var dew = ew.getDefensiveEW(target);
-        var oew = ew.getOffensiveEW(shooter, target);
-        var mod = 0;
-        
-        if (shipManager.movement.isRolling(shooter)){
-            mod -= 3;
-        }
-        
-        if (shipManager.movement.isPivoting(shooter)){
-            mod -= 3;
-        }
-        
-        if (oew == 0)
-            rangePenalty = rangePenalty*2;
-            
-        var defence = weaponManager.getShipDefenceValue(shooter, target);
-        
-        var firecontrol =  weaponManager.getFireControl(target, weapon);
-            
-        
-        var goal = (defence - dew - rangePenalty + oew + firecontrol);
-        
-        var change = Math.round((goal/20)*100);
-        //console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " goal: " +goal);
-        
-        var text = "Base: "+defence+" - DEW " + dew + " - range " + Math.round(rangePenalty) + " + OEW " + oew + " + F/C " + firecontrol +"+ other: "+mod +" = "+ Math.round(goal) ;
-        
-        return text;
         
     
     },

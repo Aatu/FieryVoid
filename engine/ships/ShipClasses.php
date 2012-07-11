@@ -282,6 +282,25 @@
             return $pos;
         }
         
+        public function getEWbyType($type, $turn, $target = null){
+            
+            foreach ($this->EW as $EW)
+            {
+                if ($EW->turn != $turn)
+                    continue;
+
+                if ($target && $EW->targetid != $target->id)
+                    continue;
+
+                if ($EW->type == $type){
+                    return $EW->amount;
+                }
+            }
+
+            return 0;
+        
+        }
+        
         public function getDEW($turn){
             
             foreach ($this->EW as $EW){
@@ -319,6 +338,17 @@
             
             
             return 0;
+        }
+        
+        public function getOEWTargetNum($turn){
+        
+			$amount = 0;
+            foreach ($this->EW as $EW){
+                if ($EW->type == "OEW" && $EW->turn == $turn)
+                    $amount++;
+            }
+            
+            return $amount;
         }
         
         public function getFacingAngle(){
