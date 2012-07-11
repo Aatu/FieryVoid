@@ -379,6 +379,11 @@ window.shipManager = {
         return {x:x, y:y, xO:xO, yO:yO};
     },
     
+    getShipPositionInWindowCoWithoutOffset: function(ship){
+        var hexpos = shipManager.getShipPosition(ship);
+        var pos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
+        return pos;
+    },
     
     getShipPositionInWindowCo: function(ship){
         var hexpos = shipManager.getShipPosition(ship);

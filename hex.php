@@ -305,13 +305,7 @@
 	
     <div id="shipNameContainer">
         <div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>
-		<div><span class="iniative value">Speed: 11</span></div>
-		<div><span class="speed value">Speed: 11</span></div>
-		<div><span class="turndelay value">Turn delay: 5</span></div>
-		<div><span class="rolling value">Turn delay: 5</span></div>
-		<div><span class="rolled value">Turn delay: 5</span></div>
-		<div><span class="pivoting value">Turn delay: 5</span></div>
-		<div><span class="unused value">Unused thrust: 0</span></div>
+		
 		<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>
 		<div class="fire targeting"></div>
     </div>
