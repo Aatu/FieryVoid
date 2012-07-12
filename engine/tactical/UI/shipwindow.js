@@ -414,7 +414,7 @@ shipWindowManager = {
 		
 		for (var i in ship.EW){
 			var entry = ship.EW[i];
-			if ((entry.type != "OEW" && entry.type != "SOEW" && entry.type != "SDEW" )|| entry.turn != gamedata.turn)
+			if ((entry.type != "OEW" && entry.type != "DIST" && entry.type != "SOEW" && entry.type != "SDEW" )|| entry.turn != gamedata.turn)
 				continue;
 				
 			element = template.clone(true).appendTo(shipwindow.find(".EW .EWcontainer"));
@@ -431,7 +431,9 @@ shipWindowManager = {
             }else if (entry.type == "SDEW"){
                 element.find(".value").html(entry.amount*0.5);
             }else if (entry.type == "DIST"){
-                element.find(".value").html((entry.amount/3).toFixed(2));
+                element.find(".value").html((entry.amount/3));
+            }else if (entry.type == "OEW"){
+                element.find(".value").html((entry.amount - ew.getDistruptionEW(ship)));
             }else{
                 element.find(".value").html(entry.amount);
             }
@@ -633,7 +635,7 @@ shipWindowManager = {
 			field.html(rem + "/" + output);
 		}else if (system.name == "reactor"){
 			field.html(shipManager.power.getReactorPower(ship, system));
-		}else if (output > 0){
+		}else if (system.output > 0){
 		
 			field.html(output);
 		}

@@ -394,7 +394,7 @@ class Manager{
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
-        return true;
+        return true;    
     
     }
     
@@ -405,7 +405,12 @@ class Manager{
                 return;
             
             if (!self::$dbManager->getGameSubmitLock($gameid))
+            {
+                Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
+            }
+            
+            Debug::log("Advance gamestate, GOT LOCK. playerid: $playerid");
             
             self::$dbManager->startTransaction();
             
@@ -440,13 +445,14 @@ class Manager{
             }
             
             self::$dbManager->updateWeaponLoading($loadings);
-            self::$dbManager->releaseGameSubmitLock($gameid);
             self::$dbManager->endTransaction(false);
+            self::$dbManager->releaseGameSubmitLock($gameid);
         }
         catch(Exception $e)
         {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            throw $e;
         }
     }
     

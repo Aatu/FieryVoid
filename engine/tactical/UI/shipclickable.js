@@ -92,8 +92,9 @@ window.shipClickable = {
             shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
             shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
             
-            if (selectedShip && selectedShip != ship){
-                var dis = Math.ceil(mathlib.getDistanceBetweenShipsInHex(selectedShip, ship));
+            if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
+                
+                var dis = (mathlib.getDistanceBetweenShipsInHex(selectedShip, ship)).toFixed(2);
                 shipClickable.addEntryElement('DISTANCE: ' + dis);
             }
 		}

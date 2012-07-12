@@ -16,6 +16,12 @@
 
 				$ship = $gamedata->getShipById($entry->shipid);
 				$used += $entry->amount;
+                
+                if ($entry->type === "DIST")
+                {
+                    if ($entry->amount % 3 !== 0)
+                        throw new Exception("Validation of EW failed: DIST ew not divisable by 3");
+                }
 			}
 			
 			if ($ship == null)

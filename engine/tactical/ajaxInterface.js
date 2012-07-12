@@ -23,6 +23,7 @@ window.ajaxInterface = {
             success : ajaxInterface.successSubmit,
             error : ajaxInterface.errorSubmit
         });
+        console.log("SUBMITTING GAMEDATA");
         
         gamedata.goToWaiting();
     },
@@ -165,7 +166,13 @@ window.ajaxInterface = {
         
         ajaxInterface.pollcount++;
         
-        var time = 6000;
+        var time = 2000;
+        
+        
+        if (ajaxInterface.pollcount > 110){
+            time = 6000;
+        }
+        
         
         if (ajaxInterface.pollcount > 100){
             time = 30000;

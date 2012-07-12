@@ -215,6 +215,8 @@ class ShipSystem{
         
     public $criticals = array();
     
+    protected $structureSystem;
+    
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
         $this->maxhealth = (int)$maxhealth;
@@ -225,8 +227,7 @@ class ShipSystem{
     }
     
     public function onConstructed($ship, $turn, $phase){
-            
-     
+        $this->structureSystem = $ship->getStructureSystem($this->location);
     }
     
     public function beforeTurn($ship, $turn, $phase){
@@ -380,6 +381,9 @@ class ShipSystem{
             if (($turn === false || $damage->turn <= $turn) && $damage->destroyed)
                 return true;
         }
+        
+        if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($turn))
+            return true;
   
         return false;
         

@@ -290,7 +290,7 @@ window.ew = {
 			var pos = shipManager.getShipPositionForDrawing(ship);
             
 
-			if (EW.type == "OEW" || EW.type == "SOEW" || EW.type == "SDEW"){
+			if (EW.type == "OEW" || EW.type == "SOEW" || EW.type == "SDEW" || EW.type == "DIST"){
 				var posE = shipManager.getShipPositionForDrawing(gamedata.getShip(EW.targetid));
 				var a = (EW.amount == 1) ? 0.50 : 0.50;
 				
@@ -317,6 +317,14 @@ window.ew = {
                     }else{
                         canvas.strokeStyle = "rgba(125,12,12,"+a+")";
                         canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                    }
+                }else if (EW.type == "DIST"){
+                    if (ship.userid == gamedata.thisplayer){
+                        canvas.strokeStyle = "rgba(255,115,40,"+a+")";
+                        canvas.fillStyle = "rgba(255,115,40,"+a+")";
+                    }else{
+                        canvas.strokeStyle = "rgba(255,115,40,"+a+")";
+                        canvas.fillStyle = "rgba(255,115,40,"+a+")";
                     }
                 }
                 
@@ -348,7 +356,6 @@ window.ew = {
 	},
     
     AssignOEW: function(ship, type){
-	
 		if (gamedata.waiting == true || gamedata.gamephase != 1)
 			return; 
         
@@ -371,19 +378,22 @@ window.ew = {
         }
         var left = ew.getDefensiveEW(selected);
         
-        if (left < 1)
+        if (left < 1 || (type == "DIST" && left < 3)){
             return;
+        }
             
-		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+		if (type == "OEW" && shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
 			var allOEW = ew.getAllOffensiveEW(selected);
 			var all = ew.getScannerOutput(selected);
 			
 			if (allOEW+1 > all*0.5)
 				return false;
 		}
-			
+		var amount = 1;
+        if (type == "DIST")
+            amount = 3;
             
-        selected.EW.push({shipid:selected.id, type:type, amount:1, targetid:ship.id, turn:gamedata.turn});
+        selected.EW.push({shipid:selected.id, type:type, amount:amount, targetid:ship.id, turn:gamedata.turn});
         ew.adEWindicators(selected);
         gamedata.shipStatusChanged(selected);
     },
@@ -404,6 +414,10 @@ window.ew = {
         }else if (entry == "BDEW"){
             ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
             ew.adEWindicators(ship);
+        }else if (entry.type == "DIST"){
+            if (left < 3)
+                return;
+            entry.amount += 3;
         }else{
             
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){
@@ -436,7 +450,11 @@ window.ew = {
             return;
         }
         
-        entry.amount--;
+        amount = 1;
+        if (entry.type == "DIST")
+            amount = 3;
+        
+        entry.amount -= amount;
         if (entry.amount<1){
             var i = $.inArray(entry, ship.EW);
             ship.EW.splice(i, 1);
