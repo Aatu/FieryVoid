@@ -407,6 +407,8 @@ class Manager{
             if (!self::$dbManager->getGameSubmitLock($gameid))
                 return;
             
+            self::$dbManager->startTransaction();
+            
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
             $phase = $gamedata->phase;
             
@@ -439,9 +441,11 @@ class Manager{
             
             self::$dbManager->updateWeaponLoading($loadings);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            self::$dbManager->endTransaction(false);
         }
         catch(Exception $e)
         {
+            self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
         }
     }

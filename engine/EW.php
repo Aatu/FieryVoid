@@ -119,7 +119,7 @@
                 if ($elint == $ship)
                     continue;
                 
-                if (Mathlib::getDistanceHex( $target->getCoPos(), $elint->getCoPos() ) > 50)
+                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)
                     continue;
 
                 $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship)*0.25;

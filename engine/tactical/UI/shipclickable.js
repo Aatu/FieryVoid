@@ -90,6 +90,7 @@ window.shipClickable = {
             shipClickable.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
             shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
             shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
+            shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
             
             if (selectedShip && selectedShip != ship){
                 var dis = Math.ceil(mathlib.getDistanceBetweenShipsInHex(selectedShip, ship));
