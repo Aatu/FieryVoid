@@ -3,40 +3,43 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 
 class DBManager {
 
-    private static $connection = null;
+    private $id;
+    private $connection = null;
     
     function __construct($host, $port = 3306, $database, $username, $password) {
+        $this->id = uniqid();
+        Debug::log("CONSTRUCTING new DB object: " . $this->id);
+        if ($this->connection !== null)
+            return $this->connection;
         
-        if (self::$connection !== null)
-            return self::$connection;
-        
-        if (!self::$connection = mysqli_connect($host, $username, $password, $database, $port))
+        if (!$this->connection = mysqli_connect($host, $username, $password, $database, $port))
             throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_connect_error(), mysqli_connect_errno(), null);
             
-        if (!mysqli_select_db(self::$connection, $database ))
-            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_error(self::$connection), mysqli_errno(), null);
+        if (!mysqli_select_db($this->connection, $database ))
+            throw new CustomException(300,"DBManager:Construct, connection failed: ".mysqli_error($this->connection), mysqli_errno(), null);
             
-        mysqli_set_charset(self::$connection, 'utf8');
+        mysqli_set_charset($this->connection, 'utf8');
     }
     
     private function DBEscape($string) {
             
-        return mysqli_real_escape_string(self::$connection, (String)$string);
+        return mysqli_real_escape_string($this->connection, (String)$string);
     }
     
     
     public function __destruct() {
+        Debug::log("DESTROYING DB object: " . $this->id);
         $this->close();
     }
        
     private function query($sql) {
 
     
-        if (!self::$connection)
+        if (!$this->connection)
             throw new Exception("DBManager:query, connection failed");
             
-        if (!$answer = mysqli_query(self::$connection, $sql)){
-            throw new Exception("DBManager:query, SQL error: ".mysql_error(self::$connection)."\n sql: $sql error:", mysql_errno(self::$connection));
+        if (!$answer = mysqli_query($this->connection, $sql)){
+            throw new Exception("DBManager:query, SQL error: ".mysql_error($this->connection)."\n sql: $sql error:", mysql_errno($this->connection));
         }
             
         $result = array();
@@ -51,16 +54,16 @@ class DBManager {
     private function insert($sql) {
 
     
-        if (!self::$connection)
+        if (!$this->connection)
             throw new exception("DBManager:insert, connection failed");
             
-        if (!$answer = mysqli_query(self::$connection, $sql))
-            throw new exception("DBManager:insert, SQL error: ".mysqli_error(self::$connection)."\n sql: $sql". mysqli_errno(self::$connection));
+        if (!$answer = mysqli_query($this->connection, $sql))
+            throw new exception("DBManager:insert, SQL error: ".mysqli_error($this->connection)."\n sql: $sql". mysqli_errno($this->connection));
             
         $sql = "select LAST_INSERT_ID() as id";
         
-        if (!$answer = mysqli_query(self::$connection, $sql))
-           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysqli_error(self::$connection)."\n sql: $sql", mysqli_errno(self::$connection));
+        if (!$answer = mysqli_query($this->connection, $sql))
+           throw new exception("DBManager:insert, SQL (getting the id) error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
 
             
         while ($row = mysqli_fetch_object($answer)) {
@@ -75,12 +78,12 @@ class DBManager {
     public function update($sql) {
 
     
-        if (!self::$connection)
+        if (!$this->connection)
             throw new exception("DBManager:update, connection failed");
             
-        if (!$answer = mysqli_query(self::$connection, $sql)){
+        if (!$answer = mysqli_query($this->connection, $sql)){
             $this->endTransaction(true);
-            throw new exception("DBManager:update, SQL error: ".mysqli_error(self::$connection)."\n sql: $sql", mysqli_errno(self::$connection));
+            throw new exception("DBManager:update, SQL error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
         }
 
             
@@ -96,24 +99,24 @@ class DBManager {
 	}
     
     public function startTransaction(){
-		//mysqlii_query("SET AUTOCOMMIT=0", self::$connection);
-		//mysqlii_query("START TRANSACTION", self::$connection);
-        mysqli_autocommit(self::$connection, FALSE);
+		//mysqlii_query("SET AUTOCOMMIT=0", $this->connection);
+		//mysqlii_query("START TRANSACTION", $this->connection);
+        mysqli_autocommit($this->connection, FALSE);
     }
     
     public function endTransaction($rollback = false){
         if ($rollback == true){
-            mysqli_rollback(self::$connection); 
+            mysqli_rollback($this->connection); 
         }else{
-            mysqli_commit(self::$connection);
+            mysqli_commit($this->connection);
         }
-        mysqli_autocommit(self::$connection, TRUE);
+        mysqli_autocommit($this->connection, TRUE);
         
     }
     
     public function close() {
 		
-		mysqli_close(self::$connection);
+		mysqli_close($this->connection);
 		
 		
 		
@@ -377,7 +380,7 @@ class DBManager {
             $loadings[] = $input;
         
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "INSERT INTO  
                     tac_loading
                 VALUES 
@@ -420,7 +423,7 @@ class DBManager {
             $loadings[] = $input;
         
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_loading
                 SET 
@@ -466,7 +469,7 @@ class DBManager {
     {
         $loading = null;
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "SELECT 
                     *
                 FROM 
@@ -508,7 +511,7 @@ class DBManager {
     {
         $orders = array();
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "SELECT 
                     *
                 FROM 
@@ -776,7 +779,7 @@ class DBManager {
         else 
             $moves[] = $input;
          try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "INSERT INTO  
                     tac_shipmovement
                 VALUES 
@@ -862,14 +865,25 @@ class DBManager {
 		if ($gameid <=0)
 			return null;
 		
+        Debug::log("GAME: $gameid Player: $playerid Starting to fetch new GAMEDATA from DB.");
         $gamedata = $this->getTacGame($gameid, $playerid);
 		if ($gamedata == null)
 			return null;
 
+        Debug::log("    GAME: $gameid Player: $playerid GAMEDATA fetched from DB.");
 			
         $gamedata->players = $this->getPlayersInGame($playerid, $gameid);
+        
+        Debug::log("    GAME: $gameid Player: $playerid PLAYERS fetched from DB.");
+        
         $gamedata->setShips( $this->getTacShips($gameid, $gamedata->players, $gamedata->turn, $gamedata->phase) );
+        
+        Debug::log("    GAME: $gameid Player: $playerid SHIPS fetched from DB. CALLING onConstruct");
+        
+        
 		$gamedata->onConstructed();
+        
+        Debug::log("    GAME: $gameid Player: $playerid OnConstruct done, returning gamedata.");
         
         return $gamedata;
     }
@@ -944,8 +958,170 @@ class DBManager {
         return $players;
     }
     
+    public function getTacShips($gameid, $players, $turn, $phase)
+    {
+        Debug::log("        GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
+        
+        $ships = array();
+        try {
+            $stmt = $this->connection->prepare(
+                "SELECT
+                    id, playerid, name, phpclass 
+                FROM
+                    tac_ship 
+                WHERE
+                    tacgameid = ?
+                "
+            );
+            
+			if ($stmt)
+            {
+                $stmt->bind_param('i', $gameid);
+                $stmt->bind_result($id, $playerid, $name, $phpclass);
+				$stmt->execute();
+				while ($stmt->fetch())
+                {
+                   $ships[] = new $phpclass($id, $playerid, $name, null);
+                }
+				$stmt->close();
+			}
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
+        
+        $this->getIniativeForShips($gameid, $turn, $ships);
+        $this->getMovesForShips($gameid, $turn, $ships);
+        
+        return $ships;
+        
+        
+    }
     
-    public function getTacShips($gameid, $players, $turn, $phase){
+    private function getIniativeForShips($gameid, $turn, $ships){
+        
+        
+        $stmt = $this->connection->prepare(
+            "SELECT
+                iniative
+            FROM
+                tac_iniative 
+            WHERE
+                gameid = ?
+            AND
+                shipid = ?
+            AND 
+                turn = ?
+            "
+        );
+
+        if ($stmt)
+        {
+            foreach ($ships as $ship)
+            {
+                $stmt->bind_param('iii', $gameid, $ship->id, $turn);
+                $stmt->bind_result($iniative);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $ship->iniative = $iniative;
+                }
+            }
+            $stmt->close();
+        }
+        
+        
+    }
+    
+    private function getMovesForShips($gameid, $turn, $ships){
+        
+        $turn = $turn - 1;
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                id, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust
+            FROM 
+                tac_shipmovement
+            WHERE
+                gameid = ?
+            AND
+                shipid = ?
+            AND
+                ( turn > ? OR turn = 1 ) 
+            ORDER BY
+                id ASC
+            "
+        );
+
+        if ($stmt)
+        {
+            foreach ($ships as $ship)
+            {
+                $moves = array();
+                
+                $stmt->bind_param('iii', $gameid, $ship->id, $turn);
+                $stmt->bind_result($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value);
+                    $move->setReqThrustJSON($requiredthrust);
+                    $move->setAssThrustJSON($assignedthrust);
+            
+                    $moves[] = $move;
+                }
+                
+                $ship->setMovement($moves);
+            }
+            $stmt->close();
+        }
+        
+        
+    }
+    
+    private function getEWForShips($gameid, $turn, $ships){
+        
+        $turn = $turn - 1;
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                id, shipid, turn, type, amount, targetid
+            FROM 
+                tac_ew 
+            WHERE 
+                gameid = ?
+            AND
+                shipid = ?
+            AND
+                turn > ? 
+            ORDER BY
+                id ASC
+            "
+        );
+
+        if ($stmt)
+        {
+            foreach ($ships as $ship)
+            {
+                $ews = array();
+                
+                $stmt->bind_param('iii', $gameid, $ship->id, $turn);
+                $stmt->bind_result($id, $shipid, $turn, $type, $amount, $targetid);
+                $stmt->execute();
+                while ($stmt->fetch())
+                {
+                    $ews[] = new EWentry($id, $shipid, $turn, $type, $amount, $targetid);
+                }
+                
+                $ship->EW = $ews;
+            }
+            $stmt->close();
+        }
+        
+        
+    }
+    
+    public function getTacShipsOld($gameid, $players, $turn, $phase){
+        Debug::log("        GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
+        
         $sql = "select * from tac_ship s join tac_iniative i on s.id = i.shipid where s.tacgameid = $gameid and i.turn = $turn order by i.iniative asc";
         
         $ships = array();
@@ -954,7 +1130,8 @@ class DBManager {
             
             if ($result == null || sizeof($result) == 0)
                 return null;
-                
+            
+            Debug::log("        GAME: $gameid Ships fetched from DB.");
             foreach ($result as $value) {
                                                
                 $moves = $this->getMoves($value->id, $gameid, $turn);
@@ -995,12 +1172,10 @@ class DBManager {
                 
             }
             
-            //
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
             
         return $ships;
     }
@@ -1064,7 +1239,7 @@ class DBManager {
     
     public function isNewGamedata($gameid, $turn, $phase, $activeship){
         try {
-			if ($stmt = self::$connection->prepare("
+			if ($stmt = $this->connection->prepare("
                 SELECT 
                     turn, phase, activeship, status
                 FROM 
@@ -1103,7 +1278,7 @@ class DBManager {
 	
         $id = false;
         try {
-			if ($stmt = self::$connection->prepare(
+			if ($stmt = $this->connection->prepare(
                 "SELECT id FROM player where username = ? and password = password(?)")) {
 				
 				$stmt->bind_param('ss', $username, $password);
@@ -1129,7 +1304,7 @@ class DBManager {
     public function releaseGameSubmitLock($gameid)
     {
         try {
-			if ($stmt = self::$connection->prepare(
+			if ($stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_game 
                 SET
@@ -1154,7 +1329,7 @@ class DBManager {
     public function releasePlayerSubmitLock($gameid, $playerid)
     {
         try {
-			if ($stmt = self::$connection->prepare(
+			if ($stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_playeringame 
                 SET
@@ -1180,7 +1355,7 @@ class DBManager {
     {
         $result = false;
         try {
-			if ($stmt = self::$connection->prepare(
+			if ($stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_game
                 SET
@@ -1217,7 +1392,7 @@ class DBManager {
     {
         $result = false;
         try {
-			if ($stmt = self::$connection->prepare(
+			if ($stmt = $this->connection->prepare(
                 "UPDATE 
                     tac_playeringame
                 SET
@@ -1255,7 +1430,7 @@ class DBManager {
     public function checkIfPhaseReady($gameid)
     {
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "SELECT 
                     g.id, g.slots
                 FROM 
@@ -1300,7 +1475,7 @@ class DBManager {
     {
         $ids = array();
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "SELECT 
                     g.id
                 FROM 
@@ -1340,7 +1515,7 @@ class DBManager {
     public function deleteGames($ids)
     {
         try {
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_game
                 WHERE
@@ -1348,7 +1523,7 @@ class DBManager {
             );
 			$this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_playeringame
                 WHERE
@@ -1356,7 +1531,7 @@ class DBManager {
             );
 			$this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_critical
                 WHERE
@@ -1364,7 +1539,7 @@ class DBManager {
             );
 			$this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_ew
                 WHERE
@@ -1372,7 +1547,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_damage
                 WHERE
@@ -1380,7 +1555,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_fireorder
                 WHERE
@@ -1388,7 +1563,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_iniative
                 WHERE
@@ -1396,7 +1571,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_loading
                 WHERE
@@ -1404,7 +1579,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_ship
                 WHERE
@@ -1412,7 +1587,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_shipmovement
                 WHERE
@@ -1420,7 +1595,7 @@ class DBManager {
             );
             $this->executeGameDeleteStatement($stmt, $ids);
             
-            $stmt = self::$connection->prepare(
+            $stmt = $this->connection->prepare(
                 "DELETE FROM 
                     tac_power
                 WHERE

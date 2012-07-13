@@ -166,10 +166,10 @@ window.ajaxInterface = {
         
         ajaxInterface.pollcount++;
         
-        var time = 2000;
+        var time = 6000;
         
         
-        if (ajaxInterface.pollcount > 110){
+        if (ajaxInterface.pollcount > 10){
             time = 6000;
         }
         

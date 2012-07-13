@@ -36,8 +36,12 @@
             $this->id = (int)$id;
             $this->userid = (int)$userid;
             $this->name = $name;
-            $this->movement = $movement;
 
+        }
+        
+        public function setMovement($movement)
+        {
+            $this->movement = $movement;
         }
         
         public function onConstructed($turn, $phase)
