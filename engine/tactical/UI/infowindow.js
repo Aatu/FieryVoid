@@ -21,6 +21,10 @@ infowindow = {
 			h.html("TURN " + gamedata.turn + ", GAME OVER");
 		}else{
         
+            if (gamedata.gamephase == 6){
+				h.html(gamedata.getPhasename());
+			}
+            
 			if (gamedata.gamephase == 4){
 				h.html("TURN " + gamedata.turn + ", " + gamedata.getPhasename());
 			}

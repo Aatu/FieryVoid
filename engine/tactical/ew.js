@@ -339,7 +339,7 @@ window.ew = {
                 a += 0.1;
 				if (ship.userid == gamedata.thisplayer){
 					canvas.strokeStyle = "rgba(160,250,100,0.5)";
-                        canvas.fillStyle = "rgba(160,250,100,"+a+")";
+                    canvas.fillStyle = "rgba(160,250,100,"+a+")";
 				}else{
 					canvas.strokeStyle = "rgba(125,12,12,0.5)";
 					canvas.fillStyle = "rgba(125,12,12,"+a+")";

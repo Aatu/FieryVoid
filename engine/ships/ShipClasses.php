@@ -267,7 +267,6 @@
             foreach ($this->movement as $move){
                 $movement = $move;
             }
-        
             return $movement->getCoPos();
         
         }

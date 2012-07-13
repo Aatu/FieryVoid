@@ -1,7 +1,42 @@
 shipManager.movement = {
 
 
-    
+    deploy: function(ship, pos){
+        
+        if (!ship.deploymove){
+            var lm = ship.movement[ship.movement.length-1];
+            var move = {
+                id:-1,
+                type:"deploy",
+                x:pos.x,
+                y:pos.y,
+                xOffset:0,
+                yOffset:0,
+                facing:lm.facing,
+                heading:lm.heading,
+                speed:lm.speed,
+                animating:false,
+                animated:true,
+                animationtics:0,
+                requiredThrust:Array(null, null, null, null, null),
+                assignedThrust:Array(),
+                commit:true,
+                preturn:false,
+                turn:gamedata.turn,
+                forced:false,
+                value:0
+            };
+            
+            ship.deploymove = move;
+            ship.movement[ship.movement.length] = move;
+        }else{
+            ship.deploymove.x = pos.x;
+            ship.deploymove.y = pos.y;
+        }
+        
+        shipManager.drawShip(ship);
+        
+    },
 
     isMovementReady: function(ship){
 		//console.log("movement ready: " + shipManager.movement.getRemainingMovement(ship));

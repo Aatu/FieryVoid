@@ -21,11 +21,16 @@ window.hexgrid = {
         
         var canvas = window.graphics.getCanvas("hexgrid");
         graphics.clearCanvas("hexgrid");
+        
+        if (gamedata.gamephase === 6)
+            deployment.drawDeploymentAreas(canvas);
+        
         canvas.save();
         canvas.fillStyle   = hexgrid.hexlinecolor;
         canvas.strokeStyle = hexgrid.hexlinecolor;
         
         
+         
         if (gamedata.zoom <= 0.8)
             canvas.strokeStyle = "rgba(255,255,255,0.16)";
         
@@ -282,8 +287,7 @@ window.hexgrid = {
     },
     
     onHexClicked: function(e){
-       
-        if ((((new Date()).getTime()) - scrolling.scrollingstarted ) <= 200){
+        if (e && e.which === 1){
             shipManager.movement.RemoveMovementIndicators();
             
             var location = $(this).elementlocation();
@@ -320,6 +324,9 @@ window.hexgrid = {
             if (gamedata.selectedSystems.length > 0){
                 weaponManager.targetHex(hexpos);
             }
+        
+            if (gamedata.gamephase === 6)
+                deployment.onHexClicked(hexpos);
         }
         
     },

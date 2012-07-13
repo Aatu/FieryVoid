@@ -260,6 +260,8 @@ class Manager{
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS);
+            }else if ($gdS->phase == 6){
+                $ret = self::handleDeployment($ships, $gdS);
             }
                         
             self::$dbManager->endTransaction(false);
@@ -436,6 +438,8 @@ class Manager{
                 self::changeTurn($gamedata);
             }else if ($phase == -2){
                 self::startGame($gamedata);
+            }else if ($phase == 6){
+                self::startInitialOrders($gamedata);
             }
             
             $loadings = Array();
@@ -467,6 +471,14 @@ class Manager{
             self::$dbManager->releaseGameSubmitLock($gameid);
             throw $e;
         }
+    }
+    
+    private static function startInitialOrders($gamedata){
+    
+        $gamedata->phase = 1; 
+        
+        self::$dbManager->updateGamedata($gamedata);
+    
     }
     
     private static function startMovement($gamedata){
@@ -512,10 +524,10 @@ class Manager{
                 $y = (($t-1)/2)*-1;
             }
             
-            $x = -30;
+            $x = -50;
             
             if ($player->team == 2){
-                $x=30;
+                $x=50;
             }
             
             
@@ -555,6 +567,18 @@ class Manager{
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        
+    }
+    
+    private static function handleDeployment( $ships, $gamedata)
+    {
+        $moves = Deployment::validateDeployment($gamedata, $ships);
+        foreach ($moves as $shipid=>$move)
+        {
+            self::$dbManager->insertMovement($gamedata->id, $shipid, $move);
+        }
+        
+        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
         
     }
     
@@ -598,11 +622,17 @@ class Manager{
     private static function changeTurn($gamedata){
     
         $gamedata->turn = $gamedata->turn+1;
-        $gamedata->phase = 1; 
+        if ($gamedata->turn === 1)
+        {
+            $gamedata->phase = 6; 
+        }else{
+            $gamedata->phase = 1; 
+        }
+        
         $gamedata->activeship = -1;
         $gamedata->status = "ACTIVE";
         
-        if ($gamedata->isFinished())
+        if ($gamedata->turn > 1 && $gamedata->isFinished())
             $gamedata->status = "FINISHED";
             
         self::generateIniative($gamedata);
