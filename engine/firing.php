@@ -260,8 +260,6 @@ class Firing{
     
     
     public static function fireWeapons($gamedata){
-
-        $turn = $gamedata->turn;
         
         foreach ($gamedata->ships as $ship){
 			if ($ship instanceof FighterFlight)
@@ -340,7 +338,6 @@ class Firing{
     
     
     private static function fire($ship, $fire, $gamedata){
-		
 		if ($fire->turn != $gamedata->turn)
 			return;
 			
@@ -352,13 +349,6 @@ class Firing{
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
 		
-		//if ($weapon->ballistic)
-		//	return;
-			
-		if ($fire->rolled>0)
-			return;
-			
-		//print("Firing " . $fire->id . "\n");
 		$weapon->fire($gamedata, $fire);
 		
 	}

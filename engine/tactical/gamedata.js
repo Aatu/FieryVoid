@@ -194,7 +194,7 @@ gamedata = {
             ajaxInterface.submitGamedata();
         }else if (gamedata.gamephase == 4){
             ajaxInterface.submitGamedata();
-        }else if (gamedata.gamephase == 6){
+        }else if (gamedata.gamephase == -1){
             ajaxInterface.submitGamedata();
         }
         
@@ -240,7 +240,7 @@ gamedata = {
         if (gamedata.gamephase == 4)
             return "FINAL ORDERS";
         
-        if (gamedata.gamephase == 6)
+        if (gamedata.gamephase == -1)
             return "DEPLOYMENT";
             
         return "ERROR"
@@ -254,7 +254,7 @@ gamedata = {
         b.removeClass("phase2");
         b.removeClass("phase3");
         b.removeClass("phase4");
-        b.removeClass("phase6");
+        b.removeClass("phase-1");
     
         b.addClass("phase"+gamedata.gamephase);
     },
@@ -269,7 +269,7 @@ gamedata = {
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
         
-        if (gamedata.gamephase == 6){
+        if (gamedata.gamephase == -1){
             if (gamedata.waiting == false){
                infowindow.informPhase(5000, null);
                 for (var i in gamedata.ships){
@@ -375,7 +375,7 @@ gamedata = {
             return;
         }
         
-        if (gamedata.gamephase == 6){
+        if (gamedata.gamephase == -1){
             if (deployment.validateAllDeployment() && !gamedata.waiting){
                 console.log("show commit");
                 commit.show();

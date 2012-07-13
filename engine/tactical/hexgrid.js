@@ -22,7 +22,7 @@ window.hexgrid = {
         var canvas = window.graphics.getCanvas("hexgrid");
         graphics.clearCanvas("hexgrid");
         
-        if (gamedata.gamephase === 6)
+        if (gamedata.gamephase === -1)
             deployment.drawDeploymentAreas(canvas);
         
         canvas.save();
@@ -325,7 +325,7 @@ window.hexgrid = {
                 weaponManager.targetHex(hexpos);
             }
         
-            if (gamedata.gamephase === 6)
+            if (gamedata.gamephase === -1)
                 deployment.onHexClicked(hexpos);
         }
         

@@ -19,10 +19,11 @@ class Deployment
         {
             if ($move->y <= ($dep["y"]+($dep["h"]/2)) && $move->y >= ($dep["y"]-($dep["h"]/2)))
             {
-                if (count($gamedata->getShipsInDistance($pos)) === 0)
+                if (count($gamedata->getShipsInDistance(array("x"=>$move->x, "y"=>$move->y))) === 0)
                     return true;
             }
         }
+       
         
         return false;
         
@@ -46,11 +47,11 @@ class Deployment
                 if ($move->type == "deploy")
                 {
                     $found = true;
-                    
-                    if (self::validateDeploymentArea($gamedata, $ship, $move))
+                    $servership = $gamedata->getShipById($ship->id);
+                    if (self::validateDeploymentArea($gamedata, $servership, $move))
                     {
                         $moves[] = $move;
-                        $gamedata->getShipById($ship->id)->movement[] = $move;
+                        $servership->movement[] = $move;
                     }else{
                         throw new Exception("Deployment validation failed: Illegal placement. Ship: " . $ship->name . "(".$move->x .",".$move->y.")");
                     }

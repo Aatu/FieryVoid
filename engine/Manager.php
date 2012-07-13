@@ -260,7 +260,7 @@ class Manager{
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS);
-            }else if ($gdS->phase == 6){
+            }else if ($gdS->phase == -1){
                 $ret = self::handleDeployment($ships, $gdS);
             }
                         
@@ -277,6 +277,7 @@ class Manager{
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            Debug::error($e);
             return "{'error': '" .$e->getMessage() . "'}";
         }
        
@@ -438,7 +439,7 @@ class Manager{
                 self::changeTurn($gamedata);
             }else if ($phase == -2){
                 self::startGame($gamedata);
-            }else if ($phase == 6){
+            }else if ($phase == -1){
                 self::startInitialOrders($gamedata);
             }
             
@@ -469,6 +470,7 @@ class Manager{
         {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            Debug::error($e);
             throw $e;
         }
     }
@@ -552,15 +554,15 @@ class Manager{
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-        Debug::log("AUTOMATE INTERCEPT - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
-        Debug::log("RESOLVING FIRE - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         
-        $criticals = Criticals::setCriticals($servergamedata);
+        Criticals::setCriticals($servergamedata);
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
 		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
@@ -624,7 +626,7 @@ class Manager{
         $gamedata->turn = $gamedata->turn+1;
         if ($gamedata->turn === 1)
         {
-            $gamedata->phase = 6; 
+            $gamedata->phase = -1; 
         }else{
             $gamedata->phase = 1; 
         }

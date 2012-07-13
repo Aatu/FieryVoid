@@ -55,6 +55,10 @@ window.gamedata = {
 	
 	
 	},
+    
+    isMyShip: function(ship){
+        return (ship.userid == gamedata.thisplayer);
+    },
 	
 	parseShips: function(json){
 	

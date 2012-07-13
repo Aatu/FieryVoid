@@ -52,12 +52,10 @@ window.deployment = {
                 return true;
             }
         }
-        console.log(ship.name + " failed deployment validation ("+hexpos.x +","+hexpos.y+")");
         return false;
     },
     
     validateAllDeployment: function(){
-        console.log("validateAllDeployment");
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             if (!gamedata.isMyShip(ship))
@@ -67,7 +65,6 @@ window.deployment = {
                 return false;
         }
     
-        console.log("validation succesfull");
         return true;
     }
     
