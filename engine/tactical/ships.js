@@ -379,6 +379,11 @@ window.shipManager = {
         return {x:x, y:y, xO:xO, yO:yO};
     },
     
+    getShipPositionInWindowCoWithoutOffset: function(ship){
+        var hexpos = shipManager.getShipPosition(ship);
+        var pos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
+        return pos;
+    },
     
     getShipPositionInWindowCo: function(ship){
         var hexpos = shipManager.getShipPosition(ship);
@@ -438,7 +443,7 @@ window.shipManager = {
         var id = $(e).data("id");
         var ship = gamedata.getShip(id);
         
-        if (shipSelectList.haveToShowList(ship)){
+        if (shipSelectList.haveToShowList(ship, e)){
             shipSelectList.showList(ship);
         }else{
             shipManager.doShipContextMenu(ship);
@@ -476,7 +481,7 @@ window.shipManager = {
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
         
-        if (shipSelectList.haveToShowList(ship)){
+        if (shipSelectList.haveToShowList(ship, e)){
             shipSelectList.showList(ship);
         }else{
             shipManager.doShipClick(ship);
@@ -691,9 +696,13 @@ window.shipManager = {
 		
 		return {x:0, y:0};
 		
-	}
+	},
     
-    
-    
-
+    isElint: function(ship){
+        var elint = shipManager.systems.getSystemByName(ship, "elintArray");
+        if (!elint || shipManager.systems.isDestroyed(ship, elint))
+            return false;
+        
+        return true;
+    }
 }

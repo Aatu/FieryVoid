@@ -5,8 +5,9 @@ window.combatLog = {
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             
-            for (var a in ship.fireOrders){
-                var fire = ship.fireOrders[a];
+            var fires = weaponManager.getAllFireOrders(ship);
+            for (var a in fires){
+                var fire = fires[a];
                 var target = gamedata.getShip(fire.targetid);
                 var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
                 var damages = weaponManager.getDamagesCausedBy(fire);

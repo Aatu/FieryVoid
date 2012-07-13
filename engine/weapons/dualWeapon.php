@@ -28,6 +28,7 @@ class DualWeapon extends Weapon{
     }
     
     public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
         foreach ($this->weapons as $weapon){
             $weapon->onConstructed($ship, $turn, $phase);
         }    

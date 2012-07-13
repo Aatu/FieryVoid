@@ -1287,8 +1287,8 @@ shipManager.movement = {
             //console.log(ship.name + " pivoting and not gravitic");
             return false;
         }
-        if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) 
-            && !ship.gravitic && speed != 0)
+        if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !shipManager.movement.canTurnToPivot(ship, right) 
+            && !ship.gravitic)
         {
             //console.log(ship.name + " heading is not facing, and cant turn to pivot");
             return false;
@@ -1385,6 +1385,10 @@ shipManager.movement = {
 			requiredThrust[0] = turncost;
 			return requiredThrust;
 		}
+        
+        if (speed===0){
+            return Array(1,0,0,0,0);
+        }
         
         side = Math.floor(turncost / 2);
         rear = Math.floor(turncost / 2);

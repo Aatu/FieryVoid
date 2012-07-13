@@ -1,265 +1,5 @@
 <?php
 
-class ElintArray extends ShipSystem{
-    public $name = "elintArray";
-    public $displayName = "ELINT array";
-    public $primary = true;
-    
-    function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 0);
-    }
-}
-
-interface DefensiveSystem{
-
-    public function getHitChangeMod($shooter, $pos, $turn);
-    
-    public function getDamageMod($shooter, $pos, $turn);
-    
-    
-}
-
-class Shield implements DefensiveSystem{
-    public $name = "shield";
-    public $displayName = "Shield";
-    public $startArc = 0;
-    public $endArc = 0;
-    
-    //defensive system
-    public $defensiveType = "Shield";
-    public $defensiveSystem = true;
-    public $tohitPenalty = 0;
-    public $damagePenalty = 0;
-    
-    public $possibleCriticals = array(16=>"StrReduced", 20=>"EffReduced", 25=>array("StrReduced", "EffReduced"));
-
-    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
-        // shieldfactor is handled as output.
-        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor);
-        
-        $this->startArc = (int)$startArc;
-        $this->endArc = (int)$endArc;
-    }
-    
-    public function onConstructed($ship, $turn, $phase){
-		$this->tohitPenalty = $this->output;
-		$this->damagePenalty = $this->output;
-     
-    }
-    
-    private function checkIsFighterUnderShield($shooter){
-        $dis = mathlib::getDistanceHex($this->getCoPos(), $shooter->getCoPos());
-            
-        if ( $dis == 0 && ($shooter instanceof FighterFlight)){
-            // If shooter are fighers and range is 0, they are under the shield
-            return true;
-        }
-        return false;
-    }
-    
-    public function getHitChangeMod($shooter, $pos, $turn){
-        
-        if ($this->checkIsFighterUnderShield($shooter))
-            return 0;
-        
-        return $this->output;
-    }
-    
-    public function getDamageMod($shooter, $pos, $turn){
-        if ($this->checkIsFighterUnderShield($shooter))
-            return 0;
-        
-        return $this->output;
-    }
-}
-
-class Jammer extends ShipSystem{
-    
-    public $name = "jammer";
-    public $displayName = "Jammer";
-    public $primary = true;
-    
-    public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
-    
-    function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 1);
-    }
-     
-}
-
-class Reactor extends ShipSystem{
-
-    public $name = "reactor";
-    public $displayName = "Reactor";
-    public $primary = true;
-    
-    public $possibleCriticals = array(11=>"OutputReduced2", 15=>"OutputReduced4", 19=>"OutputReduced6", 27=>"OutputReduced8", 100=>"ForcedOfflineOneTurn");
-    
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-        
-        
-        
-    }
-}
-
-class Engine extends ShipSystem{
-
-    public $name = "engine";
-    public $displayName = "Engine";
-    public $engineEfficiency;
-    public $thrustused;
-    public $primary = true;
-    public $boostable = true;
-    
-    public $possibleCriticals = array(15=>"OutputReduced2", 21=>"OutputReduced4", 27=>"ForcedOfflineOneTurn");
-    
-    function __construct($armour, $maxhealth, $powerReq, $output, $engineEfficiency, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-        
-        $this->thrustused = (int)$thrustused;
-        $this->engineEfficiency = (int)$engineEfficiency;
-    }
-    
-}
-
-class Scanner extends ShipSystem{
-
-    public $name = "scanner";
-    public $displayName = "Scanner";
-    public $primary = true;
-    public $boostable = true;
-    
-    public $possibleCriticals = array(15=>"OutputReduced2", 19=>"OutputReduced4", 23=>"OutputReduced6", 27=>"OutputReduced8");
-        
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-    }
-
-    
-    public function getScannerOutput($turn){
-
-        if ($this->isOfflineOnTurn($turn))
-            return 0;
-            
-        $output = $this->output;
-    
-        foreach ($this->power as $power){
-            if ($power->turn == $turn && $power->type == 2){
-                $output += $power->amount;
-            }
-        
-        }
-        
-        $output -= $this->outputMod;
-        return $output;
-        
-    }
-    
-}
-
-class CnC extends ShipSystem{
-
-    public $name = "CnC";
-    public $displayName = "C&C";
-    public $primary = true;
-    
-    public $possibleCriticals = array(
-    1=>"SensorsDisrupted", 
-    9=>"CommunicationsDisrupted", 
-    12=>"PenaltyToHit", 
-    15=>"RestrictedEW",
-    18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-    21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-    24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
-        
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-    
-
-    }
-    
-    
-}
-
-class Thruster extends ShipSystem{
-
-    public $name = "thruster";
-    public $displayName = "Thruster";
-    public $direction;
-    public $thrustused;
-    public $thrustwasted = 0;
-    
-    public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
-    
-    
-    public $criticalDescriptions = array(
-        
-    
-    );
-    
-    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-         
-        $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
-    
-    }
-   
-   
-    
-}
-
-class Hangar extends ShipSystem{
-
-    public $name = "hangar";
-    public $displayName = "Hangar";
-    public $squadrons = Array();
-    public $primary = true;
-    
-    function __construct($armour, $maxhealth, $output = 6){
-        parent::__construct($armour, $maxhealth, 0, $output );
- 
-    }
-
-    
-    
-}
-
-class JumpEngine extends ShipSystem{
-
-    public $name = "jumpEngine";
-    public $displayName = "Jump engine";
-    public $delay = 0;
-    public $primary = true;
-    
-    function __construct($armour, $maxhealth, $powerReq, $delay){
-        parent::__construct($armour, $maxhealth, $powerReq, 0);
-    
-        $this->delay = $delay;
-    }
-    
-   
-    
-    
-}
-
-
-class Structure extends ShipSystem{
-
-    public $name = "structure";
-    public $displayName = "Structure";
-
-    
-    function __construct($armour, $maxhealth){
-        parent::__construct($armour, $maxhealth, 0, 0);
-         
-    
-    }
-    
- 
-
-}
 
 class Weapon extends ShipSystem{
 
@@ -293,6 +33,8 @@ class Weapon extends ShipSystem{
     
     public $normalload = 0;
     public $overloadturns = 0;
+    public $overloadshots = 0;
+    public $extraoverloadshots = 0;
     
     public $uninterceptable = false;
     public $intercept = 0;
@@ -390,7 +132,7 @@ class Weapon extends ShipSystem{
     
     public function firedOnTurn($ship, $turn){
         
-        foreach ($ship->fireOrders as $fire){
+        foreach ($this->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
             }
@@ -441,6 +183,118 @@ class Weapon extends ShipSystem{
         parent::setSystemDataWindow($turn);
     }
     
+    public function setLoading( $loading )
+    {
+        if ($loading === null)
+        {
+            $this->overloadturns = 0;
+            $this->overloadshots = 0;
+            $this->turnsloaded = $this->getNormalLoad();
+        }
+        else
+        {
+            $this->overloadturns = $loading->overloading;
+            $this->overloadshots = $loading->extrashots;
+            $this->turnsloaded = $loading->loading;
+        }
+    }
+    
+    public function calculateLoading( $gameid, $phase, $ship, $turn )
+    {
+        $normalload = $this->getNormalLoad();
+        if ($phase === 2)
+        {
+            if ( $this->isOfflineOnTurn($turn) )
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            else if ($this->ballistic && $this->firedOnTurn($ship, $turn) )
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            else if (!$this->isOverloadingOnTurn($turn))
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded, 0, 0, 0);
+            }
+        }
+        else if ($phase === 4)
+        {
+           return $this->calculatePhase4Loading($gameid, $ship, $turn);
+        }
+        else if ($phase === 1)
+        {
+            if ($this->overloadshots === -1)
+            {
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            else
+            {
+                $newloading = $this->turnsloaded+1;
+                if ($newloading > $normalload)
+                    $newloading = $normalload;
+                
+                $newExtraShots = $this->overloadshots;
+                $overloading = $this->overloadturns+1;
+                if ($overloading === $normalload && $newExtraShots === 0)
+                    $newExtraShots = $this->extraoverloadshots;
+
+                if ($overloading > $normalload)
+                    $overloading = $normalload;
+
+                return new WeaponLoading($this->id, $gameid, $ship->id, $newloading, $newExtraShots, 0, $overloading);
+            }
+            
+        }
+        
+        return null;
+    }
+    
+    private function calculatePhase4Loading($gameid, $ship, $turn )
+    {
+        if ($this->ballistic)   
+            return null;
+        
+            
+        if ($this->firedOnTurn($ship, $turn)){
+            /* if overloading ja ampuu:
+             
+                    JOS ON EXTRASHOTTEJA laske extrashotteja. Jos extrashotit menee nollaan, pistä -1 (cooldown)
+                    ja loading ja overloading 0
+             * 
+             *      JOS EI OLE EXTRASHOTTEJA: laske overloading ja loading 0
+           */
+            
+            if ($this->overloadshots > 0)
+            {
+                $newExtraShots = $this->overloadshots-1;
+                //if you have extra shots use them
+                if ($newExtraShots === 0)
+                {
+                    //if extra shots are reduced to zero, go to cooldown
+                    return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
+                }
+                else
+                {
+                    //if you didn't use the last extra shot, keep on going.
+                    return new WeaponLoading($this->id, $gameid, $ship->id, $this->turnsloaded, $newExtraShots, 0, $this->overloadturns);
+                }
+            }
+            else
+            {
+                //Situation normal, no overloading -> lose loading
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+            }
+            
+        }else{
+              //cannot save the extra shots from everload -> lose loading and cooldown
+            if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots)
+                return new WeaponLoading($this->id, $gameid, $ship->id, 0, -1, 0, 0);
+        }
+        
+        return null;
+    }
+    
+    /*
     public function setLoading($ship, $turn, $phase){
         $turnsloaded = 0;
         $turnsOverloaded = 0;
@@ -517,20 +371,13 @@ class Weapon extends ShipSystem{
         $this->overloadturns = $turnsOverloaded;
         $this->turnsloaded = $turnsloaded;
     }
-    
-    public function onConstructed($ship, $turn, $phase){
-            $this->setLoading($ship, $turn, $phase);
-     
-    }
+    */
     
     public function beforeTurn($ship, $turn, $phase){
-        
-        
-        
         parent::beforeTurn($ship, $turn, $phase);
     }
     
-    public function getDamage($fireOrder){
+    public function getDamage(){
         return 0;
     }
     
@@ -573,20 +420,33 @@ class Weapon extends ShipSystem{
         $dew = $target->getDEW($gamedata->turn);
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
-			
+		
+        $bdew = 0;
+        
 		if ($target instanceof FighterFlight){
 			if (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 
 				||  Movement::getCombatPivots($shooter, $gamedata->turn) > 0){
 				$dew = Movement::getJinking($target, $gamedata->turn);
 			}
 			
-		}
+		}else{
+            $bdew += EW::getBlanketDEW($gamedata, $target);
+        }
 		
 		$mod = 0;
         
         $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
-				
+        
+        $sdew = EW::getSupportedDEW($gamedata, $target);
+        $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+        $dist = EW::getDistruptionEW($gamedata, $shooter);
+        
         $oew = $shooter->getOEW($target, $gamedata->turn);
+        $oew -= $dist;
+        
+        if ($oew < 0)
+            $oew = 0;
+        
         if ($shooter instanceof FighterFlight){
 			$oew = $shooter->offensivebonus;
 			$mod -= Movement::getJinking($shooter, $gamedata->turn);
@@ -609,7 +469,7 @@ class Weapon extends ShipSystem{
 		
 		$mod += $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 		
-        if ($oew == 0)
+        if ($oew < 1)
             $rangePenalty = $rangePenalty*2;
         else if ($shooter->faction != $target->faction){
             // Calculate jammer impact only if a ship has a lock-on
@@ -618,7 +478,7 @@ class Weapon extends ShipSystem{
             $jammer = $target->getSystemByName("jammer");
 
             if ( $jammer != null){
-                $jammermod = $rangePenalty*($jammer->output);
+                $jammermod = $rangePenalty*$jammer->output;
             }
 
             // Make certain fighters have either their jammer benefits
@@ -641,12 +501,12 @@ class Weapon extends ShipSystem{
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
             
-        $goal = ($defence - $dew - $jammermod - $rangePenalty - $intercept + $oew + $firecontrol + $mod);
+        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         
         
-        $notes = $rp["notes"] . ", DEW: $dew, OEW: $oew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -662,7 +522,8 @@ class Weapon extends ShipSystem{
     
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
         foreach ($gamedata->ships as $ship){
-            foreach ($ship->fireOrders as $fire){
+            $fireOrders = $ship->getAllFireOrders();
+            foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     
                     $deg = $count;
@@ -690,7 +551,8 @@ class Weapon extends ShipSystem{
         $count = 0;
             
         foreach ($gamedata->ships as $ship){
-            foreach ($ship->fireOrders as $fire){
+            $fireOrders = $ship->getAllFireOrders();
+            foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     $count++;
                     
@@ -719,7 +581,6 @@ class Weapon extends ShipSystem{
         for ($i=0;$i<$fireOrder->shots;$i++){
             $needed = $fireOrder->needed - ($this->grouping*$i);
             $rolled = Dice::d(100);
-            $fireOrder->rolled = $rolled;
             if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
                 //$fireOrder->pubnotes .= "Shot intercepted. ";
                 $fireOrder->intercepted += 1;
@@ -732,7 +593,8 @@ class Weapon extends ShipSystem{
             }
         }
         
-        //$fireOrder->rolled = 1;//Marks that fire order has been handled
+        $fireOrder->rolled = 1;//Marks that fire order has been handled
+                
     }
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
@@ -740,7 +602,7 @@ class Weapon extends ShipSystem{
         if ($this->piercing && $this->firingMode == 2){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
-            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
         }
         
@@ -754,7 +616,7 @@ class Weapon extends ShipSystem{
             return;
         
         $damage = $target->getPiercingDamagePerLoc(
-                $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
+                $this->getFinalDamage($shooter, $target, $pos, $gamedata)
             );
 
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
@@ -860,9 +722,9 @@ class Weapon extends ShipSystem{
         return $damage;
     }
     
-    protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
+    protected function getFinalDamage($shooter, $target, $pos, $gamedata){
     
-        $damage = $this->getDamage($fireOrder);
+        $damage = $this->getDamage();
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
         
@@ -913,8 +775,3 @@ class Weapon extends ShipSystem{
 
 
 }
-
-
-?>
-
-

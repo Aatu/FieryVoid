@@ -13,8 +13,6 @@ window.ajaxInterface = {
 	
         var gd = ajaxInterface.construcGamedata();
         
-        
-        
         $.ajax({
             type : 'POST',
             url : 'gamedata.php',
@@ -23,6 +21,7 @@ window.ajaxInterface = {
             success : ajaxInterface.successSubmit,
             error : ajaxInterface.errorSubmit
         });
+        console.log("SUBMITTING GAMEDATA");
         
         gamedata.goToWaiting();
     },
@@ -42,12 +41,7 @@ window.ajaxInterface = {
                     ship.movement.splice(a,1);
                 }
             }
-            for (var a = ship.fireOrders.length-1; a>=0; a--){
-                var fire = ship.fireOrders[a];
-                if (fire.turn < gamedata.turn){
-                    ship.fireOrders.splice(a,1);
-                }
-            }
+            
             for (var a = ship.EW.length-1; a>=0; a--){
                 var ew = ship.EW[a];
                 if (ew.turn < gamedata.turn){
@@ -58,14 +52,41 @@ window.ajaxInterface = {
             
             for (var a in ship.systems){
                 var system = ship.systems[a];
-                for (var b = system.power.length-1; b>=0; b--){
-                    var power = system.power[b];
-                    if (power.turn < gamedata.turn){
-                        system.power.splice(b,1);
+                
+                if (ship.flight){
+                    var fighterSystems = Array();
+                    for (var c in system.systems){
+                        var fightersystem = system.systems[c];
+                        
+                        for (var b = fightersystem.fireOrders.length-1; b>=0; b--){
+                            var fire = fightersystem.fireOrders[b];
+                            if (fire.turn < gamedata.turn){
+                                fightersystem.fireOrders.splice(b,1);
+                            }
+                        }
+                        fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders};
                     }
+                    
+                    systems[a] = {'id': system.id, 'systems': fighterSystems};
+             
+                    
+                }else{
+                    for (var b = system.fireOrders.length-1; b>=0; b--){
+                        var fire = system.fireOrders[b];
+                        if (fire.turn < gamedata.turn){
+                            system.fireOrders.splice(b,1);
+                        }
+                    }
+
+                    for (var b = system.power.length-1; b>=0; b--){
+                        var power = system.power[b];
+                        if (power.turn < gamedata.turn){
+                            system.power.splice(b,1);
+                        }
+                    }
+                    systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': system.fireOrders};
                 }
                 
-                systems[a] = {'id': system.id, 'power':system.power};
             }
             
             ship.systems = systems;
@@ -144,6 +165,12 @@ window.ajaxInterface = {
         ajaxInterface.pollcount++;
         
         var time = 6000;
+        
+        
+        if (ajaxInterface.pollcount > 10){
+            time = 6000;
+        }
+        
         
         if (ajaxInterface.pollcount > 100){
             time = 30000;

@@ -8,6 +8,21 @@ class Manager{
             self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
     }
     
+    private static function deleteOldGames()
+    {
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
+            $ids = self::$dbManager->getGamesToBeDeleted();
+            self::$dbManager->deleteGames($ids);
+                
+            self::$dbManager->endTransaction(false);
+        }catch(exception $e) {
+            self::$dbManager->endTransaction(true);
+            throw $e;
+        }
+    }
+    
     public static function leaveLobbySlot($user){
         try {
             self::initDBManager();
@@ -147,14 +162,17 @@ class Manager{
 		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
 			return null;
         
-    
         $gamedata = null;
         try {
             self::initDBManager();
             
+            if ($turn === -1)
+                self::deleteOldGames ();
+            
             self::advanceGameState($userid, $gameid);
             
             if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
+                ////Debug("GAME: $gameid Player: $userid requesting gamedata, new found.");
                 $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
                 if ($gamedata == null)
                     return null;
@@ -187,7 +205,7 @@ class Manager{
         $json = json_encode($gdS, JSON_NUMERIC_CHECK);
     
        
-        
+        //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
         return $json;
     
     }
@@ -197,7 +215,7 @@ class Manager{
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             
             self::initDBManager();  
-            
+            $starttime = time();
             
             
             $ships = self::getShipsFromJSON($ships);
@@ -205,11 +223,13 @@ class Manager{
             if (sizeof($ships)==0)
 				throw new Exception("Gamedata missing");
             //print(var_dump($ships));
-            $gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
-            $gamedata->ships = $ships;
+            //$gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
+            //$gamedata->ships = $ships;
             
             if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
                 return "{'error': 'Failed to get player lock'}";
+            
+            //Debug("GAME: $gameid Player: $userid starting submit of phase $phase");
             
             self::$dbManager->startTransaction();
             
@@ -246,6 +266,10 @@ class Manager{
             
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
             
+            //Debug("GAME: $gameid Player: $userid SUBMIT OK");
+            
+            $endtime = time();
+            Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             return '{}';
             
         }catch(exception $e) {
@@ -308,8 +332,8 @@ class Manager{
                     self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
             }
             
-            if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata)){
+                self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }
             
         }
@@ -363,9 +387,9 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
-          		            
-            if (Firing::validateFireOrders($ship->fireOrders, $gd)){
-				 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
+				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
@@ -377,7 +401,7 @@ class Manager{
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
-        return true;
+        return true;    
     
     }
     
@@ -388,7 +412,16 @@ class Manager{
                 return;
             
             if (!self::$dbManager->getGameSubmitLock($gameid))
+            {
+                Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
+            }
+            
+            $starttime = time();
+            
+            //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
+            
+            self::$dbManager->startTransaction();
             
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
             $phase = $gamedata->phase;
@@ -405,11 +438,34 @@ class Manager{
                 self::startGame($gamedata);
             }
             
+            $loadings = Array();
+            foreach ($gamedata->ships as $ship)
+            {
+                foreach ($ship->systems as $system)
+                {
+                    if ($system instanceof Weapon)
+                    {
+                        $loading = $system->calculateLoading($gamedata->id, $gamedata->phase, $ship, $gamedata->turn);
+                        if ($loading)
+                            $loadings[] = $loading;
+                    }
+                    
+                }
+            }
+            
+            self::$dbManager->updateWeaponLoading($loadings);
+            self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            
+            $endtime = time();
+            Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+            //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
         {
+            self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            throw $e;
         }
     }
     
@@ -465,9 +521,10 @@ class Manager{
             
             
             $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0);
-            self::$dbManager->deploy($servergamedata->id, $ship->id, $move);
-            
+            $ship->movement = array($move);
         }
+        
+        self::$dbManager->insertShips($servergamedata->id, $servergamedata->ships);
         
         self::changeTurn($gamedata);
     }
@@ -479,8 +536,18 @@ class Manager{
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
+        
+        $starttime = time();
         Firing::automateIntercept($servergamedata);
+        $endtime = time();
+        Debug::log("AUTOMATE INTERCEPT - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        
+        $starttime = time();
         Firing::fireWeapons($servergamedata);
+        $endtime = time();
+        Debug::log("RESOLVING FIRE - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        
+        
         $criticals = Criticals::setCriticals($servergamedata);
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
@@ -488,6 +555,7 @@ class Manager{
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        
     }
     
     private static function handleMovement( $ships, $gamedata ){
@@ -496,7 +564,6 @@ class Manager{
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");
         
-            
         self::$dbManager->submitMovement($gamedata->id, $ships[$gamedata->activeship]->id, $gamedata->turn, $ships[$gamedata->activeship]->movement);
         
         $next = false;
@@ -617,36 +684,57 @@ class Manager{
                 }
             }
             
-            $fireOrders = array();
-            
-            if (is_array($value["fireOrders"])){
-                foreach($value["fireOrders"] as $i=>$fo){
-                                                //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode
-                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
-                    $fireOrders[$i] = $fireOrder;
-                }
-            }
             
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
-                
+            
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], null);
+            $ship->setMovement($movements);    
             $ship->EW = $EW;
-            $ship->fireOrders = $fireOrders;
             
             foreach($value["systems"] as $i=>$system){
-                if (!is_array($system["power"]))
-                    continue;
-                    
-                foreach ($system["power"] as $a=>$power){
-                                                    
-                    $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
-                    $sys = $ship->getSystemById($powerEntry->systemid);
-                    
-                    if (isset($sys)){
-                        $sys->power[] = $powerEntry;
+                $sys = $ship->getSystemById($system['id']);
+                
+                if (isset($system["power"]) &&is_array($system["power"]))
+                {
+                    foreach ($system["power"] as $a=>$power)
+                    {
+                        $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
+                        if (isset($sys)){
+                            $sys->power[] = $powerEntry;
+                        }
                     }
+                }
+
+                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
+                {
+                    foreach($system["fireOrders"] as $i=>$fo)
+                    {
+                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                        if (isset($sys)){
+                            $sys->fireOrders[] = $fireOrder;
+                        }
+                    }
+                }
+                
+                if (isset($system["systems"]) && is_array($system["systems"]))
+                {
+                    foreach ($system["systems"] as $fighter)
+                    {
+                        $fig = $sys->getSystemById($fighter['id']);
+                        if (isset($fighter["fireOrders"]) && is_array($fighter["fireOrders"]))
+                        {
+                            foreach($fighter["fireOrders"] as $i=>$fo)
+                            {
+                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                                if (isset($fig)){
+                                    $fig->fireOrders[] = $fireOrder;
+                                }
+                            }
+                        }
+                    }
+                    
                 }
             
             }

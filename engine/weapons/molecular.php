@@ -82,8 +82,10 @@
         private $damagebonus = 0;
 
 
-        function __construct($startArc, $endArc, $damagebonus){
+        function __construct($startArc, $endArc, $damagebonus, $shots){
 			$this->damagebonus = $damagebonus;
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
 
         }

@@ -385,11 +385,11 @@ body {
 	display:none;
 }
 
-body.phase1 .ewentry .button1{
+body.phase1 #botPanel .ewentry .button1{
 	display:block;
 }
 
-body.phase1 .ewentry .button2{
+body.phase1 #botPanel .ewentry .button2{
 	display:block;
 }
 
@@ -766,19 +766,23 @@ body.phase1 .ewentry .button2{
 .shipSelectList .shiplistentry{
 	margin:3px 20px;
 	cursor:pointer;
+}
 
+.shipSelectList .shiplistentry.action{
+	margin:3px 40px;
+	cursor:pointer;
 }
 
 .shipSelectList .shiplistentry span{
 	 font-size:14px;
 	 padding-right:5px;
-
+}
+.shipSelectList .shiplistentry.action span{
+	 font-size:12px;
 }
 
 .shipSelectList .shiplistentry .name{
-  
    font-style:italic;
-
 }
 
 

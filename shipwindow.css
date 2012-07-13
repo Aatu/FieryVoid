@@ -210,14 +210,6 @@
     cursor:pointer;
 }
 
-body.phase1 .shipwindow.owned .ewentry .button1{
-    display:block;
-}
-
-body.phase1 .shipwindow.owned .ewentry .button2{
-    display:block;
-}
-
 
 .shipwindow .divider td{
     vertical-align:top;

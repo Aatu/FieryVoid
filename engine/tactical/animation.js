@@ -135,9 +135,12 @@ window.animation = {
                             done = true;
                         movement.animated = true;
                         gamedata.shipStatusChanged(ship);
+                        ballistics.calculateBallisticLocations();
+                        ballistics.drawBallistics();
                         shipManager.drawShip(ship);
                     }else{
                         //console.log(" - animating: ship " +ship.name +" move: " +movement.type);
+                        ballistics.hideBallistics();
                         movement.animationtics ++;
                         shipManager.drawShip(ship);
                         break;

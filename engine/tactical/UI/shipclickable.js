@@ -36,6 +36,7 @@ window.shipClickable = {
 	},
 	
 	doMouseOver: function(){
+        var selectedShip = gamedata.getSelectedShip();
 		var ship = shipClickable.ship;
 		gamedata.mouseOverShipId = ship.id;
 		shipManager.drawShips();
@@ -68,7 +69,8 @@ window.shipClickable = {
 					p = "";
 				$('<span class="name value '+fac+'">'+p+list[i].name+'</span>').appendTo('#shipNameContainer .namecontainer');
 			}
-		
+            $(".entry", e).remove();
+            /*
 			$(".rolling.value", e).html("");
 			$(".turndelay.value", e).html("");
 			$(".pivoting.value", e).html("");
@@ -76,51 +78,25 @@ window.shipClickable = {
 			$(".iniative.value", e).html("");
 			$(".rolled.value", e).html("");
             $(".unused.value", e).html("");
+            */
 		}else{
 				
 			$('<span class="name value '+fac+'">'+ship.name+'</span>').appendTo('#shipNameContainer .namecontainer');
+			$(".entry", e).remove();
 			
-			
-			//$(".name.value", e).html(ship.name);
-			$(".speed.value", e).html("Speed: " + shipManager.movement.getSpeed(ship));
-			$(".iniative.value", e).html("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
-			var td = shipManager.movement.calculateCurrentTurndelay(ship);
-			
-			if (td > 0){
-				$(".turndelay.value", e).html("Turn delay: " + td);
-			}else{
-				$(".turndelay.value", e).html("");
-			}
-			
-			var rolled = shipManager.movement.isRolled(ship);
-			var rolling = shipManager.movement.isRolling(ship);
-			var pivoting = shipManager.movement.isPivoting(ship);
-			
-			
-			if (rolled){
-				$(".rolled.value", e).html("Rolled");
-			}else{
-				$(".rolled.value", e).html("");
-			}
-			
-			if (rolling){
-				$(".rolling.value", e).html("Rolling");
-			}else{
-				$(".rolling.value", e).html("");
-			}
-			
-			if (pivoting != "no"){
-				$(".pivoting.value", e).html("Pivoting " + pivoting);
-			}else{
-				$(".pivoting.value", e).html("");
-			}
-			
-			if (ship.flight){
-				$(".unused.value", e).html("Unused thrust: " + 
-					shipManager.movement.getRemainingEngineThrust(ship));
-			}else{
-				$(".unused.value", e).html("");
-			}
+            shipClickable.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight === true);
+            shipClickable.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
+            shipClickable.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
+            shipClickable.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
+            shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
+            shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
+            shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
+            
+            if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
+                
+                var dis = (mathlib.getDistanceBetweenShipsInHex(selectedShip, ship)).toFixed(2);
+                shipClickable.addEntryElement('DISTANCE: ' + dis);
+            }
 		}
 		
 		var dis = 10 + (40*gamedata.zoom);
@@ -159,7 +135,19 @@ window.shipClickable = {
 		
 		
 		
-	}
+	},
+    
+    addEntryElement: function(value, condition){
+        if (condition === false || condition === 0)
+            return;
+        
+        var s = value;
+        if ( condition !== true && condition)
+            s += condition;
+                
+        $('<div class="entry"><span class="value">'+s+'</span></div>')
+            .insertAfter('#shipNameContainer .namecontainer');;
+    }
 	
 	
 }
