@@ -215,7 +215,7 @@ class Manager{
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             
             self::initDBManager();  
-            
+            $starttime = time();
             
             
             $ships = self::getShipsFromJSON($ships);
@@ -268,6 +268,8 @@ class Manager{
             
             //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
+            $endtime = time();
+            Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             return '{}';
             
         }catch(exception $e) {
@@ -415,6 +417,8 @@ class Manager{
                 return;
             }
             
+            $starttime = time();
+            
             //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
             
             self::$dbManager->startTransaction();
@@ -453,6 +457,8 @@ class Manager{
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
             
+            $endtime = time();
+            Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
@@ -525,21 +531,24 @@ class Manager{
     
     private static function startEndPhase($gamedata){
         //print("start end");
-        Debug::log("GAME: $gamedata->id RESOLVING FIRE ORDERS PHASE");
         $gamedata->phase = 4; 
         $gamedata->activeship = -1;
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        Debug::log("    GAME: $gamedata->id STARTING automateIntercept");
+        
+        $starttime = time();
         Firing::automateIntercept($servergamedata);
-        Debug::log("    GAME: $gamedata->id FINISHED automateIntercept");
-        Debug::log("    GAME: $gamedata->id STARTING fireWeapons");
+        $endtime = time();
+        Debug::log("AUTOMATE INTERCEPT - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        
+        $starttime = time();
         Firing::fireWeapons($servergamedata);
-        Debug::log("    GAME: $gamedata->id FINISHED fireWeapons");
-        Debug::log("    GAME: $gamedata->id STARTING setCriticals");
+        $endtime = time();
+        Debug::log("RESOLVING FIRE - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        
+        
         $criticals = Criticals::setCriticals($servergamedata);
-        Debug::log("    GAME: $gamedata->id FINISHED setCriticals");
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
 		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
@@ -547,7 +556,6 @@ class Manager{
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
         
-        Debug::log("GAME: $gamedata->id DONE RESOLVING FIRE ORDERS PHASE");
     }
     
     private static function handleMovement( $ships, $gamedata ){

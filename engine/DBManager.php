@@ -271,32 +271,6 @@ class DBManager {
     
     }
     
-    public function getCriticals($shipid, $gameid, $systemid){
-        $sql = "SELECT * FROM `B5CGM`.`tac_critical` WHERE gameid = $gameid AND shipid = $shipid AND systemid = $systemid";
-
-        $criticals = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return $criticals;
-                
-                foreach ($result as $value) {
-                    $entry = new $value->type($value->id, $value->shipid, $value->systemid, $value->type, $value->turn);
-                    $criticals[] = $entry;
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-
-        return $criticals;
-    
-    }
-    
     public function updateFireOrders($fireOrders){
     
         foreach ($fireOrders as $fire){
@@ -570,35 +544,6 @@ class DBManager {
         return $orders;
     }
     
-    public function getPower($shipid, $gameid, $systemid, $turn){
-        $turn--;
-        $sql = "SELECT * FROM `B5CGM`.`tac_power` WHERE gameid = $gameid AND shipid = $shipid AND systemid = $systemid AND turn >= $turn";
-
-        $powers = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return $powers;
-                
-                foreach ($result as $value) {
-                                                     //$id, $shipid, $systemid, $type, $turn, $amount
-                    $entry = new PowerManagementEntry($value->id, $value->shipid, $value->systemid, $value->type, $value->turn, $value->amount);
-        
-                    $powers[] = $entry;
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-
-        return $powers;
-    
-    }
-    
     public function submitDamages($gameid, $turn, $damages){
         
         try {
@@ -620,33 +565,6 @@ class DBManager {
         catch(Exception $e) {
             throw $e;
         }
-    
-    }
-    
-    public function getDamage($shipid, $gameid, $systemid){
-        $sql = "SELECT * FROM `B5CGM`.`tac_damage` WHERE gameid = $gameid AND shipid = $shipid AND systemid = $systemid";
-
-        $damages = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return $damages;
-                
-                foreach ($result as $value) {
-                    $entry = new DamageEntry($value->id, $value->shipid, $value->gameid, $value->turn, $value->systemid, $value->damage, $value->armour, $value->shields, $value->fireorderid, $value->destroyed, $value->pubnotes);
-        
-                    $damages[] = $entry;
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-
-        return $damages;
     
     }
     
@@ -862,25 +780,14 @@ class DBManager {
 		if ($gameid <=0)
 			return null;
 		
-        Debug::log("GAME: $gameid Player: $playerid Starting to fetch new GAMEDATA from DB.");
         $gamedata = $this->getTacGame($gameid, $playerid);
 		if ($gamedata == null)
 			return null;
 
-        Debug::log("    GAME: $gameid Player: $playerid GAMEDATA fetched from DB.");
-			
         $gamedata->players = $this->getPlayersInGame($playerid, $gameid);
-        
-        Debug::log("    GAME: $gameid Player: $playerid PLAYERS fetched from DB.");
-        
         $gamedata->setShips( $this->getTacShips($gameid, $gamedata->players, $gamedata->turn, $gamedata->phase) );
-        
-        Debug::log("    GAME: $gameid Player: $playerid SHIPS fetched from DB. CALLING onConstruct");
-        
-        
 		$gamedata->onConstructed();
         
-        Debug::log("    GAME: $gameid Player: $playerid OnConstruct done, returning gamedata.");
         
         return $gamedata;
     }
@@ -957,8 +864,8 @@ class DBManager {
     
     public function getTacShips($gameid, $players, $turn, $phase)
     {
-        Debug::log("GETTING SHIPS - GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
         
+        $starttime = time();
         $ships = array();
         try {
             $stmt = $this->connection->prepare(
@@ -978,7 +885,9 @@ class DBManager {
 				$stmt->execute();
 				while ($stmt->fetch())
                 {
-                   $ships[] = new $phpclass($id, $playerid, $name, null);
+                   $ship = new $phpclass($id, $playerid, $name, null);
+                   $ship->team = $players[$playerid]->team;
+                   $ships[] = $ship;
                 }
 				$stmt->close();
 			}
@@ -987,17 +896,13 @@ class DBManager {
             throw $e;
         }
         
-        Debug::log("GETTING SHIPS - GAME: $gameid iniative");
         $this->getIniativeForShips($gameid, $turn, $ships);
-        Debug::log("GETTING SHIPS - GAME: $gameid moves");
         $this->getMovesForShips($gameid, $turn, $ships);
-        Debug::log("GETTING SHIPS - GAME: $gameid ew");
         $this->getEWForShips($gameid, $turn, $ships);
-        Debug::log("GETTING SHIPS - GAME: $gameid system data");
         $this->getSystemDataForShips($gameid, $turn, $ships);
         
-        
-        Debug::log("GETTING SHIPS - GAME: $gameid Returning");
+        $endtime = time();
+        Debug::log("GETTING SHIPS - GAME: $gameid Fetching gamedata took " . ($endtime - $starttime) . " seconds.");
         return $ships;
         
         
@@ -1239,124 +1144,6 @@ class DBManager {
             $damageStmt->close();
         }
     }
-    
-    public function getTacShipsOld($gameid, $players, $turn, $phase){
-        Debug::log("        GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
-        
-        $sql = "select * from tac_ship s join tac_iniative i on s.id = i.shipid where s.tacgameid = $gameid and i.turn = $turn order by i.iniative asc";
-        
-        $ships = array();
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return null;
-            
-            Debug::log("        GAME: $gameid Ships fetched from DB.");
-            foreach ($result as $value) {
-                                               
-                $moves = $this->getMoves($value->id, $gameid, $turn);
-                $EW = $this->getEW($value->id, $gameid, $turn);
-                
-                $ship = new $value->phpclass($value->id, $value->playerid, $value->name, $moves);
-                
-                foreach ($ship->systems as $system){
-                    $system->setDamage($this->getDamage($value->id, $gameid, $system->id));
-                    $system->setPower($this->getPower($value->id, $gameid, $system->id, $turn));
-                    
-                    $system->setCriticals($this->getCriticals($ship->id, $gameid, $system->id), $turn);
-                    if ($system instanceof Weapon){
-                        $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
-                    }
-                    if ($system instanceof Fighter)
-                    {
-                        foreach ($system->systems as $fighterSystem)
-                        {
-                            if ($fighterSystem instanceof Weapon)
-                            {
-                                $fighterSystem->setLoading($this->getWeaponLoading($ship->id, $gameid, $fighterSystem->id));
-                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $turn));
-                            }
-                                
-                        }
-                    }else if ($system instanceof Weapon){
-                        $system->setFireOrders($this->getFireOrders($value->id, $gameid, $system->id, $turn));
-                    }
-					//$system->beforeTurn($ship, $turn, $phase);
-                }
-                
-                $ship->EW = $EW;
-                $ship->team = $players[$value->playerid]->team;
-                $ship->iniative = $value->iniative;
-
-                $ships[] = $ship;
-                
-            }
-            
-        }
-        catch(Exception $e) {
-            throw $e;
-        }
-            
-        return $ships;
-    }
-    
-    public function getEW($shipid, $gameid, $turn){
-        $sql = "SELECT * FROM tac_ew where shipid = $shipid and gameid = $gameid and turn > ".($turn-3)." order by id ASC";
-        $EW = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return $EW;
-                
-                foreach ($result as $value) {
-                    $entry = new EWentry($value->id, $value->shipid, $value->turn, $value->type, $value->amount, $value->targetid);
-        
-                    $EW[] = $entry;
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-
-        return $EW;
-    }
-    
-    
-    public function getMoves($shipid, $gameid, $turn){
-        $sql = "SELECT * FROM tac_shipmovement where shipid = $shipid and gameid = $gameid and ( turn > ".($turn-3)." OR turn = 1 ) order by id ASC";
-				
-        $moves = array();
-         
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return null;
-                
-            foreach ($result as $value) {
-                $move = new MovementOrder($value->id, $value->type, $value->x, $value->y, $value->xOffset, $value->yOffset, $value->speed, $value->heading, $value->facing, $value->preturn, $value->turn, $value->value);
-
-                $move->setReqThrustJSON($value->requiredthrust);
-                $move->setAssThrustJSON($value->assignedthrust);
-            
-                $moves[] = $move;
-                
-                }
-           
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
-
-        return $moves;
-    }
-    
     
     public function isNewGamedata($gameid, $turn, $phase, $activeship){
         try {
