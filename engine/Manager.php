@@ -172,7 +172,7 @@ class Manager{
             self::advanceGameState($userid, $gameid);
             
             if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
-                Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
+                ////Debug("GAME: $gameid Player: $userid requesting gamedata, new found.");
                 $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
                 if ($gamedata == null)
                     return null;
@@ -205,7 +205,7 @@ class Manager{
         $json = json_encode($gdS, JSON_NUMERIC_CHECK);
     
        
-        Debug::log("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
+        //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
         return $json;
     
     }
@@ -223,13 +223,13 @@ class Manager{
             if (sizeof($ships)==0)
 				throw new Exception("Gamedata missing");
             //print(var_dump($ships));
-            $gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
-            $gamedata->ships = $ships;
+            //$gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
+            //$gamedata->ships = $ships;
             
             if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
                 return "{'error': 'Failed to get player lock'}";
             
-            Debug::log("GAME: $gameid Player: $userid starting submit of phase $phase");
+            //Debug("GAME: $gameid Player: $userid starting submit of phase $phase");
             
             self::$dbManager->startTransaction();
             
@@ -266,7 +266,7 @@ class Manager{
             
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
             
-            Debug::log("GAME: $gameid Player: $userid SUBMIT OK");
+            //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
             return '{}';
             
@@ -415,7 +415,7 @@ class Manager{
                 return;
             }
             
-            Debug::log("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
+            //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
             
             self::$dbManager->startTransaction();
             
@@ -453,7 +453,7 @@ class Manager{
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
             
-            Debug::log("GAME: $gameid Gamedata advanced ok");
+            //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
         {
@@ -556,7 +556,6 @@ class Manager{
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");
         
-            
         self::$dbManager->submitMovement($gamedata->id, $ships[$gamedata->activeship]->id, $gamedata->turn, $ships[$gamedata->activeship]->movement);
         
         $next = false;
@@ -682,8 +681,8 @@ class Manager{
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
-                
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], null);
+            $ship->setMovement($movements);    
             $ship->EW = $EW;
             
             foreach($value["systems"] as $i=>$system){

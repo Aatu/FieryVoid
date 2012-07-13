@@ -3,12 +3,10 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 
 class DBManager {
 
-    private $id;
     private $connection = null;
     
     function __construct($host, $port = 3306, $database, $username, $password) {
         $this->id = uniqid();
-        Debug::log("CONSTRUCTING new DB object: " . $this->id);
         if ($this->connection !== null)
             return $this->connection;
         
@@ -28,7 +26,6 @@ class DBManager {
     
     
     public function __destruct() {
-        Debug::log("DESTROYING DB object: " . $this->id);
         $this->close();
     }
        
@@ -824,7 +821,7 @@ class DBManager {
 	
     public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false){
         try {
-                  
+            
             foreach ($movements as $movement){
                 
                 if($movement->type == "start" || $movement->turn != $turn)
@@ -960,7 +957,7 @@ class DBManager {
     
     public function getTacShips($gameid, $players, $turn, $phase)
     {
-        Debug::log("        GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
+        Debug::log("GETTING SHIPS - GAME: $gameid Called: getTacShips($gameid, $players, $turn, $phase)");
         
         $ships = array();
         try {
@@ -990,9 +987,17 @@ class DBManager {
             throw $e;
         }
         
+        Debug::log("GETTING SHIPS - GAME: $gameid iniative");
         $this->getIniativeForShips($gameid, $turn, $ships);
+        Debug::log("GETTING SHIPS - GAME: $gameid moves");
         $this->getMovesForShips($gameid, $turn, $ships);
+        Debug::log("GETTING SHIPS - GAME: $gameid ew");
+        $this->getEWForShips($gameid, $turn, $ships);
+        Debug::log("GETTING SHIPS - GAME: $gameid system data");
+        $this->getSystemDataForShips($gameid, $turn, $ships);
         
+        
+        Debug::log("GETTING SHIPS - GAME: $gameid Returning");
         return $ships;
         
         
@@ -1033,9 +1038,9 @@ class DBManager {
         
     }
     
-    private function getMovesForShips($gameid, $turn, $ships){
+    private function getMovesForShips($gameid, $gameturn, $ships){
         
-        $turn = $turn - 1;
+        $gameturn = $gameturn - 1;
         $stmt = $this->connection->prepare(
             "SELECT 
                 id, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust
@@ -1046,7 +1051,7 @@ class DBManager {
             AND
                 shipid = ?
             AND
-                ( turn > ? OR turn = 1 ) 
+                ( turn >= ? OR turn = 1 ) 
             ORDER BY
                 id ASC
             "
@@ -1058,7 +1063,7 @@ class DBManager {
             {
                 $moves = array();
                 
-                $stmt->bind_param('iii', $gameid, $ship->id, $turn);
+                $stmt->bind_param('iii', $gameid, $ship->id, $gameturn);
                 $stmt->bind_result($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust);
                 $stmt->execute();
                 while ($stmt->fetch())
@@ -1078,9 +1083,9 @@ class DBManager {
         
     }
     
-    private function getEWForShips($gameid, $turn, $ships){
+    private function getEWForShips($gameid, $gameturn, $ships){
         
-        $turn = $turn - 1;
+        $gameturn = $gameturn - 1;
         $stmt = $this->connection->prepare(
             "SELECT 
                 id, shipid, turn, type, amount, targetid
@@ -1091,7 +1096,7 @@ class DBManager {
             AND
                 shipid = ?
             AND
-                turn > ? 
+                turn >= ? 
             ORDER BY
                 id ASC
             "
@@ -1103,7 +1108,7 @@ class DBManager {
             {
                 $ews = array();
                 
-                $stmt->bind_param('iii', $gameid, $ship->id, $turn);
+                $stmt->bind_param('iii', $gameid, $ship->id, $gameturn);
                 $stmt->bind_result($id, $shipid, $turn, $type, $amount, $targetid);
                 $stmt->execute();
                 while ($stmt->fetch())
@@ -1117,6 +1122,122 @@ class DBManager {
         }
         
         
+    }
+    
+    private function getSystemDataForShips($gameid, $gameturn, $ships){
+        $fetchturn = $gameturn - 1;
+        $damageStmt = $this->connection->prepare(
+            "SELECT 
+                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes 
+            FROM
+                tac_damage
+            WHERE 
+                gameid = ?
+            AND 
+                shipid = ?
+            AND 
+                systemid = ?
+            "
+        );
+        
+        $powerStmt = $this->connection->prepare(
+            "SELECT
+                id, shipid, systemid, type, turn, amount 
+            FROM
+                tac_power
+            WHERE 
+                gameid = ?
+            AND 
+                shipid = ?
+            AND 
+                systemid = ?
+            AND 
+                turn >= ?
+            "
+        );
+        
+        $criticalStmt = $this->connection->prepare(
+            "SELECT 
+                id, shipid, systemid, type, turn 
+            FROM 
+                tac_critical
+            WHERE 
+                gameid = ?
+            AND 
+                shipid = ?
+            AND 
+                systemid = ?
+            "
+        );
+        
+
+        if ($damageStmt && $powerStmt && $criticalStmt)
+        {
+            foreach ($ships as $ship)
+            {
+                foreach ($ship->systems as $system)
+                {
+                    $damages = array();
+
+                    $damageStmt->bind_param('iii', $gameid, $ship->id, $system->id);
+                    $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes );
+                    $damageStmt->execute();
+                    while ($damageStmt->fetch())
+                    {
+                        $damages[] = new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes );
+                    }
+
+                    $system->setDamage($damages);
+                    
+                    $power = array();
+
+                    $powerStmt->bind_param('iiii', $gameid, $ship->id, $system->id, $fetchturn);
+                    $powerStmt->bind_result($id, $shipid, $systemid, $type, $turn, $amount );
+                    $powerStmt->execute();
+                    while ($powerStmt->fetch())
+                    {
+                        $power[] = new PowerManagementEntry($id, $shipid, $systemid, $type, $turn, $amount);
+                    }
+
+                    $system->setPower($power);
+                    
+                    $criticals = array();
+
+                    $criticalStmt->bind_param('iii', $gameid, $ship->id, $system->id);
+                    $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn);
+                    $criticalStmt->execute();
+                    while ($criticalStmt->fetch())
+                    {
+                        $criticals[] = new $type($id, $shipid, $systemid, $type, $turn);
+                    }
+
+                    $system->setCriticals($criticals, $gameturn);
+                    
+                    
+                    if ($system instanceof Weapon){
+                        $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
+                    }
+                    if ($system instanceof Fighter)
+                    {
+                        foreach ($system->systems as $fighterSystem)
+                        {
+                            if ($fighterSystem instanceof Weapon)
+                            {
+                                $fighterSystem->setLoading($this->getWeaponLoading($ship->id, $gameid, $fighterSystem->id));
+                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $turn));
+                            }
+                                
+                        }
+                    }else if ($system instanceof Weapon){
+                        $system->setFireOrders($this->getFireOrders($system->id, $gameid, $system->id, $turn));
+                    }
+                    
+                }
+            }
+            $powerStmt->close();
+            $criticalStmt->close();
+            $damageStmt->close();
+        }
     }
     
     public function getTacShipsOld($gameid, $players, $turn, $phase){

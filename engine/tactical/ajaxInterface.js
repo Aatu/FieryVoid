@@ -13,8 +13,6 @@ window.ajaxInterface = {
 	
         var gd = ajaxInterface.construcGamedata();
         
-        
-        
         $.ajax({
             type : 'POST',
             url : 'gamedata.php',
