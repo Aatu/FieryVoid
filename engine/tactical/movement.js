@@ -66,7 +66,7 @@ shipManager.movement = {
                 }
                     
             }else{
-                if (!movement.preturn && !movement.forced)
+                if (!movement.preturn && !movement.forced && movement.type != "deploy")
                     return true;
             }
         }
@@ -853,7 +853,7 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn)
                 continue;
             
-            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange")
+            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy")
                 return false;
         
         }
