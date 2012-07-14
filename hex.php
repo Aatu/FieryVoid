@@ -86,6 +86,7 @@
     <script src="./engine/tactical/criticals.js"></script>
     <script src="./engine/tactical/systems.js"></script>
 	<script src="./engine/tactical/power.js"></script>
+    <script src="./engine/tactical/deployment.js"></script>
     <script src="./engine/tactical/UI/shipMovement.js"></script>
     <script src="./engine/tactical/UI/infowindow.js"></script>
 	<script src="./engine/tactical/UI/systemInfo.js"></script>

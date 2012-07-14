@@ -273,6 +273,8 @@ class DBManager {
     
     public function updateFireOrders($fireOrders){
     
+        Debug::log("Upadting FireOrders: " . var_export($fireOrders, true));
+        
         foreach ($fireOrders as $fire){
             try {
                 $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes.
@@ -291,31 +293,23 @@ class DBManager {
         
     public function submitFireorders($gameid, $fireOrders, $turn, $phase){
         
-        try {
-            
-            
-            foreach ($fireOrders as $fire){
-                if ($fire->turn != $turn)
-                    continue;
-                    
-                if ($fire->type=="ballistic" && $phase != 1)
-					continue;
-					
-				if ($fire->type!="ballistic" && $phase == 1)
-					continue;
-                            
-                $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
-                        .$fire->firingMode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."')";
+        
 
-                $this->update($sql);
-            }
-                
-            
+        foreach ($fireOrders as $fire){
+            if ($fire->turn != $turn)
+                continue;
+
+            if ($fire->type=="ballistic" && $phase != 1)
+                continue;
+
+            if ($fire->type!="ballistic" && $phase == 1)
+                continue;
+
+            $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
+                    .$fire->firingMode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."')";
+
+            $this->update($sql);
         }
-        catch(Exception $e) {
-            throw $e;
-        }
-    
     }
     
     public function submitPower($gameid, $turn, $powers){
@@ -1121,20 +1115,19 @@ class DBManager {
                     
                     if ($system instanceof Weapon){
                         $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
+                        $system->setFireOrders($this->getFireOrders($ship->id, $gameid, $system->id, $gameturn));
                     }
-                    if ($system instanceof Fighter)
+                    else if ($system instanceof Fighter)
                     {
                         foreach ($system->systems as $fighterSystem)
                         {
                             if ($fighterSystem instanceof Weapon)
                             {
                                 $fighterSystem->setLoading($this->getWeaponLoading($ship->id, $gameid, $fighterSystem->id));
-                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $turn));
+                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $gameturn));
                             }
                                 
                         }
-                    }else if ($system instanceof Weapon){
-                        $system->setFireOrders($this->getFireOrders($system->id, $gameid, $system->id, $turn));
                     }
                     
                 }

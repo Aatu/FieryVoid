@@ -186,8 +186,13 @@ window.scrolling = {
     mousedown: function(event){
 	
 		shipSelectList.remove();
+        
+        
+		if (!event || event.which !== 3)
+            return;
+        
+        event.stopPropagation(event);
 		
-		event.stopPropagation(event);
         if (gamedata.effectsDrawing)
 			return;
 			

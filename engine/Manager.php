@@ -260,6 +260,8 @@ class Manager{
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS);
+            }else if ($gdS->phase == -1){
+                $ret = self::handleDeployment($ships, $gdS);
             }
                         
             self::$dbManager->endTransaction(false);
@@ -275,6 +277,7 @@ class Manager{
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            Debug::error($e);
             return "{'error': '" .$e->getMessage() . "'}";
         }
        
@@ -436,6 +439,8 @@ class Manager{
                 self::changeTurn($gamedata);
             }else if ($phase == -2){
                 self::startGame($gamedata);
+            }else if ($phase == -1){
+                self::startInitialOrders($gamedata);
             }
             
             $loadings = Array();
@@ -465,8 +470,17 @@ class Manager{
         {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            Debug::error($e);
             throw $e;
         }
+    }
+    
+    private static function startInitialOrders($gamedata){
+    
+        $gamedata->phase = 1; 
+        
+        self::$dbManager->updateGamedata($gamedata);
+    
     }
     
     private static function startMovement($gamedata){
@@ -512,10 +526,10 @@ class Manager{
                 $y = (($t-1)/2)*-1;
             }
             
-            $x = -30;
+            $x = -50;
             
             if ($player->team == 2){
-                $x=30;
+                $x=50;
             }
             
             
@@ -540,21 +554,33 @@ class Manager{
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-        Debug::log("AUTOMATE INTERCEPT - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
-        Debug::log("RESOLVING FIRE - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+        Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         
-        $criticals = Criticals::setCriticals($servergamedata);
+        Criticals::setCriticals($servergamedata);
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
 		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        
+    }
+    
+    private static function handleDeployment( $ships, $gamedata)
+    {
+        $moves = Deployment::validateDeployment($gamedata, $ships);
+        foreach ($moves as $shipid=>$move)
+        {
+            self::$dbManager->insertMovement($gamedata->id, $shipid, $move);
+        }
+        
+        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
         
     }
     
@@ -598,11 +624,17 @@ class Manager{
     private static function changeTurn($gamedata){
     
         $gamedata->turn = $gamedata->turn+1;
-        $gamedata->phase = 1; 
+        if ($gamedata->turn === 1)
+        {
+            $gamedata->phase = -1; 
+        }else{
+            $gamedata->phase = 1; 
+        }
+        
         $gamedata->activeship = -1;
         $gamedata->status = "ACTIVE";
         
-        if ($gamedata->isFinished())
+        if ($gamedata->turn > 1 && $gamedata->isFinished())
             $gamedata->status = "FINISHED";
             
         self::generateIniative($gamedata);

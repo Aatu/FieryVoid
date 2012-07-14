@@ -90,7 +90,7 @@
         public function getLastTurnMoved(){
             $turn = 0;
             foreach($this->movement as $elementKey => $move) {
-                if (!$move->preturn)
+                if (!$move->preturn && $move->type != "deploy")
                     $turn = $move->turn;
             } 
             
@@ -267,7 +267,6 @@
             foreach ($this->movement as $move){
                 $movement = $move;
             }
-        
             return $movement->getCoPos();
         
         }

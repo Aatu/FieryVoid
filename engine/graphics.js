@@ -51,6 +51,18 @@ window.graphics = {
 			
 	
 	},
+    
+    drawBox: function (canvas, p, w, h, lw){
+        canvas.lineWidth = lw;
+        canvas.beginPath();
+        canvas.moveTo(p.x-(w/2), p.y+(h/2));
+        canvas.lineTo(p.x+(w/2),p.y+(h/2));
+        canvas.lineTo(p.x+(w/2),p.y-(h/2));
+        canvas.lineTo(p.x-(w/2),p.y-(h/2));
+        canvas.closePath();
+        canvas.stroke();
+        canvas.fill();
+    },
 
     drawCircle: function(canvas, x, y, r, w){
 		if (r<1)

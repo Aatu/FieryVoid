@@ -477,6 +477,10 @@ window.shipManager = {
     
     onShipClick: function(e){
         //console.log("click on ship");
+        
+        if (!e || e.which !== 1)
+            return;
+        
         e.stopPropagation();
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
@@ -639,7 +643,11 @@ window.shipManager = {
         
     },
     
-    getShipsInSameHex: function(ship){
+    getShipsInSameHex: function(ship, pos1){
+        
+        if (!pos1)
+            var pos1 = shipManager.getShipPosition(ship);
+        
         var shipsInHex = Array();
         for (var i in gamedata.ships){
             var ship2 = gamedata.ships[i];
@@ -649,8 +657,7 @@ window.shipManager = {
 				
             //if (ship.id = ship2.d)
             //  continue;
-                
-            var pos1 = shipManager.getShipPosition(ship);
+            
             var pos2 = shipManager.getShipPosition(ship2);
             
             
