@@ -49,7 +49,7 @@
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 
-                if ($system instanceof ElintArray)
+                if ($system instanceof ElintScanner)
                     $this->elint = true;
             }
         }

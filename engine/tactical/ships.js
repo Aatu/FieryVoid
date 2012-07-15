@@ -706,7 +706,7 @@ window.shipManager = {
 	},
     
     isElint: function(ship){
-        var elint = shipManager.systems.getSystemByName(ship, "elintArray");
+        var elint = shipManager.systems.getSystemByName(ship, "elintScanner");
         if (!elint || shipManager.systems.isDestroyed(ship, elint))
             return false;
         
