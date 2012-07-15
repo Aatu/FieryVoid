@@ -21,7 +21,7 @@
                             
                 
                 $damage = $firingweapon->getAvgDamage() * ceil($fire->shots/2);
-                $hitChance = $firingweapon->calculateHit($gd, $fire);
+                //$hitChance = $firingweapon->calculateHit($gd, $fire);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
                 
                 $perc = 0;

@@ -55,7 +55,7 @@
             $FDEW = 0;
             foreach ($gamedata->ships as $ship)
             {
-                if ($ship->team == $target->team && $ship->elint
+                if ($ship->team == $target->team && $ship->isElint()
                      && Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) <= 20){
                     $blanket = $ship->getBlanketDEW($gamedata->turn);
                     
@@ -75,7 +75,10 @@
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint == $ship)
+                if ($elint->id === $ship->id)
+                    continue;
+                
+                if (!$elint->isElint())
                     continue;
                 
                 if (Mathlib::getDistanceHex( $target->getCoPos(), $elint->getCoPos() ) > 30)
@@ -103,6 +106,9 @@
                 if ($elint == $ship)
                     continue;
                 
+                if (!$elint->isElint())
+                    continue;
+                
                 if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 30)
                     continue;
 
@@ -123,6 +129,9 @@
             foreach ($gamedata->ships as $elint)
             {
                 if ($elint == $ship)
+                    continue;
+                
+                if (!$elint->isElint())
                     continue;
                 
                 if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)

@@ -3,6 +3,7 @@
 class ElintArray extends ShipSystem{
     public $name = "elintArray";
     public $displayName = "ELINT array";
+    public $specialAbilities = array("ELINT");
     public $primary = true;
     
     function __construct($armour, $maxhealth, $powerReq){
@@ -92,6 +93,7 @@ class Reactor extends ShipSystem{
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
+    public $outputType = "Power";
     
     public $possibleCriticals = array(11=>"OutputReduced2", 15=>"OutputReduced4", 19=>"OutputReduced6", 27=>"OutputReduced8", 100=>"ForcedOfflineOneTurn");
     
@@ -107,18 +109,17 @@ class Engine extends ShipSystem{
 
     public $name = "engine";
     public $displayName = "Engine";
-    public $engineEfficiency;
     public $thrustused;
     public $primary = true;
     public $boostable = true;
     
     public $possibleCriticals = array(15=>"OutputReduced2", 21=>"OutputReduced4", 27=>"ForcedOfflineOneTurn");
     
-    function __construct($armour, $maxhealth, $powerReq, $output, $engineEfficiency, $thrustused = 0 ){
+    function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         
         $this->thrustused = (int)$thrustused;
-        $this->engineEfficiency = (int)$engineEfficiency;
+        $this->boostEfficiency = (int)$boostEfficiency;
     }
     
 }
@@ -129,11 +130,14 @@ class Scanner extends ShipSystem{
     public $displayName = "Scanner";
     public $primary = true;
     public $boostable = true;
+    public $outputType = "EW";
     
     public $possibleCriticals = array(15=>"OutputReduced2", 19=>"OutputReduced4", 23=>"OutputReduced6", 27=>"OutputReduced8");
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
+        
+        $this->boostEfficiency = "output+1";
     }
 
     
@@ -161,6 +165,7 @@ class Scanner extends ShipSystem{
 class ElintScanner extends Scanner{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
+    public $specialAbilities = array("ELINT");
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -247,10 +252,6 @@ class JumpEngine extends ShipSystem{
     
         $this->delay = $delay;
     }
-    
-   
-    
-    
 }
 
 
@@ -265,10 +266,6 @@ class Structure extends ShipSystem{
          
     
     }
-    
- 
 
 }
-?>
-
 

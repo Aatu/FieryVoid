@@ -96,30 +96,6 @@
 
     }
 
-    class LightFusionCannon3 extends LightFusionCannon
-    {
-        public $shots = 3;
-        public $defaultShots = 3;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
-    }
-
-    class LightFusionCannon2 extends LightFusionCannon
-    {
-        public $shots = 2;
-        public $defaultShots = 2;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
-    }
-
     // mhhh... extended from Raking as that involves less code duplication
     class MolecularDisruptor extends Raking
     {
@@ -185,4 +161,4 @@
         public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20+$this->damagebonus - $this->dp;      }
     }
-?>
+
