@@ -30,6 +30,7 @@ class Tinashi extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
+        $this->addPrimarySystem(new Jammer(4, 8, 5));
 
         $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 240, 0));
