@@ -2,24 +2,29 @@
 
 	class Critical{
 
-		public $id, $shipid, $systemid, $phpclass, $turn;
+		public $id, $shipid, $systemid, $phpclass, $tur, $param;
 		public $updated = false;
 		public $outputMod = 0;
 		public $description = "";
 		public $oneturn = false;
         public $inEffect = true;
 		
-		function __construct($id, $shipid, $systemid, $phpclass, $turn){
+		public function __construct($id, $shipid, $systemid, $phpclass, $turn, $param = null){
 			$this->id = (int)$id;
 			$this->shipid = (int)$shipid;
 			$this->systemid = (int)$systemid;
 			$this->phpclass = $phpclass;
 			$this->turn = (int)$turn;
-
+            $this->setParam($param);
 
 		}
+        
+        
+        protected function setParam($param){
+            $this->param = $param;
+        }
 		
-		function getDescription(){
+		public function getDescription(){
 			return $this->description;
 		}
     
