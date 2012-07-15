@@ -258,7 +258,7 @@ class DBManager {
                 if ($critical->turn != $turn)
                     continue;
                 
-                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $turn)";
+                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $turn, '".$critical->param."')";
     
                 $this->update($sql);
             }
@@ -1057,7 +1057,7 @@ class DBManager {
         
         $criticalStmt = $this->connection->prepare(
             "SELECT 
-                id, shipid, systemid, type, turn 
+                id, shipid, systemid, type, turn, param 
             FROM 
                 tac_critical
             WHERE 
@@ -1103,11 +1103,11 @@ class DBManager {
                     $criticals = array();
 
                     $criticalStmt->bind_param('iii', $gameid, $ship->id, $system->id);
-                    $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn);
+                    $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $param);
                     $criticalStmt->execute();
                     while ($criticalStmt->fetch())
                     {
-                        $criticals[] = new $type($id, $shipid, $systemid, $type, $turn);
+                        $criticals[] = new $type($id, $shipid, $systemid, $type, $turn, $param);
                     }
 
                     $system->setCriticals($criticals, $gameturn);
