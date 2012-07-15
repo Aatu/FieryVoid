@@ -109,18 +109,17 @@ class Engine extends ShipSystem{
 
     public $name = "engine";
     public $displayName = "Engine";
-    public $engineEfficiency;
     public $thrustused;
     public $primary = true;
     public $boostable = true;
     
     public $possibleCriticals = array(15=>"OutputReduced2", 21=>"OutputReduced4", 27=>"ForcedOfflineOneTurn");
     
-    function __construct($armour, $maxhealth, $powerReq, $output, $engineEfficiency, $thrustused = 0 ){
+    function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         
         $this->thrustused = (int)$thrustused;
-        $this->engineEfficiency = (int)$engineEfficiency;
+        $this->boostEfficiency = (int)$boostEfficiency;
     }
     
 }
@@ -137,6 +136,8 @@ class Scanner extends ShipSystem{
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
+        
+        $this->boostEfficiency = "output+1";
     }
 
     

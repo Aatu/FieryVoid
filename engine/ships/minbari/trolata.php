@@ -1,9 +1,12 @@
+
+<?php
+
 /**
  * Description of trolata
  *
  * @author Jasper van Rosmalen
  */
-<?php
+
 class Trolata extends BaseShip{
 
     function __construct($id, $userid, $name,  $movement){

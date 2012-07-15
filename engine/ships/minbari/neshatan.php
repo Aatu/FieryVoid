@@ -1,14 +1,11 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+<?php
 
 /**
  * Description of neshatan
  *
  * @author Jasper van Rosmalen
  */
-<?php
+
 class Neshatan extends BaseShip{
 
     function __construct($id, $userid, $name,  $movement){

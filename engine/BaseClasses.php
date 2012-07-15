@@ -206,6 +206,7 @@ class ShipSystem{
     public $damage = array();
     public $outputMod = 0;
     public $boostable = false;
+    public $boostEfficiency = null;
     public $power = array();
     public $fireOrders = array();
 

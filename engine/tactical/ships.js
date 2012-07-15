@@ -718,14 +718,16 @@ window.shipManager = {
             if (shipManager.power.isOffline(ship, system))
                 continue;
             
-            if ($.inArray(ability, system.specialAbilities))
-                return system;
+            for (var a in system.specialAbilities){
+                if (system.specialAbilities[a] == ability)
+                    return system;
+            }
         }
         
-        return null;
+        return false;
     },
 
-    hasSpecialAbility: function(ship, $ability)
+    hasSpecialAbility: function(ship, ability)
     {
         if (shipManager.getSpecialAbilitySystem(ship, ability))
             return true;
@@ -734,6 +736,11 @@ window.shipManager = {
     },
     
     isElint: function(ship){
-        return shipManager.hasSpecialAbility(ship, "ELINT");
+        if (shipManager.hasSpecialAbility(ship, "ELINT")){
+            return true;
+        }
+        
+        return false;
+            
     }
 }
