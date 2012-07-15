@@ -29,6 +29,15 @@
 			
 		}
         
+        public function getSystemById($id){
+            foreach ($this->systems as $system){
+                if ($system->id == $id){
+                    return $system;
+                }
+            }
+            return null;
+        }
+        
         public function isDisengaged($turn){
             if ($this->hasCritical("DisengagedFighter", $turn))
 				return true;

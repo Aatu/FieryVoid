@@ -1,13 +1,24 @@
 window.shipSelectList = {
 
 
-	haveToShowList: function(ship){
+	haveToShowList: function(ship, event){
 	
 		var list = shipManager.getShipsInSameHex(ship);
 		
 		if (list.length > 1)
 			return true;
-			
+        
+        if (event && event.which === 1 && gamedata.gamephase == 1){
+            var selectedShip = gamedata.getSelectedShip();
+            if (shipManager.isElint(selectedShip)){
+                if (selectedShip != ship && ew.checkInELINTDistance(selectedShip, ship)){
+                    return true;
+                }
+                if (!gamedata.isMyShip(ship) && ew.checkInELINTDistance(selectedShip, ship, 30)){
+                    return true;
+                }
+            }
+        }
 		return false;
 		
 	
@@ -19,18 +30,33 @@ window.shipSelectList = {
 		
 		var list = shipManager.getShipsInSameHex(ship);
 		var pos = shipManager.getShipPositionForDrawing(ship);
-		
+		var selectedShip = gamedata.getSelectedShip();
+        
+       
+       
+        
 		var e = $('<div class="shipSelectList"></div>');
 		for (var i in list){
-			var ship = list[i];
-			
+			var listship = list[i];
 			var fac = "ally";
-			if (ship.userid != gamedata.thisplayer){
+			if (listship.userid != gamedata.thisplayer){
 				fac = "enemy";
 			}
 			
-			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+ship.id+'"><span class="name '+fac+'">'+ship.name+'</span></div>').appendTo(e);
+			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
+            if (gamedata.gamephase === 1 && selectedShip != listship && shipManager.isElint(selectedShip)){
+                if (gamedata.isEnemy(selectedShip, listship)){
+                    if (ew.checkInELINTDistance(selectedShip, listship, 50)){
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="DIST" data-id="'+listship.id+'"><span class="'+fac+'">Assign disruption EW</span></div>').appendTo(e);
+                    }
+                }else{
+                    if (ew.checkInELINTDistance(selectedShip, listship, 30)){
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
+                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
+                    }
+                }
+            }
 		}
 		
 		var dis = 10 + (40*gamedata.zoom);
@@ -53,13 +79,21 @@ window.shipSelectList = {
 	},
 	
 	onListClicked: function(e){
-	
+        shipSelectList.remove();
+        
 		var id = $(this).data("id");
         var ship = gamedata.getShip(id);
 		
-		
-		shipManager.doShipClick(ship);
-		
+		var action = $(this).data("action");
+        if (!action){
+            shipManager.doShipClick(ship);
+		}else if (action == "SOEW"){
+            ew.AssignOEW(ship, "SOEW");
+        }else if (action == "SDEW"){
+            ew.AssignOEW(ship, "SDEW");
+        }else if (action == "DIST"){
+            ew.AssignOEW(ship, "DIST");
+        }
 	
 	},
 	

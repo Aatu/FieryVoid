@@ -13,8 +13,6 @@ window.ajaxInterface = {
 	
         var gd = ajaxInterface.construcGamedata();
         
-        
-        
         $.ajax({
             type : 'POST',
             url : 'gamedata.php',
@@ -23,7 +21,9 @@ window.ajaxInterface = {
             success : ajaxInterface.successSubmit,
             error : ajaxInterface.errorSubmit
         });
+        console.log("SUBMITTING GAMEDATA");
         
+        gamedata.goToWaiting();
     },
     
     construcGamedata: function(){
@@ -35,40 +35,67 @@ window.ajaxInterface = {
             ship.htmlContainer = null;
             ship.shipclickableContainer = null;
             ship.shipStatusWindow = null;
-            for (var a = ship.movement.length-1; a>=0; a--){
-                var move = ship.movement[a];
-                if (move.turn < gamedata.turn){
-                    ship.movement.splice(a,1);
-                }
-            }
-            for (var a = ship.fireOrders.length-1; a>=0; a--){
-                var fire = ship.fireOrders[a];
-                if (fire.turn < gamedata.turn){
-                    ship.fireOrders.splice(a,1);
-                }
-            }
-            for (var a = ship.EW.length-1; a>=0; a--){
-                var ew = ship.EW[a];
-                if (ew.turn < gamedata.turn){
-                    ship.EW.splice(a,1);
-                }
-            }
-            var systems = Array();
-            
-            for (var a in ship.systems){
-                var system = ship.systems[a];
-                for (var b = system.power.length-1; b>=0; b--){
-                    var power = system.power[b];
-                    if (power.turn < gamedata.turn){
-                        system.power.splice(b,1);
+            if (gamedata.isMyShip(ship)){
+                for (var a = ship.movement.length-1; a>=0; a--){
+                    var move = ship.movement[a];
+                    if (move.turn < gamedata.turn){
+                        ship.movement.splice(a,1);
                     }
                 }
-                
-                systems[a] = {'id': system.id, 'power':system.power};
+
+                for (var a = ship.EW.length-1; a>=0; a--){
+                    var ew = ship.EW[a];
+                    if (ew.turn < gamedata.turn){
+                        ship.EW.splice(a,1);
+                    }
+                }
+                var systems = Array();
+
+                for (var a in ship.systems){
+                    var system = ship.systems[a];
+
+                    if (ship.flight){
+                        var fighterSystems = Array();
+                        for (var c in system.systems){
+                            var fightersystem = system.systems[c];
+
+                            for (var b = fightersystem.fireOrders.length-1; b>=0; b--){
+                                var fire = fightersystem.fireOrders[b];
+                                if (fire.turn < gamedata.turn){
+                                    fightersystem.fireOrders.splice(b,1);
+                                }
+                            }
+                            fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders};
+                        }
+
+                        systems[a] = {'id': system.id, 'systems': fighterSystems};
+
+
+                    }else{
+                        for (var b = system.fireOrders.length-1; b>=0; b--){
+                            var fire = system.fireOrders[b];
+                            if (fire.turn < gamedata.turn){
+                                system.fireOrders.splice(b,1);
+                            }
+                        }
+
+                        for (var b = system.power.length-1; b>=0; b--){
+                            var power = system.power[b];
+                            if (power.turn < gamedata.turn){
+                                system.power.splice(b,1);
+                            }
+                        }
+                        systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': system.fireOrders};
+                    }
+
+                }
+            
+                ship.systems = systems;
+            }else{
+                ship.EW = Array();
+                ship.movement = Array();
+                ship.systems = Array();
             }
-            
-            ship.systems = systems;
-            
         }
        
         var gd = {
@@ -79,10 +106,7 @@ window.ajaxInterface = {
             playerid: gamedata.thisplayer,
             ships: JSON.stringify(tidyships)
         };
-        
-        
-        
-        
+  
         return gd;
     },
     
@@ -92,7 +116,7 @@ window.ajaxInterface = {
 		if (data.error){
 			ajaxInterface.errorAjax(data);
 		}else{
-			gamedata.parseServerData(data);
+			//gamedata.parseServerData(data);
 		}
     },
     
@@ -108,7 +132,7 @@ window.ajaxInterface = {
 	errorSubmit: function(data){
 		ajaxInterface.submiting = false;
         console.log("error " + data.error);
-        if (data.error = "Not logged in."){
+        if (data.error == "Not logged in."){
 			$(".notlogged").show();
 			$(".waiting").hide();
 			gamedata.waiting = false;
@@ -145,7 +169,13 @@ window.ajaxInterface = {
         
         ajaxInterface.pollcount++;
         
-        var time = 3000;
+        var time = 6000;
+        
+        
+        if (ajaxInterface.pollcount > 10){
+            time = 6000;
+        }
+        
         
         if (ajaxInterface.pollcount > 100){
             time = 30000;

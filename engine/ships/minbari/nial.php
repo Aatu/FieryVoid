@@ -9,7 +9,7 @@ class Nial extends FighterFlight{
 		$this->phpclass = "Nial";
 		$this->shipClass = "Nial flight";
 			// need picture
-		$this->imagePath = "ships/frazi.png";
+		$this->imagePath = "ships/nial.png";
 
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
@@ -25,11 +25,11 @@ class Nial extends FighterFlight{
             $nial = new Fighter($armour, 14, $this->id);
             $nial->displayName = "Nial Heavy Fighter";
         // need picture
-            $nial->imagePath = "ships/frazi.png";
+            $nial->imagePath = "ships/nial.png";
         // need picture
-            $nial->iconPath = "ships/frazi_large.png";
-            $nial->addFrontSystem(new LightFusionCannon3(300, 60, 4));
-            $nial->addFrontSystem(new Jammer(0, 1, 0));
+            $nial->iconPath = "ships/nial-large.png";
+            $nial->addFrontSystem(new LightFusionCannon(300, 60, 4, 3));
+            $nial->addAftSystem(new Jammer(0, 1, 0));
             $this->addSystem($nial);
 	}
     }

@@ -184,7 +184,6 @@ gamedata = {
             UI.shipMovement.hide();
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
-                gamedata.waiting = true;
                 shipManager.movement.RemoveMovementIndicators();
                 ajaxInterface.submitGamedata();
             }else{
@@ -194,6 +193,8 @@ gamedata = {
 			UI.shipMovement.hide();
             ajaxInterface.submitGamedata();
         }else if (gamedata.gamephase == 4){
+            ajaxInterface.submitGamedata();
+        }else if (gamedata.gamephase == -1){
             ajaxInterface.submitGamedata();
         }
         
@@ -221,6 +222,11 @@ gamedata = {
         return "";
     },
     
+    getPlayerTeam: function(){
+        var player = gamedata.players[gamedata.thisplayer];
+        return player.team;
+    },
+    
     getPhasename: function(){
         if (gamedata.gamephase == 1)
             return "INITIAL ORDERS";
@@ -233,6 +239,9 @@ gamedata = {
             
         if (gamedata.gamephase == 4)
             return "FINAL ORDERS";
+        
+        if (gamedata.gamephase == -1)
+            return "DEPLOYMENT";
             
         return "ERROR"
     },
@@ -245,6 +254,7 @@ gamedata = {
         b.removeClass("phase2");
         b.removeClass("phase3");
         b.removeClass("phase4");
+        b.removeClass("phase-1");
     
         b.addClass("phase"+gamedata.gamephase);
     },
@@ -259,7 +269,21 @@ gamedata = {
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
         
-         if (gamedata.gamephase == 4){
+        if (gamedata.gamephase == -1){
+            if (gamedata.waiting == false){
+               infowindow.informPhase(5000, null);
+                for (var i in gamedata.ships){
+                    var ship = gamedata.ships[i];
+                    if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
+                        gamedata.selectShip(ship, false);
+                        scrolling.scrollToShip(ship);
+                        break;
+                    }
+                }
+            }            
+        }
+        
+        if (gamedata.gamephase == 4){
             if (gamedata.waiting == false){
                 effects.displayAllWeaponFire(function(){
 					gamedata.subphase = 1;
@@ -351,7 +375,13 @@ gamedata = {
             return;
         }
         
-        
+        if (gamedata.gamephase == -1){
+            if (deployment.validateAllDeployment() && !gamedata.waiting){
+                console.log("show commit");
+                commit.show();
+                return;
+            }
+        }
         
         if (gamedata.gamephase == 4){
             
@@ -401,7 +431,13 @@ gamedata = {
         cancel.hide();
     },
     
-    
+    goToWaiting: function(){
+        if (gamedata.waiting == false){
+            gamedata.waiting = true;
+            ajaxInterface.startPollingGamedata();
+            gamedata.checkGameStatus();
+        }
+    },
 
     parseServerData: function(serverdata){
     

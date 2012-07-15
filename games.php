@@ -59,7 +59,7 @@
 			
 			<div><span>STARTING GAMES</span></div>
 			<div class="gamecontainer lobby subpanel">
-				<div class="notfound">No active games</div>
+				<div class="notfound">No starting games</div>
 			</div>
 			
 			<a href="creategame.php">CREATE GAME</a>

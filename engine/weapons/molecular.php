@@ -82,8 +82,10 @@
         private $damagebonus = 0;
 
 
-        function __construct($startArc, $endArc, $damagebonus){
+        function __construct($startArc, $endArc, $damagebonus, $shots){
 			$this->damagebonus = $damagebonus;
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
 
         }
@@ -92,30 +94,6 @@
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
 
-    }
-
-    class LightFusionCannon3 extends LightFusionCannon
-    {
-        public $shots = 3;
-        public $defaultShots = 3;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
-    }
-
-    class LightFusionCannon2 extends LightFusionCannon
-    {
-        public $shots = 2;
-        public $defaultShots = 2;
-
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-
-        }
     }
 
     // mhhh... extended from Raking as that involves less code duplication
@@ -183,4 +161,3 @@
         public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20+$this->damagebonus - $this->dp;      }
     }
-?>

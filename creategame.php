@@ -22,8 +22,8 @@
 		if (!is_numeric($points))
 			$points = 1000;
 			
-		if ($points >10000)
-			$points = 10000;
+		if ($points >20000)
+			$points = 20000;
 	
 		$id = Manager::createGame($_POST["name"], $_POST["background"], 2, $points, $_SESSION["user"]);
 		if ($id){

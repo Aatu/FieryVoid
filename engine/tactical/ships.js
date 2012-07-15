@@ -379,6 +379,11 @@ window.shipManager = {
         return {x:x, y:y, xO:xO, yO:yO};
     },
     
+    getShipPositionInWindowCoWithoutOffset: function(ship){
+        var hexpos = shipManager.getShipPosition(ship);
+        var pos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
+        return pos;
+    },
     
     getShipPositionInWindowCo: function(ship){
         var hexpos = shipManager.getShipPosition(ship);
@@ -438,7 +443,7 @@ window.shipManager = {
         var id = $(e).data("id");
         var ship = gamedata.getShip(id);
         
-        if (shipSelectList.haveToShowList(ship)){
+        if (shipSelectList.haveToShowList(ship, e)){
             shipSelectList.showList(ship);
         }else{
             shipManager.doShipContextMenu(ship);
@@ -472,11 +477,15 @@ window.shipManager = {
     
     onShipClick: function(e){
         //console.log("click on ship");
+        
+        if (!e || e.which !== 1)
+            return;
+        
         e.stopPropagation();
         var id = $(this).data("id");
         var ship = gamedata.getShip(id);
         
-        if (shipSelectList.haveToShowList(ship)){
+        if (shipSelectList.haveToShowList(ship, e)){
             shipSelectList.showList(ship);
         }else{
             shipManager.doShipClick(ship);
@@ -630,7 +639,11 @@ window.shipManager = {
         
     },
     
-    getShipsInSameHex: function(ship){
+    getShipsInSameHex: function(ship, pos1){
+        
+        if (!pos1)
+            var pos1 = shipManager.getShipPosition(ship);
+        
         var shipsInHex = Array();
         for (var i in gamedata.ships){
             var ship2 = gamedata.ships[i];
@@ -640,8 +653,7 @@ window.shipManager = {
 				
             //if (ship.id = ship2.d)
             //  continue;
-                
-            var pos1 = shipManager.getShipPosition(ship);
+            
             var pos2 = shipManager.getShipPosition(ship2);
             
             
@@ -687,9 +699,13 @@ window.shipManager = {
 		
 		return {x:0, y:0};
 		
-	}
+	},
     
-    
-    
-
+    isElint: function(ship){
+        var elint = shipManager.systems.getSystemByName(ship, "elintArray");
+        if (!elint || shipManager.systems.isDestroyed(ship, elint))
+            return false;
+        
+        return true;
+    }
 }

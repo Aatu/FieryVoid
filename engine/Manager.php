@@ -8,6 +8,21 @@ class Manager{
             self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
     }
     
+    private static function deleteOldGames()
+    {
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
+            $ids = self::$dbManager->getGamesToBeDeleted();
+            self::$dbManager->deleteGames($ids);
+                
+            self::$dbManager->endTransaction(false);
+        }catch(exception $e) {
+            self::$dbManager->endTransaction(true);
+            throw $e;
+        }
+    }
+    
     public static function leaveLobbySlot($user){
         try {
             self::initDBManager();
@@ -41,7 +56,6 @@ class Manager{
     }
     
     public static function getTacGames($userid){
-        $gamedata = null;
         
         if (!is_numeric($userid))
 			return null;
@@ -147,14 +161,18 @@ class Manager{
     
 		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
 			return null;
-		
         
-        
-    
         $gamedata = null;
         try {
             self::initDBManager();
+            
+            if ($turn === -1)
+                self::deleteOldGames ();
+            
+            self::advanceGameState($userid, $gameid);
+            
             if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
+                ////Debug("GAME: $gameid Player: $userid requesting gamedata, new found.");
                 $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
                 if ($gamedata == null)
                     return null;
@@ -165,7 +183,7 @@ class Manager{
             }
         }
         catch(exception $e) {
-            throw $e;
+            Debug::error($e);
         }
         
         return $gamedata;
@@ -187,7 +205,7 @@ class Manager{
         $json = json_encode($gdS, JSON_NUMERIC_CHECK);
     
        
-        
+        //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
         return $json;
     
     }
@@ -195,67 +213,75 @@ class Manager{
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships){
         try {
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
+            
+            self::initDBManager();  
+            $starttime = time();
+            
+            
             $ships = self::getShipsFromJSON($ships);
             
             if (sizeof($ships)==0)
-				return "{error:\"Error, No gamedata submitted.\"}";
+				throw new Exception("Gamedata missing");
             //print(var_dump($ships));
-            $gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
-            $gamedata->ships = $ships;
+            //$gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
+            //$gamedata->ships = $ships;
             
-            self::initDBManager();  
+            if (!self::$dbManager->getPlayerSubmitLock($gameid, $userid))
+                return "{'error': 'Failed to get player lock'}";
+            
+            //Debug("GAME: $gameid Player: $userid starting submit of phase $phase");
+            
             self::$dbManager->startTransaction();
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
-                return "{error:\"Error, we were not expecting this.\"}";
+                throw new Exception("Unexpected orders");
                 
             if ($gdS->hasAlreadySubmitted($userid))
-                return "{error: \"Error, turn already submitted. Or player not found\"}";
+                throw new Exception("Turn already submitted or wrong user");
                 
             if ($gdS->status == "FINISHED")
-                return "{error: \"Error, game is finished\"}";
+                throw new Exception("Game is finished");
             
             //print(var_dump($ships));
             
             if ($gdS->phase == 1){
-                 if (!($ret = self::handleInitialActions($ships, $gdS)))
-                        return $ret;
-                        
+                 $ret = self::handleInitialActions($ships, $gdS);
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
-                    if (!($ret = self::handleMovement($ships, $gdS)))
-                        return $ret;
+                    $ret = self::handleMovement($ships, $gdS);
                 }else{
-                    return "{error: \"phase and active ship does not match\"}";
+                    throw new Exception("phase and active ship does not match");
                 }
             }else if ($gdS->phase == 3){
-                if (!($ret = self::handleFiringOrders($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleFiringOrders($ships, $gdS);
             }else if ($gdS->phase == 4){
-                if (!($ret = self::handleFinalOrders($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
-                if (!($ret = self::handleBuying($ships, $gdS)))
-                    return $ret;
+                $ret = self::handleBuying($ships, $gdS);
+            }else if ($gdS->phase == -1){
+                $ret = self::handleDeployment($ships, $gdS);
             }
-            
-            $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-            $gdS->prepareForPlayer($turn, $phase, $activeship);
-                      
-            $gdS = json_encode($gdS, JSON_NUMERIC_CHECK);
-            
+                        
             self::$dbManager->endTransaction(false);
-                   
-            return $gdS;
+            
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            
+            //Debug("GAME: $gameid Player: $userid SUBMIT OK");
+            
+            $endtime = time();
+            Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+            return '{}';
             
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
-            return $e->getMessage();
+            self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            Debug::error($e);
+            return "{'error': '" .$e->getMessage() . "'}";
         }
+       
         
-        return "error";
     }
     
     private static function handleBuying(  $ships, $gamedata ){
@@ -267,7 +293,7 @@ class Manager{
         }
         
         if ($points > $gamedata->points)    
-            return "Error, fleet too expensive.";
+            throw new Exception("Fleet too expensive.");
     
             
         foreach ($ships as $ship){
@@ -283,11 +309,6 @@ class Manager{
             return true;
         }
         
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-            self::startGame($servergamedata);
-        
-        }
         
         return true;
         
@@ -296,12 +317,7 @@ class Manager{
     
     private static function handleFinalOrders(  $ships, $gamedata ){
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::changeTurn($gamedata);
-        
-        }
-        
+       
         return true;
     }
     
@@ -319,8 +335,8 @@ class Manager{
                     self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
             }
             
-            if (Firing::validateFireOrders($ship->fireOrders, $gamedata)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata)){
+                self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }
             
         }
@@ -328,10 +344,6 @@ class Manager{
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
         
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::startEndPhase($gamedata);
-        
-        }
         //print("firing");
         return true;
     
@@ -364,7 +376,7 @@ class Manager{
             if (EW::validateEW($ship->EW, $gd)){
                 self::$dbManager->submitEW($gamedata->id, $ship->id, $ship->EW, $gamedata->turn);
             }else{
-                return "{error: \"Failed to validate EW\"}";
+                throw new Exception("Failed to validate EW");
             }
 		   			
             
@@ -378,11 +390,11 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
-          		            
-            if (Firing::validateFireOrders($ship->fireOrders, $gd)){
-				 self::$dbManager->submitFireorders($gamedata->id, $ship->fireOrders, $gamedata->turn, $gamedata->phase);
+            
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
+				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }else{
-                return "{error: \"Failed to validate Ballistic firing orders\"}";
+                throw new Exception("Failed to validate Ballistic firing orders");
             }
 			
             
@@ -391,13 +403,83 @@ class Manager{
         }
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        if ($gamedata->othersDone($gamedata->forPlayer)){
-            self::startMovement($gamedata);
-        
+                
+        return true;    
+    
+    }
+    
+    public static function advanceGameState($playerid, $gameid)
+    {
+        try{
+            if (!self::$dbManager->checkIfPhaseReady($gameid))
+                return;
+            
+            if (!self::$dbManager->getGameSubmitLock($gameid))
+            {
+                Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
+                return;
+            }
+            
+            $starttime = time();
+            
+            //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
+            
+            self::$dbManager->startTransaction();
+            
+            $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
+            $phase = $gamedata->phase;
+            
+            if ($phase == 1){
+                 self::startMovement($gamedata);
+            }else if ($phase == 2){
+                //Because movement does not have simultaenous orders, this is handled in handleMovement
+            }else if ($phase == 3){
+                   self::startEndPhase($gamedata);
+            }else if ($phase == 4){
+                self::changeTurn($gamedata);
+            }else if ($phase == -2){
+                self::startGame($gamedata);
+            }else if ($phase == -1){
+                self::startInitialOrders($gamedata);
+            }
+            
+            $loadings = Array();
+            foreach ($gamedata->ships as $ship)
+            {
+                foreach ($ship->systems as $system)
+                {
+                    if ($system instanceof Weapon)
+                    {
+                        $loading = $system->calculateLoading($gamedata->id, $gamedata->phase, $ship, $gamedata->turn);
+                        if ($loading)
+                            $loadings[] = $loading;
+                    }
+                    
+                }
+            }
+            
+            self::$dbManager->updateWeaponLoading($loadings);
+            self::$dbManager->endTransaction(false);
+            self::$dbManager->releaseGameSubmitLock($gameid);
+            
+            $endtime = time();
+            Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+            //Debug("GAME: $gameid Gamedata advanced ok");
         }
+        catch(Exception $e)
+        {
+            self::$dbManager->endTransaction(true);
+            self::$dbManager->releaseGameSubmitLock($gameid);
+            Debug::error($e);
+            throw $e;
+        }
+    }
+    
+    private static function startInitialOrders($gamedata){
+    
+        $gamedata->phase = 1; 
         
-        return true;
+        self::$dbManager->updateGamedata($gamedata);
     
     }
     
@@ -444,18 +526,19 @@ class Manager{
                 $y = (($t-1)/2)*-1;
             }
             
-            $x = -30;
+            $x = -50;
             
             if ($player->team == 2){
-                $x=30;
+                $x=50;
             }
             
             
             
             $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0);
-            self::$dbManager->deploy($servergamedata->id, $ship->id, $move);
-            
+            $ship->movement = array($move);
         }
+        
+        self::$dbManager->insertShips($servergamedata->id, $servergamedata->ships);
         
         self::changeTurn($gamedata);
     }
@@ -467,24 +550,46 @@ class Manager{
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
+        
+        $starttime = time();
         Firing::automateIntercept($servergamedata);
+        $endtime = time();
+        Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
+        
+        $starttime = time();
         Firing::fireWeapons($servergamedata);
-        $criticals = Criticals::setCriticals($servergamedata);
+        $endtime = time();
+        Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
+        
+        
+        Criticals::setCriticals($servergamedata);
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
 		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        
+    }
+    
+    private static function handleDeployment( $ships, $gamedata)
+    {
+        $moves = Deployment::validateDeployment($gamedata, $ships);
+        foreach ($moves as $shipid=>$move)
+        {
+            self::$dbManager->insertMovement($gamedata->id, $shipid, $move);
+        }
+        
+        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
+        
     }
     
     private static function handleMovement( $ships, $gamedata ){
     
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
-            return "Already moved";
+            throw new Exception("The ship has already moved");
         
-            
         self::$dbManager->submitMovement($gamedata->id, $ships[$gamedata->activeship]->id, $gamedata->turn, $ships[$gamedata->activeship]->movement);
         
         $next = false;
@@ -519,11 +624,17 @@ class Manager{
     private static function changeTurn($gamedata){
     
         $gamedata->turn = $gamedata->turn+1;
-        $gamedata->phase = 1; 
+        if ($gamedata->turn === 1)
+        {
+            $gamedata->phase = -1; 
+        }else{
+            $gamedata->phase = 1; 
+        }
+        
         $gamedata->activeship = -1;
         $gamedata->status = "ACTIVE";
         
-        if ($gamedata->isFinished())
+        if ($gamedata->turn > 1 && $gamedata->isFinished())
             $gamedata->status = "FINISHED";
             
         self::generateIniative($gamedata);
@@ -605,36 +716,57 @@ class Manager{
                 }
             }
             
-            $fireOrders = array();
-            
-            if (is_array($value["fireOrders"])){
-                foreach($value["fireOrders"] as $i=>$fo){
-                                                //$id, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode
-                    $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingmode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
-                    $fireOrders[$i] = $fireOrder;
-                }
-            }
             
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $movements );
-                
+            
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], null);
+            $ship->setMovement($movements);    
             $ship->EW = $EW;
-            $ship->fireOrders = $fireOrders;
             
             foreach($value["systems"] as $i=>$system){
-                if (!is_array($system["power"]))
-                    continue;
-                    
-                foreach ($system["power"] as $a=>$power){
-                                                    
-                    $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
-                    $sys = $ship->getSystemById($powerEntry->systemid);
-                    
-                    if (isset($sys)){
-                        $sys->power[] = $powerEntry;
+                $sys = $ship->getSystemById($system['id']);
+                
+                if (isset($system["power"]) &&is_array($system["power"]))
+                {
+                    foreach ($system["power"] as $a=>$power)
+                    {
+                        $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
+                        if (isset($sys)){
+                            $sys->power[] = $powerEntry;
+                        }
                     }
+                }
+
+                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
+                {
+                    foreach($system["fireOrders"] as $i=>$fo)
+                    {
+                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                        if (isset($sys)){
+                            $sys->fireOrders[] = $fireOrder;
+                        }
+                    }
+                }
+                
+                if (isset($system["systems"]) && is_array($system["systems"]))
+                {
+                    foreach ($system["systems"] as $fighter)
+                    {
+                        $fig = $sys->getSystemById($fighter['id']);
+                        if (isset($fighter["fireOrders"]) && is_array($fighter["fireOrders"]))
+                        {
+                            foreach($fighter["fireOrders"] as $i=>$fo)
+                            {
+                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                                if (isset($fig)){
+                                    $fig->fireOrders[] = $fireOrder;
+                                }
+                            }
+                        }
+                    }
+                    
                 }
             
             }

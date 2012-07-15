@@ -22,8 +22,6 @@
         
         public $canvasSize = 200;
 
-        public $fireOrders = array();
-        
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
@@ -38,8 +36,22 @@
             $this->id = (int)$id;
             $this->userid = (int)$userid;
             $this->name = $name;
-            $this->movement = $movement;
 
+        }
+        
+        public function setMovement($movement)
+        {
+            $this->movement = $movement;
+        }
+        
+        public function onConstructed($turn, $phase)
+        {
+            foreach ($this->systems as $system){
+                $system->onConstructed($this, $turn, $phase);
+                
+                if ($system instanceof ElintArray)
+                    $this->elint = true;
+            }
         }
         
         protected function addSystem($system, $loc){
@@ -78,7 +90,7 @@
         public function getLastTurnMoved(){
             $turn = 0;
             foreach($this->movement as $elementKey => $move) {
-                if (!$move->preturn)
+                if (!$move->preturn && $move->type != "deploy")
                     $turn = $move->turn;
             } 
             
@@ -255,7 +267,6 @@
             foreach ($this->movement as $move){
                 $movement = $move;
             }
-        
             return $movement->getCoPos();
         
         }
@@ -272,6 +283,25 @@
             }
             
             return $pos;
+        }
+        
+        public function getEWbyType($type, $turn, $target = null){
+            
+            foreach ($this->EW as $EW)
+            {
+                if ($EW->turn != $turn)
+                    continue;
+
+                if ($target && $EW->targetid != $target->id)
+                    continue;
+
+                if ($EW->type == $type){
+                    return $EW->amount;
+                }
+            }
+
+            return 0;
+        
         }
         
         public function getDEW($turn){
@@ -311,6 +341,17 @@
             
             
             return 0;
+        }
+        
+        public function getOEWTargetNum($turn){
+        
+			$amount = 0;
+            foreach ($this->EW as $EW){
+                if ($EW->type == "OEW" && $EW->turn == $turn)
+                    $amount++;
+            }
+            
+            return $amount;
         }
         
         public function getFacingAngle(){
@@ -611,6 +652,18 @@
             }
             
             return false;
+        }
+        
+        public function getAllFireOrders()
+        {
+            $orders = array();
+            
+            foreach ($this->systems as $system)
+            {
+                $orders = array_merge($orders, $system->fireOrders);
+            }
+            
+            return $orders;
         }
         
     }

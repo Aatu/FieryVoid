@@ -55,6 +55,10 @@ window.gamedata = {
 	
 	
 	},
+    
+    isMyShip: function(ship){
+        return (ship.userid == gamedata.thisplayer);
+    },
 	
 	parseShips: function(json){
 	
@@ -75,6 +79,10 @@ window.gamedata = {
 		$(".addship").bind("click", this.buyShip);
 	
 	},
+    
+    goToWaiting: function(){
+        
+    },
 	
 	parseServerData: function(serverdata){
 

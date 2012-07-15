@@ -1,7 +1,42 @@
 shipManager.movement = {
 
 
-    
+    deploy: function(ship, pos){
+        
+        if (!ship.deploymove){
+            var lm = ship.movement[ship.movement.length-1];
+            var move = {
+                id:-1,
+                type:"deploy",
+                x:pos.x,
+                y:pos.y,
+                xOffset:0,
+                yOffset:0,
+                facing:lm.facing,
+                heading:lm.heading,
+                speed:lm.speed,
+                animating:false,
+                animated:true,
+                animationtics:0,
+                requiredThrust:Array(null, null, null, null, null),
+                assignedThrust:Array(),
+                commit:true,
+                preturn:false,
+                turn:gamedata.turn,
+                forced:false,
+                value:0
+            };
+            
+            ship.deploymove = move;
+            ship.movement[ship.movement.length] = move;
+        }else{
+            ship.deploymove.x = pos.x;
+            ship.deploymove.y = pos.y;
+        }
+        
+        shipManager.drawShip(ship);
+        
+    },
 
     isMovementReady: function(ship){
 		//console.log("movement ready: " + shipManager.movement.getRemainingMovement(ship));
@@ -31,7 +66,7 @@ shipManager.movement = {
                 }
                     
             }else{
-                if (!movement.preturn && !movement.forced)
+                if (!movement.preturn && !movement.forced && movement.type != "deploy")
                     return true;
             }
         }
@@ -818,7 +853,7 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn)
                 continue;
             
-            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange")
+            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy")
                 return false;
         
         }
@@ -1241,6 +1276,7 @@ shipManager.movement = {
     //TURN
     
     canTurn: function(ship, right){
+        //console.log(ship.name + " checking turn");
         
         if (gamedata.gamephase != 2)
             return false;
@@ -1267,7 +1303,7 @@ shipManager.movement = {
                
        
         if (!(ship.agile && previous && shipManager.movement.isTurn(previous)) && turndelay > 0){
-            //console.log("has turn delay, cant turn");
+            //console.log(ship.name + " has turn delay, cant turn");
             return false;
         }
         
@@ -1276,18 +1312,25 @@ shipManager.movement = {
         
         //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost){
-            //console.log("does not have enough thrust");
+            //console.log(ship.name + " does not have enough thrust");
             return false;
         }
         
         
         var pivoting = shipManager.movement.isPivoting(ship);
         if (pivoting != "no" && !ship.gravitic ){ //&& !shipManager.movement.isTurningToPivot(ship, right) && !ship.gravitic){
+            //console.log(ship.name + " pivoting and not gravitic");
             return false;
         }
-        if (heading !== facing && !shipManager.movement.canTurnToPivot(ship, right) && !ship.gravitic)
+        if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !shipManager.movement.canTurnToPivot(ship, right) 
+            && !ship.gravitic)
+        {
+            //console.log(ship.name + " heading is not facing, and cant turn to pivot");
             return false;
+        }
+            
         
+        //console.log(ship.name + " can turn");
         return true;
         
         
@@ -1377,6 +1420,10 @@ shipManager.movement = {
 			requiredThrust[0] = turncost;
 			return requiredThrust;
 		}
+        
+        if (speed===0){
+            return Array(1,0,0,0,0);
+        }
         
         side = Math.floor(turncost / 2);
         rear = Math.floor(turncost / 2);

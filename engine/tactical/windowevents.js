@@ -48,6 +48,7 @@ jQuery(function(){
     $(".shipclickable").bind("click", shipManager.onShipClick);
 	$(".shipclickable").bind("mouseover", shipClickable.shipclickableMouseOver);
     $(".shipclickable").bind("mouseout", shipClickable.shipclickableMouseOut);
+    $(document).bind("keyup", windowEvents.onKeyUp);
 	
 	
 	
@@ -62,7 +63,28 @@ jQuery(function(){
         event = event || window.event;
         
     }
-})
+});
+
+window.windowEvents = {
+    
+    onKeyUp: function(e){
+        console.log("keycode: " +  e.keyCode);
+        switch(e.keyCode){
+            case 81:
+                animation.cancelAnimation();
+                break;
+            case 69:
+                ew.showAllEnemyEW();
+                break;
+            case 87:
+                ew.showAllFriendlyEW();
+                break;
+            default:
+                return;
+         
+        }
+    }
+}
 
 window.zooming = {
 
@@ -186,8 +208,13 @@ window.scrolling = {
     mousedown: function(event){
 	
 		shipSelectList.remove();
+        
+        
+		if (!event || event.which !== 3)
+            return;
+        
+        event.stopPropagation(event);
 		
-		event.stopPropagation(event);
         if (gamedata.effectsDrawing)
 			return;
 			

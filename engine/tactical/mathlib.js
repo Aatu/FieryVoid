@@ -33,7 +33,20 @@ window.mathlib = {
 			console.trace();
 		return Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
 	},
-	
+    
+    getDistanceBetweenShips: function(s1, s2){
+        var start = shipManager.getShipPositionInWindowCoWithoutOffset(s1);
+        var end = shipManager.getShipPositionInWindowCoWithoutOffset(s2);
+        var dis = Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
+        
+        return dis;
+    },
+    
+    getDistanceBetweenShipsInHex: function(s1, s2){
+        var dis = mathlib.getDistanceBetweenShips(s1, s2);
+        return (dis / hexgrid.hexWidth());
+    },
+    
 	getDistanceHex: function(start, end){
 		var dis = Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
 		return (dis / hexgrid.hexWidth());

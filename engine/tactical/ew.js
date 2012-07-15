@@ -88,6 +88,38 @@ window.ew = {
 		return amount;
 		
 	},
+    
+    getNumOfOffensiveTargets: function(ship){
+		var amount = 0;
+		for (var i in ship.EW){
+			var entry = ship.EW[i];
+			if (entry.turn != gamedata.turn)
+				continue;
+			
+			if (entry.type == "OEW")
+				amount ++;
+		}
+		
+		return amount;
+		
+	},
+    
+    getEWByType: function(type, ship, target){
+        for (var i in ship.EW){
+			var entry = ship.EW[i];
+			if (entry.turn != gamedata.turn)
+				continue;
+			
+            if (target && entry.targetid != target.id)
+                continue;
+            
+			if (entry.type == type){
+				return entry.amount;
+            }
+		}
+		
+		return 0;
+    },
 	
 	convertUnusedToDEW: function(ship){
 		var listed = ew.getListedDEW(ship);
@@ -114,6 +146,35 @@ window.ew = {
 		
 		return 0;
 	},
+    
+    getBDEW: function(ship){
+        for (var i in ship.EW){
+            var EWentry = ship.EW[i];
+			if (EWentry.turn != gamedata.turn)
+				continue;
+				
+            if (EWentry.type == "BDEW"){
+                return EWentry.amount;
+            }        
+        }
+        
+        return 0;
+    },
+    
+    getBDEWentry: function(ship){
+    
+        for (var i in ship.EW){
+            var EWentry = ship.EW[i];
+			if (EWentry.turn != gamedata.turn)
+				continue;
+				
+            if (EWentry.type == "BDEW"){
+                return EWentry;
+            }        
+        }
+        
+        return null;
+    },
     
     getCCEW: function(ship){
         
@@ -229,32 +290,77 @@ window.ew = {
 			var pos = shipManager.getShipPositionForDrawing(ship);
             
 
-			if (EW.type == "OEW"){
+			if (EW.type == "OEW" || EW.type == "SOEW" || EW.type == "SDEW" || EW.type == "DIST"){
 				var posE = shipManager.getShipPositionForDrawing(gamedata.getShip(EW.targetid));
 				var a = (EW.amount == 1) ? 0.50 : 0.50;
 				
-				if (ship.userid == gamedata.thisplayer){
-					canvas.strokeStyle = "rgba(225,225,250,"+a+")";
-					canvas.fillStyle = "rgba(225,225,250,"+a+")";
-				}else{
-					canvas.strokeStyle = "rgba(125,12,12,"+a+")";
-					canvas.fillStyle = "rgba(125,12,12,"+a+")";
-				}
+                if (EW.type == "OEW"){
+                    if (ship.userid == gamedata.thisplayer){
+                        canvas.strokeStyle = "rgba(225,225,250,"+a+")";
+                        canvas.fillStyle = "rgba(225,225,250,"+a+")";
+                    }else{
+                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
+                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                    }
+                }else if (EW.type == "SOEW"){
+                    if (ship.userid == gamedata.thisplayer){
+                        canvas.strokeStyle = "rgba(100,220,240,"+a+")";
+                        canvas.fillStyle = "rgba(100,220,240,"+a+")";
+                    }else{
+                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
+                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                    }
+                }else if (EW.type == "SDEW"){
+                    if (ship.userid == gamedata.thisplayer){
+                        canvas.strokeStyle = "rgba(160,250,100,"+a+")";
+                        canvas.fillStyle = "rgba(160,250,100,"+a+")";
+                    }else{
+                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
+                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                    }
+                }else if (EW.type == "DIST"){
+                    if (ship.userid == gamedata.thisplayer){
+                        canvas.strokeStyle = "rgba(255,115,40,"+a+")";
+                        canvas.fillStyle = "rgba(255,115,40,"+a+")";
+                    }else{
+                        canvas.strokeStyle = "rgba(255,115,40,"+a+")";
+                        canvas.fillStyle = "rgba(255,115,40,"+a+")";
+                    }
+                }
+                
 				var w = Math.ceil(( EW.amount )*gamedata.zoom*0.5);
 				var start = mathlib.getPointInDistanceBetween(pos, posE, 38*gamedata.zoom);
 				graphics.drawLine(canvas, start.x, start.y, posE.x, posE.y, w);
 				graphics.drawCircleAndFill(canvas, posE.x, posE.y, 5*gamedata.zoom, 0 );
 			}
+            
+            if (EW.type == "BDEW"){
+                var a = EW.amount *0.01;
+                a += 0.1;
+				if (ship.userid == gamedata.thisplayer){
+					canvas.strokeStyle = "rgba(160,250,100,0.5)";
+                    canvas.fillStyle = "rgba(160,250,100,"+a+")";
+				}else{
+					canvas.strokeStyle = "rgba(125,12,12,0.5)";
+					canvas.fillStyle = "rgba(125,12,12,"+a+")";
+				}
+				
+				graphics.drawCircleAndFill(canvas, pos.x, pos.y, 20.5*hexgrid.hexWidth(), 2 );
+			}
 		};
+        
+        
 		
 		return effect;
 	
 	},
     
-    AssignOEW: function(ship){
-	
+    AssignOEW: function(ship, type){
 		if (gamedata.waiting == true || gamedata.gamephase != 1)
 			return; 
+        
+        if (!type) 
+            type = "OEW";
 			
         var selected = gamedata.getSelectedShip();
         
@@ -267,24 +373,27 @@ window.ew = {
 			if (EWentry.turn != gamedata.turn)
 				continue;
 				
-            if (EWentry.type=="OEW" && EWentry.targetid == ship.id)
+            if (EWentry.type==type && EWentry.targetid == ship.id)
                 return;
         }
         var left = ew.getDefensiveEW(selected);
         
-        if (left < 1)
+        if (left < 1 || (type == "DIST" && left < 3)){
             return;
+        }
             
-		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+		if (type == "OEW" && shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
 			var allOEW = ew.getAllOffensiveEW(selected);
 			var all = ew.getScannerOutput(selected);
 			
 			if (allOEW+1 > all*0.5)
 				return false;
 		}
-			
+		var amount = 1;
+        if (type == "DIST")
+            amount = 3;
             
-        selected.EW.push({shipid:selected.id, type:"OEW", amount:1, targetid:ship.id, turn:gamedata.turn});
+        selected.EW.push({shipid:selected.id, type:type, amount:amount, targetid:ship.id, turn:gamedata.turn});
         ew.adEWindicators(selected);
         gamedata.shipStatusChanged(selected);
     },
@@ -302,6 +411,13 @@ window.ew = {
 		
         if (entry == "CCEW"){
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});
+        }else if (entry == "BDEW"){
+            ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
+            ew.adEWindicators(ship);
+        }else if (entry.type == "DIST"){
+            if (left < 3)
+                return;
+            entry.amount += 3;
         }else{
             
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){
@@ -313,7 +429,9 @@ window.ew = {
 			}
            
             
-                
+            if (entry.type == "SOEW")
+                return;
+            
             entry.amount++;
         }
         gamedata.shipStatusChanged(ship);
@@ -328,11 +446,15 @@ window.ew = {
         var ship = e.data("ship");
         var entry = e.data("EW");
         
-        if (entry == "CCEW"){
+        if (entry == "CCEW" || entry == "BDEW"){
             return;
         }
         
-        entry.amount--;
+        amount = 1;
+        if (entry.type == "DIST")
+            amount = 3;
+        
+        entry.amount -= amount;
         if (entry.amount<1){
             var i = $.inArray(entry, ship.EW);
             ship.EW.splice(i, 1);
@@ -352,7 +474,116 @@ window.ew = {
 				ship.EW.splice(i, 1);
         }     
 	
-	}
+	},
+    checkInELINTDistance: function(ship, target, distance){
+        var shipPos = shipManager.getShipPositionInWindowCo(ship);
+        var targetPos = shipManager.getShipPositionInWindowCo(target)
+       
+        if (!distance)
+            distance = 30;
+        
+        return (mathlib.getDistanceHex(shipPos, targetPos)<=distance);
+    },
+    
+    getSupportedOEW: function(ship, target){
+        var amount = 0;
+        for (var i in gamedata.ships){
+            var elint = gamedata.ships[i];
+            if (elint == ship || !shipManager.isElint(elint))
+                continue;
+            
+            if (!ew.checkInELINTDistance(target, elint, 30))
+                continue;
+            
+            if (!ew.getEWByType("SOEW", elint, ship))
+                continue;
+            
+            var foew = ew.getEWByType("OEW", elint, target) * 0.5;
+            if (foew > amount)
+               amount = foew;
+        }
+        
+        return amount;
+    },
+    
+    getSupportedDEW: function(ship){
+        var amount = 0;
+        for (var i in gamedata.ships){
+            var elint = gamedata.ships[i];
+            if (elint == ship || !shipManager.isElint(elint))
+                continue;
+            
+            var fdew = ew.getEWByType("SDEW", elint, ship)*0.5;
+
+            if (fdew > amount)
+               amount = fdew;
+        }
+        
+        return amount;
+    },
+    
+    getSupportedBDEW: function(ship){
+        var amount = 0;
+        for (var i in gamedata.ships){
+            var elint = gamedata.ships[i];
+            if ( !shipManager.isElint(elint) || !ew.checkInELINTDistance(ship, elint, 20))
+                continue;
+            
+            var fdew = ew.getEWByType("BDEW", elint)*0.25;
+
+            if (fdew > amount)
+               amount = fdew;
+        }
+        return amount;
+    },
+    
+    getDistruptionEW: function(ship){
+        
+        var amount = 0;
+        for (var i in gamedata.ships){
+            var elint = gamedata.ships[i];
+            if (elint == ship || !shipManager.isElint(elint))
+                continue;
+            
+            var fdew = ew.getEWByType("DIST", elint, ship)/3;
+
+            //if (fdew > amount)
+            amount += fdew;
+        }
+        
+        var num = ew.getNumOfOffensiveTargets(ship);
+        if (num > 0)
+            return amount/num;
+        
+        return amount;
+    },
+    
+    showAllEnemyEW: function(){
+        if (gamedata.gamephase > 1){
+            
+            for (var i in gamedata.ships){
+                var ship = gamedata.ships[i];
+                
+                if (gamedata.isMyShip(ship))
+                    continue;
+                
+                ew.adEWindicators(ship);
+            }
+			drawEntities();
+		}
+    },
+    
+    showAllFriendlyEW: function(){
+        for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+
+            if (!gamedata.isMyShip(ship))
+                continue;
+
+            ew.adEWindicators(ship);
+        }
+        drawEntities();
+    }
     
     
 

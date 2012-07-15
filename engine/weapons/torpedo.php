@@ -68,7 +68,7 @@
         
         public function firedOnTurn($ship, $turn){
             
-            foreach ($ship->fireOrders as $fire){
+            foreach ($this->fireOrders as $fire){
                 if ($fire->weaponid == $this->id && $fire->turn == $turn){
                     return  $fire->shots;
                 }
@@ -76,6 +76,39 @@
             return 0;
         }
         
+        public function calculateLoading( $gameid, $phase, $ship, $turn )
+        {
+            $loading = null;
+            $shotsfired = $this->firedOnTurn($ship, $turn);
+            if ($phase === 2)
+            {
+                if  
+                ( $this->isOfflineOnTurn($turn) )
+                {
+                    $loading = new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+                }
+                else if ($shotsfired)
+                {
+                    $newloading = $this->turnsloaded-$shotsfired;
+                    if ($newloading < 0)
+                        $newloading = 0;
+
+                $loading = new WeaponLoading($this->id, $gameid, $ship->id, $newloading, 0, 0, 0);
+                }
+            }
+            else if ($phase === 1)
+            {
+                $newloading = $this->turnsloaded+1;
+                if ($newloading > $this->getNormalLoad())
+                    $newloading = $this->getNormalLoad();
+
+                $loading = new WeaponLoading($this->id, $gameid, $ship->id, $newloading, 0, 0, 0);
+            }
+
+            return $loading;
+        }
+        
+        /*
         public function setLoading($ship, $turn, $phase){
             $turnsloaded = 0;
         
@@ -136,7 +169,7 @@
             
             $this->turnsloaded = $turnsloaded;
         }
-        
+        */
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
             $this->shots = $this->turnsloaded;

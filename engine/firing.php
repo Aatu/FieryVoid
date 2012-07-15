@@ -45,7 +45,7 @@
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
                     $interceptFire->addToDB = true;
-                    $this->ship->fireOrders[] = $interceptFire;
+                    $this->weapon->fireOrders[] = $interceptFire;
                 }
                 
             }
@@ -109,8 +109,7 @@ class Firing{
                 if ($weapon->ballistic)
                     continue;
                     
-                $weapon->setLoading($ship, $gd->turn-1, 3);
-                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime)
+                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime || $weapon->firedOnTurn($ship, $gd->turn))
                     continue;
                    
                 $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
@@ -158,8 +157,9 @@ class Firing{
             
             if ($shooter->team == $ship->team)
                 continue;
-                      
-            foreach($shooter->fireOrders as $fire){
+            
+            $fireOrders = $shooter->getAllFireOrders();
+            foreach($fireOrders as $fire){
                 if ($fire->turn != $turn)
                     continue;
                 
@@ -260,15 +260,13 @@ class Firing{
     
     
     public static function fireWeapons($gamedata){
-
-        $turn = $gamedata->turn;
         
         foreach ($gamedata->ships as $ship){
 			if ($ship instanceof FighterFlight)
 				continue;
 			
 			//FIRE all ships
-            foreach($ship->fireOrders as $fire){
+            foreach($ship->getAllFireOrders() as $fire){
 				self::fire($ship, $fire, $gamedata);
 			}
             
@@ -282,7 +280,7 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			foreach($ship->fireOrders as $fire){
+			foreach($ship->getAllFireOrders() as $fire){
 				if ($fire->turn != $gamedata->turn)
                     continue;
                 
@@ -316,7 +314,7 @@ class Firing{
 			if (!($ship instanceof FighterFlight))
 				continue;
 				
-			foreach($ship->fireOrders as $fire){
+			foreach($ship->getAllFireOrders() as $fire){
                 if ($fire->turn != $gamedata->turn)
                     continue;
 							
@@ -340,7 +338,6 @@ class Firing{
     
     
     private static function fire($ship, $fire, $gamedata){
-		
 		if ($fire->turn != $gamedata->turn)
 			return;
 			
@@ -352,14 +349,6 @@ class Firing{
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
 		
-		//if ($weapon->ballistic)
-		//	return;
-			
-		if ($fire->rolled>0)
-			return;
-			
-		//print("Firing " . $fire->id . "\n");
-		$weapon->setLoading($ship, $gamedata->turn-1, 3);
 		$weapon->fire($gamedata, $fire);
 		
 	}

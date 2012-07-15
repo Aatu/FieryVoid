@@ -236,10 +236,10 @@ window.effects = {
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             
+            var fires = weaponManager.getAllFireOrders(ship);
             
-            
-            for (var a in ship.fireOrders){
-                var fire = ship.fireOrders[a];
+            for (var a in fires){
+                var fire = fires[a];
                 if (fire.turn != gamedata.turn || fire.type=='intercept' || !fire.rolled)
                     continue;
                 
@@ -260,8 +260,9 @@ window.effects = {
                     var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
                     weapon = weaponManager.getFiringWeapon(weapon, fire);
                     
-                    for (var b in ship.fireOrders){
-                        var otherFire = ship.fireOrders[b];
+                    var otherFires = weaponManager.getAllFireOrders(ship);
+                    for (var b in otherFires){
+                        var otherFire = otherFires[b];
                         var weapon2 = shipManager.systems.getSystem(ship, otherFire.weaponid);
                         weapon2 = weaponManager.getFiringWeapon(weapon2, otherFire);
                         
