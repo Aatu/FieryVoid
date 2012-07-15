@@ -1,8 +1,3 @@
-/**
- * Description of trolata
- *
- * @author Jasper van Rosmalen
- */
 <?php
 class Trolata extends BaseShip{
 

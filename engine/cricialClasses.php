@@ -42,6 +42,17 @@
 	
 	}
 	
+        class OutputReduced extends Critical
+        {
+            public $description = "Output reduced.";
+        
+            function __construct($id, $outputMod, $shipid, $systemid, $phpclass, $turn)
+            {
+                $this->outputMod = $outputMod;
+                parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+            }
+        }
+
 	class OutputReduced1 extends Critical{
 	
 		public $description = "Output reduced.";
