@@ -158,6 +158,15 @@ class Scanner extends ShipSystem{
     
 }
 
+class ElintScanner extends Scanner{
+    public $name = "elintScanner";
+    public $displayName = "ELINT Scanner";
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+}
+
 class CnC extends ShipSystem{
 
     public $name = "CnC";
@@ -252,7 +261,6 @@ class Structure extends ShipSystem{
          
     
     }
+
 }
-
-
 

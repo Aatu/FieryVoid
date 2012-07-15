@@ -549,6 +549,10 @@ window.shipManager = {
 			var stru = shipManager.systems.getStructureSystem(ship, 0);
 			if (shipManager.systems.isDestroyed(ship, stru))
 				return true;
+
+                        var react = shipManager.systems.getSystemByName(ship, "reactor");
+                        if (shipManager.systems.isDestroyed(ship, react))
+                            return true;
         }
             
         return false;
@@ -702,7 +706,7 @@ window.shipManager = {
 	},
     
     isElint: function(ship){
-        var elint = shipManager.systems.getSystemByName(ship, "elintArray");
+        var elint = shipManager.systems.getSystemByName(ship, "elintScanner");
         if (!elint || shipManager.systems.isDestroyed(ship, elint))
             return false;
         

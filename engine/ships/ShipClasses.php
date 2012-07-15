@@ -49,7 +49,7 @@
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 
-                if ($system instanceof ElintArray)
+                if ($system instanceof ElintScanner)
                     $this->elint = true;
             }
         }
@@ -472,11 +472,11 @@
         public function isDestroyed($turn = false){
         
             foreach($this->systems as $system){
-                /*
+
                 if ($system instanceof Reactor && $system->isDestroyed()){
                     return true;
                 }
-                */
+
                 if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                     return true;
                 }

@@ -161,3 +161,4 @@
         public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20+$this->damagebonus - $this->dp;      }
     }
+

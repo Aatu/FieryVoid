@@ -212,6 +212,7 @@ class NeutronLaser extends Laser{
         public $animationWidth = 4;
 
         public $loadingtime = 3;
+        public $overloadable = true;
 
         public $damageType = "raking";
         public $raking = 10;

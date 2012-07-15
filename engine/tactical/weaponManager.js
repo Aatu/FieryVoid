@@ -359,10 +359,10 @@ window.weaponManager = {
         var jammermod = 0;
         if (oew < 1){
             rangePenalty = rangePenalty*2;
-         }else{
+         }else if (shooter.faction != target.faction){
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
-            if (jammer)
+            if (jammer && !shipManager.power.isOffline(target, jammer))
                 jammermod = rangePenalty*shipManager.systems.getOutput(shooter, jammer);
 
             if (target.flight){
