@@ -377,7 +377,7 @@ class Weapon extends ShipSystem{
         parent::beforeTurn($ship, $turn, $phase);
     }
     
-    public function getDamage(){
+    public function getDamage($fireOrder){
         return 0;
     }
     
