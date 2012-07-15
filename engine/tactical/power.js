@@ -232,13 +232,19 @@ shipManager.power = {
 	countBoostPowerUsed: function(ship, system){
 		var boost = shipManager.power.getBoost(ship, system);
 		
+        if (boost == 0)
+            return 0;
+        
 		if (system.name == "engine"){
 			return system.engineEfficiency * boost;
 		}
 		
 		if (system.name == "scanner"){
-			
-			return (system.output * boost) + boost;
+			var power = 0;
+            for (var i = 1;i<=boost;i++){
+                power += system.output + i;
+            }
+			return power;
 		}
 	
 	},

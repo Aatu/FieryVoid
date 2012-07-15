@@ -200,6 +200,35 @@ window.animation = {
         
         e.html("WAITING FOR TURN"+s);
         e.data("dots", dots);
+    },
+    
+    cancelAnimation: function(){
+        if (!gamedata.animating)
+            return; 
+        
+        animation.endAnimation();
+        
+        for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+            
+            for (var a in ship.movement){
+                var move = ship.movement[a];
+                
+                if (move.commit !== true)
+                    continue;
+                
+                move.animated = true;
+                move.animating = false;
+            }
+            
+            gamedata.shipStatusChanged(ship);
+            shipManager.drawShip(ship);
+            
+        }
+        ballistics.calculateBallisticLocations();
+        ballistics.drawBallistics();
+        
+       
     }
     
 

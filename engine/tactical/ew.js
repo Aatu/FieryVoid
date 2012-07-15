@@ -526,7 +526,7 @@ window.ew = {
         var amount = 0;
         for (var i in gamedata.ships){
             var elint = gamedata.ships[i];
-            if (elint == ship || !shipManager.isElint(elint) || !ew.checkInELINTDistance(ship, elint, 20))
+            if ( !shipManager.isElint(elint) || !ew.checkInELINTDistance(ship, elint, 20))
                 continue;
             
             var fdew = ew.getEWByType("BDEW", elint)*0.25;
@@ -556,6 +556,33 @@ window.ew = {
             return amount/num;
         
         return amount;
+    },
+    
+    showAllEnemyEW: function(){
+        if (gamedata.gamephase > 1){
+            
+            for (var i in gamedata.ships){
+                var ship = gamedata.ships[i];
+                
+                if (gamedata.isMyShip(ship))
+                    continue;
+                
+                ew.adEWindicators(ship);
+            }
+			drawEntities();
+		}
+    },
+    
+    showAllFriendlyEW: function(){
+        for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+
+            if (!gamedata.isMyShip(ship))
+                continue;
+
+            ew.adEWindicators(ship);
+        }
+        drawEntities();
     }
     
     

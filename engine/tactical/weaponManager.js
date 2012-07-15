@@ -299,24 +299,34 @@ window.weaponManager = {
         
     },
     
-    calculateHitChange: function(shooter, target, weapon, calledid){
-    
-        var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
-        
-        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        
+    calculateBaseHitChange: function(target, base, shooter){
+
         var dew = ew.getDefensiveEW(target);
-        if (shooter.flight)
+        if (shooter && shooter.flight)
 			dew = 0;
 		
 		if (target.flight)
 			dew = shipManager.movement.getJinking(target);
-		
+        
         var bdew = ew.getSupportedBDEW(target);
         if (target.flight)
             bdew = 0;
         
         var sdew = ew.getSupportedDEW(target);
+        
+        console.log("base: " + base + " dew: " + dew + " blanket: " + bdew + "supportDEW: " +  sdew);
+        return base - dew - bdew - sdew;
+        
+        
+    },
+    
+    calculateHitChange: function(shooter, target, weapon, calledid){
+    
+        var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
+        var defence = weaponManager.getShipDefenceValue(shooter, target);
+        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
+        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
+        
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
         
@@ -365,15 +375,13 @@ window.weaponManager = {
             }
         }
             
-        var defence = weaponManager.getShipDefenceValue(shooter, target);
-        
         var firecontrol =  weaponManager.getFireControl(target, weapon);
             
         
-        var goal = (defence - dew - bdew - sdew - jammermod - rangePenalty + oew + soew + firecontrol + mod);
+        var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        console.log("rangePenalty: " + rangePenalty + " dew: " + dew + " bdew: " +bdew+ " sdew: " +sdew+ " oew: " + oew + " soew: "+soew+" defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + " baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         if (change > 100)
             change = 100;
