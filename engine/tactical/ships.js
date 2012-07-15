@@ -705,11 +705,35 @@ window.shipManager = {
 		
 	},
     
-    isElint: function(ship){
-        var elint = shipManager.systems.getSystemByName(ship, "elintScanner");
-        if (!elint || shipManager.systems.isDestroyed(ship, elint))
-            return false;
+    
+    getSpecialAbilitySystem: function(ship, ability)
+    {
+        for (var i in ship.systems)
+        {
+            var system = ship.systems[i];
+            
+            if (shipManager.systems.isDestroyed(ship, system))
+                continue;
+            
+            if (shipManager.power.isOffline(ship, system))
+                continue;
+            
+            if ($.inArray(ability, system.specialAbilities))
+                return system;
+        }
         
-        return true;
+        return null;
+    },
+
+    hasSpecialAbility: function(ship, $ability)
+    {
+        if (shipManager.getSpecialAbilitySystem(ship, ability))
+            return true;
+            
+        return false;
+    },
+    
+    isElint: function(ship){
+        return shipManager.hasSpecialAbility(ship, "ELINT");
     }
 }

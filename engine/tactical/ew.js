@@ -12,13 +12,15 @@ window.ew = {
             
             
 			            
-            if (system.name == "scanner"){
-                ret += shipManager.systems.getOutput(ship, system);
-            }
+            if (system.outputType === "EW"){
+                var output = shipManager.systems.getOutput(ship, system);
             
-            if (shipManager.criticals.hasCritical(system, "RestrictedEW"))
-				ret -= 2;
-        
+                if (shipManager.criticals.hasCritical(system, "RestrictedEW"))
+                    output -= 2;
+            
+                if (output > 0)
+                    ret += output;
+            }
         }
         
         return ret;

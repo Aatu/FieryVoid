@@ -200,6 +200,9 @@ class ShipSystem{
     public $startArc, $endArc;
     public $location; //0:primary, 1:front, 2:rear, 3:left, 4:right;
     public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
+    public $outputType = null;
+    public $specialAbilities = array();
+    
     public $damage = array();
     public $outputMod = 0;
     public $boostable = false;

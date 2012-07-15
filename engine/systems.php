@@ -3,6 +3,7 @@
 class ElintArray extends ShipSystem{
     public $name = "elintArray";
     public $displayName = "ELINT array";
+    public $specialAbilities = array("ELINT");
     public $primary = true;
     
     function __construct($armour, $maxhealth, $powerReq){
@@ -92,6 +93,7 @@ class Reactor extends ShipSystem{
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
+    public $outputType = "Power";
     
     public $possibleCriticals = array(11=>"OutputReduced2", 15=>"OutputReduced4", 19=>"OutputReduced6", 27=>"OutputReduced8", 100=>"ForcedOfflineOneTurn");
     
@@ -129,6 +131,7 @@ class Scanner extends ShipSystem{
     public $displayName = "Scanner";
     public $primary = true;
     public $boostable = true;
+    public $outputType = "EW";
     
     public $possibleCriticals = array(15=>"OutputReduced2", 19=>"OutputReduced4", 23=>"OutputReduced6", 27=>"OutputReduced8");
         
@@ -161,6 +164,7 @@ class Scanner extends ShipSystem{
 class ElintScanner extends Scanner{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
+    public $specialAbilities = array("ELINT");
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
