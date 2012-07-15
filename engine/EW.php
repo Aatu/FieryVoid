@@ -75,7 +75,7 @@
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint == $ship)
+                if ($elint->id === $ship->id)
                     continue;
                 
                 if (!$elint->isElint())
