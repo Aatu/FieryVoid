@@ -24,8 +24,7 @@ class Vorchar extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(7, 12, 0, 4));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 18, 4, 10));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new ElintScanner(6, 24, 7, 10));
         $this->addPrimarySystem(new Engine(7, 11, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(6, 2));
 		$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 3));

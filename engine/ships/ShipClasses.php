@@ -5,7 +5,7 @@
         public $imagePath, $shipClass;
         public $systems = array();
         public $EW = array();
-        public $elint = false;
+
         public $structureArmour = array();
         public $maxStructureHealth = array();
         public $agile = false;
@@ -19,6 +19,8 @@
         public $destroyed = false;
         public $pointCost = 0;
         public $faction = null;
+        
+        public $enabledSpecialAbilities = array();
         
         public $canvasSize = 200;
 
@@ -49,9 +51,37 @@
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 
-                if ($system instanceof ElintArray)
-                    $this->elint = true;
+                if ($system->isDestroyed() || $system->isOfflineOnTurn($turn))
+                    continue;
+                
+                foreach ($system->specialAbilities as $effect)
+                {
+                    if (!isset($this->enabledSpecialAbilities[$effect]))
+                    {
+                        $this->enabledSpecialAbilities[$effect] = $system->id;
+                    }
+                }
             }
+        }
+        
+        public function hasSpecialAbility($ability)
+        {
+            return (isset($this->enabledSpecialAbilities[$ability]));
+        }
+        
+        public function getSpecialAbilitySystem($ability)
+        {
+            if (isset($this->enabledSpecialAbilities[$ability]))
+            {
+                $this->getSystemById($this->enabledSpecialAbilities[$ability]);
+            }
+            
+            return null;
+        }
+        
+        public function isElint()
+        {
+            return $this->hasSpecialAbility("ELINT");
         }
         
         protected function addSystem($system, $loc){
@@ -472,11 +502,11 @@
         public function isDestroyed($turn = false){
         
             foreach($this->systems as $system){
-                /*
+
                 if ($system instanceof Reactor && $system->isDestroyed()){
                     return true;
                 }
-                */
+
                 if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                     return true;
                 }

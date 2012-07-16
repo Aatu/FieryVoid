@@ -43,12 +43,68 @@
 		}
 		
 		
-		public function getDamage(){        return Dice::d(10,3)+4;   }
+		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
         public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
 
 	}
-	
+
+
+    class ShockCannon extends Weapon{
+
+	public $name = "shockCannon";
+        public $displayName = "Shock Cannon";
+        public $animation = "laser";
+        public $animationColor = array(175, 225, 175);
+        public $trailColor = array(175, 225, 175);
+        public $projectilespeed = 15;
+        public $animationWidth = 2;
+        public $animationExplosionScale = 0.15;
+        public $trailLength = 30;
+
+        public $loadingtime = 2;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Electromagnetic";
+            parent::setSystemDataWindow($turn);
+        }
+
+        // Shock Cannons ignore armor.
+        protected function getSystemArmour($system, $gamedata, $fireOrder){
+            return 0;
+	}
+
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+            $crit = null;
+
+            if ($system instanceof Fighter){
+                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                $crit->updated = true;
+                $crit->inEffect = false;
+                $system->criticals[] =  $crit;
+            }else if ($system instanceof Structure){
+                $reactor = $ship->getSystemByName("Reactor");
+                $outputMod = $damage/4;
+                $crit = new OutputReduced(-1, $outputMod, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn);
+                $crit->updated = true;
+                $reactor->criticals[] =  $crit;
+            }
+
+            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+	}
+
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+    }
+
 	class BurstBeam extends Weapon{
 
 		public $name = "burstBeam";
@@ -103,7 +159,7 @@
 		}
 		
 		
-		public function getDamage(){        return 0;   }
+		public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
@@ -181,7 +237,7 @@
         }
 
 
-        public function getDamage(){        return 0;   }
+        public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
     }

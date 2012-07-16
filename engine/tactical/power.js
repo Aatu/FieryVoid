@@ -219,13 +219,13 @@ shipManager.power = {
 		
 	countBoostReqPower: function(ship, system){
 	
-		if (system.name == "engine"){
-			return system.engineEfficiency;
-		}
+        if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0){
+            return system.boostEfficiency;
+        }else if (system.boostEfficiency == "output+1"){
+            return system.output + shipManager.power.getBoost(ship, system) + 1;
+        }
+        
 		
-		if (system.name == "scanner"){
-			return system.output + shipManager.power.getBoost(ship, system) + 1;
-		}
 	
 	},
 	
@@ -235,17 +235,16 @@ shipManager.power = {
         if (boost == 0)
             return 0;
         
-		if (system.name == "engine"){
-			return system.engineEfficiency * boost;
-		}
-		
-		if (system.name == "scanner"){
-			var power = 0;
+        if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0){
+            return system.boostEfficiency * boost;
+        }else if (system.boostEfficiency == "output+1"){
+            var power = 0;
             for (var i = 1;i<=boost;i++){
                 power += system.output + i;
             }
 			return power;
-		}
+        }
+        return 0;
 	
 	},
 	

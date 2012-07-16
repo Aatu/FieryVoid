@@ -183,8 +183,16 @@ class Weapon extends ShipSystem{
         parent::setSystemDataWindow($turn);
     }
     
+    public function getStartLoading($gameid, $ship)
+    {
+        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 1);
+    }
+    
     public function setLoading( $loading )
     {
+        if (is_array($loading))
+            $loading = $loading[0];
+        
         if ($loading === null)
         {
             $this->overloadturns = 0;
@@ -377,7 +385,7 @@ class Weapon extends ShipSystem{
         parent::beforeTurn($ship, $turn, $phase);
     }
     
-    public function getDamage(){
+    public function getDamage($fireOrder){
         return 0;
     }
     
@@ -477,7 +485,7 @@ class Weapon extends ShipSystem{
             // races. A race is able to bypass its own jammer technology.
             $jammer = $target->getSystemByName("jammer");
 
-            if ( $jammer != null){
+            if (( $jammer != null) && !($jammer.isOfflineOnTurn($gamedata->turn))){
                 $jammermod = $rangePenalty*$jammer->output;
             }
 
@@ -602,7 +610,7 @@ class Weapon extends ShipSystem{
         if ($this->piercing && $this->firingMode == 2){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
-            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata);
+            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
         }
         
@@ -616,7 +624,7 @@ class Weapon extends ShipSystem{
             return;
         
         $damage = $target->getPiercingDamagePerLoc(
-                $this->getFinalDamage($shooter, $target, $pos, $gamedata)
+                $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
             );
 
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
@@ -722,9 +730,9 @@ class Weapon extends ShipSystem{
         return $damage;
     }
     
-    protected function getFinalDamage($shooter, $target, $pos, $gamedata){
+    protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
     
-        $damage = $this->getDamage();
+        $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
         
@@ -770,8 +778,4 @@ class Weapon extends ShipSystem{
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
         return;
     }
-    
-    
-
-
 }

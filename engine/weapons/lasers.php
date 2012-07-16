@@ -129,7 +129,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage(){        return Dice::d(10, 2)+30;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+30;   }
         public function setMinDamage(){     $this->minDamage = 32 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 50 - $this->dp;      }
         
@@ -158,7 +158,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage(){        return Dice::d(10, 2)+17;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+17;   }
         public function setMinDamage(){     $this->minDamage = 19 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 37 - $this->dp;      }
         
@@ -194,7 +194,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage(){        return Dice::d(10, 2)+22;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+22;   }
         public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 42 - $this->dp;      }
         
@@ -212,6 +212,7 @@ class NeutronLaser extends Laser{
         public $animationWidth = 4;
 
         public $loadingtime = 3;
+        public $overloadable = true;
 
         public $damageType = "raking";
         public $raking = 10;
@@ -229,7 +230,7 @@ class NeutronLaser extends Laser{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage(){ return Dice::d(10, 4)+15; }
+        public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
         public function setMinDamage(){ $this->minDamage = 19 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 55 - $this->dp; }
     }

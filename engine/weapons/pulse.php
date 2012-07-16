@@ -60,7 +60,7 @@
         
         protected function getPulses(){ return Dice::d(5); }
 
-        public function getDamage(){        return 8;   }
+        public function getDamage($fireOrder){        return 8;   }
         public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 8 - $this->dp;      }
 
@@ -94,7 +94,7 @@
         
         protected function getPulses(){ return Dice::d(5); }
 
-        public function getDamage(){        return 10;   }
+        public function getDamage($fireOrder){        return 10;   }
         public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 10 - $this->dp;      }
 
@@ -128,7 +128,7 @@
         
         protected function getPulses(){ return Dice::d(5); }
 
-        public function getDamage(){        return 15;   }
+        public function getDamage($fireOrder){        return 15;   }
         public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
 
