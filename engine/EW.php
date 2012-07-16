@@ -75,7 +75,7 @@
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint == $ship)
+                if ($elint->id === $ship->id)
                     continue;
                 
                 if (Mathlib::getDistanceHex( $target->getCoPos(), $elint->getCoPos() ) > 30)
@@ -100,7 +100,7 @@
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint == $ship)
+                if ($elint->id === $ship->id)
                     continue;
                 
                 if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 30)
@@ -122,7 +122,7 @@
             $amount = 0;
             foreach ($gamedata->ships as $elint)
             {
-                if ($elint == $ship)
+                if ($elint->id === $ship->id)
                     continue;
                 
                 if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)
