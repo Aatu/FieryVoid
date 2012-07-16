@@ -350,7 +350,7 @@ class DBManager {
                     tac_loading
                 VALUES 
                 ( 
-                    ?,?,?,?,?,?,?
+                    ?,?,?,?,?,?,?,?
                 )"
             );
             
@@ -359,8 +359,9 @@ class DBManager {
                 foreach ($loadings as $loading)
                 {
                     $stmt->bind_param(
-                        'iiiiiii',
+                        'iiiiiiii',
                         $loading->systemid,
+                        $loading->subsystem,
                         $loading->gameid,
                         $loading->shipid,
                         $loading->loading,
@@ -381,6 +382,7 @@ class DBManager {
     
     public function updateWeaponLoading($input)
     {
+        Debug::log("updateWeaponLoading: " . var_export($input, true));
         $loadings = array();
         if (is_array($input))
             $loadings = $input;
@@ -402,6 +404,8 @@ class DBManager {
                     systemid = ?
                 AND 
                     shipid = ?
+                AND
+                    subsystem = ?
                 "
             );
             
@@ -410,14 +414,15 @@ class DBManager {
                 foreach ($loadings as $loading)
                 {
                     $stmt->bind_param(
-                        'iiiiiii', 
+                        'iiiiiiii', 
                         $loading->loading,
                         $loading->extrashots,
                         $loading->loadedammo,
                         $loading->overloading,
                         $loading->gameid,
                         $loading->systemid,
-                        $loading->shipid
+                        $loading->shipid,
+                        $loading->subsystem
                     );
                     $stmt->execute();
                 }
@@ -432,11 +437,11 @@ class DBManager {
     
     public function getWeaponLoading($shipid, $gameid, $systemid)
     {
-        $loading = null;
+        $loading = array();
         try {
             $stmt = $this->connection->prepare(
                 "SELECT 
-                    *
+                    systemid, subsystem, gameid, shipid, loading, extrashots, loadedammo, overloading
                 FROM 
                     tac_loading
                 WHERE 
@@ -454,12 +459,12 @@ class DBManager {
 				$stmt->bind_param('iii', $gameid, $systemid, $shipid);
 				$stmt->execute();
                 $stmt->bind_result(
-                    $systemid, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading
+                    $systemid, $subsystem, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading
                 );
                 
                 while( $stmt->fetch())
                 {
-                    $loading = new WeaponLoading($systemid, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading);
+                    $loading[] = new WeaponLoading($systemid, $subsystem, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading);
                     
                 }
 				$stmt->close();
@@ -637,8 +642,7 @@ class DBManager {
             {
                 if ($system instanceof Weapon)
                 {
-                    $loading = new WeaponLoading($system->id, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 1);
-                    $this->insertWeaponLoading($loading);
+                    $this->insertWeaponLoading($system->getStartLoading($gameid, $ship));
                 }
                 
                 if ($system instanceof Fighter)
@@ -648,7 +652,7 @@ class DBManager {
                         if ($fighterSystem instanceof Weapon)
                         {
                             $loading = new WeaponLoading($fighterSystem->id, $gameid, $ship->id, $fighterSystem->getNormalLoad(), 0, 0, 1);
-                            $this->insertWeaponLoading($loading); 
+                            $this->insertWeaponLoading($fighterSystem->getStartLoading($gameid, $ship)); 
                         }
                      
                     }

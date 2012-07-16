@@ -66,6 +66,70 @@ class DualWeapon extends Weapon{
             $weapon->setId($id);
         } 
     }
+    
+    public function getFireOrders(){
+        $fires = array();
+        foreach ($this->weapons as $weapon){
+            $fires = array_merge($fires, $weapon->getFireOrders());
+        } 
+        return $fires;
+    }
+    
+    public function setFireOrders($fireOrders){
+        foreach ($this->weapons as $weapon){
+            $weapon->setFireOrders($fireOrders);
+        } 
+    }
+    
+    
+    public function getStartLoading($gameid, $ship)
+    {
+        $loadings = array();
+        foreach ($this->weapons as $subId => $weapon){
+            $loading = $weapon->getStartLoading($gameid, $ship);
+            $loading->subsystem = $subId;
+            $loadings[] = $loading;
+        }
+        return $loadings;
+    }
+    
+    public function setLoading( $loadings )
+    {
+        if (!$loadings || (is_array($loadings) && count($loadings) === 0))
+            return;
+        
+        foreach ($this->weapons as $subId => $weapon){
+            $weapon->setLoading(self::getLoadingWithSubId($loadings, $subId));
+        }
+    }
+    
+    private static function getLoadingWithSubId($loadings, $id)
+    {
+        foreach ($loadings as $loading)
+        {
+            if ($loading->subsystem === $id)
+                return $loading;
+        }
+    }
+    
+    public function calculateLoading( $gameid, $phase, $ship, $turn )
+    {
+        $loadings = array();
+        foreach ($this->weapons as $subId => $weapon){
+            $loading = $weapon->calculateLoading( $gameid, $phase, $ship, $turn );
+            
+            if (!$loading)
+                continue;
+            
+            $loading->subsystem = $subId;
+            $loadings[] = $loading;
+        }
+        
+        if (count($loadings)==0)
+            return null;
+        
+        return $loadings;
+    }
 }
 
 class LaserPulseArray extends DualWeapon{
