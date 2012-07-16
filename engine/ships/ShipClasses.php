@@ -316,7 +316,6 @@
         }
         
         public function getEWbyType($type, $turn, $target = null){
-            
             foreach ($this->EW as $EW)
             {
                 if ($EW->turn != $turn)

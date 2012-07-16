@@ -126,6 +126,7 @@
         {
             $num = $ship->getOEWTargetNum($gamedata->turn);
             $amount = 0;
+
             foreach ($gamedata->ships as $elint)
             {
                 if ($elint == $ship)
