@@ -183,8 +183,16 @@ class Weapon extends ShipSystem{
         parent::setSystemDataWindow($turn);
     }
     
+    public function getStartLoading($gameid, $ship)
+    {
+        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $system->getNormalLoad(), 0, 0, 1);
+    }
+    
     public function setLoading( $loading )
     {
+        if (is_array($loading))
+            $loading = $loading[0];
+        
         if ($loading === null)
         {
             $this->overloadturns = 0;

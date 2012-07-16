@@ -2,11 +2,12 @@
 
 class WeaponLoading
 {
-    public $systemid, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading;
+    public $systemid, $subsystem, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading;
     
-    public function __construct($systemid, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading)
+    public function __construct($systemid, $subsystem, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading)
     {
         $this->systemid = $systemid;
+        $this->subsystem = $subsystem;
         $this->gameid = $gameid;
         $this->shipid = $shipid;
         $this->loading = $loading;
