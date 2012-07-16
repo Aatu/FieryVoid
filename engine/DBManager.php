@@ -382,6 +382,7 @@ class DBManager {
     
     public function updateWeaponLoading($input)
     {
+        Debug::log("updateWeaponLoading: " . var_export($input, true));
         $loadings = array();
         if (is_array($input))
             $loadings = $input;
@@ -440,7 +441,7 @@ class DBManager {
         try {
             $stmt = $this->connection->prepare(
                 "SELECT 
-                    systemid, subsystem, gameid, shipid, turnsloaded, extrashots, loadedammo, overloading
+                    systemid, subsystem, gameid, shipid, loading, extrashots, loadedammo, overloading
                 FROM 
                     tac_loading
                 WHERE 

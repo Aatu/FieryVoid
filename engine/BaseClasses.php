@@ -248,6 +248,10 @@ class ShipSystem{
         $this->power = $power;
     }
     
+    public function getFireOrders(){
+        return $this->fireOrders;
+    }
+    
     public function setFireOrders($fireOrders){
         $this->fireOrders = $fireOrders;
     }

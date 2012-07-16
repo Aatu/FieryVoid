@@ -67,6 +67,20 @@ class DualWeapon extends Weapon{
         } 
     }
     
+    public function getFireOrders(){
+        $fires = array();
+        foreach ($this->weapons as $weapon){
+            $fires = array_merge($fires, $weapon->getFireOrders());
+        } 
+        return $fires;
+    }
+    
+    public function setFireOrders($fireOrders){
+        foreach ($this->weapons as $weapon){
+            $weapon->setFireOrders($fireOrders);
+        } 
+    }
+    
     
     public function getStartLoading($gameid, $ship)
     {
@@ -81,6 +95,9 @@ class DualWeapon extends Weapon{
     
     public function setLoading( $loadings )
     {
+        if (!$loadings || (is_array($loadings) && count($loadings) === 0))
+            return;
+        
         foreach ($this->weapons as $subId => $weapon){
             $weapon->setLoading(self::getLoadingWithSubId($loadings, $subId));
         }

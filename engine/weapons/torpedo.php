@@ -85,7 +85,7 @@
                 if  
                 ( $this->isOfflineOnTurn($turn) )
                 {
-                    $loading = new WeaponLoading($this->id, $gameid, $ship->id, 0, 0, 0, 0);
+                    $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, 0, 0, 0, 0);
                 }
                 else if ($shotsfired)
                 {
@@ -93,7 +93,7 @@
                     if ($newloading < 0)
                         $newloading = 0;
 
-                $loading = new WeaponLoading($this->id, $gameid, $ship->id, $newloading, 0, 0, 0);
+                $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, $newloading, 0, 0, 0);
                 }
             }
             else if ($phase === 1)
@@ -102,7 +102,7 @@
                 if ($newloading > $this->getNormalLoad())
                     $newloading = $this->getNormalLoad();
 
-                $loading = new WeaponLoading($this->id, $gameid, $ship->id, $newloading, 0, 0, 0);
+                $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, $newloading, 0, 0, 0);
             }
 
             return $loading;

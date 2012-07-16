@@ -451,8 +451,16 @@ class Manager{
                     if ($system instanceof Weapon)
                     {
                         $loading = $system->calculateLoading($gamedata->id, $gamedata->phase, $ship, $gamedata->turn);
-                        if ($loading)
-                            $loadings[] = $loading;
+                        if ($loading){
+                            if (is_array($loading))
+                            {
+                                $loadings = array_merge ($loadings, $loading);
+                            }else{
+                                $loadings[] = $loading;
+                            }
+                            
+                        }
+                            
                     }
                     
                 }
@@ -741,29 +749,33 @@ class Manager{
 
                 if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
                 {
+                    $fires = Array();
                     foreach($system["fireOrders"] as $i=>$fo)
                     {
                         $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                         if (isset($sys)){
-                            $sys->fireOrders[] = $fireOrder;
+                            $fires[] = $fireOrder;
                         }
                     }
+                    $sys->setFireOrders($fires);
                 }
                 
                 if (isset($system["systems"]) && is_array($system["systems"]))
                 {
-                    foreach ($system["systems"] as $fighter)
+                    foreach ($system["systems"] as $fightersys)
                     {
-                        $fig = $sys->getSystemById($fighter['id']);
-                        if (isset($fighter["fireOrders"]) && is_array($fighter["fireOrders"]))
+                        $fig = $sys->getSystemById($fightersys['id']);
+                        if (isset($fightersys["fireOrders"]) && is_array($fightersys["fireOrders"]))
                         {
-                            foreach($fighter["fireOrders"] as $i=>$fo)
+                            $fires = Array();
+                            foreach($fightersys["fireOrders"] as $i=>$fo)
                             {
                                 $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                                 if (isset($fig)){
-                                    $fig->fireOrders[] = $fireOrder;
+                                    $fires[] = $fireOrder;
                                 }
                             }
+                            $fig->setFireOrders($fires);
                         }
                     }
                     

@@ -690,7 +690,7 @@
             
             foreach ($this->systems as $system)
             {
-                $orders = array_merge($orders, $system->fireOrders);
+                $orders = array_merge($orders, $system->getFireOrders());
             }
             
             return $orders;
