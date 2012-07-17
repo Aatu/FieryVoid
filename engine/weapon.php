@@ -151,10 +151,18 @@ class Weapon extends ShipSystem{
         $this->data["Damage"] = $dam;
         
         if ($this->rangePenalty > 0){
-            $this->data["Range penalty"] =$this->rangePenalty;
+            $this->data["Range penalty"] = number_format(($this->rangePenalty * 5), 2) . " per hex";
         }else{
             $this->data["Range"] = $this->range;
         }
+        
+        //public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals 
+        
+        $fcfight = number_format(($this->fireControl[0] * 5), 0);
+        $fcmed = number_format(($this->fireControl[1] * 5), 0);
+        $fccap = number_format(($this->fireControl[1] * 5), 0);
+        
+        $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
         
         if ($this->guns > 1){
             $this->data["Number of guns"] = $this->guns;
