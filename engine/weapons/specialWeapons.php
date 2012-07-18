@@ -91,8 +91,9 @@
                 $system->criticals[] =  $crit;
             }else if ($system instanceof Structure){
                 $reactor = $ship->getSystemByName("Reactor");
-                $outputMod = $damage/4;
-                $crit = new OutputReduced(-1, $outputMod, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn);
+                $outputMod = round($damage/4);
+                $crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn);
+                $crit->setParam($outputMod);
                 $crit->updated = true;
                 $reactor->criticals[] =  $crit;
             }

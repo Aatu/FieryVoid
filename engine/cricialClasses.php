@@ -46,10 +46,15 @@
         {
             public $description = "Output reduced.";
         
-            function __construct($id, $outputMod, $shipid, $systemid, $phpclass, $turn)
+            function __construct($id, $shipid, $systemid, $phpclass, $turn)
             {
-                $this->outputMod = $outputMod;
                 parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+            }
+            
+            function setParam($param)
+            {
+                $this->outputMod = $param;
+                parent::setParam($param);
             }
         }
 
