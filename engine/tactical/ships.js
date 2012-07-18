@@ -64,7 +64,6 @@ window.shipManager = {
     },
     
     drawShip: function(ship){
-    
         if (!ship.htmlContainer)
             shipManager.createHexShipDiv(ship);
         
@@ -138,7 +137,6 @@ window.shipManager = {
     },
     
     doDrawShip: function(canvas, s, ship, img){
-        
         var dew = ew.getDefensiveEW(ship);
         if (ship.flight)
 			dew = shipManager.movement.getJinking(ship);
@@ -155,6 +153,7 @@ window.shipManager = {
 		{
 			return;
         }
+        
         
         var myship = gamedata.isMyShip(ship);
         //console.log("draw");
@@ -434,8 +433,8 @@ window.shipManager = {
         var y = movement.y;
         
         var lastpos = hexgrid.hexCoToPixel(x, y);
-        lastpos.x = lastpos.x + (movement.xOffset*gamedata.zoom);
-        lastpos.y = lastpos.y + (movement.yOffset*gamedata.zoom);
+        lastpos.x = Math.floor(lastpos.x + (movement.xOffset*gamedata.zoom));
+        lastpos.y = Math.floor(lastpos.y + (movement.yOffset*gamedata.zoom));
         return lastpos;
     },
     

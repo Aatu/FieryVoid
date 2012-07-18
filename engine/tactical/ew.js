@@ -510,9 +510,10 @@ window.ew = {
     
     getSupportedDEW: function(ship){
         var amount = 0;
-        for (var i in gamedata.ships){
-            var elint = gamedata.ships[i];
-            if (elint == ship || !shipManager.isElint(elint))
+        var elints = gamedata.getElintShips();
+        for (var i in elints){
+            var elint = elints[i];
+            if (elint.id === ship.id)
                 continue;
             
             var fdew = ew.getEWByType("SDEW", elint, ship)*0.5;
@@ -526,9 +527,10 @@ window.ew = {
     
     getSupportedBDEW: function(ship){
         var amount = 0;
-        for (var i in gamedata.ships){
-            var elint = gamedata.ships[i];
-            if ( !shipManager.isElint(elint) || !ew.checkInELINTDistance(ship, elint, 20))
+        var elints = gamedata.getElintShips();
+        for (var i in elints){
+            var elint = elints[i];
+            if ( !ew.checkInELINTDistance(ship, elint, 20))
                 continue;
             
             var fdew = ew.getEWByType("BDEW", elint)*0.25;

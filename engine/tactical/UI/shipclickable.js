@@ -7,6 +7,7 @@ window.shipClickable = {
 	testStacked: true,
 	
 	shipclickableMouseOver: function(e){
+        console.log("mouseover");
 		clearTimeout(shipClickable.shipClickableTimer); 
 		shipClickable.shipClickableTimer = setTimeout(shipClickable.doMouseOver, 250);
 		shipClickable.ship = gamedata.getShip($(this).data("id"));
@@ -17,7 +18,8 @@ window.shipClickable = {
 	},
 	
 	shipclickableMouseOut: function(e){
-		clearTimeout(shipClickable.shipClickableTimer); 
+		clearTimeout(shipClickable.shipClickableTimer);
+        var ship = gamedata.getShip($(this).data("id"));
 		shipClickable.ship = null;
 		gamedata.mouseOverShipId = -1;
 		if (shipClickable.shipNameElement != null){
@@ -30,16 +32,17 @@ window.shipClickable = {
 				
 		if (gamedata.gamephase > 1){
 			ew.RemoveEWEffects();
-			
+			EWindicators.drawEWindicators();
 		}
-		drawEntities();
+        if (ship)
+            shipManager.drawShip(ship);
 	},
 	
 	doMouseOver: function(){
         var selectedShip = gamedata.getSelectedShip();
 		var ship = shipClickable.ship;
 		gamedata.mouseOverShipId = ship.id;
-		shipManager.drawShips();
+		shipManager.drawShip(ship);
 		
 		if (shipClickable.shipNameElement == null){
 			shipClickable.shipNameElement = $("#shipNameContainer");
@@ -131,10 +134,10 @@ window.shipClickable = {
 		
 		e.fadeTo(500, 0.65);
 		
-		if (gamedata.gamephase > 1){
+		if (gamedata.isMyShip(ship) || gamedata.gamephase > 1){
 			//ew.adHostileOEWindicatiors(ship);
 			ew.adEWindicators(ship);
-			drawEntities();
+			EWindicators.drawEWindicators();
 		}
 		
 		

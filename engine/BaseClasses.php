@@ -198,6 +198,7 @@ class PowerManagementEntry{
 
 class ShipSystem{
 
+    public $destroyed = false;
     public $startArc, $endArc;
     public $location; //0:primary, 1:front, 2:rear, 3:left, 4:right;
     public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
@@ -233,6 +234,8 @@ class ShipSystem{
     
     public function onConstructed($ship, $turn, $phase){
         $this->structureSystem = $ship->getStructureSystem($this->location);
+        $this->effectCriticals();
+        $this->destroyed = $this->isDestroyed();
     }
     
     public function beforeTurn($ship, $turn, $phase){
@@ -240,16 +243,28 @@ class ShipSystem{
         $this->setSystemDataWindow($turn);
     }
     
-    public function setDamage($damages){
+    public function setDamage($damage){
+        $this->damage[] = $damage;
+    }
+    
+    public function setDamages($damages){
         $this->damage = $damages;
     }
     
-    public function setPower($power){
+    public function setPowers($power){
         $this->power = $power;
+    }
+    
+    public function setPower($power){
+        $this->power[] = $power;
     }
     
     public function getFireOrders(){
         return $this->fireOrders;
+    }
+    
+    public function setFireOrder($fireOrder){
+        $this->fireOrders[] = $fireOrder;
     }
     
     public function setFireOrders($fireOrders){
@@ -260,15 +275,16 @@ class ShipSystem{
         $this->id = $id;
     }
     
-    public function setCriticals($criticals, $turn){
-        $crits = array();
-        foreach( $criticals as $crit){
-            if (!$crit->oneturn || ($crit->oneturn && $crit->turn >= $turn-1))
-                $crits[] = $crit;
-        }
+    public function setCritical($critical, $turn){
         
-        $this->criticals = $crits;
-        $this->effectCriticals();
+        if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
+            $this->criticals[] = $critical; 
+    }
+    
+    public function setCriticals($criticals, $turn){
+        foreach( $criticals as $crit){
+            $this->setCritical($crit, $turn);
+        }
     }
     
     public function getArmour($gamedata, $shooter){
@@ -496,6 +512,10 @@ class TacGamedata{
    }
    
     public function onConstructed(){
+        
+        usort ( $this->ships , "self::sortShips" );
+        
+        
         $i = 0;
         foreach ($this->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
@@ -583,10 +603,7 @@ class TacGamedata{
     
     public function setShips($ships){
     
-        if (isset($ships)){
-            usort ( $ships , "self::sortShips" );
-            $this->ships = $ships;
-        }
+        $this->ships = $ships;
     }
     
     public static function sortShips($a, $b){
@@ -743,9 +760,16 @@ class TacGamedata{
         return null;
     }
     
+    private $shipsById = array();
+    
     public function getShipById($id){
+        
+        if (isset($this->shipsById[$id]))
+            return $this->shipsById[$id];
+        
         foreach ($this->ships as $ship){
-            if ($ship->id == $id){
+            if ($ship->id === $id){
+                $this->shipsById[$id] = $ship;
                 return $ship;
             }
         }

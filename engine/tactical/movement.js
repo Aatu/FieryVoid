@@ -39,7 +39,6 @@ shipManager.movement = {
     },
 
     isMovementReady: function(ship){
-		//console.log("movement ready: " + shipManager.movement.getRemainingMovement(ship));
         return (shipManager.movement.getRemainingMovement(ship) == 0);
     },
     

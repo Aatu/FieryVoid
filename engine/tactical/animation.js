@@ -26,7 +26,7 @@ window.animation = {
             }
         }
     
-        setTimeout(animation.animationLoop, 30);
+        window.requestAnimFrame(animation.animationLoop);
     },
     
     setAnimating: function(animatefunction, callback){

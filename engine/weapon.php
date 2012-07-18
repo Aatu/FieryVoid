@@ -198,24 +198,12 @@ class Weapon extends ShipSystem{
     
     public function setLoading( $loading )
     {
-        if (!$loading || (is_array($loading) && count($loading) === 0))
+        if (!$loading)
             return;
         
-        if (is_array($loading))
-            $loading = $loading[0];
-        
-        if ($loading === null)
-        {
-            $this->overloadturns = 0;
-            $this->overloadshots = 0;
-            $this->turnsloaded = $this->getNormalLoad();
-        }
-        else
-        {
-            $this->overloadturns = $loading->overloading;
-            $this->overloadshots = $loading->extrashots;
-            $this->turnsloaded = $loading->loading;
-        }
+        $this->overloadturns = $loading->overloading;
+        $this->overloadshots = $loading->extrashots;
+        $this->turnsloaded = $loading->loading;
     }
     
     public function calculateLoading( $gameid, $phase, $ship, $turn )

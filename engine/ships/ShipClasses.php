@@ -23,6 +23,8 @@
         public $enabledSpecialAbilities = array();
         
         public $canvasSize = 200;
+        
+        public $structures = Array(null, null, null, null, null);
 
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
@@ -41,9 +43,19 @@
 
         }
         
+        public function setEW($ew)
+        {
+            $this->EW[] = $ew;
+        }
+        
         public function setMovement($movement)
         {
-            $this->movement = $movement;
+            $this->movement[] = $movement;
+        }
+        
+        public function setMovements($movements)
+        {
+            $this->movement = $movements;
         }
         
         public function onConstructed($turn, $phase)
@@ -85,12 +97,13 @@
         }
         
         protected function addSystem($system, $loc){
-            
             $i = sizeof($this->systems);
             $system->setId($i);
             $system->location = $loc;
             $this->systems[$i] = $system;
             
+            if ($system instanceof Structure)
+                $this->structures[$loc] = $system;
         
         }
         
@@ -182,11 +195,8 @@
         }
         
         public function getSystemById($id){
-            foreach ($this->systems as $system){
-                if ($system->id == $id){
-                    return $system;
-                }
-            }
+            if (isset($this->systems[$id]))
+                return $this->systems[$id];
             
             return null;
         }

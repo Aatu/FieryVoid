@@ -46,10 +46,10 @@ class DualWeapon extends Weapon{
         }  
     }
     
-    public function setDamage($damages){
-        parent::setDamage($damages);
+    public function setDamage($damage){
+        parent::setDamage($damage);
         foreach ($this->weapons as $weapon){
-            $weapon->setDamage($damages);
+            $weapon->setDamage($damage);
         } 
     }
     
@@ -93,23 +93,13 @@ class DualWeapon extends Weapon{
         return $loadings;
     }
     
-    public function setLoading( $loadings )
+    public function setLoading( $loading )
     {
-        if (!$loadings || (is_array($loadings) && count($loadings) === 0))
+        if (!$loading)
             return;
         
-        foreach ($this->weapons as $subId => $weapon){
-            $weapon->setLoading(self::getLoadingWithSubId($loadings, $subId));
-        }
-    }
-    
-    private static function getLoadingWithSubId($loadings, $id)
-    {
-        foreach ($loadings as $loading)
-        {
-            if ($loading->subsystem === $id)
-                return $loading;
-        }
+        $this->weapons[$loading->subsystem]->setLoading($loading);
+        
     }
     
     public function calculateLoading( $gameid, $phase, $ship, $turn )

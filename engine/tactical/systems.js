@@ -25,7 +25,11 @@ shipManager.systems = {
 	},
 	
 	isDestroyed: function(ship, system){
+        
+        return system.destroyed;
+        
 
+        /*
         var d = damageManager.getDamage(ship, system);
         var stru = shipManager.systems.getStructureSystem(ship, system.location);
         if (stru && stru != system && shipManager.systems.isDestroyed(ship, stru))
@@ -34,7 +38,9 @@ shipManager.systems = {
         if (system.fighter && shipManager.criticals.hasCritical(system, "DisengagedFighter"))
 			return true;
             
+            
         return (d >= system.maxhealth);
+        */
     },
     
     isEngineDestroyed: function(ship){
@@ -221,13 +227,15 @@ shipManager.systems = {
     
     getStructureSystem: function(ship, location){
 			
+        return ship.structures[location];
+        /*
         for (var i in ship.systems){
             if (ship.systems[i].location == location && ship.systems[i].name == "structure")
                 return ship.systems[i];
         }
         
         return null;
-    
+        */
     },
 
     

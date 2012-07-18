@@ -314,7 +314,7 @@ window.weaponManager = {
         
         var sdew = ew.getSupportedDEW(target);
         
-        console.log("base: " + base + " dew: " + dew + " blanket: " + bdew + "supportDEW: " +  sdew);
+        //console.log("base: " + base + " dew: " + dew + " blanket: " + bdew + "supportDEW: " +  sdew);
         return base - dew - bdew - sdew;
         
         

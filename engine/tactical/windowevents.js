@@ -3,6 +3,17 @@ $(window).resize(function () {
     resizeGame();
  });
  
+ window.requestAnimFrame = (function(){
+    return  window.requestAnimationFrame       || 
+            window.webkitRequestAnimationFrame || 
+            window.mozRequestAnimationFrame    || 
+            window.oRequestAnimationFrame      || 
+            window.msRequestAnimationFrame     || 
+            function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+            };
+})();
+ 
 
  function getWindowDimensions(){
  
@@ -37,26 +48,26 @@ function drawEntities(){
 }
  
 jQuery(function(){
-    $("#zoomin").bind("click", zooming.zoomin);
-    $("#zoomout").bind("click", zooming.zoomout);
-    $("#pagecontainer").bind("mousedown", scrolling.mousedown);
-    $("#pagecontainer").bind("mouseup", scrolling.mouseup);
-    $("#pagecontainer").bind("mousemove", scrolling.mousemove);
-    $("#pagecontainer").bind("mouseout", scrolling.mouseout);
-    $("#pagecontainer").bind("click", hexgrid.onHexClicked);
-    $(".shipclickable").bind("dblclick", shipManager.onShipDblClick);
-    $(".shipclickable").bind("click", shipManager.onShipClick);
-	$(".shipclickable").bind("mouseover", shipClickable.shipclickableMouseOver);
-    $(".shipclickable").bind("mouseout", shipClickable.shipclickableMouseOut);
-    $(document).bind("keyup", windowEvents.onKeyUp);
+    $("#zoomin").on("click", zooming.zoomin);
+    $("#zoomout").on("click", zooming.zoomout);
+    //$("#pagecontainer").bind("mousedown", scrolling.mousedown);
+    //$("#pagecontainer").bind("mouseup", scrolling.mouseup);
+    //$("#pagecontainer").bind("mousemove", scrolling.mousemove);
+    //$("#pagecontainer").bind("mouseout", scrolling.mouseout);
+    $("#pagecontainer").on("click", hexgrid.onHexClicked);
+    $(".shipclickable").on("dblclick", shipManager.onShipDblClick);
+    $(".shipclickable").on("click", shipManager.onShipClick);
+	$(".shipclickable").on("mouseover", shipClickable.shipclickableMouseOver);
+    $(".shipclickable").on("mouseout", shipClickable.shipclickableMouseOut);
+    $(document).on("keyup", windowEvents.onKeyUp);
 	
 	
 	
     
     
     
-    $(".committurn").bind("click", gamedata.onCommitClicked);
-    $(".cancelturn").bind("click", gamedata.onCancelClicked);
+    $(".committurn").on("click", gamedata.onCommitClicked);
+    $(".cancelturn").on("click", gamedata.onCancelClicked);
     
     hookEvent('pagecontainer', 'mousewheel', zooming.mouseWheel);
     document.onkeydown = function( event ){
@@ -207,6 +218,7 @@ window.scrolling = {
     
     mousedown: function(event){
 	
+        return;
 		shipSelectList.remove();
         
         

@@ -22,8 +22,8 @@ window.mathlib = {
 	},
 	
 	getPointBetween: function(start, end, percentage){
-		var x = start.x + percentage * (end.x - start.x);
-		var y = start.y + percentage * (end.y - start.y);
+		var x = Math.floor(start.x + percentage * (end.x - start.x));
+		var y = Math.floor(start.y + percentage * (end.y - start.y));
 	
 		return {x:x, y:y};
 	},

@@ -69,6 +69,19 @@ gamedata = {
         
     },
     
+    elintShips: Array(),
+    
+    getElintShips: function(){
+        if (gamedata.elintShips.length === 0){
+            for (var i in gamedata.ships){
+                var ship = gamedata.ships[i];
+                if (shipManager.isElint(ship))
+                    gamedata.elintShips.push(ship);
+            }
+        }
+        return gamedata.elintShips;
+    },
+    
     unTargetShip: function(ship){
         
     },
@@ -397,7 +410,7 @@ gamedata = {
             
         }else if (gamedata.gamephase == 2){
             var ship = gamedata.getActiveShip();
-            if (shipManager.movement.isMovementReady(ship) && ship.userid == gamedata.thisplayer){
+            if (shipManager.movement.isMovementReady(ship) && gamedata.isMyShip(ship)){
                 commit.show();
             }else{
                 commit.hide();
@@ -464,6 +477,7 @@ gamedata = {
             gamedata.waiting = serverdata.waiting;
             gamedata.status = serverdata.status;
             gamedata.ballistics = serverdata.ballistics;
+            gamedata.elintShips = Array();
             //combatLog.constructLog();
             
             

@@ -287,6 +287,9 @@ window.hexgrid = {
     },
     
     onHexClicked: function(e){
+        console.log("onHexClicked");
+        return;
+        
         if (e && e.which === 1){
             shipManager.movement.RemoveMovementIndicators();
             

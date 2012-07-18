@@ -730,7 +730,7 @@ class Manager{
             
             
             $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], null);
-            $ship->setMovement($movements);    
+            $ship->setMovements($movements);    
             $ship->EW = $EW;
             
             foreach($value["systems"] as $i=>$system){
@@ -742,7 +742,7 @@ class Manager{
                     {
                         $powerEntry = new PowerManagementEntry($power["id"], $power["shipid"], $power["systemid"], $power["type"], $power["turn"], $power["amount"]);
                         if (isset($sys)){
-                            $sys->power[] = $powerEntry;
+                            $sys->setPower($powerEntry);
                         }
                     }
                 }
