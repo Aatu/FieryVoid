@@ -62,7 +62,7 @@ shipWindowManager = {
 		
 	
 		var template = $("#shipwindowtemplatecontainer .shipwindow.ship");
-		shipwindow = template.clone(true).appendTo("body");
+		var shipwindow = template.clone(true).appendTo("body");
 		
 		shipwindow.draggable();
 		

@@ -1,7 +1,7 @@
 
 jQuery(function(){
 
-	$(".shipwindow .fightersystem").on("click", flightWindowManager.clickSystem);
+	
 	
 	
 });
@@ -61,11 +61,8 @@ flightWindowManager = {
 	
 	
 	createShipWindow: function(ship){
-
-		
-	
 		var template = $("#shipwindowtemplatecontainer .shipwindow.flight");
-		shipwindow = template.clone(true).appendTo("body");
+		var shipwindow = template.clone(true).appendTo("body");
 		
 		shipwindow.draggable();
 		
@@ -82,10 +79,15 @@ flightWindowManager = {
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_"+ship.id);
 		flightWindowManager.populateShipWindow(ship, shipwindow);
-		
+        shipWindowManager.bindEvents(shipwindow);
 		return shipwindow;
 		
 	},
+    
+    bindEvents: function(shipwindow){
+        $(".fightersystem", shipwindow).on("click", flightWindowManager.clickSystem);
+        $(".close", shipwindow).on("click", shipWindowManager.close);
+    },
 
 	populateShipWindow: function(ship, shipwindow){
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
