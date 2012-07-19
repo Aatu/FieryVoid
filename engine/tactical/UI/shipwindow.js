@@ -1,23 +1,6 @@
 
 jQuery(function(){
-	$(".shipwindow .close").on("click", shipWindowManager.close);
-	$(".ewentry.CCEW .button1").on("click", ew.buttonDeassignEW);
-	$(".ewentry.CCEW .button2").on("click", ew.buttonAssignEW);
-    $(".ewentry.BDEW .button1").on("click", ew.buttonDeassignEW);
-	$(".ewentry.BDEW .button2").on("click", ew.buttonAssignEW);
-	$(".shipwindow .system .plus").on("click", shipWindowManager.clickPlus);
-	$(".shipwindow .system .minus").on("click", shipWindowManager.clickMinus);
-	$(".shipwindow .system").on("click", shipWindowManager.clickSystem);
-	$(".assignthrustcontainer .cancel").on("click", shipWindowManager.cancelAssignThrustEvent);
-	$(".assignthrustcontainer .ok").on("click", shipWindowManager.doneAssignThrust);
 	
-	
-	$(".shipwindow .system .off").on("click", shipManager.power.onOfflineClicked);
-	$(".shipwindow .system .on").on("click", shipManager.power.onOnlineClicked);
-	$(".shipwindow .system .overload").on("click", shipManager.power.onOverloadClicked);
-	$(".shipwindow .system .stopoverload").on("click", shipManager.power.onStopOverloadClicked);
-	$(".shipwindow .system .holdfire").on("click", window.weaponManager.onHoldfireClicked);
-	$(".shipwindow .system .mode").on("click", window.weaponManager.onModeClicked);
 });
 
 shipWindowManager = {
@@ -96,10 +79,32 @@ shipWindowManager = {
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_"+ship.id);
 		shipWindowManager.populateShipWindow(ship, shipwindow);
+        shipWindowManager.bindEvents(shipwindow);
 		
 		return shipwindow;
 		
 	},
+    
+    bindEvents: function(shipwindow){
+        $(".close", shipwindow).on("click", shipWindowManager.close);
+        $(".ewentry.CCEW .button1", shipwindow).on("click", ew.buttonDeassignEW);
+        $(".ewentry.CCEW .button2", shipwindow).on("click", ew.buttonAssignEW);
+        $(".ewentry.BDEW .button1", shipwindow).on("click", ew.buttonDeassignEW);
+        $(".ewentry.BDEW .button2", shipwindow).on("click", ew.buttonAssignEW);
+        $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
+        $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
+        $(".system", shipwindow).on("click", shipWindowManager.clickSystem);
+        $(".assignthrustcontainer .cancel", shipwindow).on("click", shipWindowManager.cancelAssignThrustEvent);
+        $(".assignthrustcontainer .ok", shipwindow).on("click", shipWindowManager.doneAssignThrust);
+
+
+        $(".system .off", shipwindow).on("click", shipManager.power.onOfflineClicked);
+        $(".system .on", shipwindow).on("click", shipManager.power.onOnlineClicked);
+        $(".system .overload", shipwindow).on("click", shipManager.power.onOverloadClicked);
+        $(".system .stopoverload", shipwindow).on("click", shipManager.power.onStopOverloadClicked);
+        $(".system .holdfire", shipwindow).on("click", window.weaponManager.onHoldfireClicked);
+        $(".system .mode", shipwindow).on("click", window.weaponManager.onModeClicked);
+    },
 
 	populateShipWindow: function(ship, shipwindow){
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);

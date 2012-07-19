@@ -7,7 +7,6 @@ window.shipClickable = {
 	testStacked: true,
 	
 	shipclickableMouseOver: function(e){
-        console.log("mouseover");
 		clearTimeout(shipClickable.shipClickableTimer); 
 		shipClickable.shipClickableTimer = setTimeout(shipClickable.doMouseOver, 250);
 		shipClickable.ship = gamedata.getShip($(this).data("id"));
@@ -18,7 +17,6 @@ window.shipClickable = {
 	},
 	
 	shipclickableMouseOut: function(e){
-        console.log("mouseout");
 		clearTimeout(shipClickable.shipClickableTimer);
         var ship = gamedata.getShip($(this).data("id"));
 		shipClickable.ship = null;
