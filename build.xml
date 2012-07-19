@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="FieryVoid" default="phpab" basedir=".">
+    <property name="source" value="source" />
+    <property name="build" value="build" />
+    <property name="doc" value="doc" />
+    <property name="test" value="test" />
+
+    <property name="autoloadPHP" value="${source}/autoload.php" />
+
+     
+
+    <target name="phpab" description="Generate autoloader script">
+        <exec executable="phpab">
+            <arg value="--output" />
+            <arg path="${autoloadPHP}" />
+            <arg value="--exclude" />
+            <arg value="**/test/**" />
+            <arg path="${source}" />
+        </exec>
+    </target>
+
+</project>
