@@ -68,9 +68,9 @@ window.shipSelectList = {
 		
 		e.appendTo("body");
 		
-		$('.shiplistentry',e).bind('mouseover', shipClickable.shipclickableMouseOver);
-		$('.shiplistentry',e).bind('mouseout', shipClickable.shipclickableMouseOut);
-		$('.shiplistentry',e).bind('click', shipSelectList.onListClicked);
+		$('.shiplistentry',e).on('mouseover', shipClickable.shipclickableMouseOver);
+		$('.shiplistentry',e).on('mouseout', shipClickable.shipclickableMouseOut);
+		$('.shiplistentry',e).on('click', shipSelectList.onListClicked);
 		
 		e.show();
 		

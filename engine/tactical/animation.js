@@ -1,8 +1,3 @@
-jQuery(function($){
-
-    animation.animationLoop();
-
-});
 
 window.animation = {
 

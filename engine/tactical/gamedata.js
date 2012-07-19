@@ -478,6 +478,7 @@ gamedata = {
             gamedata.status = serverdata.status;
             gamedata.ballistics = serverdata.ballistics;
             gamedata.elintShips = Array();
+            shipManager.initiated = 0;
             //combatLog.constructLog();
             
             

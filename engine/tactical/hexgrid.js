@@ -287,15 +287,12 @@ window.hexgrid = {
     },
     
     onHexClicked: function(e){
-        console.log("onHexClicked");
-        return;
         
         if (e && e.which === 1){
             shipManager.movement.RemoveMovementIndicators();
             
-            var location = $(this).elementlocation();
-            var x = e.pageX - location.x;
-            var y = e.pageY - location.y;
+            var x = e.pageX - this.offsetLeft;
+            var y = e.pageY - this.offsetTop;
             
             var hexpos = hexgrid.pixelCoToHex(x,y);
             

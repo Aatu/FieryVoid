@@ -50,20 +50,12 @@ function drawEntities(){
 jQuery(function(){
     $("#zoomin").on("click", zooming.zoomin);
     $("#zoomout").on("click", zooming.zoomout);
-    //$("#pagecontainer").bind("mousedown", scrolling.mousedown);
-    //$("#pagecontainer").bind("mouseup", scrolling.mouseup);
-    //$("#pagecontainer").bind("mousemove", scrolling.mousemove);
-    //$("#pagecontainer").bind("mouseout", scrolling.mouseout);
+    $("#pagecontainer").on("mousedown", scrolling.mousedown);
+    $("#pagecontainer").on("mouseup", scrolling.mouseup);
+    $("#pagecontainer").on("mousemove", scrolling.mousemove);
+    $("#pagecontainer").on("mouseout", scrolling.mouseout);
     $("#pagecontainer").on("click", hexgrid.onHexClicked);
-    $(".shipclickable").on("dblclick", shipManager.onShipDblClick);
-    $(".shipclickable").on("click", shipManager.onShipClick);
-	$(".shipclickable").on("mouseover", shipClickable.shipclickableMouseOver);
-    $(".shipclickable").on("mouseout", shipClickable.shipclickableMouseOut);
     $(document).on("keyup", windowEvents.onKeyUp);
-	
-	
-	
-    
     
     
     $(".committurn").on("click", gamedata.onCommitClicked);
@@ -111,9 +103,8 @@ window.zooming = {
         e = e ? e : window.event;
         var wheelData = e.detail ? e.detail * -1 : e.wheelDelta / 40;
 
-        var location = $(this).elementlocation();
-        var x = e.pageX - location.x;
-        var y = e.pageY - location.y;
+        var x = e.pageX - this.offsetLeft;
+        var y = e.pageY - this.offsetTop;
         
         zooming.wheelpos.x = x;
         zooming.wheelpos.y = y;
@@ -218,15 +209,12 @@ window.scrolling = {
     
     mousedown: function(event){
 	
-        return;
 		shipSelectList.remove();
-        
         
 		if (!event || event.which !== 3)
             return;
         
         event.stopPropagation(event);
-		
         if (gamedata.effectsDrawing)
 			return;
 			
@@ -234,9 +222,8 @@ window.scrolling = {
         scrolling.scrolling = true;
         scrolling.scrollingstarted = ((new Date()).getTime())
         
-        var location = $(this).elementlocation();
-        var x = event.pageX - location.x;
-        var y = event.pageY - location.y;
+        var x = event.pageX - this.offsetLeft;
+        var y = event.pageY - this.offsetTop;
         scrolling.lastpos.x = x;
         scrolling.lastpos.y = y;
         
@@ -273,12 +260,11 @@ window.scrolling = {
             return;
         }
         
-        var location = $(this).elementlocation();
-        var x = event.pageX - location.x;
-        var y = event.pageY - location.y;
+        var x = event.pageX - this.offsetLeft;
+        var y = event.pageY - this.offsetTop;
         
-        dx= x - scrolling.lastpos.x;
-        dy= y - scrolling.lastpos.y;
+        var dx= x - scrolling.lastpos.x;
+        var dy= y - scrolling.lastpos.y;
     
         scrolling.scroll(dx,dy);
         

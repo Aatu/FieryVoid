@@ -1,8 +1,3 @@
-jQuery(function($){
-
-    effects.animationLoop();
-
-});
 
 window.effects = {
 
@@ -66,7 +61,7 @@ window.effects = {
             
         }
     
-        setTimeout(effects.animationLoop, 30);
+        window.requestAnimFrame(effects.animationLoop);
     },
     
     clearCanvas: function(){

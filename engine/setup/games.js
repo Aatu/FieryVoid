@@ -12,8 +12,8 @@ window.gamedata = {
         this.games = serverdata;
 		
 		this.createGames();
-		$('.lobby .game').bind("click", this.clickLobbyGame);
-		$('.active .game').bind("click", this.clickActiveGame);
+		$('.lobby .game').on("click", this.clickLobbyGame);
+		$('.active .game').on("click", this.clickActiveGame);
 	},
 	
 	createGames: function(){

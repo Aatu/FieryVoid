@@ -35,7 +35,7 @@ window.damageDrawer = {
             img.src = canvas.get(0).toDataURL();
             
             images.modified = img;
-            $(images.modified).bind("load", function(){
+            $(images.modified).on("load", function(){
                 images.modified.loaded = true;
                 
                 
@@ -88,7 +88,7 @@ window.damageDrawer = {
         img.src = canvas.get(0).toDataURL();
         
         images.modified = img;
-         $(images.modified).bind("load", function(){
+         $(images.modified).on("load", function(){
             images.modified.loaded = true;
             ship.drawDamage = true;
             shipManager.drawShip(ship);

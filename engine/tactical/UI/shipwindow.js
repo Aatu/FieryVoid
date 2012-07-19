@@ -1,23 +1,23 @@
 
 jQuery(function(){
-	$(".shipwindow .close").bind("click", shipWindowManager.close);
-	$(".ewentry.CCEW .button1").bind("click", ew.buttonDeassignEW);
-	$(".ewentry.CCEW .button2").bind("click", ew.buttonAssignEW);
-    $(".ewentry.BDEW .button1").bind("click", ew.buttonDeassignEW);
-	$(".ewentry.BDEW .button2").bind("click", ew.buttonAssignEW);
-	$(".shipwindow .system .plus").bind("click", shipWindowManager.clickPlus);
-	$(".shipwindow .system .minus").bind("click", shipWindowManager.clickMinus);
-	$(".shipwindow .system").bind("click", shipWindowManager.clickSystem);
-	$(".assignthrustcontainer .cancel").bind("click", shipWindowManager.cancelAssignThrustEvent);
-	$(".assignthrustcontainer .ok").bind("click", shipWindowManager.doneAssignThrust);
+	$(".shipwindow .close").on("click", shipWindowManager.close);
+	$(".ewentry.CCEW .button1").on("click", ew.buttonDeassignEW);
+	$(".ewentry.CCEW .button2").on("click", ew.buttonAssignEW);
+    $(".ewentry.BDEW .button1").on("click", ew.buttonDeassignEW);
+	$(".ewentry.BDEW .button2").on("click", ew.buttonAssignEW);
+	$(".shipwindow .system .plus").on("click", shipWindowManager.clickPlus);
+	$(".shipwindow .system .minus").on("click", shipWindowManager.clickMinus);
+	$(".shipwindow .system").on("click", shipWindowManager.clickSystem);
+	$(".assignthrustcontainer .cancel").on("click", shipWindowManager.cancelAssignThrustEvent);
+	$(".assignthrustcontainer .ok").on("click", shipWindowManager.doneAssignThrust);
 	
 	
-	$(".shipwindow .system .off").bind("click", shipManager.power.onOfflineClicked);
-	$(".shipwindow .system .on").bind("click", shipManager.power.onOnlineClicked);
-	$(".shipwindow .system .overload").bind("click", shipManager.power.onOverloadClicked);
-	$(".shipwindow .system .stopoverload").bind("click", shipManager.power.onStopOverloadClicked);
-	$(".shipwindow .system .holdfire").bind("click", window.weaponManager.onHoldfireClicked);
-	$(".shipwindow .system .mode").bind("click", window.weaponManager.onModeClicked);
+	$(".shipwindow .system .off").on("click", shipManager.power.onOfflineClicked);
+	$(".shipwindow .system .on").on("click", shipManager.power.onOnlineClicked);
+	$(".shipwindow .system .overload").on("click", shipManager.power.onOverloadClicked);
+	$(".shipwindow .system .stopoverload").on("click", shipManager.power.onStopOverloadClicked);
+	$(".shipwindow .system .holdfire").on("click", window.weaponManager.onHoldfireClicked);
+	$(".shipwindow .system .mode").on("click", window.weaponManager.onModeClicked);
 });
 
 shipWindowManager = {
@@ -421,8 +421,8 @@ shipWindowManager = {
 
 			element.data("EW", entry);
 			element.data("ship", ship);
-            element.find(".button1").bind("click", ew.buttonDeassignEW);
-            element.find(".button2").bind("click", ew.buttonAssignEW);
+            element.find(".button1").on("click", ew.buttonDeassignEW);
+            element.find(".button2").on("click", ew.buttonAssignEW);
 
             var h = entry.type +' (<span class="shiplink">' + gamedata.getShip(entry.targetid).name + '</span>):';
             if (entry.type == "SOEW"){
@@ -489,8 +489,8 @@ shipWindowManager = {
 			systemwindow.addClass("weapon");
 		}
 		
-		systemwindow.bind("mouseover", weaponManager.onWeaponMouseover);
-		systemwindow.bind("mouseout", weaponManager.onWeaponMouseout);
+		systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
+		systemwindow.on("mouseout", weaponManager.onWeaponMouseout);
 			
 	},
 	

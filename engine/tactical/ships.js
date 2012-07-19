@@ -1,13 +1,15 @@
 window.shipManager = {
 
     shipImages: Array(),
-
-    initShips: function(){
+    initiated: 0,
     
+    initShips: function(){
+        shipManager.initiated = 1;
         for (var i in gamedata.ships){
             shipManager.createHexShipDiv(gamedata.ships[i]);
         }
-    
+        shipManager.initiated = 2;
+        shipManager.drawShips();
     },
     
     createHexShipDiv: function(ship){
@@ -31,6 +33,10 @@ window.shipManager = {
             ship.htmlContainer = $("#pagecontainer #hexship_"+ship.id);
             ship.shipclickableContainer = $('<div oncontextmenu="shipManager.onShipContextMenu(this);return false;" class="shipclickable ship_'+ship.id+'"></div>').appendTo("#pagecontainer");
             ship.shipclickableContainer.data("id", ship.id);
+            ship.shipclickableContainer.on("dblclick", shipManager.onShipDblClick);
+            ship.shipclickableContainer.on("click", shipManager.onShipClick);
+            ship.shipclickableContainer.on("mouseover", shipClickable.shipclickableMouseOver);
+            ship.shipclickableContainer.on("mouseout", shipClickable.shipclickableMouseOut);
             if (ship.flight){
 				ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
 			}else{
@@ -42,7 +48,7 @@ window.shipManager = {
             var img = new Image();
             img.src = ship.imagePath; 
             shipManager.shipImages[ship.id] = {orginal:img, modified:null, turn:null, phase:null};
-            $(shipManager.shipImages[ship.id].orginal).bind("load", function(){
+            $(shipManager.shipImages[ship.id].orginal).on("load", function(){
                 shipManager.shipImages[ship.id].orginal.loaded = true;
             });
             
@@ -58,14 +64,28 @@ window.shipManager = {
     },
     
     drawShips: function(){
+        
+        if (shipManager.initiated == 0){
+            shipManager.initShips();
+            return;
+        }
+        
+        if (shipManager.initiated == 1)
+            return;
+        
         for (var i in gamedata.ships){
             shipManager.drawShip(gamedata.ships[i]);
         }
     },
     
     drawShip: function(ship){
-        if (!ship.htmlContainer)
-            shipManager.createHexShipDiv(ship);
+        if (shipManager.initiated == 0){
+            shipManager.initShips();
+            return;
+        }
+        
+        if (shipManager.initiated == 1)
+            return;
         
         if (ship.dontDraw){
             ship.shipclickableContainer.css("z-index", "1");
@@ -121,12 +141,12 @@ window.shipManager = {
         if (img.loaded){
             shipManager.doDrawShip(canvas, s, ship, img);
         }else{
-            $(img).bind("load", function(){
+            $(img).on("load", function(){
                 img = damageDrawer.getShipImage(ship);
                 if (img.loaded){
                     shipManager.doDrawShip(canvas, s, ship, img);
                 }else{
-                    $(img).bind("load", function(){
+                    $(img).on("load", function(){
                         img = damageDrawer.getShipImage(ship);
                         shipManager.doDrawShip(canvas, s, ship, img);
                     });

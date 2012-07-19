@@ -1,7 +1,7 @@
 
 jQuery(function(){
 
-	$(".shipwindow .fightersystem").bind("click", flightWindowManager.clickSystem);
+	$(".shipwindow .fightersystem").on("click", flightWindowManager.clickSystem);
 	
 	
 });
@@ -130,8 +130,8 @@ flightWindowManager = {
 				fightersystemwindow.data("fighterid", fighter.id);
 				fightersystemwindow.data("id", fightersystem.id);
 				
-				fightersystemwindow.bind("mouseover", weaponManager.onWeaponMouseover);
-				fightersystemwindow.bind("mouseout", weaponManager.onWeaponMouseout);
+				fightersystemwindow.on("mouseover", weaponManager.onWeaponMouseover);
+				fightersystemwindow.on("mouseout", weaponManager.onWeaponMouseout);
 				
 			}
 		

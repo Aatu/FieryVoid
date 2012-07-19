@@ -33,8 +33,8 @@
 		<link href="base.css" rel="stylesheet" type="text/css">
 		<link href="lobby.css" rel="stylesheet" type="text/css">
 		<link href="games.css" rel="stylesheet" type="text/css">
-		<script src="./engine/jquery-1.5.2.min.js"></script>
-		<script src="./engine/setup/games.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="./engine/setup/games.js"></script>
 		<script src="./engine/tactical/ajaxInterface.js"></script>
 		<script src="./engine/tactical/player.js"></script>
 		<script>

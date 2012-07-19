@@ -1,7 +1,7 @@
 
 
 jQuery(function(){
-	$(".BPcontainer.thrusters .iconmask").bind("click", botPanel.onThrusterClick);
+	$(".BPcontainer.thrusters .iconmask").on("click", botPanel.onThrusterClick);
 
 });
 

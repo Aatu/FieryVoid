@@ -37,23 +37,23 @@ window.UI = {
                 UI.shipMovement.lessjinkElement = $("#lessjink", ui);
                 UI.shipMovement.cancelElement = $("#cancel", ui);
                 
-                UI.shipMovement.cancelElement.bind("click", UI.shipMovement.cancelCallback);
+                UI.shipMovement.cancelElement.on("click", UI.shipMovement.cancelCallback);
                 
-                UI.shipMovement.moveElement.bind("click", UI.shipMovement.moveCallback);
-                UI.shipMovement.turnrightElement.bind("click", UI.shipMovement.turnrightCallback);
-                UI.shipMovement.turnleftElement.bind("click", UI.shipMovement.turnleftCallback);
-                UI.shipMovement.sliprightElement.bind("click", UI.shipMovement.sliprightCallback);
-                UI.shipMovement.slipleftElement.bind("click", UI.shipMovement.slipleftCallback);
+                UI.shipMovement.moveElement.on("click", UI.shipMovement.moveCallback);
+                UI.shipMovement.turnrightElement.on("click", UI.shipMovement.turnrightCallback);
+                UI.shipMovement.turnleftElement.on("click", UI.shipMovement.turnleftCallback);
+                UI.shipMovement.sliprightElement.on("click", UI.shipMovement.sliprightCallback);
+                UI.shipMovement.slipleftElement.on("click", UI.shipMovement.slipleftCallback);
                 
-                UI.shipMovement.pivotleftElement.bind("click", UI.shipMovement.pivotleftCallback);
-                UI.shipMovement.pivotrightElement.bind("click", UI.shipMovement.pivotrightCallback);
-                UI.shipMovement.rollElement.bind("click", UI.shipMovement.rollCallback);
+                UI.shipMovement.pivotleftElement.on("click", UI.shipMovement.pivotleftCallback);
+                UI.shipMovement.pivotrightElement.on("click", UI.shipMovement.pivotrightCallback);
+                UI.shipMovement.rollElement.on("click", UI.shipMovement.rollCallback);
                 
-                UI.shipMovement.accElement.bind("click", UI.shipMovement.accelCallback);
-                UI.shipMovement.deaccElement.bind("click", UI.shipMovement.deaccCallback);
+                UI.shipMovement.accElement.on("click", UI.shipMovement.accelCallback);
+                UI.shipMovement.deaccElement.on("click", UI.shipMovement.deaccCallback);
                 
-                UI.shipMovement.morejinkElement.bind("click", UI.shipMovement.morejinkCallback);
-                UI.shipMovement.lessjinkElement.bind("click", UI.shipMovement.lessjinkCallback);
+                UI.shipMovement.morejinkElement.on("click", UI.shipMovement.morejinkCallback);
+                UI.shipMovement.lessjinkElement.on("click", UI.shipMovement.lessjinkCallback);
                 
                 
                 
@@ -382,7 +382,7 @@ window.UI = {
             var img = new Image();
             img.src = path; 
             
-            $(img).bind("load", function(){
+            $(img).on("load", function(){
                 graphics.clearSmallCanvas(canvas);
                 graphics.drawAndRotate(canvas, s, s, s*2, s*2, angle, img)
             });

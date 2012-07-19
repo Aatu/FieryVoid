@@ -130,13 +130,13 @@ window.ballistics = {
             ball.ballclickableTarget = $('<div oncontextmenu="ballistics.onBallContextMenu(this);return false;" class="ballclickable target ballistic_'+ball.id+'"></div>').appendTo("#pagecontainer");
             ball.ballclickableTarget.data("id", ball.id);
             
-            ball.ballclickableLaunch .bind("click", ballistics.onBallisticClick);
-            ball.ballclickableLaunch .bind("mouseover", ballistics.ballclickableMouseOver);
-            ball.ballclickableLaunch .bind("mouseout", ballistics.ballclickableMouseOut);
+            ball.ballclickableLaunch .on("click", ballistics.onBallisticClick);
+            ball.ballclickableLaunch .on("mouseover", ballistics.ballclickableMouseOver);
+            ball.ballclickableLaunch .on("mouseout", ballistics.ballclickableMouseOut);
             
-            ball.ballclickableTarget .bind("click", ballistics.onBallisticClick);
-            ball.ballclickableTarget .bind("mouseover", ballistics.ballclickableMouseOver);
-            ball.ballclickableTarget .bind("mouseout", ballistics.ballclickableMouseOut);
+            ball.ballclickableTarget .on("click", ballistics.onBallisticClick);
+            ball.ballclickableTarget .on("mouseover", ballistics.ballclickableMouseOver);
+            ball.ballclickableTarget .on("mouseout", ballistics.ballclickableMouseOut);
             
         }else{
             ball.launchContainer = e;
@@ -213,7 +213,7 @@ window.ballistics = {
         
         if (ball.drawLaunch){
                  
-            //$(ballistics.launchImg).bind("load", function(){
+            //$(ballistics.launchImg).on("load", function(){
                 launchCanvas.clearRect(0, 0, s, s);
                             
                 launchCanvas.drawImage(ballistics.launchImg, 0,0);
@@ -223,7 +223,7 @@ window.ballistics = {
         
         if (ball.drawTarget){
             
-            //$(ballistics.targetImg).bind("load", function(){
+            //$(ballistics.targetImg).on("load", function(){
                 targetCanvas.clearRect(0, 0, s, s);
                             
                 targetCanvas.drawImage(ballistics.targetImg, 0,0);
@@ -454,7 +454,7 @@ window.ballistics = {
         e.appendTo("body");
         
     
-        $('.shiplistentry',e).bind('click', ballistics.onBallisticSelected);
+        $('.shiplistentry',e).on('click', ballistics.onBallisticSelected);
         
         e.show();
         

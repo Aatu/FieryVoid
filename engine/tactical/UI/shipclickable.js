@@ -18,6 +18,7 @@ window.shipClickable = {
 	},
 	
 	shipclickableMouseOut: function(e){
+        console.log("mouseout");
 		clearTimeout(shipClickable.shipClickableTimer);
         var ship = gamedata.getShip($(this).data("id"));
 		shipClickable.ship = null;

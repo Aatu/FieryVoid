@@ -16,7 +16,7 @@ function debugMarker(hx, hy){
 		
 		
 		
-		$(img).bind("load", function(){
+		$(img).on("load", function(){
 		
 			var x = 100;
 			var y = 100;

@@ -45,10 +45,9 @@
 	<link href="./engine/tactical/UI/confirm.css" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="./engine/jquery-ui-1.8.15.custom.min.js"></script>
-    <script src="./engine/elementlocation.js"></script>
     <script>
 					
-        jQuery(function($){
+        $(window).load(function(){
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
             getWindowDimensions();
@@ -61,6 +60,8 @@
 				gamedata.waiting = false;
 			}
             $("#pagecontainer").show();
+            animation.animationLoop();
+            effects.animationLoop();
         });
         
             
@@ -109,8 +110,8 @@
     <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
     <table class="uitable">
         <tr>
-        <td class="committurn"><div class="ok" ></div></td>
-        <td class="cancelturn"><div class="cancel" ></div></td>
+        <td class="committurn" style="display:none"><div class="ok" ></div></td>
+        <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
         </tr>
     </table>
 </div>

@@ -40,8 +40,7 @@
 		<title>B5CGM</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="base.css" rel="stylesheet" type="text/css">
-		<script src="./engine/jquery-1.5.2.min.js"></script>
-		
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>    		
 		<script>
 		
 			function mapSelect(){

@@ -34,7 +34,7 @@ window.gamedata = {
 		ship.id = a;
 		gamedata.ships[a] = ship;
 		var h = $('<div class="ship" data-shipindex="'+a+'"><span class="shiptype">'+ship.shipClass+'</span><span class="shipname name">'+ship.name+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="remove clickable">remove</span></div>');
-		$(".remove", h).bind("click", function(){
+		$(".remove", h).on("click", function(){
 			delete gamedata.ships[a];
 			h.remove();
 			gamedata.calculateFleet();
@@ -76,7 +76,7 @@ window.gamedata = {
 			}
 		}
 		
-		$(".addship").bind("click", this.buyShip);
+		$(".addship").on("click", this.buyShip);
 	
 	},
     
@@ -110,7 +110,7 @@ window.gamedata = {
 		
 		this.createSlots();
 		$('.takeslot').unbind("click", this.clickTakeslot);
-		$('.takeslot').bind("click", this.clickTakeslot);
+		$('.takeslot').on("click", this.clickTakeslot);
 		this.enableBuy();
 	},
 	
