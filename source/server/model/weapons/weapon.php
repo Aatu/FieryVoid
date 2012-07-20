@@ -463,13 +463,14 @@ class Weapon extends ShipSystem{
         if ($this->piercing && $this->firingMode == 2)
             $mod -= 4;
        
-        
-        if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
-            $mod -=3;
-        
-        if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
-            $mod -=3;
-            
+        if (!($shooter instanceof FighterFlight))
+        {
+            if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
+                $mod -=3;
+
+            if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
+                $mod -=3;
+        }
         if ($fireOrder->calledid != -1){
 			$mod -= 8;
 		}
