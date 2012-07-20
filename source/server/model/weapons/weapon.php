@@ -485,7 +485,7 @@ class Weapon extends ShipSystem{
             // races. A race is able to bypass its own jammer technology.
             $jammer = $target->getSystemByName("jammer");
 
-            if (( $jammer != null) && !($jammer.isOfflineOnTurn($gamedata->turn))){
+            if (( $jammer != null) && !($jammer->isOfflineOnTurn($gamedata->turn))){
                 $jammermod = $rangePenalty*$jammer->output;
             }
 

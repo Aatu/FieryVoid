@@ -365,8 +365,8 @@ window.weaponManager = {
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
             if (jammer && !shipManager.power.isOffline(target, jammer))
-                jammermod = rangePenalty*shipManager.systems.getOutput(shooter, jammer);
-
+                jammermod = rangePenalty*shipManager.systems.getOutput(target, jammer);
+            
             if (target.flight){
                 var jinking = shipManager.movement.getJinking(target);
                 if ( jinking > jammermod){
@@ -384,7 +384,7 @@ window.weaponManager = {
         var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        console.log("rangePenalty: " + rangePenalty + " baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         if (change > 100)
             change = 100;
