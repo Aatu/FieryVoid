@@ -1,0 +1,60 @@
+
+body {
+	background-image:url(./../img/maps/intothefieryvoid.jpeg);
+	background-color:black;
+	color:#DEEBFF;
+	opacity:0.85;
+	font-family:arial;
+    font-size:12px;
+}
+.name{
+	font-style: italic;
+}
+
+.panel{
+	padding:10px;
+	border:1px solid #496791;
+    background-color:#0a3340;
+	border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px;
+	position:relative;
+}
+
+.subpanel{
+	padding:5px;
+	background-color:#04161C;
+	border:1px solid #37465a;
+}
+
+.panel.large{
+	width:800px;
+	margin:0px auto 10px auto;
+
+}
+
+.panelheader{
+	font-size:20px;
+	color:#DEEBFF;
+}
+
+.panelsubheader{
+	font-size:20px;
+	color:#496791;
+}
+
+a{
+	color:white;
+	text-decoration:none;
+}
+
+a:hover{
+	text-decoration:underline;
+}
+
+.logout{
+	position:absolute;
+	top:10px;
+	right:10px;
+	width:50px;
+}
