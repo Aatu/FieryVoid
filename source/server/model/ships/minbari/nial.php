@@ -28,7 +28,7 @@ class Nial extends FighterFlight{
             $nial->imagePath = "img/ships/nial.png";
         // need picture
             $nial->iconPath = "img/ships/nial-large.png";
-            $nial->addFrontSystem(new LightFusionCannon(300, 60, 4, 3));
+            $nial->addFrontSystem(new LightFusionCannon(330, 30, 4, 3));
             $nial->addAftSystem(new Jammer(0, 1, 0));
             $this->addSystem($nial);
 	}

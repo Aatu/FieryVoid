@@ -271,21 +271,46 @@ class DBManager {
     }
     
     public function updateFireOrders($fireOrders){
-    
-        Debug::log("Upadting FireOrders: " . var_export($fireOrders, true));
         
-        foreach ($fireOrders as $fire){
-            try {
-                $sql = "UPDATE `B5CGM`.`tac_fireorder` SET `needed` = ".$fire->needed.", `rolled` = ".$fire->rolled.", `notes` = '".$fire->notes.
-                "', `pubnotes` = '".$fire->pubnotes."', `shots` = ".$fire->shots.", `shotshit` = ".$fire->shotshit.", `intercepted` = "
-                .$fire->intercepted.", `x` = '".$fire->x."', `y` = '".$fire->y."' WHERE id = ".$fire->id;
+        $stmt = $this->connection->prepare(
+            "UPDATE 
+                tac_fireorder  
+            SET 
+                needed = ?,
+                rolled = ?,
+                notes = ?,
+                pubnotes = ?,
+                shots = ?,
+                shotshit = ?,
+                intercepted = ?,
+                x = ?,
+                y = ?
+            WHERE
+                id = ?
+            "
+        );
 
-                $this->update($sql);
+        if ($stmt)
+        {
+            foreach ($fireOrders as $fire)
+            {
+                $stmt->bind_param(
+                    'iissiiiiii',
+                    $fire->needed,
+                    $fire->rolled,
+                    $fire->notes,
+                    $fire->pubnotes,
+                    $fire->shots,
+                    $fire->shotshit,
+                    $fire->intercepted,
+                    $fire->x,
+                    $fire->y,
+                    $fire->id
+                );
+                $stmt->execute();
             }
-            catch(Exception $e) {
-                throw $e;
-            }
-            
+            $stmt->close();
+
         }
     
     }
@@ -342,41 +367,37 @@ class DBManager {
             $loadings = $input;
         else 
             $loadings[] = $input;
-        
-        try {
-            $stmt = $this->connection->prepare(
-                "INSERT INTO  
-                    tac_loading
-                VALUES 
-                ( 
-                    ?,?,?,?,?,?,?,?
-                )"
-            );
-            
-			if ($stmt)
+       
+        $stmt = $this->connection->prepare(
+            "INSERT INTO  
+                tac_loading
+            VALUES 
+            ( 
+                ?,?,?,?,?,?,?,?
+            )"
+        );
+
+        if ($stmt)
+        {
+            foreach ($loadings as $loading)
             {
-                foreach ($loadings as $loading)
-                {
-                    $stmt->bind_param(
-                        'iiiiiiii',
-                        $loading->systemid,
-                        $loading->subsystem,
-                        $loading->gameid,
-                        $loading->shipid,
-                        $loading->loading,
-                        $loading->extrashots,
-                        $loading->loadedammo,
-                        $loading->overloading
-                    );
-                    $stmt->execute();
-                }
-                $stmt->close();
-                
-			}
+                $stmt->bind_param(
+                    'iiiiiiii',
+                    $loading->systemid,
+                    $loading->subsystem,
+                    $loading->gameid,
+                    $loading->shipid,
+                    $loading->loading,
+                    $loading->extrashots,
+                    $loading->loadedammo,
+                    $loading->overloading
+                );
+                $stmt->execute();
+            }
+            $stmt->close();
+
         }
-        catch(Exception $e) {
-            throw $e;
-        }
+
     }
     
     public function updateWeaponLoading($input)

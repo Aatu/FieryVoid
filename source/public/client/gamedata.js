@@ -285,7 +285,8 @@ gamedata = {
         
         if (gamedata.gamephase == -1){
             if (gamedata.waiting == false){
-               infowindow.informPhase(5000, null);
+                combatLog.onTurnStart();
+                infowindow.informPhase(5000, null);
                 for (var i in gamedata.ships){
                     var ship = gamedata.ships[i];
                     if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
