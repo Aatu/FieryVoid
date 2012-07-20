@@ -193,7 +193,7 @@ class Weapon extends ShipSystem{
     
     public function getStartLoading($gameid, $ship)
     {
-        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $this->getNormalLoad(), 0, 0, 1);
+        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $this->getNormalLoad(), 0, 0, 0);
     }
     
     public function setLoading( $loading )

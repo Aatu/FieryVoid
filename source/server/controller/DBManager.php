@@ -594,7 +594,9 @@ class DBManager {
                 foreach ($moves as $move)
                 {
                     $preturn = ($move->preturn) ? 1 : 0;
-
+                    $reqThrust = $move->getReqThrustJSON();
+                    $assThrust = $move->getAssThrustJSON();
+                    
                     $stmt->bind_param(
                         'iisiiiiiiiissii',
                         $shipid,
@@ -608,8 +610,8 @@ class DBManager {
                         $move->heading,
                         $move->facing,
                         $preturn,
-                        $move->getReqThrustJSON(),
-                        $move->getAssThrustJSON(),
+                        $reqThrust,
+                        $assThrust,
                         $move->turn,
                         $move->value
                     );
