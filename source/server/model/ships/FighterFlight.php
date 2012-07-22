@@ -67,6 +67,18 @@
             return null;
         }
         
+        
+        public function getSystemByName($name){
+			foreach ($this->systems as $fighter){
+                
+                foreach ($fighter->systems as $fs){
+					if ($fs->name == $name){
+						return $fs;
+					}
+				}
+            }
+		}
+        
         public function getFighterBySystem($id){
 			foreach ($this->systems as $fighter){
                 

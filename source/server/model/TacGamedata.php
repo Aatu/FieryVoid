@@ -101,7 +101,7 @@ class TacGamedata{
                 $pos2 = $ship2->getCoPos();
                 $dis = mathlib::getDistanceHex($pos, $pos2);
                 
-                if ($dis<70){
+                if ($dis<70 || $this->turn < 5){
                     //print($ship->name . " is on distance $dis from " . $ship2->name);
                     return false;
                 }

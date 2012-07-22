@@ -211,6 +211,7 @@ class NeutronLaser extends Laser{
         public $animationColor = array(175, 225, 175);
         public $animationWidth = 4;
 
+        public $extraoverloadshots = 2;
         public $loadingtime = 3;
         public $overloadable = true;
 

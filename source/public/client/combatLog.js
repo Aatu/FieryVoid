@@ -1,5 +1,8 @@
 window.combatLog = {
 
+    onTurnStart: function(){
+        $('.logentry').remove();
+    },
     
     logDestroyedShip: function(ship){
     

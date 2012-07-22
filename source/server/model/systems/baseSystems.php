@@ -80,7 +80,7 @@ class Jammer extends ShipSystem{
     public $displayName = "Jammer";
     public $primary = true;
     
-    public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
+    //public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);

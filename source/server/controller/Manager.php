@@ -215,7 +215,7 @@ class Manager{
             return $json;
 
         }
-        catch(exception $e) {
+        catch(Exception $e) {
             $logid = Debug::error($e);
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
@@ -489,7 +489,6 @@ class Manager{
         {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
-            Debug::error($e);
             throw $e;
         }
     }

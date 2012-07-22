@@ -193,7 +193,7 @@ class Weapon extends ShipSystem{
     
     public function getStartLoading($gameid, $ship)
     {
-        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $this->getNormalLoad(), 0, 0, 1);
+        return new WeaponLoading($this->id, 0, $gameid, $ship->id, $this->getNormalLoad(), 0, 0, 0);
     }
     
     public function setLoading( $loading )
@@ -463,13 +463,14 @@ class Weapon extends ShipSystem{
         if ($this->piercing && $this->firingMode == 2)
             $mod -= 4;
        
-        
-        if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
-            $mod -=3;
-        
-        if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
-            $mod -=3;
-            
+        if (!($shooter instanceof FighterFlight))
+        {
+            if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
+                $mod -=3;
+
+            if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
+                $mod -=3;
+        }
         if ($fireOrder->calledid != -1){
 			$mod -= 8;
 		}
@@ -484,7 +485,7 @@ class Weapon extends ShipSystem{
             // races. A race is able to bypass its own jammer technology.
             $jammer = $target->getSystemByName("jammer");
 
-            if (( $jammer != null) && !($jammer.isOfflineOnTurn($gamedata->turn))){
+            if (( $jammer != null) && !($jammer->isOfflineOnTurn($gamedata->turn))){
                 $jammermod = $rangePenalty*$jammer->output;
             }
 
