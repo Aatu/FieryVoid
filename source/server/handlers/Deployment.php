@@ -5,9 +5,9 @@ class Deployment
     private static function getValidDeploymentArea($ship)
     {
         if ($ship->team == 1){
-            return array("x" => -40, "y" => 0, "w" => 16, "h" => 50);
+            return array("x" => -30, "y" => 0, "w" => 16, "h" => 50);
         }else{
-            return array("x" => 40, "y" => 0, "w" => 16, "h" => 50);
+            return array("x" => 30, "y" => 0, "w" => 16, "h" => 50);
         }
     }
     
