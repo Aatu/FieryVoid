@@ -395,7 +395,7 @@ class TacGamedata{
     private function unanimateMovements($activeship, $turn){
         $found = false;
         
-        if ($this->phase == 4){ //|| $this->waiting == true){
+        if ($this->phase == 4 || ($this->phase == 3 && $this->waiting == true)){ //|| $this->waiting == true){
             return;
         }
         

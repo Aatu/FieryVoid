@@ -40,26 +40,6 @@ class DualWeapon extends Weapon{
         }    
     }
     
-    public function setCriticals($criticals, $turn){
-        foreach ($this->weapons as $weapon){
-            $weapon->setCriticals($criticals, $turn);
-        }  
-    }
-    
-    public function setDamage($damage){
-        parent::setDamage($damage);
-        foreach ($this->weapons as $weapon){
-            $weapon->setDamage($damage);
-        } 
-    }
-    
-    public function setPower($power){
-        parent::setPower($power);
-        foreach ($this->weapons as $weapon){
-            $weapon->setPower($power);
-        } 
-    }
-    
     public function setId($id){
         parent::setId($id);
         foreach ($this->weapons as $weapon){
@@ -76,9 +56,15 @@ class DualWeapon extends Weapon{
     }
     
     public function setFireOrders($fireOrders){
-        foreach ($this->weapons as $weapon){
-            $weapon->setFireOrders($fireOrders);
-        } 
+        foreach ($fireOrders as $fire)
+        {
+            $this->setFireOrder($fire);
+        }
+    }
+    
+    public function setFireOrder($fire)
+    {
+        $this->weapons[$fire->firingMode]->setFireOrder($fire);
     }
     
     
