@@ -95,7 +95,11 @@ window.shipClickable = {
             shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
             var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
             var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
-            shipClickable.addEntryElement("Defence (F/S): " + fDef +"/"+ sDef+"%");
+            shipClickable.addEntryElement("Defence (F/S): " + fDef +"("+
+                (ship.forwardDefense *5)
+                +") / "+ sDef+"("+
+                    (ship.sideDefense * 5)
+                +")%");
             
             
             if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){

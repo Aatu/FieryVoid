@@ -10,8 +10,6 @@ window.ew = {
         for (var i in ship.systems){
             var system = ship.systems[i];
             
-            
-			            
             if (system.outputType === "EW"){
                 var output = shipManager.systems.getOutput(ship, system);
             
@@ -384,11 +382,11 @@ window.ew = {
             return;
         }
             
-		if (type == "OEW" && shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
-			var allOEW = ew.getAllOffensiveEW(selected);
+		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+			var def = ew.getDefensiveEW(selected);
 			var all = ew.getScannerOutput(selected);
 			
-			if (allOEW+1 > all*0.5)
+			if (def-1 < all*0.5)
 				return false;
 		}
 		var amount = 1;
@@ -410,6 +408,14 @@ window.ew = {
 		var left = ew.getDefensiveEW(ship);
 		if (left < 1)
             return;
+        
+        if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+			var def = ew.getDefensiveEW(selected);
+			var all = ew.getScannerOutput(selected);
+			
+			if (def-1 < all*0.5)
+				return false;
+		}
 		
         if (entry == "CCEW"){
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});
@@ -420,20 +426,9 @@ window.ew = {
             if (left < 3)
                 return;
             entry.amount += 3;
-        }else{
-            
-            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW") && entry.type == "OEW"){
-				var allOEW = ew.getAllOffensiveEW(ship);
-				var all = ew.getScannerOutput(ship);
-				
-				if (allOEW+1 > all*0.5)
-					return false;
-			}
-           
-            
-            if (entry.type == "SOEW")
-                return;
-            
+        }else if (entry.type == "SOEW"){
+            return;
+        }else{    
             entry.amount++;
         }
         gamedata.shipStatusChanged(ship);

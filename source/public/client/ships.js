@@ -539,7 +539,7 @@ window.shipManager = {
         if (gamedata.gamephase == 1 && ship.userid != gamedata.thisplayer){
             if (gamedata.selectedSystems.length > 0){
                 weaponManager.targetShip(ship, false);
-            }else{
+            }else if (!ship.flight){
                 ew.AssignOEW(ship);
             }
         }

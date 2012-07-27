@@ -431,11 +431,11 @@ shipManager.movement = {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
                 continue;
-                
+            /*    
             if (movement.type == othername){
                 return false;
             }
-            
+            */
             if (movement.type == othername || movement.type == name)
                 movebetween = false;
                 
@@ -446,10 +446,13 @@ shipManager.movement = {
         if ( movebetween == false)
             return false;
                 
-        if ( Math.ceil(shipManager.movement.getSpeed(ship) / 5) > shipManager.movement.getRemainingEngineThrust(ship)){
+        if ( !ship.flight && Math.ceil(shipManager.movement.getSpeed(ship) / 5) > shipManager.movement.getRemainingEngineThrust(ship)){
             return false;
             
         }
+        
+        if (shipManager.movement.getRemainingEngineThrust(ship) == 0)
+            return false;
         
         if (shipManager.movement.getRemainingMovement(ship) < 1)
             return false;
@@ -472,6 +475,9 @@ shipManager.movement = {
         var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
         
         var slipcost = Math.ceil(shipManager.movement.getSpeed(ship) / 5);
+        if (ship.flight)
+            slipcost = 1;
+        
         var reversed = shipManager.movement.hasSidesReversedForMovement(ship);
         if (reversed)
             right = !right;
@@ -1098,7 +1104,7 @@ shipManager.movement = {
 			used--;
 			
 		var crits = shipManager.criticals.hasCritical(system, "HalfEfficiency");
-		used = Math.round(used/(crits+1));
+		used = Math.ceil(used/(crits+1));
         
         return used;
     },
@@ -1315,7 +1321,7 @@ shipManager.movement = {
         }
         
         var speed = shipManager.movement.getSpeed(ship);        
-        var turncost = Math.round(speed * ship.turncost);
+        var turncost = Math.ceil(speed * ship.turncost);
         
         //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost){
@@ -1416,7 +1422,7 @@ shipManager.movement = {
         var requiredThrust = Array(null,null,null,null,null);
         
         var speed = shipManager.movement.getSpeed(ship);        
-        var turncost = Math.round(speed * ship.turncost);
+        var turncost = Math.ceil(speed * ship.turncost);
         
         var side, sideindex, rear, rearindex, any;
         
@@ -1497,7 +1503,7 @@ shipManager.movement = {
                     sub =1;
 			}
 
-            assignedarray[ship.systems[i].direction] += (Math.round(movement.assignedThrust[i]*mod)-sub);
+            assignedarray[ship.systems[i].direction] += (Math.ceil(movement.assignedThrust[i]*mod)-sub);
 			if (assignedarray[ship.systems[i].direction] < 0)
 				assignedarray[ship.systems[i].direction] = 0;
         }
@@ -1570,7 +1576,7 @@ shipManager.movement = {
     calculateCurrentTurndelay: function(ship){
         
         var turndelay = ship.currentturndelay;
-        
+        var last = null;
         for (var i in ship.movement){
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn)
@@ -1585,8 +1591,10 @@ shipManager.movement = {
             
                 
             if (shipManager.movement.isTurn(movement)){
-                turndelay += shipManager.movement.calculateTurndelay(ship, movement);
+                if (!ship.agile || !last || !shipManager.movement.isTurn(last))
+                    turndelay += shipManager.movement.calculateTurndelay(ship, movement);
             }
+            last = movement;
             
         }
         
@@ -1604,7 +1612,7 @@ shipManager.movement = {
 		if (speed == 0)
 			return 0;
 			
-        var turndelay = Math.round(speed * ship.turndelaycost);
+        var turndelay = Math.ceil(speed * ship.turndelaycost);
   
         if (ship.flight)
 			return turndelay;

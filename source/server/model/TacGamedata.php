@@ -392,6 +392,24 @@ class TacGamedata{
         }
     }
     
+    private function unanimateAllMovements()
+    {
+        if ($this->phase == 4 || ($this->phase == 3 && $this->waiting == true)){ //|| $this->waiting == true){
+            return;
+        }
+        
+        foreach ($this->ships as $ship)
+        {
+            if ($ship->id == $this->activeship){
+                break;
+            }
+
+            $ship->unanimateMovements($this->turn);
+
+        }
+    }
+    
+    
     private function unanimateMovements($activeship, $turn){
         $found = false;
         
@@ -405,7 +423,10 @@ class TacGamedata{
         $turn = $this->turn;
             
         if ($activeship == -1)
-            $found = true;
+        {
+            $this->unanimateAllMovements();
+            return;
+        }
         
         $turnchanged = ($turn != $this->turn);
         
@@ -429,6 +450,8 @@ class TacGamedata{
             }
         }
     }
+     
+     
     
     private function setWaiting(){
     
