@@ -18,9 +18,9 @@ window.deployment = {
     getValidDeploymentArea: function(ship){
     
         if (ship.team == 1){
-            return ({x:-40, y:0, w:16, h:50});
+            return ({x:-30, y:0, w:16, h:50});
         }else{
-            return ({x:40, y:0, w:16, h:50});
+            return ({x:30, y:0, w:16, h:50});
         }
     },
     
