@@ -42,6 +42,25 @@ class ShipSystem{
         $this->destroyed = $this->isDestroyed();
     }
     
+    public function getSpecialAbilityList($list)
+    {
+        if ($this instanceof SpecialAbility)
+        {
+            if ($this->isDestroyed() || $this->isOfflineOnTurn())
+                continue;
+
+            foreach ($this->specialAbilities as $effect)
+            {
+                if (!isset($list[$effect]))
+                {
+                    $list[$effect] = $this->id;
+                }
+            }
+        }
+        
+        return $list;
+    }
+    
     public function beforeTurn($ship, $turn, $phase){
             
         $this->setSystemDataWindow($turn);
@@ -179,6 +198,19 @@ class ShipSystem{
         return $count;
     }
     
+    public function getOutput(){
+        
+        if ($this->isOfflineOnTurn())
+            return 0;
+        
+        if ($this->isDestroyed())
+            return 0;
+        
+        $output = $this->output;
+        $output -= $this->outputMod;
+        return $output;
+    }
+    
     
     public function effectCriticals(){
            
@@ -242,7 +274,9 @@ class ShipSystem{
         return $rem;
     }
       
-    public function isOfflineOnTurn($turn){
+    public function isOfflineOnTurn($turn = null){
+        if ($turn === null)
+            $turn = TacGamedata::$currentTurn;
     
         foreach ($this->power as $power){
             if ($power->type == 1 && $power->turn == $turn){
@@ -257,7 +291,9 @@ class ShipSystem{
     
     }
     
-    public function isOverloadingOnTurn($turn){
+    public function isOverloadingOnTurn($turn = null){
+        if ($turn === null)
+            $turn = TacGamedata::$currentTurn;
         
         foreach ($this->power as $power){
             if ($power->type == 3 && $power->turn == $turn){

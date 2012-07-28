@@ -6,8 +6,6 @@
         public $systems = array();
         public $EW = array();
 
-        public $structureArmour = array();
-        public $maxStructureHealth = array();
         public $agile = false;
         public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
         public $currentturndelay = 0;
@@ -63,16 +61,7 @@
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 
-                if ($system->isDestroyed() || $system->isOfflineOnTurn($turn))
-                    continue;
-                
-                foreach ($system->specialAbilities as $effect)
-                {
-                    if (!isset($this->enabledSpecialAbilities[$effect]))
-                    {
-                        $this->enabledSpecialAbilities[$effect] = $system->id;
-                    }
-                }
+                $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
             }
         }
         
@@ -85,15 +74,24 @@
         {
             if (isset($this->enabledSpecialAbilities[$ability]))
             {
-                $this->getSystemById($this->enabledSpecialAbilities[$ability]);
+                return $this->getSystemById($this->enabledSpecialAbilities[$ability]);
             }
             
             return null;
         }
         
+        public function getSpecialAbilityValue($ability, $args = null)
+        {
+            $system = $this->getSpecialAbilitySystem($ability);
+            if ($system)
+                return $system->getSpecialAbilityValue($args);
+            
+            return false;
+        }
+        
         public function isElint()
         {
-            return $this->hasSpecialAbility("ELINT");
+            return $this->getSpecialAbilityValue("ELINT");
         }
         
         protected function addSystem($system, $loc){
@@ -103,7 +101,7 @@
             $this->systems[$i] = $system;
             
             if ($system instanceof Structure)
-                $this->structures[$loc] = $system;
+                $this->structures[$loc] = $system->id;
         
         }
         
@@ -218,11 +216,11 @@
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
                     continue;
                 
-                $mod = $systems->getHitChangeMod($shooter, $pos, $turn);
+                $mod = $system->getDefensiveHitChangeMod($shooter, $pos, $turn);
                 
-                if ( !$affectingSystems[$system->$defensiveType]
-                    || $affectingSystems[$system->$defensiveType] < mod){
-                    $affectingSystems[$system->$defensiveType] = mod;
+                if ( !isset($affectingSystems[$system->getDefensiveType()])
+                    || $affectingSystems[$system->getDefensiveType()] < $mod){
+                    $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
                 
             }
@@ -236,11 +234,11 @@
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
                     continue;
                 
-                $mod = $systems->getDamageMod($shooter, $pos, $turn);
+                $mod = $system->getDefensiveDamageMod($shooter, $pos, $turn);
                 
-                if ( !$affectingSystems[$system->$defensiveType]
-                    || $affectingSystems[$system->$defensiveType] < mod){
-                    $affectingSystems[$system->$defensiveType] = mod;
+                if ( !isset($affectingSystems[$system->getDefensiveType()])
+                    || $affectingSystems[$system->getDefensiveType()] < $mod){
+                    $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
                 
             }
@@ -257,7 +255,7 @@
                return false;
 
             //If the system is offline either because of a critical or power management, continue
-            if (isOfflineOnTurn($turn))
+            if ($system->isOfflineOnTurn($turn))
                 return false;
 
             //if the system has arcs, check that the position is on arc

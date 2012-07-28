@@ -29,6 +29,27 @@
 			
 		}
         
+        public function getSpecialAbilityList($list)
+        {
+            if ($this->isDestroyed())
+                return $list;
+            
+            foreach ($this->systems as $system)
+            {
+                if ($system instanceof SpecialAbility)
+                {
+                    foreach ($system->specialAbilities as $effect)
+                    {
+                        if (!isset($list[$effect]))
+                        {
+                            $list[$effect] = $system->id;
+                        }
+                    }
+                }
+            }
+            return $list;
+        }
+        
         public function getSystemById($id){
             foreach ($this->systems as $system){
                 if ($system->id == $id){
@@ -66,12 +87,8 @@
 		
 		
 		protected function addSystem($system, $loc){
-            
-            $i = sizeof($this->systems);
             $system->location = $loc;
-            $this->systems[$i] = $system;
-            
-        
+            $this->systems[] = $system;
         }
 			
 		public function setSystemDataWindow($turn){
@@ -104,13 +121,13 @@
 		}
 		
 		
-		public function isOfflineOnTurn($turn){
+		public function isOfflineOnTurn($turn = null){
 		
 			return false;
 		
 		}
 		
-		public function isOverloadingOnTurn($turn){
+		public function isOverloadingOnTurn($turn = null){
 			
 			return false;
 		

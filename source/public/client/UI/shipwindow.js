@@ -5,6 +5,20 @@ jQuery(function(){
 
 shipWindowManager = {
 
+    prepare: function(){
+        
+        for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+            var n = ship.shipStatusWindow;
+            if (shipManager.movement.isRolled(ship)){
+                n.addClass("rolled");
+            }else{
+                n.removeClass("rolled");
+            }
+        }
+    
+    },
+    
 	close: function(){
 		//shipWindowManager.cancelAssignThrust($(this).parent().parent());
 		$(this).parent().parent().hide();
@@ -35,7 +49,11 @@ shipWindowManager = {
 			n.css("top", old.css("top")).css("left", old.css("left"));
 		}
 			
-		
+		if (shipManager.movement.isRolled(ship)){
+            n.addClass("rolled");
+        }else{
+            n.removeClass("rolled");
+        }
 		n.show();
 		
 	
@@ -111,6 +129,8 @@ shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 3);
 		shipWindowManager.addSystems(ship, shipwindow, 4);
 
+        
+
 	},
 	
 	addSystems: function (ship, shipwindow, location){
@@ -177,9 +197,15 @@ shipWindowManager = {
 				index++;
 			}
 			
-			 
-			
 		}
+        
+        if (location == 3){
+            $('<div style="height:'+(arrangement.length*41)+'px"></div>').appendTo(".shipwindow.ship_"+ship.id+" .col1");
+        }
+        if (location == 4){
+            $('<div style="height:'+(arrangement.length*41)+'px"></div>').appendTo(".shipwindow.ship_"+ship.id+" .col3");
+        }
+      
 		
 		
 	},
@@ -324,14 +350,6 @@ shipWindowManager = {
 	
 
 	getDestinationForSystem: function(ship, location){
-	
-		if (shipManager.movement.isRolled(ship)){
-			if (location == 3){
-				location = 4;
-			}else if (location == 4){
-				location = 3;
-			}
-		}
 		
 		return $(".shipwindow.ship_"+ship.id+" #shipSection_" + location + " table");
 		
@@ -454,7 +472,7 @@ shipWindowManager = {
 		var systemwindow = template.clone(true).appendTo(destination);
 		systemwindow.addClass(system.name);
 
-		systemwindow.find(".namevalue").html(shipManager.systems.getDisplayName(system).toUpperCase());
+		//systemwindow.find(".namevalue").html(shipManager.systems.getDisplayName(system).toUpperCase());
 
 		systemwindow.addClass(system.name);
 		systemwindow.addClass("system_" + system.id);
@@ -475,8 +493,11 @@ shipWindowManager = {
 		var template = $("#systemtemplatecontainer .system.regular");
 		var systemwindow = template.clone(true).appendTo(destination);
 		systemwindow.addClass(system.name);
-        if (system.name)
+        if (system.iconPath){
+            systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.iconPath +")");
+        }else{
             systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
+        }
 		systemwindow.addClass(system.name);
 		systemwindow.addClass("system_" + system.id);
 		systemwindow.data("shipid", ship.id);
@@ -488,8 +509,7 @@ shipWindowManager = {
 		}
 		
 		systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
-		systemwindow.on("mouseout", weaponManager.onWeaponMouseout);
-			
+		systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
 	},
 	
 	removeSystemClasses: function(systemwindow){
@@ -527,12 +547,10 @@ shipWindowManager = {
 		var output = shipManager.systems.getOutput(ship, system);
 		var field = systemwindow.find(".efficiency.value");
 		
-		var healtWidth = 48;
-		if (system.name == "structure")
-			healtWidth = 108;
-			
-		systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
-		systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*healtWidth) + "px");
+        if (system.name == "structure")
+            systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
+		
+        systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*100) + "%");
 		
 		if (system.name == "thruster"){
 			systemwindow.data("direction", system.direction);

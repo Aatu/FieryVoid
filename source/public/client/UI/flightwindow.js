@@ -119,7 +119,7 @@ flightWindowManager = {
 			systemwindow.data("id", fighter.id);
 			
 			for (var a in fighter.systems){
-				fightersystem = fighter.systems[a];
+				var fightersystem = fighter.systems[a];
 				dest = flightWindowManager.getDestinationForSystem(ship, fighter, fightersystem.location);
 				template = $("#systemtemplatecontainer .fightersystem");
 				
@@ -133,7 +133,8 @@ flightWindowManager = {
 				fightersystemwindow.data("id", fightersystem.id);
 				
 				fightersystemwindow.on("mouseover", weaponManager.onWeaponMouseover);
-				fightersystemwindow.on("mouseout", weaponManager.onWeaponMouseout);
+				fightersystemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
+                
 				
 			}
 		
@@ -243,6 +244,7 @@ flightWindowManager = {
 		e.stopPropagation();
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
+        console.dir(systemwindow.data());
 		var flight = gamedata.getShip(systemwindow.data("shipid"));
 		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
 		var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));

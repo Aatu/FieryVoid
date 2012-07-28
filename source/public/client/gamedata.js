@@ -23,6 +23,7 @@ gamedata = {
     
         
     selectShip: function(ship, add){
+        
         if (!add){
             for (var i in gamedata.selectedShips){
                 var s2 = gamedata.selectedShips[i];
@@ -87,6 +88,8 @@ gamedata = {
     },
     
     unSelectShip: function(ship){
+        if (gamedata.gamephase == 3)
+            UI.shipMovement.hide();
         ew.RemoveEWEffectsFromShip(ship);
         gamedata.selectedSystems = Array();
     },
@@ -332,7 +335,7 @@ gamedata = {
           
         if (gamedata.gamephase == 1 && gamedata.waiting == false){
             shipManager.power.repeatLastTurnPower();
-            infowindow.informPhase(5000, null);
+            infowindow.informPhase(5000, function(){shipWindowManager.prepare()});
             if (gamedata.waiting == false){
                 for (var i in gamedata.ships){
                     var ship = gamedata.ships[i];

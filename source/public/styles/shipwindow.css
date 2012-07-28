@@ -1,7 +1,7 @@
 .shipwindow{
     border:1px solid #496791;
     background-color:#0a3340;
-    width:511px;
+    width:415px;
     opacity:0.85;
     color:white;
     font-family:arial;
@@ -234,6 +234,30 @@
     width:100%;
 }
 
+.shipwindow #shipSection_4{
+    position:absolute;
+    width:70px;
+    top:215px;
+    right:62px;
+}
+
+.shipwindow #shipSection_3{
+    position:absolute;
+    width:70px;
+    top:215px;
+    left:55px;
+}
+
+.shipwindow.rolled #shipSection_3{
+    right:62px;
+    left:auto;
+}
+
+.shipwindow.rolled #shipSection_4{
+    left:55px;
+    right:auto;
+}
+
 .shipwindow .col2{
     border-left:2px dotted #7e9dc7;
     border-right:2px dotted #7e9dc7;
@@ -264,25 +288,35 @@
 
 
 .structure.system .systembarcontainer{
-    width:104px;
+    width:58px;
     height:15px;
+    border:1px solid #496791;
+    margin:0px auto;
+}
+
+.structure.system .systembarcontainer .valuecontainer{
+    margin-top:3px;
 }
 
 .shipwindow .structure.system .bar{
-    height:17px;
+    height:15px;
 }
 
 
 .shipwindow .system{
-    border:1px solid #496791;
-    background-color:#072731;
-    width:50px;
     margin-left:auto;
     margin-right:auto;
-    padding:2px;
     color:white;
     font-family:arial;
     font-size:9px;
+    width:32px;
+    height:37px;
+}
+
+.shipwindow .system.structure{
+    width:64px;
+    height:37px;
+    border:1px solid #496791;
 }
 
 .shipwindow .system .value{
@@ -294,7 +328,6 @@
 }
 
 .shipwindow .system.selected {
-    border:1px solid #84a5ce !important;
 	background-color:#587aa5 !important;
 	-moz-box-shadow: 0px 0px 15px #0099ff;
     -webkit-box-shadow: 0px 0px 15px #0099ff;
@@ -446,10 +479,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system.destroyed {
-    border:1px solid #3d4755;
-    background-color:#1f2836;
-}
+
 
 .shipwindow .system.destroyed .systembarcontainer{
     border:1px solid #3d4755;
@@ -460,7 +490,9 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
 }
 
 .shipwindow .system .name{
-    width:50px;
+    width:60px;
+    margin-top:3px;
+    margin-bottom:3px
 }
 
 .shipwindow .system .health{
@@ -484,7 +516,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     position:absolute;
     top:0px;
     left:0px;
-    height:12px;
+    height:4px;
 }
 
 .shipwindow .system.critical .bar{
@@ -496,20 +528,32 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     position:relative;
 }
 
+.shipwindow  .system .UI.active{
+    -webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	-o-transition: all 0.1s linear;
+	transition: all 0.1s linear;
+    display:block;
+}
+
 .shipwindow  .system .UI{
+    z-index:10003;
     position:absolute;
-    top:0px;
-    right:3px;
-    width:12px;
-    
+    top:-1px;
+    left:30px;
+    background-color:black;
+    height:30px;
+    display:none;
+    border-right:1px solid #496791;
+    border-top:1px solid #496791;
+    border-bottom:1px solid #496791;
 }
 .shipwindow .system .button{
-    border:1px solid #496791;
     width:12px;
     height:12px;
     cursor:pointer;
     display:none;
-    margin-bottom:3px;
+    margin:1px 1px 2px 2px;
 }
 
 .shipwindow .system .plus{
@@ -586,16 +630,20 @@ body.phase1 .shipwindow  .system.boosted .minus{
 }
 
 .system .systembarcontainer{
-    width:44px;
-    border:1px solid #496791;
-    height:10px;
+    width:30px;
+    border-left:1px solid #496791;
+    border-right:1px solid #496791;
+    border-bottom:1px solid #496791;
+    height:4px;
     background-color:black;
-    margin-top:2px;
-    padding:1px 2px 1px 2px;
+    margin:0px;
+    padding:0px;
     text-align:center;
     position:relative;
 
 }
+
+
 
 
 .system .efficiency.barcontainer{
@@ -750,7 +798,6 @@ body.phase1 .shipwindow  .system.boosted .minus{
 }
 
 .fightersystemcontainer td{
-	width:100%;
 	padding:0px;
 	margin:0px;
 }

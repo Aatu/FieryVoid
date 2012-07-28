@@ -62,14 +62,30 @@ window.weaponManager = {
 	},    
     
     mouseoverTimer: null,
+    mouseOutTimer: null,
     mouseoverSystem: null,
     
     onWeaponMouseover: function(e){
+        
+        if (weaponManager.mouseOutTimer != null){
+            clearTimeout(weaponManager.mouseOutTimer); 
+            weaponManager.mouseOutTimer = null;
+        }
+        
         if (weaponManager.mouseoverTimer != null)
             return;
 
         weaponManager.mouseoverSystem = $(this);
-        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 300);
+        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
+    },
+    
+    onWeaponMouseOut: function(e){
+        if (weaponManager.mouseoverTimer != null){
+            clearTimeout(weaponManager.mouseoverTimer); 
+            weaponManager.mouseoverTimer = null;
+        }
+        
+        weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
     },
     
     doWeaponMouseOver: function(e){
@@ -77,10 +93,15 @@ window.weaponManager = {
             clearTimeout(weaponManager.mouseoverTimer); 
             weaponManager.mouseoverTimer = null;
         }
+        
+        systemInfo.hideSystemInfo();
+        weaponManager.removeArcIndicators();
 
         var t = weaponManager.mouseoverSystem;
         
-        var ship = gamedata.getShip(t.data("shipid"));
+        var id = t.data("shipid");
+               
+        var ship = gamedata.getShip(id);
         var system = null;
         
         if (t.hasClass("fightersystem")){
@@ -95,21 +116,17 @@ window.weaponManager = {
         drawEntities();
     },
     
-    onWeaponMouseout: function(e){
-        if (weaponManager.mouseoverTimer != null){
-            clearTimeout(weaponManager.mouseoverTimer); 
-            weaponManager.mouseoverTimer = null;
+    doWeaponMouseout: function(){
+        if (weaponManager.mouseOutTimer != null){
+            clearTimeout(weaponManager.mouseOutTimer); 
+            weaponManager.mouseOutTimer = null;
         }
         
-        systemInfo.hideSystemInfo(t, system, ship);
+        systemInfo.hideSystemInfo();
         
         weaponManager.mouseoverSystem = null;
         
-        var t = $(this);        
-        var ship = gamedata.getShip(t.data("shipid"));
-        var system = shipManager.systems.getSystem(ship, t.data("id"));
-        
-        weaponManager.removeArcIndicators(ship);
+        weaponManager.removeArcIndicators();
         drawEntities();
         
     },
@@ -148,7 +165,6 @@ window.weaponManager = {
         //e.find(".shipname").html(ship.name);
         var selectedShip = gamedata.getSelectedShip();
         var f = $(".targeting", e);
-		console.log(f);
         f.html("");
         for (var i in gamedata.selectedSystems){
             var weapon = gamedata.selectedSystems[i];
@@ -905,10 +921,10 @@ window.weaponManager = {
         
     },
     
-    removeArcIndicators: function(ship){
+    removeArcIndicators: function(){
      
         for(var i = EWindicators.indicators.length-1; i >= 0; i--){  
-            if(EWindicators.indicators[i].ship == ship && EWindicators.indicators[i].type == "Arcs"){              
+            if(EWindicators.indicators[i].type == "Arcs"){              
                 EWindicators.indicators.splice(i,1);                 
             }
         }

@@ -2,6 +2,9 @@
 
 class TacGamedata{
 
+    public static $currentTurn;
+    public static $currentPhase;
+    
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
     public $ships = array();
     public $players = array();
@@ -16,6 +19,8 @@ class TacGamedata{
     function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator){
         $this->id = (int)$id;
         $this->turn = (int)$turn;
+        static::$currentPhase = (int)$phase;
+        static::$currentTurn = (int)$turn;
         $this->phase = (int)$phase;
         $this->activeship = (int)$activeship;
         $this->setForPlayer($forPlayer);

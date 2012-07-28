@@ -98,42 +98,21 @@ window.damageDrawer = {
     drawDamage: function(ship, image, all){
         var images = shipManager.shipImages[ship.id];
         
-        if (images.turn == gamedata.turn && images.phase == gamedata.gamephase && images.subphase == gamedata.subphase)
-            return image;
-        
-        
         if (ship.flight){
 			//return image;
 			image = damageDrawer.drawFlight(ship, image);
 		}else{
-        
-			var stru = shipManager.systems.getStructureSystem(ship, 1);
-			var desTurn = damageManager.getTurnDestroyed(ship, stru);
-					
-			if (stru && desTurn && (desTurn >= images.turn || all)){
-				image = damageDrawer.applyDamage(ship, 1, image);
-			}
-			
-			stru = shipManager.systems.getStructureSystem(ship, 2);
-			desTurn = damageManager.getTurnDestroyed(ship, stru);
-					
-			if (stru && desTurn && (desTurn >= images.turn || all)){
-				image = damageDrawer.applyDamage(ship, 2, image);
-			}
-			
-			stru = shipManager.systems.getStructureSystem(ship, 3);
-			desTurn = damageManager.getTurnDestroyed(ship, stru);
-					
-			if (stru && desTurn && (desTurn >= images.turn || all)){
-				image = damageDrawer.applyDamage(ship, 3, image);
-			}
-			
-			stru = shipManager.systems.getStructureSystem(ship, 4);
-			desTurn = damageManager.getTurnDestroyed(ship, stru);
-					
-			if (stru && desTurn && (desTurn >= images.turn || all)){
-				image = damageDrawer.applyDamage(ship, 4, image);
-			}
+            
+            for (var i = 1; i<5; i++){
+                var stru = shipManager.systems.getStructureSystem(ship, i);
+                if (!stru)
+                    continue;
+                
+                if (shipManager.systems.isDestroyed(ship, stru) && !images.drawData[i]){
+                    image = damageDrawer.applyDamage(ship, i, image);
+                    images.drawData[i] = true;
+                }
+            }
 		}
         images.turn = gamedata.turn;
         images.phase = gamedata.gamephase;
@@ -168,11 +147,11 @@ window.damageDrawer = {
         }else if (location == 3){
             x = Math.floor((width-200)*0.5);
             //y = 100 + range;
-            y = (-100)+range;
+            y = (-140)+range;
         }else if (location == 4){
             x = Math.floor((width-200)*0.5);
             
-            y = height-100 - range;
+            y = height-140 - range;
         }
         
         

@@ -301,85 +301,6 @@ class Weapon extends ShipSystem{
         return null;
     }
     
-    /*
-    public function setLoading($ship, $turn, $phase){
-        $turnsloaded = 0;
-        $turnsOverloaded = 0;
-    
-        for ($i = 0;$i<=$turn;$i++){
-            $step = 1;
-            $off = $this->isOfflineOnTurn($i);
-            $overload = $this->isOverloadingOnTurn($i);
-            if ($phase == 1 && !$overload && $this->isOverloadingOnTurn($i-1) && $turnsOverloaded > 0)
-                $overload = true;
-               
-            $fired = $this->firedOnTurn($ship, $i);
-            
-                    
-            if ($i == 0){
-                if (!$off){
-                    $turnsloaded = $this->getNormalLoad();
-                    if ($overload){
-                        $turnsOverloaded = $this->getNormalLoad();
-                    }
-                }
-                continue;
-            }
-            
-            if ($this->firedOnTurn($ship, $i-1) && $this->isOverloadingOnTurn($i-1) && $turnsOverloaded == 0){
-                $turnsloaded = 0;
-                $turnsOverloaded = 0;
-                continue;
-            }
-            
-            if ($off){
-                $turnsloaded = 0;
-                $turnsOverloaded = 0;
-                continue;
-            }
-            
-            //TODO: if overloaded weapon is not fired next turn after firing first time, lose overloading
-            if ($turnsOverloaded > $turnsloaded && !$this->firedOnTurn($ship, $i-1)){
-                $turnsOverloaded = 0;
-            }
-            
-            if ($overload){
-                $turnsOverloaded += $step;
-            }else{
-                $turnsOverloaded = 0;
-            }
-            
-            $turnsloaded += $step;
-            
-            if ($turnsloaded > $this->getNormalLoad()){
-                $turnsloaded = $this->getNormalLoad();
-            }
-            
-            if ($turnsOverloaded > $this->getNormalLoad()){
-                $turnsOverloaded = $this->getNormalLoad();
-            }
-            
-                        
-            if ($fired && $turnsOverloaded == $this->getNormalLoad()){
-                if ($turnsloaded < $this->getNormalLoad()){
-                    $turnsloaded = 0;
-                    $turnsOverloaded = 0;
-                }else{
-                    $turnsloaded = 0;
-                }
-            }else if ($fired){
-                $turnsloaded = 0;
-                $turnsOverloaded = 0;
-            }
-            
-            
-        }
-        
-        $this->overloadturns = $turnsOverloaded;
-        $this->turnsloaded = $turnsloaded;
-    }
-    */
-    
     public function beforeTurn($ship, $turn, $phase){
         parent::beforeTurn($ship, $turn, $phase);
     }
@@ -442,8 +363,6 @@ class Weapon extends ShipSystem{
 		
 		$mod = 0;
         
-        $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
-        
         $sdew = EW::getSupportedDEW($gamedata, $target);
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         $dist = EW::getDistruptionEW($gamedata, $shooter);
@@ -475,28 +394,25 @@ class Weapon extends ShipSystem{
 			$mod -= 8;
 		}
 		
-		$mod += $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
+		$mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
 		
         if ($oew < 1)
+        {
             $rangePenalty = $rangePenalty*2;
-        else if ($shooter->faction != $target->faction){
-            // Calculate jammer impact only if a ship has a lock-on
-            // AND only if the target and shooter are of different
-            // races. A race is able to bypass its own jammer technology.
-            $jammer = $target->getSystemByName("jammer");
-
-            if (( $jammer != null) && !($jammer->isOfflineOnTurn($gamedata->turn))){
-                $jammermod = $rangePenalty*$jammer->output;
-            }
-
-            // Make certain fighters have either their jammer benefits
-            // or their jinxing, whichever is higher.
-            if ($target instanceof FighterFlight){
-                if ( $dew > $jammermod){
-                    $jammermod = 0;
-                }
-                else{
-                    $dew = 0;
+        }
+        else
+        {
+            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
+            if ($jammerValue > 0)
+            {
+                $jammermod = $rangePenalty*$jammerValue;
+                if ($target instanceof FighterFlight){
+                    if ( $dew > $jammermod){
+                        $jammermod = 0;
+                    }
+                    else{
+                        $dew = 0;
+                    }
                 }
             }
         }
@@ -514,7 +430,7 @@ class Weapon extends ShipSystem{
         $change = round(($goal/20)*100);
         
         
-        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;

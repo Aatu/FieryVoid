@@ -101,18 +101,18 @@ shipManager.systems = {
     
     getSystem: function(ship, id){
     
-        for (var i in ship.systems){
-            if (ship.systems[i].id == id)
-                return ship.systems[i];
-            
+        if (ship.systems[id]){
+            return ship.systems[id];
+        }else{
             if (ship.flight){
-				for (var a in ship.systems[i].systems){
-					var system = ship.systems[i].systems[a];
-					if (system.id == id)
-                        return system;
-				}
-			}
+                for (var i in ship.systems){
+                    var fighter = ship.systems[i];
+                    if (fighter.systems[id])
+                        return fighter.systems[id];
+                }
+            }
         }
+        
         return null;
     
     },
@@ -219,11 +219,6 @@ shipManager.systems = {
 
         var systems = Array();
         
-        if (shipManager.movement.isRolled(ship) && location == 3) {
-            location = 4;
-        }else if (shipManager.movement.isRolled(ship) && location == 4) {
-            location = 3;
-        }
         
         for (var i in ship.systems){
             if (ship.systems[i].location == location && ship.systems[i].name != "structure")
@@ -235,20 +230,12 @@ shipManager.systems = {
     },
     
     getStructureSystem: function(ship, location){
-			
-        return ship.structures[location];
-        /*
-        for (var i in ship.systems){
-            if (ship.systems[i].location == location && ship.systems[i].name == "structure")
-                return ship.systems[i];
-        }
         
-        return null;
-        */
+        if (!ship.structures[location])
+            return null;
+			
+        return shipManager.systems.getSystem(ship, ship.structures[location]);
     },
-
-    
-    
     
     groupSystems: function(systems){
         var grouped = Array();
