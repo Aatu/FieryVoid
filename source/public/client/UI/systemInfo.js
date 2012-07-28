@@ -3,17 +3,22 @@ window.systemInfo = {
 
 	showSystemInfo: function(t, system, ship){
         system = shipManager.systems.initializeSystem(system);
+        $('.UI', t).addClass("active");
 		var w = $("#systemInfo");
 		var offs = t.offset();
 
 		w.css("left", offs.left + "px");
-		w.css("top", offs.top +55+ "px");
+		w.css("top", offs.top +35+ "px");
 		
 		
 		$("span.name", w).html(system.displayName.toUpperCase());
 		
 		var h = "";
-		
+        if (!ship.flight){
+            h += '<div><span class="header">Structure:</span><span class="value">' + (system.maxhealth - damageManager.getDamage(ship, system))+'/'+ system.maxhealth+"</span></div>";
+            h += '<div><span class="header">Armor:</span><span class="value">' + shipManager.systems.getArmour(ship, system)+"</span></div>";
+		}
+        
         if (system.firingModes)
             h += '<div><span class="header">Firing mode:</span><span class="value">' + system.firingModes[system.firingMode]+"</span></div>";
 		
@@ -58,6 +63,7 @@ window.systemInfo = {
 	
 	hideSystemInfo: function(){
 		$("#systemInfo").hide();
+        $('.UI').removeClass("active");
 	}
 
 

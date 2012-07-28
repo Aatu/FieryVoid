@@ -34,6 +34,16 @@ class Mathlib{
         
     }
     
+    public static function getDistanceOfShipInHex(BaseShip $ship1, BaseShip $ship2){
+        $start = $ship1->getCoPos();
+        $end = $ship2->getCoPos();
+        
+        $dis = sqrt(($end["x"]-$start["x"])*($end["x"]-$start["x"]) + ($end["y"]-$start["y"])*($end["y"]-$start["y"]));
+        $disInHex = $dis / self::$hexWidth;
+        return $disInHex;
+        
+    }
+    
     
     public static function getCompassHeadingOfPos($observer, $pos){
         

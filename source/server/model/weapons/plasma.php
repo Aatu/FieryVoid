@@ -157,5 +157,35 @@
         public function setMaxDamage(){     $this->maxDamage = 43 - $this->dp;      }
 
 	}
+    
+    class MediumPlasma extends Plasma{
+
+		public $name = "mediumPlasma";
+        public $displayName = "Medium Plasma";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+		public $trailColor = array(75, 250, 90);
+		public $projectilespeed = 12;
+        public $animationWidth = 4;
+		public $animationExplosionScale = 0.20;
+		public $trailLength = 15;
+		public $rangeDamagePenalty = 0.5;
+		        
+        public $loadingtime = 3;
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
+        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+
+	}
 
 ?>

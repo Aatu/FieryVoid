@@ -191,7 +191,7 @@ window.graphics = {
         canvas.stroke();
     },
     
-    drawAndRotate: function(canvas, w, h, iw, ih, angle, img){
+    drawAndRotate: function(canvas, w, h, iw, ih, angle, img, rolled){
 		
         var x = Math.round(w/2);
         var y = Math.round(h/2);
@@ -202,6 +202,8 @@ window.graphics = {
         var angle = angle * Math.PI / 180;              
         canvas.save();
         canvas.translate(x, y);
+        if (rolled)
+            canvas.scale(1, -1);
         canvas.rotate(angle);
         canvas.drawImage(img, -width / 2, -height / 2, width, height);
         canvas.rotate(-angle);

@@ -47,7 +47,12 @@ window.shipManager = {
             e.attr("id", "hexship_");
             var img = new Image();
             img.src = ship.imagePath; 
-            shipManager.shipImages[ship.id] = {orginal:img, modified:null, turn:null, phase:null};
+            shipManager.shipImages[ship.id] = {
+                orginal:img,
+                modified:null,
+                rolled:null,
+                drawData:Array()
+            };
             $(shipManager.shipImages[ship.id].orginal).on("load", function(){
                 shipManager.shipImages[ship.id].orginal.loaded = true;
             });
@@ -225,7 +230,8 @@ window.shipManager = {
 			graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
 		}
 		
-		graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img);
+        var rolled = shipManager.movement.isRolled(ship);
+		graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img, rolled);
         
         if (mouseover 
             && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
@@ -694,29 +700,29 @@ window.shipManager = {
 		var dir = 0;
 		if (pos == 0){
 			dir = mathlib.addToDirection(0, angle);
-			return mathlib.getPointInDirection(10*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(12*zoom, dir, 0, 0 );
 		}
 		if (pos == 1){
 			dir = mathlib.addToDirection(270, angle);
-			return mathlib.getPointInDirection(7*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(9*zoom, dir, 0, 0 );
 		}
 		
 		if (pos == 2){
 			dir = mathlib.addToDirection(90, angle);
-			return mathlib.getPointInDirection(7*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(9*zoom, dir, 0, 0 );
 		}
 		
 		if (pos == 3){
 			dir = mathlib.addToDirection(180, angle);
-			return mathlib.getPointInDirection(10*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(12*zoom, dir, 0, 0 );
 		}
 		if (pos == 4){
 			dir = mathlib.addToDirection(240, angle);
-			return mathlib.getPointInDirection(17*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(19*zoom, dir, 0, 0 );
 		}
 		if (pos == 5){
 			dir = mathlib.addToDirection(120, angle);
-			return mathlib.getPointInDirection(17*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(19*zoom, dir, 0, 0 );
 		}
 		
 		

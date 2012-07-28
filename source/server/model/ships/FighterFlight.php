@@ -96,13 +96,14 @@
             $fighter->location = sizeof($this->systems);
             
             $this->autoid++;
-            
+            $fighterSys = array();
             foreach ($fighter->systems as $system){
 				
 				$system->id  = $this->autoid;
 				$this->autoid++;
-				
+				$fighterSys[$system->id] = $system;
 			}
+            $fighter->systems = $fighterSys;
             
             $this->systems[$fighter->id] = $fighter;
             

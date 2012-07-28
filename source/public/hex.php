@@ -23,7 +23,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>B5CGM</title>
+    <title>Fiery Void</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
@@ -116,11 +116,6 @@
                 <div class="healthbar bar" style="width:40px;"></div>
                 <div class="valuecontainer"><span class="healthvalue value"></span></div>
             </div>
-                       
-            <div class="UI">
-                <div class="button1"></div>
-                <div class="button2"></div>
-            </div>
         </div>
     </div>
 	
@@ -137,20 +132,20 @@
             <div class="icon">
                 <span class="efficiency value"></span>
 				<div class="iconmask"></div>
+                <div class="UI">
+                    <div class="button stopoverload"></div>
+                    <div class="button overload"></div>
+                    <div class="button plus"></div>
+                    <div class="button minus"></div>
+                    <div class="button off"></div>
+                    <div class="button on"></div>
+                    <div class="button holdfire"></div>
+                    <div class="button mode"></div>
+                </div>
             </div>
-			<div class="UI">
-				<div class="button stopoverload"></div>
-				<div class="button overload"></div>
-				<div class="button plus"></div>
-				<div class="button minus"></div>
-				<div class="button off"></div>
-				<div class="button on"></div>
-				<div class="button holdfire"></div>
-                <div class="button mode"></div>
-			</div>
+			
             <div class="health systembarcontainer">
                 <div class="healthbar bar" style="width:40px;"></div>
-                <div class="valuecontainer"><span class="healthvalue value"></span></div>
             </div>
             <!--
             <div class="systembarcontainer">
@@ -172,7 +167,7 @@
         <div class="systemcontainer">
             <div class="icon">
 				<table class="fightersystemcontainer 1"><tr></tr></table>
-				<div style="height:90px;"></div>
+				<div style="height:60px;"></div>
 				<table class="fightersystemcontainer 2"><tr></tr></table>
             </div>
 			
@@ -203,16 +198,16 @@
         </div>
       
                
-            
+        <div id="shipSection_3" class="shipSection">
+            <table></table>
+        </div>    
                         
             
 		<table class="divider">
 			<tr><td class="col1">
 				<div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
 				<div class="notes"></div>
-				<div id="shipSection_3" class="shipSection">
-					<table></table>
-				</div>
+				
 			</td><td class="col2">
 				<div id="shipSection_1" class="shipSection">
 					<table></table>

@@ -1,18 +1,54 @@
 <?php
-    class Defensive extends Weapon{
+    
+    class InterceptorMkI extends Weapon implements DefensiveSystem{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "interceptorMkI";
+        public $displayName = "Interceptor MK I";
+        public $animation = "trail";
+        public $iconPath = "interceptor.png";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+
+        public $animationWidth = 1;
+            
+        public $intercept = 3;
+             
+        public $loadingtime = 1;
+  
+        public $rangePenalty = 2;
+        public $fireControl = array(6, -20, -20); // fighters, <mediums, <capitals 
+        
+        public function getDefensiveType()
+        {
+            return "Interceptor";
+        }
+        
+        public function getDefensiveHitChangeMod($shooter, $pos, $turn){
+            return 3;
+        }
+
+        public function getDefensiveDamageMod($shooter, $pos, $turn){
+            return 0;
+        }
+        
+        public function setSystemDataWindow($turn){
+            $this->data["DEFENSIVE BONUS:"] = "-15 to hit on arc";
+        }
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-
-
         
+        public function getDamage($fireOrder){        return Dice::d(10)+5;   }
+        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
         
-
 
     }
     
-    class GuardianArray extends Defensive{
+    class GuardianArray extends Weapon{
 
         public $trailColor = array(30, 170, 255);
         

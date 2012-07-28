@@ -409,9 +409,9 @@ window.ew = {
 		if (left < 1)
             return;
         
-        if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
-			var def = ew.getDefensiveEW(selected);
-			var all = ew.getScannerOutput(selected);
+        if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
+			var def = ew.getDefensiveEW(ship);
+			var all = ew.getScannerOutput(ship);
 			
 			if (def-1 < all*0.5)
 				return false;

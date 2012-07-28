@@ -42,7 +42,7 @@
 			foreach ($ship->systems as $system){
 			
 				if ($system instanceof Scanner){
-					$output += $system->getScannerOutput($turn);
+					$output += $system->getOutput($turn);
 				}
 			}
 			

@@ -1,6 +1,6 @@
 <?php
 
-class ElintArray extends ShipSystem{
+class ElintArray extends ShipSystem implements SpecialAbility{
     public $name = "elintArray";
     public $displayName = "ELINT array";
     public $specialAbilities = array("ELINT");
@@ -9,13 +9,100 @@ class ElintArray extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 0);
     }
+    
+    public function getSpecialAbilityValue($args)
+    {
+        return true;
+    }
+    
+}
+
+class Jammer extends ShipSystem implements SpecialAbility{
+    
+    public $name = "jammer";
+    public $displayName = "Jammer";
+    public $specialAbilities = array("Jammer");
+    public $primary = true;
+    
+    //public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
+    }
+    
+    //args for Jammer ability are array("shooter", "target")
+    public function getSpecialAbilityValue($args)
+    {
+        if (!isset($args["shooter"]) || !isset($args["target"]))
+            throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
+        
+        $shooter = $args["shooter"];
+        $target = $args["target"];
+        
+        if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
+            throw new InvalidArgumentException("Wrong argument type for Jammer getSpecialAbilityValue");
+        
+        if ($shooter->team === $target->team)
+            return 0;
+        
+        return $this->getOutput();
+    }
+     
+}
+
+class Stealth extends ShipSystem implements SpecialAbility{
+    
+    public $name = "stealth";
+    public $displayName = "Stealth systems";
+    public $specialAbilities = array("Jammer");
+    public $primary = true;
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
+    }
+    
+    public function setSystemDataWindow($turn){
+            $this->data["DEFENSIVE BONUS:"] = "Jammer ability if targeted from over 5 hexas away.";
+        }
+    
+    //args for Jammer ability are array("shooter", "target")
+    public function getSpecialAbilityValue($args)
+    {
+        Debug::log("calling stealth getSpecialAbilityValue");
+        if (!isset($args["shooter"]) || !isset($args["target"]))
+            throw new InvalidArgumentException("Missing arguments for Stealth getSpecialAbilityValue");
+        
+        $shooter = $args["shooter"];
+        $target = $args["target"];
+        
+        if (! ($shooter instanceof BaseShip) || ! ($target instanceof BaseShip))
+            throw new InvalidArgumentException("Wrong argument type for Stealth getSpecialAbilityValue");
+        
+        if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
+        {
+            Debug::log("return 1");
+            return 1;
+        }
+            
+        
+        return 0;
+        
+    }
+     
+}
+
+interface SpecialAbility{
+ 
+    public function getSpecialAbilityValue($args);
 }
 
 interface DefensiveSystem{
 
-    public function getHitChangeMod($shooter, $pos, $turn);
+    public function getDefensiveType();
+     
+    public function getDefensiveHitChangeMod($shooter, $pos, $turn);
     
-    public function getDamageMod($shooter, $pos, $turn);
+    public function getDefensiveDamageMod($shooter, $pos, $turn);
     
     
 }
@@ -27,7 +114,6 @@ class Shield implements DefensiveSystem{
     public $endArc = 0;
     
     //defensive system
-    public $defensiveType = "Shield";
     public $defensiveSystem = true;
     public $tohitPenalty = 0;
     public $damagePenalty = 0;
@@ -58,7 +144,12 @@ class Shield implements DefensiveSystem{
         return false;
     }
     
-    public function getHitChangeMod($shooter, $pos, $turn){
+    public function getDefensiveType()
+    {
+        return "Shield";
+    }
+    
+    public function getDefensiveHitChangeMod($shooter, $pos, $turn){
         
         if ($this->checkIsFighterUnderShield($shooter))
             return 0;
@@ -66,7 +157,7 @@ class Shield implements DefensiveSystem{
         return $this->output;
     }
     
-    public function getDamageMod($shooter, $pos, $turn){
+    public function getDefensiveDamageMod($shooter, $pos, $turn){
         if ($this->checkIsFighterUnderShield($shooter))
             return 0;
         
@@ -74,19 +165,6 @@ class Shield implements DefensiveSystem{
     }
 }
 
-class Jammer extends ShipSystem{
-    
-    public $name = "jammer";
-    public $displayName = "Jammer";
-    public $primary = true;
-    
-    //public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
-    
-    function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 1);
-    }
-     
-}
 
 class Reactor extends ShipSystem{
 
@@ -141,12 +219,11 @@ class Scanner extends ShipSystem{
     }
 
     
-    public function getScannerOutput($turn){
+    public function getOutput(){
 
-        if ($this->isOfflineOnTurn($turn))
+        $output = parent::getOutput();
+        if ($output === 0)
             return 0;
-            
-        $output = $this->output;
     
         foreach ($this->power as $power){
             if ($power->turn == $turn && $power->type == 2){
@@ -155,20 +232,24 @@ class Scanner extends ShipSystem{
         
         }
         
-        $output -= $this->outputMod;
         return $output;
         
     }
     
 }
 
-class ElintScanner extends Scanner{
+class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
     public $specialAbilities = array("ELINT");
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+    
+    public function getSpecialAbilityValue($args)
+    {
+        return true;
     }
 }
 
