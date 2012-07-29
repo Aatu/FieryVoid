@@ -130,7 +130,7 @@ class Weapon extends ShipSystem{
         return $this->normalload;
     }
     
-    public function firedOnTurn($ship, $turn){
+    public function firedOnTurn($turn){
         
         foreach ($this->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
@@ -215,7 +215,7 @@ class Weapon extends ShipSystem{
             {
                 return new WeaponLoading($this->id, 0, $gameid, $ship->id, 0, 0, 0, 0);
             }
-            else if ($this->ballistic && $this->firedOnTurn($ship, $turn) )
+            else if ($this->ballistic && $this->firedOnTurn($turn) )
             {
                 return new WeaponLoading($this->id, 0, $gameid, $ship->id, 0, 0, 0, 0);
             }
@@ -262,7 +262,7 @@ class Weapon extends ShipSystem{
             return null;
         
             
-        if ($this->firedOnTurn($ship, $turn)){
+        if ($this->firedOnTurn($turn)){
             /* if overloading ja ampuu:
              
                     JOS ON EXTRASHOTTEJA laske extrashotteja. Jos extrashotit menee nollaan, pistä -1 (cooldown)

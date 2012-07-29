@@ -66,7 +66,7 @@
             
         }
         
-        public function firedOnTurn($ship, $turn){
+        public function firedOnTurn($turn){
             
             foreach ($this->fireOrders as $fire){
                 if ($fire->weaponid == $this->id && $fire->turn == $turn){
@@ -79,7 +79,7 @@
         public function calculateLoading( $gameid, $phase, $ship, $turn )
         {
             $loading = null;
-            $shotsfired = $this->firedOnTurn($ship, $turn);
+            $shotsfired = $this->firedOnTurn($turn);
             if ($phase === 2)
             {
                 if  

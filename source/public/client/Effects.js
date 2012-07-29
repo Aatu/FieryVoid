@@ -235,6 +235,7 @@ window.effects = {
             
             for (var a in fires){
                 var fire = fires[a];
+                
                 if (fire.turn != gamedata.turn || fire.type=='intercept' || !fire.rolled)
                     continue;
                 
