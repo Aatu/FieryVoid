@@ -135,14 +135,12 @@
     }
     
     
-    class GatlingPulseCannon extends Particle{
+    class GatlingPulseCannon extends Weapon{
 
-        public $trailColor = array(30, 170, 255);
-        
         public $name = "gatlingPulseCannon";
         public $displayName = "Gatling Pulse Cannon";
-        public $animation = "trail";
-        public $animationWidth = 2;
+        public $animation = "beam";
+        public $animationWidth = 4;
         public $projectilespeed = 10;
         public $animationExplosionScale = 0.15;
         public $trailLength = 10;
@@ -160,6 +158,14 @@
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
            
+        }
+        
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6,2)+6;   }
