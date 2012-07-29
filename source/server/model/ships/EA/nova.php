@@ -31,6 +31,8 @@ class Nova extends BaseShip{
         
     
         
+        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
+        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         
@@ -53,6 +55,8 @@ class Nova extends BaseShip{
         
         $this->addAftSystem(new LaserPulseArray(5, 9, 5, 60, 180));
         $this->addAftSystem(new LaserPulseArray(5, 9, 5, 60, 180));
+        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
+        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
         
 		//left
         
