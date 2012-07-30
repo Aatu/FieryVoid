@@ -133,6 +133,46 @@
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
 
     }
+    
+    
+    class GatlingPulseCannon extends Weapon{
+
+        public $name = "gatlingPulseCannon";
+        public $displayName = "Gatling Pulse Cannon";
+        public $animation = "beam";
+        public $animationWidth = 4;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.15;
+        public $trailLength = 10;
+        public $trailColor = array(190, 75, 20);
+        public $animationColor = array(190, 75, 20);
+        
+        public $intercept = 2;
+        
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+           
+        }
+        
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6,2)+6;   }
+        public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+
+    }
 
     class MolecularPulsar extends Pulse
     {

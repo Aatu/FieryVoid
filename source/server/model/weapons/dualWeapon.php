@@ -5,6 +5,7 @@ class DualWeapon extends Weapon{
     
     public $dualWeapon = true;
     public $weapons = array();
+    private $turnsFired = array();
     
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -64,6 +65,7 @@ class DualWeapon extends Weapon{
     
     public function setFireOrder($fire)
     {
+        $this->turnsFired[$fire->turn] = true;
         $this->weapons[$fire->firingMode]->setFireOrder($fire);
     }
     
@@ -105,6 +107,11 @@ class DualWeapon extends Weapon{
             return null;
         
         return $loadings;
+    }
+    
+    public function firedOnTurn($turn){
+        
+        return isset($this->turnsFired[$turn]);
     }
 }
 

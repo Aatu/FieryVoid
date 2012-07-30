@@ -220,13 +220,12 @@ class Scanner extends ShipSystem{
 
     
     public function getOutput(){
-
         $output = parent::getOutput();
         if ($output === 0)
             return 0;
     
         foreach ($this->power as $power){
-            if ($power->turn == $turn && $power->type == 2){
+            if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
                 $output += $power->amount;
             }
         

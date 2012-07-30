@@ -838,16 +838,33 @@ window.weaponManager = {
                 var fighter = ship.systems[i];
                 for (var a in fighter.systems){
                     var system = fighter.systems[a];
-                    fires = fires.concat(system.fireOrders);
+                    var sysFires = weaponManager.getAllFireOrdersFromSystem(system);
+                    if (sysFires)
+                        fires = fires.concat(sysFires);
                 }
                 
             }else{
                 var system = ship.systems[i];
-                fires = fires.concat(system.fireOrders);
+                var sysFires = weaponManager.getAllFireOrdersFromSystem(system);
+                if (sysFires)
+                    fires = fires.concat(sysFires);
             }
             
         }
         return fires;
+    },
+    
+    getAllFireOrdersFromSystem: function(system){
+        if (! system.weapon)
+            return;
+        var fires = system.fireOrders;
+        if (system.dualWeapon){
+            for (var i in system.weapons){
+                fires = fires.concat(system.weapons[i].fireOrders);
+            }
+        }
+        return fires;
+        
     },
     
     getInterceptingFiringOrders: function(id){

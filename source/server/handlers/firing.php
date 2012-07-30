@@ -99,7 +99,7 @@ class Firing{
                 }
                 
                 //CHECK IF THIS GUN IS ALREADY FIRING!
-                if ($weapon->firedOnTurn($ship, $gd->turn)){
+                if ($weapon->firedOnTurn($gd->turn)){
 					continue;
 				}
 				
@@ -109,7 +109,7 @@ class Firing{
                 if ($weapon->ballistic)
                     continue;
                     
-                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime || $weapon->firedOnTurn($ship, $gd->turn))
+                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime || $weapon->firedOnTurn($gd->turn))
                     continue;
                    
                 $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
