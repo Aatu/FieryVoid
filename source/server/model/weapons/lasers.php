@@ -123,14 +123,14 @@
         public $raking = 10;
         
         public $rangePenalty = 0.33;
-        public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 
+        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+30;   }
-        public function setMinDamage(){     $this->minDamage = 32 - $this->dp;      }
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+20;   }
+        public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 50 - $this->dp;      }
         
         
@@ -158,7 +158,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+17;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+12;   }
         public function setMinDamage(){     $this->minDamage = 19 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 37 - $this->dp;      }
         
@@ -194,7 +194,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        public function getDamage($fireOrder){        return Dice::d(10, 2)+22;   }
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
         public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 42 - $this->dp;      }
         

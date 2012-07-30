@@ -198,8 +198,10 @@ window.graphics = {
         var width = iw/2;
         var height = ih/2;
         
+        if (rolled)
+            angle = 360 - angle;
         
-        var angle = angle * Math.PI / 180;              
+        angle = angle * Math.PI / 180;              
         canvas.save();
         canvas.translate(x, y);
         if (rolled)
