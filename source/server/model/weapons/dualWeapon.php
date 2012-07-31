@@ -81,6 +81,7 @@ class DualWeapon extends Weapon{
     
     public function setSystemData($data, $subsystem)
     {
+        $this->weapons[$subsystem]->setSystemData($data, $subsystem);
         
     }
     
@@ -103,10 +104,6 @@ class DualWeapon extends Weapon{
         
     }
     
-    public function firedOnTurn($turn){
-        
-        return isset($this->turnsFired[$turn]);
-    }
 }
 
 class LaserPulseArray extends DualWeapon{

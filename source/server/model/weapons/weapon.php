@@ -132,6 +132,10 @@ class Weapon extends ShipSystem{
     
     public function firedOnTurn($turn){
         
+        
+        if ($this instanceof DualWeapon && isset($this->turnsFired[$turn]))
+            return true;
+        
         foreach ($this->fireOrders as $fire){
             if ($fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
@@ -241,6 +245,11 @@ class Weapon extends ShipSystem{
         $this->turnsloaded = $loading->loading;
     }
     
+    protected function getLoadedAmmo()
+    {
+        return 0;
+    }    
+    
     public function calculateLoading()
     {
         
@@ -249,15 +258,15 @@ class Weapon extends ShipSystem{
         {
             if ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
             {
-                return new WeaponLoading(0, 0, 0, 0);
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0);
             }
             else if ($this->ballistic && $this->firedOnTurn(TacGamedata::$currentTurn) )
             {
-                return new WeaponLoading(0, 0, 0, 0);
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0);
             }
             else if (!$this->isOverloadingOnTurn(TacGamedata::$currentTurn))
             {
-                return new WeaponLoading($this->turnsloaded, 0, 0, 0);
+                return new WeaponLoading($this->turnsloaded, 0, $this->getLoadedAmmo(), 0);
             }
         }
         else if (TacGamedata::$currentPhase === 4)
@@ -268,7 +277,7 @@ class Weapon extends ShipSystem{
         {
             if ($this->overloadshots === -1)
             {
-                return new WeaponLoading(0, 0, 0, 0);
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0);
             }
             else
             {
@@ -284,12 +293,12 @@ class Weapon extends ShipSystem{
                 if ($overloading > $normalload)
                     $overloading = $normalload;
 
-                return new WeaponLoading($newloading, $newExtraShots, 0, $overloading);
+                return new WeaponLoading($newloading, $newExtraShots, $this->getLoadedAmmo(), $overloading);
             }
             
         }
         
-        return null;
+        return new WeaponLoading($this->turnsloaded, $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns);
     }
     
     private function calculatePhase4Loading()
@@ -314,27 +323,27 @@ class Weapon extends ShipSystem{
                 if ($newExtraShots === 0)
                 {
                     //if extra shots are reduced to zero, go to cooldown
-                    return new WeaponLoading(0, -1, 0, 0);
+                    return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0);
                 }
                 else
                 {
                     //if you didn't use the last extra shot, keep on going.
-                    return new WeaponLoading($this->turnsloaded, $newExtraShots, 0, $this->overloadturns);
+                    return new WeaponLoading($this->turnsloaded, $newExtraShots, $this->getLoadedAmmo(), $this->overloadturns);
                 }
             }
             else
             {
                 //Situation normal, no overloading -> lose loading
-                return new WeaponLoading(0, 0, 0, 0);
+                return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0);
             }
             
         }else{
               //cannot save the extra shots from everload -> lose loading and cooldown
             if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots)
-                return new WeaponLoading(0, -1, 0, 0);
+                return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0);
         }
         
-        return null;
+        return new WeaponLoading($this->turnsloaded, $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns);
     }
     
     public function beforeTurn($ship, $turn, $phase){
@@ -578,7 +587,6 @@ class Weapon extends ShipSystem{
         $damage = $target->getPiercingDamagePerLoc(
                 $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
             );
-
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
         
         foreach ($locs as $loc){

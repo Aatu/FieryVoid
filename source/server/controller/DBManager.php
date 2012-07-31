@@ -431,7 +431,7 @@ class DBManager {
                     $stmt->bind_param(
                         'siiii', 
                         $json,
-                        $data->gameid,
+                        TacGamedata::$currentGameID,
                         $data->systemid,
                         $data->shipid,
                         $data->subsystem
@@ -1386,7 +1386,7 @@ class DBManager {
             
             $stmt = $this->connection->prepare(
                 "DELETE FROM 
-                    tac_loading
+                    tac_systemdata
                 WHERE
                     gameid = ?"
             );

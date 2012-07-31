@@ -454,15 +454,17 @@ class Manager{
                 self::startInitialOrders($gamedata);
             }
             
-            foreach ($gamedata->ships as $ship)
-            {
-                foreach ($ship->systems as $system)
+            if ($phase > 0){
+                foreach ($gamedata->ships as $ship)
                 {
-                  $system->onAdvancingGamedata($ship);
+                    foreach ($ship->systems as $system)
+                    {
+                    $system->onAdvancingGamedata($ship);
+                    }
                 }
+
+                self::$dbManager->updateSystemData(SystemData::$allData);
             }
-            
-            self::$dbManager->updateSystemData(SystemData::$allData);
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
             

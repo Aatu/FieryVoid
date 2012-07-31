@@ -20,16 +20,26 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, -20, -20); // fighters, <mediums, <capitals 
         
+        
+        public $tohitPenalty = 0;
+        public $damagePenalty = 0;
+    
         public function getDefensiveType()
         {
             return "Interceptor";
         }
         
-        public function getDefensiveHitChangeMod($shooter, $pos, $turn){
+        public function onConstructed($ship, $turn, $phase){
+            $this->tohitPenalty = $this->getOutput();
+            $this->damagePenalty = $this->getOutput();
+     
+        }
+        
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
             return 3;
         }
 
-        public function getDefensiveDamageMod($shooter, $pos, $turn){
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
             return 0;
         }
         

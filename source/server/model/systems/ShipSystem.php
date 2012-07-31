@@ -47,7 +47,7 @@ class ShipSystem{
         if ($this instanceof SpecialAbility)
         {
             if ($this->isDestroyed() || $this->isOfflineOnTurn())
-                continue;
+                return;
 
             foreach ($this->specialAbilities as $effect)
             {

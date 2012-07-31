@@ -128,6 +128,8 @@ shipManager.systems = {
             selectedWeapon.id = system.id;
             selectedWeapon.dualWeapon = true;
             selectedWeapon.initialized = true;
+            selectedWeapon.damage = system.damage;
+            selectedWeapon.destroyed = system.destroyed;
             return selectedWeapon;
         }
         

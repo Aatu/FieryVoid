@@ -22,22 +22,16 @@
 
     class FusionCannon extends Molecular{
 
-        // needs to be looked into
-        public $trailColor = array(110, 225, 110);
+        
 
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
-        // needs to be looked into
         public $animation = "beam";
-        // needs to be looked into
         public $animationColor =  array(175, 225, 175);
-        // needs to be looked into
+        public $trailColor = array(110, 225, 110);
         public $animationExplosionScale = 0.20;
-        // needs to be looked into
         public $projectilespeed = 12;
-        // needs to be looked into
         public $animationWidth = 7;
-        // needs to be looked into
         public $trailLength = 20;
 
         public $intercept = 2;

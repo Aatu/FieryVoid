@@ -216,7 +216,7 @@
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
                     continue;
                 
-                $mod = $system->getDefensiveHitChangeMod($shooter, $pos, $turn);
+                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn);
                 
                 if ( !isset($affectingSystems[$system->getDefensiveType()])
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
@@ -234,7 +234,7 @@
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
                     continue;
                 
-                $mod = $system->getDefensiveDamageMod($shooter, $pos, $turn);
+                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn);
                 
                 if ( !isset($affectingSystems[$system->getDefensiveType()])
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
