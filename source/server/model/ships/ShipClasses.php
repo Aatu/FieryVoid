@@ -787,7 +787,7 @@
                      $systems[] = $system;
                         
                     if ($system instanceof Structure){
-                        $multiply = 1;
+                        $multiply = 0.5;
                             
                         $totalStructure += round($system->maxhealth * $multiply);
                     }else{
@@ -808,7 +808,7 @@
                 $health = 0;
             
                 if ($system->name == "structure"){
-                    $multiply = 1;
+                    $multiply = 0.5;
                         
                     $health = round($system->maxhealth * $multiply);
                 }else{
