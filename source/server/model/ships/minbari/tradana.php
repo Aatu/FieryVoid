@@ -1,14 +1,14 @@
 <?php
-class Torotha extends MediumShip{
+class Tradana extends MediumShip{
 
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
 
-	$this->pointCost = 550;
+	$this->pointCost = 575;
 	$this->faction = "Minbari";
-        $this->phpclass = "Torotha";
+        $this->phpclass = "Tradana";
         $this->imagePath = "img/ships/torotha.png";
-        $this->shipClass = "Torotha";
+        $this->shipClass = "Tradana";
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -21,7 +21,7 @@ class Torotha extends MediumShip{
 	$this->iniativebonus = 65;
 
 
-        $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 9));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 2));
@@ -32,12 +32,14 @@ class Torotha extends MediumShip{
 
         $this->addFrontSystem(new Thruster(4, 12, 0, 5, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 360));
-        $this->addFrontSystem(new MolecularDisruptor(3, 8, 6, 240, 360));
-        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
-        $this->addFrontSystem(new MolecularDisruptor(3, 8, 6, 0, 120));
+        $this->addFrontSystem(new NeutronLaser(3, 10, 6, 240, 360));
+        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 240, 360));
+        $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 0, 120));
+        $this->addFrontSystem(new NeutronLaser(3, 10, 6, 0, 120));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 0, 120));
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new ElectroPulseGun(2, 6, 3, 120, 240));
         $this->addAftSystem(new Thruster(4, 21, 0, 8, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
