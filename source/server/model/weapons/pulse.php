@@ -174,6 +174,73 @@
 
     }
 
+    class MolecularPulsar extends Pulse
+    {
+        public $name = "molecularPulsar";
+        public $displayName = "Molecular Pulsar";
+        public $animation = "trail";
+        public $trailLength = 15;
+        public $animationWidth = 5;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.25;
+        public $animationColor = array(175, 225, 175);
+        public $rof = 2;
+        public $shots = 6;
+
+        public $loadingtime = 1;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
+
+        public $grouping = 5;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function fire($gamedata, $fireOrder)
+        {
+            setPulsarShots();
+
+            parent::fire($gamedata, $fireOrder);
+        }
+
+        protected function getPulses()
+        {
+            return Dice::d(5);
+        }
+
+        public function getDamage($fireOrder){ return 10; }
+
+        public function setMinDamage()
+        {
+            setPulsarShots();
+            $this->minDamage = 10 - $this->dp;
+        }
+
+        public function setMaxDamage()
+        {
+            setPulsarShots();
+            $this->maxDamage = 10 - $this->dp;
+        }
+
+        private function setPulsarShots()
+        {
+            // Molecular pulsars can shoot after 1 turn with reduced effect.
+            if ($this->turnsloaded == 0)
+            {
+                $shots = 3;
+                $defaultShots = 3;
+            }
+            else
+            {
+                $shots = 7;
+                $defaultShots = 6;
+            }
+        }
+    }
+
 
 
 ?>

@@ -1,0 +1,42 @@
+
+<phpunit
+    timeoutForSmallTests="1"
+    timeoutForMediumTests="3"
+    timeoutForLargeTests="8"
+    bootstrap="../../source/autoload.php"
+    stopOnError="false"
+    stopOnFailure="false"
+    strict="true"
+    verbose="true" >
+
+    <testsuites>
+        <testsuite name="Module Tests">
+            <directory suffix="Test.php">.</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../../source/</directory>
+            <exclude>
+                <file>../../source/public/index.php</file>
+                <directory>../../source/vendor</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html"
+            target="../../doc/module/"
+            charset="UTF-8"
+            yui="true"
+            highlight="true"
+            lowUpperBound="60"
+            highLowerBound="80" />
+        <log type="coverage-clover" target="../../doc/module/coverage.xml" />
+        <log type="junit" target="../../doc/junit-module.xml"
+            logIncompleteSkipped="false" />
+        <log type="coverage-php" target="../../doc/module.serialized"/>
+    </logging>
+
+</phpunit>
