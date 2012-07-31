@@ -1,19 +1,58 @@
 <?php
-
-class WeaponLoading
+class SystemData
 {
-    public $systemid, $subsystem, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading;
+    public static $allData = Array();
     
-    public function __construct($systemid, $subsystem, $gameid, $shipid, $loading, $extrashots, $loadedammo, $overloading)
+    public $systemid, $subsystem, $shipid;
+    public $data = Array();
+    
+    public function __construct($systemid, $subsystem, $shipid)
     {
         $this->systemid = $systemid;
         $this->subsystem = $subsystem;
-        $this->gameid = $gameid;
         $this->shipid = $shipid;
+    }
+    
+    public function addData($data){
+        $this->data[] = $data;
+    }
+    
+    public function toJSON()
+    {
+        $json = "{".implode(",", $this->data)."}";
+        return $json;
+    }
+    
+    public static function addDataForSystem($systemid, $subsystem, $shipid, $data)
+    {
+        if (!isset(self::$allData[$systemid."_".$subsystem."_".$shipid]))
+        {
+             $systemdata = new SystemData($systemid, $subsystem, $shipid);
+             $systemdata->addData($data);
+             self::$allData[] = $systemdata;
+        }
+        else
+        {
+            self::$allData[$systemid."_".$subsystem."_".$shipid]->addData($data);
+        }
+    }
+}
+
+class WeaponLoading
+{
+    public $loading, $extrashots, $loadedammo, $overloading;
+    
+    public function __construct($loading, $extrashots, $loadedammo, $overloading)
+    {
         $this->loading = $loading;
         $this->extrashots = $extrashots;
         $this->loadedammo = $loadedammo;
         $this->overloading = $overloading;
+    }
+    
+    public function toJSON()
+    {
+        return '"loading":{"1":"'.$this->loading.'","2":"'.$this->extrashots.'","3":"'.$this->loadedammo.'","4":"'.$this->overloading.'"}';
     }
 }
 

@@ -4,6 +4,7 @@ class TacGamedata{
 
     public static $currentTurn;
     public static $currentPhase;
+    public static $currentGameID;
     
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
     public $ships = array();
@@ -21,6 +22,7 @@ class TacGamedata{
         $this->turn = (int)$turn;
         static::$currentPhase = (int)$phase;
         static::$currentTurn = (int)$turn;
+        static::$currentGameID = (int)$id;
         $this->phase = (int)$phase;
         $this->activeship = (int)$activeship;
         $this->setForPlayer($forPlayer);

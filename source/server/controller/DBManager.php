@@ -360,37 +360,35 @@ class DBManager {
     
     }
     
-    public function insertWeaponLoading($input)
+    public function insertSystemData($input)
     {
-        $loadings = array();
+        $datas = array();
         if (is_array($input))
-            $loadings = $input;
+            $datas = $input;
         else 
-            $loadings[] = $input;
+            $datas[] = $input;
        
         $stmt = $this->connection->prepare(
             "INSERT INTO  
-                tac_loading
+                tac_systemdata
             VALUES 
             ( 
-                ?,?,?,?,?,?,?,?
+                ?,?,?,?,?
             )"
         );
 
         if ($stmt)
         {
-            foreach ($loadings as $loading)
+            foreach ($datas as $data)
             {
+                $json = $data->toJSON();
                 $stmt->bind_param(
-                    'iiiiiiii',
-                    $loading->systemid,
-                    $loading->subsystem,
-                    $loading->gameid,
-                    $loading->shipid,
-                    $loading->loading,
-                    $loading->extrashots,
-                    $loading->loadedammo,
-                    $loading->overloading
+                    'iiiis',
+                    $data->systemid,
+                    $data->subsystem,
+                    TacGamedata::$currentGameID,
+                    $data->shipid,
+                    $json
                 );
                 $stmt->execute();
             }
@@ -400,23 +398,20 @@ class DBManager {
 
     }
     
-    public function updateWeaponLoading($input)
+    public function updateSystemData($input)
     {
-        $loadings = array();
+        $datas = array();
         if (is_array($input))
-            $loadings = $input;
+            $datas = $input;
         else 
-            $loadings[] = $input;
+            $datas[] = $input;
         
         try {
             $stmt = $this->connection->prepare(
                 "UPDATE 
-                    tac_loading
+                    tac_systemdata
                 SET 
-                    loading = ?, 
-                    extrashots = ?,
-                    loadedammo = ?,
-                    overloading = ?
+                    data = ?
                 WHERE 
                     gameid = ? 
                 AND 
@@ -430,18 +425,16 @@ class DBManager {
             
 			if ($stmt)
             {
-                foreach ($loadings as $loading)
+                foreach ($datas as $data)
                 {
+                    $json = $data->toJSON();
                     $stmt->bind_param(
-                        'iiiiiiii', 
-                        $loading->loading,
-                        $loading->extrashots,
-                        $loading->loadedammo,
-                        $loading->overloading,
-                        $loading->gameid,
-                        $loading->systemid,
-                        $loading->shipid,
-                        $loading->subsystem
+                        'siiii', 
+                        $json,
+                        $data->gameid,
+                        $data->systemid,
+                        $data->shipid,
+                        $data->subsystem
                     );
                     $stmt->execute();
                 }
@@ -546,52 +539,7 @@ class DBManager {
             $move = $ship->movement[0];
             $this->insertMovement($gameid, $ship->id, $move);
         }
-        foreach ($ships as $ship)
-        {
-            foreach ($ship->systems as $system)
-            {
-                if ($system instanceof Weapon)
-                {
-                    $this->insertWeaponLoading($system->getStartLoading($gameid, $ship));
-                }
-                
-                if ($system instanceof Fighter)
-                {
-                    foreach ($system->systems as $fighterSystem)
-                    {
-                        if ($fighterSystem instanceof Weapon)
-                        {
-                            $this->insertWeaponLoading($fighterSystem->getStartLoading($gameid, $ship)); 
-                        }
-                     
-                    }
-                }
-            }
-
-        }
     }
-    
-    /*
-	public function deploy($gameid, $shipid, $movement)
-    {
-		try {
-           	
-			$preturn = ($movement->preturn) ? 1 : 0;
-			
-			$sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.
-                ", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading
-                .", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', 0, 0)";
-			
-			//throw new exception("sql: ".$movement->preturn . var_dump($movement));
-			$this->insert($sql);
-		
-    
-        }
-        catch(Exception $e) {
-
-            throw $e;
-        }
-	}*/
     
     public function insertMovement($gameid, $shipid, $input)
     {
@@ -814,7 +762,7 @@ class DBManager {
         $this->getCriticalsForShips($gamedata);
         $this->getDamageForShips($gamedata);
         $this->getFireOrdersForShips($gamedata);
-        $this->getWeaponLoadingForShips($gamedata);
+        $this->getSystemDataForShips($gamedata);
         
         $endtime = time();  
         Debug::log("GETTING SHIPS - GAME: $gamedata->id Fetching gamedata took " . ($endtime - $starttime) . " seconds.");
@@ -1014,14 +962,14 @@ class DBManager {
         
     }
     
-    public function getWeaponLoadingForShips($gamedata)
+    public function getSystemDataForShips($gamedata)
     {
         $loading = array();
         $stmt = $this->connection->prepare(
             "SELECT 
-                systemid, subsystem, gameid, shipid, loading, extrashots, loadedammo, overloading
+                data, shipid, systemid, subsystem
             FROM 
-                tac_loading
+                tac_systemdata
             WHERE 
                 gameid = ?"
         );
@@ -1031,13 +979,16 @@ class DBManager {
             $stmt->bind_param('i', $gamedata->id);
             $stmt->execute();
             $stmt->bind_result(
-                $systemid, $subsystem, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading
+                $data,
+                $shipid,
+                $systemid,
+                $subsystem
             );
 
             while( $stmt->fetch())
             {
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setLoading(
-                    new WeaponLoading($systemid, $subsystem, $gameid, $shipid, $turnsloaded, $extrashots, $loadedammo, $overloading)
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData(
+                    $data, $subsystem
                 );
             }
             $stmt->close();
@@ -1098,122 +1049,7 @@ class DBManager {
             $stmt->close();
         }
     }
-    /*
-    private function getSystemDataForShips($gameid, $gameturn, $ships){
-        $fetchturn = $gameturn - 1;
-        $damageStmt = $this->connection->prepare(
-            "SELECT 
-                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes 
-            FROM
-                tac_damage
-            WHERE 
-                gameid = ?
-            AND 
-                shipid = ?
-            AND 
-                systemid = ?
-            "
-        );
-        
-        $powerStmt = $this->connection->prepare(
-            "SELECT
-                id, shipid, systemid, type, turn, amount 
-            FROM
-                tac_power
-            WHERE 
-                gameid = ?
-            AND 
-                shipid = ?
-            AND 
-                systemid = ?
-            AND 
-                turn >= ?
-            "
-        );
-        
-        $criticalStmt = $this->connection->prepare(
-            "SELECT 
-                id, shipid, systemid, type, turn, param 
-            FROM 
-                tac_critical
-            WHERE 
-                gameid = ?
-            AND 
-                shipid = ?
-            AND 
-                systemid = ?
-            "
-        );
-        
-
-        if ($damageStmt && $powerStmt && $criticalStmt)
-        {
-            foreach ($ships as $ship)
-            {
-                foreach ($ship->systems as $system)
-                {
-                    $damages = array();
-
-                    $damageStmt->bind_param('iii', $gameid, $ship->id, $system->id);
-                    $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes );
-                    $damageStmt->execute();
-                    while ($damageStmt->fetch())
-                    {
-                        $damages[] = new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes );
-                    }
-
-                    $system->setDamage($damages);
-                    
-                    $power = array();
-
-                    $powerStmt->bind_param('iiii', $gameid, $ship->id, $system->id, $fetchturn);
-                    $powerStmt->bind_result($id, $shipid, $systemid, $type, $turn, $amount );
-                    $powerStmt->execute();
-                    while ($powerStmt->fetch())
-                    {
-                        $power[] = new PowerManagementEntry($id, $shipid, $systemid, $type, $turn, $amount);
-                    }
-
-                    $system->setPower($power);
-                    
-                    $criticals = array();
-
-                    $criticalStmt->bind_param('iii', $gameid, $ship->id, $system->id);
-                    $criticalStmt->bind_result($id, $shipid, $systemid, $type, $turn, $param);
-                    $criticalStmt->execute();
-                    while ($criticalStmt->fetch())
-                    {
-                        $criticals[] = new $type($id, $shipid, $systemid, $type, $turn, $param);
-                    }
-
-                    $system->setCriticals($criticals, $gameturn);
-                    
-                    
-                    if ($system instanceof Weapon){
-                        $system->setLoading($this->getWeaponLoading($ship->id, $gameid, $system->id));
-                        $system->setFireOrders($this->getFireOrders($ship->id, $gameid, $system->id, $gameturn));
-                    }
-                    else if ($system instanceof Fighter)
-                    {
-                        foreach ($system->systems as $fighterSystem)
-                        {
-                            if ($fighterSystem instanceof Weapon)
-                            {
-                                $fighterSystem->setLoading($this->getWeaponLoading($ship->id, $gameid, $fighterSystem->id));
-                                $fighterSystem->setFireOrders($this->getFireOrders($ship->id, $gameid, $fighterSystem->id, $gameturn));
-                            }
-                                
-                        }
-                    }
-                    
-                }
-            }
-            $powerStmt->close();
-            $criticalStmt->close();
-            $damageStmt->close();
-        }
-    }
-    */
+    
     public function isNewGamedata($gameid, $turn, $phase, $activeship){
         try {
 			if ($stmt = $this->connection->prepare("

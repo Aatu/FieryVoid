@@ -164,6 +164,23 @@
             return $this->armour[0];
         }
         
+        public function onAdvancingGamedata($ship)
+        {
+            foreach ($this->systems as $system)
+            {
+                $system->onAdvancingGamedata($ship);
+            }
+        }
+
+
+        public function setInitialSystemData($ship)
+        {
+            foreach ($this->systems as $system)
+            {
+                $system->setInitialSystemData($ship);
+            }
+        }
+        
 
 	}
 

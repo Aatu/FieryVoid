@@ -304,5 +304,17 @@ class ShipSystem{
         return false;
     
     }
+    
+    public function onAdvancingGamedata($ship)
+    {
+    }
+    
+    public function setSystemData($data, $subsystem)
+    {
+    }
+    
+    public function setInitialSystemData($ship)
+    {
+    }
 
 }

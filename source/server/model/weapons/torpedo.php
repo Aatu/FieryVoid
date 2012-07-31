@@ -76,16 +76,16 @@
             return 0;
         }
         
-        public function calculateLoading( $gameid, $phase, $ship, $turn )
+        public function calculateLoading()
         {
             $loading = null;
-            $shotsfired = $this->firedOnTurn($turn);
-            if ($phase === 2)
+            $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
+            if (TacGamedata::$currentPhase === 2)
             {
                 if  
-                ( $this->isOfflineOnTurn($turn) )
+                ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
                 {
-                    $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, 0, 0, 0, 0);
+                    $loading = new WeaponLoading(0, 0, 0, 0);
                 }
                 else if ($shotsfired)
                 {
@@ -93,83 +93,21 @@
                     if ($newloading < 0)
                         $newloading = 0;
 
-                $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, $newloading, 0, 0, 0);
+                $loading = new WeaponLoading($newloading, 0, 0, 0);
                 }
             }
-            else if ($phase === 1)
+            else if (TacGamedata::$currentPhase === 1)
             {
                 $newloading = $this->turnsloaded+1;
                 if ($newloading > $this->getNormalLoad())
                     $newloading = $this->getNormalLoad();
 
-                $loading = new WeaponLoading($this->id, 0, $gameid, $ship->id, $newloading, 0, 0, 0);
+                $loading = new WeaponLoading($newloading, 0, 0, 0);
             }
 
             return $loading;
         }
         
-        /*
-        public function setLoading($ship, $turn, $phase){
-            $turnsloaded = 0;
-        
-        
-            for ($i = 0;$i<=$turn;$i++){
-                $step = 1;
-                $off = $this->isOfflineOnTurn($i);
-                $overload = $this->isOverloadingOnTurn($i-1);
-                $nowoverloading = $this->isOverloadingOnTurn($i);
-                if ($i == $turn && $phase == 1 && $overload){
-                    $nowoverloading = true;
-                }           
-                $fired = $this->firedOnTurn($ship, $i);
-                
-                        
-                if ($i == 0){
-                    if (!$off){
-                        $turnsloaded = $this->getNormalLoad();
-                        if ($overload){
-                            $turnsloaded = $this->overloadturns;
-                        }
-                    }
-                    continue;
-                }
-                
-                if ($off){
-                    $turnsloaded = 0;
-                    continue;
-                }
-                
-                if ($overload){
-                    $step = 2;
-                }
-                
-                $turnsloaded += $step;
-                
-                if (!$overload && $turnsloaded > $this->getNormalLoad()){
-                    $turnsloaded = $this->getNormalLoad();
-                }
-        
-                if ($turnsloaded > $this->getNormalLoad() && !$nowoverloading){
-                    $turnsloaded = $this->getNormalLoad();
-                }else if ($turnsloaded > $this->overloadturns && $nowoverloading){
-                    $turnsloaded = $this->overloadturns;
-                }
-                                
-               
-                
-                        
-                if ($fired){
-                    $turnsloaded -= $fired;
-                    if ($turnsloaded < 0)
-                        $turnsloaded = 0;
-                    
-                }
-                
-            }
-            
-            $this->turnsloaded = $turnsloaded;
-        }
-        */
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
             $this->shots = $this->turnsloaded;

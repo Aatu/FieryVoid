@@ -21,8 +21,8 @@
 			parent::setSystemDataWindow($turn);
 		}
 		
-		public function setLoading($loading){
-			parent::setLoading($loading);
+		public function setSystemData($data, $subsystem){
+			parent::setSystemData($data, $subsystem);
 			$this->setMinDamage();
 			$this->setMaxDamage();
 			
