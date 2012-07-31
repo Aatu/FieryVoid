@@ -74,6 +74,7 @@ spl_autoload_register(
                 'heavypulse' => '/server/model/weapons/pulse.php',
                 'heavythentus' => '/server/model/ships/narn/HeavyThentus.php',
                 'hyperion' => '/server/model/ships/EA/hyperion.php',
+                'improvedneutronlaser' => '/server/model/weapons/lasers.php',
                 'intercept' => '/server/handlers/firing.php',
                 'interceptcandidate' => '/server/handlers/firing.php',
                 'interceptormki' => '/server/model/weapons/defensive.php',
@@ -102,6 +103,7 @@ spl_autoload_register(
                 'mogratti' => '/server/model/ships/centauri/mogratti.php',
                 'molecular' => '/server/model/weapons/molecular.php',
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
+                'molecularpulsar' => '/server/model/weapons/pulse.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'movement' => '/server/handlers/movement.php',
                 'movementorder' => '/server/model/BaseClasses.php',
@@ -140,6 +142,7 @@ spl_autoload_register(
                 'secundus' => '/server/model/ships/centauri/secundus.php',
                 'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sentri' => '/server/model/ships/centauri/sentri.php',
+                'shantavi' => '/server/model/ships/minbari/shantavi.php',
                 'sharaal' => '/server/model/ships/minbari/sharaal.php',
                 'sharlin' => '/server/model/ships/minbari/sharlin.php',
                 'shield' => '/server/model/systems/baseSystems.php',
@@ -169,6 +172,7 @@ spl_autoload_register(
                 'torotha' => '/server/model/ships/minbari/torotha.php',
                 'torpedo' => '/server/model/weapons/torpedo.php',
                 'tractorbeam' => '/server/model/weapons/specialWeapons.php',
+                'tradana' => '/server/model/ships/minbari/tradana.php',
                 'trakk' => '/server/model/ships/narn/trakk.php',
                 'trolata' => '/server/model/ships/minbari/trolata.php',
                 'twinarray' => '/server/model/weapons/particle.php',
@@ -178,7 +182,8 @@ spl_autoload_register(
                 'vorchan' => '/server/model/ships/centauri/vorchan.php',
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
                 'weapon' => '/server/model/weapons/weapon.php',
-                'weaponloading' => '/server/model/BaseClasses.php'
+                'weaponloading' => '/server/model/BaseClasses.php',
+                'whitestar' => '/server/model/ships/minbari/whitestar.php'
             );
         }
         $cn = strtolower($class);

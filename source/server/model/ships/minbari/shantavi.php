@@ -1,5 +1,5 @@
 <?php
-class Tinashi extends HeavyCombatVessel{
+class Shantavi extends HeavyCombatVessel{
 
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);

@@ -31,10 +31,15 @@ class TacGamedata{
         $this->creator = $creator;
    }
    
+    public function doSortShips()
+    {
+        usort ( $this->ships , "self::sortShips" );
+    }
+   
     public function onConstructed(){
         
-        usort ( $this->ships , "self::sortShips" );
         
+        $this->doSortShips();
         
         $i = 0;
         foreach ($this->ships as $ship){
@@ -129,10 +134,15 @@ class TacGamedata{
     public static function sortShips($a, $b){
         
         if ($a->iniative == $b->iniative){
-            if ($a->iniativebonus > $b->iniativebonus){
-                return -1;
-            }else{
+            if ($a->iniativebonus == $b->iniativebonus){
+                if ($a->id > $b->id)
+                    return 1;
+                else
+                    return -1;
+            }else if ($a->iniativebonus > $b->iniativebonus){
                 return 1;
+            }else{
+                return -1;
             }
         }else if ($a->iniative < $b->iniative){
             return -1;
