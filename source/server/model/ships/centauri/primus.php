@@ -4,7 +4,7 @@ class Primus extends BaseShip{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-		$this->pointCost = 820;
+		$this->pointCost = 830;
 		$this->faction = "Centauri";
         $this->phpclass = "Primus";
         $this->imagePath = "img/ships/primus.png";

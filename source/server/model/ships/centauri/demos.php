@@ -15,7 +15,7 @@ class Demos extends HeavyCombatVessel{
         $this->sideDefense = 14;
         
         $this->turncost = 0.50;
-        $this->turndelaycost = 0.66;
+        $this->turndelaycost = 0.33;
         $this->accelcost = 2;
         $this->rollcost = 1;
         $this->pivotcost = 2;
