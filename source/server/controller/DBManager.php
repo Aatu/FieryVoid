@@ -374,7 +374,11 @@ class DBManager {
             VALUES 
             ( 
                 ?,?,?,?,?
-            )"
+            )
+            ON DUPLICATE KEY UPDATE
+            SET 
+                data = ?
+            "
         );
 
         if ($stmt)
@@ -383,11 +387,12 @@ class DBManager {
             {
                 $json = $data->toJSON();
                 $stmt->bind_param(
-                    'iiiis',
+                    'iiiiss',
                     $data->systemid,
                     $data->subsystem,
                     TacGamedata::$currentGameID,
                     $data->shipid,
+                    $json,
                     $json
                 );
                 $stmt->execute();
@@ -400,6 +405,8 @@ class DBManager {
     
     public function updateSystemData($input)
     {
+        $this->insertSystemData($input);
+        /*
         $datas = array();
         if (is_array($input))
             $datas = $input;
@@ -444,6 +451,8 @@ class DBManager {
         catch(Exception $e) {
             throw $e;
         }
+         
+        */
     }
     
     public function submitDamages($gameid, $turn, $damages){
