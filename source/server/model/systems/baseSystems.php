@@ -129,6 +129,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
 		$this->tohitPenalty = $this->getOutput();
 		$this->damagePenalty = $this->getOutput();
      
