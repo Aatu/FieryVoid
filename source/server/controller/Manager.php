@@ -482,7 +482,7 @@ class Manager{
     
     private static function startInitialOrders($gamedata){
     
-        $gamedata->phase = 1; 
+        $gamedata->setPhase(1); 
         
         self::$dbManager->updateGamedata($gamedata);
     
@@ -490,15 +490,15 @@ class Manager{
     
     private static function startMovement($gamedata){
     
-        $gamedata->phase = 2; 
-        $gamedata->activeship = $gamedata->getFirstShip()->id;
+        $gamedata->setPhase(2); 
+        $gamedata->setActiveship($gamedata->getFirstShip()->id);
         self::$dbManager->updateGamedata($gamedata);
     
     }
     
     private static function startWeaponAllocation($gamedata){
-        $gamedata->phase = 3; 
-        $gamedata->activeship = -1;
+        $gamedata->setPhase(3); 
+        $gamedata->setActiveship(-1);
         self::$dbManager->updateGamedata($gamedata);
     }
     
@@ -557,8 +557,8 @@ class Manager{
     
     private static function startEndPhase($gamedata){
         //print("start end");
-        $gamedata->phase = 4; 
-        $gamedata->activeship = -1;
+        $gamedata->setPhase(4); 
+        $gamedata->setActiveship(-1);
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
@@ -621,7 +621,7 @@ class Manager{
         }
         
         if ($nextshipid > -1){
-            $gamedata->activeship = $nextshipid;
+            $gamedata->setActiveship($nextshipid);
             self::$dbManager->updateGamedata($gamedata);
         }else{
             self::startWeaponAllocation($gamedata);
@@ -635,15 +635,15 @@ class Manager{
     
     private static function changeTurn($gamedata){
     
-        $gamedata->turn = $gamedata->turn+1;
+        $gamedata->setTurn( $gamedata->turn+1 );
         if ($gamedata->turn === 1)
         {
-            $gamedata->phase = -1; 
+            $gamedata->setPhase(-1); 
         }else{
-            $gamedata->phase = 1; 
+            $gamedata->setPhase(1); 
         }
         
-        $gamedata->activeship = -1;
+        $gamedata->setActiveship(-1);
         $gamedata->status = "ACTIVE";
         
         if ($gamedata->turn > 1 && $gamedata->isFinished())

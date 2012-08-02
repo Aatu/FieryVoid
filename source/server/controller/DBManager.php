@@ -376,7 +376,6 @@ class DBManager {
                 ?,?,?,?,?
             )
             ON DUPLICATE KEY UPDATE
-            SET 
                 data = ?
             "
         );

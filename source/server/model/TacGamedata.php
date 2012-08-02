@@ -5,6 +5,7 @@ class TacGamedata{
     public static $currentTurn;
     public static $currentPhase;
     public static $currentGameID;
+    public static $currentActiveship;
     
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
     public $ships = array();
@@ -32,6 +33,24 @@ class TacGamedata{
         $this->background = $background;
         $this->creator = $creator;
    }
+   
+    public function setPhase($phase)
+    {
+        self::$currentPhase = $phase;
+        $this->phase = $phase;
+    }
+    
+    public function setTurn($turn)
+    {
+        self::$currentTurn = $turn;
+        $this->turn = $turn;
+    }
+    
+    public function setActiveship($activeship)
+    {
+        self::$currentActiveship = $activeship;
+        $this->activeship = $activeship;
+    }
    
     public function doSortShips()
     {

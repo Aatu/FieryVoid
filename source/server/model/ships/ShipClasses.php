@@ -283,6 +283,9 @@
                 return array("x"=>0, "y"=>0);
             }
             foreach ($this->movement as $move){
+                if ($move->type == "start")
+                    continue;
+                
                 if ($move->turn == $turn){
                     if (!$movement)
                         $movement = $move;

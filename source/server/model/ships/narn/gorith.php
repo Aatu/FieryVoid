@@ -12,7 +12,7 @@ class Gorith extends FighterFlight{
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
-        $this->freethrust = 10;
+        $this->freethrust = 12;
         $this->offensivebonus = 5;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;

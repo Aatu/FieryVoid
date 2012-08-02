@@ -20,6 +20,7 @@
         public $rangePenalty = 2;
         public $fireControl = array(6, -20, -20); // fighters, <mediums, <capitals 
         
+        public $output = 3;
         
         public $tohitPenalty = 0;
         public $damagePenalty = 0;
@@ -36,7 +37,7 @@
         }
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
-            return 3;
+            return $this->getOutput();
         }
 
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
@@ -56,6 +57,26 @@
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
         
 
+    }
+    
+    class InterceptorMkII extends InterceptorMkI
+    {
+        public $name = "interceptorMkII";
+        public $displayName = "Interceptor MK II";
+        
+        public $output = 4;
+        
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+            return $this->getOutput();
+        }
+
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+            return 0;
+        }
+        
+        public function setSystemDataWindow($turn){
+            $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
+        }
     }
     
     class GuardianArray extends Weapon{
