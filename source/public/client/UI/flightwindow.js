@@ -244,12 +244,10 @@ flightWindowManager = {
 		e.stopPropagation();
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
-        console.dir(systemwindow.data());
-		var flight = gamedata.getShip(systemwindow.data("shipid"));
+
+        var flight = gamedata.getShip(systemwindow.data("shipid"));
 		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
 		var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));
-		
-		console.log("flight: " + flight.name + " fighter: " + fighter.id + " system: " + system.displayName);
 		
 		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
 			return;

@@ -62,6 +62,8 @@ class Weapon extends ShipSystem{
     public $damageType = "standard";
     public $minDamage, $maxDamage;
     
+    public $exclusive = false;
+    
     
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));

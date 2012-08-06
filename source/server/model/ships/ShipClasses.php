@@ -526,6 +526,18 @@
             return false;
         }
         
+        public function isDisabled()
+        {
+            if ($this->isPowerless())
+                return true;
+            
+            $CnC = $this->getSystemByName("CnC");
+			if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
+                return true;
+            
+            return false;
+        }
+        
         public function isPowerless(){
         
             $output = 0;

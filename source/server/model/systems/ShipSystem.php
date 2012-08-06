@@ -27,6 +27,8 @@ class ShipSystem{
     
     protected $structureSystem;
     
+    public $parent;
+    
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
         $this->maxhealth = (int)$maxhealth;

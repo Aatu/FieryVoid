@@ -38,13 +38,19 @@
 		
 		public static function getScannerOutput($ship, $turn){
 		
+            if (shipManager.isAdrift(ship))
+                return 0;
+            
 			$output = 0;
 			foreach ($ship->systems as $system){
 			
-				if ($system instanceof Scanner){
+				if ($system->outputType == "EW"){
 					$output += $system->getOutput($turn);
 				}
 			}
+            $CnC = $ship->getSystemByName("CnC");
+			if ($CnC && $CnC->hasCritical("RestrictedEW"))
+                $output -= 2;
 			
 			return $output;
 				

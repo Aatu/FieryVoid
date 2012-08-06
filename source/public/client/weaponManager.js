@@ -143,9 +143,45 @@ window.weaponManager = {
         shipWindowManager.setDataForSystem(ship, weapon);
 
     },
+
+    checkConflictingFireOrder: function(ship, weapon, alert){
+
+        var p = ship;
+        if (ship.flight){
+            p = shipManager.systems.getFighterBySystem(ship, weapon.id);
+        }
+        
+        for (var i in p.systems){
+            var system = p.systems[i];
+            if (system.id == weapon.id)
+                continue;
+
+        if (weaponManager.hasFiringOrder(ship, system)){
+                if (weapon.exclusive){
+                    if (alert)
+                        confirm.error("You cannot fire another weapon at the same time as " +weapon.displayName + ".");
+                    return true;
+                }
+                
+                if (system.exclusive){
+                    if (alert)
+                        confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
+                    return true;
+                }
+            }
+                
+        }
+        
+        return false;
+     
+    },
     
     selectWeapon: function(ship, weapon){
-
+        
+        if (weaponManager.checkConflictingFireOrder(ship, weapon, alert)){
+            return;
+        }
+         
         if (!weaponManager.isLoaded(weapon))
             return;
     
@@ -578,15 +614,13 @@ window.weaponManager = {
         
     },
     
-     
+    //system is for called shot! 
     targetShip: function(ship, system){
     
         var selectedShip = gamedata.getSelectedShip();
         if (shipManager.isDestroyed(selectedShip))
             return;
         
-        console.log("targetship");
-            
         var toUnselect = Array();
         for (var i in gamedata.selectedSystems){
             var weapon = gamedata.selectedSystems[i];
@@ -604,6 +638,10 @@ window.weaponManager = {
             
             if (weapon.ballistic && system)
 				continue;
+            
+            if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)){
+                continue;
+            }
             
             var type = 'normal';
             if (weapon.ballistic){
@@ -710,6 +748,10 @@ window.weaponManager = {
             
             if (!weapon.hextarget)
                 continue;
+            
+            if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)){
+                continue;
+            }
             
             var type = 'normal';
             if (weapon.ballistic){

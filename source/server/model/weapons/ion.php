@@ -18,7 +18,7 @@ class IonBolt extends Weapon{
 
     public $rangePenalty = 1;
     public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals 
- 
+    public $exclusive = true;
 
     function __construct($startArc, $endArc){
         parent::__construct(0, 1, 0, $startArc, $endArc);
