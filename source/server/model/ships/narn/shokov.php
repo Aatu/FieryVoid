@@ -23,7 +23,7 @@ class Shokov extends MediumShip{
 		$this->iniativebonus = 60;
         
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 2));
+        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 3, 6));
         $this->addPrimarySystem(new Engine(3, 10, 0, 12, 3));
@@ -33,9 +33,9 @@ class Shokov extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 240, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 120));
-		$this->addFrontSystem(new IonTorpedo(4, 5, 4, 240, 120));		
+        $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 60));
+        $this->addFrontSystem(new IonTorpedo(3, 5, 4, 300, 120));
+		$this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 120));		
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));

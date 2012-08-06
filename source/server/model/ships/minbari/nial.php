@@ -31,7 +31,7 @@ class Nial extends FighterFlight{
             $nial->addFrontSystem(new LightFusionCannon(330, 30, 4, 3));
             $nial->addAftSystem(new Jammer(0, 1, 0));
             $this->addSystem($nial);
-	}
+        }
     }
 }
 
