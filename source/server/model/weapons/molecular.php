@@ -22,8 +22,6 @@
 
     class FusionCannon extends Molecular{
 
-        
-
         public $name = "fusionCannon";
         public $displayName = "Fusion Cannon";
         public $animation = "beam";
@@ -34,7 +32,7 @@
         public $animationWidth = 7;
         public $trailLength = 20;
 
-        public $intercept = 2;
+        public $intercept = 3;
 
 
         public $loadingtime = 1;
