@@ -29,7 +29,7 @@ class Tishat extends FighterFlight{
         // need picture
             $tishat->iconPath = "img/ships/tishat-large.png";
             $tishat->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
-            $nial->addAftSystem(new Jammer(0, 1, 0));
+            $tishat->addAftSystem(new Jammer(0, 1, 0));
             $this->addSystem($tishat);
         }
     }
