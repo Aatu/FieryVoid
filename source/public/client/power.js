@@ -93,7 +93,7 @@ shipManager.power = {
 			if (ship.userid != gamedata.thisplayer)
 				continue; 
 				
-			if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
 				continue;
 			
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"))<0)
@@ -385,7 +385,7 @@ shipManager.power = {
 			return;
 			
 		
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system))
 			return;
 		
 		if (ship.userid != gamedata.thisplayer)
@@ -418,7 +418,7 @@ shipManager.power = {
 		if (gamedata.gamephase != 1)
 			return;
 		
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system))
 			return;
 		
 		if (ship.userid != gamedata.thisplayer)
@@ -443,7 +443,7 @@ shipManager.power = {
 		if (gamedata.gamephase != 1)
 			return;
 		
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system))
 			return;
 		
 		if (ship.userid != gamedata.thisplayer)

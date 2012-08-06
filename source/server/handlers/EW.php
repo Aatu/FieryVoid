@@ -38,7 +38,7 @@
 		
 		public static function getScannerOutput($ship, $turn){
 		
-            if (shipManager.isAdrift(ship))
+            if ($ship->isDisabled())
                 return 0;
             
 			$output = 0;
