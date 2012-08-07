@@ -63,3 +63,18 @@
 	color:#DEEBFF;
 	text-decoration:underline;
 }
+
+.mediumSize{
+    width:200px;
+    
+}
+
+.smallSize{
+    width:100px;
+    
+}
+
+.tinySize{
+    width:20px;
+    
+}
