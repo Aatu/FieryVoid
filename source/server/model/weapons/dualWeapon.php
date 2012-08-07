@@ -116,9 +116,15 @@ class LaserPulseArray extends DualWeapon{
 	public $displayName = "Laser/Pulse array";
 	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        
+        $laser = new MediumLaser($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $laser->parentSystem = $this;
+        $pulse = new MediumPulse($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $pulse->parentSystem = $this;
+        
 		$weapons = array(
-			 1 => new MediumLaser($armour, $maxhealth, $powerReq, $startArc, $endArc)
-            ,2 => new MediumPulse($armour, $maxhealth, $powerReq, $startArc, $endArc)
+			 1 => $laser
+            ,2 => $pulse
 		);
 		
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);

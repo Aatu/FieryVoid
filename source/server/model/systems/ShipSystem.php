@@ -27,7 +27,7 @@ class ShipSystem{
     
     protected $structureSystem;
     
-    public $parent;
+    public $parentSystem = null;
     
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -279,6 +279,9 @@ class ShipSystem{
     public function isOfflineOnTurn($turn = null){
         if ($turn === null)
             $turn = TacGamedata::$currentTurn;
+        
+        if ($this->parentSystem && $this->parentSystem instanceof DualWeapon)
+            return $this->parentSystem->isOfflineOnTurn($turn);
     
         foreach ($this->power as $power){
             if ($power->type == 1 && $power->turn == $turn){
@@ -296,6 +299,9 @@ class ShipSystem{
     public function isOverloadingOnTurn($turn = null){
         if ($turn === null)
             $turn = TacGamedata::$currentTurn;
+        
+        if ($this->parentSystem && $this->parentSystem instanceof DualWeapon)
+            return $this->parentSystem->isOverloadingOnTurn($turn);
         
         foreach ($this->power as $power){
             if ($power->type == 3 && $power->turn == $turn){

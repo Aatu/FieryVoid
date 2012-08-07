@@ -134,7 +134,6 @@ class Weapon extends ShipSystem{
     
     public function firedOnTurn($turn){
         
-        
         if ($this instanceof DualWeapon && isset($this->turnsFired[$turn]))
             return true;
         
