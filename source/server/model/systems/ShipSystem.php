@@ -27,7 +27,7 @@ class ShipSystem{
     
     protected $structureSystem;
     
-    public $parentSystem = null;
+    protected $parentSystem = null;
     
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
