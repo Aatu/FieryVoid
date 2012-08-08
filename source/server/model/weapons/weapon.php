@@ -253,9 +253,8 @@ class Weapon extends ShipSystem{
     
     public function calculateLoading()
     {
-        
         $normalload = $this->getNormalLoad();
-        if (TacGamedata::$currentPhase === 2)
+        if (TacGamedata::$currentPhase == 2)
         {
             if ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
             {
@@ -270,11 +269,11 @@ class Weapon extends ShipSystem{
                 return new WeaponLoading($this->turnsloaded, 0, $this->getLoadedAmmo(), 0);
             }
         }
-        else if (TacGamedata::$currentPhase === 4)
+        else if (TacGamedata::$currentPhase == 4)
         {
            return $this->calculatePhase4Loading();
         }
-        else if (TacGamedata::$currentPhase === 1)
+        else if (TacGamedata::$currentPhase == 1)
         {
             if ($this->overloadshots === -1)
             {
@@ -288,7 +287,7 @@ class Weapon extends ShipSystem{
                 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns+1;
-                if ($overloading === $normalload && $newExtraShots === 0)
+                if ($overloading == $normalload && $newExtraShots == 0)
                     $newExtraShots = $this->extraoverloadshots;
 
                 if ($overloading > $normalload)

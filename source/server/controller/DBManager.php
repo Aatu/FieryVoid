@@ -128,7 +128,7 @@ class DBManager {
 	
 		try{
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '".$this->DBEscape($ship->name)."', '".$ship->phpclass."', 0, 0, 0, 0, 0)";
+			$sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '".$this->DBEscape($ship->name)."', '".$ship->phpclass."', 0, 0, 0, 0, 0, 0)";
 			$id = $this->insert($sql);
 			
 			$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
@@ -753,6 +753,7 @@ class DBManager {
 		$games = $this->getTacGame(0, $playerid, false);
 		if ($games == null)
 			return array();
+        
 		foreach ($games as $game){
 			$game->slots = $this->getSlotsInGame($game->id);
 		}

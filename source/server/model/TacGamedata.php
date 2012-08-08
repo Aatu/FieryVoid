@@ -19,14 +19,12 @@ class TacGamedata{
     
     
     function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator){
-        $this->id = (int)$id;
-        $this->turn = (int)$turn;
-        static::$currentPhase = (int)$phase;
-        static::$currentTurn = (int)$turn;
-        static::$currentGameID = (int)$id;
-        $this->phase = (int)$phase;
-        $this->activeship = (int)$activeship;
+        $this->setId($id);
+        $this->setTurn($turn);
+        $this->setPhase($phase);
+        $this->setActiveship($activeship);
         $this->setForPlayer($forPlayer);
+        $this->activeship = (int)$activeship;
         $this->name = $name;
         $this->status = $status;
         $this->points = (int)$points;
@@ -50,6 +48,12 @@ class TacGamedata{
     {
         self::$currentActiveship = $activeship;
         $this->activeship = $activeship;
+    }
+    
+    public function setId($id)
+    {
+        self::$currentGameID = $id;
+        $this->id = $id;
     }
    
     public function doSortShips()
