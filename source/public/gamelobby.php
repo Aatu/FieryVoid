@@ -67,13 +67,14 @@
 
 			<div><span>TEAM 1</span></div>
 			<div id="team1" class="subpanel slotcontainer">
-				<div class="slot" data-slotid="1" data-playerid=""><span>SLOT 1:</span><span class="playername"></span><span class="status">READY</span><span class="takeslot clickable">Take slot</span></div>
 			</div>
 			
 			<div><span>TEAM 2</span></div>
-			<div id="team1" class="subpanel slotcontainer">
-				<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span><span class="playername"></span><span class="status">READY</span><span class="takeslot clickable">Take slot</span></div>
-			</div>
+			<div id="team2" class="subpanel slotcontainer">
+            </div>
+            
+            <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
+			-->
 			
 			<a href="gamelobby.php?leaveslot">LEAVE GAME</a>
 			
@@ -96,6 +97,34 @@
 			<div><span class="clickable readybutton">READY</span></div>
 			
 		</div>
+                    
+    <div id="slottemplatecontainer" style="display:none;">
+        <div class="slot" >
+            <div>
+                <span class="smallSize headerSpan">NAME:</span>
+                <span class ="value name"></span>
+                <span class="smallSize headerSpan">POINTS:</span>
+                <span class ="value points"></span>
+                <span class="smallSize headerSpan">PLAYER:</span>
+                <span class="playername"></span><span class="status">READY</span><span class="takeslot clickable">Take slot</span>
+            </div>
+            <div>
+                <span class="smallSize headerSpan">DEPLOYMENT:</span>
+                <span>X:</span>
+                <span class ="value depx"></span>
+                <span>Y:</span>
+                <span class ="value depy"></span>
+                <span>Type:</span>
+                <span class ="value deptype"></span>
+                <span>Width:</span>
+                <span class ="value depwidth"></span>
+                <span>Height:</span>
+                <span class ="value depheight"></span>
+                <span>Turn available:</span>
+                <span class ="value depavailable"></span>
+            </div>
+        </div>
+    </div>
 
 	</body>
 </html>

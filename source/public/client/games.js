@@ -31,7 +31,7 @@ window.gamedata = {
 					var html = gamehtml;
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", Object.keys(game.players).length);
+					html = html.replace("{players}", Object.keys(game.slots).length);
 					
 					gameDOM = $(html);
 					gameDOM.appendTo($('.gamecontainer.active'));
@@ -45,13 +45,13 @@ window.gamedata = {
 					var html = gamehtml;
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", Object.keys(game.players).length);
+					html = html.replace("{players}", Object.keys(game.slots).length);
 					
 					gameDOM = $(html);
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				}else{
-					$('.players', gameDOM).html("players: " + Object.keys(game.players).length+"/2");
+					$('.players', gameDOM).html("players: " + Object.keys(game.slots).length+"/2");
 				}
 				lobbyfound = true;
 			}
@@ -89,8 +89,8 @@ window.gamedata = {
 			if (this.games[i].id != id)
 				continue;
 				
-			for (var a in this.games[i].players){
-				if (this.games[i].players[a].id == this.thisplayer)
+			for (var a in this.games[i].slots){
+				if (this.games[i].slots[a].playerid == this.thisplayer)
 					return true;
 			}
 		}

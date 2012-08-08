@@ -1,7 +1,7 @@
 window.gamedata = {
 
 	thisplayer: 0,
-	players: null,
+	slots: null,
 	ships: {},
 	gameid: 0,
 	turn: 0,
@@ -90,12 +90,11 @@ window.gamedata = {
 			window.location = "games.php";
 			return;
 		}
-
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;
         gamedata.gameid = serverdata.id;
-        gamedata.players = serverdata.players;
+        gamedata.slots = serverdata.slots;
         //gamedata.ships = serverdata.ships;
         gamedata.thisplayer = serverdata.forPlayer;
         gamedata.maxpoints = serverdata.points;
@@ -113,8 +112,73 @@ window.gamedata = {
 		$('.takeslot').bind("click", this.clickTakeslot);
 		this.enableBuy();
 	},
+    
+    createNewSlot: function(data){
+        var template = $("#slottemplatecontainer .slot");
+        var target = $("#team"+data.team + ".slotcontainer");
+        var actual = template.clone(true).appendTo(target);
+        
+        actual.data("slotid", data.slot);
+        actual.addClass("slotid_"+data.slot);
+        gamedata.setSlotData(data);
+    },
+    
+    createSlots: function()
+    {
+        for (var i in gamedata.slots){
+            var slot = gamedata.slots[i];
+            var slotElement = $('.slot.slotid_'+slot.slot);
+            
+            if (!slotElement.length){
+                gamedata.createNewSlot(slot);
+            }
+            
+            slotElement = $('.slot.slotid_'+slot.slot);
+            var data = slotElement.data();
+            if (playerManager.isOccupiedSlot(slot)){
 
-	createSlots: function(){
+				var player = playerManager.getPlayerInSlot(i);
+				if (data.playerid != player.id){
+					slotElement.data("playerid", player.id);
+					slotElement.addClass("taken");
+					$(".playername", slotElement).html(player.name);
+				}
+
+
+				if	(slot.lastphase == "-2"){
+					slotElement.addClass("ready");
+
+				}
+
+			}else{
+
+				if (data.playerid){
+					slotElement.attr("data-playerid", "");
+					slotElement.removeClass("taken");
+					$(".playername", slotElement).html("");
+				}
+
+				slotElement.removeClass("ready");
+			}
+
+        }
+    },
+
+    setSlotData: function(data){
+        var slot = $(".slot.slotid_"+data.slot);
+        $(".name",slot).html(data.name);
+        $(".points",slot).html(data.points);
+        
+        $(".depx",slot).html(data.depx);
+        $(".depy",slot).html(data.depy);
+        $(".deptype",slot).html(data.deptype);
+        $(".depwidth",slot).html(data.depwidth);
+        $(".depheight",slot).html(data.depheight);
+        $(".depavailable",slot).html(data.depavailable);
+        
+    },
+    
+	createSlotsOld: function(){
 
 		for (var i = 1;i<=2;i++){
 			var slot = $('.slot[data-slotid="'+i+'"]');

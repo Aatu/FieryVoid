@@ -2,24 +2,16 @@ window.playerManager = {
 
 	isOccupiedSlot: function(slot){
 	
-		for (var i in gamedata.players){
-			var player = gamedata.players[i];
-			if (player.slot == slot)
-				return true;
-		}
+		
+        if (slot.playerid)
+            return true;
 		
 		return false;
 	
 	},
 	
 	getPlayerInSlot: function(slot){
-		for (var i in gamedata.players){
-			var player = gamedata.players[i];
-			if (player.slot == slot)
-				return player;
-		}
-		
-		return null;
+		return {id:slot.playerid, name:slot.playername};
 	},
 	
 	isInGame: function(){

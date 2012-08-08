@@ -9,7 +9,7 @@ class TacGamedata{
     
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
     public $ships = array();
-    public $players = array();
+    public $slots = array();
     public $waiting = false;
     public $changed = false;
     public $getDistanceHex = false;
@@ -32,7 +32,7 @@ class TacGamedata{
         $this->points = (int)$points;
         $this->background = $background;
         $this->creator = $creator;
-   }
+    }
    
     public function setPhase($phase)
     {
@@ -258,7 +258,7 @@ class TacGamedata{
     
     public function othersDone($userid){
     
-        foreach ($this->players as $player){
+        foreach ($this->slots as $player){
             if ($player->id == $userid)
                 continue;
                 
@@ -272,29 +272,30 @@ class TacGamedata{
     }
     
     public function hasAlreadySubmitted($userid){
-        $player = $this->getPlayerById($userid);
+        $slots = $this->getSlotsByPlayerId($userid);
         
-        if ($player == null)
-            return true;
-            
-        if ($player->lastturn < $this->turn || $player->lastphase < $this->phase)
+        foreach ($slots as $slot)
+        {
+            if ($slot->lastturn < $this->turn || $slot->lastphase < $this->phase)
             return false;
-            
+        }
         
         return true;
     
     }
     
-    public function getPlayerById($id){
-        foreach ($this->players as $player){
-            if ($player->id == $id){
-                return $player;
+    public function getSlotsByPlayerId($id)
+    {
+        $slots = array();
+        foreach ($this->slots as $slot){
+            if ($slot->playerid == $id){
+                $slots[] = $slot;
             }
         }
         
-        return null;
+        return $slots;
+        
     }
-    
     
     private function setForPlayer($player){
         $this->forPlayer = $player;
@@ -491,11 +492,13 @@ class TacGamedata{
     
     private function setWaiting(){
     
-        $player = $this->getPlayerById($this->forPlayer);
-        if ($player == null){
+        $player = $this->getSlotsByPlayerId($this->forPlayer);
+        if (!isset($player[0])){
             $this->waiting = false;
             return;
         }
+        
+        $player = $player[0];
     
         if ($this->phase == 1 || $this->phase == 3 || $this->phase == 4){
                             

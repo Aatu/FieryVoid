@@ -1,7 +1,13 @@
+.creategame .subpanel.slotcontainer{
+    padding-bottom:0px;
+}
+
 .slot{
 	border:1px solid #DEEBFF;
 	color:#DEEBFF;
 	padding: 3px 5px;
+    position:relative;
+    margin-bottom:5px;
 }
 
 .slot span{
@@ -30,6 +36,10 @@
 }
 .clickable:hover{
 	text-decoration:underline;
+}
+
+.takeslot{
+    color:red;
 }
 
 .taken .takeslot{
@@ -76,5 +86,24 @@
 
 .tinySize{
     width:20px;
+    
+}
+.slot input{
+    margin-right:5px;
+}
+
+.close{
+    position:absolute;
+    border:1px solid #496791;
+    width:10px;
+    height:10px;
+    right:5px;
+    top:4px;
+    background-image:url(../img/close.png);
+    cursor:pointer;
+}
+
+.value{
+    color:#496791;
     
 }

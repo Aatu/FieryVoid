@@ -98,16 +98,27 @@ class Manager{
         }
     }
     
-    public static function createGame($name, $bg, $maxplayers, $points, $userid){
-    
+    public static function createGame($userid, $data){
+        $data = json_decode($data, true);
+        
+        $gamename = $data["gamename"];
+        $background = $data["background"];
+        $slots = array();
+        
+        foreach ($data["slots"] as $slot){
+            $slots[] = new PlayerSlotFromJSON($slot);
+        }
+        
         try {
             self::initDBManager();
-            $gameid = self::$dbManager->createGame($name, $bg, $maxplayers, $points, $userid);
-            self::takeSlot($userid, $gameid, 1);
-            
+            self::$dbManager->startTransaction();
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid);
+            //self::takeSlot($userid, $gameid, 1);
+            self::$dbManager->endTransaction(false);
             return $gameid;
         }
         catch(exception $e) {
+            self::$dbManager->endTransaction(true);
             throw $e;
         }
     
@@ -312,13 +323,8 @@ class Manager{
                 self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
             }
         }
-        
     
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        if (sizeof($gamedata->players)<2){
-            return true;
-        }
         
         
         return true;
@@ -512,11 +518,10 @@ class Manager{
         
         foreach ($servergamedata->ships as $ship){
             
-            $player = $servergamedata->getPlayerById($ship->userid);
             $y = 0;
             $t = 0;
             $h = 3;
-            if ($player->team == 1){
+            if ($ship->team == 1){
                 $t1++;
                 $t = $t1;
                 $h = 0;
@@ -533,7 +538,7 @@ class Manager{
             
             $x = -50;
             
-            if ($player->team == 2){
+            if ($ship->team == 2){
                 $x=50;
             }
             

@@ -57,6 +57,13 @@ class DBManager {
         if (!$answer = mysqli_query($this->connection, $sql))
             throw new exception("DBManager:insert, SQL error: ".mysqli_error($this->connection)."\n sql: $sql". mysqli_errno($this->connection));
             
+        return $this->getLastInstertID();
+
+        
+    }
+    
+    private function getLastInstertID()
+    {
         $sql = "select LAST_INSERT_ID() as id";
         
         if (!$answer = mysqli_query($this->connection, $sql))
@@ -68,8 +75,6 @@ class DBManager {
         }
         
         return null;
-
-        
     }
     
     public function update($sql) {
@@ -235,17 +240,124 @@ class DBManager {
             throw $e;
         }
 	}
-	
-	public function createGame($name, $background, $maxplayers, $points, $userid){
-	
-		try{
-			$sql = "INSERT INTO `B5CGM`.`tac_game` VALUES (	null,'".$this->DBEscape($name)."',0,-2,-1,'$background',$points, 'LOBBY', 2, $userid, 0)";
-			$id = $this->insert($sql);
-			
-			return $id;
-		}catch(Exception $e) {
-            throw $e;
+    
+    public function createSlots($gameid, $input){
+        $slots = array();
+        if (is_array($input))
+            $slots = $input;
+        else 
+            $slots[] = $input;
+        
+        $stmt = $this->connection->prepare("
+            INSERT INTO 
+                tac_playeringame
+            VALUES
+            (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                '0000-00-00 00:00:00',
+                '0000-00-00 00:00:00',
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )
+
+        ");
+
+        if ($stmt)
+        {
+            foreach ($slots as $slot)
+            {
+                $stmt->bind_param(
+                    'iiiiiisiiisiii',
+                    $gameid,
+                    $slot->slot,
+                    $slot->playerid,
+                    $slot->team,
+                    $slot->lastturn,
+                    $slot->lastphase,
+                    $slot->name,
+                    $slot->points,
+                    $slot->depx,
+                    $slot->depy,
+                    $slot->deptype,
+                    $slot->depwidth,
+                    $slot->depheight,
+                    $slot->depavailable
+                );    
+                $stmt->execute();
+            }
+            $stmt->close();
         }
+        
+        /*
+        VALUES
+        (
+        <{gameid: }>,
+        <{slot: 0}>,
+        <{playerid: }>,
+        <{teamid: 0}>,
+        <{lastturn: 0}>,
+        <{lastphase: 0}>,
+        <{name: }>,
+        <{points: }>,
+        <{depx: }>,
+        <{depy: }>,
+        <{deptype: }>,
+        <{depwidth: }>,
+        <{depheight: }>,
+        <{depavailable: }>
+        );
+        */
+    }
+	
+	public function createGame($gamename, $background, $slots, $userid){
+        $stmt = $this->connection->prepare("
+            INSERT INTO 
+                tac_game
+            VALUES
+            (
+                null,
+                ?,
+                0,
+                -2,
+                -1,
+                ?,
+                0,
+                'LOBBY',
+                0,
+                ?,
+                '0000-00-00 00:00:00'
+            )
+        ");
+
+        if ($stmt)
+        {
+            $gamename = $this->DBEscape($gamename);
+            $background = $this->DBEscape($background);
+            $stmt->bind_param(
+                'ssi',
+                $gamename,
+                $background,
+                $userid
+            );
+            $stmt->execute();
+            $stmt->close();
+            $gameid = $this->getLastInstertID();
+        }
+        
+        $this->createSlots($gameid, $slots);
+        
+        return $gameid;
 	}
     
     public function submitCriticals($gameid, $criticals, $turn){
@@ -634,7 +746,7 @@ class DBManager {
 		if ($games == null)
 			return array();
 		foreach ($games as $game){
-			$game->players = $this->getPlayersInGame($playerid, $game->id);
+			$game->slots = $this->getSlotsInGame($game->id);
 		}
 		
 		return $games;
@@ -649,7 +761,7 @@ class DBManager {
 		if ($gamedata == null)
 			return null;
 
-        $gamedata->players = $this->getPlayersInGame($playerid, $gameid);
+        $gamedata->slots = $this->getSlotsInGame($gameid);
         $this->getTacShips($gamedata);
 		$gamedata->onConstructed();
         
@@ -704,27 +816,33 @@ class DBManager {
            
     }
     
-    public function getPlayersInGame($playerid, $gameid){
-        $sql = "SELECT * FROM `B5CGM`.`tac_playeringame` pg join `B5CGM`.`player` p on p.id = pg.playerid where pg.gameid = $gameid";
+    public function getSlotsInGame($gameid){
         
-        $players = array();
-         try {
-            $result = $this->query($sql);
-            
-            if ($result == null || sizeof($result) == 0)
-                return null;
-                
-                foreach ($result as $value) {
-                    $players[$value->playerid] = new TacticalPlayer($value->playerid, $value->slot, $value->teamid, $value->lastturn, $value->lastphase, $value->username);
-                    
-                }
-            
-            }
-            catch(Exception $e) {
-                throw $e;
-            }
+        $slots = array();
         
-        return $players;
+        $stmt = $this->connection->prepare("
+            SELECT 
+                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username
+            FROM 
+                tac_playeringame pg
+            LEFT JOIN 
+                player p on p.id = pg.playerid
+            WHERE 
+                gameid = ?
+        ");
+
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gameid);
+            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $slots[] = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            }
+            $stmt->close();
+        }
+        return $slots;
     }
     
     public function getTacShips($gamedata)
@@ -732,33 +850,30 @@ class DBManager {
         
         $starttime = time();  
         $ships = array();
-        try {
-            $stmt = $this->connection->prepare(
-                "SELECT
-                    id, playerid, name, phpclass 
-                FROM
-                    tac_ship 
-                WHERE
-                    tacgameid = ?
-                "
-            );
-            
-			if ($stmt)
+        
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, playerid, name, phpclass, slot
+            FROM
+                tac_ship 
+            WHERE
+                tacgameid = ?
+            "
+        );
+
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot);
+            $stmt->execute();
+            while ($stmt->fetch())
             {
-                $stmt->bind_param('i', $gamedata->id);
-                $stmt->bind_result($id, $playerid, $name, $phpclass);
-				$stmt->execute();
-				while ($stmt->fetch())
-                {
-                   $ship = new $phpclass($id, $playerid, $name, null);
-                   $ship->team = $gamedata->players[$playerid]->team;
-                   $ships[] = $ship;
-                }
-				$stmt->close();
-			}
-        }
-        catch(Exception $e) {
-            throw $e;
+                $ship = new $phpclass($id, $playerid, $name, null);
+                $ship->team = $gamedata->slots[$slot]->team;
+                $ship->slot = $slot;
+                $ships[] = $ship;
+            }
+            $stmt->close();
         }
         
         $gamedata->setShips($ships);

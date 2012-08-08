@@ -56,17 +56,47 @@ class WeaponLoading
     }
 }
 
-class TacticalPlayer{
-    public $id, $slot, $team, $lastturn, $lastphase, $name;
+class PlayerSlot{
+    public $slot, $team, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $playerid, $playername;
     
-    function __construct($id, $slot, $team, $lastturn, $lastphase, $name){
-        $this->id = $id;
+    function __construct($playerid, $slot, $team, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $playername){
+        $this->playerid = $playerid;
         $this->team = $team;
         $this->lastturn = $lastturn;
         $this->lastphase = $lastphase;
         $this->name = $name;
         $this->slot = $slot;
+        
+        $this->points = $points;
+        $this->depx = $depx;
+        $this->depy = $depy;
+        $this->deptype = $deptype;
+        $this->depwidth = $depwidth;
+        $this->depheight = $depheight;
+        $this->depavailable = $depavailable;
+        $this->playername = $playername;
     }
+    
+}
+
+class PlayerSlotFromJSON extends PlayerSlot{
+    
+    public function __construct($json){
+        $this->slot = $json["id"];
+        $this->team = $json["team"];
+        $this->lastturn = 0;
+        $this->lastphase = -3;
+        $this->name = $json["name"];
+        
+        $this->points = $json["points"];
+        $this->depx = $json["depx"];
+        $this->depy = $json["depy"];
+        $this->deptype = $json["deptype"];
+        $this->depwidth = $json["depwidth"];
+        $this->depheight = $json["depheight"];
+        $this->depavailable = $json["depavailable"];
+    }
+    
 }
 
 class MovementOrder{

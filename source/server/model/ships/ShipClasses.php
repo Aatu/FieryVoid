@@ -17,6 +17,7 @@
         public $destroyed = false;
         public $pointCost = 0;
         public $faction = null;
+        public $slot;
         
         public $enabledSpecialAbilities = array();
         
