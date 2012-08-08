@@ -454,12 +454,12 @@ class Manager{
                 self::startInitialOrders($gamedata);
             }
             
-            if ($phase > 0){
+            if (TacGamedata::$currentPhase > 0){
                 foreach ($gamedata->ships as $ship)
                 {
                     foreach ($ship->systems as $system)
                     {
-                    $system->onAdvancingGamedata($ship);
+                        $system->onAdvancingGamedata($ship);
                     }
                 }
 

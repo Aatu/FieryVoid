@@ -147,11 +147,11 @@ window.damageDrawer = {
         }else if (location == 3){
             x = Math.floor((width-200)*0.5);
             //y = 100 + range;
-            y = (-140)+range;
+            y = (-70)+range;
         }else if (location == 4){
             x = Math.floor((width-200)*0.5);
             
-            y = height-140 - range;
+            y = height-130 - range;
         }
         
         
