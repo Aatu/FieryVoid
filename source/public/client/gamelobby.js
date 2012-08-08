@@ -218,9 +218,10 @@ window.gamedata = {
 	},
 
 	clickTakeslot: function(){
-		var slot = $(this).parent().data().slotid;
-		console.log(slot);
-		window.location = "gamelobby.php?gameid="+gamedata.gameid+"&slotid="+slot;
+        var slot = $(".slot").has($(this));
+		var slotid = slot.data("slotid");
+		console.log(slotid);
+		window.location = "gamelobby.php?gameid="+gamedata.gameid+"&slotid="+slotid;
 	},
 
 	enableBuy: function(){

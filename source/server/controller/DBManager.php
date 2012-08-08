@@ -140,7 +140,7 @@ class DBManager {
         }
 	}
 	
-	public function leaveSlot($userid){
+	public function leaveSlot($userid, $slotid){
 		
 		
 		try{
@@ -207,18 +207,26 @@ class DBManager {
 		
 	}
 	
-	public function takeSlot($userid, $gameid, $slot){
+	public function takeSlot($userid, $gameid, $slotid){
 	
+        $userid = $this->DBEscape($userid);
+        $gameid = $this->DBEscape($gameid);
+        $slotid = $this->DBEscape($slotid);
 		try{
 			
-			//already in slot?
-			$sql = "SELECT * FROM `B5CGM`.`tac_playeringame` WHERE gameid = $gameid AND slot = $slot";
+            $slot = $this->getSlotById($slotid, $gameid);
+            if (!slot)
+                return false;
+            
+			//already in slot on other team?
+			$sql = "SELECT * FROM `B5CGM`.`tac_playeringame` WHERE gameid = $gameid AND teamid != ".$slot->team." AND playerid = $userid";
 			if ($this->found($sql))
 				return false;
 			
 
 			//already in slot in another game, that has status "LOBBY"?
-			$sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
+			/*
+            $sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
 			
 			$result = $this->query($sql);
             				
@@ -229,11 +237,11 @@ class DBManager {
 				$this->update($sql);
 							
 			}
-					
+            */	
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_playeringame` VALUES ( $gameid, $slot, $userid, $slot, 0, -3, now(), '0000-00-00 00:00:00')";
+			$sql = "UPDATE tac_playeringame SET playerid = $userid WHERE gameid = $gameid and slot = $slotid";
 			
-			$this->insert($sql);
+			$this->update($sql);
 			
 			
 		}catch(Exception $e) {
@@ -843,6 +851,38 @@ class DBManager {
             $stmt->close();
         }
         return $slots;
+    }
+    
+    public function getSlotById($slotid, $gameid)
+    {
+        Debug::log("slotid: $slotid gameid: $gameid");
+        $slot = null;
+        
+        $stmt = $this->connection->prepare("
+            SELECT 
+                playerid, slot, teamid, lastturn, lastphase, name, points, depx, depy, deptype, depwidth, depheight, depavailable, p.username
+            FROM 
+                tac_playeringame pg
+            LEFT JOIN 
+                player p on p.id = pg.playerid
+            WHERE 
+                gameid = ?
+            AND
+                slot = ?
+        ");
+
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $gameid, $slotid);
+            $stmt->bind_result($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $slot = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+            }
+            $stmt->close();
+        }
+        return $slot;
     }
     
     public function getTacShips($gamedata)
