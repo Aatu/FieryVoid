@@ -21,7 +21,7 @@
 	
 		$id = Manager::createGame($_POST["name"], $_POST["background"], 2, $points, $_SESSION["user"]);
 		if ($id){
-			header('Location: gamelobby.php');
+			header("Location: gamelobby.php?gameid=$id");
 		}
 		
 	}
