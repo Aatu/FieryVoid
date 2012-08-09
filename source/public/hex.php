@@ -14,7 +14,7 @@
 		$thisplayer = $_SESSION["user"];
 	}
 	
-	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, -1, 2, -1);
+	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, -1, 0, -1);
 	
 	$serverdataJSON = json_encode($serverdata, JSON_NUMERIC_CHECK);
 ?>

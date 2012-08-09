@@ -109,8 +109,6 @@ window.gamedata = {
 
 
 		this.createSlots();
-		$('.takeslot').unbind("click", this.clickTakeslot);
-		$('.takeslot').bind("click", this.clickTakeslot);
 		this.enableBuy();
 	},
     
@@ -237,7 +235,8 @@ window.gamedata = {
         var slot = $(".slot").has($(this));
 		var slotid = slot.data("slotid");
 		console.log(slotid);
-		window.location = "gamelobby.php?takeslot=true&gameid="+gamedata.gameid+"&slotid="+slotid;
+        
+        ajaxInterface.submitSlotAction("takeslot", slotid);
 	},
 
 	enableBuy: function(){

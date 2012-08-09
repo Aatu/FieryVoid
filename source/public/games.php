@@ -6,14 +6,7 @@
         return;
 	}
 	
-	$gameid = Manager::shouldBeInGame($_SESSION["user"]);
-	if ($gameid){
-		header('Location: gamelobby.php');
-	}
-	
 	$games = Manager::getTacGames($_SESSION["user"]);
-	
-	
 	
 	$games = json_encode($games, JSON_NUMERIC_CHECK);
 	

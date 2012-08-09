@@ -139,9 +139,41 @@ class DBManager {
             throw $e;
         }
 	}
+    
+    public function deleteEmptyGames()
+    {
+        $ids = array();
+        $stmt = $this->connection->prepare("
+            SELECT 
+                gameid, playerid
+            FROM
+                tac_playeringame
+            GROUP BY 
+                gameid 
+            HAVING
+                playerid is null
+        ");
+
+        if ($stmt)
+        {
+            $stmt->bind_result($id, $playerid);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $ids[] = $id; 
+            }
+            $stmt->close();
+        }
+        Debug::log(var_export($ids, true));
+        
+        $this->deleteGames($ids);
+    }
 	
-	public function leaveSlot($userid, $gameid, $slotid){
+	public function leaveSlot($userid, $gameid, $slotid = null){
 		
+        $userid = $this->DBEscape($userid);
+        $gameid = $this->DBEscape($gameid);
+        $slotid = $this->DBEscape($slotid);
 		
 		try{
 			
@@ -196,23 +228,9 @@ class DBManager {
 			//already in slot on other team?
 			$sql = "SELECT * FROM `B5CGM`.`tac_playeringame` WHERE gameid = $gameid AND teamid != ".$slot->team." AND playerid = $userid";
 			if ($this->found($sql))
-				return false;
-			
-
-			//already in slot in another game, that has status "LOBBY"?
-			/*
-            $sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
-			
-			$result = $this->query($sql);
-            				
-			foreach ($result as $value){
-						
-				$sql = "DELETE FROM `B5CGM`.`tac_playeringame` WHERE gameid = ".$value->id . " AND playerid = $userid";
-						
-				$this->update($sql);
-							
-			}
-            */	
+            {
+                $this->leaveSlot($userid, $gameid);
+            }
 			
 			$sql = "UPDATE tac_playeringame SET playerid = $userid WHERE gameid = $gameid and slot = $slotid";
 			
@@ -281,26 +299,6 @@ class DBManager {
             }
             $stmt->close();
         }
-        
-        /*
-        VALUES
-        (
-        <{gameid: }>,
-        <{slot: 0}>,
-        <{playerid: }>,
-        <{teamid: 0}>,
-        <{lastturn: 0}>,
-        <{lastphase: 0}>,
-        <{name: }>,
-        <{points: }>,
-        <{depx: }>,
-        <{depy: }>,
-        <{deptype: }>,
-        <{depwidth: }>,
-        <{depheight: }>,
-        <{depavailable: }>
-        );
-        */
     }
 	
 	public function createGame($gamename, $background, $slots, $userid){
@@ -411,8 +409,6 @@ class DBManager {
     }
         
     public function submitFireorders($gameid, $fireOrders, $turn, $phase){
-        
-        
 
         foreach ($fireOrders as $fire){
             if ($fire->turn != $turn)
@@ -1425,38 +1421,33 @@ class DBManager {
     public function getGamesToBeDeleted( )
     {
         $ids = array();
-        try {
-            $stmt = $this->connection->prepare(
-                "SELECT 
-                    g.id
-                FROM 
-                    tac_game g
-                JOIN 
-                    tac_playeringame p
-                ON
-                    p.gameid = g.id
-                WHERE
-                    DATE_ADD(p.lastactivity, INTERVAL 1 MONTH) < NOW()
-                OR
-                    (DATE_ADD(p.lastactivity, INTERVAL 1 DAY) < NOW() 
-                    AND
-                    g.status = 'LOBBY')
-                "
-            );
-            
-			if ($stmt)
+        $stmt = $this->connection->prepare("
+            SELECT 
+                g.id
+            FROM 
+                tac_game g
+            JOIN 
+                tac_playeringame p
+            ON
+                p.gameid = g.id
+            WHERE
+                DATE_ADD(p.lastactivity, INTERVAL 1 MONTH) < NOW()
+            OR
+                (DATE_ADD(p.lastactivity, INTERVAL 1 DAY) < NOW() 
+                AND
+                g.status = 'LOBBY')
+
+        ");
+
+        if ($stmt)
+        {
+            $stmt->bind_result($id);
+            $stmt->execute();
+            while ($stmt->fetch())
             {
-                $stmt->bind_result($id);
-				$stmt->execute();
-				while ($stmt->fetch())
-                {
-                   $ids[] = $id; 
-                }
-				$stmt->close();
-			}
-        }
-        catch(Exception $e) {
-            throw $e;
+                $ids[] = $id; 
+            }
+            $stmt->close();
         }
         
         return $ids;

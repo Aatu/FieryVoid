@@ -54,8 +54,33 @@ window.createGame = {
             return;
         
         data[inputname] = value;
-        console.log(inputname+":"+value);
-        
+
+        if (inputname == "deptype"){
+            var width = $(".depwidthheader", slot);
+            var height = $(".depheightheader", slot);
+            var inputHeight = $(".depwidth", slot);
+            
+            if (value == "box"){
+                width.html("Width:");
+                height.html("Height:");
+                inputHeight.show();
+                height.show();
+            }
+            
+            if (value == "circle"){
+                width.html("Radius:");
+                inputHeight.hide();
+                height.hide();
+            }
+            
+            if (value == "distance"){
+                width.html("From:");
+                height.html("To:");
+                inputHeight.show();
+                height.show();
+            }
+        }
+
     },
     
     createSlotsFromArray: function(){
@@ -131,6 +156,5 @@ window.createGame = {
         var data = ({gamename:gamename, background:background, slots:createGame.slots});
         data = JSON.stringify(data);
         $("#createGameData").val(data);
-        return false;
     }
 }

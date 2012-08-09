@@ -11,6 +11,9 @@ class Manager{
 
     private static $dbManager = null;
 
+    /**
+     *  @return DBManager dbManager
+     */
     private static function initDBManager() {
         if (self::$dbManager == null)
             self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
@@ -35,7 +38,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->leaveSlot($user, $gameid, $slotid);
-            
+            self::$dbManager->deleteEmptyGames();
         }
         catch(exception $e) {
             throw $e;
@@ -49,14 +52,6 @@ class Manager{
             
             if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 )
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
-            
-            $gameid = self::$dbManager->shouldBeInGameLobby($userid);
-            if ($gameid == false)
-                return null;
-                
-            
-                                
-            return self::getTacGamedata($gameid, $userid, 0, 0, -1);
         }
         catch(Exception $e) {
             Debug::error($e);
@@ -157,9 +152,6 @@ class Manager{
     }
     
     public static function canCreateGame($userid){
-        if (self::shouldBeInGame($userid))
-            return false;
-        
         return true;
     }
     

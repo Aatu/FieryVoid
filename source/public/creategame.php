@@ -13,9 +13,9 @@
 	if (isset($_POST["docreate"]) && isset($_POST["data"])){
 		
 		$id = Manager::createGame($_SESSION["user"], $_POST["data"]);
-		//if ($id){
-		//	header('Location: gamelobby.php');
-		//}
+		if ($id){
+			header("Location: gamelobby.php?gameid=$id");
+		}
 		
 	}
 	
@@ -98,9 +98,9 @@
                         <option value="circle">circle</option>
                         <option value="distance">distance</option>
                     </select>
-                    <span>Width:</span>
+                    <span class="depwidthheader">Width:</span>
                     <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
-                    <span>Height:</span>
+                    <span class="depheightheader">Height:</span>
                     <input class ="depheight tinySize" type="text" name="depheight" value="0">
                     <span>Turn available:</span>
                     <input class ="depavailable tinySize" type="text" name="depavailable" value="0">

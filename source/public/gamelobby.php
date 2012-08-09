@@ -4,10 +4,6 @@
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
 	}
-	
-	if (isset($_GET["leaveslot"]) && isset($_GET["slotid"]) && isset($_GET["gameid"])){
-		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"], $_GET["slotid"]);
-	}
     
     if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
@@ -19,10 +15,6 @@
 	
 	if (isset($_GET["gameid"])){
 		$gameid = $_GET["gameid"];
-	}
-	
-	if (isset($_GET["takeslot"]) && isset($_GET["gameid"]) && isset($_GET["slotid"])){
-		Manager::takeSlot($_SESSION["user"], $gameid, $_GET["slotid"]);
 	}
 	
 	$gamelobbydata = Manager::getGameLobbyData($_SESSION["user"], $gameid);
@@ -61,6 +53,7 @@
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.close').on("click", gamedata.onLeaveSlotClicked);
                 $('.selectslot').on("click", gamedata.onSelectSlotClicked);
+                $('.takeslot').on("click", gamedata.clickTakeslot);
 				ajaxInterface.startPollingGamedata();
 			});
 		

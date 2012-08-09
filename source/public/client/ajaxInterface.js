@@ -21,9 +21,21 @@ window.ajaxInterface = {
             success : ajaxInterface.successSubmit,
             error : ajaxInterface.errorAjax
         });
-        console.log("SUBMITTING GAMEDATA");
         
         gamedata.goToWaiting();
+    },
+    
+    submitSlotAction: function(action, slotid){
+        ajaxInterface.submiting = true;
+
+        $.ajax({
+            type : 'POST',
+            url : 'slot.php',
+            dataType : 'json',
+            data: {action:action, gameid:gamedata.gameid, slotid:slotid},
+            success : ajaxInterface.successSubmit,
+            error : ajaxInterface.errorAjax
+        });
     },
     
     construcGamedata: function(){
@@ -132,7 +144,7 @@ window.ajaxInterface = {
            window.confirm.exception(data , function(){});
            gamedata.waiting = false;
         }else{
-            //gamedata.parseServerData(data);
+            gamedata.parseServerData(data);
         }
     },
     
@@ -147,8 +159,10 @@ window.ajaxInterface = {
         gamedata.parseServerData(data);
     },
     
-    errorAjax: function(data){
-        window.confirm.exception({error:"Unable to connect to server"} , function(){});
+    errorAjax: function(jqXHR, textStatus, errorThrown){
+        console.dir(jqXHR);
+        console.dir(errorThrown);
+        window.confirm.exception({error:"AJAX error: " +textStatus} , function(){});
     },
 	
 	
@@ -164,12 +178,15 @@ window.ajaxInterface = {
         ajaxInterface.pollGamedata();
     },
     
+    stopPolling: function(){
+        ajaxInterface.poll = null;
+        ajaxInterface.pollcount  = 0;
+    },
+    
     pollGamedata: function(){
         if (gamedata.waiting == false){
+			ajaxInterface.stopPolling();
             return;
-			
-			ajaxInterface.poll = null;
-			ajaxInterface.pollcount  = 0;
 		}          
         if (!gamedata.animating){
             //console.log("polling for gamedata...");
