@@ -1,8 +1,8 @@
 <?php
 class Octurion extends BaseShip{
     
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 1350;
 		$this->faction = "Centauri";

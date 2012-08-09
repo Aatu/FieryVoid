@@ -1,8 +1,8 @@
 <?php
 class WhiteStar extends MediumShip{
 
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
 
         $this->pointCost = 750;
         $this->faction = "Minbari";

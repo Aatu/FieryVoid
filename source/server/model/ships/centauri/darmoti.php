@@ -1,8 +1,8 @@
 <?php
 class Darmoti extends HeavyCombatVessel{
     
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 575;
         $this->faction = "Centauri";

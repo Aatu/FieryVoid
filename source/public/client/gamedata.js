@@ -18,6 +18,7 @@ gamedata = {
     finished: false,
     gamephase: 0,
     subphase: 0,
+    selectedSlot:null,
     
     mouseOverShipId: -1,
     

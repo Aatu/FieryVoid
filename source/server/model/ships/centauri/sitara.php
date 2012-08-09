@@ -1,8 +1,8 @@
 <?php
 class Sitara extends FighterFlight{
     
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 270;
 		$this->faction = "Centauri";

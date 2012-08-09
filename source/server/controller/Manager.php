@@ -225,7 +225,7 @@ class Manager{
     
     }
             
-    public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships){
+    public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $slotid = 0){
         try {
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
@@ -273,7 +273,7 @@ class Manager{
             }else if ($gdS->phase == 4){
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
-                $ret = self::handleBuying($ships, $gdS);
+                $ret = self::handleBuying($ships, $gdS, $slotid);
             }else if ($gdS->phase == -1){
                 $ret = self::handleDeployment($ships, $gdS);
             }
@@ -298,16 +298,26 @@ class Manager{
         
     }
     
-    private static function handleBuying(  $ships, $gamedata ){
+    private static function handleBuying(  $ships, $gamedata, $slotid ){
     
+        $seenSlots = array();
+        foreach($gamedata->slots as $slot)
+        {
+            $points = 0;
+            foreach ($ships as $ship){
+                if ($ship->slot != $slot->slot)
+                    continue;
+                
+                $seenSlots[$slot->slot] = true;
+                
+                $points += $ship->pointCost;
+            }
 
-        $points = 0;
-        foreach ($ships as $ship){
-            $points += $ship->pointCost;
+            if ($points > $slot->points)    
+                throw new Exception("Fleet too expensive.");
         }
+
         
-        if ($points > $gamedata->points)    
-            throw new Exception("Fleet too expensive.");
     
             
         foreach ($ships as $ship){
@@ -316,7 +326,7 @@ class Manager{
             }
         }
     
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
+        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn, $seenSlots);
         
         
         return true;
@@ -730,7 +740,7 @@ class Manager{
             
             
             
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], null);
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $value["slot"]);
             $ship->setMovements($movements);    
             $ship->EW = $EW;
             

@@ -1,8 +1,8 @@
 <?php
 class Sharaal extends BaseShip{
 
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
 
 	$this->pointCost = 1600;
 	$this->faction = "Minbari";

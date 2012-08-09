@@ -42,11 +42,11 @@
 
         public $movement = array();
         
-        function __construct($id, $userid, $name, $movement){
+        function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
             $this->userid = (int)$userid;
             $this->name = $name;
-            $this->movement = $movement;
+            $this->slot = $slot;
 
         }
         

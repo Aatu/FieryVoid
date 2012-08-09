@@ -116,11 +116,7 @@ class DBManager {
     }
     
     public function close() {
-		
 		mysqli_close($this->connection);
-		
-		
-		
     }
 	
 	
@@ -128,7 +124,8 @@ class DBManager {
 	
 		try{
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '".$this->DBEscape($ship->name)."', '".$ship->phpclass."', 0, 0, 0, 0, 0, 0)";
+			$sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '".$this->DBEscape($ship->name)."', '".$ship->phpclass."', 0, 0, 0, 0, 0, $ship->slot)";
+            Debug::log($sql);
 			$id = $this->insert($sql);
 			
 			$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
@@ -315,7 +312,7 @@ class DBManager {
                 ?,
                 0,
                 'LOBBY',
-                0,
+                ?,
                 ?,
                 '0000-00-00 00:00:00'
             )
@@ -325,10 +322,12 @@ class DBManager {
         {
             $gamename = $this->DBEscape($gamename);
             $background = $this->DBEscape($background);
+            $slotnum = count($slots);
             $stmt->bind_param(
-                'ssi',
+                'ssii',
                 $gamename,
                 $background,
+                $slotnum,
                 $userid
             );
             $stmt->execute();
@@ -585,11 +584,17 @@ class DBManager {
     
     }
     
-    public function updatePlayerStatus($gameid, $userid, $phase, $turn){
+    public function updatePlayerStatus($gameid, $userid, $phase, $turn, $slots = null){
         try {
             $sql = "UPDATE `B5CGM`.`tac_playeringame` SET `lastturn` = $turn, `lastphase` = $phase, `lastactivity` = NOW() WHERE"
             ." gameid = $gameid AND playerid = $userid";
 
+            if ($slots){
+                $slots = array_keys($slots);
+                $slots = implode(',',$slots);
+                $sql .= " AND slot IN ($slots)";
+            }
+            
             $this->update($sql);
         }
         catch(Exception $e) {
@@ -818,7 +823,7 @@ class DBManager {
             $stmt->execute();
             while ($stmt->fetch())
             {
-                $slots[] = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
+                $slots[$slot] = new PlayerSlot($playerid, $slot, $teamid, $lastturn, $lastphase, $name, $points, $depx, $depy, $deptype, $depwidth, $depheight, $depavailable, $username);
             }
             $stmt->close();
         }
@@ -879,9 +884,8 @@ class DBManager {
             $stmt->execute();
             while ($stmt->fetch())
             {
-                $ship = new $phpclass($id, $playerid, $name, null);
+                $ship = new $phpclass($id, $playerid, $name, $slot);
                 $ship->team = $gamedata->slots[$slot]->team;
-                $ship->slot = $slot;
                 $ships[] = $ship;
             }
             $stmt->close();
@@ -1360,7 +1364,7 @@ class DBManager {
 				$stmt->bind_param('ii', $gameid, $playerid);
 				$stmt->execute();
 				
-                if ($stmt->affected_rows === 1)
+                if ($stmt->affected_rows > 0)
                     $result = true;
 				
 				/* close statement */

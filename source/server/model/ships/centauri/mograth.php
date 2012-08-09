@@ -1,8 +1,8 @@
 <?php
 class Mograth extends MediumShip{
     
-    function __construct($id, $userid, $name,  $movement){
-        parent::__construct($id, $userid, $name,  $movement);
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
 		$this->faction = "Centauri";

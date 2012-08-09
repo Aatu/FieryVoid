@@ -83,7 +83,7 @@
 			<div><span class="panelheader" style="padding-right:20px;">PURCHASE YOUR FLEET</span>
 				<span class="panelsubheader current">0</span>
 				<span class="panelsubheader">/</span>
-				<span class="panelsubheader max"><?php print($gamelobbydata->points)?></span>
+				<span class="panelsubheader max">0</span>
 				<span class="panelsubheader">points</span>
 				</div>
 			<table class="store" style="width:100%;">

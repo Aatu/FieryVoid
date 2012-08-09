@@ -24,6 +24,32 @@
             parent::setSystemDataWindow($turn);
         }
     
+        
+        /*
+        public function damage($target, $shooter, $fireOrder){
+
+            $extra = ($fireOrder->needed - $fireOrder->rolled) % ($this->grouping*5);
+            $pulses = $this->getPulses() + $extra;
+            if ($pulses > $this->maxpulses)
+                $pulses = $this->maxpulses;
+
+            for ($i=0;$i<$pulses;$i++){
+
+                if ($target->isDestroyed())
+                    return;
+
+                $system = $target->getHitSystem($shooter, $fireOrder->turn);
+
+                if ($system == null)
+                    return;
+
+                $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target), $fireOrder);
+
+            }
+
+
+        }
+        */
     
     }
 
