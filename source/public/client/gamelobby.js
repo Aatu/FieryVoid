@@ -124,6 +124,10 @@ window.gamedata = {
     
     createSlots: function()
     {
+        var selectedSlot = playerManager.getSlotById(gamedata.selectedSlot);
+        if (selectedSlot && selectedSlot.playerid != gamedata.thisplayer)
+            gamedata.selectedSlot = null;
+        
         for (var i in gamedata.slots){
             var slot = gamedata.slots[i];
             var slotElement = $('.slot.slotid_'+slot.slot);
@@ -137,7 +141,6 @@ window.gamedata = {
             if (playerManager.isOccupiedSlot(slot)){
                 console.log("slot " +slot.slot+" is occupied");
 				var player = playerManager.getPlayerInSlot(slot);
-                console.dir(player);
 				if (data.playerid != player.id){
 					slotElement.data("playerid", player.id);
 					slotElement.addClass("taken");
