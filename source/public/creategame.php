@@ -82,7 +82,7 @@
                 <div class="close"></div>
                 <div>
                     <span class="smallSize headerSpan">NAME:</span>
-                    <input class ="name mediumSize" type="text" name="slotname" value="BLUE">
+                    <input class ="name mediumSize" type="text" name="name" value="BLUE">
                     <span class="smallSize headerSpan">POINTS:</span>
                     <input class ="points smallSize" type="text" name="points" value="0">
                 </div>

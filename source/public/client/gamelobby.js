@@ -10,6 +10,7 @@ window.gamedata = {
 	waiting: true,
 	maxpoints:0,
 	status: "LOBBY",
+    selectedSlot:null,
 
 	canAfford: function(ship){
 
@@ -136,8 +137,9 @@ window.gamedata = {
             slotElement = $('.slot.slotid_'+slot.slot);
             var data = slotElement.data();
             if (playerManager.isOccupiedSlot(slot)){
-
-				var player = playerManager.getPlayerInSlot(i);
+                console.log("slot " +slot.slot+" is occupied");
+				var player = playerManager.getPlayerInSlot(slot);
+                console.dir(player);
 				if (data.playerid != player.id){
 					slotElement.data("playerid", player.id);
 					slotElement.addClass("taken");
@@ -149,9 +151,19 @@ window.gamedata = {
 					slotElement.addClass("ready");
 
 				}
+                
+                if (player.id == gamedata.thisplayer)
+                {
+                    if (gamedata.selectedSlot == null)
+                        gamedata.selectedSlot = slot.slot;
+                    $(".close", slotElement).show();
+                }
+                else
+                    $(".close", slotElement).hide();
 
 			}else{
-
+                $(".close", slotElement).hide();
+                
 				if (data.playerid){
 					slotElement.attr("data-playerid", "");
 					slotElement.removeClass("taken");
@@ -160,6 +172,10 @@ window.gamedata = {
 
 				slotElement.removeClass("ready");
 			}
+            
+            if (gamedata.selectedSlot == slot.slot){
+                gamedata.selectSlot(slot);
+            }
 
         }
     },
@@ -200,7 +216,7 @@ window.gamedata = {
 				}
 
 			}else{
-
+                
 				if (data.playerid){
 					slot.attr("data-playerid", "");
 					slot.removeClass("taken");
@@ -221,7 +237,7 @@ window.gamedata = {
         var slot = $(".slot").has($(this));
 		var slotid = slot.data("slotid");
 		console.log(slotid);
-		window.location = "gamelobby.php?gameid="+gamedata.gameid+"&slotid="+slotid;
+		window.location = "gamelobby.php?takeslot=true&gameid="+gamedata.gameid+"&slotid="+slotid;
 	},
 
 	enableBuy: function(){
@@ -278,9 +294,33 @@ window.gamedata = {
 		}
 
 		ajaxInterface.submitGamedata();
-	}
+	},
 
+    onLeaveClicked: function(){
+        window.location = "gamelobby.php?gameid="+gamedata.gameid+"&leave=true";
+    },
+    onLeaveSlotClicked: function(){
+        var slot = $(".slot").has($(this));
+		var slotid = slot.data("slotid");
+        window.location = "gamelobby.php?gameid="+gamedata.gameid+"&leaveslot=true&slotid="+slotid;
+    },
+    
+    onSelectSlotClicked: function(e){
+        var slotElement = $(".slot").has($(this));
+		var slotid = slotElement.data("slotid");
+        var slot = playerManager.getSlotById(slotid);
+        
+        if (slot.playerid == gamedata.thisplayer)
+            gamedata.selectSlot(slot);
+        
+    },
 
+    selectSlot: function(slot){
+        $(".slot").removeClass("selected");
+        
+        $(".slot.slotid_"+slot.slot).addClass("selected");
+        gamedata.selectedSlot = slot.slot;
+    }
 
 
 }

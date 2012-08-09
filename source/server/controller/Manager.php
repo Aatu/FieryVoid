@@ -31,10 +31,10 @@ class Manager{
         }
     }
     
-    public static function leaveLobbySlot($user){
+    public static function leaveLobbySlot($user, $gameid, $slotid = null){
         try {
             self::initDBManager();
-            self::$dbManager->leaveSlot($user);
+            self::$dbManager->leaveSlot($user, $gameid, $slotid);
             
         }
         catch(exception $e) {
@@ -113,7 +113,7 @@ class Manager{
             self::initDBManager();
             self::$dbManager->startTransaction();
             $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid);
-            //self::takeSlot($userid, $gameid, 1);
+            self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
             return $gameid;
         }
@@ -191,7 +191,7 @@ class Manager{
         self::advanceGameState($userid, $gameid);
 
         if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
-            ////Debug("GAME: $gameid Player: $userid requesting gamedata, new found.");
+            Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
             $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
             if ($gamedata == null)
                 return null;

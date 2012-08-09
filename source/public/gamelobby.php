@@ -5,8 +5,12 @@
 		header('Location: index.php');
 	}
 	
-	if (isset($_GET["leaveslot"])){
-		Manager::leaveLobbySlot($_SESSION["user"]);
+	if (isset($_GET["leaveslot"]) && isset($_GET["slotid"]) && isset($_GET["gameid"])){
+		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"], $_GET["slotid"]);
+	}
+    
+    if (isset($_GET["leave"]) && isset($_GET["gameid"])){
+		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
 		header('Location: games.php');
 	}
 	
@@ -17,7 +21,7 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-	if (isset($_GET["gameid"]) && isset($_GET["slotid"])){
+	if (isset($_GET["takeslot"]) && isset($_GET["gameid"]) && isset($_GET["slotid"])){
 		Manager::takeSlot($_SESSION["user"], $gameid, $_GET["slotid"]);
 	}
 	
@@ -54,6 +58,9 @@
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 				gamedata.parseShips(<?php print($ships); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
+                $('.leave').on("click", gamedata.onLeaveClicked);
+                $('.close').on("click", gamedata.onLeaveSlotClicked);
+                $('.selectslot').on("click", gamedata.onSelectSlotClicked);
 				ajaxInterface.startPollingGamedata();
 			});
 		
@@ -76,7 +83,7 @@
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
 			
-			<a href="gamelobby.php?leaveslot">LEAVE GAME</a>
+			<span class="clickable leave">LEAVE GAME</a>
 			
 		</div>
 		<div class="panel large buy" style="display:none;">
@@ -100,13 +107,16 @@
                     
     <div id="slottemplatecontainer" style="display:none;">
         <div class="slot" >
+            <div class="close"></div>
             <div>
                 <span class="smallSize headerSpan">NAME:</span>
                 <span class ="value name"></span>
                 <span class="smallSize headerSpan">POINTS:</span>
                 <span class ="value points"></span>
                 <span class="smallSize headerSpan">PLAYER:</span>
-                <span class="playername"></span><span class="status">READY</span><span class="takeslot clickable">Take slot</span>
+                <span class="playername"></span><span class="status">READY</span>
+                <span class="takeslot clickable">Take slot</span>
+                <span class="selectslot clickable">SELECT</span>
             </div>
             <div>
                 <span class="smallSize headerSpan">DEPLOYMENT:</span>

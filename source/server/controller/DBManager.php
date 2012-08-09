@@ -140,51 +140,26 @@ class DBManager {
         }
 	}
 	
-	public function leaveSlot($userid, $slotid){
+	public function leaveSlot($userid, $gameid, $slotid){
 		
 		
 		try{
 			
-			$sql = "SELECT * FROM `B5CGM`.`tac_game` g join `B5CGM`.`tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
-			
-			$result = $this->query($sql);
+            $sql = "DELETE FROM `B5CGM`.`tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
+            if ($slotid)
+                $sql .= " AND slot = $slotid";
             
-            if ($result == null || sizeof($result) == 0)
-				return false;
-				
-			foreach ($result as $value){
-			
-				if ($value->creator == $userid){
-					$sql = "DELETE FROM `B5CGM`.`tac_playeringame` WHERE gameid = ".$value->id;
-					$this->update($sql);
-					
-					$sql = "DELETE FROM `B5CGM`.`tac_ship` WHERE tacgameid = ".$value->id;
-					$this->update($sql);
-					
-					$sql = "DELETE FROM `B5CGM`.`tac_iniative` WHERE gameid = ".$value->id;
-					$this->update($sql);
-					
-					$sql = "DELETE FROM `B5CGM`.`tac_game` WHERE id = ".$value->id;
-					$this->update($sql);
-					
-				}else{
-					$sql = "DELETE FROM `B5CGM`.`tac_ship` WHERE tacgameid = ".$value->id." AND playerid = $userid";
-					$this->update($sql);
-					
-					$sql = "DELETE FROM `B5CGM`.`tac_playeringame` WHERE gameid = ".$value->id . " AND playerid = $userid";
-					$this->update($sql);
-				}
-			
-				
-				
+            $this->update($sql);
 
-				
-			}
+            $sql = "UPDATE tac_playeringame SET playerid = null WHERE gameid = $gameid AND playerid = $userid";
+            if ($slotid)
+                $sql .= " AND slot = $slotid";
+            
+            $this->update($sql);
+            Debug::log($sql);
 			
-				
 			
 		}catch(Exception $e) {
-			$this->endTransaction(true);
             throw $e;
         }
 	}
@@ -215,7 +190,7 @@ class DBManager {
 		try{
 			
             $slot = $this->getSlotById($slotid, $gameid);
-            if (!slot)
+            if (!$slot)
                 return false;
             
 			//already in slot on other team?
@@ -856,7 +831,6 @@ class DBManager {
     
     public function getSlotById($slotid, $gameid)
     {
-        Debug::log("slotid: $slotid gameid: $gameid");
         $slot = null;
         
         $stmt = $this->connection->prepare("

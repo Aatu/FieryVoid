@@ -107,3 +107,25 @@
     color:#496791;
     
 }
+
+.selectslot{
+    display:none;
+}
+
+.taken .selectslot{
+    
+    display:inline;
+}
+
+.slot.selected .selectslot{
+    
+    display:none;
+}
+
+.slot.selected{
+    background-color:#123D73 !important;
+	-moz-box-shadow: 0px 0px 15px #0099ff;
+    -webkit-box-shadow: 0px 0px 15px #0099ff;
+    box-shadow: 0px 0px 15px #0099ff;
+    
+}

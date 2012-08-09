@@ -3,6 +3,7 @@ jQuery(function($){
     createGame.mapSelect();
 
     $("input").on("change", createGame.inputChange);
+    $("select").on("change", createGame.inputChange);
     $("input").on("focus", createGame.inputFocus);
     $(".addslotbutton").on("click", createGame.createNewSlot);
     $(".close").on("click", createGame.removeSlot);
@@ -53,7 +54,7 @@ window.createGame = {
             return;
         
         data[inputname] = value;
-        console.dir(data);
+        console.log(inputname+":"+value);
         
     },
     
@@ -130,5 +131,6 @@ window.createGame = {
         var data = ({gamename:gamename, background:background, slots:createGame.slots});
         data = JSON.stringify(data);
         $("#createGameData").val(data);
+        return false;
     }
 }
