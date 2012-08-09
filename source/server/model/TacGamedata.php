@@ -376,7 +376,7 @@ class TacGamedata{
     }
     
     private function deleteHiddenData(){
-    
+        
         if ($this->phase == 1){
             foreach ($this->ships as $ship){
                 if ($ship->userid != $this->forPlayer){
