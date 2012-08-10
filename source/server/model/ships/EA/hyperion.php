@@ -61,10 +61,10 @@ class Hyperion extends BaseShip{
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 4, 52));
+        $this->addFrontSystem(new Structure( 5, 52));
         $this->addAftSystem(new Structure( 4, 52));
         $this->addLeftSystem(new Structure( 4, 60));
-        $this->addRightSystem(new Structure( 5, 60));
+        $this->addRightSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 5, 54));
     }
 }
