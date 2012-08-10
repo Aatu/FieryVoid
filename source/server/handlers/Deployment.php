@@ -13,18 +13,32 @@ class Deployment
     
     private static function validateDeploymentArea($gamedata, $ship, $move){
         
-        $dep = self::getValidDeploymentArea($ship);
+        $slot = $gamedata->slots[$ship->slot];
+        $hexpos = Mathlib::hexCoToPixel($move->x, $move->y);
         
-        if ($move->x <= ($dep["x"]+($dep["w"]/2)) && $move->x > ($dep["x"]-($dep["w"]/2)))
-        {
-            if ($move->y <= ($dep["y"]+($dep["h"]/2)) && $move->y >= ($dep["y"]-($dep["h"]/2)))
-            {
-                if (count($gamedata->getShipsInDistance(array("x"=>$move->x, "y"=>$move->y))) === 0)
+        $deppos = Mathlib::hexCoToPixel($slot->depx, $slot->depy);
+        
+        if ($slot->deptype == "box"){
+            $depw = $slot->depwidth*Mathlib::$hexWidth;
+            $deph = $slot->depheight*Mathlib::$hexHeight;
+            if ($hexpos["x"] <= ($deppos["x"]+($depw/2)) && $hexpos["x"] > ($deppos["x"]-($depw/2))){
+                if ($hexpos["y"] <= ($deppos["y"]+($deph/2)) && $hexpos["y"] >= ($deppos["y"]-($deph/2))){
                     return true;
+                }
+            }
+        }else if ($slot->deptype=="distance"){
+            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depheight*Mathlib::$hexWidth){
+                if (Mathlib::getDistance($deppos, $hexpos) > $slot->depwidth*Mathlib::$hexWidth){
+                    return true;
+                }
+            }
+        }else{
+            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depwidth*Mathlib::$hexWidth){
+                return true;
             }
         }
-       
-        
+         
+         
         return false;
         
     }
@@ -42,7 +56,7 @@ class Deployment
             foreach ($ship->movement as $move)
             {
                 if ($found)
-                    throw new Exception("Deployment validation failed: Found more than one deployment entry.");
+                    throw new Exception("Deployment validation failed: Found more than one deployment entry for ship $ship->name.");
                 
                 if ($move->type == "deploy")
                 {
@@ -59,7 +73,7 @@ class Deployment
             }
             
             if (!$found)
-                throw new Exception("Deployment validation failed: Entry not found.");
+                throw new Exception("Deployment validation failed: Entry not found for ship $ship->name.");
             
             $shipIdMoves[$ship->id] = $moves;
         }

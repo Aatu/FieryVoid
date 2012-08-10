@@ -38,6 +38,20 @@ shipManager.movement = {
         
     },
 
+    doDeploymentTurn: function(ship, right){
+        
+        var step = 1;
+        if (!right){
+            step = -1;
+        }
+        
+        var newfacing = mathlib.addToHexFacing(ship.deploymove.facing, step);
+        var newheading = mathlib.addToHexFacing(ship.deploymove.heading, step);
+        
+        ship.deploymove.facing = newfacing;
+        ship.deploymove.heading = newheading;
+    },
+
     isMovementReady: function(ship){
         return (shipManager.movement.getRemainingMovement(ship) == 0);
     },
@@ -1291,6 +1305,9 @@ shipManager.movement = {
     canTurn: function(ship, right){
         //console.log(ship.name + " checking turn");
         
+        if ( gamedata.gamephase == -1 && ship.deploymove)
+            return true;
+        
         if (gamedata.gamephase != 2)
             return false;
         
@@ -1350,12 +1367,17 @@ shipManager.movement = {
         
     },
     
-    
     doTurn: function(ship, right){
         
         if (!shipManager.movement.canTurn(ship, right)){
             return false;
         }
+    
+        if (gamedata.gamephase == -1){
+            shipManager.movement.doDeploymentTurn(ship, right);
+            return;
+        }
+            
     
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
         var lm = ship.movement[ship.movement.length-1];

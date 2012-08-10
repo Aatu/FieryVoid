@@ -189,6 +189,8 @@ window.UI = {
     
             
             var ship = gamedata.getActiveShip();
+            if (!ship)
+                ship = gamedata.getSelectedShip();
             
             shipManager.movement.doTurn(ship, right);
                 

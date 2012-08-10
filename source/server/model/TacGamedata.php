@@ -63,6 +63,7 @@ class TacGamedata{
    
     public function onConstructed(){
         
+        $this->deleteUnavailableShips();
         
         $this->doSortShips();
         
@@ -102,12 +103,29 @@ class TacGamedata{
             $ship->onConstructed($this->turn, $this->phase);
         
         }
-    
-    
     }
    
+    public function deleteUnavailableShips()
+    {
+        if ($this->phase < 0)
+            return;
+        
+        for ($i=count($this->ships)-1;$i>=0;$i--){
+            $ship = $this->ships[$i];
+            if ($this->slots[$ship->slot]->depavailable > $this->turn)
+                unset($this->ships[$i]);
+        }
+    }
+    
     public function isFinished(){
 
+        foreach ($this->slots as $slot)
+        {
+            //still ships coming in
+            if ($slot->depavailable > $this->turn)
+                return false;
+        }
+        
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()){
                 //print($ship->name . " is destroyed");

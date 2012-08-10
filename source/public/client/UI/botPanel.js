@@ -27,7 +27,6 @@ window.botPanel = {
 	},
 	
 	setEW: function(ship){
-        console.log("set ew for botPanel");
 		shipWindowManager.addEW(ship, $("#botPanel"));
 	},
 	

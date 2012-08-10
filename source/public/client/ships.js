@@ -140,6 +140,9 @@ window.shipManager = {
         if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
             UI.shipMovement.drawShipMovementUI(ship);
         
+        if (gamedata.gamephase == -1 && gamedata.isMyShip(ship) && gamedata.isSelected(ship))
+            UI.shipMovement.drawShipMovementUI(ship);
+        
         if (gamedata.gamephase == 3 && ship.flight && gamedata.isSelected(ship))
             UI.shipMovement.drawShipMovementUI(ship);
         

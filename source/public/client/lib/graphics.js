@@ -74,6 +74,15 @@ window.graphics = {
         canvas.stroke();
     },
     
+    drawHollowCircleAndFill: function(canvas, x, y, r, r2, w){
+        canvas.beginPath()
+        canvas.arc(x,y,r2,0,Math.PI*2, false); // outer (filled)
+        canvas.moveTo(x+r, y);
+        canvas.arc(x,y,r,0,Math.PI*2, true); // inner (unfills it)
+        canvas.stroke();
+        canvas.fill();
+    },
+    
     drawCircleAndFill: function(canvas, x, y, r, w){
         canvas.lineWidth = w;
         canvas.beginPath();

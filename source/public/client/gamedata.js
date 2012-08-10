@@ -181,7 +181,7 @@ gamedata = {
     },
     
     doCommit: function(){
-        
+        UI.shipMovement.hide();
         if (gamedata.gamephase == 1){
         
             if (!shipManager.power.checkPowerPositive()){
@@ -198,7 +198,6 @@ gamedata = {
             ajaxInterface.submitGamedata();
             
         }else if (gamedata.gamephase == 2){
-            UI.shipMovement.hide();
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
                 combatLog.logMoves(ship);
@@ -208,7 +207,6 @@ gamedata = {
                 return false;
             }
         }else if (gamedata.gamephase == 3){
-			UI.shipMovement.hide();
             ajaxInterface.submitGamedata();
         }else if (gamedata.gamephase == 4){
             ajaxInterface.submitGamedata();
@@ -241,8 +239,11 @@ gamedata = {
     },
     
     getPlayerTeam: function(){
-        var player = gamedata.players[gamedata.thisplayer];
-        return player.team;
+        for (var i in gamedata.slots){
+            var slot = gamedata.slots[i];
+            if (slot.playerid = gamedata.thisplayer)
+                return slot.team;
+        }
     },
     
     getPhasename: function(){
@@ -280,7 +281,7 @@ gamedata = {
     initPhase: function(){
 		gamedata.subphase = 0;
         shipManager.initShips();
-        
+        UI.shipMovement.hide();
         
         gamedata.setPhaseClass();
         for (var i in gamedata.ships){
@@ -396,7 +397,6 @@ gamedata = {
         
         if (gamedata.gamephase == -1){
             if (deployment.validateAllDeployment() && !gamedata.waiting){
-                console.log("show commit");
                 commit.show();
                 return;
             }

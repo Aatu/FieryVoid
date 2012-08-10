@@ -18,7 +18,7 @@ window.gamedata = {
 	
 	createGames: function(){
 	
-		var gamehtml = '<div class="game slot takeslot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/2</span></div>'; 
+		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/2</span></div>'; 
 		var activefound = false;
 		var lobbyfound = false;
 		for (var i in this.games){
@@ -73,14 +73,12 @@ window.gamedata = {
 	}, 
 	
 	gameIdFound: function(id){
-		
 		for (var i in this.games){
 			if (this.games[i].id == id)
 				return true;
 		}
 		
 		return false;
-	
 	},
 	
 	isInGame: function(id){
