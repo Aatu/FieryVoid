@@ -17,8 +17,7 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-	$gamelobbydata = Manager::getGameLobbyData($_SESSION["user"], $gameid);
-	//var_export($gamelobbydata, true);
+	$gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
 	if (!$gamelobbydata || $gamelobbydata->status != "LOBBY"){
 		header('Location: games.php');
 	}

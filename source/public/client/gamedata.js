@@ -462,6 +462,9 @@ gamedata = {
     
         if (serverdata == null)
             return;
+        
+        if (!serverdata.id)
+            return;
             
         if (gamedata.waiting == false && serverdata.waiting == true && serverdata.changed == false){
              gamedata.waiting = true;

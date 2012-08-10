@@ -50,8 +50,10 @@ class Manager{
         try {
             self::initDBManager();
             
-            if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 )
+            if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 ){
+                Debug::log("if trough");
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
+            }
         }
         catch(Exception $e) {
             Debug::error($e);

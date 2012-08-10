@@ -31,11 +31,8 @@
 			$ret = Manager::getTacGamedataJSON($gameid, $playerid, $turn, $phase, $activeship);
 		
 		}else{
-			$ret["error"] = true;
-			$ret["msg"] = "Omitting required data"; 
-			json_encode($ret);
+            $ret = '{"error":"Omitting required data"}';
 		}
-		
 		
 		print($ret);
 	}

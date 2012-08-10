@@ -117,11 +117,14 @@ window.gamedata = {
     },
 
 	parseServerData: function(serverdata){
-
 		if (serverdata == null){
 			window.location = "games.php";
 			return;
 		}
+        
+        if (!serverdata.id)
+            return;
+        
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;

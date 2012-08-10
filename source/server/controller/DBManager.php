@@ -128,8 +128,8 @@ class DBManager {
             Debug::log($sql);
 			$id = $this->insert($sql);
 			
-			$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
-            $this->insert($sql);			
+			//$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
+            //$this->insert($sql);			
 			
 		}catch(Exception $e) {
 			$this->endTransaction(true);
@@ -139,6 +139,7 @@ class DBManager {
     
     public function deleteEmptyGames()
     {
+        //TODO: not working
         $ids = array();
         $stmt = $this->connection->prepare("
             SELECT 
@@ -148,7 +149,7 @@ class DBManager {
             GROUP BY 
                 gameid 
             HAVING
-                playerid is null
+                count(playerid) = 0
         ");
 
         if ($stmt)
@@ -180,7 +181,7 @@ class DBManager {
             
             $this->update($sql);
 
-            $sql = "UPDATE tac_playeringame SET playerid = null WHERE gameid = $gameid AND playerid = $userid";
+            $sql = "UPDATE tac_playeringame SET playerid = null, lastphase = -3, lastturn = 0 WHERE gameid = $gameid AND playerid = $userid";
             if ($slotid)
                 $sql .= " AND slot = $slotid";
             
@@ -327,7 +328,7 @@ class DBManager {
                 'ssii',
                 $gamename,
                 $background,
-                $slotnum,
+                $slotnum,   
                 $userid
             );
             $stmt->execute();
@@ -1383,7 +1384,7 @@ class DBManager {
         try {
             $stmt = $this->connection->prepare(
                 "SELECT 
-                    g.id, g.slots
+                    g.id, g.slots, p.playerid
                 FROM 
                     tac_playeringame p
                 INNER JOIN tac_game g on g.id = p.gameid
@@ -1397,19 +1398,22 @@ class DBManager {
                     g.phase != 2
                 GROUP BY p.gameid
                 HAVING 
-                    count(p.playerid) = g.slots;"
+                    count(p.playerid) = g.slots"
             );
             
 			if ($stmt)
             {
 				$stmt->bind_param('i', $gameid);
 				$stmt->execute();
-                $stmt->bind_result($id, $slots);
+                $stmt->bind_result($id, $slots, $playerid);
 				$stmt->fetch();
 				$stmt->close();
                 
                 if ($id)
+                {
+                    Debug::log("gameid: $id phase is ready");
                     return true;
+                }
 				
 				
 			}
