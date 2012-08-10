@@ -2,25 +2,39 @@ window.deployment = {
     
 
     drawDeploymentAreas: function(canvas){
+        deployment.drawDeploymentForSelectedShip(canvas);
+    },
+
+    drawDeploymentForSelectedShip: function(canvas){
+        
         var selectedShip = gamedata.getSelectedShip();
         
         if (!selectedShip)
             return;
         
-        var dep = deployment.getValidDeploymentArea(selectedShip);
-        
         canvas.strokeStyle = "rgba(160,250,100,0.5)";
         canvas.fillStyle = "rgba(160,250,100,0.1)";
-                    
-        graphics.drawBox(canvas, hexgrid.hexCoToPixel(dep.x,dep.y), (dep.w)*hexgrid.hexWidth(), (dep.h)*hexgrid.hexHeight(), 1);
+        var slot = deployment.getValidDeploymentArea(selectedShip);
+        deployment.drawDep(canvas, slot);
+    },
+    
+    drawDep: function(canvas, slot){
+        var pos = hexgrid.hexCoToPixel(slot.depx,slot.depy);
+        if (slot.deptype == "box"){
+            graphics.drawBox(canvas, pos, (slot.depwidth)*hexgrid.hexWidth(), (slot.depheight)*hexgrid.hexHeight(), 1);
+        }else{
+            
+            graphics.drawCircle(canvas, pos.x, pos.y, (slot.depwidth)*hexgrid.hexWidth(), 1);
+        }
     },
     
     getValidDeploymentArea: function(ship){
     
-        if (ship.team == 1){
-            return ({x:-30, y:0, w:16, h:50});
-        }else{
-            return ({x:30, y:0, w:16, h:50});
+        for (var i in gamedata.slots){
+            var slot = gamedata.slots[i];
+            if (slot.slot == ship.slot){
+                return slot;
+            }
         }
     },
     
@@ -44,6 +58,7 @@ window.deployment = {
     },
     
     validateDeploymentPos: function(ship){
+        return true;
         var dep = deployment.getValidDeploymentArea(ship);
         var hexpos = shipManager.getShipPosition(ship);
 

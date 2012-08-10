@@ -18,7 +18,10 @@ window.gamedata = {
         var selectedSlot = playerManager.getSlotById(slotid);
 		var points = 0;
 		for (var i in gamedata.ships){
-			points += gamedata.ships[i].pointCost;
+            var lship = gamedata.ships[i];
+            if (lship.slot != slotid)
+                continue;
+			points += lship.pointCost;
 		}
 
 		points += ship.pointCost;
@@ -72,6 +75,9 @@ window.gamedata = {
 	calculateFleet: function(){
 
         var slotid = gamedata.selectedSlot;
+        if (!slotid)
+            return;
+        
         var selectedSlot = playerManager.getSlotById(slotid);
 		var points = 0;
 		for (var i in gamedata.ships){

@@ -275,8 +275,10 @@ class TacGamedata{
     
     }
     
-    public function hasAlreadySubmitted($userid){
-        $slots = $this->getSlotsByPlayerId($userid);
+    
+    
+    public function hasAlreadySubmitted($userid, $slotid = null){
+        $slots = $this->getSlotsByPlayerId($userid, $slotid);
         
         foreach ($slots as $slot)
         {
@@ -288,12 +290,13 @@ class TacGamedata{
     
     }
     
-    public function getSlotsByPlayerId($id)
+    public function getSlotsByPlayerId($id, $slotid = null)
     {
         $slots = array();
         foreach ($this->slots as $slot){
             if ($slot->playerid == $id){
-                $slots[] = $slot;
+                if ($slotid == null || $slot->slot == $slotid)
+                    $slots[] = $slot;
             }
         }
         

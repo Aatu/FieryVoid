@@ -195,7 +195,7 @@ class Manager{
             return null;
         }
         
-        
+        Debug::log(var_export($gamedata->slots, true));
         return $gamedata;
         
         
@@ -305,6 +305,9 @@ class Manager{
         $seenSlots = array();
         foreach($gamedata->slots as $slot)
         {
+            if ($gamedata->hasAlreadySubmitted($gamedata->forPlayer, $slot->id))
+                continue;
+            
             $points = 0;
             foreach ($ships as $ship){
                 if ($ship->slot != $slot->slot)
