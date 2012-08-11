@@ -1606,6 +1606,7 @@ class DBManager {
                 gameid = ?
             AND 
                 id > ?
+            ORDER BY id ASC
         ");
         
         if ($stmt)
@@ -1629,7 +1630,7 @@ class DBManager {
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 1 HOUR) < NOW()    
+                DATE_ADD(time, INTERVAL 1 DAY) < NOW()    
         ");
         
         if ($stmt)
