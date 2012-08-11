@@ -53,6 +53,13 @@
 			
 			<a href="creategame.php">CREATE GAME</a>
 		</div>
+        <div id="globalchat" class="panel large" style="height:150px;">
+        <?php 
+            $chatgameid = 0;
+            $chatelement = "#globalchat";
+            include("chat.php")
+        ?>
+        </div>
 
 	</body>
 </html>

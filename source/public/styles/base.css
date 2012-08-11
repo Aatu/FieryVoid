@@ -1,6 +1,8 @@
 
 body {
 	background-image:url(./../img/maps/intothefieryvoid.jpeg);
+    background-repeat:no-repeat;
+    background-attachment:fixed;
 	background-color:black;
 	color:#DEEBFF;
 	opacity:0.85;

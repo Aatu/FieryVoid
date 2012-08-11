@@ -21,6 +21,8 @@ spl_autoload_register(
                 'battlelaser' => '/server/model/weapons/lasers.php',
                 'bintak' => '/server/model/ships/narn/bintak.php',
                 'burstbeam' => '/server/model/weapons/specialWeapons.php',
+                'chatmanager' => '/server/controller/ChatManager.php',
+                'chatmessage' => '/server/model/ChatMessage.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
                 'communicationsdisrupted' => '/server/model/cricialClasses.php',
                 'covran' => '/server/model/ships/centauri/Covran.php',

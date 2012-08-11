@@ -51,7 +51,6 @@ class Manager{
             self::initDBManager();
             
             if ($targetGameId &&  is_numeric($targetGameId) && $targetGameId > 0 ){
-                Debug::log("if trough");
                 return self::getTacGamedata($targetGameId, $userid, 0, 0, -1);
             }
         }
@@ -195,10 +194,7 @@ class Manager{
             return null;
         }
         
-        Debug::log(var_export($gamedata->slots, true));
         return $gamedata;
-        
-        
     }
     
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship){
@@ -305,7 +301,7 @@ class Manager{
         $seenSlots = array();
         foreach($gamedata->slots as $slot)
         {
-            if ($gamedata->hasAlreadySubmitted($gamedata->forPlayer, $slot->id))
+            if ($gamedata->hasAlreadySubmitted($gamedata->forPlayer, $slot->slot))
                 continue;
             
             $points = 0;
@@ -316,26 +312,19 @@ class Manager{
                 $seenSlots[$slot->slot] = true;
                 
                 $points += $ship->pointCost;
+                
+                if ($ship->userid == $gamedata->forPlayer){
+                    self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
+                }
             }
 
             if ($points > $slot->points)    
                 throw new Exception("Fleet too expensive.");
         }
-
-        
-    
-            
-        foreach ($ships as $ship){
-            if ($ship->userid == $gamedata->forPlayer){
-                self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
-            }
-        }
     
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn, $seenSlots);
         
-        
         return true;
-        
     }
     
     

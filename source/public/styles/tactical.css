@@ -366,6 +366,7 @@ body {
     -webkit-border-top-right-radius: 20px;
 
 }
+
 .BPcontainer{
 	width:190px;
 	height:190px;
@@ -584,9 +585,62 @@ body.phase1 #botPanel .ewentry .button2{
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
-	
 	font-family:arial;
 	font-size:10px;
+}
+
+.logUiEntry{
+    position:absolute;
+    top:-26px;
+    border-top: 1px solid #496791;
+	border-right: 1px solid #496791;
+	border-left: 1px solid #496791;
+    border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    width:100px;
+    height:18px;
+    text-align: center;
+    font-size: 10px;
+    padding-top:6px;
+    z-index: 9999;
+    background-color:#020E12;
+    cursor:pointer;
+}
+
+.logUiEntry span{
+}
+
+.logUiEntry.selected{
+    top:-25px;
+    background-color: #04161C;
+    color:#DEEBFF;
+}
+
+#logTab.logUiEntry{
+    left:-1px;
+}
+
+#chatTab.logUiEntry{
+    left:104px;
+}
+
+#globalChatTab.logUiEntry{
+    left:208px;
+}
+
+#logcontainer #chat{
+    height:100%;
+    width:100%;
+    z-index: 10001;
+    
+}
+
+#logcontainer #globalchat{
+    height:100%;
+    width:100%;
+    z-index: 10001;
+    
 }
 
 #log{

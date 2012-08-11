@@ -60,6 +60,7 @@ jQuery(function(){
     
     $(".committurn").on("click", gamedata.onCommitClicked);
     $(".cancelturn").on("click", gamedata.onCancelClicked);
+    $(".logUiEntry").on("click", botPanel.onLogUIClicked);
     
     hookEvent('pagecontainer', 'mousewheel', zooming.mouseWheel);
     document.onkeydown = function( event ){
@@ -71,7 +72,12 @@ jQuery(function(){
 window.windowEvents = {
     
     onKeyUp: function(e){
+        
+        if (windowEvents.chatfocus)
+            return;
+        
         console.log("keycode: " +  e.keyCode);
+
         switch(e.keyCode){
             case 81:
                 animation.cancelAnimation();

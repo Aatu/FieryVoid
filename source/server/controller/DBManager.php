@@ -139,7 +139,6 @@ class DBManager {
     
     public function deleteEmptyGames()
     {
-        //TODO: not working
         $ids = array();
         $stmt = $this->connection->prepare("
             SELECT 
@@ -162,7 +161,6 @@ class DBManager {
             }
             $stmt->close();
         }
-        Debug::log(var_export($ids, true));
         
         $this->deleteGames($ids);
     }
@@ -186,7 +184,6 @@ class DBManager {
                 $sql .= " AND slot = $slotid";
             
             $this->update($sql);
-            Debug::log($sql);
 			
 			
 		}catch(Exception $e) {
@@ -1411,7 +1408,6 @@ class DBManager {
                 
                 if ($id)
                 {
-                    Debug::log("gameid: $id phase is ready");
                     return true;
                 }
 				
@@ -1570,6 +1566,78 @@ class DBManager {
             }
             $stmt->close();
         }
+    }
+    
+    public function submitChatMessage($userid, $message, $gameid = 0)
+    {
+        
+        $stmt = $this->connection->prepare("
+                INSERT INTO 
+                    chat
+                VALUES
+                (
+                    null,
+                    ?,
+                    (SELECT username FROM player WHERE id = ?),
+                    ?,
+                    now(),
+                    ?
+                )
+
+            ");
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+    
+    public function getChatMessages($lastid, $gameid = 0)
+    {
+        $messages = array();
+        $stmt = $this->connection->prepare("
+            SELECT 
+                id, userid, username, gameid, message, time
+            FROM
+                chat
+            WHERE
+                gameid = ?
+            AND 
+                id > ?
+        ");
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $gameid, $lastid);
+            $stmt->bind_result($id, $userid, $username, $gameid, $message, $time);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $messages[] = 
+                    new ChatMessage($id, $userid, $username, $gameid, $message, $time);
+            }
+            $stmt->close();
+        }
+        
+        return $messages;
+    }
+    
+    public function deleteOldChatMessages(){
+        $stmt = $this->connection->prepare("
+            DELETE FROM
+                chat
+            WHERE
+                DATE_ADD(time, INTERVAL 1 HOUR) < NOW()    
+        ");
+        
+        if ($stmt)
+        {
+            $stmt->execute();
+            $stmt->close();
+        }
+        
     }
   
     //UTILS

@@ -11,6 +11,20 @@ jQuery(function(){
 });
 
 window.botPanel = {
+    
+    onLogUIClicked: function(e){
+        
+        var e = $(this);
+        $(".logUiEntry").removeClass("selected");
+        e.addClass("selected");
+        
+        $(".logPanelEntry").hide();
+        
+        var select = e.data("select");
+        var e = $(select);
+        e.show();
+        e.trigger("onshow");
+    },
 
 	onShipStatusChanged: function(ship){
 		if (!gamedata.isSelected(ship))

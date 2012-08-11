@@ -643,9 +643,36 @@
 		<div class="ok"></div>
 		<div class="cancel"></div>
 	</div>
-	<div id="log">
-	
-	</div>
+    
+    <div id="logUI">
+        <div id="logTab" data-select="#log" class="logUiEntry selected">
+            <span>COMBAT LOG</span>
+        </div>
+        <div id="chatTab" data-select="#chat" class="logUiEntry">
+            <span>GAME CHAT</span>
+        </div>
+        <div id="globalChatTab" data-select="#globalchat" class="logUiEntry">
+            <span>GLOBAL CHAT</span>
+        </div>
+    </div>
+    <div id="log" class="logPanelEntry">
+
+    </div>
+    <div id="chat" class="logPanelEntry" style="display:none;">
+        <?php 
+            $chatgameid = $gameid;
+            $chatelement = "#chat";
+            include("chat.php")
+        ?>
+    </div>
+    
+    <div id="globalchat" class="logPanelEntry" style="display:none;">
+        <?php 
+            $chatgameid = 0;
+            $chatelement = "#globalchat";
+            include("chat.php")
+        ?>
+    </div>
 </div>
 
 </body>

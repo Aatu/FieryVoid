@@ -1,0 +1,45 @@
+.chatcontainer{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    position:relative;
+}
+
+.chatMessages{
+    height:100%;
+	overflow-x:hidden;
+    overflow-y:scroll;
+}
+
+.chatinput{
+    border:0;
+    padding:0;
+    height:20px;
+    width:100%;
+}
+
+.chatmessage{
+    margin: 2px 5px 2px 5px;
+    font-size:11px;
+}
+
+.chattime{
+    display:none;
+    color:#DEEBFF;
+}
+
+.chatuser{
+    color:#DEEBFF;
+}
+
+.chatingame{
+    color:#b34119;
+}
+
+.chatuser.mine{
+    color:#2f5123;
+}
+
+.chattext{
+    color:#496791;
+}

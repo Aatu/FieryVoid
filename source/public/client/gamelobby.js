@@ -16,7 +16,8 @@ window.gamedata = {
 
         var slotid = gamedata.selectedSlot;
         var selectedSlot = playerManager.getSlotById(slotid);
-		var points = 0;
+
+        var points = 0;
 		for (var i in gamedata.ships){
             var lship = gamedata.ships[i];
             if (lship.slot != slotid)
@@ -297,6 +298,14 @@ window.gamedata = {
 	buyShip: function(e){
 		var shipclass = $(this).parent().data().shipclass;
 		var ship = gamedata.getShipByType(shipclass);
+        
+        var slotid = gamedata.selectedSlot;
+        var selectedSlot = playerManager.getSlotById(slotid);
+        if	(selectedSlot.lastphase == "-2"){
+            window.confirm.error("This slot has already bought a fleet!", function(){});
+            return false;
+        }
+        
 		if (gamedata.canAfford(ship)){
 			window.confirm.showShipBuy(ship, gamedata.doBuyShip);
 		}else{

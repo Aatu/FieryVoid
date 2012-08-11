@@ -76,6 +76,14 @@
 			</form>
 			
 		</div>
+        
+        <div id="globalchat" class="panel large" style="height:150px;">
+        <?php 
+            $chatgameid = 0;
+            $chatelement = "#globalchat";
+            include("chat.php")
+        ?>
+        </div>
 
         <div id="slottemplatecontainer" style="display:none;">
             <div class="slot" >
