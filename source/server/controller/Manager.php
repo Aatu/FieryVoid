@@ -609,6 +609,10 @@ class Manager{
         $nextshipid = -1;
         $firstship = null;
         foreach ($gamedata->ships as $ship){
+            
+            if ($ship->unavailable)
+                continue;
+            
             if ($firstship == null)
                 $firstship = $ship;
                         

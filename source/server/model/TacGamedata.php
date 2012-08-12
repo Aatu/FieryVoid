@@ -63,8 +63,6 @@ class TacGamedata{
    
     public function onConstructed(){
         
-        $this->deleteUnavailableShips();
-        
         $this->doSortShips();
         
         $i = 0;
@@ -99,21 +97,21 @@ class TacGamedata{
                 }
             
             }
-            
+            $this->markUnavailableShips();
             $ship->onConstructed($this->turn, $this->phase);
-        
+            
         }
     }
    
-    public function deleteUnavailableShips()
+    public function markUnavailableShips()
     {
         if ($this->phase < 0)
             return;
         
-        for ($i=count($this->ships)-1;$i>=0;$i--){
-            $ship = $this->ships[$i];
+        foreach ($this->ships as $ship)
+        {
             if ($this->slots[$ship->slot]->depavailable > $this->turn)
-                unset($this->ships[$i]);
+                $ship->unavailable = true;
         }
     }
     
@@ -357,6 +355,9 @@ class TacGamedata{
     public function getShipsInDistance($pos, $dis = 0){
         $ships = array();
         foreach ($this->ships as $ship){
+            if ($ship->unavailable)
+                continue;
+            
             $shipPos = $ship->getCoPos();
             $curDis = mathlib::getDistance($pos, $shipPos);
         

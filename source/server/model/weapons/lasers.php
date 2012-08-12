@@ -131,7 +131,7 @@
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+20;   }
         public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 50 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 60 - $this->dp;      }
         
         
         
@@ -159,8 +159,8 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+12;   }
-        public function setMinDamage(){     $this->minDamage = 19 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 37 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 42 - $this->dp;      }
         
         
         
@@ -195,8 +195,8 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
-        public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 42 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 52 - $this->dp;      }
         
         
         
@@ -265,7 +265,7 @@ class NeutronLaser extends Laser{
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 4)+18; }
-        public function setMinDamage(){ $this->minDamage = 19 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 55 - $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 22 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 58-  $this->dp; }
     }
 ?>

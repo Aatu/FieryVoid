@@ -79,6 +79,9 @@ class Firing{
     public static function automateIntercept($gd){
         
         foreach ($gd->ships as $ship){
+            if ($ship->unavailable)
+                continue;
+            
             $intercepts = Array(); 
             foreach($ship->systems as $weapon){
                                 

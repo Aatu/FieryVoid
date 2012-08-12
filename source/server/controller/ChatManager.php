@@ -22,6 +22,12 @@ class ChatManager{
     {
         try
         {
+            $message = trim($message);
+            if ($message == "")
+                return "{}";
+            
+            $message = htmlspecialchars($message);
+            
             self::initDBManager();
             self::$dbManager->submitChatMessage($userid, $message, $gameid);
             return "{}";

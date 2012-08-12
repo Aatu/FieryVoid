@@ -18,6 +18,7 @@
         public $pointCost = 0;
         public $faction = null;
         public $slot;
+        public $unavailable = false;
         
         public $enabledSpecialAbilities = array();
         

@@ -86,6 +86,9 @@ shipManager.power = {
 	
 		for (var i in gamedata.ships){
 			var ship = gamedata.ships[i];
+            
+            if (ship.unavailable)
+                continue;
 			
 			if (ship.flight)
 				continue;

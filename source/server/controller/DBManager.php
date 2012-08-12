@@ -1606,7 +1606,8 @@ class DBManager {
                 gameid = ?
             AND 
                 id > ?
-            ORDER BY id ASC
+            ORDER BY id DESC
+            LIMIT 10;
         ");
         
         if ($stmt)
@@ -1616,12 +1617,13 @@ class DBManager {
             $stmt->execute();
             while ($stmt->fetch())
             {
-                $messages[] = 
+                $messages[$id] = 
                     new ChatMessage($id, $userid, $username, $gameid, $message, $time);
             }
             $stmt->close();
         }
         
+        ksort($messages);
         return $messages;
     }
     

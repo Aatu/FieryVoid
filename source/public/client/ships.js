@@ -92,7 +92,7 @@ window.shipManager = {
         if (shipManager.initiated == 1)
             return;
         
-        if (ship.dontDraw){
+        if (ship.dontDraw || ship.unavailable){
             ship.shipclickableContainer.css("z-index", "1");
             ship.htmlContainer.hide();
             return;
@@ -122,7 +122,7 @@ window.shipManager = {
             scZ+=250;
         }
         ship.htmlContainer.css("top", pos.y -h + "px").css("left", pos.x -h + "px").css("z-index", hexShipZ);
-        
+        ship.htmlContainer.show();
         
         var img = damageDrawer.getShipImage(ship);
         
