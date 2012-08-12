@@ -206,12 +206,18 @@ window.weaponManager = {
             var weapon = gamedata.selectedSystems[i];
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
-                $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
+                if(weaponManager.checkIsInRange(selectedShip, ship, weapon))
+                {
+                    $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
+                }
+                else
+                {
+                    $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+                }
             }else{
                 $('<div><span class="weapon">'+weapon.displayName+':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
             }
-        }
-        
+        }        
     },
     
     canCalledshot: function(target, system){
@@ -717,10 +723,15 @@ window.weaponManager = {
         
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
-        if (jammer)
-            range = range / shipManager.systems.getOutput(target, jammer);
+        if (jammer
+            //&& !shipManager.power.isOffline(target, jammer)
+            //&& !shipManager.systems.isDestroyed(target, jammer)
+        )
+        {
+            range = range / (shipManager.systems.getOutput(target, jammer)+1);
+        }
         
-        return (mathlib.getDistanceHex(shooterPos, targetPos)<=weapon.range);
+        return (mathlib.getDistanceHex(shooterPos, targetPos) <= range);
     },
     
     targetHex: function(hexpos){

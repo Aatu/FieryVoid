@@ -548,6 +548,40 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
         
         for ($i=0;$i<$fireOrder->shots;$i++){
+            Debug::log("a) Started with shots".$i);
+            // Check if, in case of ballistic weapons, the target
+            // moved out of launch range
+            // Put in here and not before the for loop to account
+            // for future update that e.g. torpedos are fired at
+            // multiple targets.
+            if ($this->ballistic)
+            {
+                Debug::log("b) This is ballistic");
+                $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
+                $range = $this->range;
+
+                Debug::log("b2) Jammer value ".$jammerValue);
+
+                // Account for reduced launch range in case of jammer.
+                if ($jammerValue > 0)
+                {
+                    Debug::log("c) Jammer value is".$jammerValue);
+                    Debug::log("d) Range before is".$range);
+
+                    $range = $range/($jammerValue+1);
+                    Debug::log("e) Range after is".$range);
+                }
+
+                if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $range)
+                {
+                    Debug::log("f) You´re too far away");
+                    $fireOrder->pubnotes .= " FIRING SHOT ". ($i+1) .": Target moved out of launch range.";
+                    continue;
+                }
+            }
+
+            Debug::log("g) After the if ballistic");
+
             $needed = $fireOrder->needed - ($this->grouping*$i);
             $rolled = Dice::d(100);
             if ($rolled > $needed && $rolled <= $needed+($intercept*5)){

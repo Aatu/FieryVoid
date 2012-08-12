@@ -77,7 +77,7 @@ window.combatLog = {
                 shottext = ', '+shotshit+'/'+shots+' shots hit'+intertext+'.';
                 
             var notestext = "";
-            if (notes)
+            //if (notes)
                 notestext = '<span class="notes">'+notes+'</span>';
             
             html += ' firing ' +counttext + weapon.displayName + targettext+'. '+chancetext +shottext + notestext;
