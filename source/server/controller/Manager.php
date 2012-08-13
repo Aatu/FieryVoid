@@ -155,6 +155,19 @@ class Manager{
     public static function canCreateGame($userid){
         return true;
     }
+    public static function registerPlayer($username, $password) {
+        try {
+            self::initDBManager();
+            $ret =  self::$dbManager->registerPlayer($username, $password);
+                      
+            return $ret;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return null;
+        }
+        
+    }
     
     public static function authenticatePlayer($username, $password) {
         try {
@@ -164,7 +177,8 @@ class Manager{
             return $ret;
         }
         catch(exception $e) {
-            throw $e;
+            Debug::error($e);
+            return null;
         }
         
     }

@@ -353,8 +353,9 @@ window.weaponManager = {
     
     calculateBaseHitChange: function(target, base, shooter){
 
-        dew = 0;
+        var dew = 0;
 		
+        //TODO: jincing ignored if range 0 and shooter not jinking!
 		if (target.flight){
 			dew = shipManager.movement.getJinking(target);
         }else{
@@ -387,10 +388,12 @@ window.weaponManager = {
         var oew = ew.getTargetingEW(shooter, target);
         oew -= dist;
 		
-        if (shooter.flight)
-			oew = shooter.offensivebonus;
-        
         var mod = 0;
+        
+        if (shooter.flight){
+			oew = shooter.offensivebonus;
+            mod -= shipManager.movement.getJinking(shooter);
+        }
         
         if (weapon.piercing && weapon.firingMode == 2)
             mod -= 4;

@@ -938,24 +938,39 @@ class DBManager {
     
     private function getMovesForShips($gamedata){
         
-        $stmt = $this->connection->prepare(
-            "SELECT 
+        $stmt = $this->connection->prepare("
+            SELECT 
                 id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust
             FROM 
-                tac_shipmovement
+                tac_shipmovement as s1
             WHERE
                 gameid = ?
             AND
-                ( turn >= ? OR turn = 1 ) 
+                ( turn >= ? 
+                OR 
+                s1.id = 
+                    (
+                    SELECT
+                        id
+                    FROM 
+                        tac_shipmovement as s2
+                    WHERE 
+                        gameid = ? 
+                        AND
+                        shipid = s1.shipid
+                    ORDER BY id DESC
+                    LIMIT 1
+                    ) 
+                ) 
             ORDER BY
                 id ASC
-            "
-        );
+            
+        ");
 
         if ($stmt)
         {
             $fetchturn = $gamedata->turn-1;
-            $stmt->bind_param('ii', $gamedata->id, $fetchturn);
+            $stmt->bind_param('iii', $gamedata->id, $fetchturn, $gamedata->id);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust);
             $stmt->execute();
             while ($stmt->fetch())
@@ -1222,6 +1237,37 @@ class DBManager {
         }
         
     }
+    
+    public function registerPlayer($username, $password)
+    {
+        $username = htmlspecialchars($username);
+        $username = $this->DBEscape($username);
+        
+        $sql = "SELECT * FROM player WHERE username LIKE '$username'";
+        if ($this->found($sql))
+        {
+            return false;
+        }
+			
+        if ($stmt = $this->connection->prepare("
+            INSERT INTO 
+                player
+            VALUES
+            (
+                null,
+                ?,
+                password(?),
+                1
+            );
+            ")) 
+        {
+            $stmt->bind_param('ss', $username, $password);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        return true;
+    }  
   
     public function authenticatePlayer($username, $password){
 	

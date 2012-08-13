@@ -10,7 +10,10 @@
 		
 		protected function getSystemArmour($system, $gamedata, $fireOrder){
 			$armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
-			return round($armor / 2);
+            if (is_numeric($armor))
+                return round($armor / 2);
+            
+            return 0;
 		}
 	
 		public function setSystemDataWindow($turn){
