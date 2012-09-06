@@ -35,10 +35,10 @@ class Secundus extends BaseShip{
         $this->addFrontSystem(new HeavyArray(3, 8, 4, 240, 0));
 		$this->addFrontSystem(new HeavyArray(3, 8, 4, 0, 120));
 		
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
         
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
@@ -55,11 +55,11 @@ class Secundus extends BaseShip{
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 40));
+        $this->addFrontSystem(new Structure( 5, 42));
         $this->addAftSystem(new Structure( 5, 40));
         $this->addLeftSystem(new Structure( 5, 56));
         $this->addRightSystem(new Structure( 5, 56));
-        $this->addPrimarySystem(new Structure( 7, 42));
+        $this->addPrimarySystem(new Structure( 7, 40));
 		
 		
     }

@@ -29,25 +29,25 @@ class Bintak extends BaseShip{
 		$this->addPrimarySystem(new JumpEngine(6, 30, 5, 20));
 		$this->addPrimarySystem(new Hangar(6, 22));
         
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 300, 60));
+        $this->addFrontSystem(new LightPulse(3, 4, 2, 300, 60));
         $this->addFrontSystem(new MagGun(5, 9, 8, 300, 60));
         
-        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new HeavyLaser(5, 8, 6, 300, 60));
         
         $this->addFrontSystem(new Thruster(5, 15, 0, 5, 1));
         $this->addFrontSystem(new Thruster(5, 15, 0, 5, 1));
         
-        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new HeavyLaser(5, 8, 6, 300, 60));
         
-		$this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-		$this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+		$this->addFrontSystem(new EnergyMine(5, 5, 4, 300, 60));
+		$this->addFrontSystem(new EnergyMine(5, 5, 4, 300, 60));
 		//aft
 		          
 
-		$this->addAftSystem(new HeavyLaser(4, 8, 6, 180, 300));
-		$this->addAftSystem(new HeavyLaser(4, 8, 6, 60, 180));
-		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+		$this->addAftSystem(new HeavyLaser(5, 8, 6, 180, 300));
+		$this->addAftSystem(new HeavyLaser(5, 8, 6, 60, 180));
+		$this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
+		$this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
 		$this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
 		
         $this->addAftSystem(new Thruster(5, 12, 0, 3, 2));
@@ -57,20 +57,20 @@ class Bintak extends BaseShip{
         
 		//left
 		
-		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
-		$this->addLeftSystem(new LightPulse(2, 4, 2, 240, 60));
+		$this->addLeftSystem(new HeavyLaser(5, 8, 6, 240, 0));
+		$this->addLeftSystem(new LightPulse(3, 4, 2, 240, 60));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 240, 0));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 240, 0));
-		$this->addLeftSystem(new IonTorpedo(4, 5, 4, 240, 0));
+		$this->addLeftSystem(new IonTorpedo(5, 5, 4, 240, 0));
 		$this->addLeftSystem(new Thruster(5, 20, 0, 6, 3));
               
 
 		//right
-		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
-		$this->addRightSystem(new LightPulse(2, 4, 2, 300, 120));
+		$this->addRightSystem(new HeavyLaser(5, 8, 6, 0, 120));
+		$this->addRightSystem(new LightPulse(3, 4, 2, 300, 120));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 120));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 120));
-		$this->addRightSystem(new IonTorpedo(4, 5, 4, 0, 120));
+		$this->addRightSystem(new IonTorpedo(5, 5, 4, 0, 120));
 		$this->addRightSystem(new Thruster(5, 20, 0, 6, 4));
         
 		
@@ -79,7 +79,7 @@ class Bintak extends BaseShip{
         $this->addAftSystem(new Structure(5, 87));
         $this->addLeftSystem(new Structure(5, 96));
         $this->addRightSystem(new Structure(5, 96));
-        $this->addPrimarySystem(new Structure(6, 50));
+        $this->addPrimarySystem(new Structure(6, 72));
         
     }
 

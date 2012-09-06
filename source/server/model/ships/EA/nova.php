@@ -36,11 +36,11 @@ class Nova extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         
-        $this->addFrontSystem(new LaserPulseArray(5, 9, 5, 300, 0));
-        $this->addFrontSystem(new LaserPulseArray(5, 9, 5, 300, 0));
+        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 300, 0));
+        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 300, 0));
         
-        $this->addFrontSystem(new LaserPulseArray(5, 9, 5, 0, 60));
-        $this->addFrontSystem(new LaserPulseArray(5, 9, 5, 0, 60));
+        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 0, 60));
+        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 0, 60));
 		//aft
 		          
 
@@ -50,31 +50,31 @@ class Nova extends BaseShip{
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         
-        $this->addAftSystem(new LaserPulseArray(5, 9, 5, 180, 300));
-        $this->addAftSystem(new LaserPulseArray(5, 9, 5, 180, 300));
+        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 180, 300));
+        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 180, 300));
         
-        $this->addAftSystem(new LaserPulseArray(5, 9, 5, 60, 180));
-        $this->addAftSystem(new LaserPulseArray(5, 9, 5, 60, 180));
+        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 60, 180));
+        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 60, 180));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
         
 		//left
         
-        $this->addLeftSystem(new LaserPulseArray(5, 9, 5, 240, 0));
-		$this->addLeftSystem(new LaserPulseArray(5, 9, 5, 240, 0));
-        $this->addLeftSystem(new LaserPulseArray(5, 9, 5, 240, 0));
-        $this->addLeftSystem(new LaserPulseArray(5, 9, 5, 240, 0));
-        $this->addLeftSystem(new LaserPulseArray(5, 9, 5, 240, 0));
+        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
+		$this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
+        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
+        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
+        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
         
 		$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
               
 
 		//right
-		$this->addRightSystem(new LaserPulseArray(5, 9, 5, 0, 120));
-        $this->addRightSystem(new LaserPulseArray(5, 9, 5, 0, 120));
-        $this->addRightSystem(new LaserPulseArray(5, 9, 5, 0, 120));
-        $this->addRightSystem(new LaserPulseArray(5, 9, 5, 0, 120));
-        $this->addRightSystem(new LaserPulseArray(5, 9, 5, 0, 120));
+		$this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
+        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
+        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
+        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
+        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
         
 		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
         

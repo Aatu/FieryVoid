@@ -22,7 +22,7 @@ class Darmoti extends HeavyCombatVessel{
         $this->iniativebonus = 30;
         
          
-        $this->addPrimarySystem(new Reactor(7, 15, 0, 8));
+        $this->addPrimarySystem(new Reactor(7, 20, 0, 8));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 9));
         $this->addPrimarySystem(new Engine(7, 13, 0, 10, 2));
