@@ -830,6 +830,33 @@ shipManager.movement = {
         return {left:left, right:right};
     },
     
+    hasCombatPivoted: function(ship){
+    
+        if (! ship.flight)
+            return false;
+        
+        for (var i in ship.movement){
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn)
+                continue;
+            
+            if (movement.value != 'combatpivot')
+                continue;
+                
+            if ( movement.type == "pivotleft" || movement.type == "pivotright"){
+                return true;
+            }
+            
+            if ( movement.type == "isPivotingRight" || movement.type == "isPivotingLeft"){
+                return true;
+            }
+            
+            
+        }
+        
+        return false;
+    },
+    
     hasPivotedForShooting: function(ship){
   
         for (var i in ship.movement){

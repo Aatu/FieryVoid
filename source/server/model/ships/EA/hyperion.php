@@ -56,8 +56,6 @@ class Hyperion extends BaseShip{
 		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 60));
 		$this->addRightSystem(new HeavyLaser(4, 8, 6, 120, 180));
 		$this->addRightSystem(new MediumPulse(3, 6, 3, 0, 180));
-		
-
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

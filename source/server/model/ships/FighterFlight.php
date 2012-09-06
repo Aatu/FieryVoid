@@ -177,7 +177,7 @@
            
         
         
-        public function getHitSection($shooter, $turn, $weapon){
+        public function getHitSection($pos, $turn, $weapon){
             
             
             return 0;

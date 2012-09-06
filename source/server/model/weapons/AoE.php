@@ -30,7 +30,7 @@
                     }   
                     $fireOrder->x = $target["x"];
                     $fireOrder->y = $target["y"];
-                    $fireOrder->pubnotes .= "Shot deviates $dis hexas. ";   
+                    $fireOrder->pubnotes .= "Shot deviates $dis hexes. ";   
                     
                 }else{
                     $fireOrder->pubnotes .= "Charge dissipates. ";  

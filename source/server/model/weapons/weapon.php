@@ -421,7 +421,9 @@ class Weapon extends ShipSystem{
         if ($shooter instanceof FighterFlight){
 			$oew = $shooter->offensivebonus;
 			$mod -= Movement::getJinking($shooter, $gamedata->turn);
-			$mod -= Movement::getCombatPivots($shooter, $gamedata->turn);
+            
+            if (Movement::getCombatPivots($shooter, $gamedata->turn)>0)
+                $mod -= 1;
 		}
         
         if ($this->piercing && $this->firingMode == 2)

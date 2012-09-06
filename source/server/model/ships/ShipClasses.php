@@ -458,20 +458,10 @@
            
         
         
-        public function getHitSection($shooter, $turn, $weapon){
+        public function getHitSection($pos, $turn, $weapon){
             
             $tf = $this->getFacingAngle();
-            $shooterCompassHeading = null;
-            
-            if ($weapon->ballistic){
-                $movement = $shooter->getLastTurnMovement($turn);
-                $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-                
-                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-            }else{
-                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-            }
-                       
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
             
             $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
             
@@ -575,7 +565,7 @@
 				return $system;
         
             if ($location === null)
-                $location = $this->getHitSection($shooter, $fire->turn, $weapon);
+                $location = $this->getHitSection($pos, $fire->turn, $weapon);
             
             //print("getHitSystem, location: $location ");
             $systems = array();
@@ -789,7 +779,7 @@
 				return $system;
         
             if ($location == null)
-                $location = $this->getHitSection($shooter, $fire->turn, $weapon);
+                $location = $this->getHitSection($pos, $fire->turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -871,7 +861,7 @@
 				return $system;
         
             if ($location == null)
-                $location = $this->getHitSection($shooter, $fire->turn, $weapon);
+                $location = $this->getHitSection($pos, $fire->turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
