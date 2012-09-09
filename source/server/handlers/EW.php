@@ -52,6 +52,10 @@
 			if ($CnC && $CnC->hasCritical("RestrictedEW"))
                 $output -= 2;
 			
+            
+            if ($output < 0)
+                $output = 0;
+            
 			return $output;
 				
 		}

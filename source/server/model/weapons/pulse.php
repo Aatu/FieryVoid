@@ -191,6 +191,7 @@
     {
         public $name = "molecularPulsar";
         public $displayName = "Molecular Pulsar";
+        public $iconPath = "mediumPulse.png";
         public $animation = "trail";
         public $trailLength = 15;
         public $animationWidth = 4;

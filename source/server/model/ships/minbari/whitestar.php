@@ -7,10 +7,10 @@ class WhiteStar extends MediumShip{
         $this->pointCost = 750;
         $this->faction = "Minbari";
         $this->phpclass = "WhiteStar";
-        $this->imagePath = "img/ships/whitestarGS2.png";
+        $this->imagePath = "img/ships/whitestar.png";
         $this->shipClass = "White Star";
         $this->agile = true;
-        $this->canvasSize = 200;
+        $this->canvasSize = 100;
         $this->gravitic = true;
 
         $this->forwardDefense = 13;

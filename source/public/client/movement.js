@@ -1065,6 +1065,7 @@ shipManager.movement = {
     
     getLastCommitedMove: function(ship){
         var lm;
+        var first;
         if (!ship){
             console.log("movement.getLastCommitedMove, ship is undefined");
             console.trace();
@@ -1072,10 +1073,17 @@ shipManager.movement = {
 			
 			
         for (var i in ship.movement){
+            
+            if (!first)
+                first = ship.movement[i];
+            
             if (ship.movement[i].commit==true && ship.movement[i].animated == true)
                 lm = ship.movement[i];
            
         }
+        
+        if (!lm)
+            return first;
         return lm;
     },
     

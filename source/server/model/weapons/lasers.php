@@ -240,6 +240,7 @@ class NeutronLaser extends Laser{
 
         public $name = "improvedNeutronLaser";
         public $displayName = "Improved Neutron Laser";
+        public $iconPath = "neutronLaser.png";
         public $animation = "laser";
         public $animationColor = array(175, 225, 175);
         public $animationWidth = 5;
