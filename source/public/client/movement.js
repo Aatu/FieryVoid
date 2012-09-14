@@ -1367,9 +1367,13 @@ shipManager.movement = {
         var previous = shipManager.movement.getLastCommitedMove(ship);
                
        
-        if (!(ship.agile && previous && shipManager.movement.isTurn(previous)) && turndelay > 0){
-            //console.log(ship.name + " has turn delay, cant turn");
-            return false;
+        if ( turndelay > 0 ){
+            
+            if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous)))
+            {
+                //console.log(ship.name + " has turn delay, cant turn");
+                return false;
+            }
         }
         
         var speed = shipManager.movement.getSpeed(ship);        
