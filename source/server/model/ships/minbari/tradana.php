@@ -7,7 +7,7 @@ class Tradana extends MediumShip{
 	$this->pointCost = 575;
 	$this->faction = "Minbari";
         $this->phpclass = "Tradana";
-        $this->imagePath = "img/ships/torotha.png";
+        $this->imagePath = "img/ships/tradana.png";
         $this->shipClass = "Tradana";
 
         $this->forwardDefense = 15;

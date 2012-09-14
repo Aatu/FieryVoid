@@ -36,12 +36,12 @@ class Kutai extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240,120));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
-        $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
 		$this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
+        $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
        
-	    $this->addAftSystem(new TwinArray(3, 6, 2, 300, 60));  
-        $this->addAftSystem(new MatterCannon(4, 7, 4, 300, 180));
+	    $this->addAftSystem(new TwinArray(3, 6, 2, 60, 300));  
+        $this->addAftSystem(new MatterCannon(4, 7, 4, 180, 300));
 		$this->addAftSystem(new MatterCannon(4, 7, 4, 60, 180));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));

@@ -167,6 +167,9 @@
 				return 0;
 				
             foreach ($ship->movement as $move){
+                
+                if ($move->turn < TacGamedata::$currentTurn -1)
+                    continue;
            
                 if (($move->type == "move" || $move->type == "slipright" || $move->type == "slipleft" ) && $turndelay > 0){
                     $turndelay--;

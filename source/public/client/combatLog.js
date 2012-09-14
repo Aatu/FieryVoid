@@ -83,6 +83,10 @@ window.combatLog = {
 
             notestext = '<span class="notes">'+notes+'</span>';
 
+            //if (notes)
+            //    notestext = '<span class="notes">'+notes+'</span>';
+            //if (notes)
+            //    notestext = '<span class="pubotes">'+notes+'</span>';
             
             html += ' firing ' +counttext + weapon.displayName + targettext+'. '+chancetext +shottext + notestext;
         

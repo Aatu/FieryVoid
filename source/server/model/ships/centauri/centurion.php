@@ -31,11 +31,11 @@ class Centurion extends BaseShip{
 		$this->addPrimarySystem(new Hangar(7, 2));
 
         
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 45));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 315, 180));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 45));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 315, 180));
-		$this->addFrontSystem(new BattleLaser(5, 6, 6, 315, 45));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+		$this->addFrontSystem(new BattleLaser(5, 6, 6, 300, 60));
 		
 		$this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
@@ -49,12 +49,12 @@ class Centurion extends BaseShip{
 	
 		
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
-		$this->addLeftSystem(new BattleLaser(5, 6, 6, 225, 0));
-		$this->addLeftSystem(new MatterCannon(4, 7, 4, 225, 0));
+		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 0));
+		$this->addLeftSystem(new MatterCannon(4, 7, 4, 240, 0));
 
 		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
-		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 135));
-		$this->addRightSystem(new MatterCannon(4, 7, 4, 0, 135));
+		$this->addRightSystem(new BattleLaser(5, 6, 6, 0, 120));
+		$this->addRightSystem(new MatterCannon(4, 7, 4, 0, 120));
 
         
         

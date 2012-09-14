@@ -624,13 +624,10 @@ class Manager{
         $firstship = null;
         foreach ($gamedata->ships as $ship){
             
-            if ($ship->unavailable)
-                continue;
-            
             if ($firstship == null)
                 $firstship = $ship;
                         
-            if ($next && !$ship->isDestroyed()){
+            if ($next && !$ship->isDestroyed() && !$ship->unavailable){
                 $nextshipid = $ship->id;
                 break;
             }
