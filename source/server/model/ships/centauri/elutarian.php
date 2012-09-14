@@ -22,7 +22,7 @@ class Elutarian extends HeavyCombatVessel{
         $this->iniativebonus = 30;
         
          
-        $this->addPrimarySystem(new Reactor(6, 17, 0, -2));
+        $this->addPrimarySystem(new Reactor(6, 18, 0, -2));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
@@ -46,7 +46,7 @@ class Elutarian extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 300));
         $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         
 

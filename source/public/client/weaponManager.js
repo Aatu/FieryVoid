@@ -359,8 +359,9 @@ window.weaponManager = {
     
     calculateBaseHitChange: function(target, base, shooter){
 
-        dew = 0;
+        var dew = 0;
 		
+        //TODO: jincing ignored if range 0 and shooter not jinking!
 		if (target.flight){
 			dew = shipManager.movement.getJinking(target);
         }else{
@@ -393,25 +394,31 @@ window.weaponManager = {
         var oew = ew.getTargetingEW(shooter, target);
         oew -= dist;
 		
-        if (shooter.flight)
-			oew = shooter.offensivebonus;
-        
         var mod = 0;
         
-        if (weapon.piercing && weapon.firingMode == 2)
-            mod -= 4;
-        
-        if (shipManager.movement.hasRolled(shooter)){
-            console.log("rolled");
-            mod -= 3;
+        if (shooter.flight){
+			oew = shooter.offensivebonus;
+            mod -= shipManager.movement.getJinking(shooter);
+            
+            if (shipManager.movement.hasCombatPivoted(shooter))
+                mod--;
         }
-        
-        if (shipManager.movement.hasPivotedForShooting(shooter)){
-            console.log("pivoting");
-            mod -= 3;
+        else
+        {
+            if (weapon.piercing && weapon.firingMode == 2)
+                mod -= 4;
+
+            if (shipManager.movement.hasRolled(shooter)){
+                console.log("rolled");
+                mod -= 3;
+            }
+
+            if (shipManager.movement.hasPivotedForShooting(shooter)){
+                console.log("pivoting");
+                mod -= 3;
+            }
+            mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         }
-        if (!shooter.flight)
-			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         
         if (calledid)
 			mod -= 8;

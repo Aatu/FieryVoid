@@ -35,10 +35,10 @@ class Primus extends BaseShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 		
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
         
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
@@ -59,11 +59,11 @@ class Primus extends BaseShip{
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 40));
+        $this->addFrontSystem(new Structure( 5, 42));
         $this->addAftSystem(new Structure( 5, 40));
         $this->addLeftSystem(new Structure( 5, 56));
         $this->addRightSystem(new Structure( 5, 56));
-        $this->addPrimarySystem(new Structure( 7, 42));
+        $this->addPrimarySystem(new Structure( 7, 40));
 		
 		
     }

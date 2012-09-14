@@ -7,7 +7,7 @@ class Letann extends HeavyCombatVessel{
         $this->pointCost = 900;
         $this->faction = "Minbari";
         $this->phpclass = "Letann";
-        $this->imagePath = "img/ships/tinashi.png";
+        $this->imagePath = "img/ships/letann.png";
         $this->shipClass = "Letann Scout";
         $this->gravitic = true;
 

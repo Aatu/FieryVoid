@@ -367,6 +367,9 @@ window.shipManager = {
                 
             if (movement.type=="turnleft" || movement.type=="turnright"){
                 var last = ship.movement[i-1];
+                if (!last)
+                    return shipManager.getShipHeadingAngle(ship);
+                
                 var lastheading = shipManager.hexFacingToAngle(last.facing);
                 var destination = shipManager.hexFacingToAngle(movement.facing);
                 var perc = movement.animationtics / animation.turningspeed;
@@ -379,6 +382,9 @@ window.shipManager = {
             
             if (movement.type=="pivotleft" || movement.type=="pivotright"){
                 var last = ship.movement[i-1];
+                if (!last)
+                    return shipManager.getShipHeadingAngle(ship);
+                
                 var lastheading = shipManager.hexFacingToAngle(last.facing);
                 var destination = shipManager.hexFacingToAngle(movement.facing);
                 var perc = movement.animationtics / animation.turningspeed;
@@ -426,7 +432,6 @@ window.shipManager = {
     
     getShipPositionForDrawing: function(ship){
         var movement = null;    
-        
         for (var i in ship.movement){
             if (ship.movement[i].commit == false)
                 break;
@@ -436,10 +441,13 @@ window.shipManager = {
             if (movement.animated == true)
                 continue;
             
-            
-                                
             if (movement.type=="move" || movement.type=="slipright" || movement.type=="slipleft"){
                 var last = ship.movement[i-1];
+                
+                if (!last)
+                {
+                    break;
+                }
                 var lastpos = hexgrid.hexCoToPixel(last.x, last.y);
                 lastpos.x = lastpos.x + (last.xOffset*gamedata.zoom);
                 lastpos.y = lastpos.y + (last.yOffset*gamedata.zoom);

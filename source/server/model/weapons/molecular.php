@@ -32,7 +32,7 @@
         public $animationWidth = 7;
         public $trailLength = 20;
 
-        public $intercept = 3;
+        public $intercept = 2;
 
 
         public $loadingtime = 1;
@@ -135,7 +135,7 @@
                 $structTarget = $target->getStructureSystem(0);
             }
             else{
-                $locTarget = $target->getHitSection($shooter, $fireOrder->turn, $this);
+                $locTarget = $target->getHitSection($shooter->getCoPos(), $fireOrder->turn, $this);
                 $structTarget = $target->getStructureSystem($locTarget);
             }
 

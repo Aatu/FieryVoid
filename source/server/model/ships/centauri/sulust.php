@@ -24,7 +24,7 @@ class Sulust extends HeavyCombatVessel{
          
         $this->addPrimarySystem(new Reactor(6, 15, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 5, 8));
+        $this->addPrimarySystem(new Scanner(5, 15, 5, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(5, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
@@ -36,7 +36,7 @@ class Sulust extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
-        $this->addFrontSystem(new BattleLaser(3, 6, 2, 300, 60));
+        $this->addFrontSystem(new BattleLaser(4, 6, 2, 300, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new GuardianArray(3, 4, 2, 240, 60));
@@ -54,7 +54,7 @@ class Sulust extends HeavyCombatVessel{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 60));
         $this->addAftSystem(new Structure( 4, 60));
-        $this->addPrimarySystem(new Structure( 6, 46));
+        $this->addPrimarySystem(new Structure( 6, 40));
         
         
     }

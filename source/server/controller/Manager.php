@@ -155,6 +155,19 @@ class Manager{
     public static function canCreateGame($userid){
         return true;
     }
+    public static function registerPlayer($username, $password) {
+        try {
+            self::initDBManager();
+            $ret =  self::$dbManager->registerPlayer($username, $password);
+                      
+            return $ret;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return null;
+        }
+        
+    }
     
     public static function authenticatePlayer($username, $password) {
         try {
@@ -164,7 +177,8 @@ class Manager{
             return $ret;
         }
         catch(exception $e) {
-            throw $e;
+            Debug::error($e);
+            return null;
         }
         
     }
@@ -610,13 +624,10 @@ class Manager{
         $firstship = null;
         foreach ($gamedata->ships as $ship){
             
-            if ($ship->unavailable)
-                continue;
-            
             if ($firstship == null)
                 $firstship = $ship;
                         
-            if ($next && !$ship->isDestroyed()){
+            if ($next && !$ship->isDestroyed() && !$ship->unavailable){
                 $nextshipid = $ship->id;
                 break;
             }

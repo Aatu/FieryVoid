@@ -830,6 +830,33 @@ shipManager.movement = {
         return {left:left, right:right};
     },
     
+    hasCombatPivoted: function(ship){
+    
+        if (! ship.flight)
+            return false;
+        
+        for (var i in ship.movement){
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn)
+                continue;
+            
+            if (movement.value != 'combatpivot')
+                continue;
+                
+            if ( movement.type == "pivotleft" || movement.type == "pivotright"){
+                return true;
+            }
+            
+            if ( movement.type == "isPivotingRight" || movement.type == "isPivotingLeft"){
+                return true;
+            }
+            
+            
+        }
+        
+        return false;
+    },
+    
     hasPivotedForShooting: function(ship){
   
         for (var i in ship.movement){
@@ -1038,6 +1065,7 @@ shipManager.movement = {
     
     getLastCommitedMove: function(ship){
         var lm;
+        var first;
         if (!ship){
             console.log("movement.getLastCommitedMove, ship is undefined");
             console.trace();
@@ -1045,10 +1073,17 @@ shipManager.movement = {
 			
 			
         for (var i in ship.movement){
+            
+            if (!first)
+                first = ship.movement[i];
+            
             if (ship.movement[i].commit==true && ship.movement[i].animated == true)
                 lm = ship.movement[i];
            
         }
+        
+        if (!lm)
+            return first;
         return lm;
     },
     

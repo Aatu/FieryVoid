@@ -22,7 +22,7 @@ class Darkner extends HeavyCombatVessel{
         $this->iniativebonus = 40;
         
          
-        $this->addPrimarySystem(new Reactor(6, 17, 0, 2));
+        $this->addPrimarySystem(new Reactor(5, 17, 0, 2));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 9));
         $this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
@@ -32,15 +32,15 @@ class Darkner extends HeavyCombatVessel{
         
         
         
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new BattleLaser(3, 6, 2, 240, 0));
-        $this->addFrontSystem(new BattleLaser(3, 6, 2, 0, 120));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+        $this->addFrontSystem(new BattleLaser(4, 6, 2, 240, 0));
+        $this->addFrontSystem(new BattleLaser(4, 6, 2, 0, 120));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
         
-        $this->addAftSystem(new Thruster(4, 19, 0, 6, 2));
-        $this->addAftSystem(new Thruster(4, 19, 0, 6, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
         $this->addAftSystem(new JumpEngine(4, 15, 4, 20));
         
 

@@ -24,7 +24,11 @@
         }
         
         protected function getSystemArmour($system, $gamedata, $fireOrder){
-			return round($system->armour / 2);
+            $armor = $system->armour;
+            if (is_numeric($armor))
+                return round($armor / 2);
+            
+            return 0;
 		}
 	
 		public function setSystemDataWindow($turn){
