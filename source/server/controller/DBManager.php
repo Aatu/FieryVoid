@@ -1274,11 +1274,11 @@ class DBManager {
         $id = false;
         try {
 			if ($stmt = $this->connection->prepare(
-                "SELECT id FROM player where username = ? and password = password(?)")) {
+                "SELECT id, accesslevel FROM player where username = ? and password = password(?)")) {
 				
 				$stmt->bind_param('ss', $username, $password);
 				$stmt->execute();
-				$stmt->bind_result($id);
+				$stmt->bind_result($id, $acces);
 				$stmt->fetch();
 				
 				/* close statement */
@@ -1293,7 +1293,7 @@ class DBManager {
             throw $e;
         }
         
-        return $id;
+        return array('id' => $id, 'access' => $acces);
     }  
     
     public function releaseGameSubmitLock($gameid)

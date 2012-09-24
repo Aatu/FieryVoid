@@ -71,7 +71,7 @@
                 $ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
                  
                 foreach($ships2 as $ship){
-                    if (in_array($ship, $ships1))
+                    if (isset($ships1[$ship->id]))
                         continue;
                     
                     $fireOrder->notes .= $ship->name ." in adjacent hex. "; 

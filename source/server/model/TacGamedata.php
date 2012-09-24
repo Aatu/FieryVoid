@@ -362,7 +362,7 @@ class TacGamedata{
             $curDis = mathlib::getDistance($pos, $shipPos);
         
             if ($curDis <= $dis){
-                $ships[] = $ship;
+                $ships[$ship->id] = $ship;
             }
         }
         

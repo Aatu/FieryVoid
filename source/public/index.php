@@ -7,17 +7,14 @@
 	
 	if (isset($_POST["user"]) && isset($_POST["pass"])){
 		
-		$userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
+		$user = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
 		
-		if ($userid != false){
-			$_SESSION["user"] = $userid;
+		if ($user != false){
+			$_SESSION["user"] = $user['id'];
+            $_SESSION["access"] = $user['access'];
 			header('Location: games.php');
-		
 		}
-		
 	}
-	
-	
 ?>
 
 <!DOCTYPE HTML>

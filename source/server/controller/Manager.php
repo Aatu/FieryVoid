@@ -198,7 +198,7 @@ class Manager{
         self::advanceGameState($userid, $gameid);
 
         if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
-            Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
+            //Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
             $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
             if ($gamedata == null)
                 return null;
@@ -297,7 +297,7 @@ class Manager{
             //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
             $endtime = time();
-            Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+            //Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             return '{}';
             
         }catch(exception $e) {
@@ -443,7 +443,7 @@ class Manager{
             
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
-                Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
+                //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
             }
             
@@ -485,7 +485,7 @@ class Manager{
             self::$dbManager->releaseGameSubmitLock($gameid);
             
             $endtime = time();
-            Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
+            //Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
