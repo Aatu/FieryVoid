@@ -42,13 +42,16 @@ class Rongoth extends HeavyCombatVessel{
         $this->addFrontSystem(new HeavyPulse(5, 6, 4, 300, 60));
         
         
-        $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-        $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 120, 300));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 60, 240));
+        $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
+        $this->addAftSystem(new LightPulse(3, 4, 2, 120, 300));
+        $this->addAftSystem(new LightPulse(3, 4, 2, 60, 240));
         
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
+        
+        $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -24,28 +24,28 @@ class Glan extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 25, 5, 8));
+        $this->addPrimarySystem(new Scanner(6, 24, 5, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 3));
-		$this->addPrimarySystem(new JumpEngine(6, 30, 3, 20));
-		$this->addPrimarySystem(new Hangar(6, 14));
-        
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
-        
-        $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
-        
-		$this->addFrontSystem(new MagGun(5, 9, 8, 300, 60));
-		$this->addFrontSystem(new MagGun(5, 9, 8, 300, 60));
-		//aft
-		          
+        $this->addPrimarySystem(new JumpEngine(6, 30, 3, 20));
+        $this->addPrimarySystem(new Hangar(6, 14));
 
-		$this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));	
-		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-		$this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
-		
+        $this->addFrontSystem(new MediumLaser(4, 6, 5, 300, 60));
+        
+        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
+        
+        $this->addFrontSystem(new MediumLaser(4, 6, 5, 300, 60));
+
+        $this->addFrontSystem(new MagGun(4, 9, 8, 300, 60));
+        $this->addFrontSystem(new MagGun(4, 9, 8, 300, 60));
+        //aft
+
+
+        $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));	
+        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
+
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
@@ -53,15 +53,15 @@ class Glan extends BaseShip{
         
 		//left
 		
-		$this->addLeftSystem(new MediumPulse(2, 6, 3, 270, 90));
-		$this->addLeftSystem(new TwinArray(3, 6, 2, 270, 90));
+        $this->addLeftSystem(new MediumPulse(2, 6, 3, 270, 90));
+        $this->addLeftSystem(new TwinArray(3, 6, 2, 270, 90));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
               
 
-		//right
-		$this->addRightSystem(new MediumPulse(2, 6, 3, 270, 90));
-		$this->addRightSystem(new TwinArray(3, 6, 2, 270, 90));	
-		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
+        //right
+        $this->addRightSystem(new MediumPulse(2, 6, 3, 270, 90));
+        $this->addRightSystem(new TwinArray(3, 6, 2, 270, 90));	
+        $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         
 		
 		//structures

@@ -4,12 +4,11 @@ class Dagkar extends MediumShip{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-		$this->pointCost = 750;
-		$this->faction = "Narn";
+        $this->pointCost = 750;
+        $this->faction = "Narn";
         $this->phpclass = "Dagkar";
         $this->imagePath = "img/ships/dagkar.png";
         $this->shipClass = "Dag'Kar";
-        $this->agile = true;
         
 
         $this->forwardDefense = 14;
@@ -28,40 +27,36 @@ class Dagkar extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
-		$this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
+        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
         
 
         
         //front
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-		$this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-		$this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        
-        
-   
-		//aft
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 
-       
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        
+        //aft
 
-        $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
         
 
-		//structures
+        //structures
         $this->addPrimarySystem(new Structure(4, 55));
         
     }
