@@ -174,7 +174,11 @@ class Reactor extends ShipSystem{
     public $primary = true;
     public $outputType = "Power";
     
-    public $possibleCriticals = array(11=>"OutputReduced2", 15=>"OutputReduced4", 19=>"OutputReduced6", 27=>"OutputReduced8", 100=>"ForcedOfflineOneTurn");
+    public $possibleCriticals = array(
+        11=>"OutputReduced2",
+        15=>"OutputReduced4",
+        19=>"OutputReduced8",
+        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
     
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -192,7 +196,10 @@ class Engine extends ShipSystem{
     public $primary = true;
     public $boostable = true;
     
-    public $possibleCriticals = array(15=>"OutputReduced2", 21=>"OutputReduced4", 27=>"ForcedOfflineOneTurn");
+    public $possibleCriticals = array(
+        15=>"OutputReduced2",
+        21=>"OutputReduced4",
+        28=>"ForcedOfflineOneTurn");
     
     function __construct($armour, $maxhealth, $powerReq, $output, $boostEfficiency, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -211,8 +218,12 @@ class Scanner extends ShipSystem{
     public $boostable = true;
     public $outputType = "EW";
     
-    public $possibleCriticals = array(15=>"OutputReduced2", 19=>"OutputReduced4", 23=>"OutputReduced6", 27=>"OutputReduced8");
-        
+    public $possibleCriticals = array(
+        15=>"OutputReduced1",
+        19=>"OutputReduced2",
+        23=>"OutputReduced3",
+        27=>"OutputReduced4");
+    
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         

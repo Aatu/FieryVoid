@@ -113,15 +113,14 @@ class ShipSystem{
     }
     
     public function getArmour($gamedata, $shooter){
-		return $this->armour;
-	}
+        return $this->armour;
+    }
 	
-	public function getArmourPos($gamedata, $pos){
-		return $this->armour;
-	}
+    public function getArmourPos($gamedata, $pos){
+        return $this->armour;
+    }
     
     public function setSystemDataWindow($turn){
-        $critDesc = array();
         $counts = array();
         
         foreach ($this->criticals as $crit){
@@ -188,12 +187,12 @@ class ShipSystem{
         foreach ($this->criticals as $critical){
             if ($critical->phpclass == $type && $critical->inEffect){
 				
-				if ($turn === false){
-					$count++;
-				}else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
-                    $count++;
-				}
-			}
+                if ($turn === false){
+                        $count++;
+                }else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
+                $count++;
+                }
+            }
                 
         }
     
