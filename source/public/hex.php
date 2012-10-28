@@ -84,7 +84,9 @@
 	<script src="client/UI/shipSelect.js"></script>
 	<script src="client/ballistics.js"></script>
 	<script src="client/damageDrawer.js"></script>
-	
+	<script src="client/model/ship.js"></script>
+    <script src="client/model/shipSystem.js"></script>
+    <script src="client/model/systemFactory.js"></script>
 </head>
 
 

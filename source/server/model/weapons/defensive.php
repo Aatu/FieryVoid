@@ -4,6 +4,7 @@
 
         public $trailColor = array(30, 170, 255);
         
+        public $jsClass = 'Interceptor';
         public $name = "interceptorMkI";
         public $displayName = "Interceptor MK I";
         public $animation = "trail";
@@ -33,7 +34,7 @@
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
             $this->tohitPenalty = $this->getOutput();
-            $this->damagePenalty = $this->getOutput();
+            $this->damagePenalty = 0;
      
         }
         
@@ -50,7 +51,8 @@
         }
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            parent::__construct(
+                $armour, $maxhealth, $powerReq, $startArc, $endArc, $this->output);
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }

@@ -2,6 +2,7 @@
 
 class ShipSystem{
 
+    public $jsClass = false;
     public $destroyed = false;
     public $startArc, $endArc;
     public $location; //0:primary, 1:front, 2:rear, 3:left, 4:right;

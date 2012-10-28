@@ -65,12 +65,11 @@ shipManager.systems = {
 		
 		if (this.isDestroyed(ship, system))
 			return 0;
-		
+        
 		if (shipManager.power.isOffline(ship, system))
 			return 0;
 		
 		var output = system.output + system.outputMod + shipManager.power.getBoost(ship, system);
-		
         
         return output;
     },

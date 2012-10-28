@@ -481,7 +481,7 @@ gamedata = {
             gamedata.activeship = serverdata.activeship;
             gamedata.gameid = serverdata.id;
             gamedata.slots = serverdata.slots;
-            gamedata.ships = serverdata.ships;
+            
             gamedata.thisplayer = serverdata.forPlayer;
             gamedata.waiting = serverdata.waiting;
             gamedata.status = serverdata.status;
@@ -490,12 +490,24 @@ gamedata = {
             shipManager.initiated = 0;
             //combatLog.constructLog();
             
+            gamedata.setShipsFromJson(serverdata.ships);
             
             
             gamedata.initPhase();
             drawEntities();
         }
         gamedata.checkGameStatus();
+    },
+            
+    setShipsFromJson: function(jsonShips)
+    {
+        gamedata.ships = Array();
+        
+        for (var i in jsonShips)
+        {
+            var ship = jsonShips[i];
+            gamedata.ships[i] = new Ship(ship);
+        }
     },
     
     listShipPositions: function(){

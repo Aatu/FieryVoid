@@ -68,8 +68,8 @@ class Weapon extends ShipSystem{
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc ){
-        parent::__construct($armour, $maxhealth, $powerReq, 0 );
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output = 0){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
          
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;

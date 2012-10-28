@@ -277,10 +277,8 @@ window.weaponManager = {
     
     },
     
-    calculateRangePenalty: function(shooter, target, weapon){
-        var sPos = shipManager.getShipPositionInWindowCo(shooter);
-        var tPos = shipManager.getShipPositionInWindowCo(target);
-        var dis = mathlib.getDistance(sPos, tPos);
+    calculateRangePenalty: function(shooterpos, targetpos, weapon){
+        var dis = mathlib.getDistance(shooterpos, targetpos);
         var rangePenalty = (weapon.rangePenalty/hexgrid.hexWidth()*dis);
     
         return rangePenalty;
@@ -293,38 +291,37 @@ window.weaponManager = {
         var shooter = gamedata.getShip(ball.shooterid);
         var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         var target = gamedata.getShip(ball.targetid);
+        var launchPos = hexgrid.positionToPixel(ball.position);
+        var tPos = shipManager.getShipPositionInWindowCo(target);
         
-        var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
+        var rangePenalty = weaponManager.calculateRangePenalty(launchPos, tPos, weapon);
         
-        var dew = ew.getDefensiveEW(target);
-        if (target.flight)
-			dew = shipManager.movement.getJinking(target);
+        var defence = weaponManager.getShipDefenceValuePos(launchPos, target);
+        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
+        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
         
-        var bdew = ew.getSupportedBDEW(target);
-        if (target.flight)
-            bdew = 0;
-        
-        var sdew = ew.getSupportedDEW(target);
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
         
         var oew = ew.getTargetingEW(shooter, target);
         oew -= dist;
-        
-        var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
+       
         
         var firecontrol =  weaponManager.getFireControl(target, weapon);
         
         var intercept = weaponManager.getInterception(ball);
         
         var mod = 0;
+        
+        mod -= target.getHitChangeMod(shooter, launchPos);
+        
         if (!shooter.flight)
 			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
        
 		if (calledid)
 			mod -= 8;
         
-        var goal = (defence - dew - bdew - sdew - rangePenalty - intercept + oew + soew + firecontrol + mod);
+        var goal = (baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
         console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
@@ -383,8 +380,10 @@ window.weaponManager = {
     
     calculateHitChange: function(shooter, target, weapon, calledid){
     
-        var rangePenalty = weaponManager.calculateRangePenalty(shooter, target, weapon);
-        var defence = weaponManager.getShipDefenceValue(shooter, target);
+        var sPos = shipManager.getShipPositionInWindowCo(shooter);
+        var tPos = shipManager.getShipPositionInWindowCo(target);
+        var rangePenalty = weaponManager.calculateRangePenalty(sPos, tPos, weapon);
+        var defence = weaponManager.getShipDefenceValuePos(sPos, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
         
@@ -395,6 +394,8 @@ window.weaponManager = {
         oew -= dist;
 		
         var mod = 0;
+        
+        mod -= target.getHitChangeMod(shooter, sPos);
         
         if (shooter.flight){
 			oew = shooter.offensivebonus;
