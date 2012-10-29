@@ -82,49 +82,89 @@ class Firing{
             if ($ship->unavailable)
                 continue;
             
-            $intercepts = Array(); 
-            foreach($ship->systems as $weapon){
-                                
-                if (!($weapon instanceof Weapon))
-                    continue;
-                
-                $weapon = $weapon->getWeaponForIntercept();
-                
-                if (!$weapon)
-                    continue;
-                
-                if ($weapon->intercept == 0)
-                    continue;
-                    
-                if ($weapon->isDestroyed()){
-                    //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
-                    continue;
-                }
-                
-                //CHECK IF THIS GUN IS ALREADY FIRING!
-                if ($weapon->firedOnTurn($gd->turn)){
-					continue;
-				}
-				
-                if ($weapon->isOfflineOnTurn($gd->turn))
-                    continue;
-                
-                if ($weapon->ballistic)
-                    continue;
-                    
-                if ($weapon->loadingtime > 1 || $weapon->turnsloaded < $weapon->loadingtime || $weapon->firedOnTurn($gd->turn))
-                    continue;
-                   
-                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
-                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
-                    
+            if ($ship instanceof FighterFlight)
+            {
+                $intercepts = self::getFighterIntercepts($gd, $ship);
+            }
+            else
+            {
+                $intercepts = self::getShipIntercepts($gd, $ship);
             }
             
             self::doIntercept($gd, $ship, $intercepts);
-            
-            
         }
         
+    }
+    
+    private static function getFighterIntercepts($gd, $ship)
+    {
+        $intercepts = Array(); 
+        
+        foreach($ship->systems as $fighter)
+        {
+            foreach ($fighter->systems as $weapon)
+            {
+            if (self::isValidInterceptor($gd, $weapon) === false)
+                continue;
+
+                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
+                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
+            }
+        }
+        return $intercepts;
+    }
+    
+    private static function getShipIntercepts($gd, $ship)
+    {
+        $intercepts = Array(); 
+        
+        foreach($ship->systems as $weapon)
+        {
+            if (self::isValidInterceptor($gd, $weapon) === false)
+               continue;
+
+            $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
+            $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
+        }
+        return $intercepts;
+    }
+    
+    private static function isValidInterceptor($gd, $weapon)
+    {
+
+        if (!($weapon instanceof Weapon))
+            return false;
+
+        $weapon = $weapon->getWeaponForIntercept();
+
+        if (!$weapon)
+            return false;
+        
+        if ($weapon->intercept == 0)
+            return false;
+
+        if ($weapon->isDestroyed()){
+            //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
+            return false;
+        }
+
+        //CHECK IF THIS GUN IS ALREADY FIRING!
+        if ($weapon->firedOnTurn($gd->turn)){
+            return false;
+        }
+
+        if ($weapon->isOfflineOnTurn($gd->turn))
+            return false;
+
+        if ($weapon->ballistic)
+            return false;
+
+        if ($weapon->loadingtime > 1 || 
+            $weapon->turnsloaded < $weapon->loadingtime || 
+            $weapon->firedOnTurn($gd->turn))
+            return false;
+        
+        return true;
     }
     
     public static function doIntercept($gd, $ship, $intercepts){

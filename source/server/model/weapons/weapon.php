@@ -145,6 +145,14 @@ class Weapon extends ShipSystem{
         return false;
     }
     
+    private function formatFCValue($fc)
+    {
+        if ($fc === null)
+            return "-";
+        
+        return number_format(($fc * 5), 0);
+    }
+    
     public function setSystemDataWindow($turn){
 
         $this->data["Loading"] = $this->turnsloaded."/".$this->getNormalLoad();
@@ -163,9 +171,9 @@ class Weapon extends ShipSystem{
         
         //public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals 
         
-        $fcfight = number_format(($this->fireControl[0] * 5), 0);
-        $fcmed = number_format(($this->fireControl[1] * 5), 0);
-        $fccap = number_format(($this->fireControl[2] * 5), 0);
+        $fcfight = $this->formatFCValue($this->fireControl[0]);
+        $fcmed = $this->formatFCValue($this->fireControl[1]);
+        $fccap = $this->formatFCValue($this->fireControl[2]);
         
         $this->data["Fire control (fighter/med/cap)"] = "$fcfight/$fcmed/$fccap";
         
