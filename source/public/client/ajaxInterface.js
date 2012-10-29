@@ -37,8 +37,114 @@ window.ajaxInterface = {
             error : ajaxInterface.errorAjax
         });
     },
-    
+            
     construcGamedata: function(){
+        
+        var tidyships = Array();
+        
+        for (var i in gamedata.ships)
+        {
+            var ship = gamedata.ships[i];
+            var newShip = {
+                'phpclass': ship.phpclass,
+                'userid':ship.userid,
+                'slot':ship.slot,
+                'id':ship.id
+            };
+            newShip.movement = Array();
+            newShip.EW = Array();
+            newShip.systems = Array();
+            
+            if (gamedata.isMyShip(ship)){
+                for (var a = ship.movement.length-1; a>=0; a--){
+                    var move = ship.movement[a];
+                    if (move.turn == gamedata.turn){
+                        newShip.movement[a] = move;
+                    }
+                }
+
+                for (var a = ship.EW.length-1; a>=0; a--){
+                    var ew = ship.EW[a];
+                    if (ew.turn == gamedata.turn){
+                        newShip.EW[a] = ew;
+                    }
+                }
+                var systems = Array();
+
+                for (var a in ship.systems){
+                    var system = ship.systems[a];
+
+                    if (ship.flight){
+                        var fighterSystems = Array();
+                        for (var c in system.systems){
+                            var fightersystem = system.systems[c];
+
+                            for (var b = fightersystem.fireOrders.length-1; b>=0; b--){
+                                var fire = fightersystem.fireOrders[b];
+                                if (fire.turn < gamedata.turn){
+                                    fightersystem.fireOrders.splice(b,1);
+                                }
+                            }
+                            fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders};
+                        }
+
+                        systems[a] = {'id': system.id, 'systems': fighterSystems};
+
+
+                    }else{
+                        var fires = Array();
+                        if (system.dualWeapon){
+                            for (var c in system.weapons){
+                                var weapon = system.weapons[c];
+                                for (var b = weapon.fireOrders.length-1; b>=0; b--){
+                                    var fire = weapon.fireOrders[b];
+                                    if (fire.turn < gamedata.turn){
+                                        weapon.fireOrders.splice(b,1);
+                                    }
+                                }
+                                fires = fires.concat(weapon.fireOrders);
+                            }
+                            
+                        }else{
+                            for (var b = system.fireOrders.length-1; b>=0; b--){
+                                var fire = system.fireOrders[b];
+                                if (fire.turn < gamedata.turn){
+                                    system.fireOrders.splice(b,1);
+                                }
+                            }
+                            fires = system.fireOrders;
+                        }
+                        
+                        for (var b = system.power.length-1; b>=0; b--){
+                            var power = system.power[b];
+                            if (power.turn < gamedata.turn){
+                                system.power.splice(b,1);
+                            }
+                        }
+                        systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': fires};
+                    }
+
+                }
+            
+                newShip.systems = systems;
+                tidyships.push(newShip);
+            }
+        }
+       
+        var gd = {
+            turn: gamedata.turn,
+            phase: gamedata.gamephase,
+            activeship: gamedata.activeship,
+            gameid: gamedata.gameid,
+            playerid: gamedata.thisplayer,
+            slotid: gamedata.selectedSlot,
+            ships: JSON.stringify(tidyships)
+        };
+  
+        return gd;
+    },
+    
+    construcGamedata2: function(){
         
         var tidyships = jQuery.extend(true, {}, gamedata.ships);
         

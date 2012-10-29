@@ -586,9 +586,9 @@ window.shipManager = {
 			if (shipManager.systems.isDestroyed(ship, stru))
 				return true;
 
-                        var react = shipManager.systems.getSystemByName(ship, "reactor");
-                        if (shipManager.systems.isDestroyed(ship, react))
-                            return true;
+            var react = shipManager.systems.getSystemByName(ship, "reactor");
+            if (shipManager.systems.isDestroyed(ship, react))
+                return true;
         }
             
         return false;

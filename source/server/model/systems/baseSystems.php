@@ -112,6 +112,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $displayName = "Shield";
     public $startArc = 0;
     public $endArc = 0;
+    public $jsClass = 'Shield';
     
     //defensive system
     public $defensiveSystem = true;

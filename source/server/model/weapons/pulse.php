@@ -9,10 +9,9 @@
         
         public $trailColor = array(190, 75, 20);
         public $animationColor = array(190, 75, 20);
-        public $grouping = 5;
-        public $shots = 6;
-        public $defaultShots = 6;
+        public $grouping = 20;
         public $rof = 1;
+        public $maxpulses = 6;
         
 
         public function setSystemDataWindow($turn){
@@ -23,6 +22,49 @@
             
             parent::setSystemDataWindow($turn);
         }
+        
+        protected function getPulses()
+        {
+            return Dice::d(5);
+        }
+        
+        
+    public function fire($gamedata, $fireOrder){
+    
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
+        $this->firingMode = $fireOrder->firingMode;
+        
+        $pos = $shooter->getCoPos();
+                    
+        $this->calculateHit($gamedata, $fireOrder);
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
+        $pulses = $this->getPulses(); 
+        
+        $fireOrder->notes .= " pulses: $pulses";
+        $fireOrder->shots = $this->maxpulses;
+        $needed = $fireOrder->needed;
+        $rolled = Dice::d(100);
+        if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
+            //$fireOrder->pubnotes .= "Shot intercepted. ";
+            $fireOrder->intercepted += $pulses;
+        }
+
+        if ($rolled <= $needed){
+            $extra = floor(($needed - $rolled) / ($this->grouping));
+            $fireOrder->notes .= " extra pulses: $extra";
+            $pulses += $extra;
+            if ($pulses > $this->maxpulses)
+                $pulses = $this->maxpulses;
+            
+            $fireOrder->shotshit = $pulses;
+            for ($i=0;$i<$pulses;$i++){
+                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+            }
+        }
+        
+        $fireOrder->rolled = 1;//Marks that fire order has been handled
+    }
     
         
         /*
@@ -69,8 +111,6 @@
         public $rangePenalty = 2;
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
         
-        public $grouping = 5;
-        
         public $intercept = 2;
         
         
@@ -103,8 +143,6 @@
         public $rangePenalty = 1;
         public $fireControl = array(1, 3, 4); // fighters, <mediums, <capitals 
         
-        public $grouping = 5;
-        
         public $intercept = 2;
         
         
@@ -135,8 +173,6 @@
         public $rangePenalty = 0.5;
         public $fireControl = array(-1, 3, 4); // fighters, <mediums, <capitals 
         
-        public $grouping = 5;
-
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -207,8 +243,6 @@
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
-
-        public $grouping = 5;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {

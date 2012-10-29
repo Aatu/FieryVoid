@@ -143,7 +143,7 @@ body {
     position:absolute;
     top:-3px;
     left:-3px;
-    height:35px;
+    height:25px;
     width:700px;
     opacity:0.85;
     -moz-box-shadow: 5px 5px 10px black;
@@ -159,7 +159,7 @@ body {
 
 #phaseheader .value{
     font-family:arial;
-    font-size:20px;
+    font-size:16px;
     margin-left:10px;
 }
 
@@ -344,7 +344,7 @@ body {
 
 #botPanel{
 	width:200px;
-	height:200px;
+	height:180px;
 	opacity:0.85;
     color: #496791; /* #deebff; */
     background-color: #04161C;
@@ -352,7 +352,7 @@ body {
 	border-right: 1px solid #496791;
 	position:absolute;
 	left:0px;
-	bottom:0px;
+	bottom:-140px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
@@ -364,12 +364,21 @@ body {
 	border-radius: 0px 20px 0px 0px;
     -moz-border-radius: 0px 20px 0px 0px;
     -webkit-border-top-right-radius: 20px;
+    -webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	-o-transition: all 0.1s linear;
+	transition: all 0.1s linear;
 
+}
+
+#botPanel.mouseover
+{
+    bottom:0px;
 }
 
 .BPcontainer{
 	width:190px;
-	height:190px;
+	height:170px;
 	margin: 2px 5px 5px 5px; 
 	display:none;
 }
@@ -490,7 +499,7 @@ body.phase1 #botPanel .ewentry .button2{
 #botPanel .frontcontainer {
 	position:absolute;
 	left:37px;
-	top:28px;
+	top:18px;
 	width:106px;
 }
 
@@ -501,7 +510,7 @@ body.phase1 #botPanel .ewentry .button2{
 #botPanel .aftcontainer {
 	position:absolute;
 	left:37px;
-	bottom:12px;
+	bottom:2px;
 	width:106px;
 }
 
@@ -512,7 +521,7 @@ body.phase1 #botPanel .ewentry .button2{
 #botPanel .portcontainer {
 	position:absolute;
 	left:10px;
-	top:55px;
+	top:45px;
 }
 
 #botPanel .portcontainer .system .icon{
@@ -522,7 +531,7 @@ body.phase1 #botPanel .ewentry .button2{
 #botPanel .starboardcontainer {
 	position:absolute;
 	right:30px;
-	top:55px;
+	top:45px;
 }
 
 #botPanel .starboardcontainer .system .icon{
@@ -552,7 +561,7 @@ body.phase1 #botPanel .ewentry .button2{
 	width:96px;
 	height:96px;
 	position:absolute;
-	top:58px;
+	top:48px;
 	left:40px;
 }
 
@@ -580,13 +589,22 @@ body.phase1 #botPanel .ewentry .button2{
 	border-left: 1px solid #496791;
 	position:absolute;
 	left:210px;
-	bottom:0px;
+	bottom:-140px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
 	font-family:arial;
 	font-size:10px;
+    -webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	-o-transition: all 0.1s linear;
+	transition: all 0.1s linear;
+}
+
+#logcontainer.mouseover
+{
+    bottom:0px;
 }
 
 .logUiEntry{

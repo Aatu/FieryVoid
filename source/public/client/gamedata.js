@@ -501,7 +501,7 @@ gamedata = {
             
     setShipsFromJson: function(jsonShips)
     {
-        gamedata.ships = Array();
+        //gamedata.ships = Array();
         
         for (var i in jsonShips)
         {

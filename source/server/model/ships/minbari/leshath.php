@@ -14,8 +14,8 @@ class Leshath extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 1500;
-	$this->faction = "Minbari";
+        $this->pointCost = 1500;
+        $this->faction = "Minbari";
         $this->phpclass = "Leshath";
         $this->imagePath = "img/ships/leshath.png";
         $this->shipClass = "Leshath Heavy Scout";
@@ -44,7 +44,7 @@ class Leshath extends BaseShip{
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-	$this->addFrontSystem(new Thruster(4, 25, 0, 6, 1));
+        $this->addFrontSystem(new Thruster(4, 25, 0, 6, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 

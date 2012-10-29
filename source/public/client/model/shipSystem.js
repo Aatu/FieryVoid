@@ -41,3 +41,20 @@ var Interceptor = function(json, ship)
 }
 
 Interceptor.prototype = Object.create( DefensiveSystem.prototype );
+
+var Shield = function(json, ship)
+{
+    DefensiveSystem.call( this, json, ship);
+    this.defensiveType = "Shield";
+}
+
+Shield.prototype = Object.create( DefensiveSystem.prototype );
+
+Shield.prototype.getDefensiveHitChangeMod = 
+    function(target, shooter, pos)
+{
+    if (shooter.flight && mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)
+        return 0;
+    
+    return shipManager.systems.getOutput(target, this);
+}

@@ -745,11 +745,7 @@ class Manager{
             }
             
             
-            
-            
-            
-            
-            $ship = new $value["phpclass"]($value["id"], $value["userid"], $value["name"], $value["slot"]);
+            $ship = new $value["phpclass"]($value["id"], $value["userid"], 'name', $value["slot"]);
             $ship->setMovements($movements);    
             $ship->EW = $EW;
             

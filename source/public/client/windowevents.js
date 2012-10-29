@@ -71,6 +71,16 @@ jQuery(function(){
 
 window.windowEvents = {
     
+    botElementMouseOver: function (e)
+    {
+        $(this).addClass("mouseover");
+    },
+    
+    botElementMouseOut: function (e)
+    {
+        $(this).removeClass("mouseover");
+    },
+            
     onKeyUp: function(e){
         
         if (windowEvents.chatfocus)
