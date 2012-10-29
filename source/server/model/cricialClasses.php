@@ -76,6 +76,17 @@ class OutputReduced2 extends Critical{
 
 }
 
+class OutputReduced3 extends Critical{
+
+    public $description = "Output reduced.";
+    public $outputMod = -3;
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+
+}
+
 class OutputReduced4 extends Critical{
 
     public $description = "Output reduced.";
