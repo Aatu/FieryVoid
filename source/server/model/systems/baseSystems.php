@@ -24,7 +24,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
     public $specialAbilities = array("Jammer");
     public $primary = true;
     
-    //public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
+    public $possibleCriticals = array(16=>"PartialBurnout", 23=>"SevereBurnout");
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
@@ -119,7 +119,10 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $tohitPenalty = 0;
     public $damagePenalty = 0;
     
-    //public $possibleCriticals = array(16=>"StrReduced", 20=>"EffReduced", 25=>array("StrReduced", "EffReduced"));
+    public $possibleCriticals = array(
+            16=>"OutputReduced1",
+            20=>"DamageReductionRemoved",
+            25=>array("OutputReduced1", "DamageReductionRemoved"));
 
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
@@ -156,14 +159,17 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if ($this->checkIsFighterUnderShield($target, $shooter))
             return 0;
         
-        return $this->output;
+        return $this->getOutput();
     }
     
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
         if ($this->checkIsFighterUnderShield($target, $shooter))
             return 0;
         
-        return $this->output;
+        if ($this->hasCritical('DamageReductionRemoved'))
+            return 0;
+        
+        return $this->getOutput();
     }
 }
 

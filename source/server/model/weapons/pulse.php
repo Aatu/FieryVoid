@@ -19,6 +19,8 @@
             $this->data["Weapon type"] = "Pulse";
             $this->data["Damage type"] = "Standard";
             $this->data["Grouping range"] = $this->grouping + "%";
+            $this->data["Max pulses"] = $this->maxpulses;
+            $this->data["Pulses"] = '1-5';
             
             parent::setSystemDataWindow($turn);
         }
@@ -28,44 +30,48 @@
             return Dice::d(5);
         }
         
-        
-    public function fire($gamedata, $fireOrder){
-    
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
-        $this->firingMode = $fireOrder->firingMode;
-        
-        $pos = $shooter->getCoPos();
-                    
-        $this->calculateHit($gamedata, $fireOrder);
-        $intercept = $this->getIntercept($gamedata, $fireOrder);
-        $pulses = $this->getPulses(); 
-        
-        $fireOrder->notes .= " pulses: $pulses";
-        $fireOrder->shots = $this->maxpulses;
-        $needed = $fireOrder->needed;
-        $rolled = Dice::d(100);
-        if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
-            //$fireOrder->pubnotes .= "Shot intercepted. ";
-            $fireOrder->intercepted += $pulses;
-        }
 
-        if ($rolled <= $needed){
-            $extra = floor(($needed - $rolled) / ($this->grouping));
-            $fireOrder->notes .= " extra pulses: $extra";
-            $pulses += $extra;
-            if ($pulses > $this->maxpulses)
-                $pulses = $this->maxpulses;
-            
-            $fireOrder->shotshit = $pulses;
-            for ($i=0;$i<$pulses;$i++){
-                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+        public function fire($gamedata, $fireOrder){
+
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $target = $gamedata->getShipById($fireOrder->targetid);
+            $this->firingMode = $fireOrder->firingMode;
+
+            $pos = $shooter->getCoPos();
+
+            $this->calculateHit($gamedata, $fireOrder);
+            $intercept = $this->getIntercept($gamedata, $fireOrder);
+            $pulses = $this->getPulses(); 
+
+            $fireOrder->notes .= " pulses: $pulses";
+            $fireOrder->shots = $this->maxpulses;
+            $needed = $fireOrder->needed;
+            $rolled = Dice::d(100);
+            if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
+                //$fireOrder->pubnotes .= "Shot intercepted. ";
+                $fireOrder->intercepted += $pulses;
             }
+
+            if ($rolled <= $needed){
+                $extra = $this->getExtraPulses($needed, $rolled);
+                $fireOrder->notes .= " extra pulses: $extra";
+                $pulses += $extra;
+                if ($pulses > $this->maxpulses)
+                    $pulses = $this->maxpulses;
+
+                $fireOrder->shotshit = $pulses;
+                for ($i=0;$i<$pulses;$i++){
+                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+                }
+            }
+
+            $fireOrder->rolled = 1;//Marks that fire order has been handled
         }
-        
-        $fireOrder->rolled = 1;//Marks that fire order has been handled
-    }
     
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
         
         /*
         public function damage($target, $shooter, $fireOrder){
@@ -236,7 +242,8 @@
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
         public $rof = 2;
-        public $shots = 7;
+        public $maxpulses = 7;
+        public $grouping = 15;
 
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -251,8 +258,40 @@
         
         public function setSystemData($data, $subsystem){
 			parent::setSystemData($data, $subsystem);
-            $this->setPulsarShots();
+            if ($this->turnsloaded == 1)
+            {
+                $this->maxpulses = 3;
+            }
+            else
+            {
+                $this->maxpulses = 7;
+            }
 		}
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if ($this->turnsloaded == 1)
+            {
+                $this->data["Pulses"] = '1-3';
+                $this->data["Grouping range"] = 'NONE';
+            }
+            else
+            {
+                $this->data["Pulses"] = '1-5';
+            }
+        }
+        
+        protected function getExtraPulses($needed, $rolled)
+        {
+            if ($this->turnsloaded == 1)
+            {
+                return 0;
+            }
+            else
+            {
+                return parent::getExtraPulses($needed, $rolled);
+            }
+        }
 
         public function getDamage($fireOrder){ return 10; }
  
@@ -265,23 +304,18 @@
         {
             $this->maxDamage = 10 - $this->dp;
         }
-
-        private function setPulsarShots()
+        
+        protected function getPulses()
         {
-            // Molecular pulsars can shoot after 1 turn with reduced effect.
             if ($this->turnsloaded == 1)
             {
-                $shots = 3;
-                $defaultShots = 3;
+                return Dice::d(3);
             }
             else
             {
-                $shots = 7;
-                $defaultShots = 7;
+                return Dice::d(5);
             }
+            
         }
     }
-
-
-
 ?>

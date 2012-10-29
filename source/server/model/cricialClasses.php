@@ -130,6 +130,37 @@ class OutputReduced10 extends Critical{
 
 }
 
+class PartialBurnout extends Critical{
+
+    public $description = "Efficiency halved.";
+    public $outputMod = -0.5;
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+
+}
+
+class SevereBurnout extends Critical{
+
+    public $description = "System non functional";
+    public $outputMod = -100;
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+
+}
+
+class DamageReductionRemoved extends Critical{
+
+    public $description = "Damage reduction disabled";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+}
+
 class ForcedOfflineOneTurn extends Critical{
 
     public $description = "Forced offline for ";

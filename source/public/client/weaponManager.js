@@ -324,7 +324,7 @@ window.weaponManager = {
         var goal = (baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);
-        console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " dew: " + dew + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+        console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
         //if (change > 100)
         //  change = 100;

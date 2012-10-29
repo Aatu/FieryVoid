@@ -49,7 +49,8 @@ window.ajaxInterface = {
                 'phpclass': ship.phpclass,
                 'userid':ship.userid,
                 'slot':ship.slot,
-                'id':ship.id
+                'id':ship.id,
+                'name': ship.name
             };
             newShip.movement = Array();
             newShip.EW = Array();
