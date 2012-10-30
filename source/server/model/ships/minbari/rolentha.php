@@ -30,15 +30,15 @@ class Rolentha extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(5, 28, 0, 14, 3));
         $this->addPrimarySystem(new Jammer(4, 8, 5));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 6, 4));
+        $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 3));
+        $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 4));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 0, 180));
 
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 240, 0));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 240, 0));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new Thruster(4, 20, 0, 8, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 20, 0, 8, 1));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 0, 120));
@@ -46,7 +46,7 @@ class Rolentha extends HeavyCombatVessel{
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new TractorBeam(4, 10, 0, 0));
-        $this->addAftSystem(new Thruster(4, 35, 0, 10, 2));
+        $this->addAftSystem(new GraviticThruster(4, 35, 0, 10, 2));
         $this->addAftSystem(new TractorBeam(4, 10, 0, 0));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 

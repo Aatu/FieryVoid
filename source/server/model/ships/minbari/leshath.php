@@ -44,26 +44,26 @@ class Leshath extends BaseShip{
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new Thruster(4, 25, 0, 6, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 25, 0, 6, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new Thruster(4, 38, 0, 10, 2));
+        $this->addAftSystem(new GraviticThruster(4, 38, 0, 10, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
         $this->addLeftSystem(new ElectroPulseGun(2, 6, 3, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->addLeftSystem(new Thruster(4, 16, 0, 5, 3));
+        $this->addLeftSystem(new GraviticThruster(4, 16, 0, 5, 3));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
 
         $this->addLeftSystem(new ElectroPulseGun(2, 6, 3, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new Thruster(4, 16, 0, 5, 4));
+        $this->addRightSystem(new GraviticThruster(4, 16, 0, 5, 4));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

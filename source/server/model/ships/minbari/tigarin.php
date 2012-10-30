@@ -35,7 +35,7 @@ class Tigarin extends BaseShip{
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 		$this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
-		$this->addFrontSystem(new Thruster(4, 25, 0, 6, 1));
+		$this->addFrontSystem(new GraviticThruster(4, 25, 0, 6, 1));
 		$this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 		$this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 0));
@@ -43,7 +43,7 @@ class Tigarin extends BaseShip{
 
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
 		$this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
-		$this->addAftSystem(new Thruster(4, 38, 0, 10, 2));
+		$this->addAftSystem(new GraviticThruster(4, 38, 0, 10, 2));
 		$this->addAftSystem(new NeutronLaser(4, 10, 6, 120, 240));
 		$this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
 
@@ -51,13 +51,13 @@ class Tigarin extends BaseShip{
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
 		$this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
-		$this->addLeftSystem(new Thruster(4, 16, 0, 5, 3));
+		$this->addLeftSystem(new GraviticThruster(4, 16, 0, 5, 3));
 
 		$this->addRightSystem(new NeutronLaser(4, 10, 6, 0, 120));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
 		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
-		$this->addRightSystem(new Thruster(4, 16, 0, 5, 4));
+		$this->addRightSystem(new GraviticThruster(4, 16, 0, 5, 4));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
 		$this->addFrontSystem(new Structure( 6, 50));

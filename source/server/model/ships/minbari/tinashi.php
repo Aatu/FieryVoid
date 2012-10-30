@@ -28,22 +28,22 @@ class Tinashi extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 3, 12));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
+        $this->addPrimarySystem(new GraviticThruster(4, 13, 0, 4, 3));
+        $this->addPrimarySystem(new GraviticThruster(4, 13, 0, 4, 4));
         $this->addPrimarySystem(new Jammer(4, 8, 5));
 
-        $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 4, 1));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 240, 0));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 0, 120));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 4, 1));
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addAftSystem(new NeutronLaser(4, 10, 6, 240, 0));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new Thruster(4, 35, 0, 10, 2));
+        $this->addAftSystem(new GraviticThruster(4, 35, 0, 10, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new NeutronLaser(4, 10, 6, 0, 120));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 120));

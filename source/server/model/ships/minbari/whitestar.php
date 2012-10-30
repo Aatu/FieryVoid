@@ -28,8 +28,8 @@ class WhiteStar extends MediumShip{
         $this->addPrimarySystem(new Scanner(5, 15, 3, 10));
         $this->addPrimarySystem(new Engine(5, 15, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(4, 12, 0, 5, 4));
+        $this->addPrimarySystem(new GraviticThruster(4, 12, 0, 5, 3));
+        $this->addPrimarySystem(new GraviticThruster(4, 12, 0, 5, 4));
         $this->addPrimarySystem(new Shield(3, 6, 0, 2, 180, 360));
         $this->addPrimarySystem(new Shield(3, 6, 0, 2, 0, 180));
         $this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));
@@ -37,16 +37,16 @@ class WhiteStar extends MediumShip{
 
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 4, 1));
         $this->addFrontSystem(new ImprovedNeutronLaser(4, 11, 7, 330, 30));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 4, 1));
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
         $this->addFrontSystem(new MolecularPulsar(4, 8, 2, 300, 60));
 
-        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(5, 20, 4, 24));
-        $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 4, 2));
 
         $this->addPrimarySystem(new Structure( 5, 48));                                                 
     }

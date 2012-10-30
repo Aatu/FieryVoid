@@ -34,16 +34,16 @@ class Sharaal extends BaseShip{
         $this->addPrimarySystem(new TractorBeam(5, 10, 0, 0));
 
         // weapons arguments: armor, health, power, start arc, end arc
-	$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+	$this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new AntimatterConverter(4, 11, 5, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addFrontSystem(new AntimatterConverter(4, 11, 5, 300, 60));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
 
         $this->addAftSystem(new AntimatterConverter(4, 11, 5, 120, 240));
         $this->addAftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
-        $this->addAftSystem(new Thruster(4, 48, 0, 12, 2));
+        $this->addAftSystem(new GraviticThruster(4, 48, 0, 12, 2));
         $this->addAftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addAftSystem(new AntimatterConverter(4, 11, 5, 120, 240));
 
@@ -51,7 +51,7 @@ class Sharaal extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
+        $this->addLeftSystem(new GraviticThruster(4, 14, 0, 5, 3));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
 
@@ -59,7 +59,7 @@ class Sharaal extends BaseShip{
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
+        $this->addRightSystem(new GraviticThruster(4, 14, 0, 5, 4));
 	$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
 
