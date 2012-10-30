@@ -458,10 +458,17 @@
            
         
         
-        public function getHitSection($pos, $turn, $weapon){
+        public function getHitSection($pos, $shooter, $turn, $weapon){
             
             $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            $shooterCompassHeading = 0;
+            
+            if (! $weapon->ballistic){
+                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+            }else{
+                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            }
+            
             
             $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
             
@@ -506,7 +513,7 @@
         
             foreach($this->systems as $system){
 
-                if ($system instanceof Reactor && $system->isDestroyed()){
+                if ($system instanceof Reactor && $system->isDestroyed($turn)){
                     return true;
                 }
 
@@ -565,7 +572,7 @@
 				return $system;
         
             if ($location === null)
-                $location = $this->getHitSection($pos, $fire->turn, $weapon);
+                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
             
             //print("getHitSystem, location: $location ");
             $systems = array();
@@ -779,7 +786,7 @@
 				return $system;
         
             if ($location == null)
-                $location = $this->getHitSection($pos, $fire->turn, $weapon);
+                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
             
 
             //print("getHitSystem, location: $location ");
@@ -850,94 +857,5 @@
             return null;
         
         }
-        
-        public function getHitSystem2($pos, $shooter, $fire, $weapon, $location = null){
-        
-			$system = null;
-			if ($fire->calledid != -1){
-				$system = $this->getSystemById($fire->calledid);
-			}
-			if ($system != null && !$system->isDestroyed())
-				return $system;
-        
-            if ($location == null)
-                $location = $this->getHitSection($pos, $fire->turn, $weapon);
-            
-
-            //print("getHitSystem, location: $location ");
-            $systems = array();
-            $totalStructure = 0;
-
-            foreach ($this->systems as $system){
-                
-                if ($system->location == $location || $system instanceof Structure
-                        || $system->location == 0){
-                    //if ($system->isDestroyed())
-                    //  continue;
-                        
-                     $systems[] = $system;
-                     
-                    $multiply = 1;
-                    
-                    if ($system->location == $location){
-                        $multiply = 2;
-                    }       
-                    $totalStructure += round($system->maxhealth * $multiply);
-                    
-                    
-                }
-            
-                
-            }   
-            
-            $roll = Dice::d($totalStructure);
-            $goneTrough = 0;
-
-            
-            foreach ($systems as $system){
-                
-                $health = 0;
-            
-                if ($system->location == $location){
-                    $multiply = 2;
-                        
-                    $health = round($system->maxhealth * $multiply);
-                }else{
-                    $health = $system->maxhealth;
-                }
-                
-                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
-                    //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
-                    if ($system->isDestroyed()){
-                        if ($system instanceof Structure){
-                            return null;
-                        }
-                        
-                        if ($location !== 0){
-                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                        }
-                        
-                        $structure = $this->getStructureSystem(0);
-                        if ($structure == null || $structure->isDestroyed()){
-                            return null;
-                          
-                        }else{
-                            return $structure;
-                        }
-                                
-                        
-                    }
-                    return $system;
-                }
-                $goneTrough += $health;
-                
-            }
-            
-            return null;
-        
-        }   
-
-    
     }
-
 ?>

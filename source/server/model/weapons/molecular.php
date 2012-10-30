@@ -52,7 +52,7 @@
 
     }
 
-    class LightFusionCannon extends Molecular{
+    class LightFusionCannon extends LinkedWeapon{
 
         // take a look
         public $trailColor = array(30, 170, 255);
@@ -79,7 +79,14 @@
             $this->shots = $shots;
             $this->defaultShots = $shots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
 
+            $this->data["Weapon type"] = "Molecular";
+            $this->data["Damage type"] = "Standard";
+
+            parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }

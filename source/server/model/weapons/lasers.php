@@ -18,6 +18,14 @@
                 $rake = $totalDamage;
             
             $this->damages = array();
+            
+            if ($target instanceof FighterFlight)
+            {
+                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+                $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
+                return;
+            }
+            
             while(true){
                                 
                 if ($totalDamage <= 0)

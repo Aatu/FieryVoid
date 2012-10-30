@@ -624,8 +624,7 @@ window.shipManager = {
             return true;
         
         
-        if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))
-            || shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"))){
+        if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))){
             return true;
         }
         
@@ -646,8 +645,16 @@ window.shipManager = {
 			}
 					
 		}else{
+            
+            var react = shipManager.systems.getSystemByName(ship, "reactor");
+            var rturn = damageManager.getTurnDestroyed(ship, react);
 			var stru = shipManager.systems.getStructureSystem(ship, 0);
-			turn = damageManager.getTurnDestroyed(ship, stru);
+			var sturn = damageManager.getTurnDestroyed(ship, stru);
+            
+            if (rturn < sturn)
+                turn = rturn;
+            else
+                turn = sturn;
 		}
         
         return turn;

@@ -118,7 +118,7 @@
 
     }
     
-    class PairedParticleGun extends Particle{
+    class PairedParticleGun extends LinkedWeapon{
 
         public $trailColor = array(30, 170, 255);
         
@@ -146,6 +146,14 @@
 			$this->damagebonus = $damagebonus;
             parent::__construct(0, 1, 0, $startArc, $endArc);
            
+        }
+        
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }

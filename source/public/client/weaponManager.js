@@ -512,12 +512,16 @@ window.weaponManager = {
         
         //console.log("ship degree: " +delta); 
         if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing) )){
+            console.log("hitting 1");
             return 1;
         }else if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing) )){
+            console.log("hitting 2");
             return 2;
         }else if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing) )){
+            console.log("hitting 3");
             return 3;
         }else if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(30, targetFacing), mathlib.addToDirection(150, targetFacing) )){
+            console.log("hitting 4");
             return 4;
         }
             

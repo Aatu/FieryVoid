@@ -78,9 +78,9 @@ window.hexgrid = {
                 
                 
                     
-                //canvas.font         = 'italic 12px sans-serif';
-                //canvas.textBaseline = 'top';
-                //canvas.fillText  ((h+gamedata.scroll["x"])+","+(v+gamedata.scroll["y"]), x+b, y+hl);
+                canvas.font         = 'italic 12px sans-serif';
+                canvas.textBaseline = 'top';
+                canvas.fillText  ((h+gamedata.scroll["x"])+","+(v+gamedata.scroll["y"]), x+b, y+hl);
                 
             }
             
