@@ -58,7 +58,7 @@ window.createGame = {
         if (inputname == "deptype"){
             var width = $(".depwidthheader", slot);
             var height = $(".depheightheader", slot);
-            var inputHeight = $(".depwidth", slot);
+            var inputHeight = $(".depheight", slot);
             
             if (value == "box"){
                 width.html("Width:");
@@ -130,8 +130,8 @@ window.createGame = {
     },
 
     removeSlotData: function(id){
-        for(var i = createGame.slots-1; i >= 0; i--){  
-            if(createGame.slots[i].id == id){              
+        for(var i = createGame.slots.length-1; i >= 0; i--){
+            if(createGame.slots[i].id === id){
                 createGame.slots.splice(i,1);                 
             }
         }  

@@ -403,6 +403,26 @@ window.shipManager = {
         return shipManager.getShipHeadingAngle(ship);
             
     },
+            
+    getShipPositionInTurn: function(ship, turn){
+        
+        if (turn <= 0)
+            turn = 1;
+        
+        var movement = null;
+        
+        for (var i in ship.movement)
+        {
+            if (ship.movement[i].turn == turn)
+                movement = ship.movement[i];
+        }
+        
+        var x = movement.x;
+        var y = movement.y;
+        var xO = movement.xOffset;
+        var yO = movement.yOffset;
+        return {x:x, y:y, xO:xO, yO:yO};
+    },
     
     getShipPosition: function(ship){
         var movement = shipManager.movement.getLastCommitedMove(ship);
@@ -778,5 +798,35 @@ window.shipManager = {
         
         return false;
             
+    },
+            
+    isEscorting: function(ship, target)
+    {
+        if ( ! ship.flight)
+            return false;
+        
+        var ships = shipManager.getShipsInSameHex(ship);
+        
+        for (var i in ships)
+        {
+            var othership = ships[i];
+            
+            if (othership.id == ship.id)
+                continue;
+            
+            if (gamedata.isEnemy(ship, othership))
+                continue;
+            
+            var oPos = shipManager.getShipPositionInTurn(othership, gamedata.turn-1);
+            var tPos = shipManager.getShipPositionInTurn(ship, gamedata.turn-1);
+            
+            if ( ! target || target.id == othership.id)
+            {
+                if (oPos.x == tPos.x && oPos.y == tPos.y)
+                    return true;
+            }
+        }
+        
+        return false;
     }
 }

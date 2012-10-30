@@ -593,7 +593,9 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems){
             var weapon = gamedata.selectedSystems[i];
             
-            if (ball.targetid != selectedShip.id && !weapon.freeintercept )
+            if (ball.targetid != selectedShip.id 
+                && ! weapon.freeintercept 
+                && ! shipManager.isEscorting(selectedShip, target))
                 continue;
                 
             if (ball.targetid != selectedShip.id && weapon.freeintercept){

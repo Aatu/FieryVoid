@@ -161,17 +161,14 @@ class ShipSystem{
             
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){
-                    $crit = new $phpclass(-1, $ship->id, $this->id, $phpclass, $turn);
-                    $crit->updated = true;
-                    $this->criticals[] =  $crit;
-                    $crits[] = $crit;
+                    $crit = $this->addCritical($ship->id, $phpclass, $turn);
+                    if ($crit)
+                        $crits[] = $crit;
                 }
             }else{
-                        
-                $crit = new $criticalTypes(-1, $ship->id, $this->id, $criticalTypes, $turn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;
-                $crits[] = $crit;
+                $crit = $this->addCritical($ship->id, $criticalTypes, $turn);
+                if ($crit)
+                    $crits[] = $crit;
             }
             
             
@@ -182,6 +179,13 @@ class ShipSystem{
          
     }
     
+    protected function addCritical($shipid, $phpclass, $turn)
+    {
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+        return $crit;
+    }
     
     public function hasCritical($type, $turn = false){
         $count = 0;

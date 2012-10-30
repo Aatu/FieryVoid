@@ -93,6 +93,7 @@ window.shipClickable = {
             shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
             shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
             shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
+            shipClickable.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
             var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
             var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
             shipClickable.addEntryElement("Defence (F/S): " + fDef +"("+

@@ -46,10 +46,10 @@ class WeaponLoading
     
     public function __construct($loading, $extrashots, $loadedammo, $overloading)
     {
-        $this->loading = $loading;
-        $this->extrashots = $extrashots;
-        $this->loadedammo = $loadedammo;
-        $this->overloading = $overloading;
+        $this->loading = (int)$loading;
+        $this->extrashots = (int)$extrashots;
+        $this->loadedammo = (int)$loadedammo;
+        $this->overloading = (int)$overloading;
     }
     
     public function toJSON()

@@ -305,12 +305,6 @@ class Thruster extends ShipSystem{
     
     public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
     
-    
-    public $criticalDescriptions = array(
-        
-    
-    );
-    
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
@@ -318,9 +312,57 @@ class Thruster extends ShipSystem{
         $this->direction = (int)$direction;
     
     }
-   
-   
+}
+
+class GraviticThruster extends Thruster{
     
+    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused);
+    }
+    
+    public $firstCriticalIgnored = false;
+    
+    public function onAdvancingGamedata($ship)
+    {
+        SystemData::addDataForSystem(
+            $this->id, 0, $ship->id,
+            '"firstCriticalIgnored":{"1":"'.$this->firstCriticalIgnored.'"}');
+        
+        parent::onAdvancingGamedata($ship);
+    }
+    
+    public function setSystemData($data, $subsystem)
+    {
+        $array = json_decode($data, true);
+        if (!is_array($array))
+            return;
+        
+        foreach ($array as $i=>$entry)
+        {
+            if ($i == "firstCriticalIgnored"){
+                $this->firstCriticalIgnored = $entry[1];
+            }
+        }
+        
+        parent::setSystemData($data, $subsystem);
+    }
+    
+    protected function addCritical($shipid, $phpclass, $turn)
+    {
+        if (! $this->firstCriticalIgnored)
+        {
+            $this->firstCriticalIgnored = true;
+            Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
+            return null;
+        }
+        
+        Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
+            
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+        return $crit;
+    }
 }
 
 class Hangar extends ShipSystem{
