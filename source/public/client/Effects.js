@@ -221,6 +221,10 @@ window.effects = {
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             
+            console.log(ship.name);
+            console.log("destroyed:" + shipManager.isDestroyed(ship));
+            console.log("turn:" + shipManager.getTurnDestroyed(ship));
+            
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn && !ship.destructionAnimated ){
                 ship.dontDraw = false;
                 ship.destructionAnimated = false;
