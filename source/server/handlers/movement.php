@@ -165,7 +165,9 @@
             $turndelay = 0;
 			if (!is_array($ship->movement))
 				return 0;
-				
+			
+            $last = null;
+            
             foreach ($ship->movement as $move){
                 
                 if ($move->turn < TacGamedata::$currentTurn -1)
@@ -176,9 +178,13 @@
                 }
                                    
                 if ($move->type == "turnleft" || $move->type == "turnright"){
-                    $turndelay += self::calculateTurndelay($ship, $move);
+                    if (!$ship->agile || !$last 
+                        || ($last->type != "turnleft" && $last->type != "turnright"))
+                    {
+                        $turndelay += self::calculateTurndelay($ship, $move);
+                    }
                 }
-            
+                $last = $move;
             }
         
             if ($turndelay < 0)

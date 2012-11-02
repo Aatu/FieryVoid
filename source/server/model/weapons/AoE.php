@@ -87,6 +87,9 @@
             if ($target->isDestroyed())
                 return;
             
+            
+            $amount -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
+            
             if ($target instanceof FighterFlight){
 				$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
 			}else{

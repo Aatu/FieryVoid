@@ -1646,7 +1646,9 @@ shipManager.movement = {
             if (movement.commit == false)
                 continue;
                 
-            if ((movement.type == "move" || movement.type == "slipright" || movement.type == "slipleft" ) && turndelay > 0)
+            if ((movement.type == "move" 
+                || movement.type == "slipright" 
+                || movement.type == "slipleft" ) && turndelay > 0)
                 turndelay--;
                 
             
