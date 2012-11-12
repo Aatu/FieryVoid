@@ -225,8 +225,7 @@ flightWindowManager = {
 			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
 			
 			if (!firing){
-				var load = system.turnsloaded;
-									
+                var load = weaponManager.getWeaponCurrentLoading(system);
 				
 				var loadingtime = system.loadingtime;
 				if (system.normalload > 0)

@@ -5,7 +5,6 @@ body {
     background-attachment:fixed;
 	background-color:black;
 	color:#DEEBFF;
-	opacity:0.85;
 	font-family:arial;
     font-size:12px;
 }
@@ -32,6 +31,7 @@ a.link:hover
 }
 
 .panel{
+    opacity:0.9;
 	padding:10px;
 	border:1px solid #496791;
     background-color:#0a3340;

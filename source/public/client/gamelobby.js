@@ -110,7 +110,7 @@ window.gamedata = {
 
 			for (var a in faction){
 				var ship = faction[a];
-				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+a+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 				h.appendTo("."+i+".faction");
 			}
 		}
@@ -396,11 +396,17 @@ window.gamedata = {
         return false;
     },
             
-    getShip: function(id, faction)
+    getShip: function(id)
     {
-        for (var a in gamedata.allShips[faction]){
-            if (a == id)
-                return gamedata.allShips[faction][a];
+        for (var a in gamedata.allShips)
+        {
+            for (var i in gamedata.allShips[a])
+            {
+                var ship = gamedata.allShips[a][i];
+                if (ship.id == id)
+                    return ship;
+            }
+                
         }
         return null;
     }

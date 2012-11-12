@@ -374,7 +374,7 @@ shipWindowManager = {
 	},
 	
 	setData: function(ship){
-		
+		console.log("setting data for " + ship.shipClass);
 		var shipwindow = ship.shipStatusWindow;
 		if (shipwindow){
 			if (ship.flight){

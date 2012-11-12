@@ -3,9 +3,12 @@ window.systemInfo = {
 
 	showSystemInfo: function(t, system, ship){
         system = shipManager.systems.initializeSystem(system);
+        
         $('.UI', t).addClass("active");
 		var w = $("#systemInfo");
 		var offs = t.offset();
+        
+        console.log(w);
 
 		w.css("left", offs.left + "px");
 		w.css("top", offs.top +35+ "px");
@@ -54,8 +57,6 @@ window.systemInfo = {
 				$(".datacontainer", w).append(e);
 			}
 		}
-		
-		
 		
 		w.show();
 		

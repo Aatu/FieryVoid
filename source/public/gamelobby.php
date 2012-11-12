@@ -57,7 +57,68 @@
 			
             window.weaponManager = 
             {
-                onWeaponMouseover: function(){},
+                
+                mouseoverTimer: null,
+                mouseOutTimer: null,
+                mouseoverSystem: null,
+
+                onWeaponMouseover: function(e){
+
+                    if (weaponManager.mouseOutTimer != null){
+                        clearTimeout(weaponManager.mouseOutTimer); 
+                        weaponManager.mouseOutTimer = null;
+                    }
+
+                    if (weaponManager.mouseoverTimer != null)
+                        return;
+
+                    weaponManager.mouseoverSystem = $(this);
+                    weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
+                },
+
+                onWeaponMouseOut: function(e){
+                    if (weaponManager.mouseoverTimer != null){
+                        clearTimeout(weaponManager.mouseoverTimer); 
+                        weaponManager.mouseoverTimer = null;
+                    }
+
+                    weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
+                },
+
+                doWeaponMouseOver: function(e){
+                    if (weaponManager.mouseoverTimer != null){
+                        clearTimeout(weaponManager.mouseoverTimer); 
+                        weaponManager.mouseoverTimer = null;
+                    }
+
+                    systemInfo.hideSystemInfo();
+
+                    var t = weaponManager.mouseoverSystem;
+
+                    var id = t.data("shipid");
+
+                    var ship = gamedata.getShip(id);
+                    var system = null;
+
+                    if (t.hasClass("fightersystem")){
+                        system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
+                    }else{
+                        system = shipManager.systems.getSystem(ship, t.data("id"));
+                    }
+
+                    systemInfo.showSystemInfo(t, system, ship);
+                },
+
+                doWeaponMouseout: function(){
+                    if (weaponManager.mouseOutTimer != null){
+                        clearTimeout(weaponManager.mouseOutTimer); 
+                        weaponManager.mouseOutTimer = null;
+                    }
+
+                    systemInfo.hideSystemInfo();
+
+                    weaponManager.mouseoverSystem = null;
+                },
                 hasFiringOrder: function(){return false},
                 isLoaded: function(){return true},
                 isSelectedWeapon: function(){return false},
@@ -318,10 +379,6 @@
                 <div class="close"></div>
             </div>
 
-
-
-
-
             <table class="divider">
                 <tr>
                     <td class="fightercontainer 0"></td>
@@ -334,12 +391,6 @@
                     <td class="fightercontainer 5"></td>
                 </tr>
             </table>
-
-
-
-
-
-
         </div>
 
     </div>

@@ -260,6 +260,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
     public $displayName = "ELINT Scanner";
     public $specialAbilities = array("ELINT");
+    public $iconPath = "elintArray.png";
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
