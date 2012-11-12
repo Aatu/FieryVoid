@@ -32,25 +32,57 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>B5CGM</title>
+		<title>Fiery Void - Gamelobby</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
+        <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>
+        <script src="client/ships.js"></script>
+        <script src="client/criticals.js"></script>
+        <script src="client/damage.js"></script>
+        <script src="client/systems.js"></script>
+        <script src="client/power.js"></script>
+        <script src="client/movement.js"></script>
 		<script src="client/UI/confirm.js"></script>
+        <script src="client/UI/shipwindow.js"></script>
+        <script src="client/UI/flightwindow.js"></script>
+        <script src="client/UI/systemInfo.js"></script>
 		<script>
 			
+            window.weaponManager = 
+            {
+                onWeaponMouseover: function(){},
+                hasFiringOrder: function(){return false},
+                isLoaded: function(){return true},
+                isSelectedWeapon: function(){return false},
+                getWeaponCurrentLoading: function(weapon)
+                {
+                    return weapon.normalload;
+                },
+            }
+            
+            window.shipManager.movement.isRolled = function(ship)
+            {
+                return false;
+            }
+            
+            
+            window.shipWindowManager.addEW = function(){};
+            
+            
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 				gamedata.parseShips(<?php print($ships); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
                 $('.leave').on("click", gamedata.onLeaveClicked);
-                $('.close').on("click", gamedata.onLeaveSlotClicked);
+                $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
                 $('.selectslot').on("click", gamedata.onSelectSlotClicked);
                 $('.takeslot').on("click", gamedata.clickTakeslot);
 				ajaxInterface.startPollingGamedata();
@@ -60,6 +92,7 @@
 	</head>
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
 	
+        <img src="img/logo.png">
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
@@ -105,9 +138,14 @@
         ?>
         </div>
                     
+    <div id="systemInfo">
+		<div class="name"><span class="name header">test</span></div>
+		<div class="datacontainer"></div>
+	</div>
+                    
     <div id="slottemplatecontainer" style="display:none;">
         <div class="slot" >
-            <div class="close"></div>
+            <div class="leaveslot"></div>
             <div>
                 <span class="smallSize headerSpan">NAME:</span>
                 <span class ="value name"></span>
@@ -134,6 +172,176 @@
                 <span class ="value depavailable"></span>
             </div>
         </div>
+    </div>
+                    
+                    
+    <div id="systemtemplatecontainer" style="display:none;">
+
+        <div class="structure system">
+            <div class="name"><span class="namevalue">STRUCTURE</span></div>
+            <div class="systemcontainer">
+
+                <div class="health systembarcontainer">
+                    <div class="healthbar bar" style="width:40px;"></div>
+                    <div class="valuecontainer"><span class="healthvalue value"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fightersystem">
+            <div class="icon">
+                <span class="efficiency value"></span>
+                <div class="iconmask"></div>
+            </div>
+        </div>
+
+        <div class="system regular">
+            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
+            <div class="systemcontainer">
+                <div class="icon">
+                    <span class="efficiency value"></span>
+                    <div class="iconmask"></div>
+                    <div class="UI">
+                        <div class="button stopoverload"></div>
+                        <div class="button overload"></div>
+                        <div class="button plus"></div>
+                        <div class="button minus"></div>
+                        <div class="button off"></div>
+                        <div class="button on"></div>
+                        <div class="button holdfire"></div>
+                        <div class="button mode"></div>
+                    </div>
+                </div>
+
+                <div class="health systembarcontainer">
+                    <div class="healthbar bar" style="width:40px;"></div>
+                </div>
+                <!--
+                <div class="systembarcontainer">
+                    <div class="efficiencybar bar" style="width:30px;"></div>
+                    <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
+                </div>
+                -->
+                <div class="critical systembarcontainer">
+                    <div class="valuecontainer"><span class="criticalvalue value">CRITICAL<span></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="fighter">
+            <div class="destroyedtext"><span>DESTROYED</span></div>
+            <div class="disengagedtext"><span>DISENGAGED</span></div>
+            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
+            <div class="systemcontainer">
+                <div class="icon">
+                    <table class="fightersystemcontainer 1"><tr></tr></table>
+                    <div style="height:60px;"></div>
+                    <table class="fightersystemcontainer 2"><tr></tr></table>
+                </div>
+
+                <div class="health systembarcontainer">
+                    <div class="healthbar bar" style="width:90px;"></div>
+                    <div class="valuecontainer"><span class="healthvalue value"></span></div>
+                </div>
+                <!--
+                <div class="systembarcontainer">
+                    <div class="efficiencybar bar" style="width:30px;"></div>
+                    <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
+                </div>
+                -->
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="shipwindowtemplatecontainer" style="display:none;">
+
+        <div class="shipwindow ship">
+            <div class="topbar">
+                <span class="valueheader name">Name:</span><span class="value name">name here</span>
+                <span class="valueheader shipclass">Class:</span><span class="value shipclass">ship type class here</span>
+                <div class="close"></div>
+            </div>
+
+
+            <div id="shipSection_3" class="shipSection">
+                <table></table>
+            </div>    
+
+
+            <table class="divider">
+                <tr><td class="col1">
+                    <div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
+                    <div class="notes"></div>
+
+                </td><td class="col2">
+                    <div id="shipSection_1" class="shipSection">
+                        <table></table>
+                    </div>
+                    <div id="shipSection_0" class="shipSection primary">
+                        <table></table>
+                    </div>
+                    <div id="shipSection_2" class="shipSection">
+                        <table></table>
+                    </div>
+                </td><td class="col3">
+                    <div class="EW">
+                        <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
+                        <div class="EWcontainer">
+                            <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
+                            <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
+                            <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
+
+                        </div>
+                    </div>
+                    <div id="shipSection_4" class="shipSection">
+                        <table></table>
+                    </div>
+
+                </td></tr>
+            </table>
+
+
+
+
+
+
+        </div>
+
+        <div class="shipwindow flight">
+            <div class="topbar">
+                <span class="valueheader name">Name:</span><span class="value name">name here</span>
+                <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
+                <div class="close"></div>
+            </div>
+
+
+
+
+
+            <table class="divider">
+                <tr>
+                    <td class="fightercontainer 0"></td>
+                    <td class="fightercontainer 1"></td>
+                    <td class="fightercontainer 2"></td>
+                </tr>
+                <tr>
+                    <td class="fightercontainer 3"></td>
+                    <td class="fightercontainer 4"></td>
+                    <td class="fightercontainer 5"></td>
+                </tr>
+            </table>
+
+
+
+
+
+
+        </div>
+
     </div>
 
 	</body>

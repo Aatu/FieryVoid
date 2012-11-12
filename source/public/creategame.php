@@ -24,7 +24,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>FieryVoid</title>
+		<title>Fiery Void - Create game</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
@@ -35,6 +35,7 @@
 	</head>
 	<body class="creategame">
 	
+        <img src="img/logo.png">
 		<div class="panel large">
 			<div class="panelheader">	<span>CREATE GAME</span>	</div>
 			<form id="createGameForm" method="post">

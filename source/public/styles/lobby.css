@@ -1,3 +1,7 @@
+.shipwindow{
+    position:fixed !important;
+}
+
 .creategame .subpanel.slotcontainer{
     padding-bottom:0px;
 }
@@ -92,7 +96,7 @@
     margin-right:5px;
 }
 
-.close{
+.leaveslot{
     position:absolute;
     border:1px solid #496791;
     width:10px;

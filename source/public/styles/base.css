@@ -9,6 +9,24 @@ body {
 	font-family:arial;
     font-size:12px;
 }
+
+a.link
+{
+    display: block;
+    background-color: #222;
+    padding: 5px 0px;
+    width: 160px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+a.link:hover
+{
+    background-color: #DEEBFF;
+    color:black;
+    text-decoration: none;
+}
+
 .name{
 	font-style: italic;
 }

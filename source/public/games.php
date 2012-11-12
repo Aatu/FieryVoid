@@ -15,7 +15,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>B5CGM</title>
+		<title>Fiery Void - Games</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
@@ -37,21 +37,31 @@
 	</head>
 	<body>
 	
+        <img src="img/logo.png">
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
-			<div class="panelheader">	<span>GAMES</span>	</div>
 			
-			<div><span>ACTIVE GAMES</span></div>
-			<div class="gamecontainer active subpanel">
-				<div class="notfound">No active games</div>
-			</div>
+            <table class="gametable">
+                <tr><td>ACTIVE GAMES</td><td>STARTING GAMES</td></tr>
+                <tr>
+                    <td><div class="gamecontainer active subpanel">
+                        <div class="notfound">No active games</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="gamecontainer lobby subpanel">
+                        <div class="notfound">No starting games</div>
+                        </div>
+                    </td>
+                    <td>
+                        <a class="link" href="creategame.php">TUTORIAL</a>
+                        <a class="link" href="creategame.php">AUTOMATCH</a>
+                        <a class="link" href="creategame.php">CREATE GAME</a>
+                    </td>
+                </tr>
+            </table>
 			
-			<div><span>STARTING GAMES</span></div>
-			<div class="gamecontainer lobby subpanel">
-				<div class="notfound">No starting games</div>
-			</div>
 			
-			<a href="creategame.php">CREATE GAME</a>
 		</div>
         <div id="globalchat" class="panel large" style="height:150px;">
         <?php 
