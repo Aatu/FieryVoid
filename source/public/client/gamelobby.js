@@ -110,7 +110,7 @@ window.gamedata = {
 
 			for (var a in faction){
 				var ship = faction[a];
-				var h = $('<div class="ship" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+a+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 				h.appendTo("."+i+".faction");
 			}
 		}
@@ -199,13 +199,13 @@ window.gamedata = {
                 {
                     if (gamedata.selectedSlot == null)
                         gamedata.selectedSlot = slot.slot;
-                    $(".close", slotElement).show();
+                    $(".leaveslot", slotElement).show();
                 }
                 else
-                    $(".close", slotElement).hide();
+                    $(".leaveslot", slotElement).hide();
 
 			}else{
-                $(".close", slotElement).hide();
+                $(".leaveslot", slotElement).hide();
                 
                 slotElement.attr("data-playerid", "");
                 slotElement.removeClass("taken");
@@ -371,6 +371,38 @@ window.gamedata = {
         $(".slot.slotid_"+slot.slot).addClass("selected");
         gamedata.selectedSlot = slot.slot;
         this.constructFleetList();
+    },
+            
+    onShipContextMenu: function(e){
+    
+        var id = $(e).data("id");
+        var faction = $(e).data("faction");
+        
+        console.log("id: " + id + " faction: " + faction);
+        var ship = gamedata.getShip(id, faction);
+        
+        if (! ship.shipStatusWindow)
+        {
+            if (ship.flight){
+                ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
+            }else{
+                ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+            }
+            
+            shipWindowManager.setData(ship);
+        }
+    
+        shipWindowManager.open(ship);
+        return false;
+    },
+            
+    getShip: function(id, faction)
+    {
+        for (var a in gamedata.allShips[faction]){
+            if (a == id)
+                return gamedata.allShips[faction][a];
+        }
+        return null;
     }
 
 

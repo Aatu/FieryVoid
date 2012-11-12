@@ -20,12 +20,13 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>FieryVoid</title>
+		<title>Fiery Void - Login</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	</head>
 	<body>
+        <img src="img/logo.png">
 		<div class="panel" style="width:400px;margin:auto;">
 			<form method="post">
 				<table>

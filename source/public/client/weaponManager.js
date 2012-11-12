@@ -1,5 +1,10 @@
 window.weaponManager = {
 
+    getWeaponCurrentLoading: function(weapon)
+    {
+        return weapon.turnsloaded;
+    },
+            
     onModeClicked: function(e)
     {
         e.stopPropagation();

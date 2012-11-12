@@ -1,3 +1,22 @@
 .gamecontainer.found .notfound{
 	display:none;
 }
+
+.gametable td
+{
+    vertical-align: top;
+}
+
+.gametable .gamecontainer
+{
+    width:300px;
+}
+
+.waitingForTurn
+{
+    border:1px solid #84a5ce !important;
+	background-color:#254e82 !important;
+	-moz-box-shadow: 0px 0px 15px #0099ff;
+    -webkit-box-shadow: 0px 0px 15px #0099ff;
+    box-shadow: 0px 0px 15px #0099ff;
+}

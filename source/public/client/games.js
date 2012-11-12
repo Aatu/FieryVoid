@@ -18,7 +18,7 @@ window.gamedata = {
 	
 	createGames: function(){
 	
-		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/2</span></div>'; 
+		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/{maxplayers}</span></div>'; 
 		var activefound = false;
 		var lobbyfound = false;
 		for (var i in this.games){
@@ -31,9 +31,13 @@ window.gamedata = {
 					var html = gamehtml;
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", Object.keys(game.slots).length);
 					
 					gameDOM = $(html);
+                    gameDOM.find('.players').remove();
+                    
+                    if (game.waitingForThisPlayer)
+                        gameDOM.addClass("waitingForTurn");
+                    
 					gameDOM.appendTo($('.gamecontainer.active'));
 					$('.gamecontainer.active').addClass("found");
 				}
@@ -45,13 +49,18 @@ window.gamedata = {
 					var html = gamehtml;
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", Object.keys(game.slots).length);
-					
+					html = html.replace("{players}", gamedata.getNumberOfPlayers(game));
+					html = html.replace("{maxplayers}", Object.keys(game.slots).length);
+                    
 					gameDOM = $(html);
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				}else{
-					$('.players', gameDOM).html("players: " + Object.keys(game.slots).length+"/2");
+					$('.players', gameDOM).html("players: "
+                        + gamedata.getNumberOfPlayers(game)
+                        +"/"
+                        + Object.keys(game.slots).length);
+                        
 				}
 				lobbyfound = true;
 			}
@@ -72,6 +81,18 @@ window.gamedata = {
 			$(".gamecontainer.active").removeClass("found");
 	}, 
 	
+    getNumberOfPlayers: function(game)
+    {
+        var count = 0;
+        for (var i in game.slots)
+        {
+            if (game.slots[i].playerid != null)
+                count++;
+        }
+        console.log(game.name +": "+ count);
+        return count;
+    },
+            
 	gameIdFound: function(id){
 		for (var i in this.games){
 			if (this.games[i].id == id)
