@@ -255,7 +255,7 @@ class DBManager {
                 ?,
                 ?,
                 ?,
-                '0000-00-00 00:00:00',
+                now(),
                 '0000-00-00 00:00:00',
                 ?,
                 ?,
@@ -730,6 +730,7 @@ class DBManager {
         
 		foreach ($games as $game){
 			$game->slots = $this->getSlotsInGame($game->id);
+            $game->onConstructed();
 		}
 		
 		return $games;

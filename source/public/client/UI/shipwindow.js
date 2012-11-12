@@ -603,7 +603,7 @@ shipWindowManager = {
 				field.html(fire.shots+ "/" + system.shots);
 				
 			}else if (!firing){
-				var load = system.turnsloaded;
+				var load = weaponManager.getWeaponCurrentLoading(system);
 				//if (!systemwindow.hasClass("overload") && load > system.loadingtime)
 				//	load = system.loadingtime;
 				
@@ -658,7 +658,6 @@ shipWindowManager = {
 		}
 	},
 	
-		
 	assignThrust: function(ship){
 		var movement = ship.movement[ship.movement.length-1];
 		if (movement.commit)

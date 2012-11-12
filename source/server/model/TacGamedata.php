@@ -15,6 +15,7 @@ class TacGamedata{
     public $getDistanceHex = false;
     public $forPlayer;
     public $ballistics = array();
+    public $waitingForThisPlayer = false;
     
     
     
@@ -63,6 +64,7 @@ class TacGamedata{
    
     public function onConstructed(){
         
+        $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
         
         $i = 0;
@@ -570,6 +572,28 @@ class TacGamedata{
             $this->changed = false;
         }
     
+    }
+    
+    private function getIsWaitingForThisPlayer()
+    {
+        $slots = $this->getSlotsByPlayerId($this->forPlayer);
+        
+        if (($activeship = $this->getActiveship()) != null)
+        {
+            if ($activeship->userid == $this->forPlayer)
+                return true;
+        }
+        
+        foreach ($slots as $slot)
+        {
+            if ($slot->lastturn < $this->turn) 
+                return true;
+            
+            if ($slot->lastphase < $this->phase && $this->phase != 2)
+                return true;
+        }
+                
+        return false;
     }
     
 
