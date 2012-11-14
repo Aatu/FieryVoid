@@ -64,7 +64,7 @@ class Weapon extends ShipSystem{
     
     public $exclusive = false;
     
-    
+    public $useOEW = true;
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
@@ -254,9 +254,9 @@ class Weapon extends ShipSystem{
         $this->turnsloaded = $loading->loading;
     }
     
-    protected function getLoadedAmmo()
+    protected function getAmmo()
     {
-        return 0;
+        return null;
     }    
     
     public function calculateLoading()
@@ -420,11 +420,22 @@ class Weapon extends ShipSystem{
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         $dist = EW::getDistruptionEW($gamedata, $shooter);
         
-        $oew = $shooter->getOEW($target, $gamedata->turn);
-        $oew -= $dist;
+        $oew = 0;
         
-        if ($oew < 0)
-            $oew = 0;
+        if ($this->useOEW)
+        {
+            $oew = $shooter->getOEW($target, $gamedata->turn);
+            $oew -= $dist;
+            
+            if ($oew < 0)
+                $oew = 0;
+        }
+        
+        $ammo = $this->getAmmo();
+        if ($ammo !== null)
+        {
+            $mod += $ammo->getHitChangeMod();
+        }
         
         if ($shooter instanceof FighterFlight){
             $oew = $shooter->offensivebonus;

@@ -57,7 +57,7 @@
         // take a look
         public $trailColor = array(30, 170, 255);
 
-        public $name = "lightFusionCannon";
+        public $name = "lightfusionCannon";
         public $displayName = "Light Fusion Cannon";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
@@ -78,6 +78,8 @@
 			$this->damagebonus = $damagebonus;
             $this->shots = $shots;
             $this->defaultShots = $shots;
+            
+            $this->iconPath = "lightfusionCannon$shots.png";
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         

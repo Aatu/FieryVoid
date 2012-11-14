@@ -125,7 +125,11 @@ flightWindowManager = {
 				
 				fightersystemwindow = template.clone(true).appendTo(dest);
 				fightersystemwindow.wrap('<td/>');
-				fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+fightersystem.name +".png)");
+                if (fightersystem.iconPath){
+                    fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+fightersystem.iconPath +")");
+                }else{
+                    fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+fightersystem.name +".png)");
+                }
 				fightersystemwindow.addClass(fightersystem.name);
 				fightersystemwindow.addClass("system_" + fightersystem.id);
 				fightersystemwindow.data("shipid", ship.id);

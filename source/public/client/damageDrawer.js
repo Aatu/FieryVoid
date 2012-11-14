@@ -213,7 +213,6 @@ window.damageDrawer = {
     },
     
     drawFlight: function(flight, image){
-		//console.log("Draw flight: " + flight.name);
 		var images = shipManager.shipImages[flight.id];
         var width = flight.canvasSize;
         var height = flight.canvasSize;
@@ -234,7 +233,9 @@ window.damageDrawer = {
 			if (gamedata.gamephase == 4 && gamedata.subphase == 0){
 				var turndest = damageManager.getTurnDestroyed(flight, fighter);
 				if ( turndest && turndest < gamedata.turn)
+                {
 					continue;
+                }
 			}else{
 			
 				if (shipManager.systems.isDestroyed(flight, fighter))

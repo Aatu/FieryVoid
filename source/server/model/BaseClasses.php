@@ -226,7 +226,23 @@ class FireOrder{
     public $updated = false;
     public $addToDB = false;
     
-    function __construct($id,  $type, $shooterid, $targetid, $weaponid, $calledid, $turn, $firingmode, $needed = 0, $rolled = 0, $shots = 1, $shotshit = 0, $intercepted = 0, $x, $y){
+    function __construct(
+        $id,
+        $type, 
+        $shooterid, 
+        $targetid, 
+        $weaponid, 
+        $calledid, 
+        $turn, 
+        $firingmode, 
+        $needed = 0, 
+        $rolled = 0, 
+        $shots = 1, 
+        $shotshit = 0, 
+        $intercepted = 0, 
+        $x, 
+        $y
+    ){
          $this->id = $id;
          $this->type = $type;
          $this->shooterid = $shooterid;

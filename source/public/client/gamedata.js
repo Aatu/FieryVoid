@@ -311,6 +311,9 @@ gamedata = {
                     infowindow.informPhase(5000, null);
                     
                     });
+            }else{
+                gamedata.subphase = 1;
+                damageDrawer.checkDamages();
             }
                            
         }
