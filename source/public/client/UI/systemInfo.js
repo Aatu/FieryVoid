@@ -7,8 +7,6 @@ window.systemInfo = {
         $('.UI', t).addClass("active");
 		var w = $("#systemInfo");
 		var offs = t.offset();
-        
-        console.log(w);
 
 		w.css("left", offs.left + "px");
 		w.css("top", offs.top +35+ "px");
@@ -30,7 +28,6 @@ window.systemInfo = {
 			h += '<div><span class="header">'+i+':</span><span class="value">' + system.data[i]+"</span></div>";
 		}
 		
-		//console.log(system.critData);
 		if (Object.keys(system.critData).length > 0){
 			h +="<div><span>DAMAGE:</span></div><ul>"
 			

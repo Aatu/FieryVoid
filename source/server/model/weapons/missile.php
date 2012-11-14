@@ -4,6 +4,13 @@ class MissileLauncher extends Weapon
 {
     public $useOEW = false;
     public $ballistic = true;
+    public $trailColor = array(141, 240, 255);
+    public $animation = "trail";
+    public $animationColor = array(50, 50, 50);
+    public $animationExplosionScale = 0.25;
+    public $projectilespeed = 8;
+    public $animationWidth = 4;
+    public $trailLength = 100;
     
     public static $fireModeToMissile = array(
         1 => 'BasicMissile'
@@ -35,14 +42,6 @@ class SMissileRack extends MissileLauncher
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
-    public $trailColor = array(141, 240, 255);
-    public $animation = "trail";
-    public $animationColor = array(100, 100, 100);
-    public $animationExplosionScale = 0.25;
-    public $projectilespeed = 12;
-    public $animationWidth = 4;
-    public $trailLength = 40;
-
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
@@ -54,7 +53,8 @@ class SMissileRack extends MissileLauncher
     
     public function getDamage($fireOrder)
     {
-        return self::$fireModeToMissile[$fireOrder->firingMode]->getDamage();
+        $ammo = new self::$fireModeToMissile[$fireOrder->firingMode];
+        return $ammo->getDamage();
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     

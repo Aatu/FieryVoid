@@ -668,9 +668,13 @@ window.weaponManager = {
                 continue;
             }
             
-            if ((ship.flight && weapon.fireControl[0] === null)
-                || (ship.shipSizeClass < 2 && weapon.fireControl[1] === null)
-                || (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null))
+            if (ship.flight && weapon.fireControl[0] === null)
+                continue;
+            
+            if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null)
+                continue;
+            
+            if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null)
                 continue;
             
             var type = 'normal';

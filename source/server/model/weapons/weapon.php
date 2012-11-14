@@ -79,6 +79,11 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function getRange($fireOrder)
+    {
+        return $this->range;
+    }
+    
     public function getWeaponForIntercept(){
         return $this;
     }
@@ -258,6 +263,11 @@ class Weapon extends ShipSystem{
     {
         return null;
     }    
+    
+    protected function getLoadedAmmo()
+    {
+        return 0;
+    }  
     
     public function calculateLoading()
     {
@@ -577,7 +587,7 @@ class Weapon extends ShipSystem{
             if ($this->ballistic)
             {
                 $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
-                $range = $this->range;
+                $range = $this->getRange($fireOrder);
 
                 // Account for reduced launch range in case of jammer.
                 if ($jammerValue > 0)

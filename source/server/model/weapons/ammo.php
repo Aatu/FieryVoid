@@ -17,7 +17,7 @@ class Ammo
         return 0;
     }
     
-    public function getRangeMod()
+    public function getRange()
     {
         return 0;
     }
@@ -35,7 +35,7 @@ class BasicMissile extends Ammo
         return 3;
     }
     
-    public function getRangeMod()
+    public function getRange()
     {
         return 15;
     }
