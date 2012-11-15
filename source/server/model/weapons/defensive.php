@@ -68,6 +68,7 @@
         public $displayName = "Interceptor MK II";
         
         public $output = 4;
+        public $intercept = 4;
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
             return $this->getOutput();

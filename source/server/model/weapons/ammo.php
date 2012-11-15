@@ -37,6 +37,6 @@ class BasicMissile extends Ammo
     
     public function getRange()
     {
-        return 15;
+        return 20;
     }
 }
