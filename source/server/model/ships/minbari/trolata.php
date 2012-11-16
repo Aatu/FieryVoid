@@ -50,9 +50,9 @@ class Trolata extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addLeftSystem(new GraviticThruster(6, 14, 0, 4, 3));
 
-        $this->addLeftSystem(new AntimatterConverter(5, 7, 5, 0, 120));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new AntimatterConverter(5, 7, 5, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new GraviticThruster(6, 14, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
