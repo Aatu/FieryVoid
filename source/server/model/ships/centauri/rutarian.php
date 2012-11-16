@@ -22,7 +22,7 @@ class Rutarian extends FighterFlight{
         for ($i = 0; $i<6; $i++){
 
 			$armour = array(4, 1, 3, 3);
-			$fighter = new Fighter($armour, 11, $this->id);
+			$fighter = new Fighter("rutarian", $armour, 11, $this->id);
 			$fighter->displayName = "Rutarian Medium Fighter";
 			$fighter->imagePath = "img/ships/rutarian.png";
 			$fighter->iconPath = "img/ships/rutarian_large.png";

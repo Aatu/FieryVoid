@@ -14,10 +14,12 @@ window.SystemFactory =
     
     createSystemFromJson: function(systemJson, ship)
     {
-        if (systemJson.jsClass)
-            return new window[systemJson.jsClass](systemJson, ship);
-        else
-            return new ShipSystem(systemJson, ship);
+        if (systemJson.fighter)
+            return new Fighter(systemJson, ship);
+        
+        var name = systemJson.name.charAt(0).toUpperCase() + systemJson.name.slice(1);
+        //console.log(name);
+        return new window[name](systemJson, ship);
     }
     
 }

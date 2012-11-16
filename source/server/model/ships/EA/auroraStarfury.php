@@ -22,7 +22,7 @@ class AuroraStarfury extends FighterFlight{
         for ($i = 0; $i<6; $i++){
 
 			$armour = array(3, 2, 2, 2);
-			$fighter = new Fighter($armour, 13, $this->id);
+			$fighter = new Fighter("auroraStarfury", $armour, 13, $this->id);
 			$fighter->displayName = "Starfury Medium Fighter";
 			$fighter->imagePath = "img/ships/auroraStarfury.png";
 			$fighter->iconPath = "img/ships/auroraStarfury_largei.png";

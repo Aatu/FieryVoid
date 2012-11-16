@@ -13,48 +13,50 @@ ShipSystem.prototype = {
 	constructor: ShipSystem
 }
 
-var DefensiveSystem = function(json, ship)
+var Fighter = function(json, ship)
 {
-    this.defensiveType = "none";
+    for (var i in json)
+    {
+        if (i == 'systems')
+        {
+            this.systems = SystemFactory.createSystemsFromJson(json[i], this);
+        }
+        else
+        {
+            this[i] = json[i];
+        }
+    }
+}
+
+Fighter.prototype = Object.create( ShipSystem.prototype );
+Fighter.prototype.constructor = Fighter;
+
+
+var Weapon = function(json, ship)
+{
     ShipSystem.call( this, json, ship);
 }
 
-DefensiveSystem.prototype = Object.create( ShipSystem.prototype );
+Weapon.prototype = Object.create( ShipSystem.prototype );
+Weapon.prototype.constructor = Weapon;
 
-DefensiveSystem.prototype.constructor = DefensiveSystem;
-
-DefensiveSystem.prototype.getDefensiveType = function()
+Weapon.prototype.getAmmo = function(fireOrder)
 {
-    return this.defensiveType;
+    return null;
+}
+Weapon.prototype.changeFiringMode = function()
+{
+    var mode = this.firingMode+1;
+    if (this.firingModes[mode]){
+        this.firingMode = mode;
+    }else{
+        this.firingMode = 1;
+    }
+}
+var Ballistic = function(json, ship)
+{
+    Weapon.call( this, json, ship);
 }
 
-DefensiveSystem.prototype.getDefensiveHitChangeMod = 
-    function(target, shooter, pos)
-{
-    return shipManager.systems.getOutput(target, this);
-}
-
-var Interceptor = function(json, ship)
-{
-    DefensiveSystem.call( this, json, ship);
-    this.defensiveType = "Interceptor";
-}
-
-Interceptor.prototype = Object.create( DefensiveSystem.prototype );
-
-var Shield = function(json, ship)
-{
-    DefensiveSystem.call( this, json, ship);
-    this.defensiveType = "Shield";
-}
-
-Shield.prototype = Object.create( DefensiveSystem.prototype );
-
-Shield.prototype.getDefensiveHitChangeMod = 
-    function(target, shooter, pos)
-{
-    if (shooter.flight && mathlib.getDistanceBetweenShipsInHex(target, shooter) == 0)
-        return 0;
-    
-    return shipManager.systems.getOutput(target, this);
-}
+Ballistic.prototype = Object.create( Weapon.prototype );
+Ballistic.prototype.constructor = Ballistic;

@@ -22,7 +22,7 @@ class Sentri extends FighterFlight{
         for ($i = 0; $i<6; $i++){
 			
 			$armour = array(3, 2, 3, 3);
-			$fighter = new Fighter($armour, 10, $this->id);
+			$fighter = new Fighter("sentri", $armour, 10, $this->id);
 			$fighter->displayName = "Sentri Medium Fighter";
 			$fighter->imagePath = "img/ships/sentri.png";
 			$fighter->iconPath = "img/ships/sentri_large.png";

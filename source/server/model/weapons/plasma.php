@@ -1,10 +1,8 @@
 <?php
 
 	class Plasma extends Weapon{
-	
-		
-	
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
@@ -28,13 +26,11 @@
 			parent::setSystemData($data, $subsystem);
 			$this->setMinDamage();
 			$this->setMaxDamage();
-			
-			
 		}
 		
 	}
 
-		class PlasmaAccelerator extends Plasma{
+    class PlasmaAccelerator extends Plasma{
 
 		public $name = "plasmaAccelerator";
         public $displayName = "Plasma Accelerator";

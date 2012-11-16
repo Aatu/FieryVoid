@@ -29,11 +29,11 @@ Ship.prototype =
 
             var mod = system.getDefensiveHitChangeMod(this, shooter, pos);
 
-            if ( ! (affectingSystems[system.getDefensiveType()])
-                || affectingSystems[system.getDefensiveType()] < mod)
+            if ( ! (affectingSystems[system.defensiveType])
+                || affectingSystems[system.defensiveType] < mod)
             {
                 console.log("getting defensive: " + system.name + " mod: " + mod);
-                affectingSystems[system.getDefensiveType()] = mod;
+                affectingSystems[system.getDefensiveType] = mod;
             }
 
         }
@@ -47,7 +47,7 @@ Ship.prototype =
        
     checkIsValidAffectingSystem: function(system, pos)
     {
-        if (!(system instanceof DefensiveSystem))
+        if (!(system.defensiveType))
             return false;
 
         //If the system was destroyed last turn continue 

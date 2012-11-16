@@ -259,7 +259,7 @@ class Weapon extends ShipSystem{
         $this->turnsloaded = $loading->loading;
     }
     
-    protected function getAmmo()
+    protected function getAmmo($fireOrder)
     {
         return null;
     }    
@@ -441,7 +441,7 @@ class Weapon extends ShipSystem{
                 $oew = 0;
         }
         
-        $ammo = $this->getAmmo();
+        $ammo = $this->getAmmo($fireOrder);
         if ($ammo !== null)
         {
             $mod += $ammo->getHitChangeMod();

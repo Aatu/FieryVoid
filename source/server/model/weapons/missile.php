@@ -12,8 +12,12 @@ class MissileLauncher extends Weapon
     public $animationWidth = 4;
     public $trailLength = 100;
     
-    public static $fireModeToMissile = array(
-        1 => 'BasicMissile'
+    public $firingModes = array(
+        1 => "BasicMissile"
+    );
+    
+    public $missileCount = array(
+        1 => 20
     );
         
 
@@ -46,14 +50,14 @@ class SMissileRack extends MissileLauncher
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
     }
-    protected function getAmmo()
+    protected function getAmmo($fireOrder)
     {
-        return new BasicMissile();
+        return new $this->firingModes[$fireOrder->firingMode];
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new self::$fireModeToMissile[$fireOrder->firingMode];
+        $ammo = new $this->firingModes[$fireOrder->firingMode];
         return $ammo->getDamage();
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}

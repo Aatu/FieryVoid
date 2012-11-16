@@ -22,7 +22,7 @@ class ThunderboltStarfury extends FighterFlight{
         for ($i = 0; $i<6; $i++){
 
 			$armour = array(3, 2, 2, 2);
-			$fighter = new Fighter($armour, 15, $this->id);
+			$fighter = new Fighter("thunderboltStarfury", $armour, 15, $this->id);
 			$fighter->displayName = "Thunderbolt Medium Fighter";
 			$fighter->imagePath = "img/ships/thunderboltStarfury.png";
 			$fighter->iconPath = "img/ships/thunderboltStarfury_large.png";

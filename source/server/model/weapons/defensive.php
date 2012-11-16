@@ -4,7 +4,6 @@
 
         public $trailColor = array(30, 170, 255);
         
-        public $jsClass = 'Interceptor';
         public $name = "interceptorMkI";
         public $displayName = "Interceptor MK I";
         public $animation = "trail";

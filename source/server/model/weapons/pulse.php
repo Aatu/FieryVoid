@@ -118,10 +118,6 @@
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
         
         public $intercept = 2;
-        
-        
-        
-        
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

@@ -22,7 +22,7 @@ class NovaAlpha extends BaseShip{
         $this->pivotcost = 3;
 
         
-        $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 30, 0, -5));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 6, 4));

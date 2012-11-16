@@ -21,9 +21,10 @@
 		public $criticals = array();
 		
 		
-		function __construct($armour, $maxhealth, $flight){
+		function __construct($name, $armour, $maxhealth, $flight){
 			parent::__construct($armour, $maxhealth, 0, 0 );
 			
+            $this->name = $name;
 			$this->flightid = $flight;
 			
 			

@@ -101,8 +101,9 @@ window.gamedata = {
 
 	parseShips: function(json){
 
-		gamedata.allShips = json;
-
+		gamedata.setShipsFromJson(json);
+        //gamedata.allShips = json;
+        
 		for (var i in gamedata.allShips){
 			var faction = gamedata.allShips[i];
 
@@ -409,7 +410,28 @@ window.gamedata = {
                 
         }
         return null;
-    }
+    },
+            
+    setShipsFromJson: function(jsonShips)
+    {
+        //gamedata.ships = Array();
+        
+        var factions = Array();
+        for (var f in jsonShips)
+        {
+            console.log(f);
+            var faction = jsonShips[f];
+            factions[f] = Array();
+            
+            for (var i in faction)
+            {
+                var ship = faction[i];
+                factions[f][i] = new Ship(ship);
+            }
+        }
+        
+        gamedata.allShips = factions; 
+    },
 
 
 }

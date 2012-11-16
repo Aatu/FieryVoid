@@ -112,7 +112,6 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $displayName = "Shield";
     public $startArc = 0;
     public $endArc = 0;
-    public $jsClass = 'Shield';
     
     //defensive system
     public $defensiveSystem = true;
@@ -179,7 +178,7 @@ class Reactor extends ShipSystem{
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
-    public $outputType = "Power";
+    public $outputType = "power";
     
     public $possibleCriticals = array(
         11=>"OutputReduced2",
@@ -202,6 +201,7 @@ class Engine extends ShipSystem{
     public $thrustused;
     public $primary = true;
     public $boostable = true;
+    public $outputType = "thrust";
     
     public $possibleCriticals = array(
         15=>"OutputReduced2",

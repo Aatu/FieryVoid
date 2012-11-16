@@ -26,12 +26,7 @@ window.weaponManager = {
             return;
         
         if (gamedata.isMyShip(ship)){
-            var mode = system.firingMode+1;
-            if (system.firingModes[mode]){
-                system.firingMode = mode;
-            }else{
-                system.firingMode = 1;
-            }
+            system.changeFiringMode();
             
             weaponManager.unSelectWeapon(ship, system);
   
@@ -308,9 +303,16 @@ window.weaponManager = {
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
         
-        var oew = ew.getTargetingEW(shooter, target);
-        oew -= dist;
-       
+        var oew = 0;
+        
+        if (weapon.useOEW)
+        {
+            oew = ew.getTargetingEW(shooter, target);
+            oew -= dist;
+            
+            if (oew<0)
+                oew = 0;
+        }
         
         var firecontrol =  weaponManager.getFireControl(target, weapon);
         
@@ -325,6 +327,10 @@ window.weaponManager = {
        
 		if (calledid)
 			mod -= 8;
+        
+        var ammo = weapon.getAmmo(weaponManager.getFireOrderById(ball.fireOrderId));
+        if (ammo)
+            mod += ammo.getHitChanceMod();
         
         var goal = (baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod);
         
@@ -395,9 +401,17 @@ window.weaponManager = {
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
         
-        var oew = ew.getTargetingEW(shooter, target);
-        oew -= dist;
-		
+        var oew = 0;
+        
+        if (weapon.useOEW)
+        {
+            oew = ew.getTargetingEW(shooter, target);
+            oew -= dist;
+            
+            if (oew<0)
+                oew = 0;
+        }
+
         var mod = 0;
         
         mod -= target.getHitChangeMod(shooter, sPos);
@@ -429,6 +443,10 @@ window.weaponManager = {
         if (calledid)
 			mod -= 8;
         
+        var ammo = weapon.getAmmo();
+        if (ammo)
+            mod += ammo.getHitChanceMod();
+        
         var jammermod = 0;
         if (oew < 1){
             rangePenalty = rangePenalty*2;
@@ -450,8 +468,7 @@ window.weaponManager = {
         }
             
         var firecontrol =  weaponManager.getFireControl(target, weapon);
-            
-        
+
         var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
         
         var change = Math.round((goal/20)*100);

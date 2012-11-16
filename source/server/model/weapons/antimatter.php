@@ -8,8 +8,8 @@
         public $animationColor = array(175, 225, 175);
         public $projectilespeed = 20;
         public $animationWidth = 4;
-	public $animationExplosionScale = 0.20;
-	public $trailLength = 20;
+        public $animationExplosionScale = 0.20;
+        public $trailLength = 20;
 		        
         public $loadingtime = 3;
         public $rangePenalty = 1;
