@@ -595,7 +595,7 @@ class Weapon extends ShipSystem{
                     $range = $range/($jammerValue+1);
                 }
 
-                if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $range)
+                if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > ($range*2))
                 {
                     $fireOrder->pubnotes .= " FIRING SHOT ". ($i+1) .": Target moved out of launch range.";
                     continue;
