@@ -60,7 +60,7 @@ class Leshath extends BaseShip{
         $this->addLeftSystem(new GraviticThruster(4, 16, 0, 5, 3));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
 
-        $this->addLeftSystem(new ElectroPulseGun(2, 6, 3, 0, 120));
+        $this->addRightSystem(new ElectroPulseGun(2, 6, 3, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new GraviticThruster(4, 16, 0, 5, 4));
