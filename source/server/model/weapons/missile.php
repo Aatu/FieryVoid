@@ -40,7 +40,7 @@ class SMissileRack extends MissileLauncher
 {
     public $name = "sMissileRack";
     public $displayName = "Class-S Missile Rack";
-    public $range = 15;
+    public $range = 20;
     public $loadingtime = 2;
     public $iconPath = "missile1.png";
 
