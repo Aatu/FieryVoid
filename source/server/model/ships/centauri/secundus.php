@@ -28,11 +28,11 @@ class Secundus extends BaseShip{
 		$this->addPrimarySystem(new Hangar(7, 14));
 		
         
-		$this->addFrontSystem(new HeavyArray(3, 8, 4, 300, 60));
+        $this->addFrontSystem(new HeavyArray(3, 8, 4, 240, 0));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new HeavyArray(3, 8, 4, 300, 60));
-        $this->addFrontSystem(new HeavyArray(3, 8, 4, 240, 0));
+        $this->addFrontSystem(new HeavyArray(3, 8, 4, 300, 60));
 		$this->addFrontSystem(new HeavyArray(3, 8, 4, 0, 120));
 		
         $this->addAftSystem(new Thruster(5, 8, 0, 2, 2));

@@ -198,7 +198,15 @@ window.shipManager = {
 				
 				if (ccew > 0){
 					ccew = Math.ceil(( ccew )*gamedata.zoom*0.5);
-					canvas.strokeStyle = "rgba(20,80,128,0.50)";
+                    if (myship)
+                    {
+                        canvas.strokeStyle = "rgba(20,80,128,0.50)"; 
+                    }
+                    else
+                    {
+                        canvas.strokeStyle = "rgba(179,65,25,0.50)";
+                    }
+					
 					graphics.drawCircle(canvas, s/2, s/2, ((s*0.18*gamedata.zoom)+(dew*0.5) + (ccew*0.5) + 2), ccew);
 				}
 			}

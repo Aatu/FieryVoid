@@ -1,4 +1,4 @@
-
+<?php
 class Sagittarius extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
@@ -34,11 +34,11 @@ class Sagittarius extends BaseShip{
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Class L Launcher(3, 6, 0, 240, 120));
-        $this->addFrontSystem(new Class L Launcher(3, 6, 0, 240, 120));
-        $this->addFrontSystem(new Class L Launcher(3, 6, 0, 180, 60));
-        $this->addFrontSystem(new Class L Launcher(3, 6, 0, 300, 180));
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 240, 120));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 180, 60));
+        $this->addFrontSystem(new LMissileRack(3, 6, 0, 300, 180));
+        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
 
 
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
@@ -47,14 +47,13 @@ class Sagittarius extends BaseShip{
 
 
         $this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
-        $this->addLeftSystem(new Class L Launcher(3, 6, 6, 180, 60));
-        $this->addLeftSystem(new Class L Launcher(3, 6, 6, 60, 300));
+        $this->addLeftSystem(new LMissileRack(3, 6, 6, 180, 60));
+        $this->addLeftSystem(new LMissileRack(3, 6, 6, 60, 300));
 
 
         $this->addRightSystem(new Thruster(3, 13, 0, 4, 4));
-        $this->addRightSystem(new Class L Launcher(3, 6, 6, 300,180));
-        $this->addRightSystem(new Class L Launcher(3, 6, 6, 60, 300 ));
-
+        $this->addRightSystem(new LMissileRack(3, 6, 6, 300,180));
+        $this->addRightSystem(new LMissileRack(3, 6, 6, 60, 300 ));
 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -179,8 +179,8 @@ window.ballistics = {
         
         var s = 20;
         var h = Math.round(s/2)
-        var hexZ = 2000+ball.id;
-        var scZ = 4000+ball.id;
+        var hexZ = 10000+ball.id;
+        var scZ = 10000+ball.id;
         
         ball.launchContainer.css("top", launchPos.y -h + "px").css("left", launchPos.x -h + "px").css("z-index", hexZ).show();
         
