@@ -57,7 +57,7 @@
 
     class ShockCannon extends Weapon{
 
-	public $name = "shockCannon";
+        public $name = "shockCannon";
         public $displayName = "Shock Cannon";
         public $animation = "laser";
         public $animationColor = array(175, 225, 175);
@@ -203,7 +203,7 @@
 
         public $loadingtime = 2;
         public $rangePenalty = 3;
-        public $fireControl = array(0, 0, 3); // fighters, <=mediums, <=capitals
+        public $fireControl = array(2, null, null); // fighters, <=mediums, <=capitals
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
