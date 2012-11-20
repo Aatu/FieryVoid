@@ -102,6 +102,9 @@ class Firing{
         
         foreach($ship->systems as $fighter)
         {
+            if ($fighter->isDestroyed())
+                continue;
+            
             foreach ($fighter->systems as $weapon)
             {
             if (self::isValidInterceptor($gd, $weapon) === false)
