@@ -203,7 +203,7 @@
 
         public $loadingtime = 2;
         public $rangePenalty = 3;
-        public $fireControl = array(2, null, null); // fighters, <=mediums, <=capitals
+        public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
