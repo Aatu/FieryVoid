@@ -47,13 +47,13 @@ class Sagittarius extends BaseShip{
 
 
         $this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
-        $this->addLeftSystem(new LMissileRack(3, 6, 6, 180, 60));
-        $this->addLeftSystem(new LMissileRack(3, 6, 6, 60, 300));
+        $this->addLeftSystem(new LMissileRack(3, 6, 0, 180, 60));
+        $this->addLeftSystem(new LMissileRack(3, 6, 0, 60, 300));
 
 
         $this->addRightSystem(new Thruster(3, 13, 0, 4, 4));
-        $this->addRightSystem(new LMissileRack(3, 6, 6, 300,180));
-        $this->addRightSystem(new LMissileRack(3, 6, 6, 60, 300 ));
+        $this->addRightSystem(new LMissileRack(3, 6, 0, 300,180));
+        $this->addRightSystem(new LMissileRack(3, 6, 0, 60, 300 ));
 
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
