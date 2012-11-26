@@ -352,7 +352,7 @@ body {
 	border-right: 1px solid #496791;
 	position:absolute;
 	left:0px;
-	bottom:-140px;
+	bottom:0px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
@@ -589,7 +589,7 @@ body.phase1 #botPanel .ewentry .button2{
 	border-left: 1px solid #496791;
 	position:absolute;
 	left:210px;
-	bottom:-140px;
+	bottom:0px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;

@@ -1279,7 +1279,7 @@ class DBManager {
 				
 				$stmt->bind_param('ss', $username, $password);
 				$stmt->execute();
-				$stmt->bind_result($id, $acces);
+				$stmt->bind_result($id, $access);
 				$stmt->fetch();
 				
 				/* close statement */
@@ -1294,7 +1294,7 @@ class DBManager {
             throw $e;
         }
         
-        return array('id' => $id, 'access' => $acces);
+        return array('id' => $id, 'access' => $access);
     }  
     
     public function releaseGameSubmitLock($gameid)

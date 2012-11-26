@@ -143,14 +143,17 @@ window.combatLog = {
     
     logMoves: function(ship){
         
-        var e = $('.logentry.'+ship.id +' .move');
+        var e = $('.logentry.'+ship.id +' .move.t'+gamedata.turn);
         if (e.length > 0)
             return;
         
         var start = shipManager.movement.getFirstMoveOfTurn(ship);
         var end = shipManager.movement.getLastCommitedMove(ship);
         
-        var html = '<div class="logentry '+ship.id+'" data-shipid="'+ship.id+'"><span class="logheader move">MOVE: </span> <span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';
+        if (!start || !end)
+            return;
+        
+        var html = '<div class="logentry '+ship.id+'" data-shipid="'+ship.id+'"><span class="logheader move t'+gamedata.turn+'">MOVE: </span> <span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';
             html += '<span> From ('+start.x+','+start.y+') to ('+end.x+','+end.y+') </span></div>';
         var log = $(html);
         //var details = $('<ul><li><span> From ('+start.x+','+start.y+') to ('+end.x+','+end.y+') </span></ul></li>')
