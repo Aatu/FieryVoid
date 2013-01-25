@@ -702,6 +702,18 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function isInLaunchRange($fireOrder)
+    {
+        // fireOrder is needed to check if target has jammers
+        return true;
+    }
+    
+    public function isInDistanceRange($fireOrder)
+    {
+        // fireOrder is needed to check if target has jammers
+        return true;
+    }
+    
     protected function getSystemArmour($system, $gamedata, $fireOrder){
 		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
