@@ -106,10 +106,10 @@
         public $displayName = "Molecular Disruptor";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
-        public $animationExplosionScale = 0.10;
+        public $animationExplosionScale = 0.35;
         public $projectilespeed = 12;
-        public $animationWidth = 2;
-        public $trailLength = 10;
+        public $animationWidth = 10;
+        public $trailLength = 25;
 
         public $intercept = 0;
         public $loadingtime = 4;

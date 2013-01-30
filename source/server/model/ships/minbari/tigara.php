@@ -43,7 +43,7 @@ class Tigara extends BaseShip{
         $this->addAftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addAftSystem(new GraviticThruster(4, 38, 0, 10, 2));
         $this->addAftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
