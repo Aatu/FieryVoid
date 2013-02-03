@@ -126,10 +126,10 @@
         public $displayName = "Particle Cannon";
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 20;
-        public $animationWidth = 4;
-        public $trailLength = 15;
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 15;
+        public $animationWidth = 8;
+        public $trailLength = 24;
         public $damageType = "raking";
         
         public $intercept = 1;

@@ -40,3 +40,10 @@ var GuardianArray = function(json, ship)
 }
 GuardianArray.prototype = Object.create( Particle.prototype );
 PairedParticleGun.prototype.constructor = GuardianArray;
+
+var ParticleCannon = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+ParticleCannon.prototype = Object.create(Particle.prototype);
+ParticleCannon.prototype.constructor = ParticleCannon;

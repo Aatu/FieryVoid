@@ -37,8 +37,8 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 0, 0));
         
-        $this->addAftSystem(new ParticleCannon(4, 8, 7, 0, 0));
         $this->addAftSystem(new ParticleCannon(3, 8, 7, 240, 0));
+        $this->addAftSystem(new ParticleCannon(4, 8, 7, 0, 0));
         $this->addAftSystem(new ParticleCannon(3, 8, 7, 0, 120));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));

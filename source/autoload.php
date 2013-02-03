@@ -137,7 +137,7 @@ spl_autoload_register(
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'olympus' => '/server/model/ships/EA/olympus.php',
-                //'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
+                'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
                 'outputreduced' => '/server/model/cricialClasses.php',
