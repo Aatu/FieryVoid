@@ -1,5 +1,4 @@
 <?php
-
 class OlympusBeta extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,10 +6,9 @@ class OlympusBeta extends HeavyCombatVessel{
         
         $this->pointCost = 625;
         $this->faction = "EA";
-        $this->phpclass = "Olympus Gunship (Beta)";
+        $this->phpclass = "OlympusBeta";
         $this->imagePath = "img/ships/olympus.png";
-        $this->shipClass = "OlympusBeta";
-        
+        $this->shipClass = "Olympus Gunship (Beta Version)";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -22,7 +20,6 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
         
-         
         $this->addPrimarySystem(new Reactor(5, 20, 0, -4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 4, 6));
@@ -38,11 +35,11 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 0, 120));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        $this->addFrontSystem(new Particlecannon(4, 8, 7, 0, 0));
+        $this->addFrontSystem(new ParticleCannon(4, 8, 7, 0, 0));
         
-        $this->addAftSystem(new Particlecannon(4, 8, 7, 0, 0));
-        $this->addAftSystem(new Particlecannon(3, 8, 7, 240, 0));
-        $this->addAftSystem(new Particlecannon(3, 8, 7, 0, 120));
+        $this->addAftSystem(new ParticleCannon(4, 8, 7, 0, 0));
+        $this->addAftSystem(new ParticleCannon(3, 8, 7, 240, 0));
+        $this->addAftSystem(new ParticleCannon(3, 8, 7, 0, 120));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 7, 0, 2, 2));
@@ -53,10 +50,7 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 48));
         $this->addAftSystem(new Structure( 5, 42));
         $this->addPrimarySystem(new Structure( 5, 50));
-        
-        
     }
-
 }
 
 

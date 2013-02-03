@@ -118,6 +118,42 @@
 
     }
     
+    class ParticleCannon extends Raking{
+        
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "particleCannon";
+        public $displayName = "Particle Cannon";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 20;
+        public $animationWidth = 4;
+        public $trailLength = 15;
+        public $damageType = "raking";
+        
+        public $intercept = 1;
+        public $loadingtime = 2;
+      
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Raking";
+           
+            parent::setSystemDataWindow($turn);
+        }
+        
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+15;   }
+        public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
+    }
+    
     class PairedParticleGun extends LinkedWeapon{
 
         public $trailColor = array(30, 170, 255);
@@ -162,38 +198,6 @@
 
     }
     
-    class ParticleCannon extends Raking{
-        public $trailColor = array(30, 170, 255);
-        
-        public $name = "ParticleCannon";
-        public $displayName = "Particle Cannon";
-        public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 12;
-        public $animationWidth = 6;
-        public $trailLength = 15;
-        
-        public $intercept = 1;
-        public $loadingtime = 2;
-      
-        public $rangePenalty = 0.5;
-        public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals 
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Raking";
-           
-            parent::setSystemDataWindow($turn);
-        }
-        
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+15;   }
-        public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
-    }
 
 ?>
+
