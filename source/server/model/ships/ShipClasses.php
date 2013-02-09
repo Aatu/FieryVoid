@@ -829,8 +829,6 @@
                 }
             }   
 
-            Debug::log("half medium getHitSystem");
-            
             if(sizeof($systems) == 0){
                 // All normal systems have already been destroyed on this section
                 // If we already are doing primary:
@@ -840,19 +838,14 @@
                     $structure = $this->getStructureSystem(0);
                     
                     if($structure->isDestroyed()){
-                                    Debug::log("r1 Medium getHitSystem");
-
                         return null;
                     }
                     else{
-                                    Debug::log("2 Medium getHitSystem");
                         return $structure;
                     }
                 }
 
                 // all systems were destroyed. Go to primary.
-                                                    Debug::log("r3 Medium getHitSystem");
-
                 //return $this->getStructureSystem(0);
                 return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
             }
@@ -876,32 +869,22 @@
                     //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
                     if ($system->isDestroyed()){
                         if ($system instanceof Structure){
-                                                                Debug::log("5 Medium getHitSystem");
-
                             return null;}
                                 
                         $structure = $this->getStructureSystem(0);
                         if ($structure == null || $structure->isDestroyed()){
-                                                                Debug::log("r6 Medium getHitSystem");
-
                             return null;
                           
                         }else{
-                                                                Debug::log("r7 Medium getHitSystem");
-
                             return $structure;
                         }
                     }
-                    
-                                                        Debug::log("r8 Medium getHitSystem");
 
                     return $system;
                 }
                 
                 $goneTrough += $health;
             }
-
-                                                Debug::log("9 Medium getHitSystem");
 
             return null;
         }

@@ -707,7 +707,6 @@ class Weapon extends ShipSystem{
             foreach($ships1 as $ship){
                 if($ship === $target){
                     // make certain the target doesn't get the damage twice
-                    Debug::log("Continue: is same target.");
                     continue;
                 }
                 
