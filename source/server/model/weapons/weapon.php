@@ -658,48 +658,89 @@ class Weapon extends ShipSystem{
         
     }
     
-    protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata){
-        if ($this->piercing && $this->firingMode == 2)
-            return null;
+    protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
+    {
+        $okSystem = null;
         
-		if ($target instanceof FighterFlight){
-			return null;
-		}
-		
-        if ($this->flashDamage){
-            return $target->getHitSystem($pos, $shooter, $fireOrder, $this);
-        }else{
-            
-            $okSystem = $target->getStructureSystem($system->location);
-            
-            if ($okSystem == null || $okSystem->isDestroyed()){
-                $okSystem = $target->getStructureSystem(0);
-            }
-            if ($okSystem == null || $okSystem->isDestroyed()){
-                return null;
-            }
+        if ($this->piercing && $this->firingMode == 2)
+        {
+            return null;
         }
         
+	if ($target instanceof FighterFlight)
+        {
+            return null;
+        }
+		
+        if ($this->flashDamage)
+        {
+            // If overkill comes from flash damage, first go through all
+            // other systems before overkilling into structure.
+            $okSystem = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
+        }
+        
+        if ( $okSystem == null )
+        {
+            $okSystem = $target->getStructureSystem($system->location);
+        }
+            
+        if ($okSystem == null || $okSystem->isDestroyed())
+        {
+            $okSystem = $target->getStructureSystem(0);
+        }
+        
+        if ($okSystem == null || $okSystem->isDestroyed())
+        {
+            return null;
+        }
+     
         return $okSystem;
-    
     }
    
     
     public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-        
+       
+        if($this->flashDamage){
+            $flashDamageAmount = $damage/4;
+
+            $ships1 = $gamedata->getShipsInDistance($target->getCoPos());
+            foreach($ships1 as $ship){
+                if($ship === $target){
+                    // make certain the target doesn't get the damage twice
+                    Debug::log("Continue: is same target.");
+                    continue;
+                }
+                
+                if ($ship instanceof FighterFlight){
+
+                    foreach ($ship->systems as $fighter){
+                        if ($fighter == null || $fighter->isDestroyed()){
+                            continue;
+			}
+                        $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+                    }
+                }
+                else{
+                    $system = $ship->getHitSystem($target->getCoPos(), $target, $fireOrder, $this);
+                    
+                    if ($system == null){
+                        continue;
+                    }
+                    
+                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, $pos, $gamedata);                
+                }
+            }
+        }
         
         if ($target->isDestroyed())
             return;
        
-		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
 		
         if ($system == null)
             return;
             
         $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-            
-        
-        
     }
     
     public function isInLaunchRange($fireOrder)

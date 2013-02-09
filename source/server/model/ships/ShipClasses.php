@@ -562,31 +562,36 @@
         }
         
         
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-        
-			$system = null;
-			if ($fire->calledid != -1){
-				$system = $this->getSystemById($fire->calledid);
-			}
-			if ($system != null && !$system->isDestroyed())
-				return $system;
+        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null)
+        {  
+            $system = null;
+            
+            if ($fire->calledid != -1){
+                $system = $this->getSystemById($fire->calledid);
+            }
+            
+            if ($system != null && !$system->isDestroyed())
+                return $system;
         
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
             
-            //print("getHitSystem, location: $location ");
             $systems = array();
             $totalStructure = 0;
 
             foreach ($this->systems as $system){
-                
                 if ($system->location == $location){
-                    //if ($system->isDestroyed())
-                    //  continue;
+            
+                    // For flash damage, only take into account the systems
+                    // that are still alive and are not structure.
+                    if ($weapon->flashDamage && ($system->isDestroyed() || $system->name == "structure" )){
+                        continue;
+                    }
                         
-                     $systems[] = $system;
+                    $systems[] = $system;
                         
                     if ($system->name == "structure"){
+                       
                         $multiply = 0.5;
                         if ($location == 0)
                             $multiply = 2;
@@ -597,18 +602,30 @@
                     }
                     
                 }
-            
-                
             }   
+            
+            if(sizeof($systems) == 0){
+                // all systems were destroyed. If there still is structure,
+                // return that. If not, go to primary.
+                $structure = $this->getStructureSystem($location);
+                if($structure->isDestroyed()){
+                    if ($location == 0)
+                                return null;
+                    // Go to primary
+                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                }
+                else{
+                    // there is still structure left.
+                    return $structure;
+                }
+            }
             
             $roll = Dice::d($totalStructure);
             $goneTrough = 0;
 
-            
             foreach ($systems as $system){
-                
                 $health = 0;
-            
+                    
                 if ($system->name == "structure"){
                     $multiply = 0.5;
                     if ($location == 0)
@@ -623,15 +640,16 @@
                     //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
                     if ($system->isDestroyed()){
                         if ($system instanceof Structure){
-                            if ($system->location == 0)
-                                return null;
+                            if ($system->location == 0){
+                                return null;}
                                 
                             return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                         }
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
-                            if ($structure->location == 0)
+                            if ($structure->location == 0){
                                 return null;
+                            }
                                 
                             return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                         }else{
@@ -642,12 +660,11 @@
                     }
                     return $system;
                 }
-                $goneTrough += $health;
                 
+                $goneTrough += $health;
             }
             
             return null;
-        
         }
         
         public function getPiercingDamagePerLoc($damage){
@@ -777,28 +794,28 @@
         }
         
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+            $system = null;
+            if ($fire->calledid != -1){
+                $system = $this->getSystemById($fire->calledid);
+            }
+            
+            if ($system != null && !$system->isDestroyed())
+                return $system;
         
-			$system = null;
-			if ($fire->calledid != -1){
-				$system = $this->getSystemById($fire->calledid);
-			}
-			if ($system != null && !$system->isDestroyed())
-				return $system;
-        
-            if ($location == null)
+            if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
             
-
-            //print("getHitSystem, location: $location ");
             $systems = array();
             $totalStructure = 0;
 
             foreach ($this->systems as $system){
-                
+                // For flash damage, only take into account the systems
+                // that are still alive and are not structure.
+                if ($weapon->flashDamage && ($system->isDestroyed() || $system instanceof Structure )){
+                    continue;
+                }
+                    
                 if ($system->location == $location || $system instanceof Structure){
-                    //if ($system->isDestroyed())
-                    //  continue;
-                        
                      $systems[] = $system;
                         
                     if ($system instanceof Structure){
@@ -810,13 +827,38 @@
                     }
                     
                 }
-            
-                
             }   
+
+            Debug::log("half medium getHitSystem");
+            
+            if(sizeof($systems) == 0){
+                // All normal systems have already been destroyed on this section
+                // If we already are doing primary:
+                // If structure is gone, return null
+                // else return structure
+                if ($location == 0){
+                    $structure = $this->getStructureSystem(0);
+                    
+                    if($structure->isDestroyed()){
+                                    Debug::log("r1 Medium getHitSystem");
+
+                        return null;
+                    }
+                    else{
+                                    Debug::log("2 Medium getHitSystem");
+                        return $structure;
+                    }
+                }
+
+                // all systems were destroyed. Go to primary.
+                                                    Debug::log("r3 Medium getHitSystem");
+
+                //return $this->getStructureSystem(0);
+                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+            }
             
             $roll = Dice::d($totalStructure);
             $goneTrough = 0;
-
             
             foreach ($systems as $system){
                 
@@ -834,28 +876,34 @@
                     //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
                     if ($system->isDestroyed()){
                         if ($system instanceof Structure){
-                            return null;
+                                                                Debug::log("5 Medium getHitSystem");
+
+                            return null;}
                                 
-                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                        }
                         $structure = $this->getStructureSystem(0);
                         if ($structure == null || $structure->isDestroyed()){
+                                                                Debug::log("r6 Medium getHitSystem");
+
                             return null;
                           
                         }else{
+                                                                Debug::log("r7 Medium getHitSystem");
+
                             return $structure;
                         }
-                            
-                        
                     }
+                    
+                                                        Debug::log("r8 Medium getHitSystem");
+
                     return $system;
                 }
-                $goneTrough += $health;
                 
+                $goneTrough += $health;
             }
-            
+
+                                                Debug::log("9 Medium getHitSystem");
+
             return null;
-        
         }
     }
 ?>
