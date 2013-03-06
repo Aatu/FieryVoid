@@ -174,6 +174,31 @@
         
     }
     
+    class LightLaser extends Laser{
+        public $name = "lightLaser";
+        public $displayName = "Light laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 11, 11);
+        public $animationExplosionScale = 0.15;
+        public $animationWidth = 2;
+        
+        public $loadingtime = 2;
+        
+        public $damageType = "raking";
+        public $raking = 10;
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+7;   }
+        public function setMinDamage(){     $this->minDamage = 9 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 27 - $this->dp;      }
+    }
+    
     class BattleLaser extends Laser{
         
         public $name = "battleLaser";

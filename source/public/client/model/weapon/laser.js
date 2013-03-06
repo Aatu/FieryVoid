@@ -21,6 +21,13 @@ var MediumLaser = function(json, ship)
 MediumLaser.prototype = Object.create( Laser.prototype );
 MediumLaser.prototype.constructor = MediumLaser;
 
+var LightLaser = function(json, ship)
+{
+    Laser.call( this, json, ship);
+}
+LightLaser.prototype = Object.create( Laser.prototype );
+LightLaser.prototype.constructor = LightLaser;
+
 
 var BattleLaser = function(json, ship)
 {
