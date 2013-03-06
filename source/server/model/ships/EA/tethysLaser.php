@@ -25,7 +25,7 @@ class TethysLaser extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
-        $this->addPrimarySystem(new Engine(4, 8, 0, 11, 3));
+        $this->addPrimarySystem(new Engine(4, 11, 0, 8, 3));
 	$this->addPrimarySystem(new Hangar(4, 2));
 	$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
