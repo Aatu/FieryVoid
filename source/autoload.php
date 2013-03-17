@@ -140,6 +140,8 @@ spl_autoload_register(
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
+                'oracle' => '/server/model/ships/EA/oracle.php',
+                'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'outputreduced' => '/server/model/cricialClasses.php',
                 'outputreduced1' => '/server/model/cricialClasses.php',
                 'outputreduced10' => '/server/model/cricialClasses.php',
