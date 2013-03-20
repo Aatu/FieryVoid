@@ -9,7 +9,6 @@ class TethysMissile extends MediumShip{
         $this->phpclass = "TethysMissile";
         $this->imagePath = "img/ships/tethys.png";
         $this->shipClass = "Tethys Missile Boat";
-        $this->agile = true;
         $this->canvasSize = 100;
         
         $this->forwardDefense = 13;

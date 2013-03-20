@@ -479,7 +479,7 @@ class Weapon extends ShipSystem{
         else
         {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
-            if ($jammerValue > 0)
+            if ($jammerValue > 0 && $shooter->faction != $target->faction)
             {
                 $jammermod = $rangePenalty*$jammerValue;
                 if ($target instanceof FighterFlight){
@@ -590,7 +590,7 @@ class Weapon extends ShipSystem{
                 $range = $this->getRange($fireOrder);
 
                 // Account for reduced launch range in case of jammer.
-                if ($jammerValue > 0)
+                if ($jammerValue > 0 && $shooter->faction != $target->faction)
                 {
                     $range = $range/($jammerValue+1);
                 }

@@ -184,6 +184,8 @@ spl_autoload_register(
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
                 'sharaal' => '/server/model/ships/minbari/sharaal.php',
                 'sharlin' => '/server/model/ships/minbari/sharlin.php',
+                'shaveenpatrolcutter' => '/server/model/ships/minbari/shaveenPatrolCutter.php',
+                'shaveenpoliceleader' => '/server/model/ships/minbari/shaveenPoliceLeader.php',
                 'shield' => '/server/model/systems/baseSystems.php',
                 'shipdisabledoneturn' => '/server/model/cricialClasses.php',
                 'shiploader' => '/server/controller/shipLoader.php',
