@@ -579,27 +579,11 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
         
         for ($i=0;$i<$fireOrder->shots;$i++){
-            // Check if, in case of ballistic weapons, the target
-            // moved out of launch range
-            // Put in here and not before the for loop to account
-            // for future update that e.g. torpedos are fired at
-            // multiple targets.
-            if ($this->ballistic)
+            // Check if weapon is in distance range.
+            if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
             {
-                $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
-                $range = $this->getRange($fireOrder);
-
-                // Account for reduced launch range in case of jammer.
-                if ($jammerValue > 0 && $shooter->faction != $target->faction)
-                {
-                    $range = $range/($jammerValue+1);
-                }
-
-                if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $range)
-                {
-                    $fireOrder->pubnotes .= " FIRING SHOT ". ($i+1) .": Target moved out of launch range.";
-                    continue;
-                }
+                // Target is not in distance range. Move to next shot.
+                continue;
             }
 
             $needed = $fireOrder->needed - ($this->grouping*$i);
@@ -742,15 +726,15 @@ class Weapon extends ShipSystem{
         $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
     }
     
-    public function isInLaunchRange($fireOrder)
+    public function isInLaunchRange($shooter, $target, $fireOrder)
     {
-        // fireOrder is needed to check if target has jammers
+        // gameData and fireOrder is needed to check if target has jammers
         return true;
     }
     
-    public function isInDistanceRange($fireOrder)
+    public function isInDistanceRange($shooter, $target, $fireOrder)
     {
-        // fireOrder is needed to check if target has jammers
+        // gameData and fireOrder is needed to check if target has jammers
         return true;
     }
     

@@ -11,6 +11,7 @@ class MissileLauncher extends Weapon
     public $projectilespeed = 8;
     public $animationWidth = 4;
     public $trailLength = 100;
+    public $distanceRange = 0;
     
     public $firingModes = array(
         1 => "BasicMissile"
@@ -34,6 +35,20 @@ class MissileLauncher extends Weapon
 
         parent::setSystemDataWindow($turn);
     }
+    
+    public function isInDistanceRange($shooter, $target, $fireOrder)
+    {
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+    
+        if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->distanceRange)
+        {
+            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+            return false;
+        }
+        
+        return true;
+    }
 }
 
 class SMissileRack extends MissileLauncher
@@ -41,6 +56,7 @@ class SMissileRack extends MissileLauncher
     public $name = "sMissileRack";
     public $displayName = "Class-S Missile Rack";
     public $range = 20;
+    public $distanceRange = 60;
     public $loadingtime = 2;
     public $iconPath = "missile1.png";
 
@@ -70,6 +86,7 @@ class LMissileRack extends MissileLauncher
     public $name = "lMissileRack";
     public $displayName = "Class-L Missile Rack";
     public $range = 30;
+    public $distanceRange = 70;
     public $loadingtime = 2;
     public $iconPath = "missile1.png";
 

@@ -8,6 +8,19 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+        public function isInDistanceRange($shooter, $target, $fireOrder)
+        {
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+
+            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->range)
+            {
+                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+                return false;
+            }
+
+            return true;
+        }
     }
     
     class IonTorpedo extends Torpedo{
