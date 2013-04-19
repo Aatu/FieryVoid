@@ -35,8 +35,8 @@ class OmegaBeta  extends BaseShip{
 	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
 	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 0));
 	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
-        $this->addFrontSystem(new InterceptorMkII(2, 4, 1, 240, 60));
-        $this->addFrontSystem(new InterceptorMkII(2, 4, 1, 300, 120));
+        $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
+        $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
 	$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
@@ -46,8 +46,8 @@ class OmegaBeta  extends BaseShip{
 	$this->addAftSystem(new MediumPulse(4, 6, 4, 180, 240));
 	$this->addAftSystem(new MediumPulse(4, 8, 6, 120, 180));
 	$this->addAftSystem(new MediumPulse(4, 8, 6, 120, 180));
-        $this->addAftSystem(new InterceptorMkII(2, 4, 1, 120, 300));
-        $this->addAftSystem(new InterceptorMkII(2, 4, 1, 60, 240));
+        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
+        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         
 	$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
@@ -56,7 +56,7 @@ class OmegaBeta  extends BaseShip{
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
-        $this->addLeftSystem(new InterceptorMkII(2, 4, 1, 180, 0));
+        $this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 0));
 
 
         $this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
@@ -66,7 +66,7 @@ class OmegaBeta  extends BaseShip{
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-        $this->addRightSystem(new InterceptorMkII(2, 4, 1, 0, 180));
+        $this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 60));
