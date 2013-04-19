@@ -109,3 +109,44 @@ class LMissileRack extends MissileLauncher
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
 }
+
+class LHMissileRack extends MissileLauncher
+{
+    public $name = "lHMissileRack";
+    public $displayName = "Class-LH Missile Rack";
+    public $range = 30;
+    public $distanceRange = 70;
+    public $loadingtime = 1;
+    public $iconPath = "missile2.png";
+    
+    public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
+    
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+    }
+    protected function getAmmo($fireOrder)
+    {
+        return new $this->firingModes[$fireOrder->firingMode];
+    }
+    
+    public function getDamage($fireOrder)
+    {
+        $ammo = new $this->firingModes[$fireOrder->firingMode];
+        return $ammo->getDamage();
+    }
+    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
+    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
+}
+
+class ReloadRack extends ShipSystem
+{
+    // This needs to be implemented
+    public $name = "ReloadRack";
+    public $displayName = "Reload Rack (tbd)";
+    
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+
+    }
+}
