@@ -36,6 +36,12 @@ var BattleLaser = function(json, ship)
 BattleLaser.prototype = Object.create( Laser.prototype );
 BattleLaser.prototype.constructor = BattleLaser;
 
+var AssaultLaser = function(json, ship)
+{
+    Laser.call( this, json, ship);
+}
+AssaultLaser.prototype = Object.create( Laser.prototype );
+AssaultLaser.prototype.constructor = AssaultLaser;
 
 var NeutronLaser = function(json, ship)
 {

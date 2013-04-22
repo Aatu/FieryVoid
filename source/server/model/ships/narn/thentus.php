@@ -46,8 +46,8 @@ class Thentus extends MediumShip{
    
 		//aft
 		          
-        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
 		
         $this->addAftSystem(new Thruster(4, 20, 0, 12, 2));
         

@@ -208,8 +208,6 @@
         public $animationWidth = 4;
         
         public $loadingtime = 3;
-        public $overloadable = true;
-        public $extraoverloadshots = 2;
         
         public $damageType = "raking";
         public $raking = 10;
@@ -234,6 +232,32 @@
         
         
     }
+    
+    class AssaultLaser extends Laser{
+        
+        public $name = "assaultLaser";
+        public $displayName = "Assault laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 11, 115);
+        public $animationWidth = 3;
+        
+        public $loadingtime = 2;
+        
+        public $damageType = "raking";
+        public $raking = 10;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+4;   }
+        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+    }
+    
 
 // Jasper
 class NeutronLaser extends Laser{

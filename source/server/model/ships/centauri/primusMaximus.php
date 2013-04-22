@@ -34,12 +34,12 @@ class PrimusMaximus extends BaseShip{
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
-        $this->addFrontSystem(new BattleLaser(5, 6, 6, 315, 45));
-		$this->addFrontSystem(new BattleLaser(5, 6, 6, 315, 45));
+        $this->addFrontSystem(new BattleLaser(5, 6, 6, 300, 60));
+		$this->addFrontSystem(new BattleLaser(5, 6, 6, 300, 60));
 
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 3));
+        $this->addAftSystem(new Thruster(5, 8, 0, 3, 3));
         $this->addAftSystem(new Thruster(5, 8, 0, 3, 2));
 		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
         
