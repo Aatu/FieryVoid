@@ -482,8 +482,9 @@
             
             if ($location != 0){
                 if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) 
-					&& !$weapon->flashDamage)
+					&& !$weapon->flashDamage){
                     return 0;
+                }
                     
                 $structure = $this->getStructureSystem($location);
                 if ($structure != null && $structure->isDestroyed($turn-1))
@@ -608,11 +609,30 @@
                 // all systems were destroyed. If there still is structure,
                 // return that. If not, go to primary.
                 $structure = $this->getStructureSystem($location);
+                
                 if($structure->isDestroyed()){
                     if ($location == 0)
                                 return null;
                     // Go to primary
-                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                    // Go to primary systems for flash damage
+                    if ($weapon->flashDamage){
+                        return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                    }
+                    else{
+                        if($structure->isDestroyed($fire->turn -1)){
+                            $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                        }
+                        else{
+                            $structure = $this->getStructureSystem(0);
+                        
+                            if($structure->isDestroyed()){
+                                return null;
+                            }
+                            else{
+                                return $structure;
+                            }
+                        }
+                    }
                 }
                 else{
                     // there is still structure left.
@@ -639,20 +659,66 @@
                 if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
                     //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
                     if ($system->isDestroyed()){
+                        $newSystem = $this->getUndamagedSameSystem($system, $location);
+                        
+                        if($newSystem != null){
+                            return $newSystem;
+                        }
+                        
                         if ($system instanceof Structure){
                             if ($system->location == 0){
                                 return null;}
                                 
-                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                            // Go to primary systems for flash damage
+                            // Go to primary structure for other weapons.
+                            if ($weapon->flashDamage){
+                                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                            }
+                            else{
+                                if($system->isDestroyed($fire->turn -1)){
+                                    $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                                }
+                                else{
+                                    $structure = $this->getStructureSystem(0);
+
+                                    if($structure->isDestroyed()){
+                                        return null;
+                                    }
+                                    else{
+                                        return $structure;
+                                    }
+                                }
+                            }
                         }
+                        
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
                             if ($structure->location == 0){
                                 return null;
                             }
                                 
-                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                        }else{
+                            // Go to primary systems for flash damage
+                            // Go to primary structure for other weapons.
+                            if ($weapon->flashDamage){
+                                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                            }
+                            else{
+                                if($structure->isDestroyed($fire->turn -1)){
+                                    $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                                }
+                                else{
+                                    $structure = $this->getStructureSystem(0);
+
+                                    if($structure->isDestroyed()){
+                                        return null;
+                                    }
+                                    else{
+                                        return $structure;
+                                    }
+                                }
+                            }
+                        }
+                        else{
                             return $structure;
                         }
                             
@@ -735,6 +801,19 @@
             return $orders;
         }
         
+        protected function getUndamagedSameSystem($system, $location){
+            foreach ($this->systems as $sys){
+                // check if there is another system of the same class
+                // on this location.
+                
+                if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
+                    return $sys;
+                }
+            }
+
+            return null;
+        } 
+        
     }
     
     class HeavyCombatVessel extends BaseShip{
@@ -794,6 +873,10 @@
         }
         
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+
+            // Turn counter needed to keep track of when a section was destroyed.
+            $destroyedThisTurn = false;
+            
             $system = null;
             if ($fire->calledid != -1){
                 $system = $this->getSystemById($fire->calledid);
@@ -811,6 +894,18 @@
             foreach ($this->systems as $system){
                 // For flash damage, only take into account the systems
                 // that are still alive and are not structure.
+                // The turn in which a system is destroyed is checked for each system
+                // this is done to keep track of when the last system was destroyed on
+                // this section, so we can decide whether to throw on the primary
+                // hit section, or if we need to go to primary structure for overkill
+                foreach ($system->damage as $damage){
+                    if ($damage->turn === $fire->turn && $damage->destroyed){
+                        // A system has had damage this turn. This means not all
+                        // of them were destroyed at the start of this turn.
+                        $destroyedThisTurn = true;
+                    }
+                }
+                
                 if ($weapon->flashDamage && ($system->isDestroyed() || $system instanceof Structure )){
                     continue;
                 }
@@ -829,6 +924,7 @@
                 }
             }   
 
+            
             if(sizeof($systems) == 0){
                 // All normal systems have already been destroyed on this section
                 // If we already are doing primary:
@@ -846,15 +942,32 @@
                 }
 
                 // all systems were destroyed. Go to primary.
-                //return $this->getStructureSystem(0);
-                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                // Go to primary systems for flash damage
+                // Go to primary structure for other weapons.
+                if ($weapon->flashDamage){
+                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                }
+                else{
+                    if($destroyedThisTurn){
+                        $structure = $this->getStructureSystem(0);
+
+                        if($structure->isDestroyed()){
+                            return null;
+                        }
+                        else{
+                            return $structure;
+                        }    
+                    }
+                    else{
+                        return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                    }
+                }
             }
             
             $roll = Dice::d($totalStructure);
             $goneTrough = 0;
             
             foreach ($systems as $system){
-                
                 $health = 0;
             
                 if ($system->name == "structure"){
@@ -866,8 +979,14 @@
                 }
                 
                 if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
-                    //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
-                    if ($system->isDestroyed()){
+                    if ($system->isDestroyed())                        
+                    {
+                        $newSystem = $this->getUndamagedSameSystem($system, $location);
+                        
+                        if($newSystem != null){
+                            return $newSystem;
+                        }
+ 
                         if ($system instanceof Structure){
                             return null;}
                                 
