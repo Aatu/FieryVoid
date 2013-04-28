@@ -1,0 +1,37 @@
+<?php
+
+class Shadras extends FighterFlight{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+	$this->pointCost = 300;
+	$this->faction = "Balosian";
+        $this->phpclass = "shadras";
+        $this->shipClass = "Shadras flight";
+	$this->imagePath = "img/ships/shadras.png";
+        
+        $this->forwardDefense = 8;
+        $this->sideDefense = 7;
+        $this->freethrust = 10;
+        $this->offensivebonus = 4;
+        $this->jinkinglimit = 6;
+        $this->turncost = 0.33;
+        
+	$this->iniativebonus = 96;
+        
+        for ($i = 0; $i<6; $i++){
+			
+            $armour = array(3, 1, 2, 2);
+            $fighter = new Fighter("shadras", $armour, 12, $this->id);
+            $fighter->displayName = "Shadras Heavy Fighter";
+            $fighter->imagePath = "img/ships/shadras.png";
+            $fighter->iconPath = "img/ships/shadras_large.png";
+
+            $fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 3));
+
+            $this->addSystem($fighter);
+	}
+    }
+}
+?>

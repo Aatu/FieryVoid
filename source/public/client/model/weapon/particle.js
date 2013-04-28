@@ -47,3 +47,10 @@ var ParticleCannon = function(json, ship)
 }
 ParticleCannon.prototype = Object.create(Particle.prototype);
 ParticleCannon.prototype.constructor = ParticleCannon;
+
+var HvyParticleCannon = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+HvyParticleCannon.prototype = Object.create(Particle.prototype);
+HvyParticleCannon.prototype.constructor = HvyParticleCannon;

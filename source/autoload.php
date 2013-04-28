@@ -7,6 +7,7 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
+                'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
                 'altarian' => '/server/model/ships/centauri/altarian.php',
                 'altarianmagnus' => '/server/model/ships/centauri/altarianmagnus.php',
                 'amar' => '/server/model/ships/centauri/amar.php',
@@ -43,6 +44,7 @@ spl_autoload_register(
                 'dbmanager' => '/server/controller/DBManager.php',
                 'debug' => '/server/lib/Debug.php',
                 'defensivesystem' => '/server/model/systems/baseSystems.php',
+                'delphi' => '/server/model/ships/EA/delphi.php',
                 'demos' => '/server/model/ships/centauri/demos.php',
                 'deployment' => '/server/handlers/Deployment.php',
                 'dice' => '/server/lib/dice.php',
@@ -91,6 +93,7 @@ spl_autoload_register(
                 'hyperionpatrol' => '/server/model/ships/EA/hyperionPatrol.php',
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
+                'hvyparticlecannon' => '/server/model/weapons/particle.php',
                 'improvedneutronlaser' => '/server/model/weapons/lasers.php',
                 'intercept' => '/server/handlers/firing.php',
                 'interceptcandidate' => '/server/handlers/firing.php',
@@ -168,6 +171,7 @@ spl_autoload_register(
                 'pulse' => '/server/model/weapons/pulse.php',
                 'railgun' => '/server/model/weapons/matter.php',
                 'raking' => '/server/model/weapons/lasers.php',
+                'razik' => '/server/model/ships/centauri/razik.php',
                 'reactor' => '/server/model/systems/baseSystems.php',
                 'reduceddamage' => '/server/model/cricialClasses.php',
                 'reducediniative' => '/server/model/cricialClasses.php',
@@ -184,6 +188,7 @@ spl_autoload_register(
                 'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sentri' => '/server/model/ships/centauri/sentri.php',
                 'severeburnout' => '/server/model/cricialClasses.php',
+                'shadras' => '/server/model/ships/balosian/shadras.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
                 'sharaal' => '/server/model/ships/minbari/sharaal.php',
                 'sharlin' => '/server/model/ships/minbari/sharlin.php',
@@ -232,6 +237,7 @@ spl_autoload_register(
                 'vasachi' => '/server/model/ships/centauri/vasachi.php',
                 'vorchan' => '/server/model/ships/centauri/vorchan.php',
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
+                'warlock' => '/server/model/ships/EA/warlock.php',
                 'weapon' => '/server/model/weapons/weapon.php',
                 'weaponloading' => '/server/model/BaseClasses.php',
                 'whitestar' => '/server/model/ships/minbari/whitestar.php'

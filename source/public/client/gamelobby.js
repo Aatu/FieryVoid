@@ -99,18 +99,39 @@ window.gamedata = {
         return (ship.userid == gamedata.thisplayer);
     },
 
+                orderShipListOnName: function(shipList){
+                    var swapped;
+
+                    do {
+                        swapped = false;
+
+                        for (var i=0; i < shipList.length-1; i++)
+                        {
+                            if (shipList[i].shipClass > shipList[i+1].shipClass) {
+                                var temp = shipList[i];
+                                shipList[i] = shipList[i+1];
+                                shipList[i+1] = temp;
+                                swapped = true;
+                            }
+                        }
+                    } while (swapped);
+                },
+        
 	parseShips: function(json){
 
-		gamedata.setShipsFromJson(json);
-        //gamedata.allShips = json;
-        
-		for (var i in gamedata.allShips){
-			var faction = gamedata.allShips[i];
 
+        
+		gamedata.setShipsFromJson(json);
+                
+                for (var i in gamedata.allShips){
+			var faction = gamedata.allShips[i];
+                        
+                        this.orderShipListOnName(faction);
+                        
 			$('<div class="'+i+' faction" data-faction="'+i+'"><div class="factionname name"><span>'+i+'</span></div>').appendTo("#store");
 
-			for (var a in faction){
-				var ship = faction[a];
+			for (var index = 0; index < faction.length-1; index++){
+				var ship = faction[index];
 				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 				h.appendTo("."+i+".faction");
 			}

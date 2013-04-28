@@ -18,7 +18,7 @@ window.SystemFactory =
             return new Fighter(systemJson, ship);
         
         var name = systemJson.name.charAt(0).toUpperCase() + systemJson.name.slice(1);
-        //console.log(name);
+        console.log(name);
         return new window[name](systemJson, ship);
     }
     

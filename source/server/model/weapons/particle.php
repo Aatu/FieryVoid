@@ -154,6 +154,42 @@
         public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
     }
     
+    class HvyParticleCannon extends Raking{
+        
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "hvyParticleCannon";
+        public $displayName = "Heavy Particle Cannon";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.45;
+        public $projectilespeed = 13;
+        public $animationWidth = 10;
+        public $trailLength = 24;
+        public $damageType = "raking";
+        
+        public $loadingtime = 6;
+      
+        public $rangePenalty = 0.33;
+        public $fireControl = array(0, 4, 6); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Raking";
+           
+            parent::setSystemDataWindow($turn);
+        }
+        
+        public function getDamage($fireOrder){ return Dice::d(10, 6)+60;   }
+        public function setMinDamage(){     $this->minDamage = 66 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 120 - $this->dp;      }
+    }
+    
+    
     class PairedParticleGun extends LinkedWeapon{
 
         public $trailColor = array(30, 170, 255);
@@ -178,8 +214,9 @@
         private $damagebonus = 0;
 
 
-        function __construct($startArc, $endArc, $damagebonus){
-			$this->damagebonus = $damagebonus;
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
             parent::__construct(0, 1, 0, $startArc, $endArc);
            
         }
@@ -197,6 +234,8 @@
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
 
     }
+    
+    
     
 
 ?>

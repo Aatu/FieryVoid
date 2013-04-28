@@ -24,8 +24,8 @@ class Sitara extends FighterFlight{
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sitara", $armour, 10, $this->id);
 			$fighter->displayName = "Sitara Medium Fighter";
-			$fighter->imagePath = "img/ships/sentri.png";
-			$fighter->iconPath = "img/ships/sentri_large.png";
+			$fighter->imagePath = "img/ships/sitara.png";
+			$fighter->iconPath = "img/ships/sitara_large.png";
 
 
 			$fighter->addFrontSystem(new IonBolt(330, 30));
