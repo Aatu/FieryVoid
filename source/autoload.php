@@ -65,6 +65,7 @@ spl_autoload_register(
                 'esharan' => '/server/model/ships/minbari/esharan.php',
                 'essusu' => '/server/model/ships/balosian/essusu.php',
                 'esthasa' => '/server/model/ships/balosian/esthasa.php',
+                'estnassa' => '/server/model/ships/balosian/estnassa.php',
                 'ew' => '/server/handlers/EW.php',
                 'ewentry' => '/server/model/BaseClasses.php',
                 'fighter' => '/server/model/systems/fighter.php',
