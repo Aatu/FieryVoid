@@ -100,21 +100,26 @@ window.gamedata = {
     },
 
                 orderShipListOnName: function(shipList){
-                    var swapped;
-
-                    do {
+                    console.log("ShipList length: " + shipList.length);
+                    var swapped = true;
+                    
+                    for(var x=1; x< shipList.length && swapped; x++){
                         swapped = false;
-
-                        for (var i=0; i < shipList.length-1; i++)
-                        {
-                            if (shipList[i].shipClass > shipList[i+1].shipClass) {
-                                var temp = shipList[i];
-                                shipList[i] = shipList[i+1];
-                                shipList[i+1] = temp;
+                        console.log("*****************");
+                        
+                        for(var y=0; y < shipList.length - x; y++){
+                            console.log("Comparing: " + shipList[y+1].shipClass + " and " +shipList[y].shipClass);
+                            
+                            if(shipList[y+1].shipClass < shipList[y].shipClass){
+                                console.log("Swapping");
+                                var temp = shipList[y];
+                                shipList[y] = shipList[y+1];
+                                shipList[y+1] = temp;
                                 swapped = true;
                             }
                         }
-                    } while (swapped);
+                        console.log("*****************");
+                    }
                 },
         
 	parseShips: function(json){
@@ -130,7 +135,7 @@ window.gamedata = {
                         
 			$('<div class="'+i+' faction" data-faction="'+i+'"><div class="factionname name"><span>'+i+'</span></div>').appendTo("#store");
 
-			for (var index = 0; index < faction.length-1; index++){
+			for (var index = 0; index < faction.length; index++){
 				var ship = faction[index];
 				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 				h.appendTo("."+i+".faction");

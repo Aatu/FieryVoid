@@ -30,3 +30,65 @@ class IonBolt extends Weapon{
     public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
 
 }
+
+class IonCannon extends Weapon{
+
+    public $trailColor = array(30, 170, 255);
+
+    public $name = "ionCannon";
+    public $displayName = "Ion Cannon";
+    public $animation = "trail";
+    public $animationColor = array(127, 0, 255);
+    public $animationExplosionScale = 0.25;
+    public $projectilespeed = 10;
+    public $animationWidth = 4;
+    public $trailLength = 24;
+    public $intercept = 1;
+
+    public $loadingtime = 2;
+    public $shots = 1;
+
+    public $rangePenalty = 0.25;
+    public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals 
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+    {
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function getDamage($fireOrder){        return Dice::d(10, 2)+10;  }
+    public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
+}
+
+class ImprovedIonCannon extends Weapon{
+
+    public $trailColor = array(30, 170, 255);
+
+    public $name = "improvedIonCannon";
+    public $displayName = "Imp. Ion Cannon";
+    public $animation = "trail";
+    public $animationColor = array(127, 0, 255);
+    public $animationExplosionScale = 0.30;
+    public $projectilespeed = 10;
+    public $animationWidth = 5;
+    public $trailLength = 24;
+    public $intercept = 1;
+
+    public $loadingtime = 2;
+    public $shots = 1;
+
+    public $rangePenalty = 0.25;
+    public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals 
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+    {
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function getDamage($fireOrder){        return Dice::d(10, 2)+15;  }
+    public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
+}
+
+

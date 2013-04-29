@@ -27,6 +27,13 @@ var StdParticleBeam = function(json, ship)
 StdParticleBeam.prototype = Object.create( Particle.prototype );
 StdParticleBeam.prototype.constructor = StdParticleBeam;
 
+var AdvParticleBeam = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+AdvParticleBeam.prototype = Object.create( Particle.prototype );
+AdvParticleBeam.prototype.constructor = AdvParticleBeam;
+
 var PairedParticleGun = function(json, ship)
 {
     Particle.call( this, json, ship);

@@ -53,6 +53,35 @@
 
     }
 
+    class AdvParticleBeam extends Particle{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "advParticleBeam";
+        public $displayName = "Advanced Particle Beam";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.20;
+        public $projectilespeed = 14;
+        public $animationWidth = 5;
+        public $trailLength = 10;
+        public $iconPath = "stdParticleBeam.png";
+        
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $rangePenalty = 0.66;
+        public $fireControl = array(5, 5, 5); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+8;   }
+        public function setMinDamage(){     $this->minDamage = 9 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+
+    }
+    
     class TwinArray extends Particle{
 
         public $trailColor = array(30, 170, 255);
@@ -217,6 +246,11 @@
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
+            
+            if($nrOfShots === 3){
+                $this->iconPath = "pairedParticleGun3.png";
+            }
+            
             parent::__construct(0, 1, 0, $startArc, $endArc);
            
         }

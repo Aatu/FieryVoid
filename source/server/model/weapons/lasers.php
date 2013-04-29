@@ -258,7 +258,31 @@
         public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
     }
     
-
+    class AdvancedAssaultLaser extends Laser{
+        
+        public $name = "advancedAssaultLaser";
+        public $displayName = "Adv. Assault laser";
+        public $animation = "laser";
+        public $animationColor = array(255, 11, 115);
+        public $animationWidth = 4;
+        
+        public $loadingtime = 2;
+        
+        public $damageType = "raking";
+        public $raking = 10;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-3, 4, 4); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
+        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 - $this->dp;      }
+    }
+    
 // Jasper
 class NeutronLaser extends Laser{
 

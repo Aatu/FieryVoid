@@ -10,6 +10,7 @@ class Warlock extends BaseShip{
         $this->imagePath = "img/ships/warlock.png";
         $this->shipClass = "Warlock";
         $this->shipSizeClass = 3;
+        $this->canvasSize= 280;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
@@ -43,8 +44,8 @@ class Warlock extends BaseShip{
 	$this->addAftSystem(new Railgun(4, 9, 6, 120, 240));
 	$this->addAftSystem(new LaserPulseArray(4, 9, 5, 120, 240));
 	$this->addAftSystem(new LaserPulseArray(4, 9, 5, 120, 240));
-        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
+        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
 	$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
 	$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
 	$this->addAftSystem(new Thruster(4, 12, 0, 2, 2));
