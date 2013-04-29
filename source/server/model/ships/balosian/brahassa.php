@@ -28,7 +28,7 @@ class Brahassa extends BaseShip{
 	$this->addPrimarySystem(new Hangar(5, 14));
 
        	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
-       	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 60, 240));
+       	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));
        	$this->addFrontSystem(new IonCannon(4, 6, 4, 300, 60));
        	$this->addFrontSystem(new IonCannon(4, 6, 4, 300, 60));
 	$this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));

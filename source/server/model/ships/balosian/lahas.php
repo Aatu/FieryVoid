@@ -29,7 +29,7 @@ class Lahas extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 10, 3, 36));
 
        	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
-       	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 60, 240));
+       	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));
        	$this->addFrontSystem(new IonCannon(4, 6, 4, 300, 60));
        	$this->addFrontSystem(new IonCannon(4, 6, 4, 300, 60));
 	$this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
