@@ -246,6 +246,7 @@
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
             
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";
