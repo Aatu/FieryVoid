@@ -1,34 +1,34 @@
 <?php
 class Warlock extends BaseShip{
-    
+
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-        
+
 	$this->pointCost = 1800;
 	$this->faction = "EA";
         $this->phpclass = "Warlock";
         $this->imagePath = "img/ships/warlock.png";
         $this->shipClass = "Warlock";
         $this->shipSizeClass = 3;
-        $this->canvasSize= 280;
-        
+        $this->canvasSize= 400;
+
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
-        
+
         $this->turncost = 1;
         $this->turndelaycost = 1;
         $this->accelcost = 4;
         $this->rollcost = 2;
         $this->pivotcost = 3;
 	$this->iniativebonus = 0;
-	
+
         $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 5, 9));
         $this->addPrimarySystem(new Engine(6, 23, 0, 10, 3));
 	$this->addPrimarySystem(new Hangar(5, 26));
 	$this->addPrimarySystem(new Jumpengine(6, 20, 4, 16));
-		
+
 	$this->addFrontSystem(new Railgun(4, 9, 6, 300, 60));
 	$this->addFrontSystem(new Railgun(4, 9, 6, 300, 60));
 	$this->addFrontSystem(new HvyParticleCannon(5, 12, 9, 330, 30));

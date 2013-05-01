@@ -10,7 +10,7 @@ class Apollo extends BaseShip{
         $this->imagePath = "img/ships/apollo.png";
         $this->shipClass = "Apollo Bombardment Cruiser";
         $this->shipSizeClass = 3;
-        $this->canvasSize = 280;
+        $this->canvasSize = 200;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
