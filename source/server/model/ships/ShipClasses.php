@@ -19,6 +19,7 @@
         public $faction = null;
         public $slot;
         public $unavailable = false;
+        public $minesweeperbonus = 0;
         
         public $enabledSpecialAbilities = array();
         
