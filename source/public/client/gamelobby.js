@@ -133,7 +133,10 @@ window.gamedata = {
                         
                         this.orderShipListOnName(faction);
                         
-			$('<div class="'+i+' faction" data-faction="'+i+'"><div class="factionname name"><span>'+i+'</span></div>').appendTo("#store");
+			var group = $('<div class="'+i+' faction shipshidden" data-faction="'+i+'"><div class="factionname name"><span>'+i+ '</span><span class="tooltip">(click to expand)</span></div>')
+                .appendTo("#store");
+
+                group.find('.factionname').on("click", this.expandFaction);
 
 			for (var index = 0; index < faction.length; index++){
 				var ship = faction[index];
@@ -142,10 +145,19 @@ window.gamedata = {
 			}
 		}
 
+
+
 		$(".addship").bind("click", this.buyShip);
 
 	},
-    
+
+    expandFaction: function(event)
+    {
+        console.log("clicked");
+        var clickedElement = $(this);
+        clickedElement.parent().toggleClass("shipshidden");
+    },
+
     goToWaiting: function(){
         
     },
@@ -261,43 +273,6 @@ window.gamedata = {
         $(".depavailable",slot).html(data.depavailable);
         
     },
-    
-	createSlotsOld: function(){
-
-		for (var i = 1;i<=2;i++){
-			var slot = $('.slot[data-slotid="'+i+'"]');
-			var data = slot.data();
-
-			if (playerManager.isOccupiedSlot(i)){
-
-				var player = playerManager.getPlayerInSlot(i);
-				if (data.playerid != player.id){
-					slot.data("playerid", player.id);
-					slot.addClass("taken");
-					$(".playername", slot).html(player.name);
-				}
-
-
-				if	(player.lastphase == "-2"){
-					slot.addClass("ready");
-
-				}
-
-			}else{
-                
-				if (data.playerid){
-					slot.attr("data-playerid", "");
-					slot.removeClass("taken");
-					$(".playername", slot).html("");
-				}
-
-				slot.removeClass("ready");
-
-
-
-			}
-
-		}
 
 	},
 

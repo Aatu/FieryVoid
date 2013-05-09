@@ -59,6 +59,11 @@
 	margin-left:20px;
 }
 
+.store .faction
+{
+    cursor:pointer;
+}
+
 .store .factionname{
 	font-size:14px;
 	
@@ -133,3 +138,22 @@
     box-shadow: 0px 0px 15px #0099ff;
     
 }
+
+.store .shipshidden .ship
+{
+    display:none;
+}
+
+.store .factionname .tooltip
+{
+    font-size: 12px;
+    color:#496791;
+    display:none;
+}
+
+
+.store .factionname:hover .tooltip
+{
+    display:inline;
+}
+
