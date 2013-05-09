@@ -37,6 +37,12 @@ var MediumPlasma = function(json, ship)
 MediumPlasma.prototype = Object.create( Plasma.prototype );
 MediumPlasma.prototype.constructor = MediumPlasma;
 
+var LightPlasma = function(json, ship)
+{
+    Plasma.call( this, json, ship);
+}
+LightPlasma.prototype = Object.create( Plasma.prototype );
+LightPlasma.prototype.constructor = LightPlasma;
 
 var PlasmaStream = function(json, ship)
 {

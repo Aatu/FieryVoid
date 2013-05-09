@@ -1,16 +1,15 @@
 <?php
-class Vakar extends BaseShip{
+class Varloth extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 650;
+        $this->pointCost = 520;
         $this->faction = "Narn";
-        $this->phpclass = "Vakar";
-        $this->imagePath = "img/ships/varkar.png";
-        $this->shipClass = "Va'Kar";
+        $this->phpclass = "Varloth";
+        $this->imagePath = "img/ships/varnic.png";
+        $this->shipClass = "Var'Loth Assault Destroyer";
         $this->shipSizeClass = 3;
-        
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
@@ -25,45 +24,31 @@ class Vakar extends BaseShip{
         //primary
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 21, 6, 10));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new Scanner(5, 18, 5, 9));
         $this->addPrimarySystem(new Engine(4, 14, 0, 12, 2));
         $this->addPrimarySystem(new JumpEngine(5, 18, 3, 20));
         $this->addPrimarySystem(new Hangar(5, 7));
         
         //front
-        $this->addFrontSystem(new TwinArray(5, 6, 2, 300, 60));
+        $this->addFrontSystem(new HeavyPlasma(5, 8, 5, 300, 60));
         $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 4, 1));
 
         //aft
-                  
-
-
         $this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
         $this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
-
-        
         $this->addAftSystem(new Thruster(3, 24, 0, 12, 2));
-
-        
         
         //left
-        
-        
-        $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
-        $this->addLeftSystem(new mediumPulse(3, 6, 3, 240, 60));
-        $this->addLeftSystem(new mediumPulse(3, 6, 3, 240, 60));
+        $this->addLeftSystem(new LightPulse(3, 4, 2, 240, 60));
+        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 60));
+        $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
-              
 
         //right
-        
-        
-        $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
+        $this->addRightSystem(new LightPulse(3, 4, 2, 300, 120));
         $this->addRightSystem(new IonTorpedo(4, 5, 4, 0, 120));
-        $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
-        
+        $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
         
         //structures
         $this->addFrontSystem(new Structure(4, 40));
@@ -71,11 +56,6 @@ class Vakar extends BaseShip{
         $this->addLeftSystem(new Structure(5, 60));
         $this->addRightSystem(new Structure(4, 39));
         $this->addPrimarySystem(new Structure(5, 36));
-        
     }
-
 }
-
-
-
 ?>

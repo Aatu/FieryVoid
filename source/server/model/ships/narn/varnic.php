@@ -40,8 +40,8 @@ class Varnic extends BaseShip{
 
 
 
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
+        $this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
+        $this->addAftSystem(new LightPulse(3, 4, 2, 90, 270));
 
 
         $this->addAftSystem(new Thruster(3, 24, 0, 12, 2));
@@ -67,7 +67,7 @@ class Varnic extends BaseShip{
 
         //structures
         $this->addFrontSystem(new Structure(4, 40));
-        $this->addAftSystem(new Structure(4, 28));
+        $this->addAftSystem(new Structure(4, 38));
         $this->addLeftSystem(new Structure(5, 60));
         $this->addRightSystem(new Structure(4, 39));
         $this->addPrimarySystem(new Structure(5, 36));
