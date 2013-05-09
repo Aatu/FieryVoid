@@ -2,7 +2,7 @@ window.gamedata = {
 
 	thisplayer: 0,
 	slots: null,
-	ships: {},
+	ships: [],
 	gameid: 0,
 	turn: 0,
 	phase: 0,
@@ -63,13 +63,23 @@ window.gamedata = {
                 continue;
             
             var h = $('<div class="ship bought slotid_'+ship.slot+' shipid_'+ship.id+'" data-shipindex="'+ship.id+'"><span class="shiptype">'+ship.shipClass+'</span><span class="shipname name">'+ship.name+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="remove clickable">remove</span></div>');
-            $(".remove", h).bind("click", function(){
-                delete gamedata.ships[ship.id];
-                h.remove();
-                gamedata.calculateFleet();
-            });
             h.appendTo("#fleet");
         }
+        $(".ship.bought .remove").bind("click", function(e){
+            var id = $(this).parent().data('shipindex');
+
+            for (var i in gamedata.ships)
+            {
+                if (gamedata.ships[i].id === id)
+                {
+                    gamedata.ships.splice(i, 1);
+                    break;
+                }
+            }
+            $('.ship.bought.shipid_' + id).remove();
+            gamedata.calculateFleet();
+        });
+
         gamedata.calculateFleet();
     },
 
@@ -273,8 +283,6 @@ window.gamedata = {
         $(".depavailable",slot).html(data.depavailable);
         
     },
-
-	},
 
 	clickTakeslot: function(){
         var slot = $(".slot").has($(this));
