@@ -85,7 +85,10 @@ window.shipClickable = {
 				
 			$('<span class="name value '+fac+'">'+ship.name+'</span>').appendTo('#shipNameContainer .namecontainer');
 			$(".entry", e).remove();
-			
+
+            var jinking = shipManager.movement.getJinking(ship) * 5;
+
+            shipClickable.addEntryElement('Evasion: -' +jinking+ ' to hit', ship.flight === true && jinking > 0);
             shipClickable.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight === true);
             shipClickable.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
             shipClickable.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
