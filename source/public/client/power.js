@@ -235,7 +235,7 @@ shipManager.power = {
 	countBoostPowerUsed: function(ship, system){
 		var boost = shipManager.power.getBoost(ship, system);
 		
-        if (boost == 0 || shipManager.systems.isDestroyed(ship, system));
+        if (boost == 0 || shipManager.systems.isDestroyed(ship, system))
             return 0;
         
         if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0){
