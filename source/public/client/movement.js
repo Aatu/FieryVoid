@@ -328,8 +328,8 @@ shipManager.movement = {
         if (ship.agile){
 			for (var i in ship.movement){
 				var m = ship.movement[i];
-				if (m.turn != gamedata.turn)
-					continue;
+//				if (m.turn != gamedata.turn)
+//					continue;
 					
 				if (m.type == "isRolled"){
 					ret = true;

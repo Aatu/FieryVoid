@@ -342,46 +342,45 @@
         }
         
          public static function isRolled($ship, $turn = -1){
-            $ret = false;
-			$turnwas = 0;
-            $lastmove = $ship->getLastMovement();
-            $movements = array();
-            if ($ship->agile){
-				foreach ($ship->movement as $move){
-					if ($move->turn != $turn && $turn != -1)
-						continue;
-					
-					if ($move->turn != $turnwas){
-						$ret = false;
-					}
-									
-					if ($move->type == "isRolled"){
-						$ret = true;
-						$turnwas = $move->turn;
-					}
-					
-					if ($move->type == "roll")
-						$ret = !$ret;
-				
-					
-				}
-			}else{
-				foreach ($ship->movement as $move){
-					if ($move->turn != $turn && $turn != -1)
-						continue;
-					
-					if ($move->turn != $turnwas){
-						$ret = false;
-					}
-									
-					if ($move->type == "isRolled"){
-						$ret = true;
-						$turnwas = $move->turn;
-					}
-				
-					
-				}
-			}
+             $ret = false;
+             $turnwas = 0;
+             $lastmove = $ship->getLastMovement();
+             $movements = array();
+             
+             if ($ship->agile){
+                 foreach ($ship->movement as $move){
+//                     if ($move->turn != $turn && $turn != -1)
+//                         continue;
+                     
+//                     if ($move->turn != $turnwas){
+//                         $ret = false;
+//                     }
+
+//                     if ($move->type == "isRolled"){
+//                         $ret = true;
+//                         $turnwas = $move->turn;
+//                     }
+
+                     if ($move->type == "roll")
+                         $ret = !$ret;
+                }
+            }
+            else
+            {
+                foreach ($ship->movement as $move){
+                    if ($move->turn != $turn && $turn != -1)
+                        continue;
+
+                    if ($move->turn != $turnwas){
+                        $ret = false;
+                    }
+
+                    if ($move->type == "isRolled"){
+                        $ret = true;
+                        $turnwas = $move->turn;
+                    }
+                }
+            }
             
             return $ret;
         }
