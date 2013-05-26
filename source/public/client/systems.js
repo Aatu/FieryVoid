@@ -160,7 +160,8 @@ shipManager.systems = {
     
     getArcs: function (ship, weapon){
         
-        if (shipManager.movement.isRolled(ship) && (weapon.location == 3 || weapon.location == 4)) {
+//        if (shipManager.movement.isRolled(ship) && (weapon.location == 3 || weapon.location == 4)) {
+        if (shipManager.movement.isRolled(ship)) {
             return {start: mathlib.addToDirection(weapon.endArc, (weapon.endArc*-2)), end: mathlib.addToDirection(weapon.startArc, (weapon.startArc*-2))}
         }else{
             return {start:weapon.startArc, end:weapon.endArc};

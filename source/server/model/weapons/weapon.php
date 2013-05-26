@@ -530,9 +530,14 @@ class Weapon extends ShipSystem{
                     if ($this->ballistic)
                         $deg = 0;
                     
-                    $i = ($ship->getSystemById($fire->weaponid)->intercept - $deg);
-                    if ($i<0)
+                    $interceptWeapon = $ship->getSystemById($fire->weaponid);
+                    $i = $interceptWeapon->intercept - $deg;
+                    
+                    if ($i<0
+                     || $interceptWeapon->destroyed
+                     || $interceptWeapon->isOfflineOnTurn(TacGamedata::$currentTurn)){
                         $i = 0;
+                     }
                     
                     if ($shooter instanceof FighterFlight)
 						$deg--;

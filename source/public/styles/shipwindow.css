@@ -221,8 +221,15 @@
 .shipwindow .notes{
     border:1px solid #496791;
     margin-top:4px;
+    text-indent: 8px;
+    color: #496791;
     height:57px;
     background-color:#072731;
+    overflow-y:auto;
+}
+
+.shipwindow .notes p{
+    margin:.5em 0 .5em 0;
 }
 
 .shipwindow .shipSection{

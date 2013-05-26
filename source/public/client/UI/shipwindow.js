@@ -10,11 +10,11 @@ shipWindowManager = {
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             var n = ship.shipStatusWindow;
-            if (shipManager.movement.isRolled(ship)){
+/*            if (shipManager.movement.isRolled(ship)){
                 n.addClass("rolled");
             }else{
                 n.removeClass("rolled");
-            }
+            }*/
         }
     
     },
@@ -49,12 +49,15 @@ shipWindowManager = {
 			n.css("top", old.css("top")).css("left", old.css("left"));
 		}
 			
-		if (shipManager.movement.isRolled(ship)){
+/*		if (shipManager.movement.isRolled(ship)){
             n.addClass("rolled");
         }else{
             n.removeClass("rolled");
-        }
-		n.show();
+        }*/
+        
+        this.updateNotes(ship);
+
+        n.show();
 		
 	
 	},
@@ -129,10 +132,73 @@ shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 3);
 		shipWindowManager.addSystems(ship, shipwindow, 4);
 
-        
-
 	},
 	
+        updateNotes: function(ship){
+            var shipWindow = ship.shipStatusWindow;
+            shipWindow.find(".notes").html("");
+            
+            var abilities = Array();
+            var notes = Array();
+            
+            if(ship.agile){
+                abilities.push("Agile ship");
+            }
+
+            if(shipManager.movement.isRolled(ship)){
+                notes.push("Ship is rolled.");
+            }
+
+            if(shipManager.movement.isRolling(ship)){
+                notes.push("Ship is rolling.</p><p>");
+            }
+            
+            /* Set everything into the notes decently. */
+            /* If we have both abilities and notes, insert a hr as seperator*/
+            for(var i = 0; i < abilities.length; i++){
+                shipWindow.find(".notes").append("<p>");
+                shipWindow.find(".notes").append(abilities[i]);
+                shipWindow.find(".notes").append("</p>");
+            }
+            
+            if(abilities.length > 0 && notes.length > 0){
+                /* Insert fancy hr. */
+                shipWindow.find(".notes").append('<hr width=90% height=1px border=0 color=#496791>');
+            }
+            
+            for(var index = 0; index < notes.length; index++){
+                shipWindow.find(".notes").append("<p>");
+                shipWindow.find(".notes").append(notes[index]);
+                shipWindow.find(".notes").append("</p>");
+            }
+            
+            
+/*            var abilities = $("<p>");
+            
+            if(ship.agile){
+                abilities.append("Agile ship</p><p>");
+            }
+
+            abilities.append("</p>");
+            
+            shipWindow.find(".notes").append(abilities);
+            shipWindow.find(".notes").append('<hr width=90% height=1px border=0 color=#496791>');
+            
+            var notes = $("<p>");
+            
+            if(shipManager.movement.isRolled(ship)){
+                notes.append("Ship is rolled.</p><p>");
+            }
+
+            if(shipManager.movement.isRolling(ship)){
+                notes.append("Ship is rolling.</p><p>");
+            }
+
+            notes.append("</p>");
+
+            shipWindow.find(".notes").append(notes);*/
+        },
+        
 	addSystems: function (ship, shipwindow, location){
 		
 		var systems = shipManager.systems.getSystemsForShipStatus(ship, location);
@@ -536,6 +602,9 @@ shipWindowManager = {
 	},
 	
 	setSystemData: function(ship, system, shipwindow){
+            
+        this.updateNotes(ship);
+        
         system = shipManager.systems.initializeSystem(system);
 		var systemwindow = shipwindow.find(".system_"+system.id);
 
