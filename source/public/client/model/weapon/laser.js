@@ -57,17 +57,9 @@ var NeutronLaser = function(json, ship)
 NeutronLaser.prototype = Object.create( Laser.prototype );
 NeutronLaser.prototype.constructor = NeutronLaser;
 
-
 var ImprovedNeutronLaser = function(json, ship)
 {
     Laser.call( this, json, ship);
 }
 ImprovedNeutronLaser.prototype = Object.create( Laser.prototype );
 ImprovedNeutronLaser.prototype.constructor = ImprovedNeutronLaser;
-
-var AssaultLaser = function(json, ship)
-{
-    Laser.call( this, json, ship);
-}
-AssaultLaser.prototype = Object.create( Laser.prototype );
-AssaultLaser.prototype.constructor = AssaultLaser;

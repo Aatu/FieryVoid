@@ -69,7 +69,7 @@ shipManager.systems = {
 		if (shipManager.power.isOffline(ship, system))
 			return 0;
 		
-		var output = system.output + system.outputMod + shipManager.power.getBoost(ship, system);
+		var output = system.output + system.outputMod + shipManager.power.getBoost(system);
         
         return output;
     },
@@ -115,7 +115,7 @@ shipManager.systems = {
         return null;
     
     },
-
+    
     initializeSystem: function(system){
         
         if (system.dualWeapon && !system.initialized){
@@ -132,6 +132,10 @@ shipManager.systems = {
             return selectedWeapon;
         }
         
+        if(system.boostable){
+            system = system.initBoostableInfo();
+        }
+
         return system;
     },
             

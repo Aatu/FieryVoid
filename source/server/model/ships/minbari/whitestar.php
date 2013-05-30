@@ -30,8 +30,8 @@ class WhiteStar extends MediumShip{
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 12, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 12, 0, 5, 4));
-        $this->addPrimarySystem(new Shield(3, 6, 0, 2, 180, 360));
-        $this->addPrimarySystem(new Shield(3, 6, 0, 2, 0, 180));
+        $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 180, 360));
+        $this->addPrimarySystem(new EMShield(3, 6, 0, 2, 0, 180));
         $this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));
         $this->addPrimarySystem(new Jammer(4, 8, 7));
 

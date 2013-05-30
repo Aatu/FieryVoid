@@ -430,6 +430,7 @@ window.gamedata = {
         {
             console.log(f);
             var faction = jsonShips[f];
+            console.log(""+faction.length);
             factions[f] = Array();
             
             for (var i in faction)
@@ -437,6 +438,8 @@ window.gamedata = {
                 var ship = faction[i];
                 factions[f][i] = new Ship(ship);
             }
+            console.log(f);
+
         }
         
         gamedata.allShips = factions; 

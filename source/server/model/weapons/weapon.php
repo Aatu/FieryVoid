@@ -132,9 +132,13 @@ class Weapon extends ShipSystem{
     
     public function getNormalLoad(){
         if ($this->normalload == 0){
-            return $this->loadingtime;
+            return $this->getLoadingTime();
         }
         return $this->normalload;
+    }
+    
+    public function getLoadingTime(){
+        return $this->loadingtime;
     }
     
     public function firedOnTurn($turn){

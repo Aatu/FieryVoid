@@ -672,6 +672,8 @@ shipWindowManager = {
 				
 			}else if (!firing){
 				var load = weaponManager.getWeaponCurrentLoading(system);
+                                
+                                
 				//if (!systemwindow.hasClass("overload") && load > system.loadingtime)
 				//	load = system.loadingtime;
 				
@@ -680,7 +682,11 @@ shipWindowManager = {
 				var loadingtime = system.loadingtime;
 				if (system.normalload > 0)
 					loadingtime = system.normalload;
-                
+
+                                if(load > loadingtime){
+                                    load = loadingtime;
+                                }
+
                 var overloadturns = "";
                 
                 if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system))

@@ -25,7 +25,7 @@
             parent::setSystemDataWindow($turn);
         }
         
-        protected function getPulses()
+        protected function getPulses($turn)
         {
             return Dice::d(5);
         }
@@ -41,7 +41,7 @@
 
             $this->calculateHit($gamedata, $fireOrder);
             $intercept = $this->getIntercept($gamedata, $fireOrder);
-            $pulses = $this->getPulses(); 
+            $pulses = $this->getPulses($gamedata->turn); 
 
             $fireOrder->notes .= " pulses: $pulses";
             $fireOrder->shots = $this->maxpulses;
@@ -301,7 +301,7 @@
             $this->maxDamage = 10 - $this->dp;
         }
         
-        protected function getPulses()
+        protected function getPulses($turn)
         {
             if ($this->turnsloaded == 1)
             {

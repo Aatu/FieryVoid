@@ -844,6 +844,27 @@
 
     
     }
+
+    class HeavyCombatVesselLeftRight extends BaseShip{
+    
+        public $shipSizeClass = 2;
+        
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name,$slot);
+        }
+         
+         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            $location = 0;
+            
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(0,$tf), Mathlib::addToDirection(180,$tf) )){
+                $location = 3;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
+                $location = 4;
+            }
+                
+            return $location;
+        }
+    }
     
     class MediumShip extends BaseShip{
     

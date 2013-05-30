@@ -162,8 +162,8 @@ class Firing{
         if ($weapon->ballistic)
             return false;
 
-        if ($weapon->loadingtime > 1 || 
-            $weapon->turnsloaded < $weapon->loadingtime || 
+        if ($weapon->getLoadingTime() > 1 || 
+            $weapon->turnsloaded < $weapon->getLoadingTime() || 
             $weapon->firedOnTurn($gd->turn))
             return false;
         

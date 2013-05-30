@@ -14,6 +14,7 @@ class ShipSystem{
     public $outputMod = 0;
     public $boostable = false;
     public $boostEfficiency = null;
+    public $maxBoostLevel = null;
     public $power = array();
     public $fireOrders = array();
 

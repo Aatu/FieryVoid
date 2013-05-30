@@ -172,6 +172,38 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
 }
 
+class EMShield extends Shield{
+    public $name = "eMShield";
+    public $displayName = "EM Shield";
+    public $iconPath = "shield.png";
+
+    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+    }
+}
+
+class GraviticShield extends Shield{
+    public $name = "graviticShield";
+    public $displayName = "Gravitic Shield";
+    public $iconPath = "shield.png";
+
+    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+    }
+}
+
+class ShieldGenerator extends ShipSystem{
+    public $name = "shieldGenerator";
+    public $displayName = "Shield Generator";
+    public $primary = true;    
+    public $boostable = true;
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }    
+}
 
 class Reactor extends ShipSystem{
 

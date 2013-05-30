@@ -65,7 +65,7 @@ shipManager.power = {
 			systemwindow.addClass("canoverload");
 		}
 		
-		var boost = shipManager.power.getBoost(ship, system);
+		var boost = shipManager.power.getBoost(system);
 		
 		if (system.boostable && !boost){
 			systemwindow.addClass("canboost");
@@ -203,7 +203,7 @@ shipManager.power = {
 	
 	},
 	
-	getBoost: function(ship, system){
+	getBoost: function(system){
 		var boost = 0;
 		for (var i in system.power){
 			var power = system.power[i];
@@ -225,7 +225,7 @@ shipManager.power = {
         if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0){
             return system.boostEfficiency;
         }else if (system.boostEfficiency == "output+1"){
-            return system.output + shipManager.power.getBoost(ship, system) + 1;
+            return system.output + shipManager.power.getBoost(system) + 1;
         }
         
 		
@@ -233,7 +233,7 @@ shipManager.power = {
 	},
 	
 	countBoostPowerUsed: function(ship, system){
-		var boost = shipManager.power.getBoost(ship, system);
+		var boost = shipManager.power.getBoost(system);
 		
         if (boost == 0 || shipManager.systems.isDestroyed(ship, system))
             return 0;
@@ -273,12 +273,17 @@ shipManager.power = {
 				continue;
 				
 			if (power.type == 2){
-				power.amount--;
+                            
+//                            if(system.hasMaxBoost() && system.boostLevel > 0){
+//                                system.boostLevel--;
+//                            }
+                            
+                            power.amount--;
+			
+                            if (power.amount==0)
+                                system.power.splice(i, 1);
 				
-				if (power.amount==0)
-					system.power.splice(i, 1);
-				
-				return;
+                            return;
 			}
 		}
 		
@@ -286,22 +291,26 @@ shipManager.power = {
 	},
 	
 	setBoost: function(ship, system){
+            if (!shipManager.power.canBoost(ship, system))
+                return;
+
+//            if(system.hasMaxBoost()){
+//                system.boostLevel++;
+//            }
 	
-		if (!shipManager.power.canBoost(ship, system))
-			return;
-			
-		for (var i in system.power){
-			var power = system.power[i];
-			if (power.turn != gamedata.turn)
-				continue;
-				
-			if (power.type == 2){
-				power.amount++;
-				return;
-			}
-		}
+            for (var i in system.power){
+                var power = system.power[i];
+            
+                if (power.turn != gamedata.turn)
+                    continue;
+                    
+		if (power.type == 2){
+                    power.amount++;
+                    return;
+                }
+            }
 		
-		system.power.push({id:null, shipid:ship.id, systemid:system.id, type:2, turn:gamedata.turn, amount:1});
+            system.power.push({id:null, shipid:ship.id, systemid:system.id, type:2, turn:gamedata.turn, amount:1});
 	},
 	
 	setOverloading: function(ship, system){
@@ -349,15 +358,21 @@ shipManager.power = {
 	},
 	
 	clickPlus: function(ship, system){
-        if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
-			
-            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+                confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+                return;
+            }
             
-            return;
-		}
-		shipManager.power.setBoost(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+            if(system.hasMaxBoost()){
+                if(system.maxBoostLevel <= shipManager.power.getBoost(system)){
+                    confirm.error("You can not boost this weapon any further.");
+                    return;
+                }
+            }
+            
+            shipManager.power.setBoost(ship, system);
+            shipWindowManager.setDataForSystem(ship, system);
+            shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	}, 
 	
 	clickMinus: function(ship, system){

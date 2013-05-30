@@ -13,6 +13,14 @@ ShipSystem.prototype = {
 	constructor: ShipSystem
 }
 
+ShipSystem.prototype.initBoostableInfo = function(){
+    return this;
+}
+
+ShipSystem.prototype.hasMaxBoost = function(){
+    return false;
+}
+
 var Fighter = function(json, ship)
 {
     for (var i in json)
