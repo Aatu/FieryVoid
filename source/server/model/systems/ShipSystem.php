@@ -17,6 +17,7 @@ class ShipSystem{
     public $maxBoostLevel = null;
     public $power = array();
     public $fireOrders = array();
+    public $canOffLine = false;
 
     public $data = array();
     public $critData = array();
@@ -66,7 +67,8 @@ class ShipSystem{
     }
     
     public function beforeTurn($ship, $turn, $phase){
-            
+        Debug::log("beforeTurn");
+    
         $this->setSystemDataWindow($turn);
     }
     

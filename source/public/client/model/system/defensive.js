@@ -62,3 +62,29 @@ var ShieldGenerator = function(json, ship)
 
 ShieldGenerator.prototype = Object.create( ShipSystem.prototype );
 ShieldGenerator.prototype.constructor = ShieldGenerator;
+
+ShieldGenerator.prototype.onTurnOff = function(ship)
+{
+    for(var i in ship.systems){
+        var system = ship.systems[i];
+        if(system.name == 'graviticShield'){
+            // Shut it down.
+            system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+            shipWindowManager.setDataForSystem(ship, system);
+        }
+    }
+}
+
+ShieldGenerator.prototype.onTurnOn = function(ship)
+{
+    for(var i in ship.systems){
+        var system = ship.systems[i];
+        if(system.name == 'graviticShield'){
+            // Turn it all on.
+            shipManager.power.setOnline(ship, system);
+            shipWindowManager.setDataForSystem(ship, system);
+        }
+    }
+}
+
+

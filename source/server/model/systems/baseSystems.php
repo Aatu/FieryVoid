@@ -187,6 +187,7 @@ class GraviticShield extends Shield{
     public $name = "graviticShield";
     public $displayName = "Gravitic Shield";
     public $iconPath = "shield.png";
+    public $canOffLine = true;
 
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.

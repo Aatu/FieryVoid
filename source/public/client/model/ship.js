@@ -78,6 +78,32 @@ Ship.prototype =
         }
 
         return true;
+    },
+    
+    checkShieldGenerator: function(){
+        var shieldCapacity = 0;
+        var activeShields = 0;
+        
+        for(var i in this.systems){
+            var system = this.systems[i];
+            
+            if(system.name == "shieldGenerator"){
+                if(system.destroyed || shipManager.power.isOffline(this, system)){
+                    return true;
+                }
+                
+                shieldCapacity = system.output;
+            }
+            
+            if( system.name == "graviticShield"
+                && !(system.destroyed || shipManager.power.isOffline(this, system))
+              )
+            {
+                activeShields = activeShields + 1;
+            }
+        }
+        
+        return shieldCapacity >= activeShields;
     }
     
 }

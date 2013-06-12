@@ -11,6 +11,7 @@ class Haltona extends BaseShip{
         $this->imagePath = "img/ships/halik.png";
         $this->shipClass = "Haltona Frigate";
         $this->shipSizeClass = 1;
+        $this->canvasSize = 100;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

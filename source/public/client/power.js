@@ -67,13 +67,20 @@ shipManager.power = {
 		
 		var boost = shipManager.power.getBoost(system);
 		
-		if (system.boostable && !boost){
-			systemwindow.addClass("canboost");
+/*		if (system.boostable && !boost){
+                    systemwindow.addClass("canboost");
 		}else if (boost){
 			systemwindow.addClass("boosted");
 		}
+  */              
+/*                if(system.weapon && !window.weaponManager.isLoaded(system)){
+                    systemwindow.remove("canboost");
+                }
+                else{
+                    systemwindow.addClass("canboost");
+                }*/
 		
-		if (system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system)){
+		if (system.canOffLine || (system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system))){
 			systemwindow.addClass("canoffline");
 		}
 		
@@ -82,6 +89,29 @@ shipManager.power = {
 	
 	},
 	
+        checkGraviticShield: function(){
+            for (var i in gamedata.ships){
+                var ship = gamedata.ships[i];
+
+                if (ship.unavailable)
+                    continue;
+			
+		if (ship.flight)
+                    continue;
+			
+                if (ship.userid != gamedata.thisplayer)
+                    continue; 
+
+                if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
+                    continue;
+
+                if(!ship.checkShieldGenerator())
+                    return false;
+            }
+            
+            return true;
+        },
+        
 	checkPowerPositive: function(){
 	
 		for (var i in gamedata.ships){
@@ -273,11 +303,6 @@ shipManager.power = {
 				continue;
 				
 			if (power.type == 2){
-                            
-//                            if(system.hasMaxBoost() && system.boostLevel > 0){
-//                                system.boostLevel--;
-//                            }
-                            
                             power.amount--;
 			
                             if (power.amount==0)
@@ -294,10 +319,6 @@ shipManager.power = {
             if (!shipManager.power.canBoost(ship, system))
                 return;
 
-//            if(system.hasMaxBoost()){
-//                system.boostLevel++;
-//            }
-	
             for (var i in system.power){
                 var power = system.power[i];
             
@@ -420,6 +441,10 @@ shipManager.power = {
             
             return;
 		}
+                
+                if(system.name=="shieldGenerator"){
+                    system.onTurnOff(ship);
+                }
 		
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
@@ -444,7 +469,12 @@ shipManager.power = {
 		
 		if (!shipManager.power.isOffline(ship, system))
 			return;
-		
+
+                if(system.name=="shieldGenerator")
+                {
+                    system.onTurnOn(ship);
+                }
+                
 		shipManager.power.setOnline(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));

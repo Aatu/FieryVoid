@@ -31,7 +31,7 @@ class IonBolt extends Weapon{
 
 }
 
-class IonCannon extends Weapon{
+class IonCannon extends Raking{
 
     public $trailColor = array(30, 170, 255);
 

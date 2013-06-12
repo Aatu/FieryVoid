@@ -672,16 +672,12 @@ shipWindowManager = {
 				
 			}else if (!firing){
 				var load = weaponManager.getWeaponCurrentLoading(system);
-                                
-                                
-				//if (!systemwindow.hasClass("overload") && load > system.loadingtime)
-				//	load = system.loadingtime;
 				
 					
-				
 				var loadingtime = system.loadingtime;
-				if (system.normalload > 0)
+				if (system.normalload > 0){
 					loadingtime = system.normalload;
+                                }
 
                                 if(load > loadingtime){
                                     load = loadingtime;

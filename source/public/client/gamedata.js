@@ -188,11 +188,15 @@ gamedata = {
                 window.confirm.error("You have ships with insufficient power. You need to turn off systems before you can commit the turn.", function(){});
                 return false;
             }
-        
+            
+            if (!shipManager.power.checkGraviticShield()){
+                window.confirm.error("Shield generators can only support a limited amount of shields. You need to turn of shields.", function(){});
+                return false;
+            }
+            
             for (var i in gamedata.ships){
                 var ship = gamedata.ships[i];
                 ew.convertUnusedToDEW(ship);
-                
             }
             
             ajaxInterface.submitGamedata();

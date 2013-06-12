@@ -185,8 +185,8 @@ class Manager{
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
     
-		if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
-			return null;
+	if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
+                return null;
         
         $gamedata = null;
         
@@ -762,7 +762,7 @@ class Manager{
                         }
                     }
                 }
-
+                
                 if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
                 {
                     $fires = Array();

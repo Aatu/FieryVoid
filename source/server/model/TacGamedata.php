@@ -389,6 +389,8 @@ class TacGamedata{
     }
     
     private function setPreTurnTasks(){
+        //plopje
+        Debug::log("setPreTurnTasks");
         
         foreach ($this->ships as $ship){
             foreach ($ship->systems as $system){
