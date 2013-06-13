@@ -51,6 +51,15 @@ class IonCannon extends Raking{
     public $rangePenalty = 0.25;
     public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals 
 
+    public function setSystemDataWindow($turn){
+
+        $this->data["Weapon type"] = "Ion";
+        $this->data["Damage type"] = "Raking";
+
+        parent::setSystemDataWindow($turn);
+    }
+
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -61,7 +70,7 @@ class IonCannon extends Raking{
     public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
 }
 
-class ImprovedIonCannon extends Weapon{
+class ImprovedIonCannon extends Raking{
 
     public $trailColor = array(30, 170, 255);
 
@@ -85,7 +94,15 @@ class ImprovedIonCannon extends Weapon{
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
+    
+    public function setSystemDataWindow($turn){
 
+        $this->data["Weapon type"] = "Ion";
+        $this->data["Damage type"] = "Raking";
+
+        parent::setSystemDataWindow($turn);
+    }
+    
     public function getDamage($fireOrder){        return Dice::d(10, 2)+15;  }
     public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
     public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
