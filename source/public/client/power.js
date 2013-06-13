@@ -56,10 +56,6 @@ shipManager.power = {
 		
 		if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer)
 			return;
-					
-		
-		
-		
 		
 		if (system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system)){
 			systemwindow.addClass("canoverload");
@@ -67,19 +63,12 @@ shipManager.power = {
 		
 		var boost = shipManager.power.getBoost(system);
 		
-/*		if (system.boostable && !boost){
+		if (system.boostable && !boost){
                     systemwindow.addClass("canboost");
 		}else if (boost){
 			systemwindow.addClass("boosted");
 		}
-  */              
-/*                if(system.weapon && !window.weaponManager.isLoaded(system)){
-                    systemwindow.remove("canboost");
-                }
-                else{
-                    systemwindow.addClass("canboost");
-                }*/
-		
+
 		if (system.canOffLine || (system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system))){
 			systemwindow.addClass("canoffline");
 		}

@@ -43,10 +43,32 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
         this.normalload =  1 + shipManager.power.getBoost(this);
     }
     else{
-        shipManager.power.unsetBoost(null, this);
+        var count = shipManager.power.getBoost(this);
+        
+        console.log("Count " + count);
+        
+        for(var i = 0; i < count; i++){
+            shipManager.power.unsetBoost(null, this);
+        }
+                        
+ //       this.clearBoost();
     }
     
     return this;
+}
+
+GravitonPulsar.prototype.clearBoost = function(){
+        for (var i in system.power){
+                var power = system.power[i];
+                if (power.turn != gamedata.turn)
+                        continue;
+
+                if (power.type == 2){
+                    system.power.splice(i, 1);
+
+                    return;
+                }
+        }
 }
 
 GravitonPulsar.prototype.hasMaxBoost = function(){

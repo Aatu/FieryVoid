@@ -76,6 +76,26 @@
                                 Debug::log("2) setSystemDataWindow ".$this->loadingtime);
         }
         
+        public function getLoadingTime(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->loadingtime;
+            }
+        }
+
+        public function getTurnsloaded(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->turnsloaded;
+            }
+        }
+        
         public function setTimes(){
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.

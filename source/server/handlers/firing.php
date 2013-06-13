@@ -163,7 +163,7 @@ class Firing{
             return false;
 
         if ($weapon->getLoadingTime() > 1 || 
-            $weapon->turnsloaded < $weapon->getLoadingTime() || 
+            $weapon->getTurnsloaded() < $weapon->getLoadingTime() || 
             $weapon->firedOnTurn($gd->turn))
             return false;
         
