@@ -305,8 +305,10 @@ shipManager.power = {
 	},
 	
 	setBoost: function(ship, system){
-            if (!shipManager.power.canBoost(ship, system))
+            if (!shipManager.power.canBoost(ship, system)){
+                window.confirm.error("You do not have sufficient energy to boost this system.", function(){});
                 return;
+            }
 
             for (var i in system.power){
                 var power = system.power[i];

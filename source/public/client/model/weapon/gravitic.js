@@ -50,8 +50,6 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
         for(var i = 0; i < count; i++){
             shipManager.power.unsetBoost(null, this);
         }
-                        
- //       this.clearBoost();
     }
     
     return this;
@@ -129,9 +127,9 @@ GravitonBeam.prototype.constructor = GravitonBeam;
 
 var LightGravitonBeam = function(json, ship)
 {
-    Weapon.call( this, json, ship);
+    Gravitic.call( this, json, ship);
 }
-LightGravitonBeam.prototype = Object.create( Weapon.prototype );
+LightGravitonBeam.prototype = Object.create( Gravitic.prototype );
 LightGravitonBeam.prototype.constructor = LightGravitonBeam;
 
 var GraviticCannon = function(json, ship)
@@ -154,3 +152,74 @@ var UltraLightGraviticBolt = function(json, ship)
 }
 UltraLightGraviticBolt.prototype = Object.create( Gravitic.prototype );
 UltraLightGraviticBolt.prototype.constructor = UltraLightGraviticBolt;
+
+var GravLance = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+GravLance.prototype = Object.create( Weapon.prototype );
+GravLance.prototype.constructor = GravLance;
+
+var GraviticCutter = function(json, ship)
+{
+    Gravitic.call( this, json, ship);
+}
+GraviticCutter.prototype = Object.create( Gravitic.prototype );
+GraviticCutter.prototype.constructor = GraviticCutter;
+
+GraviticCutter.prototype.initBoostableInfo = function(){
+    // Needed because it can chance during initial phase
+    // because of adding extra power.
+    
+    this.data["Weapon type"] ="Raking";
+    this.data["Damage type"] ="Standard";
+
+    switch(shipManager.power.getBoost(this)){
+        case 0:
+            this.data["Damage"] = '10-28';
+            break;
+        case 1:
+            this.data["Damage"] = '13-40';
+            break;
+        default:
+            this.data["Damage"] = '10-28';
+            break;
+    }            
+
+    if(window.weaponManager.isLoaded(this)){
+        this.loadingtime = 2 + shipManager.power.getBoost(this);
+        this.turnsloaded = 2 + shipManager.power.getBoost(this);
+        this.normalload =  2 + shipManager.power.getBoost(this);
+    }
+    else{
+        var count = shipManager.power.getBoost(this);
+        
+        for(var i = 0; i < count; i++){
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    
+    return this;
+}
+
+GraviticCutter.prototype.clearBoost = function(){
+        for (var i in system.power){
+                var power = system.power[i];
+                if (power.turn != gamedata.turn)
+                        continue;
+
+                if (power.type == 2){
+                    system.power.splice(i, 1);
+
+                    return;
+                }
+        }
+}
+
+GraviticCutter.prototype.hasMaxBoost = function(){
+    return true;
+}
+
+GraviticCutter.prototype.getMaxBoost = function(){
+    return this.maxBoostLevel;
+}

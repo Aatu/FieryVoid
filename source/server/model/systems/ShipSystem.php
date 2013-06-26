@@ -67,8 +67,6 @@ class ShipSystem{
     }
     
     public function beforeTurn($ship, $turn, $phase){
-        Debug::log("beforeTurn");
-    
         $this->setSystemDataWindow($turn);
     }
     

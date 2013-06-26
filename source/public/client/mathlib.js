@@ -171,12 +171,12 @@ window.mathlib = {
 	
 
 		var oPos = shipManager.getShipPosition(observer);
-		var tPos = position;
-
+		var tPos = hexgrid.pixelCoToHex(position.x, position.y);
+                
+                
 		if (oPos.x == tPos.x && oPos.y == tPos.y){
 				oPos =  shipManager.movement.getPreviousLocation(observer);
 		}
-
 		
 		oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
 		tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);

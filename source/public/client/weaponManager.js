@@ -2,6 +2,11 @@ window.weaponManager = {
 
     getWeaponCurrentLoading: function(weapon)
     {
+        if(weapon.duoWeapon){
+            var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
+            return returnArray;
+        }
+        
         return weapon.turnsloaded;
     },
             
@@ -12,6 +17,9 @@ window.weaponManager = {
         var systemwindow = $(".system").has($(this));
         var ship = gamedata.getShip(shipwindow.data("ship"));
         var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+        
+        console.log(system);
+        console.log(system instanceof Weapon);
         
         if (!system)
             return;

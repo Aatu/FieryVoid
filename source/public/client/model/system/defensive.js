@@ -41,6 +41,7 @@ Shield.prototype.getDefensiveHitChangeMod =
 var EMShield = function(json, ship)
 {
     Shield.call( this, json, ship);
+    this.defensiveType = "Shield";
 }
 
 Shield.prototype = Object.create( Shield.prototype );
@@ -49,6 +50,7 @@ EMShield.prototype.constructor = EMShield;
 var GraviticShield = function(json, ship)
 {
     Shield.call( this, json, ship);
+    this.defensiveType = "Shield";
 }
 
 GraviticShield.prototype = Object.create( Shield.prototype );
@@ -57,7 +59,6 @@ GraviticShield.prototype.constructor = GraviticShield;
 var ShieldGenerator = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
-    this.defensiveType = "Shield";
 }
 
 ShieldGenerator.prototype = Object.create( ShipSystem.prototype );

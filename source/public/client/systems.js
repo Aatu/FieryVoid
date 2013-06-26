@@ -120,6 +120,18 @@ shipManager.systems = {
         
         if (system.dualWeapon && !system.initialized){
             var selectedWeapon = system.weapons[system.firingMode];
+            
+            if(selectedWeapon.duoWeapon){
+                selectedWeapon.firingMode = system.weapons[1].firingMode;
+                selectedWeapon.firingModes = system.weapons[1].firingModes;
+                selectedWeapon.power = system.weapons[1].power;
+                selectedWeapon.displayName = system.weapons[1].displayName;
+                selectedWeapon.dualWeapon = true;
+                selectedWeapon.initialized = true;
+                selectedWeapon.damage = system.weapons[1].damage;
+                selectedWeapon.destroyed = system.weapons[1].destroyed;
+            }
+            
             selectedWeapon.firingMode = system.firingMode;
             selectedWeapon.firingModes = system.firingModes;
             selectedWeapon.power = system.power;

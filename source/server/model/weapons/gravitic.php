@@ -28,7 +28,6 @@
         public $boostEfficiency = 2;
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
-        public $boostedLoadingtime = 0;
         public $maxpulses = 3;
 		
         public $rangePenalty = 1;
@@ -41,9 +40,6 @@
         }
 
         public function setSystemDataWindow($turn){
-            //plopje
-                    Debug::log("setSystemDataWindow");
-
             // Keep this consistent with the gravitic.js implementation.
             // Yeah, I know: dirty.
             $this->data["Weapon type"] = "Pulse";
@@ -70,10 +66,7 @@
                     break;
             }            
 
-                                Debug::log("1) setSystemDataWindow ".$this->loadingtime);
-
             parent::setSystemDataWindow($turn);
-                                Debug::log("2) setSystemDataWindow ".$this->loadingtime);
         }
         
         public function getLoadingTime(){
@@ -130,13 +123,10 @@
             $this->maxpulses = $this->getMaxPulses($gamedata->turn);
             $this->setTimes();
             
-            Debug::log("Loading time :".$this->loadingtime);
-            
             $crits = array();
             
             /* If fully boosted: test for possible crit. */
             if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
-                Debug::log("Graviton Pulsar: Fully boosted");
                 $shooter = $gamedata->getShipById($fireOrder->shooterid);
                 $crits = $this->testCritical($shooter, $gamedata->turn, $crits);
                 $this->setCriticals($crits, $gamedata->turn);
@@ -161,20 +151,6 @@
             }
 
             return $boostLevel;
-            
-   /*         $boostLevel = 0;
-            
-            if(count($this->power) > 0){
-                $lastBoostTurn = $this->power[count($this->power)-1]->turn;
-            }
-
-            foreach($this->power as $i){
-                if($i->turn === $lastBoostTurn){
-                    $boostLevel += $i->amount;
-                }
-            }
-
-            return $boostLevel;*/
         }
 
         private function getMaxPulses($turn){
@@ -418,7 +394,7 @@ class GraviticBolt extends Gravitic
 
     }
 
-    class LightGravitonBeam extends Raking{
+    class LightGravitonBeam extends Weapon{
         public $name = "lightGravitonBeam";
         public $displayName = "Light Graviton Beam";
         public $animation = "laser";
@@ -441,7 +417,7 @@ class GraviticBolt extends Gravitic
         public function setSystemDataWindow($turn){
 
             $this->data["Weapon type"] = "Gravitic";
-            $this->data["Damage type"] = "Raking";
+            $this->data["Damage type"] = "Standard";
             
             parent::setSystemDataWindow($turn);
         }
@@ -450,4 +426,212 @@ class GraviticBolt extends Gravitic
         public function setMinDamage(){   return  $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){   return  $this->maxDamage = 30 - $this->dp;      }
     }
+    
+    class GraviticLance extends DualWeapon{
+    
+	public $firingModes = array( 
+		1 => "Lance",
+		2 => "Beams"
+	);
+	
+        public $name = "GraviticLance";
+	public $displayName = "Gravitic Lance";
+        	
+	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        
+            $lance = new GravLance($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $lance->parentSystem = $this;
+            $beams = new DuoGravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beams->parentSystem = $this;
+        
+            $weapons = array(
+		 1 => $lance
+                ,2 => $beams
+            );
+		
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
+        }
+    }
+    
+    // Don't use the GravLance. It's only here for the GraviticLance class!!
+    class GravLance extends Raking{
+        public $name = "graviticLance";
+        public $displayName = "Gravitic Lance 1";
+        public $animation = "laser";
+        public $animationColor = array(99, 255, 00);
+        public $animationWidth = 5;
+        
+        public $loadingtime = 4;
+        public $extraoverloadshots = 2;
+        public $damageType = "raking";
+        public $raking = 10;
+        
+        public $rangePenalty = 0.2;
+        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Gravitic";
+            $this->data["Damage type"] = "Raking";
+            
+            parent::setSystemDataWindow($turn);
+        }
+        
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 6)+24;   }
+        public function setMinDamage(){   return  $this->minDamage = 30 - $this->dp;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 84 - $this->dp;      }
+    }
+    
+    class DuoGravitonBeam extends DuoWeapon{
+    
+        public $name = "duoGravitonBeam";
+	public $displayName = "Graviton Beams";
+	
+	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            $beam1 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam1->parentSystem = $this;
+            $beam2 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam2->parentSystem = $this;
+            
+            $weapons = array(
+		 1 => $beam1
+                ,2 => $beam2
+            );
+ 
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
+        }
+    }
+
+    class GraviticCutter extends Raking
+    {
+        public $name = "graviticCutter";
+        public $displayName = "Gravitic Cutter";
+        public $animation = "laser";
+        public $animationColor = array(99, 255, 00);
+        public $animationWidth = 2;
+        
+        public $damageType = "raking";
+        public $raking = 6;
+
+        public $boostable = true;
+        public $boostEfficiency = 5;
+        public $maxBoostLevel = 1;
+        public $loadingtime = 2;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 2, 4); // fighters, <mediums, <capitals 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            // Keep this consistent with the gravitic.js implementation.
+            // Yeah, I know: dirty.
+            $this->data["Weapon type"] = "Raking";
+            $this->setTimes();
+//            $this->normalload = $this->loadingtime;
+            
+            if($this->getBoostLevel($turn)==0){
+                $this->raking = 6;
+            }
+            else{
+                $this->raking = 8;
+            }
+            
+            parent::setSystemDataWindow($turn);
+        }
+        
+        public function getLoadingTime(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->loadingtime;
+            }
+        }
+
+        public function getTurnsloaded(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->turnsloaded;
+            }
+        }
+        
+        public function setTimes(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+        }
+        
+        public function fire($gamedata, $fireOrder){
+            $this->setTimes();
+            
+            parent::fire($gamedata, $fireOrder);
+        }
+
+        public function getNormalLoad(){
+            return $this->loadingtime + $this->maxBoostLevel;
+        }
+        
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+
+            return $boostLevel;
+        }
+
+        public function getDamage($fireOrder){
+            if($this->getBoostLevel($fireOrder->turn)==0){
+                $this->raking = 6;
+                return (Dice::d(10, 2)+8);
+            }
+            else{
+                $this->raking = 8;
+                return (Dice::d(10, 3)+10);
+            }
+        }
+        
+        public function setMinDamage(){
+            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
+                $this->minDamage = 10 - (2*$this->dp);
+            }
+            else{
+                $this->minDamage = 13 - (2*$this->dp);
+            }
+        }
+        
+        public function setMaxDamage(){
+            if($this->getBoostLevel(TacGameData::$currentTurn)==0){
+                $this->maxDamage = 28 - (2*$this->dp);
+            }
+            else{
+                $this->maxDamage = 40 - (2*$this->dp);
+            }
+        }
+    }
+    
 ?>

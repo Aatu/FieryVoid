@@ -15,6 +15,7 @@ class Weapon extends ShipSystem{
     public $animationWidth = 3;
     public $animationExplosionScale = 0.25;
     public $animationExplosionType = "normal";
+    public $duoWeapon = false;
     public $explosionColor = array(250, 230, 80);
     public $trailLength = 40;
     public $trailColor = array(248, 216, 65);
@@ -287,40 +288,30 @@ class Weapon extends ShipSystem{
     
     public function calculateLoading()
     {
-        //plopje
-        Debug::log("calculateLoading ".$this->name." ".$this->getLoadingTime());
-        Debug::log("calculateLoading ".$this->name." ".$this->loadingtime);
-
         $normalload = $this->getNormalLoad();
         if (TacGamedata::$currentPhase == 2)
         {
             if ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
             {
-                        Debug::log("calculateLoading 1");
-
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
             }
             else if ($this->ballistic && $this->firedOnTurn(TacGamedata::$currentTurn) )
             {
-                        Debug::log("calculateLoading 2");
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
             }
             else if (!$this->isOverloadingOnTurn(TacGamedata::$currentTurn))
             {
-                        Debug::log("calculateLoading 3");
                 return new WeaponLoading($this->getTurnsloaded(), 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
             }
         }
         else if (TacGamedata::$currentPhase == 4)
         {
-                        Debug::log("calculateLoading 4");
            return $this->calculatePhase4Loading();
         }
         else if (TacGamedata::$currentPhase == 1)
         {
             if ($this->overloadshots === -1)
             {
-                        Debug::log("calculateLoading 5");
                 return new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
             }
             else
@@ -337,13 +328,10 @@ class Weapon extends ShipSystem{
                 if ($overloading > $normalload)
                     $overloading = $normalload;
 
-                                        Debug::log("calculateLoading 6");
-
                 return new WeaponLoading($newloading, $newExtraShots, $this->getLoadedAmmo(), $overloading, $this->getLoadingTime());
             }
             
         }
-                        Debug::log("calculateLoading 7");
         
         return new WeaponLoading($this->getTurnsloaded(), $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime());
     }
@@ -453,7 +441,7 @@ class Weapon extends ShipSystem{
             $bdew += EW::getBlanketDEW($gamedata, $target);
         }
 		
-		$mod = 0;
+        $mod = 0;
         
         $sdew = EW::getSupportedDEW($gamedata, $target);
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
@@ -473,7 +461,7 @@ class Weapon extends ShipSystem{
         $ammo = $this->getAmmo($fireOrder);
         if ($ammo !== null)
         {
-            $mod += $ammo->getHitChangeMod();
+            $mod += $ammo->getHitChanceMod();
         }
         
         if ($shooter instanceof FighterFlight){
@@ -499,7 +487,7 @@ class Weapon extends ShipSystem{
             $mod -= 8;
         }
 		
-        $mod -= $target->getHitChangeMod($shooter, $pos, $gamedata->turn);
+        $mod -= $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
 		
         if ($oew < 1)
         {

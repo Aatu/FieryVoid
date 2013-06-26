@@ -92,7 +92,7 @@ Ship.prototype =
                     return true;
                 }
                 
-                shieldCapacity = system.output;
+                shieldCapacity = system.output + shipManager.power.getBoost(system);
             }
             
             if( system.name == "graviticShield"

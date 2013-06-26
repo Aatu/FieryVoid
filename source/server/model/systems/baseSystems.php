@@ -117,6 +117,8 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $defensiveSystem = true;
     public $tohitPenalty = 0;
     public $damagePenalty = 0;
+    public $rangePenalty = 0;
+    public $range = 5;
     
     public $possibleCriticals = array(
             16=>"OutputReduced1",
@@ -154,6 +156,8 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+        if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+            return 0;
         
         if ($this->checkIsFighterUnderShield($target, $shooter))
             return 0;
@@ -162,6 +166,9 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+        if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn())
+            return 0;
+        
         if ($this->checkIsFighterUnderShield($target, $shooter))
             return 0;
         
@@ -172,7 +179,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
 }
 
-class EMShield extends Shield{
+class EMShield extends Shield implements DefensiveSystem{
     public $name = "eMShield";
     public $displayName = "EM Shield";
     public $iconPath = "shield.png";
@@ -183,7 +190,7 @@ class EMShield extends Shield{
     }
 }
 
-class GraviticShield extends Shield{
+class GraviticShield extends Shield implements DefensiveSystem{
     public $name = "graviticShield";
     public $displayName = "Gravitic Shield";
     public $iconPath = "shield.png";
@@ -203,6 +210,8 @@ class ShieldGenerator extends ShipSystem{
 
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
+        
+        $this->boostEfficiency = $output;
     }    
 }
 

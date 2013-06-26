@@ -213,8 +213,9 @@
             return null;
         }
         
-        public function getHitChangeMod($shooter, $pos, $turn){
-			$affectingSystems = array();
+        public function getHitChanceMod($shooter, $pos, $turn){
+            $affectingSystems = array();
+            
             foreach($this->systems as $system){
                 
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
@@ -857,9 +858,9 @@
             $location = 0;
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(0,$tf), Mathlib::addToDirection(180,$tf) )){
-                $location = 3;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
                 $location = 4;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
+                $location = 3;
             }
                 
             return $location;

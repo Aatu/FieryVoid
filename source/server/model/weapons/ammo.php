@@ -12,7 +12,7 @@ class Ammo
         return 0;
     }
     
-    public function getHitChangeMod()
+    public function getHitChanceMod()
     {
         return 0;
     }
@@ -30,7 +30,7 @@ class BasicMissile extends Ammo
         return 20;
     }
     
-    public function getHitChangeMod()
+    public function getHitChanceMod()
     {
         return 3;
     }

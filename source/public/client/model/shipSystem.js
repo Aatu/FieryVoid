@@ -55,12 +55,19 @@ Weapon.prototype.getAmmo = function(fireOrder)
 Weapon.prototype.changeFiringMode = function()
 {
     var mode = this.firingMode+1;
+    
     if (this.firingModes[mode]){
         this.firingMode = mode;
     }else{
         this.firingMode = 1;
     }
 }
+
+Weapon.prototype.getTurnsloaded = function()
+{
+    return this.turnsloaded;
+}
+
 var Ballistic = function(json, ship)
 {
     Weapon.call( this, json, ship);

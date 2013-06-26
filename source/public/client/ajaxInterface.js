@@ -94,7 +94,7 @@ window.ajaxInterface = {
 
                     }else{
                         var fires = Array();
-                        if (system.dualWeapon){
+                        if (system.dualWeapon || system.duoWeapon){
                             for (var c in system.weapons){
                                 var weapon = system.weapons[c];
                                 for (var b = weapon.fireOrders.length-1; b>=0; b--){

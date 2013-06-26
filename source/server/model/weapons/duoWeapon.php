@@ -1,12 +1,12 @@
 <?php
 
-class DualWeapon extends Weapon{
+class DuoWeapon extends Weapon{
     
     
-    public $dualWeapon = true;
+    public $duoWeapon = true;
     public $weapons = array();
     private $turnsFired = array();
-    
+
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         
@@ -18,8 +18,13 @@ class DualWeapon extends Weapon{
     }
     
     public function getFiringWeapon($fireOrder){
-        $firingMode = $fireOrder->firingMode;
-        return $this->weapons[$firingMode];
+        $id = $fireOrder->$weaponid;
+        
+        foreach( $this->weapons as $weapon){
+            if($weapon->id == $id){
+                return $weapon;
+            }
+        }
     }
     
     public function fire($gamedata, $fireOrder){
@@ -100,37 +105,11 @@ class DualWeapon extends Weapon{
         if (!$loading)
             return;
         
-        $this->weapons[$loading->subsystem]->setLoading($loading);
+        foreach ($this->weapons as $weapon){
+            $weapon->setLoading($loading);
+        }
         
-    }
-    
+    }    
 }
 
-class LaserPulseArray extends DualWeapon{
-    
-	public $firingModes = array( 
-		1 => "Laser",
-		2 => "Pulse"
-	);
-	
-    public $name = "LaserPulseArray";
-	public $displayName = "Laser/Pulse array";
-	
-	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-        
-        $laser = new MediumLaser($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        $laser->parentSystem = $this;
-        $pulse = new MediumPulse($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        $pulse->parentSystem = $this;
-        
-		$weapons = array(
-			 1 => $laser
-            ,2 => $pulse
-		);
-		
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
-        
-    }
-}
-
-
+?>
