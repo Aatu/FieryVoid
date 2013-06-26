@@ -57,6 +57,21 @@ window.confirm = {
 		a.fadeIn(250);
 		
 	},
+        
+    confirmOrSurrender: function(msg, callbackCommit, callbackSurrender){
+        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="surrender"></div><div class="confirmcancel"></div></div></div>');
+		$('<span>'+msg+'</span>').prependTo(e);
+		
+		$(".ok", e).on("click", callbackCommit);
+		$(".confirmok", e).on("click", function(){$(".confirm").remove();});
+		$(".confirmok", e).on("click", callbackCommit);
+                $(".confirmcancel",e).on("click", function(){$(".confirm").remove();});
+                $(".surrender",e).on("click", function(){$(".confirm").remove();});
+		$(".surrender", e).on("click", callbackSurrender);
+		$(".ok",e).css("left", "45%");
+		var a = e.appendTo("body");
+		a.fadeIn(250);
+	},
     
     exception: function(data){
 		var e = $('<div style="z-index:999999"class="confirm error"></div>');
