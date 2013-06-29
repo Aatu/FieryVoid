@@ -10,7 +10,8 @@ class Morshin extends HeavyCombatVessel{
         $this->imagePath = "img/ships/morshin.png";
         $this->shipClass = "Morshin Carrier";
         $this->gravitic = true;
-
+        $this->limited = 33;
+        $this->fighters = array("normal"=>48);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

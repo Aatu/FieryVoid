@@ -11,7 +11,8 @@ class Sharlin extends BaseShip{
         $this->shipClass = "Sharlin";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-		$this->canvasSize = 280;
+        $this->canvasSize = 280;
+        $this->fighters = array("normal"=>24);
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 19;

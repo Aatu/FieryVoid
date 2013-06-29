@@ -10,7 +10,7 @@ class Gquonth extends BaseShip{
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Quonth";
         $this->shipSizeClass = 3;
-        
+        $this->occurence = "uncommon";
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

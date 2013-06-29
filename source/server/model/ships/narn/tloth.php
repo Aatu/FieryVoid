@@ -10,7 +10,7 @@ class Tloth extends BaseShip{
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Loth";
         $this->shipSizeClass = 3;
-        
+        $this->fighters = array("normal"=>12);        
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;

@@ -11,7 +11,8 @@ class Neshatan extends BaseShip{
         $this->shipClass = "Neshatan Gunship";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-
+        $this->limited = 33;
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 19;
 

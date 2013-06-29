@@ -9,8 +9,9 @@ class ShoKar extends BaseShip{
         $this->phpclass = "ShoKar";
         $this->imagePath = "img/ships/shokar.png";
         $this->shipClass = "Sho'Kar";
+        $this->limited = 33;
+        $this->fighters = array("normal"=>6);
         
-		
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

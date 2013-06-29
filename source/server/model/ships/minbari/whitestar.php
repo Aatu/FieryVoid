@@ -12,6 +12,7 @@ class WhiteStar extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 100;
         $this->gravitic = true;
+        $this->limited = 33;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

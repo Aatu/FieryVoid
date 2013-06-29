@@ -9,7 +9,7 @@ class Vorchar extends HeavyCombatVessel{
         $this->phpclass = "Vorchar";
         $this->imagePath = "img/ships/vorchar.png";
         $this->shipClass = "Vorchar";
-        
+        $this->occurence = "uncommon";
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

@@ -11,7 +11,8 @@ class Balvarin extends BaseShip{
         $this->imagePath = "img/ships/balvarin.png";
         $this->shipClass = "Balvarin";
         $this->shipSizeClass = 3;
-        
+        $this->fighters = array("medium"=>36);
+
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         

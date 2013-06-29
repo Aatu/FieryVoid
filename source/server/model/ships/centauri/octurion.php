@@ -10,7 +10,9 @@ class Octurion extends BaseShip{
         $this->imagePath = "img/ships/octurion.png";
         $this->shipClass = "Octurion ";
         $this->shipSizeClass = 3;
-        
+        $this->limited = 33;
+        $this->fighters = array("normal"=>24);
+
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
         

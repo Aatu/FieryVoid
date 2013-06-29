@@ -11,6 +11,8 @@ class Warlock extends BaseShip{
         $this->shipClass = "Warlock";
         $this->shipSizeClass = 3;
         $this->canvasSize= 400;
+        $this->limited = 10;
+        $this->fighters = array("normal"=>24);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 19;

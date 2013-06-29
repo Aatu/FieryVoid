@@ -5,7 +5,10 @@
         public $imagePath, $shipClass;
         public $systems = array();
         public $EW = array();
+        public $fighters = array();
 
+        public $occurence = "common";
+        public $limited = 0;
         public $agile = false;
         public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
         public $currentturndelay = 0;

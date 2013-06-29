@@ -10,6 +10,7 @@ class Brahassa extends BaseShip{
         $this->imagePath = "img/ships/brahassa.png";
         $this->shipClass = "Brahassa Cruiser";
         $this->shipSizeClass = 3;
+        $this->fighters = array("normal"=>24);
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

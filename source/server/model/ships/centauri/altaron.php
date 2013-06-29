@@ -8,6 +8,8 @@ class Altaron extends HeavyCombatVessel{
         $this->phpclass = "Altaron";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Altaron Destroyer";
+        $this->occurence = "uncommon";
+        $this->fighters = array("medium"=>6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

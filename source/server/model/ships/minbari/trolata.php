@@ -11,6 +11,7 @@ class Trolata extends BaseShip{
         $this->shipClass = "Trolata";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

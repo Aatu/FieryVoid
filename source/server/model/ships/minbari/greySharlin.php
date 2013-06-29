@@ -12,6 +12,8 @@ class GreySharlin extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
 	$this->canvasSize = 280;
+        $this->occurence = "unique";
+        $this->fighters = array("normal"=>24);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 19;

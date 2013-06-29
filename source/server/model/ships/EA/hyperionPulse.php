@@ -10,7 +10,9 @@ class HyperionPulse extends BaseShip{
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Pulse Cruiser (Delta Model)";
         $this->shipSizeClass = 3;
-        
+        $this->fighters = array("normal"=>6);
+        $this->occurence = "uncommon";
+
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         

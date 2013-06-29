@@ -122,9 +122,19 @@ shipWindowManager = {
 
 	populateShipWindow: function(ship, shipwindow){
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
+                
+                if(gamedata.turn != 0){
+                    shipwindow.find(".topbar .value.shipclass").html("");
+                    shipwindow.find(".topbar .valueheader.shipclass").html("");
+                    shipwindow.find(".topbar .value.name").html(ship.name);
+                }
+                else{
+                    shipwindow.find(".topbar .value.name").html("");
+                    shipwindow.find(".topbar .valueheader.name").html("");
+                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
+                }
+                
 		
-		shipwindow.find(".topbar .value.name").html(ship.name);
-		shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
 		
 		shipWindowManager.addSystems(ship, shipwindow, 1);
 		shipWindowManager.addSystems(ship, shipwindow, 0);
@@ -142,15 +152,38 @@ shipWindowManager = {
             var notes = Array();
             
             if(ship.agile){
-                abilities.push("Agile ship");
+                abilities.push("&nbsp;Agile ship");
             }
 
             if(shipManager.movement.isRolled(ship)){
-                notes.push("Ship is rolled.");
+                notes.push("&nbsp;Ship is rolled.");
             }
 
             if(shipManager.movement.isRolling(ship)){
-                notes.push("Ship is rolling.</p><p>");
+                notes.push("&nbsp;Ship is rolling.</p><p>");
+            }
+
+            if(gamedata.turn == 0){
+                notes.push("&nbsp;This ship carries:");
+                if(ship.fighters.length != 0){
+                    for (var i in ship.fighters){
+                        var amount = ship.fighters[i];
+                        
+                        if(i == "normal"){
+                            notes.push("&nbsp;&nbsp;&nbsp;"+amount+" fighters");
+                        }
+                        else{
+                            notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
+                        }
+                    }
+                }
+                else{
+                    notes.push("&nbsp;&nbsp;&nbsp;no fighters");
+                }
+               
+                if(ship.limited != 0){
+                    notes.push("&nbsp;Limited: " + ship.limited + "%");
+                }
             }
             
             /* Set everything into the notes decently. */
@@ -171,32 +204,6 @@ shipWindowManager = {
                 shipWindow.find(".notes").append(notes[index]);
                 shipWindow.find(".notes").append("</p>");
             }
-            
-            
-/*            var abilities = $("<p>");
-            
-            if(ship.agile){
-                abilities.append("Agile ship</p><p>");
-            }
-
-            abilities.append("</p>");
-            
-            shipWindow.find(".notes").append(abilities);
-            shipWindow.find(".notes").append('<hr width=90% height=1px border=0 color=#496791>');
-            
-            var notes = $("<p>");
-            
-            if(shipManager.movement.isRolled(ship)){
-                notes.append("Ship is rolled.</p><p>");
-            }
-
-            if(shipManager.movement.isRolling(ship)){
-                notes.append("Ship is rolling.</p><p>");
-            }
-
-            notes.append("</p>");
-
-            shipWindow.find(".notes").append(notes);*/
         },
         
 	addSystems: function (ship, shipwindow, location){

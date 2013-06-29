@@ -9,7 +9,7 @@ class Vasachi extends HeavyCombatVessel{
         $this->phpclass = "Vasachi";
         $this->imagePath = "img/ships/sulust.png";
         $this->shipClass = "Vasachi";
-        
+        $this->occurence = "rare";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

@@ -10,7 +10,9 @@ class Trann extends BaseShip{
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Rann Heavy Carrier";
         $this->shipSizeClass = 3;
-
+        $this->occurence = "uncommon";
+        $this->fighters = array("normal"=>24);
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
         

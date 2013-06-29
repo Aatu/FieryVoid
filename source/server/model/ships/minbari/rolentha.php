@@ -10,7 +10,7 @@ class Rolentha extends HeavyCombatVessel{
         $this->imagePath = "img/ships/rogata.png";
         $this->shipClass = "Rolentha";
         $this->gravitic = true;
-
+        $this->occurence = "rare";
 
         $this->forwardDefense = 17;
         $this->sideDefense = 17;

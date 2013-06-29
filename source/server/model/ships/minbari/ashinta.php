@@ -10,7 +10,7 @@ class Ashinta extends HeavyCombatVessel{
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Ashinta";
         $this->gravitic = true;
-
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

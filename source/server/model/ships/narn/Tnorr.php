@@ -11,6 +11,7 @@ class Tnorr extends HeavyCombatVessel{
         $this->shipClass = "T'Norr Frigate";
         $this->forwardDefense = 10;
         $this->sideDefense = 16;
+        $this->occurence = "uncommon";
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.50;

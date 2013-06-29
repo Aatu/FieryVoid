@@ -11,6 +11,7 @@ class Tigara extends BaseShip{
         $this->shipClass = "Tigara";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
+        $this->fighters = array("normal"=>6);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

@@ -10,6 +10,7 @@ class Sagittarius extends BaseShip{
         $this->imagePath = "img/ships/sagittarius.png";
         $this->shipClass = "Sagittarius Missile Cruiser (Beta Model)";
         $this->shipSizeClass = 3;
+        $this->limited = 33;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -11,6 +11,7 @@ class Shokov extends MediumShip{
         $this->shipClass = "Sho'Kov";
         $this->agile = true;
         $this->canvasSize = 100;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;

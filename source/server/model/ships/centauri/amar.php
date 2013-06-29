@@ -9,7 +9,7 @@ class Amar extends HeavyCombatVessel{
         $this->phpclass = "Amar";
         $this->imagePath = "img/ships/darkner.png";
         $this->shipClass = "Amar";
-        
+        $this->occurence = "uncommon";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 13;

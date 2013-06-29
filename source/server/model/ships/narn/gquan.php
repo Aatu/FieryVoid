@@ -10,7 +10,7 @@ class Gquan extends BaseShip{
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Quan";
         $this->shipSizeClass = 3;
-        
+        $this->fighters = array("normal"=>12);
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
