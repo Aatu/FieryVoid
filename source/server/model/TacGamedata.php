@@ -118,7 +118,6 @@ class TacGamedata{
     }
     
     public function isFinished(){
-
         foreach ($this->slots as $slot)
         {
             //still ships coming in
