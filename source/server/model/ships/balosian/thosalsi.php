@@ -11,6 +11,8 @@ class Thosalsi extends BaseShip{
         $this->imagePath = "img/ships/thosalsi.png";
         $this->shipClass = "Thosalsi Heavy Carrier";
         $this->shipSizeClass = 3;
+        $this->limited = 10;
+        $this->fighters = array("medium"=>12);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

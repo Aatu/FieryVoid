@@ -9,7 +9,8 @@ class HyperionMissile extends BaseShip{
         $this->phpclass = "HyperionMissile";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Missile Cruiser";
-        
+        $this->occurence = "uncommon";
+
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         

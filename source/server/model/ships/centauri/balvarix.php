@@ -11,7 +11,10 @@ class Balvarix extends BaseShip{
         $this->shipClass = "Balvarix";
         $this->imagePath = "img/ships/balvarix.png";
         $this->shipSizeClass = 3;
-	
+        $this->fighters = array("medium"=>24,
+            "medium (rutarian capable)"=>12);
+        $this->occurence = "rare";
+
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         

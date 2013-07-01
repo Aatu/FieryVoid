@@ -9,7 +9,7 @@ class Dagkar extends MediumShip{
         $this->phpclass = "Dagkar";
         $this->imagePath = "img/ships/dagkar.png";
         $this->shipClass = "Dag'Kar";
-        
+        $this->limited = 33;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

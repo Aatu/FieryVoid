@@ -10,6 +10,7 @@ class Covran extends BaseShip{
         $this->imagePath = "img/ships/covran.png";
         $this->shipClass = "Covran";
         $this->shipSizeClass = 3;
+        $this->limited = 33;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

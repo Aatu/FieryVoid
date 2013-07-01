@@ -174,10 +174,23 @@ gamedata = {
         if(gamedata.status == "FINISHED")
             return;
         
-        confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
-        
+        if(gamedata.gamephase!=4){
+            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+        }
+        else{
+            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+        }
+    },
     
-            
+    onSurrenderClicked: function(e){
+        confirm.confirm("Are you sure you wish to SURRENDER THIS MATCH?", gamedata.doSurrender);
+    },
+    
+    doSurrender: function(){
+        UI.shipMovement.hide();
+        
+        gamedata.status = "SURRENDERED";
+        ajaxInterface.submitGamedata();
     },
     
     doCommit: function(){

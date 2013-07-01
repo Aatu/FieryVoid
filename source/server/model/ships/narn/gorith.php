@@ -7,7 +7,7 @@ class Gorith extends FighterFlight{
 		$this->pointCost = 240;
 		$this->faction = "Narn";
         $this->phpclass = "Gorith";
-        $this->shipClass = "Gorith flight";
+        $this->shipClass = "Gorith Medium Fighters";
 		$this->imagePath = "img/ships/gorith.png";
         
         $this->forwardDefense = 7;

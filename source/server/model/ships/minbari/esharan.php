@@ -10,7 +10,8 @@ class Esharan extends HeavyCombatVessel{
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Esharan";
         $this->gravitic = true;
-
+        $this->occurence = "rare";
+        $this->fighters = array("normal"=>6);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

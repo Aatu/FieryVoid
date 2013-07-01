@@ -9,6 +9,8 @@ class Gtal extends BaseShip{
         $this->phpclass = "Gtal";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tal Command Cruiser";
+        $this->occurence = "rare";
+        $this->fighters = array("normal"=>12);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

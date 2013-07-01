@@ -11,6 +11,7 @@ class Apollo extends BaseShip{
         $this->shipClass = "Apollo Bombardment Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
+        $this->limited = 33;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

@@ -10,6 +10,8 @@ class PrimusMaximus extends BaseShip{
         $this->imagePath = "img/ships/primusMaximus.png";
         $this->shipClass = "Primus Maximus";
         $this->shipSizeClass = 3;
+        $this->occurence = "rare";
+        $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

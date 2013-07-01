@@ -9,7 +9,8 @@ class Elutarian extends HeavyCombatVessel{
         $this->phpclass = "Elutarian";
         $this->imagePath = "img/ships/altarian.png";
         $this->shipClass = "Elutarian";
-        
+        $this->occurence = "rare";
+        $this->fighters = array("medium"=>6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

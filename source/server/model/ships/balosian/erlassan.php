@@ -9,6 +9,8 @@ class Erlassan extends HeavyCombatVessel{
         $this->phpclass = "Erlassan";
         $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Erlassan Scout";
+        $this->occurence = "uncommon";
+        $this->limited = 33;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

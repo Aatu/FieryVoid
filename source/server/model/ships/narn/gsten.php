@@ -10,7 +10,8 @@ class Gsten extends BaseShip{
         $this->imagePath = "img/ships/gkarith.png";
         $this->shipClass = "G'Sten";
         $this->shipSizeClass = 3;
-        
+        $this->occurence = "rare";
+        $this->fighters = array("normal"=>6);
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

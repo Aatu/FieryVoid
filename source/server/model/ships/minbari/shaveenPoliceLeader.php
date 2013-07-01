@@ -12,6 +12,7 @@ class ShaveenPoliceLeader extends MediumShip{
         $this->agile = true;
         $this->gravitic = true;
         $this->canvasSize = 100;
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

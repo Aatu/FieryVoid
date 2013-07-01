@@ -9,7 +9,8 @@ class Tnarr extends BaseShip{
         $this->phpclass = "Tnarr";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Narr Early Cruiser";
-
+        $this->fighters = array("normal"=>12);
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
         

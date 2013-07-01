@@ -10,6 +10,7 @@ class Oracle extends BaseShip{
         $this->imagePath = "img/ships/oracle.png";
         $this->shipClass = "Oracle Light Cruiser";
         $this->shipSizeClass = 3;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

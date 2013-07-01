@@ -10,6 +10,7 @@ class Shantavi extends HeavyCombatVessel{
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Shantavi";
         $this->gravitic = true;
+        $this->occurence = "rare";
 
         $this->forwardDefense = 14;
         $this->sideDefense = 17;

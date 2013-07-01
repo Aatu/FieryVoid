@@ -1,14 +1,4 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of leshath
- *
- * @author Jasper van Rosmalen
- */
 class Leshath extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
@@ -21,6 +11,9 @@ class Leshath extends BaseShip{
         $this->shipClass = "Leshath Heavy Scout";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
+        $this->limited = 10;
+        $this->fighters = array();
+        $this->fighters = array("normal"=>6);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

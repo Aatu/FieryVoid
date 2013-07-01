@@ -7,7 +7,7 @@ class Frazi extends FighterFlight{
 		$this->pointCost = 348;
 		$this->faction = "Narn";
         $this->phpclass = "Frazi";
-        $this->shipClass = "Frazi flight";
+        $this->shipClass = "Frazi Heavy Fighters";
 		$this->imagePath = "img/ships/frazi.png";
         
         $this->forwardDefense = 6;

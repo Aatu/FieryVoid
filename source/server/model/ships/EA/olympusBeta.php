@@ -9,6 +9,7 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->phpclass = "OlympusBeta";
         $this->imagePath = "img/ships/olympus.png";
         $this->shipClass = "Olympus Gunship (Beta Version)";
+        $this->occurence = "uncommon/rare";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

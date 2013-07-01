@@ -14,11 +14,12 @@
 			$phase = $_POST["phase"];
 			$activeship = $_POST["activeship"];
 			$ships = $_POST["ships"];
-            $slotid = $_POST["slotid"];
+                        $status = $_POST["status"];
+                        $slotid = $_POST["slotid"];
 			
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid gamedata.php ships:". var_export($_POST["ships"], true) ."\n\n", FILE_APPEND);
             
-			$ret = Manager::submitTacGamedata($gameid, $playerid, $turn, $phase, $activeship, $ships, $slotid);
+			$ret = Manager::submitTacGamedata($gameid, $playerid, $turn, $phase, $activeship, $ships, $status, $slotid);
 			
 			
 		}else if (isset($_GET["gameid"])){

@@ -10,7 +10,7 @@ class Varnic extends BaseShip{
         $this->imagePath = "img/ships/varnic.png";
         $this->shipClass = "Var'Nic";
         $this->shipSizeClass = 3;
-
+        $this->fighters = array("medium"=>6);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

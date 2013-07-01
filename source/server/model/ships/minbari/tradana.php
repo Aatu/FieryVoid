@@ -10,6 +10,7 @@ class Tradana extends MediumShip{
         $this->imagePath = "img/ships/tradana.png";
         $this->shipClass = "Tradana";
         $this->gravitic = true;
+        $this->occurence = "rare";
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

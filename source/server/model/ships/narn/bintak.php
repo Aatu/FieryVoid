@@ -11,6 +11,8 @@ class Bintak extends BaseShip{
         $this->shipClass = "Bin'Tak";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
+        $this->limited = 10;
+        $this->fighters = array("normal"=>18);
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;

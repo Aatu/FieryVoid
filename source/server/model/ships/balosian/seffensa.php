@@ -10,6 +10,7 @@ class Seffensa extends BaseShip{
         $this->imagePath = "img/ships/seffensa.png";
         $this->shipClass = "Seffensa";
         $this->shipSizeClass = 3;
+        $this->limited = 33;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

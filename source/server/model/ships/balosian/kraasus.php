@@ -9,6 +9,7 @@ class Kraasus extends HeavyCombatVessel{
         $this->phpclass = "Kraasus";
         $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Kraasus Destroyer";
+        $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

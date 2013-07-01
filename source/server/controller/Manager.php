@@ -237,7 +237,7 @@ class Manager{
     
     }
             
-    public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $slotid = 0){
+    public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
             //file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
@@ -260,6 +260,11 @@ class Manager{
             self::$dbManager->startTransaction();
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
+            
+            // plopje
+            if($status == "SURRENDERED"){
+                self::$dbManager->updateGameStatus($gameid, $status);
+            }
             
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
                 throw new Exception("Unexpected orders");
@@ -660,10 +665,16 @@ class Manager{
         }
         
         $gamedata->setActiveship(-1);
-        $gamedata->status = "ACTIVE";
-        
-        if ($gamedata->turn > 1 && $gamedata->isFinished())
+
+        // plopje                               
+        Debug::log("changeTurn: status ".$gamedata->status);
+
+        if (($gamedata->turn > 1 && $gamedata->isFinished()) || ($gamedata->status === "SURRENDERED")){
             $gamedata->status = "FINISHED";
+        }
+        else{
+            $gamedata->status = "ACTIVE";
+        }
             
         self::generateIniative($gamedata);
         self::$dbManager->updateGamedata($gamedata);

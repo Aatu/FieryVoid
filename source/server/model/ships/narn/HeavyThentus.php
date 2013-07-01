@@ -10,7 +10,7 @@ class HeavyThentus extends MediumShip{
         $this->imagePath = "img/ships/thentus.png";
         $this->shipClass = "Heavy Thentus";
         $this->agile = true;
-        
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

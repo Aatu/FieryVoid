@@ -778,8 +778,9 @@ class DBManager {
                 return null;
                 
             foreach ($result as $value) {
-                                               
-              
+                // plopje                               
+                Debug::log("getTacGame: phase ".$value->phase);
+                Debug::log("getTacGame: status ".$value->status);
                 
                 $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator);
 				$games[] = $game;
@@ -1318,6 +1319,30 @@ class DBManager {
 			}
         }
         catch(Exception $e) {
+            throw $e;
+        }
+    }
+    
+    public function updateGameStatus($gameid, $status){
+        try
+        {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                    tac_game 
+                SET
+                    status = ?
+                WHERE 
+                    id = ?
+                "
+            ))
+            {
+                $stmt->bind_param('si', $status, $gameid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        catch(Exception $e)
+        {
             throw $e;
         }
     }

@@ -10,6 +10,8 @@ class Dargan extends BaseShip{
         $this->imagePath = "img/ships/dargan.png";
         $this->shipClass = "Dargan";
         $this->shipSizeClass = 3;
+        $this->fighters = array("rutarian"=>12);
+        $this->limited = 10;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

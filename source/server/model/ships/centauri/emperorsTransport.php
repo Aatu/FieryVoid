@@ -8,6 +8,8 @@ class EmperorsTransport extends BaseShip{
         $this->phpclass = "EmperorsTransport";
         $this->imagePath = "img/ships/primus.png";
         $this->shipClass = "Emperor's Transport";
+        $this->occurence = "special";
+        $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

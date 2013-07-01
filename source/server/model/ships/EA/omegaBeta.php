@@ -12,6 +12,7 @@ class OmegaBeta  extends BaseShip{
         $this->shipClass = "Omega (Beta Version)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
+        $this->fighters = array("normal"=>24);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;

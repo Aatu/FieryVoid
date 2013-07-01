@@ -10,6 +10,8 @@ class KatanPulseDestroyer extends HeavyCombatVessel{
         $this->phpclass = "KatanPulseDestroyer";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Tan Pulse Destroyer";
+        $this->occurence = "uncommon";
+        $this->fighters = array("normal"=>6);        
         
         $this->forwardDefense = 12;
         $this->sideDefense = 15;

@@ -10,6 +10,7 @@ class Secundus extends BaseShip{
         $this->imagePath = "img/ships/primus.png";
         $this->shipClass = "Secundus";
         $this->shipSizeClass = 3;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

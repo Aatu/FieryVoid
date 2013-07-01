@@ -10,8 +10,9 @@ class Letann extends HeavyCombatVessel{
         $this->imagePath = "img/ships/letann.png";
         $this->shipClass = "Letann Scout";
         $this->gravitic = true;
-
-
+        $this->occurence = "rare";
+        $this->limited = 33;
+        
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
 

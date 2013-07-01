@@ -10,6 +10,8 @@ class HyperionCommand extends BaseShip{
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Command Cruiser (Epsilon Model)";
         $this->shipSizeClass = 3;
+        $this->occurence = "uncommon";
+        $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

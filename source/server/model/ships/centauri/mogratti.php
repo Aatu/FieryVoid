@@ -11,6 +11,7 @@ class Mogratti extends MediumShip{
         $this->shipClass = "Mogratti";
         $this->agile = true;
         $this->canvasSize = 100;
+        $this->occurence = "uncommon";
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

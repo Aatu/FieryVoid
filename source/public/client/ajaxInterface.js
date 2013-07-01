@@ -139,7 +139,8 @@ window.ajaxInterface = {
             gameid: gamedata.gameid,
             playerid: gamedata.thisplayer,
             slotid: gamedata.selectedSlot,
-            ships: JSON.stringify(tidyships)
+            status: gamedata.status,
+            ships: JSON.stringify(tidyships),
         };
   
         return gd;

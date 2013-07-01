@@ -10,6 +10,7 @@ class Primus extends BaseShip{
         $this->imagePath = "img/ships/primus.png";
         $this->shipClass = "Primus";
         $this->shipSizeClass = 3;
+        $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

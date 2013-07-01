@@ -11,7 +11,9 @@ class NovaAlpha extends BaseShip{
         $this->shipClass = "Nova Alpha Dreadnought";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
-
+        $this->limited = 33;
+        $this->fighters=array("normal"=>24);
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
         
