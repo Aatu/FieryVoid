@@ -9,6 +9,8 @@ class Calorta extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Calorta";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Calorta Elint Cruiser";
+        $this->occurence = "uncommon";
+        $this->limited = 33;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

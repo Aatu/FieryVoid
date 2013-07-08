@@ -234,13 +234,24 @@ class Weapon extends ShipSystem{
         foreach ($array as $i=>$entry)
         {
             if ($i == "loading"){
-                $loading = new WeaponLoading(
-                    $entry[1],
-                    $entry[2],
-                    $entry[3],
-                    $entry[4],
-                    $entry[5]    
-                );
+                if(sizeof($entry) == 4){
+                    $loading = new WeaponLoading(
+                        $entry[1],
+                        $entry[2],
+                        $entry[3],
+                        $entry[4],
+                        $this->loadingtime    
+                    );                   
+                }
+                else{
+                    $loading = new WeaponLoading(
+                        $entry[1],
+                        $entry[2],
+                        $entry[3],
+                        $entry[4],
+                        $entry[5]    
+                    );
+                }
                 
                 $this->setLoading($loading);
             }

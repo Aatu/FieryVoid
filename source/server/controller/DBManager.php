@@ -778,10 +778,6 @@ class DBManager {
                 return null;
                 
             foreach ($result as $value) {
-                // plopje                               
-                Debug::log("getTacGame: phase ".$value->phase);
-                Debug::log("getTacGame: status ".$value->status);
-                
                 $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator);
 				$games[] = $game;
             }

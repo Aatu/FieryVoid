@@ -110,13 +110,14 @@ shipWindowManager = {
         $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
         $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
         $(".system", shipwindow).on("click", shipWindowManager.clickSystem);
+        $(".iconduo", shipwindow).on("click", shipWindowManager.clickSystem);
+        $(".system .mode", shipwindow).on("click", shipWindowManager.onModeClicked);
 
         $(".system .off", shipwindow).on("click", shipManager.power.onOfflineClicked);
         $(".system .on", shipwindow).on("click", shipManager.power.onOnlineClicked);
         $(".system .overload", shipwindow).on("click", shipManager.power.onOverloadClicked);
         $(".system .stopoverload", shipwindow).on("click", shipManager.power.onStopOverloadClicked);
         $(".system .holdfire", shipwindow).on("click", window.weaponManager.onHoldfireClicked);
-        $(".system .mode", shipwindow).on("click", window.weaponManager.onModeClicked);
     },
 
 	populateShipWindow: function(ship, shipwindow){
@@ -428,40 +429,50 @@ shipWindowManager = {
 	},
 	
 	setDataForSystem: function(ship, system){
-		var shipwindow = ship.shipStatusWindow;
-		if (shipwindow){
-			if (ship.flight){
-				flightWindowManager.setData(ship, system, shipwindow);
-			
-			}else{
-			
-				shipWindowManager.setSystemData(ship, system, shipwindow);
-				if (system.name == "scanner"){
-					shipWindowManager.addEW(ship, shipwindow);
-                    botPanel.setEW(ship);
-				}
-			}
-		}
-		
+            var shipwindow = ship.shipStatusWindow;
+            if (shipwindow){
+                if (ship.flight){
+                    flightWindowManager.setData(ship, system, shipwindow);
+                }else{
+                    shipWindowManager.setSystemData(ship, system, shipwindow);
+
+                    if(system.duoWeapon){
+                        for(var i in system.weapons){
+                            shipWindowManager.setSystemData(ship, system.weapons[i], shipwindow)
+                        }
+                    }
+
+                    if (system.name == "scanner"){
+                        shipWindowManager.addEW(ship, shipwindow);
+                        botPanel.setEW(ship);
+                    }
+                }
+            }
 	},
 	
 	setData: function(ship){
-		var shipwindow = ship.shipStatusWindow;
-		if (shipwindow){
-			if (ship.flight){
-				for (var i in ship.systems){
-					var fighter = ship.systems[i];
-					flightWindowManager.setData(ship, fighter, shipwindow);
-				}
-			}else{
-				shipWindowManager.addEW(ship, shipwindow);
-				for (var i in ship.systems){
-					var system = ship.systems[i];
-					shipWindowManager.setSystemData(ship, system, shipwindow);
-				}
-			}
-		}
-	
+            var shipwindow = ship.shipStatusWindow;
+            if (shipwindow){
+                if (ship.flight){
+                    for (var i in ship.systems){
+                        var fighter = ship.systems[i];
+                        flightWindowManager.setData(ship, fighter, shipwindow);
+                    }
+                }else{
+                    shipWindowManager.addEW(ship, shipwindow);
+
+                    for (var i in ship.systems){
+                        var system = ship.systems[i];
+                        shipWindowManager.setSystemData(ship, system, shipwindow);
+
+                        if(system.duoWeapon){
+                            for(var i in system.weapons){
+                                shipWindowManager.setSystemData(ship, system.weapons[i], shipwindow)
+                            }
+                        }
+                    }
+                }
+            }
 	},
 	
 	
@@ -560,14 +571,25 @@ shipWindowManager = {
                 return;
             }
             
-            if(system.duoWeapon){
-                shipWindowManager.addDuoWeapon(ship, system, destination);
-                return;
-            }
-            
             var template = $("#systemtemplatecontainer .system.regular");
             var systemwindow = template.clone(true).appendTo(destination);
             
+            if(system.duoWeapon){
+                shipWindowManager.addDuoSystem(ship, system, systemwindow);
+            }
+            else{
+                shipWindowManager.addRegularSystem(ship, system, systemwindow);
+            }
+	},
+
+        addRegularSystem:function (ship, system, systemwindow){
+//            var blabla = systemwindow.find(".icon");
+//            var bla = systemwindow.find(".systemcontainer");
+//            bla.removeChild(blabla);
+//            var icon_template = $("#systemtemplatecontainer .systemcontainer.icon");
+//            systemwindow.find(".systemcontainer").replaceChild(icon_template, blabla);
+//            var icon_temp = icon_template.clone(true).prependTo(systemwindow.find(".systemcontainer"));
+
             systemwindow.addClass(system.name);
             if (system.iconPath){
                 systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.iconPath +")");
@@ -585,35 +607,39 @@ shipWindowManager = {
             }
 	
             systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
-            systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
-	},
+            systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);          
+        },
+        
+	addDuoSystem:function (ship, system, duowindow){
+//            var blabla = duowindow.find(".icon");
+//            var bla = duowindow.find(".systemcontainer").removeChild(blabla);
+//            bla.removeChild(blabla);
+//            var icon_template = $("#systemtemplatecontainer .systemcontainer.icon");
+//            var icon_temp = icon_template.clone(true).prependTo(duowindow.find(".systemcontainer"));
+            
+            for(var i in system.weapons){
+                var weapon = system.weapons[i];
+                var iconduo_template = $("#systemtemplatecontainer .iconduo");
+                var iconduo_temp = iconduo_template.clone(true).appendTo(duowindow.find(".icon"));
+                
+                if (weapon.iconPath){
+                    duowindow.find(".iconduo").css("background-image", "url(./img/systemicons/"+iconPath +")");
+                }else{
+                    duowindow.find(".iconduo").css("background-image", "url(./img/systemicons/"+weapon.name +"Duo.png)");
+                }
+                
+                iconduo_temp.css("left", ""+(i-1)*15 + "px");
+                
+                iconduo_temp.addClass(weapon.name);
+                iconduo_temp.addClass("system_" + weapon.id);
+                iconduo_temp.data("shipid", ship.id);
+                iconduo_temp.data("id", weapon.id);
+                
+                iconduo_temp.addClass("weapon");
 
-	addDuoWeapon:function (ship, system, destination){
-            var template = $("#systemtemplatecontainer .system.duoweapon");
-            var systemwindow = template.clone(true).appendTo(destination);
-            
-            systemwindow.addClass(system.weapons[1].name);
-            
-            if (system.iconPath){
-                systemwindow.find(".iconduo1").css("background-image", "url(./img/systemicons/"+iconPath +")");
-                systemwindow.find(".iconduo2").css("background-image", "url(./img/systemicons/"+iconPath +")");
-            }else{
-                console.log("url(./img/systemicons/"+system.name +".png)");
-                systemwindow.find(".iconduo1").css("background-image", "url(./img/systemicons/"+system.name +".png)");
-                systemwindow.find(".iconduo2").css("background-image", "url(./img/systemicons/"+system.name +".png)");
-            }
-            
-            systemwindow.addClass(system.name);
-            systemwindow.addClass("system_" + system.id);
-            systemwindow.data("shipid", ship.id);
-            systemwindow.data("id", system.id);
-
-            if (system.weapon){
-                systemwindow.addClass("weapon");
-            }
-	
-            systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
-            systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
+                iconduo_temp.on("mouseover", weaponManager.onWeaponMouseover);
+                iconduo_temp.on("mouseout", weaponManager.onWeaponMouseOut);
+           }
 	},
         
 	removeSystemClasses: function(systemwindow){
@@ -757,8 +783,8 @@ setSystemData: function(ship, system, shipwindow){
 
                     fieldStringArray[i] = (load+ "/" + loadingtime);
                 }
-                
-                field.html(fieldStringArray[1] + "<br>" + fieldStringArray[2]);
+                field.html("9");
+// plopje                field.html(fieldStringArray[1] + "<br>" + fieldStringArray[2]);
             }else{
                 var load = weaponManager.getWeaponCurrentLoading(system);
                 var loadingtime = system.loadingtime;
@@ -918,9 +944,9 @@ setSystemData: function(ship, system, shipwindow){
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
 		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = ship.systems[systemwindow.data("id")];
-        system = shipManager.systems.initializeSystem(system);
-        
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+                system = shipManager.systems.initializeSystem(system);
+                
 		var selectedShip = gamedata.getSelectedShip();
 		
 		if (gamedata.waiting)
@@ -1076,9 +1102,32 @@ setSystemData: function(ship, system, shipwindow){
 		
 		shipWindowManager.setData(ship);
 		shipManager.drawShip(ship);
-	}
+	},
 
 
+        initializeDuoSystemWindow: function(ship, system, systemwindow){
+            
+            
+            if(system.weapons[system.firingMode].duoWeapon){
+                shipWindowManager.addDuoSystem(ship, system.weapons[system.firingMode], systemwindow);
+            }
+            else{
+                shipWindowManager.addRegularSystem(ship, system.weapons[system.firingMode], systemwindow);
+            }
+        },
+        
+        onModeClicked: function(e){
+            e.stopPropagation();
 
+            var shipwindow = $(".shipwindow").has($(this));
+            var systemwindow = $(".system").has($(this));
+            var ship = gamedata.getShip(shipwindow.data("ship"));
+            var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
+            window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
+
+            if(system.weapons[system.firingMode].duoWeapon){
+                shipWindowManager.initializeDuoSystemWindow(ship, system, systemwindow);
+            }
+        }   
 }

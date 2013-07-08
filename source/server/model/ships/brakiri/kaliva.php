@@ -10,6 +10,7 @@ class Kaliva extends BaseShip{
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Kaliva Lance Cruiser";
         $this->shipSizeClass = 3;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 18;
@@ -40,8 +41,7 @@ class Kaliva extends BaseShip{
         $this->addAftSystem(new Thruster(5, 15, 0, 8, 2));
         $this->addAftSystem(new Thruster(5, 15, 0, 8, 2));
 
-//        $this->addLeftSystem(new GraviticLance(5, 12, 16, 300, 360));
-        $this->addLeftSystem(new DuoGravitonBeam(5, 12, 16, 300, 360));
+        $this->addLeftSystem(new GraviticLance(5, 12, 16, 300, 360));
         $this->addLeftSystem(new Thruster(5, 15, 0, 6, 3));
 
         $this->addRightSystem(new GraviticLance(5, 12, 16, 0, 60));

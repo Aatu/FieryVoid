@@ -10,6 +10,8 @@ class Lykorai extends BaseShip{
         $this->imagePath = "img/ships/corumai.png";
         $this->shipClass = "Lykorai Supercarrier";
         $this->shipSizeClass = 3;
+        $this->fighters = array("light"=>12, "normal"=>48);
+        $this->occurence = "unique";
         
         $this->forwardDefense = 18;
         $this->sideDefense = 20;

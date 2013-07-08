@@ -462,6 +462,10 @@ class GraviticBolt extends Gravitic
         public $animationWidth = 5;
         
         public $loadingtime = 4;
+        // Set overloading and overloadturns to have GravLance ready for
+        // sustained fire in turn 1
+        public $overloading = 4;
+        public $overloadturns = 4;
         public $extraoverloadshots = 2;
         public $damageType = "raking";
         public $raking = 10;

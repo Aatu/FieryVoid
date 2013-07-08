@@ -341,6 +341,14 @@
 
 }
 
+.shipwindow .iconduo.selected {
+	background-color:#587aa5 !important;
+	-moz-box-shadow: 0px 0px 15px #0099ff;
+    -webkit-box-shadow: 0px 0px 15px #0099ff;
+    box-shadow: 0px 0px 15px #0099ff;
+
+}
+
 .system.selected .systembarcontainer{
     border:1px solid #84a5ce !important;
 }
@@ -349,6 +357,12 @@
     border:1px solid #84a5ce !important;
     background-color:#254e82 !important;
 }
+
+.iconduo.selected{
+    border:1px solid #84a5ce !important;
+    background-color:#254e82 !important;
+}
+
 
 .fightersystem.selected .icon{
 	border:1px solid #84a5ce !important;
@@ -455,30 +469,14 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
 }
 
 .shipwindow .system .iconduo{
-    width:30px;
-    height:30px;
-    border:1px solid #496791;
-    margin:0px;
-    text-align:center;
-    position:relative;
-}
-
-.shipwindow .system .iconduo1{
+    position:absolute;
+    left:0px;
+    top:0px;
     width:15px;
     height:30px;
     margin:0px;
     text-align:center;
-    position:relative;
-    float:left;
-}
-
-.shipwindow .system .iconduo2{
-    width:15px;
-    height:30px;
-    margin:0px;
-    text-align:center;
-    position:relative;
-    float: right;
+    display: inline-block;
 }
 
 .shipwindow .system .icon .iconmask{
@@ -495,36 +493,17 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     position:absolute;
     left:0px;
     top:0px;
-    width:30px;
+    width:15px;
     height:30px;
     background-color:transparent;
     opacity:0.5;
 }
 
-/*
-.shipwindow .system .iconduo1 .iconmask{
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:15px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
-    float:left;
-}
-
-.shipwindow .system .iconduo2 .iconmask{
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:15px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
-    float:right;
-}
-*/
 .shipwindow .system.weapon.loading .iconmask{
+    background-color:orange;
+}
+
+.shipwindow .iconduo.weapon.loading .iconmask{
     background-color:orange;
 }
 
@@ -613,6 +592,20 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     border-top:1px solid #496791;
     border-bottom:1px solid #496791;
 }
+
+.shipwindow  .system .iconduo .UI{
+    z-index:10003;
+    position:absolute;
+    top:-1px;
+    left:15px;
+    background-color:black;
+    height:30px;
+    display:none;
+    border-right:1px solid #496791;
+    border-top:1px solid #496791;
+    border-bottom:1px solid #496791;
+}
+
 .shipwindow .system .button{
     width:12px;
     height:12px;
@@ -861,6 +854,11 @@ body.phase1 .shipwindow  .system.boosted .minus{
     opacity:0.5;
 
 }
+
+.shipwindow .fightersystem.loading .icon .iconmask{
+    background-color:orange;
+}
+
 
 .fightersystemcontainer td{
 	padding:0px;

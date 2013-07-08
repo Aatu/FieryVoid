@@ -10,6 +10,7 @@ class Corumai extends BaseShip{
         $this->imagePath = "img/ships/corumai.png";
         $this->shipClass = "Corumai Dreadnought";
         $this->shipSizeClass = 3;
+        $this->limited = 10;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 20;

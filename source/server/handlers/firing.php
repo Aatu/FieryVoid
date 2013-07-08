@@ -384,6 +384,9 @@ class Firing{
     
     
     private static function fire($ship, $fire, $gamedata){
+        
+        Debug::log("Into the fire");
+
 		if ($fire->turn != $gamedata->turn)
 			return;
 			
@@ -394,6 +397,8 @@ class Firing{
 			return;
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
+        Debug::log("Weapon name = ".$weapon->name);
+        Debug::log("Weapon id = ".$fire->weaponid);
 		
 		$weapon->fire($gamedata, $fire);
 		

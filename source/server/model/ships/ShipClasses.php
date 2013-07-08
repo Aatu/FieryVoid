@@ -200,8 +200,20 @@
         }
         
         public function getSystemById($id){
-            if (isset($this->systems[$id]))
+            if (isset($this->systems[$id])){
                 return $this->systems[$id];
+            }
+            else{
+                foreach($this->systems as $system){
+                    if($system instanceof Weapon && $system->duoWeapon){
+                        foreach($system->weapons as $weapon){
+                            if($weapon->id == $id){
+                                return $weapon;
+                            }
+                        }
+                    }
+                }
+            }
             
             return null;
         }
@@ -210,6 +222,15 @@
             foreach ($this->systems as $system){
                 if ($system instanceof $name){
                     return $system;
+                }
+                else{
+                    if($system instanceof Weapon && $system->duoWeapon){
+                      foreach($system->weapons as $weapon){
+                            if($weapon instanceof $name){
+                                return $weapon;
+                            }
+                      }                        
+                    }
                 }
             }
             

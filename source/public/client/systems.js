@@ -100,14 +100,30 @@ shipManager.systems = {
     
     getSystem: function(ship, id){
     
-        if (ship.systems[id]){
-            return ship.systems[id];
-        }else{
-            if (ship.flight){
-                for (var i in ship.systems){
-                    var fighter = ship.systems[i];
-                    if (fighter.systems[id])
-                        return fighter.systems[id];
+        for(var i in ship.systems){
+            var system = ship.systems[i];
+            
+            if(system.id == id){
+                return system
+            }
+            
+            if(system.fighter){
+                for(var i in system.systems){
+                    var fighter_system = system.systems[i];
+                    
+                    if(fighter_system.id == id){
+                        return fighter_system;
+                    }
+                }
+            }
+            
+            if(system.duoWeapon){
+                for(var i in system.weapons){
+                    var weapon = system.weapons[i];
+                    
+                    if(weapon.id == id){
+                        return weapon;
+                    }
                 }
             }
         }
@@ -122,14 +138,14 @@ shipManager.systems = {
             var selectedWeapon = system.weapons[system.firingMode];
             
             if(selectedWeapon.duoWeapon){
-                selectedWeapon.firingMode = system.weapons[1].firingMode;
-                selectedWeapon.firingModes = system.weapons[1].firingModes;
-                selectedWeapon.power = system.weapons[1].power;
-                selectedWeapon.displayName = system.weapons[1].displayName;
+                selectedWeapon.firingMode = system.firingMode;
+                selectedWeapon.firingModes = system.firingModes;
+                selectedWeapon.power = system.power;
                 selectedWeapon.dualWeapon = true;
                 selectedWeapon.initialized = true;
                 selectedWeapon.damage = system.weapons[1].damage;
-                selectedWeapon.destroyed = system.weapons[1].destroyed;
+                selectedWeapon.destroyed = system.destroyed;
+                return selectedWeapon;
             }
             
             selectedWeapon.firingMode = system.firingMode;

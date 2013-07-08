@@ -9,7 +9,9 @@ class Brikorta extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Brikorta";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Brikorta Light Carrier";
-        
+        $this->fighters = array("light"=>12);
+
+        $this->occurence = "uncommon";
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         

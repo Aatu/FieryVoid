@@ -12,6 +12,7 @@ class Haltona extends BaseShip{
         $this->shipClass = "Haltona Frigate";
         $this->shipSizeClass = 1;
         $this->canvasSize = 100;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

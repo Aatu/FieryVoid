@@ -10,6 +10,7 @@ class Halos extends BaseShip{
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Halos Heavy Scout";
         $this->shipSizeClass = 3;
+        $this->occurence = "rare";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 18;

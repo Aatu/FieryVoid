@@ -9,6 +9,7 @@ var DuoGravitonBeam = function(json, ship)
 {
     DuoWeapon.call( this, json, ship);
 }
+
 DuoGravitonBeam.prototype = Object.create( DuoWeapon.prototype );
 DuoGravitonBeam.prototype.constructor = DuoGravitonBeam;
 

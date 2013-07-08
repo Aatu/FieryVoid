@@ -10,14 +10,8 @@ window.weaponManager = {
         return weapon.turnsloaded;
     },
             
-    onModeClicked: function(e)
+    onModeClicked: function(shipwindow, systemwindow, ship, system)
     {
-        e.stopPropagation();
-        var shipwindow = $(".shipwindow").has($(this));
-        var systemwindow = $(".system").has($(this));
-        var ship = gamedata.getShip(shipwindow.data("ship"));
-        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-        
         console.log(system);
         console.log(system instanceof Weapon);
         
@@ -451,7 +445,7 @@ window.weaponManager = {
         if (calledid)
 			mod -= 8;
         
-        var ammo = weapon.getAmmo();
+        var ammo = weapon.getAmmo(null);
         if (ammo)
             mod += ammo.getHitChanceMod();
         
@@ -689,8 +683,15 @@ window.weaponManager = {
             if (weapon.ballistic && system)
 				continue;
             
-            if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)){
-                continue;
+            if (weaponManager.checkConflictingFireOrder(selectedShip, weapon, true)){
+                for(var j = gamedata.selectedSystems.length - 1; j>= 0; j--){
+                    var sel_weapon = gamedata.selectedSystems[j];
+                    
+                    weaponManager.removeFiringOrder(selectedShip, sel_weapon);
+                    weaponManager.unSelectWeapon(selectedShip, sel_weapon);
+                }                
+                
+                return;
             }
             
             if (ship.flight && weapon.fireControl[0] === null)
@@ -898,6 +899,15 @@ window.weaponManager = {
             }
                 
         }
+        
+        if(system.duoWeapon){
+            for(var i in system.weapons){
+                if(weaponManager.hasFiringOrder(ship, system.weapons[i])){
+                    return true;
+                }
+            }
+        }
+        
         return false;
     
     },
@@ -963,12 +973,15 @@ window.weaponManager = {
     getAllFireOrdersFromSystem: function(system){
         if (! system.weapon)
             return;
+        
         var fires = system.fireOrders;
-        if (system.dualWeapon){
+        
+        if (system.dualWeapon || system.duoWeapon){
             for (var i in system.weapons){
-                fires = fires.concat(system.weapons[i].fireOrders);
+                fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(system.weapons[i]));
             }
         }
+        
         return fires;
         
     },

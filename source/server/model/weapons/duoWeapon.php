@@ -17,7 +17,7 @@ class DuoWeapon extends Weapon{
         return null;
     }
     
-    public function getFiringWeapon($fireOrder){
+ /*   public function getFiringWeapon($fireOrder){
         $id = $fireOrder->$weaponid;
         
         foreach( $this->weapons as $weapon){
@@ -25,13 +25,13 @@ class DuoWeapon extends Weapon{
                 return $weapon;
             }
         }
-    }
+    }*/
     
-    public function fire($gamedata, $fireOrder){
+/*    public function fire($gamedata, $fireOrder){
 
         $firingMode = $fireOrder->firingMode;
         $this->weapons[$firingMode]->fire($gamedata, $fireOrder);
-    }
+    }*/
     
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
@@ -48,8 +48,12 @@ class DuoWeapon extends Weapon{
     
     public function setId($id){
         parent::setId($id);
+        
+        $count = 0;
+        
         foreach ($this->weapons as $weapon){
-            $weapon->setId($id);
+            $weapon->setId($id+ 100 + $count);
+            $count++;
         } 
     }
     
