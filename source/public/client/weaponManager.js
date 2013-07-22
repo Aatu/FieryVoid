@@ -298,7 +298,7 @@ window.weaponManager = {
         
         var rangePenalty = weaponManager.calculateRangePenalty(launchPos, tPos, weapon);
         
-        var defence = weaponManager.getShipDefenceValuePos(launchPos, target);
+        var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
         
@@ -322,7 +322,9 @@ window.weaponManager = {
         
         var mod = 0;
         
-        mod -= target.getHitChangeMod(shooter, launchPos);
+        // plopje
+        //mod -= target.getHitChangeMod(shooter, launchPos);
+        mod -= target.getHitChangeMod(shooter, ball.position);
         
         if (!shooter.flight)
 			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
@@ -396,7 +398,8 @@ window.weaponManager = {
         var sPos = shipManager.getShipPositionInWindowCo(shooter);
         var tPos = shipManager.getShipPositionInWindowCo(target);
         var rangePenalty = weaponManager.calculateRangePenalty(sPos, tPos, weapon);
-        var defence = weaponManager.getShipDefenceValuePos(sPos, target);
+        var sPosHex = shipManager.getShipPosition(shooter);
+        var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
         
@@ -497,6 +500,7 @@ window.weaponManager = {
     
     },
     
+    // 'position' should be in HEX coordinate
     getShipDefenceValuePos: function(position, target){
         var targetFacing = (shipManager.getShipHeadingAngle(target));
         var targetPos = shipManager.getShipPosition(target);

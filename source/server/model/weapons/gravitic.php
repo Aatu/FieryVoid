@@ -322,8 +322,10 @@ class GraviticBolt extends Gravitic
         public $animationWidth = 2;
         public $trailLength = 10;
 
-        public $intercept = 0;
+        public $intercept = 2;
         public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -365,8 +367,10 @@ class GraviticBolt extends Gravitic
         public $animationWidth = 2;
         public $trailLength = 10;
 
-        public $intercept = 0;
+        public $intercept = 2;
         public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals

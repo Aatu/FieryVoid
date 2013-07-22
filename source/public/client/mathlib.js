@@ -167,24 +167,29 @@ window.mathlib = {
 		return (angle / (180.0 / Math.PI));
 	},
 	
+        // IMPORTANT: Both the 'observer' and 'position' parameters
+        // should be HEX COORDINATES!!!
 	getCompassHeadingOfPosition: function(observer, position){
-	
+            
+            var oPos = shipManager.getShipPosition(observer);
+//		var tPos = hexgrid.pixelCoToHex(position.x, position.y);
+            var tPos = position;
 
-		var oPos = shipManager.getShipPosition(observer);
-		var tPos = hexgrid.pixelCoToHex(position.x, position.y);
-                
-                
-		if (oPos.x == tPos.x && oPos.y == tPos.y){
-				oPos =  shipManager.movement.getPreviousLocation(observer);
-		}
-		
-		oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
-		tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
-		
-		
-		
-		return mathlib.getCompassHeadingOfPoint(oPos, tPos);
-		
+            if( oPos.x > 100 || oPos.y > 100 || tPos.x > 100 || tPos.y > 100 ){
+               console.log("getCompassHeadingOfPosition: pixel coordinate iso hex coordinate?");
+               console.log("oPos: " + oPos.x + "," + oPos.y);
+               console.log("tPos: " + tPos.x + "," + tPos.y);
+            }
+
+
+            if (oPos.x == tPos.x && oPos.y == tPos.y){
+                            oPos =  shipManager.movement.getPreviousLocation(observer);
+            }
+
+            oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
+            tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
+
+            return mathlib.getCompassHeadingOfPoint(oPos, tPos);
 	},
 	
 	getCompassHeadingOfShip: function(observer, target){
