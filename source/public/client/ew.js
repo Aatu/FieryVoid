@@ -527,6 +527,10 @@ window.ew = {
         var elints = gamedata.getElintShips();
         for (var i in elints){
             var elint = elints[i];
+            
+            if(ship.faction != elint.faction)
+                continue;
+            
             if ( !ew.checkInELINTDistance(ship, elint, 20))
                 continue;
             
@@ -535,6 +539,7 @@ window.ew = {
             if (fdew > amount)
                amount = fdew;
         }
+    
         return amount;
     },
     

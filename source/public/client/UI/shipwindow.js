@@ -109,9 +109,7 @@ shipWindowManager = {
         $(".close", shipwindow).on("click", shipWindowManager.close);
         $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
         $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
-        $(".system", shipwindow).on("click", shipWindowManager.clickSystem);
-        $(".iconduo", shipwindow).on("click", shipWindowManager.clickSystem);
-        $(".system .mode", shipwindow).on("click", shipWindowManager.onModeClicked);
+  //      $(".system .mode", shipwindow).on("click", shipWindowManager.onModeClicked);
 
         $(".system .off", shipwindow).on("click", shipManager.power.onOfflineClicked);
         $(".system .on", shipwindow).on("click", shipManager.power.onOnlineClicked);
@@ -434,13 +432,13 @@ shipWindowManager = {
                 if (ship.flight){
                     flightWindowManager.setData(ship, system, shipwindow);
                 }else{
-                    shipWindowManager.setSystemData(ship, system, shipwindow);
-
                     if(system.duoWeapon){
                         for(var i in system.weapons){
                             shipWindowManager.setSystemData(ship, system.weapons[i], shipwindow)
                         }
                     }
+
+                    shipWindowManager.setSystemData(ship, system, shipwindow);
 
                     if (system.name == "scanner"){
                         shipWindowManager.addEW(ship, shipwindow);
@@ -583,12 +581,13 @@ shipWindowManager = {
 	},
 
         addRegularSystem:function (ship, system, systemwindow){
-//            var blabla = systemwindow.find(".icon");
-//            var bla = systemwindow.find(".systemcontainer");
-//            bla.removeChild(blabla);
-//            var icon_template = $("#systemtemplatecontainer .systemcontainer.icon");
-//            systemwindow.find(".systemcontainer").replaceChild(icon_template, blabla);
-//            var icon_temp = icon_template.clone(true).prependTo(systemwindow.find(".systemcontainer"));
+            var icon = systemwindow.find(".systemcontainer").html("");
+            icon.removeClass("duosystem");
+            icon.addClass("regular");
+            var icon_template = $("#systemtemplatecontainer .system.regular .icon");
+            icon_template.clone(true).appendTo(icon);
+            icon_template = $("#systemtemplatecontainer .system.regular .health.systembarcontainer");
+            icon_template.clone(true).appendTo(icon);
 
             systemwindow.addClass(system.name);
             if (system.iconPath){
@@ -607,15 +606,21 @@ shipWindowManager = {
             }
 	
             systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
-            systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);          
+            systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
+            systemwindow.on("click", shipWindowManager.clickSystem);
+            
+            $(".system .icon .UI .mode").on("click", shipWindowManager.onModeClicked);
         },
         
 	addDuoSystem:function (ship, system, duowindow){
-//            var blabla = duowindow.find(".icon");
-//            var bla = duowindow.find(".systemcontainer").removeChild(blabla);
-//            bla.removeChild(blabla);
-//            var icon_template = $("#systemtemplatecontainer .systemcontainer.icon");
-//            var icon_temp = icon_template.clone(true).prependTo(duowindow.find(".systemcontainer"));
+            var icon = duowindow.find(".systemcontainer").html("");
+            icon.addClass("duosystem");
+            icon.removeClass("regular");
+            var icon_template = $("#systemtemplatecontainer .system.regular .icon");
+            icon_template.clone(true).appendTo(icon);
+            icon_template = $("#systemtemplatecontainer .system.regular .health.systembarcontainer");
+            icon_template.clone(true).appendTo(icon);
+ //           duowindow.find(".icon").html("");
             
             for(var i in system.weapons){
                 var weapon = system.weapons[i];
@@ -628,7 +633,7 @@ shipWindowManager = {
                     duowindow.find(".iconduo").css("background-image", "url(./img/systemicons/"+weapon.name +"Duo.png)");
                 }
                 
-                iconduo_temp.css("left", ""+(i-1)*15 + "px");
+                iconduo_temp.css("left", ""+(i-1)*16 + "px");
                 
                 iconduo_temp.addClass(weapon.name);
                 iconduo_temp.addClass("system_" + weapon.id);
@@ -639,7 +644,10 @@ shipWindowManager = {
 
                 iconduo_temp.on("mouseover", weaponManager.onWeaponMouseover);
                 iconduo_temp.on("mouseout", weaponManager.onWeaponMouseOut);
+                iconduo_temp.on("click", shipWindowManager.clickSystem);
            }
+
+            $(".system .icon .UI .mode").on("click", shipWindowManager.onModeClicked);
 	},
         
 	removeSystemClasses: function(systemwindow){
@@ -672,7 +680,7 @@ setSystemData: function(ship, system, shipwindow){
     
     var systemwindow = shipwindow.find(".system_"+system.id);
  
-    if (system.dualWeapon){
+    if (system.dualWeapon && !system.duoWeapon){
         systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
     }
     
@@ -738,6 +746,7 @@ setSystemData: function(ship, system, shipwindow){
             systemwindow.removeClass("ballistic");
         }
 	
+        /* plopje
         if (!firing && Object.keys(system.firingModes).length > 1)
         {
             systemwindow.addClass("modes");
@@ -745,7 +754,7 @@ setSystemData: function(ship, system, shipwindow){
             var modebutton =  $(".mode", systemwindow);
             
             modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
-        }
+        } */
         
         if (firing && system.canChangeShots){
             var fire = weaponManager.getFiringOrder(ship, system);
@@ -766,12 +775,16 @@ setSystemData: function(ship, system, shipwindow){
         }else if (!firing){
             if(system.duoWeapon){
                 //var turnsLoadedArray = weaponManager.getWeaponCurrentLoading(system);
-                var fieldStringArray = new Array();
+                shipWindowManager.addDuoSystem(ship, system, systemwindow);
+                
+                var duoField;
                 
                 for(i in system.weapons){
                     var subsystem = system.weapons[i];
                     var load = subsystem.turnsloaded;
                     var loadingtime = subsystem.loadingtime;
+
+                    duoField = systemwindow.find(".system_"+subsystem.id + " .efficiency.value");
 
                     if (subsystem.normalload > 0){
                         loadingtime = subsystem.normalload;
@@ -780,11 +793,9 @@ setSystemData: function(ship, system, shipwindow){
                     if(load > loadingtime){
                         load = loadingtime;
                     }
-
-                    fieldStringArray[i] = (load+ "/" + loadingtime);
+                    
+                    duoField.html(load + "/" + loadingtime);
                 }
-                field.html("9");
-// plopje                field.html(fieldStringArray[1] + "<br>" + fieldStringArray[2]);
             }else{
                 var load = weaponManager.getWeaponCurrentLoading(system);
                 var loadingtime = system.loadingtime;
@@ -810,6 +821,18 @@ setSystemData: function(ship, system, shipwindow){
                 }
             }
 	}
+
+        // plopje
+        if (!firing && Object.keys(system.firingModes).length > 1)
+        {
+            if(!systemwindow.hasClass("modes")){
+                systemwindow.addClass("modes");
+            }
+
+            var modebutton =  $(".mode", systemwindow);
+
+            modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
+        }
     }else if (system.name == "thruster"){
         systemwindow.data("direction", system.direction);
         systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster"+system.direction+".png)");
@@ -1105,7 +1128,7 @@ setSystemData: function(ship, system, shipwindow){
 	},
 
 
-        initializeDuoSystemWindow: function(ship, system, systemwindow){
+/* plopje        initializeDuoSystemWindow: function(ship, system, systemwindow){
             
             
             if(system.weapons[system.firingMode].duoWeapon){
@@ -1114,7 +1137,7 @@ setSystemData: function(ship, system, shipwindow){
             else{
                 shipWindowManager.addRegularSystem(ship, system.weapons[system.firingMode], systemwindow);
             }
-        },
+        },*/
         
         onModeClicked: function(e){
             e.stopPropagation();
@@ -1126,8 +1149,8 @@ setSystemData: function(ship, system, shipwindow){
 
             window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
 
-            if(system.weapons[system.firingMode].duoWeapon){
-                shipWindowManager.initializeDuoSystemWindow(ship, system, systemwindow);
-            }
+//            if(system.weapons[system.firingMode].duoWeapon){
+//                shipWindowManager.initializeDuoSystemWindow(ship, system, systemwindow);
+//            }
         }   
 }

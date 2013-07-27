@@ -113,7 +113,18 @@ class DuoWeapon extends Weapon{
             $weapon->setLoading($loading);
         }
         
-    }    
+    }
+    
+/*    public function calculateLoading(){
+        if($this->duoWeapon){
+            foreach($this->weapons as $weapon){
+                $weapon->calculateLoading();
+            }
+            
+            return;
+        }        
+    }*/
+            
 }
 
 ?>

@@ -440,18 +440,19 @@ class Weapon extends ShipSystem{
         if ($shooter instanceof FighterFlight)
 			$dew = 0;
 		
-        $bdew = 0;
+        $bdew = EW::getBlanketDEW($gamedata, $target);
         
-		if ($target instanceof FighterFlight){
-			if (!($shooter instanceof FighterFlight) || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 
-				||  Movement::getCombatPivots($shooter, $gamedata->turn) > 0){
-				$dew = Movement::getJinking($target, $gamedata->turn);
-			}
-			
-		}else{
-            $bdew += EW::getBlanketDEW($gamedata, $target);
+        if ($target instanceof FighterFlight){
+            if (!($shooter instanceof FighterFlight))
+            {
+                $dew = Movement::getJinking($target, $gamedata->turn);
+            }
+            elseif( mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0
+                    ||  Movement::getJinking($shooter, $gamedata->turn) > 0){
+                $dew = Movement::getJinking($target, $gamedata->turn);
+            }
         }
-		
+
         $mod = 0;
         
         $sdew = EW::getSupportedDEW($gamedata, $target);

@@ -185,14 +185,7 @@
         <span class="efficiency value"></span>
             <div class="iconmask"></div>
         <div class="UI">
-            <div class="button stopoverload"></div>
-            <div class="button overload"></div>
-            <div class="button plus"></div>
-            <div class="button minus"></div>
-            <div class="button off"></div>
-            <div class="button on"></div>
             <div class="button holdfire"></div>
-            <div class="button mode"></div>
         </div>
     </div>
     

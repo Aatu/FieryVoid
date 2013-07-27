@@ -126,6 +126,18 @@ shipManager.systems = {
                     }
                 }
             }
+            
+            if(system.dualWeapon){
+                if(system.weapons[system.firingMode].duoWeapon){
+                    for(var i in system.weapons[system.firingMode].weapons){
+                        var duoWeapon = system.weapons[system.firingMode].weapons[i];
+                        
+                        if(duoWeapon.id == id){
+                            return duoWeapon;
+                        }
+                    }
+                }
+            }
         }
         
         return null;
@@ -138,6 +150,13 @@ shipManager.systems = {
             var selectedWeapon = system.weapons[system.firingMode];
             
             if(selectedWeapon.duoWeapon){
+                selectedWeapon.damage = system.weapons[1].damage;
+            }
+            else{
+                selectedWeapon.damage = system.damage;
+            }
+            
+/* plopje           if(selectedWeapon.duoWeapon){
                 selectedWeapon.firingMode = system.firingMode;
                 selectedWeapon.firingModes = system.firingModes;
                 selectedWeapon.power = system.power;
@@ -146,7 +165,7 @@ shipManager.systems = {
                 selectedWeapon.damage = system.weapons[1].damage;
                 selectedWeapon.destroyed = system.destroyed;
                 return selectedWeapon;
-            }
+            }*/
             
             selectedWeapon.firingMode = system.firingMode;
             selectedWeapon.firingModes = system.firingModes;
@@ -155,7 +174,7 @@ shipManager.systems = {
             selectedWeapon.id = system.id;
             selectedWeapon.dualWeapon = true;
             selectedWeapon.initialized = true;
-            selectedWeapon.damage = system.damage;
+            
             selectedWeapon.destroyed = system.destroyed;
             return selectedWeapon;
         }

@@ -45,7 +45,7 @@ window.shipSelectList = {
 			
 			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
-            if (gamedata.gamephase === 1 && selectedShip != listship && shipManager.isElint(selectedShip)){
+            if (gamedata.gamephase === 1 && selectedShip != listship && shipManager.isElint(selectedShip) && (ew.getEWByType("BDEW", selectedShip) == 0)){
                 if (gamedata.isEnemy(selectedShip, listship)){
                     if (ew.checkInELINTDistance(selectedShip, listship, 50)){
                         $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="DIST" data-id="'+listship.id+'"><span class="'+fac+'">Assign disruption EW</span></div>').appendTo(e);

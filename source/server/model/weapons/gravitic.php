@@ -449,8 +449,8 @@ class GraviticBolt extends Gravitic
             $beams->parentSystem = $this;
         
             $weapons = array(
-		 1 => $lance
-                ,2 => $beams
+                1 => $lance,
+                2 => $beams
             );
 		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
@@ -510,8 +510,8 @@ class GraviticBolt extends Gravitic
             $beam2->parentSystem = $this;
             
             $weapons = array(
-		 1 => $beam1
-                ,2 => $beam2
+                1 => $beam1,
+                2 => $beam2
             );
  
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);

@@ -20,6 +20,9 @@ Ship.prototype =
     
     getHitChangeMod: function(shooter, pos)
     {
+        // plopje
+        var pixelpos = hexgrid.positionToPixel(pos);
+        
         var affectingSystems = Array();
         for (var i in this.systems)
         {
@@ -27,7 +30,7 @@ Ship.prototype =
             if (!this.checkIsValidAffectingSystem(system, pos))
                 continue;
 
-            var mod = system.getDefensiveHitChangeMod(this, shooter, pos);
+            var mod = system.getDefensiveHitChangeMod(this, shooter, pixelpos);
 
             if ( ! (affectingSystems[system.defensiveType])
                 || affectingSystems[system.defensiveType] < mod)

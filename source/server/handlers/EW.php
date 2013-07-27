@@ -116,6 +116,9 @@
                 if ($elint->id === $ship->id)
                     continue;
                 
+                if($elint->faction != $ship->faction)
+                    continue;
+                
                 if (!$elint->isElint())
                     continue;
                 

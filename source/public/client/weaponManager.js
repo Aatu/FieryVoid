@@ -12,9 +12,6 @@ window.weaponManager = {
             
     onModeClicked: function(shipwindow, systemwindow, ship, system)
     {
-        console.log(system);
-        console.log(system instanceof Weapon);
-        
         if (!system)
             return;
         
@@ -33,7 +30,7 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(ship, system);
   
             
-            shipWindowManager.setDataForSystem(ship, system);
+            //shipWindowManager.setDataForSystem(ship, system);
         }
     },
     
@@ -100,6 +97,12 @@ window.weaponManager = {
         weaponManager.removeArcIndicators();
 
         var t = weaponManager.mouseoverSystem;
+        
+        // Dirty work-around to avoid errors when moving over two systems.
+        // (This happens between two duo_icons
+        if( t == null){
+            return;
+        }
         
         var id = t.data("shipid");
                
@@ -372,21 +375,38 @@ window.weaponManager = {
     calculateBaseHitChange: function(target, base, shooter){
 
         var dew = 0;
-		
+        
         //TODO: jincing ignored if range 0 and shooter not jinking!
-		if (target.flight){
-			dew = shipManager.movement.getJinking(target);
+        if (target.flight && shooter){
+            if(!shooter.flight)
+            {
+                dew = shipManager.movement.getJinking(target);
+            }
+            else{
+                if(shooter){
+                    var sPosHex = shipManager.getShipPosition(shooter);
+                    var tPosHex = shipManager.getShipPosition(target);
+
+                    if (!(sPosHex.x == tPosHex.x && sPosHex.y == tPosHex.y)
+                        || shipManager.movement.getJinking(shooter) > 0){
+                        dew = shipManager.movement.getJinking(target);
+                    }
+                }
+            }
         }else{
             if (!shooter || !shooter.flight)
                 dew = ew.getDefensiveEW(target);
         }
+        
         var bdew = 0;
         var sdew = 0;
+        
         if (!target.flight){
-            bdew = ew.getSupportedBDEW(target);
             sdew = ew.getSupportedDEW(target);
         }
-        
+
+        bdew = ew.getSupportedBDEW(target);
+
         //console.log("base: " + base + " dew: " + dew + " blanket: " + bdew + "supportDEW: " +  sdew);
         return base - dew - bdew - sdew;
         
