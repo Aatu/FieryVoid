@@ -44,7 +44,7 @@ var EMShield = function(json, ship)
     this.defensiveType = "Shield";
 }
 
-Shield.prototype = Object.create( Shield.prototype );
+EMShield.prototype = Object.create( Shield.prototype );
 EMShield.prototype.constructor = EMShield;
 
 var GraviticShield = function(json, ship)
