@@ -411,7 +411,7 @@ class GraviticBolt extends Gravitic
         public $exclusive = true;
         
         public $rangePenalty = 1;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
  
         function __construct($startArc, $endArc, $damagebonus){
             
