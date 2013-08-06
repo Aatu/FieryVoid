@@ -20,6 +20,13 @@ var InterceptorMkII = function(json, ship)
 InterceptorMkII.prototype = Object.create( InterceptorMkI.prototype );
 InterceptorMkII.prototype.constructor = InterceptorMkII;
 
+var InterceptorPrototype = function(json, ship)
+{
+    InterceptorMkI.call( this, json, ship);
+}
+InterceptorPrototype.prototype = Object.create( InterceptorMkI.prototype );
+InterceptorPrototype.prototype.constructor = InterceptorPrototype;
+
 var Shield = function(json, ship)
 {
     ShipSystem.call( this, json, ship);

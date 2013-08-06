@@ -82,6 +82,31 @@
         }
     }
     
+    class InterceptorPrototype extends InterceptorMkI
+    {
+        public $name = "interceptorPrototype";
+        public $displayName = "Interceptor Prototype";
+        
+        public $output = 2;
+        public $intercept = 2;
+        
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+            return $this->getOutput();
+        }
+
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+            return 0;
+        }
+        
+        public function setSystemDataWindow($turn){
+            $this->data["DEFENSIVE BONUS:"] = "-10 to hit on arc";
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+3;   }
+        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 - $this->dp;      }
+    }
+
     class GuardianArray extends Weapon{
 
         public $trailColor = array(30, 170, 255);
