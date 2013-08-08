@@ -39,7 +39,15 @@ window.shipClickable = {
 	
 	doMouseOver: function(){
         var selectedShip = gamedata.getSelectedShip();
-		var ship = shipClickable.ship;
+	var ship = shipClickable.ship;
+        
+        if(ship == null){
+            // something was moused over that isn't a ship
+            // or not connected to one. (A warning for instance, info text)
+            // ignore this mouse over.
+            return;
+        }
+        
 		gamedata.mouseOverShipId = ship.id;
 		shipManager.drawShip(ship);
 		

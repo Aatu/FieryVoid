@@ -115,12 +115,12 @@ window.ew = {
             if (target && entry.targetid != target.id)
                 continue;
             
-			if (entry.type == type){
-				return entry.amount;
+            if (entry.type == type){
+		return entry.amount;
             }
-		}
-		
-		return 0;
+        }
+	
+	return 0;
     },
 	
 	convertUnusedToDEW: function(ship){
@@ -407,7 +407,7 @@ window.ew = {
         var e = $(this).parent();
         var ship = e.data("ship");
         var entry = e.data("EW");
-		var left = ew.getDefensiveEW(ship);
+	var left = ew.getDefensiveEW(ship);
 		if (left < 1)
             return;
         
@@ -422,8 +422,13 @@ window.ew = {
         if (entry == "CCEW"){
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});
         }else if (entry == "BDEW"){
-            ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
-            ew.adEWindicators(ship);
+            if(ew.getEWByType("DIST", ship) > 0 || ew.getEWByType("SOEW", ship) > 0 || ew.getEWByType("SDEW", ship) > 0){
+                window.confirm.error("You cannot use blanket protection together with other ELINT functions.", function(){});
+                return;
+            }else{
+                ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
+                ew.adEWindicators(ship);
+            }
         }else if (entry.type == "DIST"){
             if (left < 3)
                 return;
@@ -485,7 +490,19 @@ window.ew = {
     },
     
     getSupportedOEW: function(ship, target){
+        var jammer = shipManager.systems.getSystemByName(target, "jammer");
+
+        if(jammer != null &&
+            shipManager.systems.getOutput(target, jammer) > 0
+            && !shipManager.systems.isDestroyed(target, jammer)
+            && !shipManager.power.isOffline(target, jammer))
+        {
+            // Ships with active jammers are immune to SOEW
+            return 0;
+        }
+
         var amount = 0;
+        
         for (var i in gamedata.ships){
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint))
@@ -498,6 +515,8 @@ window.ew = {
                 continue;
             
             var foew = ew.getEWByType("OEW", elint, target) * 0.5;
+            
+
             if (foew > amount)
                amount = foew;
         }

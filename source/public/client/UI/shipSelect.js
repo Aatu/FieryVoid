@@ -45,15 +45,33 @@ window.shipSelectList = {
 			
 			$('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry" data-id="'+listship.id+'"><span class="name '+fac+'">'+listship.name+'</span></div>').appendTo(e);
 			
-            if (gamedata.gamephase === 1 && selectedShip != listship && shipManager.isElint(selectedShip) && (ew.getEWByType("BDEW", selectedShip) == 0)){
+            if (gamedata.gamephase === 1 && selectedShip != listship && shipManager.isElint(selectedShip)){
                 if (gamedata.isEnemy(selectedShip, listship)){
                     if (ew.checkInELINTDistance(selectedShip, listship, 50)){
-                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="DIST" data-id="'+listship.id+'"><span class="'+fac+'">Assign disruption EW</span></div>').appendTo(e);
+                        if (ew.getEWByType("BDEW", selectedShip) == 0){
+                            $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="DIST" data-id="'+listship.id+'"><span class="'+fac+'">Assign disruption EW</span></div>').appendTo(e);
+
+                            var jammer = shipManager.systems.getSystemByName(listship, "jammer");
+
+                            if(jammer != null
+                                && shipManager.systems.getOutput(listship, jammer) > 0
+                                && !shipManager.systems.isDestroyed(listship, jammer))
+                            {
+                                // Ships with active jammers are immune to SOEW
+                                $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry remark"><span>EW on jammer-protected ships<br>will not be shared with SOEW.</span></div>').appendTo(e);
+                            }
+                        }else{
+                            $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry remark"><span >You cannot use other ELINT<br>functions with blanket protection.</span></div>').appendTo(e);
+                        }
                     }
                 }else{
                     if (ew.checkInELINTDistance(selectedShip, listship, 30)){
-                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
-                        $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
+                        if (ew.getEWByType("BDEW", selectedShip) == 0){
+                            $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SOEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support OEW</span></div>').appendTo(e);
+                            $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry action" data-action="SDEW" data-id="'+listship.id+'"><span class="'+fac+'">Assign support DEW</span></div>').appendTo(e);
+                        }else{
+                            $('<div oncontextmenu="shipSelectList.onShipContextMenu(this);return false;" class="shiplistentry remark"><span >You cannot use other ELINT<br>functions with blanket protection.</span></div>').appendTo(e);
+                        }
                     }
                 }
             }

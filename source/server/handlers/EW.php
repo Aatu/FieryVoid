@@ -79,6 +79,13 @@
         
         public static function getSupportedOEW($gamedata, $ship, $target)
         {
+            $jammer = $target->getSystemByName("jammer");
+
+            if($jammer != null && $jammer->getOutput()> 0 ){
+                // Jammer protected ships cannot be targetten for SOEW
+                            return 0;
+            }
+            
             if (Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) > 30)
                 return 0;
             

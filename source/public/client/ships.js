@@ -561,6 +561,10 @@ window.shipManager = {
 
         shipSelectList.remove();
 
+        if (ship == null){
+            return;
+        }
+
         if (gamedata.thisplayer == -1)
             return;
 
@@ -596,6 +600,9 @@ window.shipManager = {
 
     isDestroyed: function(ship){
 
+    if (ship == null){
+        return;
+    }
 
         if (ship.flight){
 

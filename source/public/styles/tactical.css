@@ -774,12 +774,21 @@ body.phase1 #botPanel .ewentry .button2{
 	cursor:pointer;
 }
 
+.shipSelectList .shiplistentry.remark{
+	margin:3px 45px;
+        color:#496791;
+}
+
 .shipSelectList .shiplistentry span{
 	 font-size:14px;
 	 padding-right:5px;
 }
 .shipSelectList .shiplistentry.action span{
 	 font-size:12px;
+}
+
+.shipSelectList .shiplistentry.remark span{
+	 font-size:11px;
 }
 
 .shipSelectList .shiplistentry .name{
