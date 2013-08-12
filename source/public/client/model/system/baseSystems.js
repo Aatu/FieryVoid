@@ -68,6 +68,13 @@ var Catapult = function(json, ship)
 Catapult.prototype = Object.create( ShipSystem.prototype );
 Catapult.prototype.constructor = Catapult;
 
+var CargoBay = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+CargoBay.prototype = Object.create( ShipSystem.prototype );
+CargoBay.prototype.constructor = CargoBay;
+
 var JumpEngine = function(json, ship)
 {
     ShipSystem.call( this, json, ship);

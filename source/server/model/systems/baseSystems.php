@@ -334,8 +334,15 @@ class CnC extends ShipSystem{
     
 
     }
+}
+
+class CargoBay extends ShipSystem{
+    public $name = "cargoBay";
+    public $displayName = "Cargo Bay";
     
-    
+    function __construct($armour, $maxhealth){
+        parent::__construct($armour, $maxhealth, 0, 0);
+    }
 }
 
 class Thruster extends ShipSystem{
