@@ -253,8 +253,8 @@
                 }
                 
             }
-            return array_sum($affectingSystems);
-		}
+            return (-array_sum($affectingSystems));
+	}
         
         public function getDamageMod($shooter, $pos, $turn){
 			$affectingSystems = array();
@@ -840,6 +840,28 @@
             return null;
         } 
         
+    }
+    
+    class BaseShipNoAft extends BaseShip{
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name,$slot);
+        }
+        
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            $location = 0;
+            
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
+                $location = 1;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
+                $location = 0;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
+                $location = 3;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
+                $location = 4;
+            } 
+           
+            return $location;
+        }
     }
     
     class HeavyCombatVessel extends BaseShip{

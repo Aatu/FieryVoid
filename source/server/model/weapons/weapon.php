@@ -89,6 +89,10 @@ class Weapon extends ShipSystem{
         return $this;
     }
     
+    protected function getWeaponHitChanceMod($turn){
+        return 0;
+    }
+    
     public function getAvgDamage(){
         $min = $this->minDamage;
         $max = $this->maxDamage;
@@ -499,7 +503,8 @@ class Weapon extends ShipSystem{
             $mod -= 8;
         }
 		
-        $mod -= $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
+        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
+        $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 		
         if ($oew < 1)
         {

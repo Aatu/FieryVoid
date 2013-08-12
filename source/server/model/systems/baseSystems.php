@@ -419,9 +419,19 @@ class Hangar extends ShipSystem{
         parent::__construct($armour, $maxhealth, 0, $output );
  
     }
+}
 
+class Catapult extends ShipSystem{
+
+    public $name = "catapult";
+    public $displayName = "Catapult";
+    public $squadrons = Array();
+    public $primary = true;
     
-    
+    function __construct($armour, $maxhealth, $output = 6){
+        parent::__construct($armour, $maxhealth, 0, $output );
+ 
+    }
 }
 
 class JumpEngine extends ShipSystem{
