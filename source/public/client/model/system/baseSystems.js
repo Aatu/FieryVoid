@@ -61,6 +61,12 @@ var Hangar = function(json, ship)
 Hangar.prototype = Object.create( ShipSystem.prototype );
 Hangar.prototype.constructor = Hangar;
 
+var CargoBay = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+CargoBay.prototype = Object.create( ShipSystem.prototype );
+CargoBay.prototype.constructor = CargoBay;
 
 var JumpEngine = function(json, ship)
 {

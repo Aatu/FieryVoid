@@ -58,9 +58,19 @@ window.botPanel = {
 		$("#botPanel .value.turncost").html(turncost);
 		
 		$("#botPanel .value.accelcost").html(ship.accelcost);
-		$("#botPanel .value.pivotcost").html(ship.pivotcost);
-		$("#botPanel .value.rollcost").html(ship.rollcost);
-		if (ship.flight){
+                if(ship.pivotcost == 999){
+                    $("#botPanel .value.pivotcost").html("N/A");
+                }else{
+                    $("#botPanel .value.pivotcost").html(ship.pivotcost);
+                }
+                
+                if(ship.rollcost == 999){
+                    $("#botPanel .value.rollcost").html("N/A");
+                }else{
+                    $("#botPanel .value.rollcost").html(ship.rollcost);
+                }
+		
+                if (ship.flight){
 			$("#botPanel .value.evasion").html(shipManager.movement.getJinking(ship));
 			$("#botPanel .entry.evasion").show();
 		}else{
