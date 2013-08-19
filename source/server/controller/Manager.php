@@ -708,7 +708,7 @@ class Manager{
             
             
                         
-            $ship->iniative = Dice::d(100) + $ship->iniativebonus - $mod;
+            $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
         }
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
         

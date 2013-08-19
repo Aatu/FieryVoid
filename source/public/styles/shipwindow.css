@@ -796,6 +796,70 @@ body.phase1 .shipwindow  .system.boosted .minus{
 	
 }
 
+.shipwindow.heavyfighter {
+    width:250px;
+}
+.shipwindow.heavyfighter .heavyfighter{
+	position:relative;
+}
+
+.shipwindow.heavyfighter .fightercontainer{
+    background-color: #072731;
+    border: 0px;
+    width:100px;
+	position:relative;
+    overflow:hidden;
+}
+
+.shipwindow.heavyfighter .icon{
+	width:120px;
+	height:151px;
+	margin:auto;
+	background-repeat:no-repeat;
+	background-position:center;
+}
+
+.shipwindow.heavyfighter .fightersystem{
+	width:30px;
+	height:30px;
+	margin:auto;
+}
+
+.shipwindow.heavyfighter .fightersystem .icon{
+	width:26px;
+	height:20px;
+	padding-top:6px;
+	background-color:transparent;
+	border:1px solid #496791;
+	background-position:center; 
+	margin:1px;
+	text-align: center;
+	position:relative;
+	overflow:hidden;
+}
+
+.shipwindow.heavyfighter .fightersystem .icon .iconmask{
+    position:absolute;
+    left:-2px;
+    top:-2px;
+    width:30px;
+    height:30px;
+    background-color:transparent;
+    opacity:0.5;
+
+}
+
+.heavyfighter .systembarcontainer {
+    background-color: black;
+    border: 1px solid #496791;
+    height: 14px;
+    margin: 2px auto 2px auto;
+    padding: 1px 2px;
+    position: relative;
+    text-align: center;
+    width: 116px;
+}
+
 .fighter.destroyed, .fighter.destroyed .icon  {
 	background-color: #1F2836 !important;
     border: 1px solid #3D4755 !important;
@@ -842,6 +906,12 @@ body.phase1 .shipwindow  .system.boosted .minus{
     font-size: 9px;
 }
 
+.shipwindow .heavyfighter .value{
+    color: white;
+    font-family: arial;
+    font-size: 9px;
+}
+
 .shipwindow.flight .fightersystem{
 	width:30px;
 	height:30px;
@@ -881,14 +951,27 @@ body.phase1 .shipwindow  .system.boosted .minus{
 	padding:0px;
 	margin:0px;
 }
-.fightersystemcontainer tr{
+.flight .fightersystemcontainer tr{
 	width:90px;
 	padding:0px;
 	margin:0px;
 }
 
-.fightersystemcontainer{
+.heavyfighter .fightersystemcontainer tr{
+	width:120px;
+	padding:0px;
+	margin:0px;
+}
+
+.flight .fightersystemcontainer{
 	width:90px;
+	padding:0px;
+	margin:0px;
+	border-spacing:0;
+}
+
+.heavyfighter .fightersystemcontainer{
+	width:120px;
 	padding:0px;
 	margin:0px;
 	border-spacing:0;

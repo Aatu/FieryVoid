@@ -69,6 +69,13 @@ var HvyParticleCannon = function(json, ship)
 HvyParticleCannon.prototype = Object.create(Particle.prototype);
 HvyParticleCannon.prototype.constructor = HvyParticleCannon;
 
+var LightParticleCannon = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+LightParticleCannon.prototype = Object.create(Particle.prototype);
+LightParticleCannon.prototype.constructor = LightParticleCannon;
+
 var ParticleCutter = function(json, ship)
 {
     Particle.call( this, json, ship);
@@ -76,9 +83,81 @@ var ParticleCutter = function(json, ship)
 ParticleCutter.prototype = Object.create(Particle.prototype);
 ParticleCutter.prototype.constructor = ParticleCutter;
 
+var SolarCannon = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+SolarCannon.prototype = Object.create(Particle.prototype);
+SolarCannon.prototype.constructor = SolarCannon;
+
+var LightParticleBlaster = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+LightParticleBlaster.prototype = Object.create( Particle.prototype );
+LightParticleBlaster.prototype.constructor = LightParticleBlaster;
+
 var ParticleRepeater = function(json, ship)
 {
     Particle.call( this, json, ship);
 }
 ParticleRepeater.prototype = Object.create(Particle.prototype);
 ParticleRepeater.prototype.constructor = ParticleRepeater;
+
+ParticleRepeater.prototype.initBoostableInfo = function(){
+    // Needed because it can chance during initial phase
+    // because of adding extra power.
+    
+    this.data["Weapon type"] ="Particle";
+    this.data["Damage type"] ="Standard";
+    this.data["Number of shots"] = shipManager.power.getBoost(this) + 1;
+
+    if(window.weaponManager.isLoaded(this)){
+        this.loadingtime = this.getLoadingTime();
+        this.turnsloaded = this.getLoadingTime();
+        this.normalload =  this.getLoadingTime();
+    }
+    else{
+        var count = shipManager.power.getBoost(this);
+        
+        for(var i = 0; i < count; i++){
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+    
+    return this;
+}
+
+ParticleRepeater.prototype.clearBoost = function(){
+        for (var i in system.power){
+                var power = system.power[i];
+                if (power.turn != gamedata.turn)
+                        continue;
+
+                if (power.type == 2){
+                    system.power.splice(i, 1);
+
+                    return;
+                }
+        }
+}
+
+ParticleRepeater.prototype.getLoadingTime = function(){
+    var boostAmount = shipManager.power.getBoost(this);
+    
+    return 1 + Math.floor(boostAmount/2);
+}
+
+var RepeaterGun = function(json, ship)
+{
+    ParticleRepeater.call( this, json, ship);
+}
+RepeaterGun.prototype = Object.create(ParticleRepeater.prototype);
+RepeaterGun.prototype.constructor = RepeaterGun;
+
+
+RepeaterGun.prototype.getLoadingTime = function(){
+    var boostAmount = shipManager.power.getBoost(this);
+    
+    return 1 + boostAmount;
+}

@@ -389,8 +389,14 @@ class Weapon extends ShipSystem{
             
         }else{
               //cannot save the extra shots from everload -> lose loading and cooldown
-            if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots)
-                return new WeaponLoading(0, -1, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
+            if ($this->overloadshots > 0 && $this->overloadshots < $this->extraoverloadshots){
+                if($this->isOverloadingOnTurn(TacGamedata::$currentTurn)){
+                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 1, $this->getLoadingTime());
+                }
+                else{
+                    return new WeaponLoading(1, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime());
+                }
+            }
         }
         
         return new WeaponLoading($this->getTurnsloaded(), $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime());
@@ -505,7 +511,9 @@ class Weapon extends ShipSystem{
 		
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
-		
+	
+        debug::log("calcHit mod $mod");
+        
         if ($oew < 1)
         {
             $rangePenalty = $rangePenalty*2;
@@ -536,6 +544,8 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
             
         $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
+        
+        debug::log("Goal is $goal");
         
         $change = round(($goal/20)*100);
         
@@ -779,7 +789,7 @@ class Weapon extends ShipSystem{
     
     protected function getSystemArmour($system, $gamedata, $fireOrder){
 		
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+	$shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
      
 		$armor = 0;
@@ -849,7 +859,7 @@ class Weapon extends ShipSystem{
         $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
-        $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata);
+        $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
         //print("damage: $damage armour: $armour destroyed: $destroyed \n");
         if ($damage-$armour > $systemHealth){
             //print("overkilling!\n\n");
@@ -864,7 +874,7 @@ class Weapon extends ShipSystem{
         
     }
     
-    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         return;
     }
 }

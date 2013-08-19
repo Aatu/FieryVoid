@@ -38,13 +38,13 @@
 			parent::setSystemDataWindow($turn);
 		}
 		
-		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 						
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
             $crit->inEffect = false;
             $system->criticals[] =  $crit;
-			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		}
 		
 		
@@ -86,10 +86,10 @@
             return 0;
 	}
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
 
-            if ($system instanceof Fighter){
+            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                 $crit->updated = true;
                 $crit->inEffect = true;
@@ -102,7 +102,7 @@
                 $reactor->criticals[] =  $crit;
             }
 
-            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
@@ -140,10 +140,10 @@
 			parent::setSystemDataWindow($turn);
 		}
 		
-		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
 			
-			if ($system instanceof Fighter){
+			if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
@@ -160,7 +160,7 @@
 			
 			}
 			
-			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		}
 		
 		
@@ -216,7 +216,7 @@
             parent::setSystemDataWindow($turn);
         }
 
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata){
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 
             // On a hit, make fighters drop out, but if this weapon had
             // a ReducedDamage crit, roll a d6 and substract 2 for each
@@ -231,14 +231,14 @@
                 }
             }
 
-            if ($system instanceof Fighter && $affect > 0){
+            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter) && $affect > 0){
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
 				$system->criticals[] =  $crit;
             }
             
-            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata);
+            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
         }
 
 

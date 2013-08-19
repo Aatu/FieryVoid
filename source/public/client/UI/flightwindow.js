@@ -61,7 +61,14 @@ flightWindowManager = {
 	
 	
 	createShipWindow: function(ship){
-		var template = $("#shipwindowtemplatecontainer .shipwindow.flight");
+                var template;
+                
+                if(!ship.superheavy){
+                    template = $("#shipwindowtemplatecontainer .shipwindow.flight");
+                }else{
+                    template = $("#shipwindowtemplatecontainer .shipwindow.heavyfighter");
+                }
+                
 		var shipwindow = template.clone(true).appendTo("body");
 		
 		shipwindow.draggable();
@@ -79,7 +86,7 @@ flightWindowManager = {
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_"+ship.id);
 		flightWindowManager.populateShipWindow(ship, shipwindow);
-        flightWindowManager.bindEvents(shipwindow);
+                flightWindowManager.bindEvents(shipwindow);
 		return shipwindow;
 		
 	},
@@ -92,10 +99,22 @@ flightWindowManager = {
 	populateShipWindow: function(ship, shipwindow){
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
 		
-		shipwindow.find(".topbar .value.name").html(ship.name);
-		shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
-		
-		flightWindowManager.addSystems(ship, shipwindow);
+                if(gamedata.turn != 0){
+                    shipwindow.find(".topbar .value.name").html(ship.name);
+                    shipwindow.find(".topbar .value.shipclass").html("");
+                    shipwindow.find(".topbar .valueheader.shipclass").html("");
+                }
+                else{
+                    shipwindow.find(".topbar .value.name").html("");
+                    shipwindow.find(".topbar .valueheader.name").html("");
+                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
+                }
+
+                if(!ship.superheavy){
+                    flightWindowManager.addSystems(ship, shipwindow);
+                }else{
+                    flightWindowManager.addHeavyFighter(ship, shipwindow);
+                }
 		
 
 	},
@@ -147,10 +166,53 @@ flightWindowManager = {
 		
 		
 	},
+
+	addHeavyFighter: function (ship, shipwindow, location){
 		
+            var fighter = ship.systems[1];
+
+            var dest = shipwindow.find(".fightercontainer");
+            dest.addClass("occupied");
+            var template = $("#systemtemplatecontainer .heavyfighter");
+            var systemwindow = template.clone(true).appendTo(dest);
+
+            systemwindow.find(".icon").css("background-image", "url("+fighter.iconPath+")");
+
+            systemwindow.addClass("heavyfighter_" + fighter.id);
+            systemwindow.data("shipid", ship.id);
+            systemwindow.data("id", fighter.id);
+
+            for (var a in fighter.systems){
+                var fightersystem = fighter.systems[a];
+                dest = flightWindowManager.getDestinationForSystem(ship, fighter, fightersystem.location);
+                template = $("#systemtemplatecontainer .fightersystem");
+
+                fightersystemwindow = template.clone(true).appendTo(dest);
+                fightersystemwindow.wrap('<td/>');
+
+                if (fightersystem.iconPath){
+                    fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+fightersystem.iconPath +")");
+                }else{
+                    fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+fightersystem.name +".png)");
+                }
+
+                fightersystemwindow.addClass(fightersystem.name);
+                fightersystemwindow.addClass("system_" + fightersystem.id);
+                fightersystemwindow.data("shipid", ship.id);
+                fightersystemwindow.data("fighterid", fighter.id);
+                fightersystemwindow.data("id", fightersystem.id);
+
+                fightersystemwindow.on("mouseover", weaponManager.onWeaponMouseover);
+                fightersystemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
+            }
+	},
+
 	getDestinationForSystem: function(flight, fighter, location){
-			
-		return $(".shipwindow.ship_"+flight.id+" .fighter_" +fighter.id+ " .fightersystemcontainer." + location + " tr");
+            if(flight.superheavy){
+		return $(".shipwindow.ship_"+flight.id+" .heavyfighter_" +fighter.id+ " .fightersystemcontainer." + location + " tr");
+            }else{
+                return $(".shipwindow.ship_"+flight.id+" .fighter_" +fighter.id+ " .fightersystemcontainer." + location + " tr");
+            }
 		
 	},
 	
@@ -181,32 +243,33 @@ flightWindowManager = {
 	},
 	
 	setFighterData: function(flight, fighter, shipwindow){
+            if(flight.superheavy){
+		var systemwindow = shipwindow.find(".heavyfighter_"+fighter.id);
+                var healtWidth = 120;
+            }else{
 		var systemwindow = shipwindow.find(".fighter_"+fighter.id);
+                var healtWidth = 90;
+            }
 
-		var healtWidth = 90;
-			
-		
-			
-		systemwindow.find(".healthvalue ").html((fighter.maxhealth - damageManager.getDamage(flight, fighter)) +"/"+ fighter.maxhealth );
-		systemwindow.find(".healthbar").css("width", (((fighter.maxhealth - damageManager.getDamage(flight, fighter)) / fighter.maxhealth)*healtWidth) + "px");
-		
-	
-		flightWindowManager.removeSystemClasses(systemwindow);
-		
-		if (shipManager.systems.isDestroyed(flight, fighter)){
-			systemwindow.addClass("destroyed");
-			if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter"))
-				systemwindow.addClass("disengaged");
-			
-			return;
-		}
-		
-		for (var i in fighter.systems){
-			var system = fighter.systems[i];
-			flightWindowManager.setFighterSystemData(flight, system, shipwindow);
-		}
-		
-		
+
+            systemwindow.find(".healthvalue ").html((fighter.maxhealth - damageManager.getDamage(flight, fighter)) +"/"+ fighter.maxhealth );
+            systemwindow.find(".healthbar").css("width", (((fighter.maxhealth - damageManager.getDamage(flight, fighter)) / fighter.maxhealth)*healtWidth) + "px");
+
+
+            flightWindowManager.removeSystemClasses(systemwindow);
+
+            if (shipManager.systems.isDestroyed(flight, fighter)){
+                    systemwindow.addClass("destroyed");
+                    if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter"))
+                            systemwindow.addClass("disengaged");
+
+                    return;
+            }
+
+            for (var i in fighter.systems){
+                    var system = fighter.systems[i];
+                    flightWindowManager.setFighterSystemData(flight, system, shipwindow);
+            }
 	},
 	
 	setFighterSystemData: function(flight, system, shipwindow){

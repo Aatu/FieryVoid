@@ -248,5 +248,11 @@
              
     }
   
-
+    class SuperHeavyFighter extends FighterFlight{
+        public $superheavy = true;
+                
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name, $slot);
+        }
+    }
 ?>

@@ -39,6 +39,23 @@ var Fighter = function(json, ship)
 Fighter.prototype = Object.create( ShipSystem.prototype );
 Fighter.prototype.constructor = Fighter;
 
+var SuperHeavyFighter = function(json, ship)
+{
+    for (var i in json)
+    {
+        if (i == 'systems')
+        {
+            this.systems = SystemFactory.createSystemsFromJson(json[i], this);
+        }
+        else
+        {
+            this[i] = json[i];
+        }
+    }
+}
+
+SuperHeavyFighter.prototype = Object.create( ShipSystem.prototype );
+SuperHeavyFighter.prototype.constructor = SuperHeavyFighter;
 
 var Weapon = function(json, ship)
 {

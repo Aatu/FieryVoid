@@ -48,6 +48,31 @@
 
         }
         
+        public function getInitiativebonus($gamedata){
+            if($this->faction == "Centauri"){
+                return $this->doCentauriInitiativeBonus($gamedata);
+            }
+            
+            return $this->iniativebonus;
+        }
+        
+        private function doCentauriInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Centauri")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof PrimusMaximus)
+                        && ($this != $ship)){
+                    debug::log("Extra ini for $this->name");
+                    return ($this->iniativebonus+5);
+                }
+            }
+
+            debug::log("No ini bonus for $this->name");
+            
+            return $this->iniativebonus;
+        }
+        
         public function setEW($ew)
         {
             $this->EW[] = $ew;
@@ -1075,6 +1100,26 @@
             }
 
             return null;
+        }
+    }
+    
+    class MediumShipLeftRight extends MediumShip{
+
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name, $slot);
+        }
+
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            
+            $location = 0;
+
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(0,$tf), Mathlib::addToDirection(180,$tf) )){
+                $location = 4;
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
+                $location = 3;
+            }
+            
+            return $location;
         }
     }
 ?>

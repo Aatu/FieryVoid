@@ -77,7 +77,7 @@
             $damageEntry->updated = true;
             $system->damage[] = $damageEntry;
             $this->damages[] = $damageEntry;
-            $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata);
+            $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
             if ($damage-$armour > $systemHealth){
             
                 $damage = $damage-$modifiedDamage;

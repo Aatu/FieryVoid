@@ -213,57 +213,50 @@ window.damageDrawer = {
     },
     
     drawFlight: function(flight, image){
-		var images = shipManager.shipImages[flight.id];
+	var images = shipManager.shipImages[flight.id];
         var width = flight.canvasSize;
         var height = flight.canvasSize;
         var canvas  = $('<canvas id="constcanFlight" width="'+width+'" height="'+height+'"></canvas>');
         var context = canvas.get(0).getContext("2d");
-        
-        
-        
+        var w = images.orginal.width;
+        var h = images.orginal.height;
         
         for (var i in flight.systems){
-			var x = 50;
-			var y = 50;
-			
-			//if (i != 2)
-			//	continue;
-			var fighter = flight.systems[i];
-		
-			if (gamedata.gamephase == 4 && gamedata.subphase == 0){
-				var turndest = damageManager.getTurnDestroyed(flight, fighter);
-				if ( turndest && turndest < gamedata.turn)
+            var fighter = flight.systems[i];
+            var x;
+            var y;
+            
+            if(flight.superheavy){
+                x = 30;
+                y = 30;
+            }else{
+                var offset = shipManager.getFighterPosition(fighter.location, 0, 2);
+                x = 50;
+                y = 50;
+
+                x += offset.x;
+                y += offset.y;
+    
+                x -= Math.round(w/2);
+                y -= Math.round(h/2);
+            }
+
+            if (gamedata.gamephase == 4 && gamedata.subphase == 0){
+                var turndest = damageManager.getTurnDestroyed(flight, fighter);
+                if ( turndest && turndest < gamedata.turn)
                 {
-					continue;
+                    continue;
                 }
-			}else{
-			
-				if (shipManager.systems.isDestroyed(flight, fighter))
-					continue;
-			}
-			
-			var offset = shipManager.getFighterPosition(fighter.location, 0, 2);
-		
-			x += offset.x;
-			y += offset.y;
-			
-			
-			
-			var w = images.orginal.width;
-			var h = images.orginal.height;
-			
-			x -= Math.round(w/2);
-			y -= Math.round(h/2);
-			
-			context.drawImage(images.orginal, x, y, w, h);
-		}
+            }else{
+                if (shipManager.systems.isDestroyed(flight, fighter))
+                    continue;
+            }
+
+            context.drawImage(images.orginal, x, y, w, h);
+        }
         
         return context.getImageData(0, 0, width, height);
-        
-	}  
-    
-    
-    
+    }  
 };
 
 (function(){

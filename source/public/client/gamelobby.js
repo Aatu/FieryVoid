@@ -110,25 +110,19 @@ window.gamedata = {
     },
 
                 orderShipListOnName: function(shipList){
-                    console.log("ShipList length: " + shipList.length);
                     var swapped = true;
                     
                     for(var x=1; x< shipList.length && swapped; x++){
                         swapped = false;
-                        console.log("*****************");
                         
                         for(var y=0; y < shipList.length - x; y++){
-                            console.log("Comparing: " + shipList[y+1].shipClass + " and " +shipList[y].shipClass);
-                            
                             if(shipList[y+1].shipClass < shipList[y].shipClass){
-                                console.log("Swapping");
                                 var temp = shipList[y];
                                 shipList[y] = shipList[y+1];
                                 shipList[y+1] = temp;
                                 swapped = true;
                             }
                         }
-                        console.log("*****************");
                     }
                 },
         
@@ -428,9 +422,7 @@ window.gamedata = {
         var factions = Array();
         for (var f in jsonShips)
         {
-            console.log(f);
             var faction = jsonShips[f];
-            console.log(""+faction.length);
             factions[f] = Array();
             
             for (var i in faction)
@@ -438,8 +430,6 @@ window.gamedata = {
                 var ship = faction[i];
                 factions[f][i] = new Ship(ship);
             }
-            console.log(f);
-
         }
         
         gamedata.allShips = factions; 

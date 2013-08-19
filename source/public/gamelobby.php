@@ -327,17 +327,25 @@
                     <div class="healthbar bar" style="width:90px;"></div>
                     <div class="valuecontainer"><span class="healthvalue value"></span></div>
                 </div>
-                <!--
-                <div class="systembarcontainer">
-                    <div class="efficiencybar bar" style="width:30px;"></div>
-                    <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
-                </div>
-                -->
-
-
             </div>
         </div>
 
+        <div class="heavyfighter">
+            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
+            <div class="systemcontainer">
+                <div class="icon">
+                    <table class="fightersystemcontainer 1"><tr></tr></table>
+                    <div style="height:60px;"></div>
+                    <table class="fightersystemcontainer 2"><tr></tr></table>
+                </div>
+
+                <div class="health systembarcontainer">
+                    <div class="healthbar bar" style="width:90px;"></div>
+                    <div class="valuecontainer"><span class="healthvalue value"></span></div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
     <div id="shipwindowtemplatecontainer" style="display:none;">
@@ -415,6 +423,19 @@
             </table>
         </div>
 
+        <div class="shipwindow heavyfighter">
+            <div class="topbar">
+                <span class="valueheader name">Name:</span><span class="value name">name here</span>
+                <span class="valueheader shipclass">Class:</span><span class="value shipclass"></span>
+                <div class="close"></div>
+            </div>
+                    <table class="divider">
+                            <tr>
+                                    <td class="fightercontainer"></td>
+                            </tr>
+                    </table>
+        </div>
+        
     </div>
 
 	</body>
