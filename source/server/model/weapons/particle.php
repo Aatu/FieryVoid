@@ -730,5 +730,79 @@
 
     }
 
+    class LightParticleBeam extends LinkedWeapon{
+
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "lightParticleBeam";
+        public $displayName = "Light Particle Beam";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 4+$this->damagebonus - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 9+$this->damagebonus - $this->dp;      }
+
+    }
+
+    class HeavyBolter extends Particle{
+
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "heavyBolter";
+        public $displayName = "Heavy Bolter";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.5;
+        public $projectilespeed = 15;
+        public $animationWidth = 6;
+        public $trailLength = 6;
+
+        public $loadingtime = 3;
+
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 24;   }
+        public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 - $this->dp;      }
+    }
+    
 ?>
 

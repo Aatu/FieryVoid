@@ -5,6 +5,19 @@ var Pulse = function(json, ship)
 Pulse.prototype = Object.create( Weapon.prototype );
 Pulse.prototype.constructor = Pulse;
 
+var ScatterPulsar = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+ScatterPulsar.prototype = Object.create( Pulse.prototype );
+ScatterPulsar.prototype.constructor = ScatterPulsar;
+
+var QuadPulsar = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+QuadPulsar.prototype = Object.create( Pulse.prototype );
+QuadPulsar.prototype.constructor = QuadPulsar;
 
 var LightPulse = function(json, ship)
 {

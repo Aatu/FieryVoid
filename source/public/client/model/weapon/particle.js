@@ -97,6 +97,13 @@ var LightParticleBlaster = function(json, ship)
 LightParticleBlaster.prototype = Object.create( Particle.prototype );
 LightParticleBlaster.prototype.constructor = LightParticleBlaster;
 
+var LightParticleBeam = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+LightParticleBeam.prototype = Object.create( Particle.prototype );
+LightParticleBeam.prototype.constructor = LightParticleBeam;
+
 var ParticleRepeater = function(json, ship)
 {
     Particle.call( this, json, ship);
@@ -161,3 +168,10 @@ RepeaterGun.prototype.getLoadingTime = function(){
     
     return 1 + boostAmount;
 }
+
+var HeavyBolter = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+HeavyBolter.prototype = Object.create(Particle.prototype);
+HeavyBolter.prototype.constructor = HeavyBolter;

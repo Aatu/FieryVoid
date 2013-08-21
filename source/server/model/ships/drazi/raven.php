@@ -1,14 +1,14 @@
 <?php
-class Merlin extends MediumShip{
+class Raven extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 315;
+	$this->pointCost = 310;
 	$this->faction = "Drazi";
-        $this->phpclass = "Merlin";
+        $this->phpclass = "Raven";
         $this->imagePath = "img/ships/merlin.png";
-        $this->shipClass = "Merlin Frigate";
+        $this->shipClass = "Raven Light Raider";
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -22,21 +22,21 @@ class Merlin extends MediumShip{
         $this->pivotcost = 2;
 	$this->iniativebonus = 70;
         
-        $this->addPrimarySystem(new Reactor(4, 11, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 2));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
-        $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-	$this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
+        $this->addPrimarySystem(new Engine(4, 13, 0, 8, 2));
+	$this->addPrimarySystem(new Hangar(4, 1));
 	$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
-	$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 300, 0));
-	$this->addFrontSystem(new LightParticleCannon(3, 6, 5, 0, 60));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));
+	$this->addFrontSystem(new RepeaterGun(3, 6, 4, 300, 60));
+	$this->addFrontSystem(new RepeaterGun(3, 6, 4, 300, 60));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 		
-        $this->addAftSystem(new Thruster(4, 12, 0, 6, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 8, 2));
 		
         $this->addPrimarySystem(new Structure( 4, 33));
     }

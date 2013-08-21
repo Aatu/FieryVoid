@@ -101,6 +101,65 @@
     
     }
 
+    class ScatterPulsar extends Pulse{
+
+        public $name = "scatterPulsar";
+        public $displayName = "Scatter Pulsar";
+        public $animation = "trail";
+        public $trailLength = 12;
+        public $animationWidth = 4;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.10;
+        public $rof = 1;
+        public $grouping = 25;
+        
+        public $loadingtime = 1;
+        public $intercept = 2;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 6;   }
+        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 6 - $this->dp;      }
+    }
+    
+    class QuadPulsar extends Pulse{
+
+        public $name = "quadPulsar";
+        public $displayName = "Quad Pulsar";
+        public $animation = "trail";
+        public $trailLength = 20;
+        public $animationWidth = 6;
+        public $projectilespeed = 20;
+        public $animationExplosionScale = 0.25;
+        public $rof = 3;
+        public $grouping = 25;
+        public $maxpulses = 4;
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-1, 3, 3); // fighters, <mediums, <capitals 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getPulses($turn)
+        {
+            return Dice::d(3);
+        }
+
+        public function getDamage($fireOrder){        return 14;   }
+        public function setMinDamage(){     $this->minDamage = 14 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+    }
+    
     class LightPulse extends Pulse{
 
         public $name = "lightPulse";
