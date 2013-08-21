@@ -477,9 +477,13 @@ window.weaponManager = {
             rangePenalty = rangePenalty*2;
          }else if (shooter.faction != target.faction){
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
+            var stealth = shipManager.systems.getSystemByName(target, "stealth");
         
             if (jammer && !shipManager.power.isOffline(target, jammer))
                 jammermod = rangePenalty*shipManager.systems.getOutput(target, jammer);
+            
+            if(stealth && (mathlib.getDistanceHex(sPos, tPos) > 5))
+                jammermod = rangePenalty;
             
             if (target.flight){
                 var jinking = shipManager.movement.getJinking(target);
@@ -797,7 +801,7 @@ window.weaponManager = {
         
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
         
-        if(stealthSystem && mathlib.getDistanceHex(shooterPos, targetPos) > 5){
+        if(stealthSystem && mathlib.getDistanceHex(shooterPos, targetPos) > 5.1 && weapon.ballistic){
             return false;
         }
         
