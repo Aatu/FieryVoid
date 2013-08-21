@@ -792,12 +792,17 @@ window.weaponManager = {
     checkIsInRange: function(shooter, target, weapon){
         
         var range = weapon.range;
+        var shooterPos = shipManager.getShipPositionInWindowCo(shooter);
+        var targetPos = shipManager.getShipPositionInWindowCo(target)
+        
+        var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
+        
+        if(stealthSystem && mathlib.getDistanceHex(shooterPos, targetPos) > 5){
+            return false;
+        }
         
         if (range === 0)
             return true;
-        
-        var shooterPos = shipManager.getShipPositionInWindowCo(shooter);
-        var targetPos = shipManager.getShipPositionInWindowCo(target)
         
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
