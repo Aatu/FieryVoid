@@ -877,11 +877,9 @@
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
                 $location = 1;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                $location = 0;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(330,$tf) )){
                 $location = 3;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
+            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(180,$tf) )){
                 $location = 4;
             } 
            
