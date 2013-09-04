@@ -22,6 +22,7 @@ if (! isset($chatelement))
             polling: false,
             requesting: false,
             lastid: 0,
+            lastTimeChecked: 0,
             focus: false,
             gameid:<?php print($chatgameid) ?>,
             playerid:<?php print($_SESSION["user"]) ?>,
@@ -33,6 +34,8 @@ if (! isset($chatelement))
                 $(chat.chatElement+ " .chatinput").on("blur", chat.onBlur);
                 $(chat.chatElement).on('onshow', chat.resizeChat);
                 
+                chat.getLastTimeChecked();
+                console.log("initChat: lastTimeChecked " + chat.lastTimeChecked );
                 chat.resizeChat();
                 chat.startPolling();
             },
@@ -45,13 +48,20 @@ if (! isset($chatelement))
             },
             
             onFocus: function(){
+                console.log("onFocus");
+                
                 if (window.windowEvents)
                     windowEvents.chatfocus = true;
             },
 
             onBlur: function(){
+                console.log("onBlur");
+                
                 if (window.windowEvents)
                     windowEvents.chatfocus = false;
+                
+                chat.setLastTimeChecked();
+                
             },
 
             onKeyUp: function(e){
@@ -71,6 +81,7 @@ if (! isset($chatelement))
 
                 var c = $(chat.chatElement+ " .chatMessages");
                 var scroll = false;
+                var lastTimeStamp = 0;
 
                 for (var i in data){
                     var message = data[i];
@@ -85,8 +96,11 @@ if (! isset($chatelement))
                     var e = $('<div class="chatmessage">'+ingame+'<span class="chattime">('+message.time+')</span> <span class="chatuser'+mine+'">'+message.username+': </span><span class="chattext">'+message.message+'</span></div></div>');
                     e.appendTo(c);
                     chat.lastid = message.id;
+                    lastTimeStamp = message.time;
                     scroll = true;
                 }
+
+                console.log("parseChatData: lastTimeStamp " + lastTimeStamp + ", lastTimeChecked " + chat.lastTimeChecked);
 
                 if (scroll)
                     c.scrollTop(c[0].scrollHeight);
@@ -98,6 +112,50 @@ if (! isset($chatelement))
                     return;
 
                 setTimeout(chat.requestChatdata, 3000);
+            },
+
+            setLastTimeChecked: function(){
+                $.ajax({
+                    type : 'POST',
+                    url : 'playerChatInfo.php',
+                    dataType : 'json',
+                    data: {
+                        gameid:chat.gameid
+                    },
+                    success : chat.successSetLastTimeChecked,
+                    error : chat.errorAjax
+                });
+                
+            },
+
+            getLastTimeChecked: function(){
+                $.ajax({
+                    type : 'GET',
+                    url : 'playerChatInfo.php',
+                    dataType : 'json',
+                    data: {
+                        gameid:chat.gameid
+                    },
+                    success : chat.successGetLastTimeChecked,
+                    error : chat.errorAjax
+                });
+                
+            },
+
+            successSetLastTimeChecked: function(data){
+                console.log("set successful");
+                
+                if (data.error){
+                    window.confirm.exception(data , function(){});
+                }
+            },
+
+            successGetLastTimeChecked: function(data){
+                if (data.error){
+                    window.confirm.exception(data , function(){});
+                }else{
+                        chat.lastTimeChecked = data.lastTimeChecked;
+                }
             },
 
             submitChatMessage: function(message){

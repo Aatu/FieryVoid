@@ -1636,6 +1636,54 @@ class DBManager {
         }
     }
     
+    public function getLastTimeChatChecked($userid, $gameid){
+        $lastTime = null;
+        
+        $stmt = $this->connection->prepare("
+            SELECT 
+                last_checked
+            FROM
+                player_chat
+            WHERE
+                playerid = ?
+            AND 
+                gameid = ?
+        ");
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->bind_result($last_checked);
+            $stmt->execute();
+            
+            $lastTime = $stmt->fetch();
+            $stmt->close();
+        }
+        
+        return $lastTime;
+    }
+
+    public function setLastTimeChatChecked($userid, $gameid){
+        $stmt = $this->connection->prepare("
+            UPDATE 
+                player_chat
+            SET
+                last_checked = now()
+            WHERE
+                playerid = ?
+            AND 
+                gameid = ?
+        ");
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->execute();
+            
+            $stmt->close();
+        }
+    }
+    
     public function submitChatMessage($userid, $message, $gameid = 0)
     {
         
