@@ -47,13 +47,8 @@ if (! isset($chatelement))
             
             resizeChat: function(){
                 chat.setLastTimeChecked();
-                
-                if (chat.gameid == 0){
-                    document.getElementById("globalChatTab").classList.remove("newMessage");
-                }
-                else{
-                    document.getElementById("chatTab").classList.remove("newMessage");
-                }
+
+                chat.removeNewMessageTag();
                 
                 var h = $(chat.chatElement+ " .chatcontainer").height();
                 $(chat.chatElement+ " .chatMessages").css("height", (h-20)+"px");
@@ -107,7 +102,9 @@ if (! isset($chatelement))
                         ingame = '<span class="chatingame">IN GAME: </span>';
                     }
 
-                    chat.lastTimeStamp = message.time;
+                    if(message.userid != chat.playerid){
+                        chat.lastTimeStamp = message.time;
+                    }
 
                     var e = $('<div class="chatmessage">'+ingame+'<span class="chattime">('+message.time+')</span> <span class="chatuser'+mine+'">'+message.username+': </span><span class="chattext">'+message.message+'</span></div></div>');
                     e.appendTo(c);
@@ -118,14 +115,15 @@ if (! isset($chatelement))
                 console.log("parseChatData: gameid " +chat.gameid + ", lastTimeStamp " + chat.lastTimeStamp + ", lastTimeChecked " + chat.lastTimeChecked );
                 
                 if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked )){
-                    // search logcontainer
+                    var thisChat = "chatTab";
+                    
                     if (chat.gameid == 0){
-                        document.getElementById("globalChatTab").classList.add("newMessage");
+                        thisChat = "globalChatTab";
                     }
-                    else{
-                        document.getElementById("chatTab").classList.add("newMessage");
+
+                    if(!document.getElementById(thisChat).classList.contains("selected")){
+                        document.getElementById(thisChat).classList.add("newMessage");
                     }
-                    console.log("gameid " + chat.gameid + " light it up!");
                 }
                 
                 if (scroll)
@@ -190,6 +188,15 @@ if (! isset($chatelement))
                 setTimeout(chat.requestChatdata, 3000);
             },
 
+            removeNewMessageTag:function(){
+                if (chat.gameid == 0){
+                    document.getElementById("globalChatTab").classList.remove("newMessage");
+                }
+                else{
+                    document.getElementById("chatTab").classList.remove("newMessage");
+                }
+            },
+            
             setLastTimeChecked: function(){
                 $.ajax({
                     type : 'POST',
@@ -233,6 +240,8 @@ if (! isset($chatelement))
             },
 
             submitChatMessage: function(message){
+                chat.setLastTimeChecked();
+                
                 $.ajax({
                     type : 'POST',
                     url : 'chatdata.php',
