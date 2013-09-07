@@ -22,7 +22,8 @@ if (! isset($chatelement))
             polling: false,
             requesting: false,
             lastid: 0,
-            lastTimeChecked: 0,
+            lastTimeChecked: "",
+            lastTimeStamp: "",
             focus: false,
             gameid:<?php print($chatgameid) ?>,
             playerid:<?php print($_SESSION["user"]) ?>,
@@ -34,34 +35,42 @@ if (! isset($chatelement))
                 $(chat.chatElement+ " .chatinput").on("blur", chat.onBlur);
                 $(chat.chatElement).on('onshow', chat.resizeChat);
                 
-                chat.getLastTimeChecked();
-                console.log("initChat: lastTimeChecked " + chat.lastTimeChecked );
-                chat.resizeChat();
-                chat.startPolling();
-            },
-            
-            resizeChat: function(){
                 var h = $(chat.chatElement+ " .chatcontainer").height();
                 $(chat.chatElement+ " .chatMessages").css("height", (h-20)+"px");
                 var c = $(chat.chatElement+ " .chatMessages");
                 c.scrollTop(c[0].scrollHeight);
+
+                chat.startPolling();
+
+                chat.getLastTimeChecked();
+            },
+            
+            resizeChat: function(){
+                chat.setLastTimeChecked();
+                
+                if (chat.gameid == 0){
+                    document.getElementById("globalChatTab").classList.remove("newMessage");
+                }
+                else{
+                    document.getElementById("chatTab").classList.remove("newMessage");
+                }
+                
+                var h = $(chat.chatElement+ " .chatcontainer").height();
+                $(chat.chatElement+ " .chatMessages").css("height", (h-20)+"px");
+                var c = $(chat.chatElement+ " .chatMessages");
+                c.scrollTop(c[0].scrollHeight);
+                
+                chat.getLastTimeChecked();
             },
             
             onFocus: function(){
-                console.log("onFocus");
-                
                 if (window.windowEvents)
                     windowEvents.chatfocus = true;
             },
 
             onBlur: function(){
-                console.log("onBlur");
-                
                 if (window.windowEvents)
                     windowEvents.chatfocus = false;
-                
-                chat.setLastTimeChecked();
-                
             },
 
             onKeyUp: function(e){
@@ -81,30 +90,97 @@ if (! isset($chatelement))
 
                 var c = $(chat.chatElement+ " .chatMessages");
                 var scroll = false;
-                var lastTimeStamp = 0;
 
                 for (var i in data){
                     var message = data[i];
+                    
                     var mine = "";
                     if (message.userid == chat.playerid)
                         mine = " mine";
                     
-                    var ingame = '<span class="chatingame">IN GAME: </span>';
-                    if (chat.gameid == 0)
+                    var ingame;
+
+                    if (chat.gameid == 0){
                         ingame = '<span class="chatglobal">GLOBAL: </span>';
-                    
+                    }
+                    else{
+                        ingame = '<span class="chatingame">IN GAME: </span>';
+                    }
+
+                    chat.lastTimeStamp = message.time;
+
                     var e = $('<div class="chatmessage">'+ingame+'<span class="chattime">('+message.time+')</span> <span class="chatuser'+mine+'">'+message.username+': </span><span class="chattext">'+message.message+'</span></div></div>');
                     e.appendTo(c);
                     chat.lastid = message.id;
-                    lastTimeStamp = message.time;
                     scroll = true;
                 }
 
-                console.log("parseChatData: lastTimeStamp " + lastTimeStamp + ", lastTimeChecked " + chat.lastTimeChecked);
-
+                console.log("parseChatData: gameid " +chat.gameid + ", lastTimeStamp " + chat.lastTimeStamp + ", lastTimeChecked " + chat.lastTimeChecked );
+                
+                if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked )){
+                    // search logcontainer
+                    if (chat.gameid == 0){
+                        document.getElementById("globalChatTab").classList.add("newMessage");
+                    }
+                    else{
+                        document.getElementById("chatTab").classList.add("newMessage");
+                    }
+                    console.log("gameid " + chat.gameid + " light it up!");
+                }
+                
                 if (scroll)
                     c.scrollTop(c[0].scrollHeight);
 
+            },
+            
+            checkTimesForLightup: function(timeStamp, lastChecked){
+                if(!timeStamp || !lastChecked){
+                    return false;
+                }
+                
+                if(chat.compareTimes(chat.parseTime(timeStamp), chat.parseTime(lastChecked))>0){
+                    return true;
+                }
+                
+                return false;
+            },
+            
+            parseTime: function(timeString){
+                var yearString = timeString.substring(0, 4);
+                var monthString = timeString.substring(5,7);
+                var dayString = timeString.substring(8,10);
+                var hoursString = timeString.substring(11, 13);
+                var minutesString = timeString.substring(14,16);
+                var secondsString = timeString.substring(17);
+                
+                var timeArray = new Array();
+                
+                timeArray[0] = parseInt(yearString);
+                timeArray[1] = parseInt(monthString);
+                timeArray[2] = parseInt(dayString);
+                timeArray[3] = parseInt(hoursString);
+                timeArray[4] = parseInt(minutesString);
+                timeArray[5] = parseInt(secondsString);
+                
+                return timeArray;
+            },
+            
+            compareTimes: function(timeArray1, timeArray2){
+                // returns 1 if time in timeArray1 is later than timeArray2
+                // returns -1 if time in timeArray1 is later than timeArray2
+                // returns 0 if times are equal
+                for(var i in timeArray1){
+                   var time1 = timeArray1[i];
+                   var time2 = timeArray2[i];
+                   
+                   if(time1 > time2){
+                       return 1;
+                   }else if(time1 < time2){
+                       return -1;
+                   }
+                }
+                
+                return 0;
             },
 
             startPolling: function(){
@@ -143,8 +219,6 @@ if (! isset($chatelement))
             },
 
             successSetLastTimeChecked: function(data){
-                console.log("set successful");
-                
                 if (data.error){
                     window.confirm.exception(data , function(){});
                 }
@@ -154,7 +228,7 @@ if (! isset($chatelement))
                 if (data.error){
                     window.confirm.exception(data , function(){});
                 }else{
-                        chat.lastTimeChecked = data.lastTimeChecked;
+                    chat.lastTimeChecked = data.lastCheckGame;
                 }
             },
 

@@ -1653,10 +1653,13 @@ class DBManager {
         if ($stmt)
         {
             $stmt->bind_param('ii', $userid, $gameid);
-            $stmt->bind_result($last_checked);
+            $stmt->bind_result($lastTimeChecked);
             $stmt->execute();
             
-            $lastTime = $stmt->fetch();
+            $stmt->fetch();
+            
+            $lastTime = $lastTimeChecked;
+            
             $stmt->close();
         }
         
@@ -1664,16 +1667,54 @@ class DBManager {
     }
 
     public function setLastTimeChatChecked($userid, $gameid){
+        // First check if there is already an entry for this game and player
         $stmt = $this->connection->prepare("
-            UPDATE 
+            SELECT 
+                last_checked
+            FROM
                 player_chat
-            SET
-                last_checked = now()
             WHERE
                 playerid = ?
             AND 
                 gameid = ?
         ");
+
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->bind_result($time);
+            $stmt->execute();
+            $stmt->fetch();
+                    
+            $stmt->close();
+        }
+        
+        // Either update or insert depending on whether there is already
+        // an entry or not.
+        if($time != ""){
+            $stmt = $this->connection->prepare("
+                UPDATE 
+                    player_chat
+                SET
+                    last_checked = now()
+                WHERE
+                    playerid = ?
+                AND 
+                    gameid = ?
+            ");
+        }
+        else{
+            $stmt = $this->connection->prepare("
+                INSERT INTO
+                    player_chat
+                VALUES
+                (
+                    ?,
+                    ?,
+                    now()
+                )
+            ");
+        }
         
         if ($stmt)
         {

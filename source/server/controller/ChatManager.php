@@ -59,8 +59,9 @@ class ChatManager{
         try
         {
             self::initDBManager();
-            $time = self::$dbManager->getLastTimeChatChecked($userid, $gameid);
-            return '{"lastTimeChecked": "'.$time.'"}';
+            // First do the game I am in
+            $gameTime = self::$dbManager->getLastTimeChatChecked($userid, $gameid);
+            return '{"lastCheckGame": "'.$gameTime.'"}';
         }    
         catch(Exception $e) 
         {
