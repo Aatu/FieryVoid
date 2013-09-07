@@ -629,6 +629,11 @@ body.phase1 #botPanel .ewentry .button2{
 .logUiEntry span{
 }
 
+.logUiEntry.newMessage{
+    color:#DEEBFF;
+}
+
+
 .logUiEntry.selected{
     top:-25px;
     background-color: #04161C;

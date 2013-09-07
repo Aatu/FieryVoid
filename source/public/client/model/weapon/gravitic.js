@@ -45,8 +45,6 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
     else{
         var count = shipManager.power.getBoost(this);
         
-        console.log("Count " + count);
-        
         for(var i = 0; i < count; i++){
             shipManager.power.unsetBoost(null, this);
         }

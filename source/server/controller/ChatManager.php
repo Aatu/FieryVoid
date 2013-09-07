@@ -54,4 +54,33 @@ class ChatManager{
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
     }
+    
+    public static function getLastTimeChatChecked($userid, $gameid){
+        try
+        {
+            self::initDBManager();
+            // First do the game I am in
+            $gameTime = self::$dbManager->getLastTimeChatChecked($userid, $gameid);
+            return '{"lastCheckGame": "'.$gameTime.'"}';
+        }    
+        catch(Exception $e) 
+        {
+            $logid = Debug::error($e);
+            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+        }
+    }
+    
+    public static function setLastTimeChatChecked($userid, $gameid){
+        try
+        {
+            self::initDBManager();
+            self::$dbManager->setLastTimeChatChecked($userid, $gameid);
+            return "{}";
+        }    
+        catch(Exception $e) 
+        {
+            $logid = Debug::error($e);
+            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+        }
+    }
 }

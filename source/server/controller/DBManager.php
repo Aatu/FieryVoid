@@ -1636,6 +1636,95 @@ class DBManager {
         }
     }
     
+    public function getLastTimeChatChecked($userid, $gameid){
+        $lastTime = null;
+        
+        $stmt = $this->connection->prepare("
+            SELECT 
+                last_checked
+            FROM
+                player_chat
+            WHERE
+                playerid = ?
+            AND 
+                gameid = ?
+        ");
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->bind_result($lastTimeChecked);
+            $stmt->execute();
+            
+            $stmt->fetch();
+            
+            $lastTime = $lastTimeChecked;
+            
+            $stmt->close();
+        }
+        
+        return $lastTime;
+    }
+
+    public function setLastTimeChatChecked($userid, $gameid){
+        // First check if there is already an entry for this game and player
+        $stmt = $this->connection->prepare("
+            SELECT 
+                last_checked
+            FROM
+                player_chat
+            WHERE
+                playerid = ?
+            AND 
+                gameid = ?
+        ");
+
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->bind_result($time);
+            $stmt->execute();
+            $stmt->fetch();
+                    
+            $stmt->close();
+        }
+        
+        // Either update or insert depending on whether there is already
+        // an entry or not.
+        if($time != ""){
+            $stmt = $this->connection->prepare("
+                UPDATE 
+                    player_chat
+                SET
+                    last_checked = now()
+                WHERE
+                    playerid = ?
+                AND 
+                    gameid = ?
+            ");
+        }
+        else{
+            $stmt = $this->connection->prepare("
+                INSERT INTO
+                    player_chat
+                VALUES
+                (
+                    ?,
+                    ?,
+                    now()
+                )
+            ");
+        }
+        
+        if ($stmt)
+        {
+            $stmt->bind_param('ii', $userid, $gameid);
+            $stmt->execute();
+            
+            $stmt->close();
+        }
+    }
+    
     public function submitChatMessage($userid, $message, $gameid = 0)
     {
         
