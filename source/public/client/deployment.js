@@ -1,5 +1,5 @@
 window.deployment = {
-    
+    initialized: false,
 
     drawDeploymentAreas: function(canvas){
         deployment.drawDeploymentForSelectedShip(canvas);
@@ -16,21 +16,28 @@ window.deployment = {
         canvas.fillStyle = "rgba(160,250,100,0.1)";
         var slot = deployment.getValidDeploymentArea(selectedShip);
         deployment.drawDep(canvas, slot);
-        
-        
+
+        var side1Players = new Array();
+        var side2Players = new Array();
         
         for (var i in gamedata.slots){
             var otherslot = gamedata.slots[i];
-            if (slot.slot == otherslot.slot)
+            if (slot.slot == otherslot.slot){
+                var index = side1Players.length;
+                side1Players[index] = otherslot.playername;
+                
                 continue;
+            }
             
             if (slot.team != otherslot.team)
                 continue;
             
+            var index = side1Players.length;
+            side1Players[index] = otherslot.playername;
+            
             canvas.strokeStyle = "rgba(100,170,250,0.5)";
             canvas.fillStyle = "rgba(100,170,250,0.1)";
             deployment.drawDep(canvas, otherslot);
-       
        }
        
        
@@ -42,11 +49,42 @@ window.deployment = {
             
             if (slot.team == otherslot.team)
                 continue;
-            
+
+            var index = side2Players.length;
+            side2Players[index] = otherslot.playername;
+
             canvas.strokeStyle = "rgba(250,100,100,0.5)";
             canvas.fillStyle = "rgba(250,100,100,0.1)";
             deployment.drawDep(canvas, otherslot);
+       }
        
+       var welcomeString = "The opponents: ";
+       
+       for (var i in side1Players){
+           var name = side1Players[i];
+           
+           if(i > 0){
+               welcomeString += " and ";
+           }
+           
+           welcomeString += name;
+       }
+       
+       welcomeString += " versus ";
+       
+       for (var i in side2Players){
+           var name = side2Players[i];
+           
+           if(i > 0){
+               welcomeString += " and ";
+           }
+           
+           welcomeString += name;
+       }
+       
+       if(!window.deployment.initialized){
+           confirm.error(welcomeString);
+           window.deployment.initialized = true;
        }
     },
     
