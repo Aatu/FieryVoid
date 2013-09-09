@@ -78,7 +78,10 @@ shipManager.power = {
 	
 	},
 	
-        checkGraviticShield: function(){
+        getShipsGraviticShield: function(){
+            var shipNames = new Array();
+            var counter = 0;
+
             for (var i in gamedata.ships){
                 var ship = gamedata.ships[i];
 
@@ -94,17 +97,21 @@ shipManager.power = {
                 if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
                     continue;
 
-                if(!ship.checkShieldGenerator())
-                    return false;
+                if(!ship.checkShieldGenerator()){
+                    shipNames[counter] = ship.name;
+                    counter++;
+                }
             }
             
-            return true;
+            return shipNames;
         },
         
-	checkPowerPositive: function(){
+	getShipsNegativePower: function(){
+            var shipNames = new Array();
+            var counter = 0;
 	
-		for (var i in gamedata.ships){
-			var ship = gamedata.ships[i];
+            for (var i in gamedata.ships){
+		var ship = gamedata.ships[i];
             
             if (ship.unavailable)
                 continue;
@@ -118,12 +125,13 @@ shipManager.power = {
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
 				continue;
 			
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"))<0)
-				return false;
-			
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"))<0){
+                            shipNames[counter] = ship.name;
+                            counter++;
+                        }
 		}
 		
-		return true;
+		return shipNames;
 	
 	},
 	

@@ -197,13 +197,31 @@ gamedata = {
         UI.shipMovement.hide();
         if (gamedata.gamephase == 1){
         
-            if (!shipManager.power.checkPowerPositive()){
-                window.confirm.error("You have ships with insufficient power. You need to turn off systems before you can commit the turn.", function(){});
+            var shipNames = shipManager.power.getShipsNegativePower();
+            
+            if (shipNames.length > 0){
+                var negPowerError = "The following ships have insufficient power:<br>";
+                
+                for(var index in shipNames){
+                    var name = shipNames[index];
+                    negPowerError += "- " + name + "<br>";
+                }
+                negPowerError += "You need to turn off systems before you can commit the turn.";
+                window.confirm.error(negPowerError, function(){});
                 return false;
             }
             
-            if (!shipManager.power.checkGraviticShield()){
-                window.confirm.error("Shield generators can only support a limited amount of shields. You need to turn of shields.", function(){});
+            shipNames = shipManager.power.getShipsGraviticShield();
+            
+            if (shipNames.length > 0){
+                var tooManyShieldsError = "The following ships have too many active shields:<br>";
+                
+                for(var i in shipNames){
+                    var shipName = shipNames[i];
+                    tooManyShieldsError += "- " + shipName + "<br>";
+                }
+                tooManyShieldsError += "You need to turn off shields or boost your shield generator before you can commit the turn.";
+                window.confirm.error(tooManyShieldsError, function(){});
                 return false;
             }
             
