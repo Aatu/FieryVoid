@@ -269,7 +269,7 @@ spl_autoload_register(
                 'reducediniativeoneturn' => '/server/model/cricialClasses.php',
                 'reducedrange' => '/server/model/cricialClasses.php',
                 'reloadrack' => '/server/model/weapons/missile.php',
-                'repeaterGun' => '/server/model/weapons/particle.php',
+                'repeatergun' => '/server/model/weapons/particle.php',
                 'resha' => '/server/model/ships/balosian/resha.php',
                 'restrictedew' => '/server/model/cricialClasses.php',
                 'rolentha' => '/server/model/ships/minbari/rolentha.php',
