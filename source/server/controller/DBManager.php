@@ -1764,7 +1764,7 @@ class DBManager {
             AND 
                 id > ?
             ORDER BY id DESC
-            LIMIT 10;
+            LIMIT 50;
         ");
         
         if ($stmt)
@@ -1789,7 +1789,7 @@ class DBManager {
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 1 DAY) < NOW()    
+                DATE_ADD(time, INTERVAL 2 DAY) < NOW()    
         ");
         
         if ($stmt)
