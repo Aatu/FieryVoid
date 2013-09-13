@@ -2,6 +2,7 @@ window.deployment = {
     initialized: false,
 
     drawDeploymentAreas: function(canvas){
+        gameInfoManager.prepare();
         deployment.drawDeploymentForSelectedShip(canvas);
     },
 

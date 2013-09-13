@@ -78,6 +78,8 @@
 	<script src="client/UI/systemInfo.js"></script>
     <script src="client/animation.js"></script>
     <script src="client/UI/shipwindow.js"></script>
+    <script src="client/UI/fleetList.js"></script>
+    <script src="client/UI/gameInfo.js"></script>
     <script src="client/UI/flightwindow.js"></script>
     <script src="client/UI/shipclickable.js"></script>
 	<script src="client/UI/confirm.js"></script>
@@ -697,6 +699,9 @@
         <div id="logTab" data-select="#log" class="logUiEntry selected">
             <span>COMBAT LOG</span>
         </div>
+        <div id="infoTab" data-select="#gameinfo" class="logUiEntry">
+            <span>GAME INFO</span>
+        </div>
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
@@ -707,6 +712,10 @@
     <div id="log" class="logPanelEntry">
 
     </div>
+    <div id="gameinfo" class="logPanelEntry" style="display:none;">
+
+    </div>
+    
     <div id="chat" class="logPanelEntry" style="display:none;">
         <?php 
             $chatgameid = $gameid;
@@ -722,6 +731,16 @@
             include("chat.php")
         ?>
     </div>
+    
+    <div class="fleetlistentry">
+        <div class="fleetheader">
+        </div>
+        <div class="fleetlist">
+                <div class="fleetlistline">
+                </div>
+    </div>
+    
+        
 </div>
 
 </body>

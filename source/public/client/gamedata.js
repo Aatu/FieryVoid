@@ -281,6 +281,15 @@ gamedata = {
         }
     },
     
+    getPlayerNameById: function(id){
+        for(var i in gamedata.slots){
+            var slot = gamedata.slots[i];
+            if(slot.playerid = id){
+                return slot.playername;
+            }
+        }
+    },
+    
     getPhasename: function(){
         if (gamedata.gamephase == 1)
             return "INITIAL ORDERS";
@@ -317,6 +326,7 @@ gamedata = {
 		gamedata.subphase = 0;
         shipManager.initShips();
         UI.shipMovement.hide();
+        fleetListManager.displayFleetLists();
         
         gamedata.setPhaseClass();
         for (var i in gamedata.ships){
@@ -350,7 +360,8 @@ gamedata = {
                 gamedata.subphase = 1;
                 damageDrawer.checkDamages();
             }
-                           
+            
+            fleetListManager.updateFleetList();
         }
         
                

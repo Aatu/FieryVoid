@@ -112,8 +112,6 @@ if (! isset($chatelement))
                     scroll = true;
                 }
 
-                console.log("parseChatData: gameid " +chat.gameid + ", lastTimeStamp " + chat.lastTimeStamp + ", lastTimeChecked " + chat.lastTimeChecked );
-                
                 if(chat.checkTimesForLightup(chat.lastTimeStamp, chat.lastTimeChecked )){
                     var thisChat = "chatTab";
                     
