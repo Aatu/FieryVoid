@@ -729,8 +729,19 @@ class DBManager {
 			return array();
         
 		foreach ($games as $game){
-			$game->slots = $this->getSlotsInGame($game->id);
-            $game->onConstructed();
+                    $game->slots = $this->getSlotsInGame($game->id);
+                    $game->onConstructed();
+                    
+                    // We are still in gamelobby. Ships are not loaded yet
+                    // for the games. And you do not want to do that, because
+                    // it takes too much time.
+                    // Just get the activeship and check that.
+                    $ship = $this->getShipByIdFromDB($game->activeship);
+                    
+                    if($ship != null){
+                        if ($ship->userid == $game->forPlayer)
+                            $game->waitingForThisPlayer = true;
+                    }
 		}
 		
 		return $games;
@@ -855,6 +866,34 @@ class DBManager {
             $stmt->close();
         }
         return $slot;
+    }
+    
+    public function getShipByIdFromDB($id){
+        $ship = null;
+        
+        $stmt = $this->connection->prepare(
+            "SELECT
+                id, playerid, name, phpclass, slot
+            FROM
+                tac_ship 
+            WHERE
+                id = ?
+            "
+        );
+
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $id);
+            $stmt->bind_result($id, $playerid, $name, $phpclass, $slot);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                $ship = new $phpclass($id, $playerid, $name, $slot);
+            }
+            $stmt->close();
+        }
+        
+        return $ship;
     }
     
     public function getTacShips($gamedata)

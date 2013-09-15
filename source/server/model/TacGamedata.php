@@ -63,7 +63,6 @@ class TacGamedata{
     }
    
     public function onConstructed(){
-        
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
         
@@ -328,11 +327,14 @@ class TacGamedata{
     
     public function getActiveship(){
         foreach ($this->ships as $ship){
+            Debug::log("I have ships");
             if ($ship->id == $this->activeship){
+                Debug::log("found it!!!");
                 return $ship;
             }
         }
         
+        Debug::log("getactiveship returns null");
         return null;
     }
     
@@ -576,7 +578,9 @@ class TacGamedata{
     {
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
         
-        if (($activeship = $this->getActiveship()) != null)
+        $activeship = $this->getShipById($this->activeship);
+        
+        if ( $activeship != null)
         {
             if ($activeship->userid == $this->forPlayer)
                 return true;
@@ -593,6 +597,4 @@ class TacGamedata{
                 
         return false;
     }
-    
-
 }
