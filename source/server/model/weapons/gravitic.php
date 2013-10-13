@@ -455,6 +455,20 @@ class GraviticBolt extends Gravitic
 		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
+        
+        public function setLoading( $loading )
+        {
+            Debug::log("Enter gravlance setLoading");
+            if (!$loading){
+                Debug::log("Exit gravlance setLoading: nothing");
+                return;
+            }
+
+            foreach ($this->weapons as $i=>$weapon){
+
+                $weapon->setLoading($loading);
+            }
+        }
     }
     
     // Don't use the GravLance. It's only here for the GraviticLance class!!

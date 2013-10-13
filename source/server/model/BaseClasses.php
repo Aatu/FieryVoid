@@ -27,15 +27,16 @@ class SystemData
     
     public static function addDataForSystem($systemid, $subsystem, $shipid, $data)
     {
-        if (!isset(self::$allData[$systemid."_".$subsystem."_".$shipid]))
+        // with new dualWeapon implementation: ignore subsystem
+        if (!isset(self::$allData[$systemid."_0_".$shipid]))
         {
-             $systemdata = new SystemData($systemid, $subsystem, $shipid);
+             $systemdata = new SystemData($systemid, 0, $shipid);
              $systemdata->addData($data);
              self::$allData[] = $systemdata;
         }
         else
         {
-            self::$allData[$systemid."_".$subsystem."_".$shipid]->addData($data);
+            self::$allData[$systemid."_0_".$shipid]->addData($data);
         }
     }
 }

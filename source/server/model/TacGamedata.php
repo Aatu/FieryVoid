@@ -327,14 +327,11 @@ class TacGamedata{
     
     public function getActiveship(){
         foreach ($this->ships as $ship){
-            Debug::log("I have ships");
             if ($ship->id == $this->activeship){
-                Debug::log("found it!!!");
                 return $ship;
             }
         }
         
-        Debug::log("getactiveship returns null");
         return null;
     }
     

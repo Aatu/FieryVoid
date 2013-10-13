@@ -5,7 +5,7 @@ class DualWeapon extends Weapon{
     
     public $dualWeapon = true;
     public $weapons = array();
-    private $turnsFired = array();
+    //private $turnsFired = array();
     
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -17,11 +17,14 @@ class DualWeapon extends Weapon{
         return null;
     }
     
+    
+    // Only for determining intercept. So not needed in new setup
     public function getFiringWeapon($fireOrder){
         $firingMode = $fireOrder->firingMode;
         return $this->weapons[$firingMode];
     }
     
+    // Never called if all is well
     public function fire($gamedata, $fireOrder){
 
         $firingMode = $fireOrder->firingMode;
@@ -43,8 +46,13 @@ class DualWeapon extends Weapon{
     
     public function setId($id){
         parent::setId($id);
+        
+        $counter = 0;
+        
         foreach ($this->weapons as $weapon){
-            $weapon->setId($id);
+            $weapon->setId(1000 + ($id*10) + $counter);
+            $weapon->parentId = $id;
+            $counter++;
         } 
     }
     
@@ -55,6 +63,7 @@ class DualWeapon extends Weapon{
         } 
         return $fires;
     }
+    
     
     public function setFireOrders($fireOrders){
         foreach ($fireOrders as $fire)
@@ -71,38 +80,75 @@ class DualWeapon extends Weapon{
     
     public function onAdvancingGamedata($ship)
     {
+        
+        foreach ($this->weapons as $i=>$weapon){
+            if($weapon->turnsloaded == 0){
+                $this->turnsloaded = 0;
+                $this->firingMode = $i;
+                foreach ($this->weapons as $weapon1){
+                    $weapon1->turnsloaded = 0;
+                }
+                break;
+            }
+        }
+        
         foreach ($this->weapons as $i=>$weapon)
         {
             $data = $weapon->calculateLoading();
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($weapon->id, 0, $ship->id, $data->toJSON());
         }
-    }
-    
-    public function setSystemData($data, $subsystem)
-    {
-        $this->weapons[$subsystem]->setSystemData($data, $subsystem);
         
+        $data = $this->calculateLoading();
+            if ($data)
+                SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
     
+    /*public function setSystemData($data, $subsystem)
+    {
+        // TODO: subsystem is no longer necessary
+        if($this->id == 31){
+            Debug::log("setSystemData dual weapon");
+            Debug::log("data: ".$data);
+        }
+        
+        parent::setSystemData($data, $subsystem);
+        
+        foreach($this->weapons as $weapon){
+            $weapon->setSystemData($data, $subsystem);
+            
+            if($this->id == 31){
+                Debug::log("setSystemData dual weapon: ".$weapon->name);
+            }
+        } 
+    }*/
+
     public function setInitialSystemData($ship)
     {
+        $data = $this->getStartLoading();
+        SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+                
         foreach ($this->weapons as $i=>$weapon)
         {
             $data = $weapon->getStartLoading();
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($weapon->id, 0, $ship->id, $data->toJSON());
         }
     }
     
-    public function setLoading( $loading )
+    // TODO: probably no longer needed
+/*    public function setLoading( $loading )
     {
-        if (!$loading)
-            return;
+//        if (!$loading)
+//            return;
+        parent::setLoading($loading);
         
-        $this->weapons[$loading->subsystem]->setLoading($loading);
+        foreach ($this->weapons as $weapon)
+        {
+          $weapon->setLoading($loading);
+        }
         
-    }
+    }*/
     
 }
 
@@ -119,9 +165,13 @@ class LaserPulseArray extends DualWeapon{
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         
         $laser = new MediumLaser($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $laser->dualWeapon = true;
         $laser->parentSystem = $this;
+        $laser->displayName = "Laser/Pulse array (Laser)";
         $pulse = new MediumPulse($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $pulse->dualWeapon = true;
         $pulse->parentSystem = $this;
+        $pulse->displayName = "Laser/Pulse array (Pulse)";
         
 		$weapons = array(
 			 1 => $laser

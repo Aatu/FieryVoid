@@ -142,6 +142,12 @@ shipManager.power = {
 
 		for (var s in ship.systems){
 			var system = ship.systems[s];
+                        
+                        if(system.parentId > 0){
+                            // This is a subsystem of a dual/duo weapon. Ignore
+                            continue;
+                        }
+                        
 			for (var i in system.power){
 				var power = system.power[i];
 				if (power.turn != gamedata.turn)
@@ -417,8 +423,12 @@ shipManager.power = {
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(".system").has($(this));
 		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = ship.systems[systemwindow.data("id")];
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 		
+                if(system.parentId > 0){
+                    system = shipManager.systems.getSystem(ship, system.parentId);
+                }
+                
 		if (gamedata.gamephase != 1)
 			return;
 			
@@ -432,7 +442,15 @@ shipManager.power = {
 		if (shipManager.power.isOffline(ship, system))
 			return;
 		
-		system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+                system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+		
+                if(system.dualWeapon || system.duoWeapon){
+                    for(var i in system.weapons){
+                        var weapon = system.weapons[i];
+                        weapon.power.push({id:null, shipid:ship.id, systemid:weapon.id, type:1, turn:gamedata.turn, amount:0});
+        		shipWindowManager.setDataForSystem(ship, weapon);
+                    }
+                }
 		
 		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 			
@@ -455,8 +473,12 @@ shipManager.power = {
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(".system").has($(this));
 		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = ship.systems[systemwindow.data("id")];
-		
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+
+                if(system.parentId > 0){
+                    system = shipManager.systems.getSystem(ship, system.parentId);
+                }
+                
 		if (gamedata.gamephase != 1)
 			return;
 		
@@ -475,6 +497,14 @@ shipManager.power = {
                 }
                 
 		shipManager.power.setOnline(ship, system);
+                
+                if(system.dualWeapon || system.duoWeapon){
+                    for(var i in system.weapons){
+                        var weapon = system.weapons[i];
+                        shipManager.power.setOnline(ship, weapon);
+                    }
+                }
+                
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	},

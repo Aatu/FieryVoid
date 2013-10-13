@@ -230,7 +230,7 @@
             }
             else{
                 foreach($this->systems as $system){
-                    if($system instanceof Weapon && $system->duoWeapon){
+                    if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){
                         foreach($system->weapons as $weapon){
                             if($weapon->id == $id){
                                 return $weapon;

@@ -52,7 +52,8 @@ class DuoWeapon extends Weapon{
         $count = 0;
         
         foreach ($this->weapons as $weapon){
-            $weapon->setId($id+ 100 + $count);
+            $weapon->setId(1000 + ($id*10) + $count);
+            $weapon->parentId = $id;
             $count++;
         } 
     }
@@ -90,7 +91,11 @@ class DuoWeapon extends Weapon{
     
     public function setSystemData($data, $subsystem)
     {
-        $this->weapons[$subsystem]->setSystemData($data, $subsystem);
+        //Debug::log("setSystemData: duoWeapon");
+        foreach ($this->weapons as $i=>$weapon){
+            $weapon->setSystemData($data, $subsystem);
+        }
+        //$this->weapons[$subsystem]->setSystemData($data, $subsystem);
         
     }
     
@@ -106,10 +111,14 @@ class DuoWeapon extends Weapon{
     
     public function setLoading( $loading )
     {
-        if (!$loading)
+        //Debug::log("Enter duo setLoading");
+        if (!$loading){
+            //Debug::log("Exit duo setLoading: nothing");
             return;
+        }
         
-        foreach ($this->weapons as $weapon){
+        foreach ($this->weapons as $i=>$weapon){
+            
             $weapon->setLoading($loading);
         }
         

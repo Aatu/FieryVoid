@@ -499,7 +499,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system.regular.weapon.loading .systemcontainer.regular .icon .iconmask{
+.shipwindow .system.regular.weapon.loading .systemcontainer .icon .iconmask{
     background-color:orange;
 }
 
@@ -517,7 +517,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }*/
 
-.shipwindow .system.offline .systemcontainer.regular .icon .iconmask{
+.shipwindow .system.offline .systemcontainer .icon .iconmask{
     background-color:black;
     background-image:url(../img/offline.png);
     opacity:0.5;
@@ -529,7 +529,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system.forcedoffline .systemcontainer.regular .icon .iconmask{
+.shipwindow .system.forcedoffline .systemcontainer .icon .iconmask{
     background-color:black;
     background-image:url(../img/offline.png);
     opacity:0.5;
@@ -540,7 +540,6 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     background-image:url(../img/offline.png);
     opacity:0.5;
 }
-
 
 .shipwindow .system.destroyed .systembarcontainer{
     border:1px solid #3d4755;

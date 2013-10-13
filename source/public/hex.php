@@ -136,7 +136,7 @@
         <div class="systemcontainer">
 
             <div class="health systembarcontainer">
-                <div class="healthbar bar" style="width:40px;"></div>
+                <div class="healthbar bar" style="width:100%;"></div>
                 <div class="valuecontainer"><span class="healthvalue value"></span></div>
             </div>
         </div>
@@ -167,7 +167,7 @@
                 </div>
             </div>
             <div class="health systembarcontainer">
-                <div class="healthbar bar" style="width:40px;"></div>
+                <div class="healthbar bar" style="width:100%;"></div>
             </div>
             <!--
             <div class="systembarcontainer">

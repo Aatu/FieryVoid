@@ -1,4 +1,7 @@
 window.weaponManager = {
+    mouseoverTimer: null,
+    mouseOutTimer: null,
+    mouseoverSystem: null,
 
     getWeaponCurrentLoading: function(weapon)
     {
@@ -25,12 +28,35 @@ window.weaponManager = {
             return;
         
         if (gamedata.isMyShip(ship)){
-            system.changeFiringMode();
-            
             weaponManager.unSelectWeapon(ship, system);
-  
+
+            if(system.dualWeapon){
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                parentSystem.changeFiringMode();
+                shipWindowManager.setDataForSystem(ship, parentSystem);
+
+                var newSystem = parentSystem.weapons[parentSystem.firingMode];
+
+                var parentwindow = shipwindow.find(".parentsystem_"+newSystem.parentId);
+                parentwindow.removeClass("system_"+system.id);
+                parentwindow.addClass("modes");
+                parentwindow.removeClass(system.name);
+                shipWindowManager.addDualSystem(ship, parentSystem, parentwindow);
+                shipWindowManager.setDataForSystem(ship, newSystem);
+                parentwindow.find(".UI").addClass("active");
+                parentwindow.find(".UI").focus();
+                weaponManager.mouseoverSystem = parentwindow;
+                clearTimeout(weaponManager.mouseOutTimer);
+                clearTimeout(weaponManager.mouseoverTimer);
+                weaponManager.mouseOutTimer = null;
+                weaponManager.mouseoverTimer = null;
+                systemInfo.showSystemInfo(parentwindow, newSystem, ship);
+            }else{
+                system.changeFiringMode();
+                shipWindowManager.setDataForSystem(ship, newSystem);
+            }
+
             
-            //shipWindowManager.setDataForSystem(ship, system);
         }
     },
     
@@ -59,10 +85,6 @@ window.weaponManager = {
 		ballistics.updateList();
         shipWindowManager.setDataForSystem(ship, system);
 	},    
-    
-    mouseoverTimer: null,
-    mouseOutTimer: null,
-    mouseoverSystem: null,
     
     onWeaponMouseover: function(e){
         
@@ -1181,9 +1203,9 @@ window.weaponManager = {
     
     getFiringWeapon: function(weapon, fire){
         //console.dir(weapon);
-        if (weapon.dualWeapon){
-            return weapon.weapons[fire.firingMode];
-        }
+//        if (weapon.dualWeapon){
+//            return weapon.weapons[fire.firingMode];
+//        }
         
         return weapon;
     }

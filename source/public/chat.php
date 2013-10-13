@@ -25,6 +25,7 @@ if (! isset($chatelement))
             lastTimeChecked: "",
             lastTimeStamp: "",
             focus: false,
+            message: "",
             gameid:<?php print($chatgameid) ?>,
             playerid:<?php print($_SESSION["user"]) ?>,
             chatElement: <?php print("'$chatelement'") ?>,
@@ -82,7 +83,6 @@ if (! isset($chatelement))
             },
 
             parseChatData: function(data){
-
                 var c = $(chat.chatElement+ " .chatMessages");
                 var scroll = false;
 
@@ -204,10 +204,16 @@ if (! isset($chatelement))
                         gameid:chat.gameid
                     },
                     success : chat.successSetLastTimeChecked,
-                    error : chat.errorAjax
+                    error : chat.retrySetTimeChecked
                 });
                 
             },
+            
+            retrySetTimeChecked: function(){
+                console.log("retry set time checked");
+                setTimeout(chat.setLastTimeChecked(), 3000);
+            },
+
 
             getLastTimeChecked: function(){
                 $.ajax({
@@ -221,6 +227,11 @@ if (! isset($chatelement))
                     error : chat.errorAjax
                 });
                 
+            },
+
+            retryGetTimeChecked: function(){
+                console.log("retry get time checked");
+                setTimeout(chat.getLastTimeChecked(), 3000);
             },
 
             successSetLastTimeChecked: function(data){
@@ -238,7 +249,7 @@ if (! isset($chatelement))
             },
 
             submitChatMessage: function(message){
-                chat.setLastTimeChecked();
+                chat.message = message;
                 
                 $.ajax({
                     type : 'POST',
@@ -249,8 +260,13 @@ if (! isset($chatelement))
                         message:message
                     },
                     success : chat.successSubmit,
-                    error : chat.errorAjax
+                    error: function(){
+                        console.log("Retry submit");
+                        $.ajax(this);
+                    }
                 });
+
+                chat.setLastTimeChecked();
             },
 
             requestChatdata: function(){
@@ -269,10 +285,14 @@ if (! isset($chatelement))
                         lastid:chat.lastid
                     },
                     success : chat.successRequest,
-                    error : chat.errorAjax
+                    //error : chat.retryRequest
+                    error: function(){
+                        console.log("Retry request");
+                        $.ajax(this);
+                    }
                 });
             },
-
+            
             successRequest: function(data){
                 chat.requesting = false;
                 if (data.error){
@@ -289,13 +309,6 @@ if (! isset($chatelement))
                 if (data.error){
                     window.confirm.exception(data , function(){});
                 }
-            },
-
-            errorAjax: function(jqXHR, textStatus, errorThrown){
-                console.log("CHAT ERROR");
-                console.dir(jqXHR);
-                console.dir(errorThrown);
-                window.confirm.exception({error:"CHAT AJAX error: " +textStatus} , function(){});
             },
 
         }

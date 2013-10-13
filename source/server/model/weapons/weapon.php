@@ -16,6 +16,7 @@ class Weapon extends ShipSystem{
     public $animationExplosionScale = 0.25;
     public $animationExplosionType = "normal";
     public $duoWeapon = false;
+    public $dualWeapon = false;
     public $explosionColor = array(250, 230, 80);
     public $trailLength = 40;
     public $trailColor = array(248, 216, 65);
@@ -55,6 +56,9 @@ class Weapon extends ShipSystem{
     public $projectilespeed = 17;
     
     public $rof = 2;
+    
+    // Used to indicate a parent in case of dualWeapons
+    public $parentId = -1;
     
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard");
@@ -271,6 +275,10 @@ class Weapon extends ShipSystem{
     
     public function getStartLoading()
     {
+        if($this->id > 100){
+            Debug::log($this->name.": id = ".$this->id.": loadingTime = ".$this->getLoadingTime());
+        }
+        
         return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime());
     }
     
@@ -614,6 +622,8 @@ class Weapon extends ShipSystem{
     
     public function fire($gamedata, $fireOrder){
     
+        Debug::log("entering fire method. Weapon id:".$this->id);
+        
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $this->firingMode = $fireOrder->firingMode;
@@ -650,7 +660,9 @@ class Weapon extends ShipSystem{
         }
         
         $fireOrder->rolled = 1;//Marks that fire order has been handled
-                
+
+        Debug::log("exit fire method. Weapon id:".$this->id);
+        Debug::log("weapon loadingtime: ".$this->loadingtime);
     }
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)

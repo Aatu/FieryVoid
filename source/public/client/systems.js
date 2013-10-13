@@ -117,7 +117,7 @@ shipManager.systems = {
                 }
             }
             
-            if(system.duoWeapon){
+            if(system.duoWeapon || system.dualWeapon){
                 for(var i in system.weapons){
                     var weapon = system.weapons[i];
                     
@@ -146,7 +146,11 @@ shipManager.systems = {
     
     initializeSystem: function(system){
         
-        if (system.dualWeapon && !system.initialized){
+        if(system.dualWeapon && system.weapons == null){
+            return system;
+        }
+        
+        if (system.dualWeapon){
             var selectedWeapon = system.weapons[system.firingMode];
             
             if(selectedWeapon.duoWeapon){
@@ -167,11 +171,12 @@ shipManager.systems = {
                 return selectedWeapon;
             }*/
             
+            selectedWeapon.power = system.power;
             selectedWeapon.firingMode = system.firingMode;
             selectedWeapon.firingModes = system.firingModes;
-            selectedWeapon.power = system.power;
-            selectedWeapon.displayName = system.displayName;
-            selectedWeapon.id = system.id;
+//            selectedWeapon.power = system.power;
+//            selectedWeapon.displayName = system.displayName;
+//            selectedWeapon.id = system.id;
             selectedWeapon.dualWeapon = true;
             selectedWeapon.initialized = true;
             
