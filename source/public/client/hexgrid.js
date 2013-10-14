@@ -97,6 +97,10 @@ window.hexgrid = {
             var width = parseInt(gamespace.substr(0, gamespace.indexOf("x")));
             var height = parseInt(gamespace.substr(gamespace.indexOf("x")+1));
             
+            if(width == -1 || height == -1){
+                return;
+            }
+            
             var lefttop = hexgrid.hexCoToPixel(-(width/2), (height - (height/2)));
             var righttop = hexgrid.hexCoToPixel((width-(width/2)), (height - (height/2)));
             var leftbottom = hexgrid.hexCoToPixel(-(width/2), -(height/2));

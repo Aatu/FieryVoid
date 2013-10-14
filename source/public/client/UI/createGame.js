@@ -105,6 +105,27 @@ window.createGame = {
           
           $(".spacex").val(createGame.gamespace_data.width);
           $(".spacey").val(createGame.gamespace_data.height);
+          $(".deptype").val("box");
+          $("#team1 .depx").val(-19);
+          $("#team2 .depx").val(18);
+          $("#team1 .depy").val(0);
+          $("#team2 .depy").val(0);
+          $("#team1 .depwidth").val(5);
+          $("#team2 .depwidth").val(5);
+          $("#team1 .depheight").val(30);
+          $("#team2 .depheight").val(30);
+          createGame.slots[0].depx = -19;
+          createGame.slots[1].depx = 18;
+          createGame.slots[0].depy = 0;
+          createGame.slots[1].depy = 0;
+          createGame.slots[0].depwidth = 5;
+          createGame.slots[1].depwidth = 5;
+          createGame.slots[0].depheight = 30;
+          createGame.slots[1].depheight = 30;
+          createGame.slots[0].deptype = "box";
+          createGame.slots[1].deptype = "box";
+          createGame.slots[0].depavailable = 0;
+          createGame.slots[1].depavailable = 0;
       }else{
           $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
           $(".gamespacedefinition .limitedspace").addClass("invisible");
