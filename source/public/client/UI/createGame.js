@@ -11,7 +11,6 @@ jQuery(function($){
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
 
     createGame.createSlotsFromArray();
-    createGame.createGameSpaceDefinition();
 });
 
 window.createGame = {
@@ -132,12 +131,6 @@ window.createGame = {
       }
       
       
-    },
-    
-    createGameSpaceDefinition: function(){
-        var template = $("#gamespacetemplatecontainer");
-        var target = $("#gamespace.gamespacecontainer");
-        var actual = template.clone(true).appendTo(target);
     },
     
     createSlotsFromArray: function(){
