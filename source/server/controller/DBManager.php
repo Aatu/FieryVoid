@@ -296,7 +296,7 @@ class DBManager {
         }
     }
 	
-	public function createGame($gamename, $background, $slots, $userid){
+	public function createGame($gamename, $background, $slots, $userid, $gamespace){
         $stmt = $this->connection->prepare("
             INSERT INTO 
                 tac_game
@@ -312,7 +312,8 @@ class DBManager {
                 'LOBBY',
                 ?,
                 ?,
-                '0000-00-00 00:00:00'
+                '0000-00-00 00:00:00',
+                ?
             )
         ");
 
@@ -321,12 +322,14 @@ class DBManager {
             $gamename = $this->DBEscape($gamename);
             $background = $this->DBEscape($background);
             $slotnum = count($slots);
+            $gamespace = $this->DBEscape($gamespace);
             $stmt->bind_param(
-                'ssii',
+                'ssiis',
                 $gamename,
                 $background,
                 $slotnum,   
-                $userid
+                $userid,
+                $gamespace
             );
             $stmt->execute();
             $stmt->close();
@@ -789,7 +792,7 @@ class DBManager {
                 return null;
                 
             foreach ($result as $value) {
-                $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator);
+                $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
 				$games[] = $game;
             }
             

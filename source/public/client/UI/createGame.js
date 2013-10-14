@@ -8,15 +8,18 @@ jQuery(function($){
     $(".addslotbutton").on("click", createGame.createNewSlot);
     $(".close").on("click", createGame.removeSlot);
     $("#createGameForm").on("submit", createGame.setData);
+    $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
 
     createGame.createSlotsFromArray();
+    createGame.createGameSpaceDefinition();
 });
 
 window.createGame = {
+    gamespace_data: {width: 42, height: 30},
     
     slots: Array(
-        {id:1, team:1, name:"BLUE", points:1000, depx:-20, depy:0, deptype:"box", depwidth:10, depheight:40, depavailable:0},
-        {id:2, team:2, name:"RED",  points:1000, depx:20, depy:0, deptype:"box", depwidth:10, depheight:40, depavailable:0}
+        {id:1, team:1, name:"BLUE", points:1000, depx:-21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0},
+        {id:2, team:2, name:"RED",  points:1000, depx:21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0}
     ),
     slotid: 2,
 
@@ -46,6 +49,16 @@ window.createGame = {
                 input.val(input.data("oldvalue"));
                 return;
             }
+        }
+        
+        if(inputname == "spacex"){
+            createGame.gamespace_data.width = parseInt(value);
+            return;
+        }
+        
+        if(inputname == "spacey"){
+            createGame.gamespace_data.height = parseInt(value);
+            return;
         }
         
         var slot = $(".slot").has($(this));
@@ -81,6 +94,29 @@ window.createGame = {
             }
         }
 
+    },
+    
+    doGameSpaceCheck: function(data){
+      var checkval = $("#gamespacecheck:checked").val();
+      
+      if(checkval == "on"){
+          $(".gamespacedefinition .unlimitedspace").addClass("invisible");
+          $(".gamespacedefinition .limitedspace").removeClass("invisible");
+          
+          $(".spacex").val(createGame.gamespace_data.width);
+          $(".spacey").val(createGame.gamespace_data.height);
+      }else{
+          $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
+          $(".gamespacedefinition .limitedspace").addClass("invisible");
+      }
+      
+      
+    },
+    
+    createGameSpaceDefinition: function(){
+        var template = $("#gamespacetemplatecontainer");
+        var target = $("#gamespace.gamespacecontainer");
+        var actual = template.clone(true).appendTo(target);
     },
     
     createSlotsFromArray: function(){
@@ -152,8 +188,13 @@ window.createGame = {
     setData: function(){
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
+        var gamespace = "-1x-1";
         
-        var data = ({gamename:gamename, background:background, slots:createGame.slots});
+        if($("#gamespacecheck:checked").val() == "on"){
+            gamespace = ""+createGame.gamespace_data.width + "x" + createGame.gamespace_data.height;
+        }
+        
+        var data = ({gamename:gamename, background:background, slots:createGame.slots, gamespace:gamespace});
         data = JSON.stringify(data);
         $("#createGameData").val(data);
     }

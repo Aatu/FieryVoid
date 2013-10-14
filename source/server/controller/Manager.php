@@ -99,6 +99,7 @@ class Manager{
         
         $gamename = $data["gamename"];
         $background = $data["background"];
+        $gamespace = $data["gamespace"];
         $slots = array();
         
         foreach ($data["slots"] as $slot){
@@ -108,7 +109,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid);
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
             return $gameid;

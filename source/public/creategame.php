@@ -55,7 +55,11 @@
 					
 					?>
 				</select>
-				
+		
+                <div style="margin-top:20px;"><h3>GAME SPACE</h3></div>
+                <div id="gamespace" class="subpanel gamespacecontainer">
+                </div>
+                
                 <div style="margin-top:20px;"><h3>TEAM 1</h3></div>
                 <div id="team1" class="subpanel slotcontainer">
                     
@@ -86,6 +90,26 @@
         ?>
         </div>
 
+        <div id="gamespacetemplatecontainer">
+            <div class="slot" >
+                <div>
+                    <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
+                </div>
+                <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
+                    <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
+                    <span class="unlimitedspace">
+                        <span>Unlimited</span>
+                    </span>
+                    <span class="limitedspace invisible">
+                        <span>Width:</span>
+                        <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
+                        <span>Height:</span>
+                        <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">                
+                    </span>
+                </div>
+            </div>
+        </div>
+        
         <div id="slottemplatecontainer" style="display:none;">
             <div class="slot" >
                 <div class="close"></div>

@@ -19,6 +19,7 @@ gamedata = {
     gamephase: 0,
     subphase: 0,
     selectedSlot:null,
+    gamespace: null,
     
     mouseOverShipId: -1,
     
@@ -536,6 +537,7 @@ gamedata = {
             gamedata.status = serverdata.status;
             gamedata.ballistics = serverdata.ballistics;
             gamedata.elintShips = Array();
+            gamedata.gamespace = serverdata.gamespace;
             shipManager.initiated = 0;
             //combatLog.constructLog();
             
