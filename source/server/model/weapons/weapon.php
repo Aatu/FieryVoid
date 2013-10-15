@@ -271,7 +271,8 @@ class Weapon extends ShipSystem{
     
     public function getStartLoading()
     {
-        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime());
+//        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime());
+        return new WeaponLoading($this->getNormalLoad(), $this->overloadshots, 0, $this->overloadturns, $this->getLoadingTime());
     }
     
     public function setLoading( $loading )
