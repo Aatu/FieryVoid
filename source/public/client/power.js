@@ -64,7 +64,15 @@ shipManager.power = {
 		var boost = shipManager.power.getBoost(system);
 		
 		if (system.boostable && !boost){
-                    systemwindow.addClass("canboost");
+                    if(system.name == "scanner" || system.name == "elintScanner"){
+                        if(system.id == shipManager.power.getHighestSensorsId(ship)){
+                            // You can only boost the highest sensor rating
+                            // if multiple sensors are present on one ship
+                            systemwindow.addClass("canboost");
+                        }
+                    }else{
+                        systemwindow.addClass("canboost");
+                    }
 		}else if (boost){
 			systemwindow.addClass("boosted");
 		}
@@ -77,6 +85,27 @@ shipManager.power = {
 
 	
 	},
+        
+        getHighestSensorsId: function(ship){
+            var highestRating = -1;
+            var highestId = -1;
+            
+            for(var i in ship.systems){
+                var system = ship.systems[i];
+                
+                if(system.name == "scanner" || system.name == "elintScanner"){
+                    if(!shipManager.power.isOffline(ship, system)){
+                        var rating = shipManager.systems.getOutput(ship, system);
+                        if(rating > highestRating){
+                            highestId = system.id;
+                            highestRating = rating;
+                        }
+                    }
+                }
+            }
+            
+            return highestId;
+        },
 	
         getShipsGraviticShield: function(){
             var shipNames = new Array();
