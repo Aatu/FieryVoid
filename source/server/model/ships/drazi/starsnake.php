@@ -20,7 +20,7 @@ class Starsnake extends FighterFlight{
         
         for ($i = 0; $i<6; $i++){
             $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("starsnake", $armour, 9, $this->id);
+            $fighter = new Fighter("starsnake", $armour, 8, $this->id);
             $fighter->displayName = "Starsnake Light Fighter";
             $fighter->imagePath = "img/ships/starsnake.png";
             $fighter->iconPath = "img/ships/starsnake_large.png";
