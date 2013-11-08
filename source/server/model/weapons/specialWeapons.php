@@ -126,7 +126,7 @@
         
 			
         public $rangePenalty = 2;
-        public $fireControl = array(2, 2, 4); // fighters, <=mediums, <=capitals 
+        public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
 
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
