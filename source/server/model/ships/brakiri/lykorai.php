@@ -37,25 +37,25 @@ class Lykorai extends BaseShip{
         $this->addFrontSystem(new Hangar(5, 12));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
-        $this->addFrontSystem(new Thruster(5, 15, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(5, 15, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
 
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 180, 0));
-        $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 90, 270));
-        $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 0, 180));
 
         $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
         $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
-        $this->addLeftSystem(new Thruster(5, 20, 0, 6, 3));
+        $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new Hangar(5, 24));
 
         $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
         $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
-        $this->addRightSystem(new Thruster(5, 20, 0, 6, 4));
+        $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new Hangar(5, 24));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

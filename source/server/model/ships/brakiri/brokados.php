@@ -36,26 +36,26 @@ class Brokados extends BaseShip{
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 4, 1));
 
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 300));
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 60, 240));
-        $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(3, 8, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(3, 8, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(3, 8, 0, 4, 2));
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 240, 0));
         $this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
         $this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 180, 240));
-        $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
+        $this->addLeftSystem(new GraviticThruster(4, 15, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 2, 0, 120));
         $this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
         $this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
         $this->addRightSystem(new GraviticShield(0, 6, 0, 2, 120, 180));
-        $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
+        $this->addRightSystem(new GraviticThruster(4, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(5, 42));
