@@ -67,16 +67,6 @@
                 default:
                     return Dice::d(10,3)+17;
             }
-/*		if ($this->turnsloaded+1 == 1){
-			//print("Plasma: turnsloaded 1 \n");
-			return Dice::d(10)+4;   
-		}else if ($this->turnsloaded+1 == 2){
-			//print("Plasma: turnsloaded 2 \n");
-			return Dice::d(10, 2)+8;
-		}else{
-			//print("Plasma: turnsloaded 3 real: ".$this->turnsloaded." \n");
-			return Dice::d(10,3)+17;
-		}*/
 	}
         
         public function setMinDamage(){
