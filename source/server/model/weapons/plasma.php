@@ -70,7 +70,24 @@
 	}
         
         public function setMinDamage(){
-			if ($this->turnsloaded == 1){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->minDamage = 5 - $this->dp;
+                    $this->animationExplosionScale = 0.15;
+                    break;
+                case 2:
+                    $this->animationExplosionScale = 0.25;
+                    $this->minDamage = 10 - $this->dp;  
+                    break;
+                case 3:
+                default:
+                    $this->animationExplosionScale = 0.35;
+                    $this->minDamage = 20 - $this->dp;  
+                    break;
+            }
+
+/*            if ($this->turnsloaded == 1){
 				$this->minDamage = 5 - $this->dp;
 				$this->animationExplosionScale = 0.15;
 			}else if ($this->turnsloaded == 2){
@@ -81,10 +98,24 @@
 				$this->minDamage = 20 - $this->dp;  
 			}else{
 				$this->minDamage = 5 - $this->dp;   
-			}
+			}*/
 		}
+                
         public function setMaxDamage(){
-			if ($this->turnsloaded == 1)
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->maxDamage = 14 - $this->dp;
+                    break;
+                case 2:
+                    $this->maxDamage = 28 - $this->dp;  
+                    break;
+                case 3:
+                default:
+                    $this->maxDamage = 47 - $this->dp;  
+                    break;
+            }
+/*			if ($this->turnsloaded == 1)
 				$this->maxDamage = 14 - $this->dp ;  
 			else if ($this->turnsloaded == 2)
 				$this->maxDamage = 28 - $this->dp; 
@@ -92,7 +123,7 @@
 				$this->maxDamage = 47 - $this->dp; 		    
 			else
 				$this->maxDamage = 47 - $this->dp;
-		}
+*/		}
 
 	}
 	
