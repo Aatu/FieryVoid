@@ -560,7 +560,7 @@ class Manager{
             
             
             
-            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0);
+            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0, 0);
             $ship->movement = array($move);
             
             foreach ($ship->systems as $system)
@@ -726,20 +726,41 @@ class Manager{
             $movements = array();
             if (is_array($value["movement"])){
                 foreach($value["movement"] as $i=>$move){
-                    $movement = new MovementOrder(
-						$move["id"],
-						$move["type"],
-						$move["x"],
-						$move["y"],
-						$move["xOffset"], 
-						$move["yOffset"], 
-						$move["speed"], 
-						$move["heading"], 
-						$move["facing"], 
-						$move["preturn"], 
-						$move["turn"],
-						$move["value"]
-					);
+                    if(isset($move["at_initiative"])){
+                        // For backwards compatibility
+                        $movement = new MovementOrder(
+                                $move["id"],
+                                $move["type"],
+                                $move["x"],
+                                $move["y"],
+                                $move["xOffset"], 
+                                $move["yOffset"], 
+                                $move["speed"], 
+                                $move["heading"], 
+                                $move["facing"], 
+                                $move["preturn"], 
+                                $move["turn"],
+                                $move["value"],
+                                $move["at_initiative"]
+                        );
+                    }
+                    else{
+                        $movement = new MovementOrder(
+                                $move["id"],
+                                $move["type"],
+                                $move["x"],
+                                $move["y"],
+                                $move["xOffset"], 
+                                $move["yOffset"], 
+                                $move["speed"], 
+                                $move["heading"], 
+                                $move["facing"], 
+                                $move["preturn"], 
+                                $move["turn"],
+                                $move["value"],
+                                0
+                        );
+                    }
                     $movement->requiredThrust = $move["requiredThrust"];
                     $movement->assignedThrust = $move["assignedThrust"];
                     

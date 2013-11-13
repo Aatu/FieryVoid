@@ -1734,6 +1734,7 @@ shipManager.movement = {
             assignedThrust:Array(),
             commit:commit,
             preturn:preturn,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:forced,
             value:0
