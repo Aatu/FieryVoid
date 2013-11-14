@@ -22,6 +22,7 @@ shipManager.movement = {
                 assignedThrust:Array(),
                 commit:true,
                 preturn:false,
+                at_initiative:shipManager.getIniativeOrder(ship),
                 turn:gamedata.turn,
                 forced:false,
                 value:0
@@ -221,6 +222,7 @@ shipManager.movement = {
 				assignedThrust:assignedThrust,
 				commit:commit,
 				preturn:false,
+                                at_initiative:shipManager.getIniativeOrder(ship),
 				turn:gamedata.turn,
 				forced:false,
 				value:accel
@@ -290,6 +292,7 @@ shipManager.movement = {
             assignedThrust:Array(),
             commit:false,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:0
@@ -415,6 +418,7 @@ shipManager.movement = {
             assignedThrust:Array(),
             commit:true,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:0
@@ -532,6 +536,7 @@ shipManager.movement = {
             assignedThrust:assignedThrust,
             commit:commit,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:0
@@ -683,6 +688,7 @@ shipManager.movement = {
             assignedThrust:assignedThrust,
             commit:commit,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:value
@@ -727,6 +733,7 @@ shipManager.movement = {
             assignedThrust:Array(),
             commit:true,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:true,
             value:0
@@ -988,6 +995,7 @@ shipManager.movement = {
             assignedThrust:assignedThrust,
             commit:commit,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:value
@@ -1467,6 +1475,7 @@ shipManager.movement = {
             assignedThrust:assignedThrust,
             commit:commit,
             preturn:false,
+            at_initiative:shipManager.getIniativeOrder(ship),
             turn:gamedata.turn,
             forced:false,
             value:0

@@ -659,7 +659,7 @@ class DBManager {
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
             
@@ -672,7 +672,7 @@ class DBManager {
                     $assThrust = $move->getAssThrustJSON();
                     
                     $stmt->bind_param(
-                        'iisiiiiiiiissii',
+                        'iisiiiiiiiissiii',
                         $shipid,
                         $gameid,
                         $move->type,
@@ -687,7 +687,8 @@ class DBManager {
                         $reqThrust,
                         $assThrust,
                         $move->turn,
-                        $move->value
+                        $move->value,
+                        $move->at_initiative
                     );
                     $stmt->execute();
                 }
