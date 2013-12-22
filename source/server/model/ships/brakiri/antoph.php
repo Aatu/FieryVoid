@@ -27,20 +27,20 @@ class Antoph extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(5, 12, 6, 7));
         $this->addPrimarySystem(new Engine(5, 14, 0, 12, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));
+        $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 3));
+        $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 4));
         $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 240, 0));
         $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 0, 120));
         
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 3, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
         
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 240));
-        $this->addAftSystem(new Thruster(4, 12, 0, 6, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 6, 2));
+        $this->addAftSystem(new GraviticThruster(4, 12, 0, 6, 2));
+        $this->addAftSystem(new GraviticThruster(4, 12, 0, 6, 2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 48));

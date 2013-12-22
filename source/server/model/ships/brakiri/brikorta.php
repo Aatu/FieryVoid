@@ -30,18 +30,18 @@ class Brikorta extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(6, 14));
 	$this->addPrimarySystem(new ShieldGenerator(6, 10, 2, 1));
-        $this->addPrimarySystem(new Thruster(6, 15, 0, 6, 1));
-        $this->addPrimarySystem(new Thruster(6, 18, 0, 10, 2));
+        $this->addPrimarySystem(new GraviticThruster(6, 15, 0, 6, 1));
+        $this->addPrimarySystem(new GraviticThruster(6, 18, 0, 10, 2));
         $this->addPrimarySystem(new GravitonPulsar(4, 5, 2, 90, 270));
 
         $this->addLeftSystem(new GravitonPulsar(4, 5, 2, 240, 60));
         $this->addLeftSystem(new MediumLaser(5, 6, 5, 240, 0));
-        $this->addLeftSystem(new Thruster(6, 15, 0, 6, 3));
+        $this->addLeftSystem(new GraviticThruster(6, 15, 0, 6, 3));
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 3, 180, 360));
 
         $this->addRightSystem(new GravitonPulsar(4, 5, 2, 300, 120));
         $this->addRightSystem(new MediumLaser(5, 6, 5, 0, 120));
-        $this->addRightSystem(new Thruster(6, 15, 0, 6, 4));
+        $this->addRightSystem(new GraviticThruster(6, 15, 0, 6, 4));
         $this->addRightSystem(new GraviticShield(0, 6, 0, 3, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

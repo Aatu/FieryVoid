@@ -224,7 +224,7 @@ if (! isset($chatelement))
                         gameid:chat.gameid
                     },
                     success : chat.successGetLastTimeChecked,
-                    error : chat.errorAjax
+                    error : chat.retryGetTimeChecked
                 });
                 
             },

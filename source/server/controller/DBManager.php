@@ -296,7 +296,7 @@ class DBManager {
         }
     }
 	
-	public function createGame($gamename, $background, $slots, $userid){
+	public function createGame($gamename, $background, $slots, $userid, $gamespace){
         $stmt = $this->connection->prepare("
             INSERT INTO 
                 tac_game
@@ -312,7 +312,8 @@ class DBManager {
                 'LOBBY',
                 ?,
                 ?,
-                '0000-00-00 00:00:00'
+                '0000-00-00 00:00:00',
+                ?
             )
         ");
 
@@ -321,12 +322,14 @@ class DBManager {
             $gamename = $this->DBEscape($gamename);
             $background = $this->DBEscape($background);
             $slotnum = count($slots);
+            $gamespace = $this->DBEscape($gamespace);
             $stmt->bind_param(
-                'ssii',
+                'ssiis',
                 $gamename,
                 $background,
                 $slotnum,   
-                $userid
+                $userid,
+                $gamespace
             );
             $stmt->execute();
             $stmt->close();
@@ -656,7 +659,7 @@ class DBManager {
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
             
@@ -669,7 +672,7 @@ class DBManager {
                     $assThrust = $move->getAssThrustJSON();
                     
                     $stmt->bind_param(
-                        'iisiiiiiiiissii',
+                        'iisiiiiiiiissiii',
                         $shipid,
                         $gameid,
                         $move->type,
@@ -684,7 +687,8 @@ class DBManager {
                         $reqThrust,
                         $assThrust,
                         $move->turn,
-                        $move->value
+                        $move->value,
+                        $move->at_initiative
                     );
                     $stmt->execute();
                 }
@@ -709,7 +713,7 @@ class DBManager {
                 if ($acceptPreturn == false && $preturn)
                     continue;
                 
-                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, '".$movement->value."')";
+                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, '".$movement->value."', '".$movement->at_initiative ."')";
                 
                 //throw new exception("sql: ".$movement->preturn . var_dump($movement));
                 $this->insert($sql);
@@ -789,7 +793,7 @@ class DBManager {
                 return null;
                 
             foreach ($result as $value) {
-                $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator);
+                $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
 				$games[] = $game;
             }
             
@@ -977,7 +981,7 @@ class DBManager {
         
         $stmt = $this->connection->prepare("
             SELECT 
-                id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust
+                id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust, at_initiative
             FROM 
                 tac_shipmovement as s1
             WHERE
@@ -1008,11 +1012,11 @@ class DBManager {
         {
             $fetchturn = $gamedata->turn-1;
             $stmt->bind_param('iii', $gamedata->id, $fetchturn, $gamedata->id);
-            $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust);
+            $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             while ($stmt->fetch())
             {
-                $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value);
+                $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
 

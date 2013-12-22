@@ -7,7 +7,7 @@ class TacGamedata{
     public static $currentGameID;
     public static $currentActiveship;
     
-    public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator;
+    public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
     public $ships = array();
     public $slots = array();
     public $waiting = false;
@@ -19,7 +19,7 @@ class TacGamedata{
     
     
     
-    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator){
+    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $gamespace = null){
         $this->setId($id);
         $this->setTurn($turn);
         $this->setPhase($phase);
@@ -31,6 +31,7 @@ class TacGamedata{
         $this->points = (int)$points;
         $this->background = $background;
         $this->creator = $creator;
+        $this->gamespace = $gamespace;
     }
    
     public function setPhase($phase)

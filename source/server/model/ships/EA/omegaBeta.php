@@ -43,10 +43,10 @@ class OmegaBeta  extends BaseShip{
 	$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
 	$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-	$this->addAftSystem(new MediumPulse(4, 6, 4, 180, 240));
-	$this->addAftSystem(new MediumPulse(4, 6, 4, 180, 240));
-	$this->addAftSystem(new MediumPulse(4, 8, 6, 120, 180));
-	$this->addAftSystem(new MediumPulse(4, 8, 6, 120, 180));
+	$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
+	$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
+	$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
+	$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         

@@ -275,11 +275,8 @@ class Weapon extends ShipSystem{
     
     public function getStartLoading()
     {
-        if($this->id > 100){
-            Debug::log($this->name.": id = ".$this->id.": loadingTime = ".$this->getLoadingTime());
-        }
-        
-        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime());
+//        return new WeaponLoading($this->getNormalLoad(), 0, 0, 0, $this->getLoadingTime());
+        return new WeaponLoading($this->getNormalLoad(), $this->overloadshots, 0, $this->overloadturns, $this->getLoadingTime());
     }
     
     public function setLoading( $loading )

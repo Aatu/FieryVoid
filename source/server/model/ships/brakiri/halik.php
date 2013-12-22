@@ -30,20 +30,20 @@ class Halik extends MediumShip{
         $this->addPrimarySystem(new Scanner(4, 11, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 2));
 	$this->addPrimarySystem(new Hangar(3, 1));
-	$this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
-	$this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
+	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
+	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
 		
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 180, 0));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 2, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 2, 1));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 270, 90));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 0, 180));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 240, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 300, 120));
         
-        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
         $this->addAftSystem(new GravitonPulsar(3, 6, 2, 90, 270));
         $this->addAftSystem(new GravitonPulsar(3, 6, 2, 90, 270));
 		

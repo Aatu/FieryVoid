@@ -6,6 +6,14 @@
     padding-bottom:0px;
 }
 
+.creategame .subpanel.gamespacecontainer{
+    padding-bottom:0px;
+}
+
+.invisible{
+    display:none;
+}
+
 .slot{
 	border:1px solid #DEEBFF;
 	color:#DEEBFF;

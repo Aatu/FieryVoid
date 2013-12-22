@@ -33,19 +33,19 @@ class Kaliva extends BaseShip{
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 4, 1));
 
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 300));
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 60, 240));
-        $this->addAftSystem(new Thruster(5, 15, 0, 8, 2));
-        $this->addAftSystem(new Thruster(5, 15, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
 
         $this->addLeftSystem(new GraviticLance(5, 12, 16, 300, 360));
-        $this->addLeftSystem(new Thruster(5, 15, 0, 6, 3));
+        $this->addLeftSystem(new GraviticThruster(5, 15, 0, 6, 3));
 
         $this->addRightSystem(new GraviticLance(5, 12, 16, 0, 60));
-        $this->addRightSystem(new Thruster(5, 15, 0, 6, 4));
+        $this->addRightSystem(new GraviticThruster(5, 15, 0, 6, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(6, 36));

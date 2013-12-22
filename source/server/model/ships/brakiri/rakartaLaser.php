@@ -27,18 +27,18 @@ class RakartaLaser extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 3));
-	$this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
-	$this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
+	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
+	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
 		
         $this->addFrontSystem(new MediumLaser(4, 6, 5, 240, 0));
         $this->addFrontSystem(new GravitonPulsar(4, 5, 2, 180, 0));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 2, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 8, 0, 2, 1));
         $this->addFrontSystem(new GravitonPulsar(4, 5, 2, 0, 180));
         $this->addFrontSystem(new MediumLaser(4, 6, 5, 0, 120));
         
-        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
+        $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
 	$this->addAftSystem(new Hangar(3, 1));
 		
         $this->addPrimarySystem(new Structure( 4, 50));

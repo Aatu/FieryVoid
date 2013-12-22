@@ -302,6 +302,7 @@
         // Set to make the weapon start already overloaded.
         public $overloadturns = 2;
         public $extraoverloadshots = 2;
+        public $overloadshots = 2;
         public $loadingtime = 2;
 
         public $rangePenalty = 0.5;

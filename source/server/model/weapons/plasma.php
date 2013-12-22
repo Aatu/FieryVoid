@@ -56,22 +56,38 @@
 		
 		
 
-		public function getDamage($fireOrder){
-		
-			if ($this->turnsloaded+1 == 1){
-				//print("Plasma: turnsloaded 1 \n");
-				return Dice::d(10)+4;   
-			}else if ($this->turnsloaded+1 == 2){
-				//print("Plasma: turnsloaded 2 \n");
-				return Dice::d(10, 2)+8;
-			}else{
-				//print("Plasma: turnsloaded 3 real: ".$this->turnsloaded." \n");
-				return Dice::d(10,3)+17;
-			}
-			
-		}
+	public function getDamage($fireOrder){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    return Dice::d(10)+4;
+                case 2:
+                    return Dice::d(10, 2)+8;
+                case 3:
+                default:
+                    return Dice::d(10,3)+17;
+            }
+	}
+        
         public function setMinDamage(){
-			if ($this->turnsloaded == 1){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->minDamage = 5 - $this->dp;
+                    $this->animationExplosionScale = 0.15;
+                    break;
+                case 2:
+                    $this->animationExplosionScale = 0.25;
+                    $this->minDamage = 10 - $this->dp;  
+                    break;
+                case 3:
+                default:
+                    $this->animationExplosionScale = 0.35;
+                    $this->minDamage = 20 - $this->dp;  
+                    break;
+            }
+
+/*            if ($this->turnsloaded == 1){
 				$this->minDamage = 5 - $this->dp;
 				$this->animationExplosionScale = 0.15;
 			}else if ($this->turnsloaded == 2){
@@ -82,10 +98,24 @@
 				$this->minDamage = 20 - $this->dp;  
 			}else{
 				$this->minDamage = 5 - $this->dp;   
-			}
+			}*/
 		}
+                
         public function setMaxDamage(){
-			if ($this->turnsloaded == 1)
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->maxDamage = 14 - $this->dp;
+                    break;
+                case 2:
+                    $this->maxDamage = 28 - $this->dp;  
+                    break;
+                case 3:
+                default:
+                    $this->maxDamage = 47 - $this->dp;  
+                    break;
+            }
+/*			if ($this->turnsloaded == 1)
 				$this->maxDamage = 14 - $this->dp ;  
 			else if ($this->turnsloaded == 2)
 				$this->maxDamage = 28 - $this->dp; 
@@ -93,7 +123,7 @@
 				$this->maxDamage = 47 - $this->dp; 		    
 			else
 				$this->maxDamage = 47 - $this->dp;
-		}
+*/		}
 
 	}
 	

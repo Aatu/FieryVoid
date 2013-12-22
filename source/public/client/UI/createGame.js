@@ -8,15 +8,17 @@ jQuery(function($){
     $(".addslotbutton").on("click", createGame.createNewSlot);
     $(".close").on("click", createGame.removeSlot);
     $("#createGameForm").on("submit", createGame.setData);
+    $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
 
     createGame.createSlotsFromArray();
 });
 
 window.createGame = {
+    gamespace_data: {width: 42, height: 30},
     
     slots: Array(
-        {id:1, team:1, name:"BLUE", points:1000, depx:-20, depy:0, deptype:"box", depwidth:10, depheight:40, depavailable:0},
-        {id:2, team:2, name:"RED",  points:1000, depx:20, depy:0, deptype:"box", depwidth:10, depheight:40, depavailable:0}
+        {id:1, team:1, name:"BLUE", points:1000, depx:-21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0},
+        {id:2, team:2, name:"RED",  points:1000, depx:21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0}
     ),
     slotid: 2,
 
@@ -46,6 +48,16 @@ window.createGame = {
                 input.val(input.data("oldvalue"));
                 return;
             }
+        }
+        
+        if(inputname == "spacex"){
+            createGame.gamespace_data.width = parseInt(value);
+            return;
+        }
+        
+        if(inputname == "spacey"){
+            createGame.gamespace_data.height = parseInt(value);
+            return;
         }
         
         var slot = $(".slot").has($(this));
@@ -81,6 +93,44 @@ window.createGame = {
             }
         }
 
+    },
+    
+    doGameSpaceCheck: function(data){
+      var checkval = $("#gamespacecheck:checked").val();
+      
+      if(checkval == "on"){
+          $(".gamespacedefinition .unlimitedspace").addClass("invisible");
+          $(".gamespacedefinition .limitedspace").removeClass("invisible");
+          
+          $(".spacex").val(createGame.gamespace_data.width);
+          $(".spacey").val(createGame.gamespace_data.height);
+          $(".deptype").val("box");
+          $("#team1 .depx").val(-19);
+          $("#team2 .depx").val(18);
+          $("#team1 .depy").val(0);
+          $("#team2 .depy").val(0);
+          $("#team1 .depwidth").val(5);
+          $("#team2 .depwidth").val(5);
+          $("#team1 .depheight").val(30);
+          $("#team2 .depheight").val(30);
+          createGame.slots[0].depx = -19;
+          createGame.slots[1].depx = 18;
+          createGame.slots[0].depy = 0;
+          createGame.slots[1].depy = 0;
+          createGame.slots[0].depwidth = 5;
+          createGame.slots[1].depwidth = 5;
+          createGame.slots[0].depheight = 30;
+          createGame.slots[1].depheight = 30;
+          createGame.slots[0].deptype = "box";
+          createGame.slots[1].deptype = "box";
+          createGame.slots[0].depavailable = 0;
+          createGame.slots[1].depavailable = 0;
+      }else{
+          $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
+          $(".gamespacedefinition .limitedspace").addClass("invisible");
+      }
+      
+      
     },
     
     createSlotsFromArray: function(){
@@ -152,8 +202,13 @@ window.createGame = {
     setData: function(){
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
+        var gamespace = "-1x-1";
         
-        var data = ({gamename:gamename, background:background, slots:createGame.slots});
+        if($("#gamespacecheck:checked").val() == "on"){
+            gamespace = ""+createGame.gamespace_data.width + "x" + createGame.gamespace_data.height;
+        }
+        
+        var data = ({gamename:gamename, background:background, slots:createGame.slots, gamespace:gamespace});
         data = JSON.stringify(data);
         $("#createGameData").val(data);
     }

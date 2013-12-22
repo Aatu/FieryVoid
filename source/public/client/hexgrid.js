@@ -90,6 +90,30 @@ window.hexgrid = {
         
     },
     
+    drawGameSpace: function(pos){
+        var gamespace = gamedata.gamespace;
+        
+        if(gamespace != null && gamespace != ""){
+            var width = parseInt(gamespace.substr(0, gamespace.indexOf("x")));
+            var height = parseInt(gamespace.substr(gamespace.indexOf("x")+1));
+            
+            if(width == -1 || height == -1){
+                return;
+            }
+            
+            var lefttop = hexgrid.hexCoToPixel(-(width/2), (height - (height/2)));
+            var righttop = hexgrid.hexCoToPixel((width-(width/2)), (height - (height/2)));
+            var leftbottom = hexgrid.hexCoToPixel(-(width/2), -(height/2));
+            var rightbottom = hexgrid.hexCoToPixel((width-(width/2)), - (height/2));
+            
+            var canvas = window.graphics.getCanvas("hexgrid");
+            window.graphics.drawLine(canvas, lefttop.x, lefttop.y, righttop.x, righttop.y, 3);
+            window.graphics.drawLine(canvas, lefttop.x, lefttop.y, leftbottom.x, leftbottom.y, 3);
+            window.graphics.drawLine(canvas, rightbottom.x, rightbottom.y, righttop.x, righttop.y, 3);
+            window.graphics.drawLine(canvas, leftbottom.x, leftbottom.y, rightbottom.x, rightbottom.y, 3);
+        }
+    },
+    
     positionToPixel: function(pos){
         if (!pos)
             return null;

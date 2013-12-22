@@ -27,6 +27,8 @@ spl_autoload_register(
                 'athasa' => '/server/model/ships/balosian/athasa.php',
                 'auk' => '/server/model/ships/drazi/auk.php',
                 'aurorastarfury' => '/server/model/ships/EA/auroraStarfury.php',
+                'avenger' => '/server/model/ships/EA/avenger.php',
+                'avengerbeta' => '/server/model/ships/EA/avengerBeta.php',
                 'avioki' => '/server/model/ships/brakiri/avioki.php',
                 'ballistic' => '/server/model/BaseClasses.php',
                 'ballistictorpedo' => '/server/model/weapons/torpedo.php',
