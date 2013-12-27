@@ -473,14 +473,6 @@ shipManager.power = {
 		
                 system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
 		
-                if(system.dualWeapon || system.duoWeapon){
-                    for(var i in system.weapons){
-                        var weapon = system.weapons[i];
-                        weapon.power.push({id:null, shipid:ship.id, systemid:weapon.id, type:1, turn:gamedata.turn, amount:0});
-        		shipWindowManager.setDataForSystem(ship, weapon);
-                    }
-                }
-		
 		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 			
             confirm.error("You need to unassing all electronic warfare before changing scanner power management.");

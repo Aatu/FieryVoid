@@ -783,9 +783,14 @@ setSystemData: function(ship, system, shipwindow){
             systemwindow.addClass("modes");
 
             var modebutton =  $(".modes", systemwindow);
-            var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+         
+            if(system.dualWeapon){
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
+            }else{
+                modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
+            }
             
-            modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
 
 //            var modebutton =  $(".modes", systemwindow);
             
@@ -866,10 +871,14 @@ setSystemData: function(ship, system, shipwindow){
             }
 
             var modebutton =  $(".mode", systemwindow);
-            
-            var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-            
-            modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
+
+            if(system.dualWeapon){
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
+            }else{
+                modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
+            }
+
         }
     }else if (system.name == "thruster"){
         systemwindow.data("direction", system.direction);

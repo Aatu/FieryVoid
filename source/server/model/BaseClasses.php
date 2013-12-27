@@ -43,20 +43,21 @@ class SystemData
 
 class WeaponLoading
 {
-    public $loading, $extrashots, $loadedammo, $overloading, $loadingtime;
+    public $loading, $extrashots, $loadedammo, $overloading, $loadingtime, $firingmode;
     
-    public function __construct($loading, $extrashots, $loadedammo, $overloading, $loadingtime = 0)
+    public function __construct($loading, $extrashots, $loadedammo, $overloading, $loadingtime = 0, $firingmode = 1)
     {
         $this->loading = (int)$loading;
         $this->extrashots = (int)$extrashots;
         $this->loadedammo = (int)$loadedammo;
         $this->overloading = (int)$overloading;
         $this->loadingtime = (int)$loadingtime;
+        $this->firingmode = (int)$firingmode;
     }
     
     public function toJSON()
     {
-        return '"loading":{"1":"'.$this->loading.'","2":"'.$this->extrashots.'","3":"'.$this->loadedammo.'","4":"'.$this->overloading.'","5":"'.$this->loadingtime.'"}';
+        return '"loading":{"1":"'.$this->loading.'","2":"'.$this->extrashots.'","3":"'.$this->loadedammo.'","4":"'.$this->overloading.'","5":"'.$this->loadingtime.'","6":"'.$this->firingmode.'"}';
     }
 }
 

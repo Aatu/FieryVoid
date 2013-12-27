@@ -91,14 +91,14 @@
         
         public function calculateLoading()
         {
-            $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime());
+            $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
             $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
             if (TacGamedata::$currentPhase == 2)
             {
                 if  
                 ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
                 {
-                    $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime());
+                    $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
                 }
                 else if ($shotsfired)
                 {
@@ -106,7 +106,7 @@
                     if ($newloading < 0)
                         $newloading = 0;
 
-                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime());
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
                 }
             }
             else if (TacGamedata::$currentPhase == 1)
@@ -115,7 +115,7 @@
                 if ($newloading > $this->getNormalLoad())
                     $newloading = $this->getNormalLoad();
 
-                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime());
+                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
             }
 
             return $loading;

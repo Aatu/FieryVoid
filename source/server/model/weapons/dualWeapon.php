@@ -26,7 +26,6 @@ class DualWeapon extends Weapon{
     
     // Never called if all is well
     public function fire($gamedata, $fireOrder){
-
         $firingMode = $fireOrder->firingMode;
         $this->weapons[$firingMode]->fire($gamedata, $fireOrder);
     }
@@ -80,49 +79,36 @@ class DualWeapon extends Weapon{
     
     public function onAdvancingGamedata($ship)
     {
-        
-        foreach ($this->weapons as $i=>$weapon){
-            if($weapon->turnsloaded == 0){
-                $this->turnsloaded = 0;
-                $this->firingMode = $i;
-                foreach ($this->weapons as $weapon1){
-                    $weapon1->turnsloaded = 0;
-                }
-                break;
-            }
-        }
+        $weaponDataArray = array();
+        $weaponFired = false;
         
         foreach ($this->weapons as $i=>$weapon)
         {
             $data = $weapon->calculateLoading();
-            if ($data)
-                SystemData::addDataForSystem($weapon->id, 0, $ship->id, $data->toJSON());
+            $weaponDataArray[$i] = $data;
+            
+            if($data->loading == 0){
+                $this->firingMode = $i;
+                $weaponFired = true;
+            }
+        }
+        
+        foreach($weaponDataArray as $i=>$data){
+            if($weaponFired){
+                $data->loading = 0;
+            }
+            
+            SystemData::addDataForSystem($this->weapons[$i]->id, 0, $ship->id, $data->toJSON());
         }
         
         $data = $this->calculateLoading();
-            if ($data)
-                SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
-    }
-    
-    /*public function setSystemData($data, $subsystem)
-    {
-        // TODO: subsystem is no longer necessary
-        if($this->id == 31){
-            Debug::log("setSystemData dual weapon");
-            Debug::log("data: ".$data);
+        if($weaponFired){
+            $data->loading = 0;
         }
         
-        parent::setSystemData($data, $subsystem);
-        
-        foreach($this->weapons as $weapon){
-            $weapon->setSystemData($data, $subsystem);
-            
-            if($this->id == 31){
-                Debug::log("setSystemData dual weapon: ".$weapon->name);
-            }
-        } 
-    }*/
-
+        SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+    }
+    
     public function setInitialSystemData($ship)
     {
         $data = $this->getStartLoading();
@@ -135,21 +121,6 @@ class DualWeapon extends Weapon{
                 SystemData::addDataForSystem($weapon->id, 0, $ship->id, $data->toJSON());
         }
     }
-    
-    // TODO: probably no longer needed
-/*    public function setLoading( $loading )
-    {
-//        if (!$loading)
-//            return;
-        parent::setLoading($loading);
-        
-        foreach ($this->weapons as $weapon)
-        {
-          $weapon->setLoading($loading);
-        }
-        
-    }*/
-    
 }
 
 class LaserPulseArray extends DualWeapon{
