@@ -40,8 +40,8 @@ class Mogratti extends MediumShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
 		$this->addFrontSystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
-		$this->addFrontSystem(new MatterCannon(4, 7, 4, 240, 0));
-        $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
+		$this->addFrontSystem(new MatterCannon(3, 7, 4, 240, 0));
+        $this->addFrontSystem(new MatterCannon(3, 7, 4, 0, 120));
 				
 		
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));

@@ -33,10 +33,12 @@ class Calorta extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new GraviticThruster(6, 18, 0, 10, 2));
         $this->addPrimarySystem(new GravitonPulsar(4, 5, 2, 90, 270));
 
+        $this->addLeftSystem(new GravitonPulsar(4, 5, 2, 240, 0));
         $this->addLeftSystem(new GravitonPulsar(4, 5, 2, 240, 60));
         $this->addLeftSystem(new GravitonPulsar(4, 5, 2, 180, 0));
         $this->addLeftSystem(new GraviticThruster(6, 15, 0, 6, 3));
 
+        $this->addRightSystem(new GravitonPulsar(4, 5, 2, 0, 120));
         $this->addRightSystem(new GravitonPulsar(4, 5, 2, 300, 120));
         $this->addRightSystem(new GravitonPulsar(4, 5, 2, 0, 180));
         $this->addRightSystem(new GraviticThruster(6, 15, 0, 6, 4));
