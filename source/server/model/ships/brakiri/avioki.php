@@ -40,12 +40,12 @@ class Avioki extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
 
-        $this->addLeftSystem(new GravitonBeam(5, 8, 8, 300, 360));
-        $this->addLeftSystem(new GravitonBeam(5, 8, 8, 300, 360));
+        $this->addLeftSystem(new GraviticLance(5, 12, 16, 0, 60));
+        $this->addLeftSystem(new GraviticLance(5, 12, 16, 0, 60));
         $this->addLeftSystem(new GraviticThruster(5, 15, 0, 6, 3));
 
-        $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
-        $this->addRightSystem(new GravitonBeam(5, 8, 8, 0, 60));
+        $this->addRightSystem(new GraviticLance(5, 12, 16, 0, 60));
+        $this->addRightSystem(new GraviticLance(5, 12, 16, 0, 60));
         $this->addRightSystem(new GraviticThruster(5, 15, 0, 6, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

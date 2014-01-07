@@ -71,10 +71,10 @@
         <script src="client/model/weapon/electromagnetic.js"></script>
         <script src="client/model/weapon/aoe.js"></script>
         <script src="client/model/weapon/molecular.js"></script>
-        <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/antimatter.js"></script>
-        <script src="client/model/weapon/duoWeapon.js"></script>
         <script src="client/model/weapon/dualWeapon.js"></script>
+        <script src="client/model/weapon/duoWeapon.js"></script>
+        <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
 		<script>

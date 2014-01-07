@@ -5,7 +5,7 @@ class DuoWeapon extends Weapon{
     
     public $duoWeapon = true;
     public $weapons = array();
-    private $turnsFired = array();
+    //private $turnsFired = array();
 
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -47,14 +47,11 @@ class DuoWeapon extends Weapon{
     }
     
     public function setId($id){
-        parent::setId($id);
+        $this->id = $id;
         
-        $count = 0;
-        
-        foreach ($this->weapons as $weapon){
-            $weapon->setId(1000 + ($id*10) + $count);
+        foreach ($this->weapons as $i=>$weapon){
+            $weapon->setId(1000 + ($id*10) + $i);
             $weapon->parentId = $id;
-            $count++;
         } 
     }
     
@@ -63,6 +60,7 @@ class DuoWeapon extends Weapon{
         foreach ($this->weapons as $weapon){
             $fires = array_merge($fires, $weapon->getFireOrders());
         } 
+        
         return $fires;
     }
     
@@ -76,27 +74,44 @@ class DuoWeapon extends Weapon{
     public function setFireOrder($fire)
     {
         $this->turnsFired[$fire->turn] = true;
-        $this->weapons[$fire->firingMode]->setFireOrder($fire);
+        
+        foreach($this->weapons as $weapon){
+            if($weapon->id == $fire->weaponid){
+                $weapon->setFireOrder($fire);
+            }
+        }
     }
     
     public function onAdvancingGamedata($ship)
     {
+        debug::log("*** onAdvancing ***");
+        $curLoading = 10;
+        
         foreach ($this->weapons as $i=>$weapon)
         {
+            debug::log("*** subweapon id: $weapon->id ***");
             $data = $weapon->calculateLoading();
+            debug::log("*** subweapon turnsloaded: $weapon->turnsloaded ***");
+            debug::log("*** subweapon data: ".$data->toJSON());
+            if($data->loading < $curLoading){
+                $curLoading = $data->loading;
+            }
+            debug::log("*** curLoading: $curLoading ***");
+            
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($this->weapons[$i]->id, 0, $ship->id, $data->toJSON());
         }
-    }
-    
-    public function setSystemData($data, $subsystem)
-    {
-        //Debug::log("setSystemData: duoWeapon");
-        foreach ($this->weapons as $i=>$weapon){
-            $weapon->setSystemData($data, $subsystem);
-        }
-        //$this->weapons[$subsystem]->setSystemData($data, $subsystem);
         
+        $data = parent::calculateLoading();
+        
+        if($data){
+            $this->turnsloaded = $curLoading;
+            $data->loading = $curLoading;
+            debug::log("*** main weapon id: $this->id");
+            debug::log("*** main weapon turnsloaded: $this->turnsloaded");
+            debug::log("*** data: ".$data->toJSON());
+            SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+        }
     }
     
     public function setInitialSystemData($ship)
@@ -105,11 +120,14 @@ class DuoWeapon extends Weapon{
         {
             $data = $weapon->getStartLoading();
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($weapon->id, $i, $ship->id, $data->toJSON());
         }
+
+        $data = $this->getStartLoading();
+        SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
     
-    public function setLoading( $loading )
+/*    public function setLoading( $loading )
     {
         //Debug::log("Enter duo setLoading");
         if (!$loading){
@@ -122,16 +140,12 @@ class DuoWeapon extends Weapon{
             $weapon->setLoading($loading);
         }
         
-    }
+    }*/
     
 /*    public function calculateLoading(){
-        if($this->duoWeapon){
             foreach($this->weapons as $weapon){
                 $weapon->calculateLoading();
             }
-            
-            return;
-        }        
     }*/
             
 }

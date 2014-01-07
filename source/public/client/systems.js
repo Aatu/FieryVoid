@@ -100,6 +100,10 @@ shipManager.systems = {
     
     getSystem: function(ship, id){
     
+        if(ship == null){
+            console.log("That's weird");
+        }
+        
         for(var i in ship.systems){
             var system = ship.systems[i];
             

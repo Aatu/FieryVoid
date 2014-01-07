@@ -2,6 +2,8 @@ window.weaponManager = {
     mouseoverTimer: null,
     mouseOutTimer: null,
     mouseoverSystem: null,
+    currentSystem: null,
+    currentShip: null,
 
     getWeaponCurrentLoading: function(weapon)
     {
@@ -87,7 +89,6 @@ window.weaponManager = {
 	},    
     
     onWeaponMouseover: function(e){
-        
         if (weaponManager.mouseOutTimer != null){
             clearTimeout(weaponManager.mouseOutTimer); 
             weaponManager.mouseOutTimer = null;
@@ -96,17 +97,60 @@ window.weaponManager = {
         if (weaponManager.mouseoverTimer != null)
             return;
 
-        weaponManager.mouseoverSystem = $(this);
+        var id = $(this).data("shipid");
+        weaponManager.currentShip = gamedata.getShip(id);
+        
+        if ($(this).hasClass("fightersystem")){
+            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), t.data("id"));
+	}else{
+            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
+        }
+        
+        var targetElement = $(this);
+        
+/*        if(targetElement.hasClass("iconduo")){
+            // We are mousing over a duo weapon. Ignore this but put focus to the systemcontainer
+            
+            
+            do{
+                targetElement = targetElement.parent();
+                if(targetElement){
+                    if (targetElement.hasClass("system")) {
+                        weaponManager.mouseoverSystem = targetElement;
+                        break;
+                    }
+                }
+                else{
+                    break;
+                }
+            } while (targetElement)
+        } else{*/
+            weaponManager.mouseoverSystem = targetElement;
+        //}
+        
         weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
     },
     
+    onWeaponMouseoverDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+        console.log("duo weapon mouse over ignored.");
+    },
+    
+    onWeaponMouseOutDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+        console.log("duo weapon mouse out ignored.");
+    },
+    
     onWeaponMouseOut: function(e){
+        //if($(this).is(weaponManager.mouseoverSystem) || $(this).is($(".UI"))){
+        
         if (weaponManager.mouseoverTimer != null){
             clearTimeout(weaponManager.mouseoverTimer); 
             weaponManager.mouseoverTimer = null;
         }
         
         weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
+        //}
     },
     
     doWeaponMouseOver: function(e){
@@ -118,13 +162,15 @@ window.weaponManager = {
         systemInfo.hideSystemInfo();
         weaponManager.removeArcIndicators();
 
-        var t = weaponManager.mouseoverSystem;
+        if( weaponManager.mouseoverSystem == null){
+            return;
+        }
+        
+/*        var t = weaponManager.mouseoverSystem;
         
         // Dirty work-around to avoid errors when moving over two systems.
         // (This happens between two duo_icons
-        if( t == null){
-            return;
-        }
+        
         
         var id = t.data("shipid");
                
@@ -135,11 +181,14 @@ window.weaponManager = {
 			system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
 		}else{
 			system = shipManager.systems.getSystem(ship, t.data("id"));
-		}
+		}*/
         
     
-        weaponManager.addArcIndicators(ship, system);
-        systemInfo.showSystemInfo(t, system, ship);
+        //weaponManager.addArcIndicators(ship, system);
+        //systemInfo.showSystemInfo(t, system, ship);
+        weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
+        systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
+
         drawEntities();
     },
     
@@ -765,12 +814,11 @@ window.weaponManager = {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
-                        
                         var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
+                        var calledid = -1;
                         
-                        var	calledid = -1;
                         if (system)
-							calledid = system.id;
+                            calledid = system.id;
 							
                         var fire = {
                             id:fireid,
@@ -1033,7 +1081,16 @@ window.weaponManager = {
         
         if (system.dualWeapon || system.duoWeapon){
             for (var i in system.weapons){
-                fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(system.weapons[i]));
+                var weapon = system.weapons[i];
+                
+                if(weapon.duoWeapon){
+                    for(var index in weapon.weapons){
+                        var subweapon = weapon.weapons[index];
+                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
+                    }
+                }else{
+                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
+                }
             }
         }
         

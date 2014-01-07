@@ -34,6 +34,7 @@ class Weapon extends ShipSystem{
     public $overloadable = false;
     
     public $normalload = 0;
+    public $alwaysoverloading = false;
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
@@ -354,7 +355,7 @@ class Weapon extends ShipSystem{
                 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns+1;
-                if ($overloading == $normalload && $newExtraShots == 0)
+                if ($overloading >= $normalload && $newExtraShots == 0)
                     $newExtraShots = $this->extraoverloadshots;
 
                 if ($overloading > $normalload)

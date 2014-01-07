@@ -24,7 +24,19 @@ window.SystemFactory =
             for(var i in system.weapons){
                 var newWeaponName = systemJson.weapons[i].name;
                 var newName = newWeaponName.charAt(0).toUpperCase() + newWeaponName.slice(1);
-                system.weapons[i] = new window[newName](systemJson.weapons[i], ship);
+                var newWeapon = new window[newName](systemJson.weapons[i], ship);
+                
+                if(newWeapon.duoWeapon || newWeapon.dualWeapon){
+                    for(var index in newWeapon.weapons){
+                        var newSubWeaponName = newWeapon.weapons[index].name;
+                        var newSubName = newSubWeaponName.charAt(0).toUpperCase() + newSubWeaponName.slice(1);
+                        var newSubWeapon = new window[newSubName](newWeapon.weapons[index], ship);
+                
+                        newWeapon.weapons[index] = newSubWeapon;
+                    }
+                }
+                
+                system.weapons[i] = newWeapon;
             }
         }
         

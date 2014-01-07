@@ -300,6 +300,7 @@
         public $firingModes = array( 1 => "Sustained");
         
         // Set to make the weapon start already overloaded.
+        public $alwaysoverloading = true;
         public $overloadturns = 2;
         public $extraoverloadshots = 2;
         public $overloadshots = 2;
@@ -315,6 +316,7 @@
         public function setSystemDataWindow($turn){
             $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Raking";
+            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
 
             parent::setSystemDataWindow($turn);
         }

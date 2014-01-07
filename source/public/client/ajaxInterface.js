@@ -98,13 +98,37 @@ window.ajaxInterface = {
 //                        if (system.duoWeapon){
                             for (var c in system.weapons){
                                 var weapon = system.weapons[c];
-                                for (var b = weapon.fireOrders.length-1; b>=0; b--){
-                                    var fire = weapon.fireOrders[b];
-                                    if (fire.turn < gamedata.turn){
-                                        weapon.fireOrders.splice(b,1);
+                                if(weapon.duoWeapon){
+                                    for(var d in weapon.weapons){
+                                        var subweapon = weapon.weapons[d];
+                                        for (var index = subweapon.fireOrders.length-1; index>=0; index--){
+                                            var subfire = subweapon.fireOrders[index];
+                                            if (subfire.turn < gamedata.turn){
+                                                subweapon.fireOrders.splice(index,1);
+                                            }
+                                        }
+                                        fires = fires.concat(subweapon.fireOrders);
+                                    }
+                                }else{
+                                    //var weapon = system.weapons[c];
+                                    for (var b = weapon.fireOrders.length-1; b>=0; b--){
+                                        var fire = weapon.fireOrders[b];
+                                        if (fire.turn < gamedata.turn){
+                                            weapon.fireOrders.splice(b,1);
+                                        }
+                                    }
+                                    fires = fires.concat(weapon.fireOrders);
+                                }
+
+                                
+                                for (var b = weapon.power.length-1; b>=0; b--){
+                                    var power = weapon.power[b];
+                                    
+                                    if (power.turn < gamedata.turn){
+                                        weapon.power.splice(b,1);
                                     }
                                 }
-                                fires = fires.concat(weapon.fireOrders);
+                                systems[a] = {'id': weapon.id, 'power': weapon.power, 'fireOrders': fires};
                             }
                             
                         }else{
@@ -115,15 +139,19 @@ window.ajaxInterface = {
                                 }
                             }
                             fires = system.fireOrders;
+                            
+                            for (var b = system.power.length-1; b>=0; b--){
+                                var power = system.power[b];
+                                if (power.turn < gamedata.turn){
+                                    system.power.splice(b,1);
+                                }
+                            }
+                            
+                            systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': fires};
                         }
                         
-                        for (var b = system.power.length-1; b>=0; b--){
-                            var power = system.power[b];
-                            if (power.turn < gamedata.turn){
-                                system.power.splice(b,1);
-                            }
-                        }
-                        systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': fires};
+                        
+                        
                     }
 
                 }

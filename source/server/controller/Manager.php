@@ -783,7 +783,8 @@ class Manager{
             $ship->EW = $EW;
             
             foreach($value["systems"] as $i=>$system){
-                $sys = $ship->getSystemById($system['id']);
+                //$sys = $ship->getSystemById($system['id']);
+                $sys = $ship->getSystemById($i);
                 
                 if (isset($system["power"]) &&is_array($system["power"]))
                 {
@@ -801,11 +802,13 @@ class Manager{
                     $fires = Array();
                     foreach($system["fireOrders"] as $i=>$fo)
                     {
+                        debug::log("For weaponid for ".$fo["weaponid"]);
                         $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                         if (isset($sys)){
                             $fires[] = $fireOrder;
                         }
                     }
+                    
                     $sys->setFireOrders($fires);
                 }
                 

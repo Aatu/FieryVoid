@@ -383,6 +383,9 @@ shipManager.power = {
 	},
 	
 	stopOverloading: function(ship, system){
+            if(system.alwaysoverloading){
+                return;
+            }
 	
 		for (var i in system.power){
 			var power = system.power[i];
@@ -398,6 +401,10 @@ shipManager.power = {
 	},
 	
 	isOverloading: function(ship, system){
+            if(system.alwaysoverloading){
+                return true;
+            }
+            
 		for (var i in system.power){
 			var power = system.power[i];
 			if (power.turn != gamedata.turn)
@@ -522,7 +529,16 @@ shipManager.power = {
                 if(system.dualWeapon || system.duoWeapon){
                     for(var i in system.weapons){
                         var weapon = system.weapons[i];
-                        shipManager.power.setOnline(ship, weapon);
+                        
+                        if(weapon.duoWeapon){
+                            for(var index in weapon.weapons){
+                                var subweapon = weapon.weapons[index];
+                                
+                                shipManager.power.setOnline(ship, subweapon);
+                            }
+                        }else{
+                            shipManager.power.setOnline(ship, weapon);
+                        }
                     }
                 }
                 
