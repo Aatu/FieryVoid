@@ -35,16 +35,16 @@ class Haven extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+        $this->addFrontSystem(new TwinArray(2, 6, 2, 180, 60));
+        $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 180));
 		$this->addFrontSystem(new MatterCannon(3, 7, 4, 300, 60));
 		
 		
 		
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
-		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
+		$this->addAftSystem(new TwinArray(2, 6, 2, 120, 0));
+        $this->addAftSystem(new TwinArray(2, 6, 2, 0, 240));
 		
 
         

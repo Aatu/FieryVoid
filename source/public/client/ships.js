@@ -667,9 +667,7 @@ window.shipManager = {
 			var stru = shipManager.systems.getStructureSystem(ship, 0);
 			var sturn = damageManager.getTurnDestroyed(ship, stru);
 
-            console.log("rturn: " + rturn + "sturn: " + sturn);
-
-            if (rturn != null && rturn < sturn)
+            if (rturn != null && (rturn < sturn || sturn == null))
                 turn = rturn;
             else
                 turn = sturn;
