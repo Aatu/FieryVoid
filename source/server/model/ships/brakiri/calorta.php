@@ -24,7 +24,7 @@ class Calorta extends HeavyCombatVesselLeftRight{
 
         $this->gravitic = true;
 
-        $this->addPrimarySystem(new Reactor(7, 18, 0, 0));
+        $this->addPrimarySystem(new Reactor(7, 18, 0, 2));
         $this->addPrimarySystem(new CnC(8, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(6, 20, 9, 9));
         $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
