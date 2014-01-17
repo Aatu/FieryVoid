@@ -102,6 +102,7 @@ shipManager.systems = {
     
         if(ship == null){
             console.log("That's weird");
+            return null;
         }
         
         for(var i in ship.systems){

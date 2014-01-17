@@ -166,7 +166,7 @@ spl_autoload_register(
                 'jammer' => '/server/model/systems/baseSystems.php',
                 'jumpengine' => '/server/model/systems/baseSystems.php',
                 'jumphawk' => '/server/model/ships/drazi/jumphawk.php',
-//                'kaliva' => '/server/model/ships/brakiri/kaliva.php',
+                'kaliva' => '/server/model/ships/brakiri/kaliva.php',
                 'kabrik' => '/server/model/ships/brakiri/kabrik.php',
                 'katoc' => '/server/model/ships/narn/Katoc.php',
                 'katanpulsedestroyer' => '/server/model/ships/narn/KatanPulseDestroyer.php',

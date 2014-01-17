@@ -133,12 +133,10 @@ window.weaponManager = {
     
     onWeaponMouseoverDuoSystem: function(e){
         // ignore this. We've already entered the parent of this duosystem
-        console.log("duo weapon mouse over ignored.");
     },
     
     onWeaponMouseOutDuoSystem: function(e){
         // ignore this. We've already entered the parent of this duosystem
-        console.log("duo weapon mouse out ignored.");
     },
     
     onWeaponMouseOut: function(e){

@@ -185,10 +185,10 @@
     
     <div class="iconduo">
         <span class="efficiency value"></span>
-            <div class="iconmask"></div>
-        <div class="iconUI">
+            <div class="duoIconmask"></div>
+<!--        <div class="iconUI">
             <div class="button holdfire"></div>
-        </div>
+        </div>-->
     </div>
     
     <div class="fighter">
