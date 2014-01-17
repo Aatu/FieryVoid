@@ -145,7 +145,7 @@ class ShipSystem{
         
     }
     
-    public function testCritical($ship, $turn, $crits, $add = 0){
+    public function testCritical($ship, $gamedata, $crits, $add = 0){
         
         $roll = Dice::d(20)+$this->getTotalDamage() + $add;
         $criticalTypes = -1;
@@ -162,12 +162,12 @@ class ShipSystem{
             
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){
-                    $crit = $this->addCritical($ship->id, $phpclass, $turn);
+                    $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
                     if ($crit)
                         $crits[] = $crit;
                 }
             }else{
-                $crit = $this->addCritical($ship->id, $criticalTypes, $turn);
+                $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
                 if ($crit)
                     $crits[] = $crit;
             }
@@ -180,9 +180,9 @@ class ShipSystem{
          
     }
     
-    protected function addCritical($shipid, $phpclass, $turn)
+    public function addCritical($shipid, $phpclass, $gamedata)
     {
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $turn);
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
         return $crit;

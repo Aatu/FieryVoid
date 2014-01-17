@@ -234,6 +234,24 @@ class Reactor extends ShipSystem{
         
         
     }
+    
+    public function addCritical($shipid, $phpclass, $gamedata) {
+        if(strcmp($phpclass, "ForcedOfflineOneTurn") == 0){
+            debug::log("On nooooos!");
+            // This is the reactor. If it takes a ForcedOffLineForOneTurn,
+            // propagate this crit to all systems that can be shut down.
+            $ship = $gamedata->getShipById($shipid);
+            foreach($ship->systems as $system){
+                if($system->powerReq > 0){
+                    $system->addCritical($shipid, $phpclass, $gamedata);
+                }
+            }
+        }
+
+        debug::log("who cares?");
+
+        parent::addCritical($shipid, $phpclass, $gamedata);
+    }
 }
 
 class Engine extends ShipSystem{
@@ -397,7 +415,7 @@ class GraviticThruster extends Thruster{
         parent::setSystemData($data, $subsystem);
     }
     
-    protected function addCritical($shipid, $phpclass, $turn)
+    public function addCritical($shipid, $phpclass, $gamedata)
     {
         if (! $this->firstCriticalIgnored)
         {
@@ -408,7 +426,7 @@ class GraviticThruster extends Thruster{
         
         Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
             
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $turn);
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
         return $crit;

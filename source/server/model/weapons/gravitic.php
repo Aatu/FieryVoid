@@ -128,8 +128,8 @@
             /* If fully boosted: test for possible crit. */
             if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
                 $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $crits = $this->testCritical($shooter, $gamedata->turn, $crits);
-                $this->setCriticals($crits, $gamedata->turn);
+                $crits = $this->testCritical($shooter, $gamedata, $crits);
+//                $this->setCriticals($crits, $gamedata->turn);
             }
             
             parent::fire($gamedata, $fireOrder);

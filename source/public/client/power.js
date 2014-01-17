@@ -42,6 +42,22 @@ shipManager.power = {
 		
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			systemwindow.addClass("forcedoffline");
+                        
+                        if(system.name == "reactor"){
+                            for(var i in ship.systems){
+                                var shipSystem = ship.systems[i];
+                                
+                                if( shipSystem.canOffLine &&
+                                    !shipManager.systems.isDestroyed(ship, system) &&
+                                    !shipManager.power.isOffline(ship, shipSystem)){
+                                    
+                                    shipSystem.power.push({id:null, shipid:ship.id, systemid:shipSystem.id, type:1, turn:gamedata.turn, amount:0});
+                                    shipManager.power.stopOverloading(ship, shipSystem);
+                                    shipWindowManager.setDataForSystem(ship, shipSystem);
+                                }
+                            }
+                        }
+                        
 			return true;		
 		}
 		
@@ -201,11 +217,13 @@ shipManager.power = {
 	},
 	
 	isPowerless: function(ship){
-	
-		if (shipManager.systems.isReactorDestroyed(ship))
+                var reactor = shipManager.systems.getSystemByName(ship, "reactor");
+        
+		if (shipManager.systems.isReactorDestroyed(ship) ||
+                    shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn"))
 			return true;
 		
-		var power = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		var power = shipManager.power.getReactorPower(ship, reactor);
 		
 		if (this.countPossiblePower(ship) + power > 0)
 			return false;
