@@ -191,7 +191,7 @@ class ShipSystem{
     public function hasCritical($type, $turn = false){
         $count = 0;
         foreach ($this->criticals as $critical){
-            if ($critical->phpclass == $type && $critical->inEffect){
+            if (strcmp($critical->phpclass, $type) == 0 && $critical->inEffect){
 				
                 if ($turn === false){
                         $count++;
@@ -294,8 +294,9 @@ class ShipSystem{
             }
         }
         
-        if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1))
+        if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1)){
             return true;
+        }
         
         return false;
     

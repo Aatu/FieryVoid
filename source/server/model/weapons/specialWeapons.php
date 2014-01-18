@@ -153,12 +153,7 @@
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 				$crit->updated = true;
 				$reactor->criticals[] =  $crit;
-//			}else if ($system->powerReq > 0){
-//				$crit = new ForcedOfflineOneTurn(-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
-//				$crit->updated = true;
-//				$system->criticals[] =  $crit;
-			}else if ($system->powerReq > 0 || strcmp($system->name, "reactor") == 0){
-                            debug::log("I just his a system called $system->name");
+			}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			}
 			
