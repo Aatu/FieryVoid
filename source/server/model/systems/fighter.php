@@ -107,11 +107,11 @@
      
 		}
 		
-		public function testCritical($ship, $turn, $crits, $add = 0){
+		public function testCritical($ship, $gamedata, $crits, $add = 0){
 			$d = Dice::d(10);
 			
 			if ($d > $this->getRemainingHealth()){
-				$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $turn);
+				$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $this->criticals[] =  $crit;
                 $crits[] = $crit;
