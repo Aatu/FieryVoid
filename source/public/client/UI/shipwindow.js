@@ -960,7 +960,7 @@ setSystemData: function(ship, system, shipwindow){
 
 		
 		if (shipManager.movement.isTurn(movement)){
-			var turndelay = shipManager.movement.calculateTurndelay(ship, movement);
+			var turndelay = shipManager.movement.calculateTurndelay(ship, movement, movement.speed);
 			additionally = " Additionally, you can assign extra thrust to lower the turn delay to minimum of 1. Current turndelay of this turn will be " 
 			+ (turndelay) + ".";
 		}

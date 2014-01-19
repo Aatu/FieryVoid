@@ -1282,7 +1282,7 @@ shipManager.movement = {
         var already = shipManager.movement.getAmountChanneledReal(ship, system);
         var step = 1;
         var wasted = 0;
-        var turndelay = shipManager.movement.calculateTurndelay(ship, movement);
+        var turndelay = shipManager.movement.calculateTurndelay(ship, movement, movement.speed);
         
         var remainingThrust = shipManager.movement.getRemainingEngineThrust(ship);
         var thrustReq = shipManager.movement.calculateThrustStillReq(ship, movement);
@@ -1719,9 +1719,15 @@ shipManager.movement = {
     },
     
     calculateCurrentTurndelay: function(ship){
-        
-        var turndelay = Math.ceil(shipManager.movement.getSpeed(ship) * ship.turndelaycost);
+        // Get the current speed, whether it's commited or not. (If it's cancelled,
+        // We recalculate the turndelay anyway.
+        var turndelay = Math.ceil(ship.movement[ship.movement.length-1].speed * ship.turndelaycost);
         var last = null;
+        
+        if(gamedata.turn == 1){
+            turndelay = 0;
+        }
+        
         for (var i in ship.movement){
             var movement = ship.movement[i];
             if (movement.turn < gamedata.turn-1)
@@ -1738,8 +1744,13 @@ shipManager.movement = {
             
                 
             if (shipManager.movement.isTurn(movement)){
-                if (!ship.agile || !last || !shipManager.movement.isTurn(last))
-                    turndelay += shipManager.movement.calculateTurndelay(ship, movement);
+                if (!ship.agile || !last || !shipManager.movement.isTurn(last)){
+                    // calculate the turndelay using the NEW speed, iso of the one
+                    // in this old movement.
+                    turndelay = 
+                        shipManager.movement.calculateTurndelay(ship,
+                            movement, ship.movement[ship.movement.length-1].speed);
+                }
             }
             last = movement;
             
@@ -1753,9 +1764,10 @@ shipManager.movement = {
         
     },
     
-    calculateTurndelay: function(ship, movement){
+    calculateTurndelay: function(ship, movement, speed){
 
-        var speed = movement.speed;
+        // speed as a seperate parameter needed to allow for calculation with
+        // new speed.
 		if (speed == 0)
 			return 0;
 			
