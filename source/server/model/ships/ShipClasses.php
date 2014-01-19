@@ -744,7 +744,7 @@
                         
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
-                            if ($structure->location == 0){
+                            if ($structure != null && $structure->location == 0){
                                 return null;
                             }
                                 
@@ -754,13 +754,13 @@
                                 return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                             }
                             else{
-                                if($structure->isDestroyed($fire->turn -1)){
+                                if($structure != null && $structure->isDestroyed($fire->turn -1)){
                                     $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                                 }
                                 else{
                                     $structure = $this->getStructureSystem(0);
 
-                                    if($structure->isDestroyed()){
+                                    if($structure != null && $structure->isDestroyed()){
                                         return null;
                                     }
                                     else{
