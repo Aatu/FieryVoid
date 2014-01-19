@@ -198,7 +198,7 @@
 			if ($speed == 0)
 				return 0;
 				
-            $turndelay = round($speed * $ship->turndelaycost);
+            $turndelay = ceil($speed * $ship->turndelaycost);
             
             if ($ship instanceof FighterFlight)
 				return $turndelay;
