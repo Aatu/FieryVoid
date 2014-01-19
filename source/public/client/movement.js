@@ -97,8 +97,17 @@ shipManager.movement = {
             
             if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || (movement.type != "pivotleft" && movement.type != "pivotright" )))
                 return;
-            
+
+            // adjust the current turn delay if the new speed changes the turn delay
+            var oldspeed = shipManager.movement.getSpeed(ship);
+
             ship.movement.splice(ship.movement.length -1, 1);
+
+            var speed = shipManager.movement.getSpeed(ship);
+
+//            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
+            ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+            
             var shipwindow = $(".shipwindow_"+ship.id);
             shipWindowManager.cancelAssignThrust(shipwindow);
             shipManager.drawShip(ship);
@@ -116,13 +125,22 @@ shipManager.movement = {
 				continue;
 	
 			if ((movement.value != accel && movement.heading == curheading) || (movement.value == accel && movement.heading != curheading)){
-				ship.movement.splice(ship.movement.length -1, 1);
-				var shipwindow = $(".shipwindow_"+ship.id);
-				shipWindowManager.cancelAssignThrust(shipwindow);
-				shipManager.drawShip(ship);
-				gamedata.shipStatusChanged(ship);
-                
-				return true;
+                            // adjust the current turn delay if the new speed changes the turn delay
+                            var oldspeed = shipManager.movement.getSpeed(ship);
+
+                            ship.movement.splice(ship.movement.length -1, 1);
+
+                            var speed = shipManager.movement.getSpeed(ship);
+        
+//                            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
+                            ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+                            
+                            var shipwindow = $(".shipwindow_"+ship.id);
+                            shipWindowManager.cancelAssignThrust(shipwindow);
+                            shipManager.drawShip(ship);
+                            gamedata.shipStatusChanged(ship);
+
+                            return true;
 			}
 		}
 		
@@ -932,13 +950,63 @@ shipManager.movement = {
         
     },
     
+    adjustTurnDelay: function(ship, oldspeed, newspeed){
+        var oldturndelay = Math.ceil(oldspeed * ship.turndelaycost);
+        var newturndelay = Math.ceil(newspeed * ship.turndelaycost);
+        var step = (newturndelay - oldturndelay);
+        var spentturndelay = newturndelay;
+        
+        if(ship.currentturndelay == 0 && step == 1){
+            // turndelay was 0. Re-check previous turn to see if the ship
+            // moved enough to have also moved enough to cancel the new turn delay.
+            for (var i in ship.movement){
+                var movement = ship.movement[i];
+                if (movement.turn != gamedata.turn - 1)
+                    continue;
+
+                if (movement.commit == false)
+                    continue;
+
+                if ((movement.type == "move" 
+                    || movement.type == "slipright" 
+                    || movement.type == "slipleft" ))
+                    spentturndelay--;
+
+                if (shipManager.movement.isTurn(movement)){
+                    if (!ship.agile || !last || !shipManager.movement.isTurn(last))
+                        spentturndelay = newturndelay;
+                }
+            }
+        }
+        
+        ship.currentturndelay = ship.currentturndelay + step;
+        
+        if(ship.currentturndelay < 0){
+            ship.currentturndelay = 0;
+        }
+        
+        ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+        
+//        if(oldturndelay == 0){
+//            ship.currentturndelay = curTurnDelay;
+//        }else{
+//            ship.currentturndelay = adjustTurnDelay;
+//        }
+//        
+        if(ship.currentturndelay < 0){
+            ship.currentturndelay = 0;
+        }
+    },
+    
     changeSpeed: function(ship, accel){
 
         if (!shipManager.movement.canChangeSpeed(ship, accel))
             return false;
 
-		if (shipManager.movement.deleteSpeedChange(ship, accel))
-			return;
+	if (shipManager.movement.deleteSpeedChange(ship, accel)){
+            ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+            return;
+        }
 
         var value = 0;
         if (accel)
@@ -956,7 +1024,11 @@ shipManager.movement = {
         }
                 
         var step = (accel) ? 1: -1;
-        var speed = shipManager.movement.getSpeed(ship) + step;
+        var oldspeed = shipManager.movement.getSpeed(ship);
+        var speed = oldspeed + step;
+        
+        // adjust the current turn delay if the new speed changes the turn delay
+ //       shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
         
         
         if (speed < 0){
@@ -1001,10 +1073,13 @@ shipManager.movement = {
             value:value
             };
         
-		gamedata.shipStatusChanged(ship);
+        ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+        
+        gamedata.shipStatusChanged(ship);
         shipManager.drawShip(ship);
-        if (!ship.flight)
-			shipWindowManager.assignThrust(ship);
+        if (!ship.flight){
+            shipWindowManager.assignThrust(ship);
+        }
     },
         
             
@@ -1645,11 +1720,11 @@ shipManager.movement = {
     
     calculateCurrentTurndelay: function(ship){
         
-        var turndelay = ship.currentturndelay;
+        var turndelay = Math.ceil(shipManager.movement.getSpeed(ship) * ship.turndelaycost);
         var last = null;
         for (var i in ship.movement){
             var movement = ship.movement[i];
-            if (movement.turn != gamedata.turn)
+            if (movement.turn < gamedata.turn-1)
                 continue;
                 
             if (movement.commit == false)
