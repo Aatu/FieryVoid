@@ -529,8 +529,6 @@ class Weapon extends ShipSystem{
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 	
-        debug::log("calcHit modifier $mod");
-        
         if ($oew < 1)
         {
             $rangePenalty = $rangePenalty*2;
@@ -559,10 +557,13 @@ class Weapon extends ShipSystem{
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-            
-        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
         
-        debug::log("Goal is $goal");
+        // Fighters ignore all defensive EW, be it DEW, SDEW or BDEW
+        if (!($shooter instanceof FighterFlight)){
+            $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
+        }else{
+            $goal = ($defence - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
+        }
         
         $change = round(($goal/20)*100);
         

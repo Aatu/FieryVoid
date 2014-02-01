@@ -241,6 +241,10 @@ window.weaponManager = {
                 {
                     $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
                 }
+                
+                if (selectedShip.flight){
+                    $('<div><span class="hitchange">(Fighters ignore all defensive EW)</span></div>').appendTo(f);
+                }
             }else{
                 $('<div><span class="weapon">'+weapon.displayName+':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
             }
@@ -304,9 +308,8 @@ window.weaponManager = {
     
     },
     
-    calculateRangePenalty: function(shooterpos, targetpos, weapon){
-        var dis = mathlib.getDistance(shooterpos, targetpos);
-        var rangePenalty = (weapon.rangePenalty/hexgrid.hexWidth()*dis);
+    calculateRangePenalty: function(distance, weapon){
+        var rangePenalty = (weapon.rangePenalty*distance);
     
         return rangePenalty;
     },
@@ -318,10 +321,12 @@ window.weaponManager = {
         var shooter = gamedata.getShip(ball.shooterid);
         var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         var target = gamedata.getShip(ball.targetid);
-        var launchPos = hexgrid.positionToPixel(ball.position);
-        var tPos = shipManager.getShipPositionInWindowCo(target);
+//        var launchPos = hexgrid.positionToPixel(ball.position);
+//        var tPos = shipManager.getShipPositionInWindowCo(target);
         
-        var rangePenalty = weaponManager.calculateRangePenalty(launchPos, tPos, weapon);
+        var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
+        
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         
         var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
@@ -396,6 +401,11 @@ window.weaponManager = {
     
     calculateBaseHitChange: function(target, base, shooter){
 
+        // fighters ignore all DEW, both normal, blanket as well as supported
+        if (shooter && shooter.flight){
+            return base;
+        }
+
         var dew = 0;
         
         //TODO: jincing ignored if range 0 and shooter not jinking!
@@ -416,30 +426,26 @@ window.weaponManager = {
                 }
             }
         }else{
-            if (!shooter || !shooter.flight)
+//            if (!shooter )
                 dew = ew.getDefensiveEW(target);
         }
         
         var bdew = 0;
         var sdew = 0;
         
-        if (!target.flight){
-            sdew = ew.getSupportedDEW(target);
-        }
-
+        sdew = ew.getSupportedDEW(target);
         bdew = ew.getSupportedBDEW(target);
 
         //console.log("base: " + base + " dew: " + dew + " blanket: " + bdew + "supportDEW: " +  sdew);
         return base - dew - bdew - sdew;
-        
-        
     },
     
     calculateHitChange: function(shooter, target, weapon, calledid){
     
         var sPos = shipManager.getShipPositionInWindowCo(shooter);
         var tPos = shipManager.getShipPositionInWindowCo(target);
-        var rangePenalty = weaponManager.calculateRangePenalty(sPos, tPos, weapon);
+        var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         var sPosHex = shipManager.getShipPosition(shooter);
         var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
@@ -818,12 +824,13 @@ window.weaponManager = {
     checkIsInRange: function(shooter, target, weapon){
         
         var range = weapon.range;
-        var shooterPos = shipManager.getShipPositionInWindowCo(shooter);
-        var targetPos = shipManager.getShipPositionInWindowCo(target)
+        var shooterPos = shipManager.getShipPositionInWindowCoWithoutOffset(shooter);
+        var targetPos = shipManager.getShipPositionInWindowCoWithoutOffset(target)
+        var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
         
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");
         
-        if(stealthSystem && mathlib.getDistanceHex(shooterPos, targetPos) > 5.1 && weapon.ballistic){
+        if(stealthSystem && distance > 5 && weapon.ballistic){
             return false;
         }
         
@@ -840,7 +847,7 @@ window.weaponManager = {
             range = range / (shipManager.systems.getOutput(target, jammer)+1);
         }
         
-        return (mathlib.getDistanceHex(shooterPos, targetPos) <= range);
+        return (distance <= range);
     },
     
     targetHex: function(hexpos){
