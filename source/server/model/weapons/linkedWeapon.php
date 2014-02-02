@@ -37,18 +37,37 @@ class LinkedWeapon extends Weapon{
         if ($target->isDestroyed())
             return;
        
-		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+        if ($location === null){
+            $location = $target->getHitSection($pos, $shooter, $fireOrder->turn, $this);
+        }
+        
+	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
         
         for ($i=0;$i<$fireOrder->shots;$i++)
         {   
             if ($system == null || $system->isDestroyed())
             {
-                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+                if($target instanceof FighterFlight){
+                    // You killed a fighter. Damage does not overkill into other
+                    // fighters.
+                    return;
+                }
+                
+                // you killed the system with one of your shots. Overkill into structure
+                // if there is no structure in this location, go to primary structure
+                // If primary structure is destroyed, just return.
+                $system = $target->getStructureSystem($location);
+                
+                if(($system == null && $location != 0) || ($system != null && $system->isDestroyed())){
+                    $system = $target->getStructureSystem(0);
+                }
+
+                if($system == null || $system->isDestroyed()){
+                    return;
+                }
             }
             
-            if ($system == null)
-                return;
-            
+            $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
         }
     }
