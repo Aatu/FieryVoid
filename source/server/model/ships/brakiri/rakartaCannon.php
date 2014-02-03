@@ -23,7 +23,7 @@ class RakartaCannon extends MediumShip{
 
         $this->gravitic = true;
         
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 1));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 3));

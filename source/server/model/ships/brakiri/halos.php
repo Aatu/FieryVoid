@@ -7,7 +7,7 @@ class Halos extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Brakiri";
         $this->phpclass = "Halos";
-        $this->imagePath = "img/ships/avioki.png";
+        $this->imagePath = "img/ships/halos.png";
         $this->shipClass = "Halos Heavy Scout";
         $this->shipSizeClass = 3;
         $this->occurence = "rare";
@@ -24,7 +24,7 @@ class Halos extends BaseShip{
         
         $this->gravitic = true;
 
-        $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 22, 0, 9));
         $this->addPrimarySystem(new CnC(8, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 16, 10, 10));
         $this->addPrimarySystem(new Engine(6, 16, 0, 15, 4));
