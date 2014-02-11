@@ -373,4 +373,54 @@
             
         }
     }
+    
+    class PointPulsar extends Pulse
+    {
+        public $name = "pointPulsar";
+        public $displayName = "Point Pulsar";
+        public $iconPath = "pointPulsar.png";
+        public $animation = "trail";
+        public $trailLength = 13;
+        public $animationWidth = 4;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.17;
+        public $animationColor =  array(175, 225, 175);
+        public $trailColor = array(110, 225, 110);
+        public $rof = 2;
+        public $maxpulses = 3;
+        public $grouping = 0;
+
+        public $loadingtime = 2;
+	public $normalload = 2;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+
+        public function getDamage($fireOrder){ return 10 - $this->dp; }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 10 - $this->dp;
+        }
+
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 10 - $this->dp;
+        }
+        
+        protected function getPulses($turn)
+        {
+            return 3;
+        }
+    }
 ?>

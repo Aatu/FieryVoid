@@ -150,3 +150,16 @@ class ReloadRack extends ShipSystem
 
     }
 }
+
+class BombRack extends Weapon{
+    
+    // This needs to be implemented
+    public $name = "BombRack";
+    public $displayName = "Bomb Rack";
+    public $ballistic = true;
+    public $targetImmobile = true;
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+}

@@ -247,4 +247,52 @@
 
 	}
 
+
+    class PlasmaTorch extends Plasma{
+
+	public $name = "plasmaTorch";
+        public $displayName = "Plasma Torch";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 15;
+        public $animationWidth = 5;
+	public $animationExplosionScale = 0.4;
+	public $trailLength = 10;
+	public $rangeDamagePenalty = 1;
+		        
+        public $loadingtime = 1;
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(null, 0, 2); // fighters, <=mediums, <=capitals 
+
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		
+	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
+        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
+
+        public function fire($gamedata, $fireOrder){
+            // If fired, a Plasma Torch might overheat and go in shutdown for 2 turns.
+            // Make a crit roll taking into account any damage already sustained.
+            $roll = Dice::d(20) + $this->getTotalDamage();
+            
+            if($roll >= 16){
+                // It has overheated.
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+            }
+            
+            parent::fire($gamedata, $fireOrder);
+        }
+    }
+
 ?>

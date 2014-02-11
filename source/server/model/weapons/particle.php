@@ -778,14 +778,12 @@
 
     class HeavyBolter extends Particle{
 
-        public $trailColor = array(30, 170, 255);
-
         public $name = "heavyBolter";
         public $displayName = "Heavy Bolter";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.5;
-        public $projectilespeed = 15;
+        public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 6;
 
@@ -805,5 +803,31 @@
         public function setMaxDamage(){     $this->maxDamage = 24 - $this->dp;      }
     }
     
+    class MediumBolter extends Particle{
+
+        public $name = "mediumBolter";
+        public $displayName = "Medium Bolter";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.4;
+        public $projectilespeed = 14;
+        public $animationWidth = 4;
+        public $trailLength = 4;
+
+        public $loadingtime = 2;
+
+
+        public $rangePenalty = 0.35;
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 18;   }
+        public function setMinDamage(){     $this->minDamage = 18 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+    }
 ?>
 

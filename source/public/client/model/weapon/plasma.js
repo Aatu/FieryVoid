@@ -51,4 +51,10 @@ var PlasmaStream = function(json, ship)
 PlasmaStream.prototype = Object.create( Plasma.prototype );
 PlasmaStream.prototype.constructor = PlasmaStream;
 
+var PlasmaTorch = function(json, ship)
+{
+    Plasma.call( this, json, ship);
+}
+PlasmaTorch.prototype = Object.create( Plasma.prototype );
+PlasmaTorch.prototype.constructor = PlasmaTorch;
 

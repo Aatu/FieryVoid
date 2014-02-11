@@ -56,3 +56,10 @@ var GatlingPulseCannon = function(json, ship)
 }
 GatlingPulseCannon.prototype = Object.create( Pulse.prototype );
 GatlingPulseCannon.prototype.constructor = GatlingPulseCannon;
+
+var PointPulsar = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+PointPulsar.prototype = Object.create( Pulse.prototype );
+PointPulsar.prototype.constructor = PointPulsar;

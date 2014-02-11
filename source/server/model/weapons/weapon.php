@@ -45,6 +45,7 @@ class Weapon extends ShipSystem{
     public $ballistic = false;
     public $hextarget = false;
     public $hidetarget = false;
+    public $targetImmobile = false;
     
     
     public $shots = 1;

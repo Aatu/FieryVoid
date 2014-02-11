@@ -88,7 +88,13 @@ var ReloadRack = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
 }
-ReloadRack.prototype = Object.create( ReloadRack.prototype );
+ReloadRack.prototype = Object.create( ShipSystem.prototype );
 ReloadRack.prototype.constructor = ReloadRack;
 
+var BombRack = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+BombRack.prototype = Object.create( ShipSystem.prototype );
+BombRack.prototype.constructor = BombRack;
 
