@@ -7,6 +7,7 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
+                'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
                 'advparticlebeam' => '/server/model/weapons/particle.php',
                 'altarian' => '/server/model/ships/centauri/altarian.php',
@@ -208,6 +209,7 @@ spl_autoload_register(
                 'mediumship' => '/server/model/ships/ShipClasses.php',
                 'mediumshipleftright' => '/server/model/ships/ShipClasses.php',
                 'merlin' => '/server/model/ships/drazi/merlin.php',
+                'mishakur' => '/server/model/ships/dilgar/mishakur.php',
                 'missilelauncher' => '/server/model/weapons/missile.php',
                 'mograth' => '/server/model/ships/centauri/mograth.php',
                 'mogratti' => '/server/model/ships/centauri/mogratti.php',
@@ -224,6 +226,7 @@ spl_autoload_register(
                 'nightowl' => '/server/model/ships/drazi/nightowl.php',
                 'nova' => '/server/model/ships/EA/nova.php',
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
+                'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
                 'olympus' => '/server/model/ships/EA/olympus.php',
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
