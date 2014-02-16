@@ -158,6 +158,7 @@ class BombRack extends Weapon{
     public $displayName = "Bomb Rack";
     public $ballistic = true;
     public $targetImmobile = true;
+    public $iconPath = "bombRack.png";
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

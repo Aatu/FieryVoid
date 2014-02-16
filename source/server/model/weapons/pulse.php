@@ -101,6 +101,41 @@
     
     }
 
+    class EnergyPulsar extends Pulse{
+
+        public $name = "energyPulsar";
+        public $displayName = "Energy Pulsar";
+        public $animation = "trail";
+        public $animationWidth = 5;
+        public $projectilespeed = 13;
+        public $animationExplosionScale = 0.30;
+        public $rof = 2;
+        public $trailLength = 12;
+        public $grouping = 25;
+        public $maxpulses = 3;
+
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 3, 3); // fighters, <mediums, <capitals 
+        
+        public $intercept = 1;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getPulses($turn)
+        {
+            return Dice::d(2);
+        }
+        
+        public function getDamage($fireOrder){        return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 - $this->dp;      }
+
+    }
+    
     class ScatterPulsar extends Pulse{
 
         public $name = "scatterPulsar";
