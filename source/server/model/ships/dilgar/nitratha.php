@@ -11,7 +11,6 @@ class Nitratha extends BaseShip{
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Ni'Tratha Jumpcruiser";
         $this->shipSizeClass = 3;
-        $this->commandBonus = 1;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -23,7 +22,7 @@ class Nitratha extends BaseShip{
         $this->pivotcost = 3;
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 21, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 21, 0, 1));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 5, 3));
         $this->addPrimarySystem(new Hangar(3, 2));

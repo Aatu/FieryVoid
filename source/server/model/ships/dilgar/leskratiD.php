@@ -1,18 +1,18 @@
 <?php
 
-class Leskrati extends BaseShip{
+class LeskratiD extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 515;
+        $this->pointCost = 585;
         $this->faction = "Dilgar";
-        $this->phpclass = "Leskrati";
+        $this->phpclass = "LeskratiD";
         $this->imagePath = "img/ships/mishakur.png";
-        $this->shipClass = "Leskrati Jumpcruiser";
+        $this->shipClass = "Leskrati-D Command Cruiser";
         $this->shipSizeClass = 3;
-        
-        $this->limited = 33;
+
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -24,7 +24,7 @@ class Leskrati extends BaseShip{
         $this->pivotcost = 3;
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 21, 0, 1));
+        $this->addPrimarySystem(new CnC(5, 25, 0, 2));
         $this->addPrimarySystem(new Scanner(5, 14, 3, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 2));
@@ -35,7 +35,7 @@ class Leskrati extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 120));
-        $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 300, 60));
+        $this->addFrontSystem(new QuadPulsar(2, 10, 4, 300, 60));
         $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 120));
 
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 180, 300));
@@ -46,14 +46,12 @@ class Leskrati extends BaseShip{
         $this->addAftSystem(new Engine(3, 9, 0, 4, 3));
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 180));
 
-        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 240, 0));
-        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 240, 0));
-        $this->addLeftSystem(new EnergyPulsar(2, 6, 3, 240, 300));
+        $this->addLeftSystem(new QuadPulsar(1, 10, 4, 240, 0));
+        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 210, 330));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
-        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 0, 120));
-        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 0, 120));
-        $this->addRightSystem(new EnergyPulsar(2, 6, 3, 60, 120));
+        $this->addRightSystem(new QuadPulsar(1, 10, 4, 0, 120));
+        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 30, 150));
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -11,7 +11,6 @@ class MishakurD extends BaseShip{
         $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur-D Command Dreadnought";
         $this->shipSizeClass = 3;
-        $this->commandBonus = 3;
         
         $this->occurence = "unique";
 
@@ -25,7 +24,7 @@ class MishakurD extends BaseShip{
         $this->pivotcost = 4;
 
         $this->addPrimarySystem(new Reactor(5, 28, 0, -18));
-        $this->addPrimarySystem(new CnC(6, 30, 0, 0));
+        $this->addPrimarySystem(new CnC(6, 30, 0, 3));
         $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(4, 4));

@@ -1,14 +1,14 @@
 <?php
-class Ochlavita extends HeavyCombatVessel{
+class OchlavitaM extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 525;
 	$this->faction = "Dilgar";
-        $this->phpclass = "Ochlavita";
+        $this->phpclass = "OchlavitaM";
         $this->imagePath = "img/ships/ochlavita.png";
-        $this->shipClass = "Ochlavita Destroyer";
+        $this->shipClass = "Ochlavita-M Missile Destroyer";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -19,6 +19,8 @@ class Ochlavita extends HeavyCombatVessel{
         $this->rollcost = 1;
         $this->pivotcost = 2;
         $this->iniativebonus = 35;
+        
+        $this->occurence = "rare";
 
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));
@@ -30,22 +32,22 @@ class Ochlavita extends HeavyCombatVessel{
 	  
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-	$this->addFrontSystem(new PointPulsar(2, 6, 3, 240, 360));	
-	$this->addFrontSystem(new MediumBolter(3, 8, 4, 240, 360));
-	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
-	$this->addFrontSystem(new BombRack(2, 6, 0, 300, 60));
-	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
-	$this->addFrontSystem(new MediumBolter(3, 8, 4, 0, 120));
-	$this->addFrontSystem(new PointPulsar(2, 6, 3, 0, 120));	
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
+	$this->addFrontSystem(new SMissileRack(3, 6, 0, 240, 60));
+	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 270, 90));
+	$this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
+	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 120));
+	$this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
 
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
-	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));        
+	$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(2, 4, 0, 2, 2));
 	$this->addAftSystem(new Engine(3, 9, 0, 4, 2));
-	$this->addAftSystem(new MediumBolter(3, 8, 4, 120, 240));        
+	$this->addAftSystem(new SMissileRack(3, 6, 0, 90, 270));
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 240));
  
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -11,7 +11,6 @@ class AbrithiB extends BaseShip{
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Abrithi Assault Cruiser";
         $this->shipSizeClass = 3;
-        $this->commandBonus = 0;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
