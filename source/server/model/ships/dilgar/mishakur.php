@@ -8,7 +8,7 @@ class Mishakur extends BaseShip{
         $this->pointCost = 975;
         $this->faction = "Dilgar";
         $this->phpclass = "Mishakur";
-        $this->imagePath = "img/ships/primus.png";
+        $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur Dreadnought";
         $this->shipSizeClass = 3;
         $this->commandBonus = 2;
@@ -22,7 +22,7 @@ class Mishakur extends BaseShip{
         $this->turncost = 1;
         $this->turndelaycost = 1;
         $this->accelcost = 4;
-        $this->rollcost = 4;
+        $this->rollcost = 2;
         $this->pivotcost = 4;
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
@@ -47,7 +47,7 @@ class Mishakur extends BaseShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
-        $this->addAftSystem(new Engine(3, 11, 0, 5, 2));
+        $this->addAftSystem(new Engine(3, 11, 0, 5, 3));
         $this->addAftSystem(new HeavyBolter(3, 10, 6, 120, 180));
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 0, 240));
 

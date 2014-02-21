@@ -817,7 +817,7 @@
         public $loadingtime = 2;
 
 
-        public $rangePenalty = 0.35;
+        public $rangePenalty = 0.5;
         public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
 
 
@@ -828,6 +828,33 @@
         public function getDamage($fireOrder){        return 18;   }
         public function setMinDamage(){     $this->minDamage = 18 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+    }
+    
+    class LightBolter extends Particle{
+
+        public $name = "lightBolter";
+        public $displayName = "Light Bolter";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+
+        public $loadingtime = 1;
+
+
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 12;   }
+        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
     }
 ?>
 

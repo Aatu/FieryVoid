@@ -458,4 +458,49 @@
             return 3;
         }
     }
+
+    class PairedLightBoltCannon extends LinkedWeapon{
+
+        public $name = "pairedLightBoltCannon";
+        public $displayName = "Light Bolt Cannon";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+
+        }
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    }
+
 ?>

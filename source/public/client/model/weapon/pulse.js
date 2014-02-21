@@ -70,3 +70,11 @@ var PointPulsar = function(json, ship)
 }
 PointPulsar.prototype = Object.create( Pulse.prototype );
 PointPulsar.prototype.constructor = PointPulsar;
+
+var PairedLightBoltCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+PairedLightBoltCannon.prototype = Object.create( Particle.prototype );
+PairedLightBoltCannon.prototype.constructor = PairedLightBoltCannon;
+

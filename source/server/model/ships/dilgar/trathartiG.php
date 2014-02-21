@@ -8,7 +8,7 @@ class TrathartiG extends BaseShip{
         $this->pointCost = 900;
         $this->faction = "Dilgar";
         $this->phpclass = "TrathartiG";
-        $this->imagePath = "img/ships/primus.png";
+        $this->imagePath = "img/ships/tratharti.png";
         $this->shipClass = "Tratharti-G Heavy Gunship";
         $this->shipSizeClass = 3;
         $this->commandBonus = 2;

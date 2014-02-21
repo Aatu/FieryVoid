@@ -182,3 +182,10 @@ var MediumBolter = function(json, ship)
 }
 MediumBolter.prototype = Object.create(Particle.prototype);
 MediumBolter.prototype.constructor = MediumBolter;
+
+var LightBolter = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+LightBolter.prototype = Object.create(Particle.prototype);
+LightBolter.prototype.constructor = LightBolter;
