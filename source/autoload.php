@@ -306,6 +306,7 @@ spl_autoload_register(
                 'repeatergun' => '/server/model/weapons/particle.php',
                 'resha' => '/server/model/ships/balosian/resha.php',
                 'restrictedew' => '/server/model/cricialClasses.php',
+                'rishekar' => '/server/model/ships/dilgar/rishekar.php',
                 'rolentha' => '/server/model/ships/minbari/rolentha.php',
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
