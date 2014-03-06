@@ -219,15 +219,12 @@ class FighterMissileRack extends MissileLauncher
     public function fire($gamedata, $fireOrder){
         $ammo = $this->missileArray[$fireOrder->firingMode];
         
-        // plopje
-        $ammo->amount == 1;
-        debug::log("AMMO NAME: ".$ammo->displayName);
-        debug::log("AMMO AMOUNT: ".$ammo->amount);
-        
         if($ammo->amount > 0){
             $ammo->amount--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
         }
         else{
+            
             $fireOrder->notes = "No ammo available of the selected type.";
             $fireOrder->updated = true;
             return;

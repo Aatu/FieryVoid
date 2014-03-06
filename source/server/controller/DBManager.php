@@ -138,10 +138,10 @@ class DBManager {
         }
 	}
 
-	public function submitAmmo($shipid, $systemid, $subsystem, $gameid, $firingMode, $ammoAmount){
+	public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount){
 	
             try{
-                $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $subsystem, $gameid, $firingMode, $ammoAmount)";
+                $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $firingMode, $gameid, $ammoAmount)";
                 Debug::log($sql);
                 $id = $this->insert($sql);
             }catch(Exception $e) {
@@ -1202,7 +1202,7 @@ class DBManager {
         // Get ammo info
         $stmt = $this->connection->prepare(
             "SELECT 
-                shipid, systemid, subsystem, firingmode, ammo
+                shipid, systemid, firingmode, ammo
             FROM 
                 tac_ammo
             WHERE 
@@ -1216,21 +1216,41 @@ class DBManager {
             $stmt->bind_result(
                 $shipid,
                 $systemid,
-                $subsystem,
                 $firingmode,
                 $ammo
             );
 
             while( $stmt->fetch())
             {
-                if($subsystem<0){
-                    // todo for normal systems
-                } else {
-                    // This is a dual/duoweapon or a fightersystem
-                    $gamedata->getShipById($shipid)->getSystemById($systemid)->systems[$subsystem]->setAmmo($firingmode, $ammo);
-                }
+                // This is a dual/duoweapon or a fightersystem
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
             }
             $stmt->close();
+        }
+    }
+    
+    public function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
+        try {
+            if ($stmt = $this->connection->prepare(
+                    "UPDATE 
+                        tac_ammo 
+                     SET
+                        ammo = ?
+                     WHERE 
+                        shipid = ?
+                        AND systemid = ?
+                        AND firingmode = ?
+                        AND gameid = ?
+                     "
+            ))
+            {
+                $stmt->bind_param('iiisi', $ammoAmount, $shipid, $systemid, $firingmode, $gameid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        catch(Exception $e) {
+            throw $e;
         }
     }
     

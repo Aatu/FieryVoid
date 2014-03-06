@@ -212,6 +212,10 @@ class Manager{
         return $gamedata;
     }
     
+    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
+        self::$dbManager->updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount);
+    }
+    
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship){
         
         try{
@@ -342,7 +346,7 @@ class Manager{
                                if(isset($fighterSys->missileArray)){
                                    // this system has a missileArray. It uses ammo
                                    foreach($fighterSys->missileArray as $firingMode=>$ammo){
-                                       self::$dbManager->submitAmmo($id, $fighter->id, $fighterSys->id, $gamedata->id, $firingMode, $ammo->amount);
+                                       self::$dbManager->submitAmmo($id, $fighterSys->id, $gamedata->id, $firingMode, $ammo->amount);
                                    }
                                }
                            }

@@ -202,8 +202,44 @@ window.weaponManager = {
         return false;
      
     },
-    
+
+    checkOutOfAmmo: function(ship, weapon){
+
+        var p = ship;
+        if (ship.flight){
+            p = shipManager.systems.getFighterBySystem(ship, weapon.id);
+        }
+        
+        for (var i in p.systems){
+            var system = p.systems[i];
+            if (system.id != weapon.id)
+                continue;
+
+            if(system.missileArray){
+                for(var j in system.missileArray){
+                    var missile = system.missileArray[j];
+                    
+                    if(missile.amount > 0){
+                        return false;
+                    }
+                }
+            } else {
+                return false;
+            }
+            
+            confirm.error("This missile rack is out of ammo.");
+            
+            return true;
+        }
+        
+        return false;
+    },
+
     selectWeapon: function(ship, weapon){
+        
+        if(weaponManager.checkOutOfAmmo(ship, weapon)){
+            return
+        }
         
         if (weaponManager.checkConflictingFireOrder(ship, weapon, alert)){
             return;

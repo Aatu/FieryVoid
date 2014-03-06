@@ -403,7 +403,25 @@ window.gamedata = {
 				var ship = gamedata.allShips[race][i];
 
 				if (ship.phpclass == type){
-					return jQuery.extend(true, {}, ship);
+                                    var shipRet = jQuery.extend(true, {}, ship);
+                                    
+                                    // to avoid two different flights pointing to the
+                                    // same fighter object, also extend each fighter
+                                    // individually. (This solves the bug of setting
+                                    // missile amounts, that suddenly are set for all
+                                    // the fighters of the same type.)
+                                    for(var i in shipRet.systems){
+                                        shipRet.systems[i] = jQuery.extend(true, {}, ship.systems[i]);
+                                        
+                                        if(shipRet.flight){
+                                            // in case of a flight, also do the systems of the fighters
+                                            for(var j in shipRet.systems[i].systems){
+                                                shipRet.systems[i].systems[j] = jQuery.extend(true, {}, ship.systems[i].systems[j]);
+                                            }
+                                        }
+                                    }
+                                    
+                                    return shipRet;
 				}
 			}
 		}
