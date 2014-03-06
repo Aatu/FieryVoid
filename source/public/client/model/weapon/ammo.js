@@ -24,3 +24,10 @@ var BasicMissile = function()
 }
 BasicMissile.prototype = Object.create( Ammo.prototype );
 BasicMissile.prototype.constructor = BasicMissile;
+
+var MissileFB = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+}
+MissileFB.prototype = Object.create( Ammo.prototype );
+MissileFB.prototype.constructor = MissileFB;

@@ -128,6 +128,7 @@ class DBManager {
             Debug::log($sql);
 			$id = $this->insert($sql);
 			
+                        return $id;
 			//$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
             //$this->insert($sql);			
 			
@@ -136,7 +137,19 @@ class DBManager {
             throw $e;
         }
 	}
-    
+
+	public function submitAmmo($shipid, $systemid, $subsystem, $gameid, $firingMode, $ammoAmount){
+	
+            try{
+                $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $subsystem, $gameid, $firingMode, $ammoAmount)";
+                Debug::log($sql);
+                $id = $this->insert($sql);
+            }catch(Exception $e) {
+                $this->endTransaction(true);
+                throw $e;
+            }
+	}
+        
     public function deleteEmptyGames()
     {
         $ids = array();
@@ -1185,6 +1198,40 @@ class DBManager {
             }
             $stmt->close();
         }
+        
+        // Get ammo info
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, systemid, subsystem, firingmode, ammo
+            FROM 
+                tac_ammo
+            WHERE 
+                gameid = ?"
+        );
+
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $systemid,
+                $subsystem,
+                $firingmode,
+                $ammo
+            );
+
+            while( $stmt->fetch())
+            {
+                if($subsystem<0){
+                    // todo for normal systems
+                } else {
+                    // This is a dual/duoweapon or a fightersystem
+                    $gamedata->getShipById($shipid)->getSystemById($systemid)->systems[$subsystem]->setAmmo($firingmode, $ammo);
+                }
+            }
+            $stmt->close();
+        }
     }
     
     public function getFireOrdersForShips($gamedata)
@@ -1659,7 +1706,14 @@ class DBManager {
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
-			
+
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_ammo
+                WHERE
+                    gameid = ?"
+            );
+			$this->executeGameDeleteStatement($stmt, $ids);
         }
         catch(Exception $e) {
             throw $e;

@@ -14,14 +14,10 @@ class MissileLauncher extends Weapon
     public $distanceRange = 0;
     
     public $firingModes = array(
-        1 => "BasicMissile"
     );
     
-    public $missileCount = array(
-        1 => 20
-    );
-        
-
+    public $missileArray = array();
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -48,6 +44,10 @@ class MissileLauncher extends Weapon
         }
         
         return true;
+    }
+    
+    public function setAmmo($firingMode, $amount){
+        $this->missileArray[$firingMode]->amount = $amount;
     }
 }
 
@@ -137,6 +137,113 @@ class LHMissileRack extends MissileLauncher
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
+}
+
+class FighterMissileRack extends MissileLauncher
+{
+    public $name = "FighterMissileRack";
+    public $displayName = "Fighter Missile Rack";
+    public $loadingtime = 1;
+    public $iconPath = "fighterMissile.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "FB"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        $this->missileArray = array(
+            1 => new MissileFB($startArc, $endArc)
+        );
+        
+        $this->maxAmount = $maxAmount;
+
+        parent::__construct(0, 0, 0, $startArc, $endArc);
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Missile";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+
+    public function calculateHit($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        $ammo->calculateHit($gamedata, $fireOrder);
+    }
+    
+    public function setId($id){
+        
+        debug::log("Set ID");
+        parent::setId($id);
+        
+        $counter = 0;
+        
+        foreach ($this->missileArray as $missile){
+            debug::log("Set ID missile, $counter");
+            $missile->setId(1000 + ($id*10) + $counter);
+            $counter++;
+        } 
+    }
+
+    
+    public function setFireControl($fighterOffensiveBonus){
+        $this->fireControl[0] = $fighterOffensiveBonus;
+        $this->fireControl[1] = $fighterOffensiveBonus;
+        $this->fireControl[2] = $fighterOffensiveBonus;
+    }
+    
+    protected function getAmmo($fireOrder)
+    {
+        return new $this->missileArray[$fireOrder->firingMode];
+    }
+    
+    public function addAmmo($missileClass, $amount){
+        foreach($this->missileArray as $missile){
+            if(strcmp($missile->missileClass, $missileClass) == 0){
+                $missile->setAmount($amount);
+                break;
+            }
+        }
+    }
+    
+    public function fire($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        
+        // plopje
+        $ammo->amount == 1;
+        debug::log("AMMO NAME: ".$ammo->displayName);
+        debug::log("AMMO AMOUNT: ".$ammo->amount);
+        
+        if($ammo->amount > 0){
+            $ammo->amount--;
+        }
+        else{
+            $fireOrder->notes = "No ammo available of the selected type.";
+            $fireOrder->updated = true;
+            return;
+        }
+        
+        $ammo->fire($gamedata, $fireOrder);
+    }
+    
+    public function getDamage($fireOrder)
+    {
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        return $ammo->getDamage();
+    }
+    
+    public function setMinDamage(){ 0;}
+    public function setMaxDamage(){ 0;}     
 }
 
 class ReloadRack extends ShipSystem

@@ -324,9 +324,77 @@ window.gamedata = {
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.userid = gamedata.thisplayer;
+                
+                if($(".confirm .totalUnitCostAmount").length > 0){
+                    ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+                }
+                
+                if($(".confirm .selectAmount").length > 0){
+                    if(ship.flight){
+                        // first get the number of fighters in the flight
+                        var nrOfFighters = 0;
+                        
+                        for(var i in ship.systems){
+                            nrOfFighters++;
+                        }
+                        
+                        // and get the amount of launchers on a fighter
+                        var nrOfLaunchers = 0;
+
+                        for(var j in ship.systems[1].systems){
+                            var fighterSystem = ship.systems[1].systems[j];
+                            
+                            if(!gamedata.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                                nrOfLaunchers++;
+                            }
+                        }
+                        
+                        // get all selections of missiles
+                        var missileOptions = $(".confirm .selectAmount");
+                        
+                        for(var k=0; k < missileOptions.length; k++){
+                            var firingMode = $(missileOptions[k]).data("firingMode");
+
+                            // divide the bought missiles over the missileArrays
+                            var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+                            // perLauncher should always get you an integer as result. The UI handles
+                            // buying of missiles that way.
+                            var perLauncher = boughtAmount/(nrOfFighters*nrOfLaunchers);
+
+                            for(var i in ship.systems){
+                                var fighter = ship.systems[i];
+
+                                for(var j in fighter.systems){
+                                    var fighterSystem = fighter.systems[j];
+
+                                    if(!gamedata.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                                        // find the correct index, depending on the firingMode
+                                        for(var index in fighterSystem.firingModes){
+                                            if(fighterSystem.firingModes[index] == firingMode){
+                                                fighterSystem.missileArray[index].amount = perLauncher;
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        
+                    }
+                }
+                
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 	},
+
+        arrayIsEmpty: function(array){
+            for(var i in array){
+                return false;
+            }
+
+            return true;
+        },
 
 	getShipByType: function(type){
 

@@ -262,7 +262,6 @@ class Manager{
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
-            // plopje
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
             }
@@ -334,7 +333,21 @@ class Manager{
                 $points += $ship->pointCost;
                 
                 if ($ship->userid == $gamedata->forPlayer){
-                    self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
+                    $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
+                    
+                    // Check if ship uses ammo
+                    if($ship->flight){
+                       foreach($ship->systems as $fighterIndex=>$fighter){
+                           foreach($fighter->systems as $systemIndex=>$fighterSys){
+                               if(isset($fighterSys->missileArray)){
+                                   // this system has a missileArray. It uses ammo
+                                   foreach($fighterSys->missileArray as $firingMode=>$ammo){
+                                       self::$dbManager->submitAmmo($id, $fighter->id, $fighterSys->id, $gamedata->id, $firingMode, $ammo->amount);
+                                   }
+                               }
+                           }
+                       } 
+                    }
                 }
             }
 
@@ -667,9 +680,6 @@ class Manager{
         
         $gamedata->setActiveship(-1);
 
-        // plopje                               
-        Debug::log("changeTurn: status ".$gamedata->status);
-
         if (($gamedata->turn > 1 && $gamedata->isFinished()) || ($gamedata->status === "SURRENDERED")){
             $gamedata->status = "FINISHED";
         }
@@ -824,8 +834,18 @@ class Manager{
                                     $fires[] = $fireOrder;
                                 }
                             }
+                            
+                            // plopje
+                            if(isset($fightersys["ammo"])){
+                                foreach($fightersys["ammo"] as $i=>$ammo){
+                                    if(isset($ammo)){
+                                        $fig->setAmmo($i, $ammo);
+                                    }
+                                }
+                            }
+
                             $fig->setFireOrders($fires);
-                        }
+                        }                        
                     }
                     
                 }

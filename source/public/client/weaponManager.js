@@ -364,7 +364,7 @@ window.weaponManager = {
         
         var ammo = weapon.getAmmo(weaponManager.getFireOrderById(ball.fireOrderId));
         if (ammo)
-            mod += ammo.getHitChanceMod();
+            mod += ammo.hitChanceMod;
         
         var goal = (baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod);
         
@@ -498,7 +498,7 @@ window.weaponManager = {
         
         var ammo = weapon.getAmmo(null);
         if (ammo)
-            mod += ammo.getHitChanceMod();
+            mod += ammo.hitChanceMod;
         
         var jammermod = 0;
         if (oew < 1){

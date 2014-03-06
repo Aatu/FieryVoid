@@ -160,23 +160,9 @@ shipManager.systems = {
                 selectedWeapon.damage = system.damage;
             }
             
-/* plopje           if(selectedWeapon.duoWeapon){
-                selectedWeapon.firingMode = system.firingMode;
-                selectedWeapon.firingModes = system.firingModes;
-                selectedWeapon.power = system.power;
-                selectedWeapon.dualWeapon = true;
-                selectedWeapon.initialized = true;
-                selectedWeapon.damage = system.weapons[1].damage;
-                selectedWeapon.destroyed = system.destroyed;
-                return selectedWeapon;
-            }*/
-            
             selectedWeapon.power = system.power;
             selectedWeapon.firingMode = system.firingMode;
             selectedWeapon.firingModes = system.firingModes;
-//            selectedWeapon.power = system.power;
-//            selectedWeapon.displayName = system.displayName;
-//            selectedWeapon.id = system.id;
             selectedWeapon.dualWeapon = true;
             selectedWeapon.initialized = true;
             
@@ -186,6 +172,11 @@ shipManager.systems = {
         
         if(system.boostable){
             system = system.initBoostableInfo();
+        }
+        
+        if(system.missileArray!= null){
+            system.range = system.missileArray[system.firingMode].range;
+            system.damage = system.missileArray[system.firingMode].damage;
         }
 
         return system;

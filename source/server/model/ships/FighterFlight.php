@@ -23,6 +23,7 @@
         public $pointCost = 0;
         public $faction = null;
         public $flight = true;
+        public $hasNavigator = false;
         
         public $offensivebonus, $freethrust;
         public $jinkinglimit = 0;
