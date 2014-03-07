@@ -37,10 +37,10 @@ window.confirm = {
                                 
                                 if(returnArray[weapon.firingModes[k]]){
                                     var maxAmount = returnArray[weapon.firingModes[k]][1];
-                                    returnArray[weapon.firingModes[k]] = [missile.displayName, (maxAmount + weapon.maxAmount), missile.cost, numberOfLaunchers];
+                                    returnArray[weapon.firingModes[k]] = ['Type '+ missile.missileClass + ' - ' +missile.displayName, (maxAmount + weapon.maxAmount), missile.cost, numberOfLaunchers];
                                     numberOfLaunchers++;
                                 }else{
-                                    returnArray[weapon.firingModes[k]] = [missile.displayName, weapon.maxAmount, missile.cost, numberOfLaunchers];
+                                    returnArray[weapon.firingModes[k]] = ['Type '+ missile.missileClass + ' - ' +missile.displayName, weapon.maxAmount, missile.cost, numberOfLaunchers];
                                     numberOfLaunchers++;
                                 }
                             }

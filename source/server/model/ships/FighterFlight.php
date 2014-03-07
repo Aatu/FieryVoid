@@ -53,6 +53,17 @@
         
         private $autoid = 1;
         
+        public function getInitiativebonus($gamedata){
+            $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+            
+            if($this->hasNavigator){
+                $initiativeBonusRet += 5;
+            }
+            
+            return $initiativeBonusRet;
+        }
+
+        
         public function getSystemById($id){
             foreach ($this->systems as $system){
                 if ($system->id == $id){

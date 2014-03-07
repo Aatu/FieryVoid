@@ -78,9 +78,8 @@ class MissileFB extends Ammo
     public $displayName = "Basic Fighter Missile";
     public $cost = 8;
     public $surCharge = 0;
-    public $damage = 8;
-    // plopje
-    public $amount = 4;
+    public $damage = 10;
+    public $amount = 0;
     public $range = 10;
     public $hitChanceMod = 3;
     
@@ -90,8 +89,6 @@ class MissileFB extends Ammo
     
     public function calculateHit($gamedata, $fireOrder){
         
-        debug::log("CalculateHit AMMO");
-    
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $jammermod = 0;
@@ -124,6 +121,7 @@ class MissileFB extends Ammo
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         
         $mod += $this->hitChanceMod;
+        $mod -= Movement::getJinking($shooter, $gamedata->turn);
         
         if($shooter->hasNavigator){
             // Fighter has navigator. Flight always benefits from offensive bonus.
@@ -131,34 +129,25 @@ class MissileFB extends Ammo
         }
         else{
             // Check if weapon is in current weapon arc
-            debug::log("1");
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($shooter, $target);
-            debug::log("1a. ShooterCompassHeading $shooterCompassHeading");
             $tf = $shooter->getFacingAngle();
-            debug::log("2, FacingAngle $tf");
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
                 // Target is in current launcher arc. Flight benefits from offensive bonus.
-                debug::log("3");
                 $oew = $shooter->offensivebonus;
             }
         }
         
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
-	debug::log("4");
-
         
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-        debug::log("5");
 
-        // Fighters ignore all defensive EW, be it DEW, SDEW or BDEW
-        $goal = ($defence - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
-        
-        // plopje
-        debug::log("Defense: $defence, RangePenalty: $rangePenalty, Intercept: $intercept, OEW: $oew, SOEW: $soew, CONTROL: $firecontrol, MOD: $mod");
+        // Fighters only ignore all defensive EW, be it DEW, SDEW or BDEW for non-ballistic weapons
+        // This is a ballistic weapon, so all defensive EW is taken into account.
+        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
         
         $change = round(($goal/20)*100);
         

@@ -148,6 +148,7 @@ class FighterMissileRack extends MissileLauncher
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -202,6 +203,28 @@ class FighterMissileRack extends MissileLauncher
         $this->fireControl[2] = $fighterOffensiveBonus;
     }
     
+    public function getLaunchRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range * 3 + $this->distanceRangeMod;
+    }
+    
+    public function isInDistanceRange($shooter, $target, $fireOrder)
+    {
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+    
+        if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->getDistanceRange())
+        {
+            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+            return false;
+        }
+        
+        return true;
+    }
+
     protected function getAmmo($fireOrder)
     {
         return new $this->missileArray[$fireOrder->firingMode];
