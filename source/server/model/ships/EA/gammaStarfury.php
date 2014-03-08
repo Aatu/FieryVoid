@@ -1,13 +1,13 @@
 <?php
-class AuroraStarfury extends FighterFlight{
+class GammaStarfury extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 342;
+        $this->pointCost = 366;
         $this->faction = "EA";
-        $this->phpclass = "AuroraStarfury";
-        $this->shipClass = "Starfury: Aurora Heavy flight";
+        $this->phpclass = "GammaStarfury";
+        $this->shipClass = "Starfury: Gamma Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
         
         $this->forwardDefense = 8;
@@ -21,13 +21,23 @@ class AuroraStarfury extends FighterFlight{
         
         for ($i = 0; $i<6; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("auroraStarfury", $armour, 13, $this->id);
-            $fighter->displayName = "Starfury Heavy Fighter";
+            $fighter = new Fighter("gammaStarfury", $armour, 13, $this->id);
+            $fighter->displayName = "Gamma Starfury Heavy Fighter";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
 
+            $missileRack = new FighterMissileRack(4, 330, 30);
+            $missileRack->firingModes = array(
+                1 => "FY"
+            );
+
+            $missileRack->missileArray = array(
+                1 => new MissileFY(330, 30)
+            );
+
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";
+            $fighter->addFrontSystem($missileRack);
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);
 	}

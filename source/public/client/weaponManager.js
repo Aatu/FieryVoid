@@ -374,7 +374,7 @@ window.weaponManager = {
         
         var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
+        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
         
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
@@ -443,10 +443,10 @@ window.weaponManager = {
         
     },
     
-    calculateBaseHitChange: function(target, base, shooter){
+    calculateBaseHitChange: function(target, base, shooter, weapon){
 
         // fighters ignore all DEW, both normal, blanket as well as supported
-        if (shooter && shooter.flight){
+        if (shooter && shooter.flight && !weapon.ballistic){
             return base;
         }
 
@@ -493,7 +493,7 @@ window.weaponManager = {
         var sPosHex = shipManager.getShipPosition(shooter);
         var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
+        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
         
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
@@ -589,9 +589,10 @@ window.weaponManager = {
         var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         var sPosHex = shipManager.getShipPosition(shooter);
+        var tPosHex = shipManager.getShipPosition(target);
         var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
         //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter);
+        var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
         
         var soew = ew.getSupportedOEW(shooter, target);
         var dist = ew.getDistruptionEW(shooter);
@@ -610,8 +611,11 @@ window.weaponManager = {
         var mod = 0;
         
         mod -= target.getHitChangeMod(shooter, sPos);
+
+        if(shooter.hasNavigator || weaponManager.isPosOnWeaponArc(shooter, tPosHex, weapon)){
+            oew = shooter.offensivebonus;
+        }
         
-	oew = shooter.offensivebonus;
         mod -= shipManager.movement.getJinking(shooter);
             
         if (shipManager.movement.hasCombatPivoted(shooter)){
@@ -628,9 +632,7 @@ window.weaponManager = {
         }
         
         var jammermod = 0;
-        if (oew < 1){
-            rangePenalty = rangePenalty*2;
-         }else if (shooter.faction != target.faction){
+        if (shooter.faction != target.faction){
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
             var stealth = shipManager.systems.getSystemByName(target, "stealth");
         

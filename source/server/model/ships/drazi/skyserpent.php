@@ -17,7 +17,7 @@ class SkySerpent extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 75;
+	$this->iniativebonus = 70;
         $this->hasNavigator = true;
         
         $armour = array(4, 2, 3, 3);

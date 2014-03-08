@@ -91,6 +91,13 @@ var FighterMissileRack = function(json, ship)
 FighterMissileRack.prototype = Object.create( MissileLauncher.prototype );
 FighterMissileRack.prototype.constructor = FighterMissileRack;
 
+var FighterTorpedoLauncher = function(json, ship)
+{
+    FighterMissileRack.call( this, json, ship);
+}
+FighterTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
+FighterTorpedoLauncher.prototype.constructor = FighterTorpedoLauncher;
+
 var ReloadRack = function(json, ship)
 {
     ShipSystem.call( this, json, ship);

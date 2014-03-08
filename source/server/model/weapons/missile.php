@@ -148,6 +148,7 @@ class FighterMissileRack extends MissileLauncher
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
+    public $ballistic = true;
     protected $distanceRangeMod = 0;
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
@@ -157,13 +158,13 @@ class FighterMissileRack extends MissileLauncher
     );
     
     function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct(0, 0, 0, $startArc, $endArc);
+
         $this->missileArray = array(
             1 => new MissileFB($startArc, $endArc)
         );
         
         $this->maxAmount = $maxAmount;
-
-        parent::__construct(0, 0, 0, $startArc, $endArc);
     }
     
     public function setSystemDataWindow($turn)
@@ -264,6 +265,49 @@ class FighterMissileRack extends MissileLauncher
     
     public function setMinDamage(){ 0;}
     public function setMaxDamage(){ 0;}     
+}
+
+class FighterTorpedoLauncher extends FighterMissileRack
+{
+    public $name = "FighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "LBT"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $this->missileArray = array(
+            1 => new LightBallisticTorpedo($startArc, $endArc)
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Torpedo";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        if($this->missileArray[$this->firingMode]->minDamage != $this->missileArray[$this->firingMode]->maxDamage){
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage."-".$this->missileArray[$this->firingMode]->maxDamage;
+        }else{
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage;
+        }
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
 }
 
 class ReloadRack extends ShipSystem

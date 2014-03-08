@@ -82,6 +82,7 @@ class MissileFB extends Ammo
     public $amount = 0;
     public $range = 10;
     public $hitChanceMod = 3;
+    public $ballistic = true;
     
     function __construct($startArc, $endArc){
         parent::__construct(0, 0, 0, $startArc, $endArc);
@@ -162,4 +163,68 @@ class MissileFB extends Ammo
     {
         return $this->hitChanceMod;
     }
+
+    public function getDamage($fireOrder){        return 10;   }
+    public function setMinDamage(){     $this->minDamage = 10;      }
+    public function setMaxDamage(){     $this->maxDamage = 10;      }        
+}
+
+class MissileFY extends MissileFB
+{
+    public $name = "missileFY";
+    public $missileClass = "FY";
+    public $displayName = "Dogfight Missile";
+    public $cost = 2;
+    public $damage = 6;
+    public $range = 8;
+    
+    function __construct($startArc, $endArc){
+        parent::__construct($startArc, $endArc);
+    }
+
+    public function getDamage($fireOrder){  return 8;   }
+    public function setMinDamage(){     $this->minDamage = 8;      }
+    public function setMaxDamage(){     $this->maxDamage = 8;      }        
+}
+
+class LightBallisticTorpedo extends MissileFB
+{
+    public $name = "lightBallisticTorpedo";
+    public $missileClass = "LBT";
+    public $displayName = "Light Ballistic Torpedo";
+    public $cost = 8;
+    public $surCharge = 0;
+    public $damage = 10;
+    public $amount = 0;
+    public $range = 25;
+    public $hitChanceMod = 0;
+    
+    function __construct($startArc, $endArc){
+        parent::__construct($startArc, $endArc);
+    }
+
+    public function getDamage($fireOrder){        return Dice::d(6,2);   }
+    public function setMinDamage(){     $this->minDamage = 2;      }
+    public function setMaxDamage(){     $this->maxDamage = 12;      }        
+}
+
+class LightIonTorpedo extends MissileFB
+{
+    public $name = "lightIonTorpedo";
+    public $missileClass = "LIT";
+    public $displayName = "Light Ion Torpedo";
+    public $cost = 8;
+    public $surCharge = 0;
+    public $damage = 10;
+    public $amount = 0;
+    public $range = 20;
+    public $hitChanceMod = 0;
+    
+    function __construct($startArc, $endArc){
+        parent::__construct($startArc, $endArc);
+    }
+
+    public function getDamage($fireOrder){        return 10;   }
+    public function setMinDamage(){     $this->minDamage = 10;      }
+    public function setMaxDamage(){     $this->maxDamage = 10;      }        
 }

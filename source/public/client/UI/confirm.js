@@ -129,6 +129,7 @@ window.confirm = {
                     $(".totalUnitCostText", totalItem).html("Total unit cost");
                     $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
                     $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
+                    $(totalItem).show();
                     
                     for(var i in missileOptions){
                         var missileOption = missileOptions[i];
@@ -138,6 +139,7 @@ window.confirm = {
                         
                         $(".selectText", item).html(missileOption[0] +' (maximum amount: '
                             + missileOption[1] +', cost: '+ missileOption[2] + ')');
+                        $(item).show();
                         
                         var selectAmountItem = $(".selectAmount", item);
                         selectAmountItem.html("0");

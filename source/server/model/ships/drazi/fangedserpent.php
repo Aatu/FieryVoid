@@ -18,7 +18,7 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 80;
+	$this->iniativebonus = 75;
         $this->hasNavigator = true;
         
         $armour = array(4, 3, 4, 4);

@@ -1,4 +1,4 @@
-<?php
+par<?php
 
 
     class Particle extends Weapon{
@@ -569,6 +569,10 @@
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
+
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
 
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";

@@ -41,3 +41,32 @@ var MissileFB = function(json, ship)
 }
 MissileFB.prototype = Object.create( Ammo.prototype );
 MissileFB.prototype.constructor = MissileFB;
+
+var MissileFY = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+    this.range = 8;
+    this.hitChanceMod = 0;
+    this.damage = 6;
+}
+MissileFY.prototype = Object.create( Ammo.prototype );
+MissileFY.prototype.constructor = MissileFY;
+
+var LightBallisticTorpedo = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+    this.range = 25;
+    this.hitChanceMod = 0;
+}
+LightBallisticTorpedo.prototype = Object.create( Ammo.prototype );
+LightBallisticTorpedo.prototype.constructor = LightBallisticTorpedo;
+
+var LightIonTorpedo = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+    this.range = 20;
+    this.hitChanceMod = 0;
+}
+LightIonTorpedo.prototype = Object.create( Ammo.prototype );
+LightIonTorpedo.prototype.constructor = LightIonTorpedo;
+

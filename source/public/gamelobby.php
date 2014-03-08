@@ -439,9 +439,8 @@
         </div>
         
     </div>
-	</body>
-
-    <div class="missileSelectItem">
+                                    
+    <div class="missileSelectItem" style="display:none">
         <span>
             <span class="selectText"></span>
             <span class="selectAmount"></span>
@@ -458,11 +457,14 @@
         </span>
     </div>
         
-    <div class="totalUnitCost">
+    <div class="totalUnitCost" style="display: none">
         <span>
             <span class="totalUnitCostText"></span>
             <span class="totalUnitCostAmount"></span>
         </span>
-    </div>
+    </div>                                    
+	</body>
+
+
 
 </html>

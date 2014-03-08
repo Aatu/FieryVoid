@@ -65,14 +65,28 @@ class Manager{
 			return null;
         
         try {
-            self::initDBManager();
-            $games = self::$dbManager->getTacGames($userid);
-            if ($games == null)
-                return null;
+            debug::log("START getTacGames userid: $userid");
             
-            foreach ($games as $game)
+            self::initDBManager();
+            
+            debug::log("getTacGames 1 ");
+            $games = self::$dbManager->getTacGames($userid);
+            debug::log("getTacGames 2 ");
+
+            if ($games == null){
+                debug::log("getTacGames 3 ");
+
+                return null;
+            }
+            
+            
+            foreach ($games as $game){
+                debug::log("getTacGames 4 ");
                 $game->prepareForPlayer(0, 0, -1);
-    
+            }
+
+            debug::log("END getTacGames");
+            
         }
         catch(exception $e) {
             throw $e;
@@ -340,7 +354,7 @@ class Manager{
                     $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
                     
                     // Check if ship uses ammo
-                    if($ship->flight){
+                    if($ship instanceof FighterFlight){
                        foreach($ship->systems as $fighterIndex=>$fighter){
                            foreach($fighter->systems as $systemIndex=>$fighterSys){
                                if(isset($fighterSys->missileArray)){
