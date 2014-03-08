@@ -88,6 +88,27 @@ class MissileFB extends Ammo
         parent::__construct(0, 0, 0, $startArc, $endArc);
     }
     
+    protected function isFiringNonBallisticWeapons($shooter, $fireOrder){
+        // first get the fighter that is armed with this weapon
+        // We have to go looking for it because the shooter is a flight,
+        // not an individual fighter.
+        foreach($shooter->systems as $fighterSys){
+            foreach($fighterSys->systems as $fighterWeapon){
+                if($fighterWeapon->id == $fireOrder->weaponid){
+                    // Found the right fighter
+                    // now recheck all the fighter's weapons
+                    foreach($fighterSys->systems as $weapon){
+                        if(!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+    
     public function calculateHit($gamedata, $fireOrder){
         
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -135,7 +156,10 @@ class MissileFB extends Ammo
             
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
                 // Target is in current launcher arc. Flight benefits from offensive bonus.
-                $oew = $shooter->offensivebonus;
+                // Now check if the fighter is not firing any non-ballistic weapons
+                if(!$this->isFiringNonBallisticWeapons($shooter, $fireOrder)){
+                    $oew = $shooter->offensivebonus;
+                }
             }
         }
         

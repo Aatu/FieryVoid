@@ -195,14 +195,6 @@ window.weaponManager = {
                         confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
                     return true;
                 }
-
-                if(ship.flight && !ship.hasNavigator){
-                    if ((weapon.ballistic && !system.ballistic) || (!weapon.ballistic && system.ballistic)){
-                        if (alert)
-                            confirm.error("Without a navigator, you cannot fire ballistic and non-ballistic weapons in the same turn.");
-                        return true;
-                    }
-                }
             }
         }
 

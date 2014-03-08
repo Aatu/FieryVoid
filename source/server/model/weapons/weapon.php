@@ -445,7 +445,6 @@ class Weapon extends ShipSystem{
     }
     
     public function calculateHit($gamedata, $fireOrder){
-    
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();

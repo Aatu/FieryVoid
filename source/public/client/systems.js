@@ -174,7 +174,7 @@ shipManager.systems = {
             system = system.initBoostableInfo();
         }
         
-        if(system.missileArray!= null){
+        if(system.missileArray!= null && system.missileArray.length > 0){
             system.range = system.missileArray[system.firingMode].range;
             system.damage = system.missileArray[system.firingMode].damage;
         }

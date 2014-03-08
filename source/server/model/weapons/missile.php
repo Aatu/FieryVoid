@@ -47,7 +47,9 @@ class MissileLauncher extends Weapon
     }
     
     public function setAmmo($firingMode, $amount){
-        $this->missileArray[$firingMode]->amount = $amount;
+        if(count($this->missileArray) > 0){
+            $this->missileArray[$firingMode]->amount = $amount;
+        }
     }
 }
 

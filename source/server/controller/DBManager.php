@@ -142,7 +142,6 @@ class DBManager {
 	
             try{
                 $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $firingMode, $gameid, $ammoAmount)";
-                Debug::log($sql);
                 $id = $this->insert($sql);
             }catch(Exception $e) {
                 $this->endTransaction(true);
