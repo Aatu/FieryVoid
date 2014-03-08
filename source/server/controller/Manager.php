@@ -65,28 +65,18 @@ class Manager{
 			return null;
         
         try {
-            debug::log("START getTacGames userid: $userid");
-            
             self::initDBManager();
             
-            debug::log("getTacGames 1 ");
             $games = self::$dbManager->getTacGames($userid);
-            debug::log("getTacGames 2 ");
 
             if ($games == null){
-                debug::log("getTacGames 3 ");
-
                 return null;
             }
             
             
             foreach ($games as $game){
-                debug::log("getTacGames 4 ");
                 $game->prepareForPlayer(0, 0, -1);
             }
-
-            debug::log("END getTacGames");
-            
         }
         catch(exception $e) {
             throw $e;

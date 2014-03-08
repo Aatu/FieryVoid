@@ -1,4 +1,4 @@
-par<?php
+<?php
 
 
     class Particle extends Weapon{

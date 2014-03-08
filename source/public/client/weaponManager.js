@@ -199,7 +199,7 @@ window.weaponManager = {
                 if(ship.flight && !ship.hasNavigator){
                     if ((weapon.ballistic && !system.ballistic) || (!weapon.ballistic && system.ballistic)){
                         if (alert)
-                            confirm.error("Without a navigator, you cannot fire ballistic and non-ballistic weapons at the same time.");
+                            confirm.error("Without a navigator, you cannot fire ballistic and non-ballistic weapons in the same turn.");
                         return true;
                     }
                 }
@@ -282,10 +282,6 @@ window.weaponManager = {
                 else
                 {
                     $('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
-                }
-                
-                if (selectedShip.flight){
-                    $('<div><span class="hitchange">(Fighters ignore all defensive EW)</span></div>').appendTo(f);
                 }
             }else{
                 $('<div><span class="weapon">'+weapon.displayName+':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);

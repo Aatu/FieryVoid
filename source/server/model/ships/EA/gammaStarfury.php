@@ -1,4 +1,5 @@
 <?php
+
 class GammaStarfury extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
@@ -43,4 +44,5 @@ class GammaStarfury extends FighterFlight{
 	}
     }
 }
+
 ?>

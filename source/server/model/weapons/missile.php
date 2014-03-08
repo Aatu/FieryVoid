@@ -308,6 +308,10 @@ class FighterTorpedoLauncher extends FighterMissileRack
         }
         $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
     }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
 }
 
 class ReloadRack extends ShipSystem
