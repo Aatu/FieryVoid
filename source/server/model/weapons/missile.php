@@ -151,6 +151,10 @@ class FighterMissileRack extends MissileLauncher
     public $firingMode = 1;
     public $maxAmount = 0;
     public $ballistic = true;
+    public $animationExplosionScale = 0.15;
+    public $projectilespeed = 10;
+    public $animationWidth = 2;
+    public $trailLength = 70;
     protected $distanceRangeMod = 0;
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 

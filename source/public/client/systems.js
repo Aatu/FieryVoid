@@ -174,7 +174,16 @@ shipManager.systems = {
             system = system.initBoostableInfo();
         }
         
-        if(system.missileArray!= null && system.missileArray.length > 0){
+        // Check the number of elements in missileArray
+        // This has to be done like this, as length doesn't give the correct
+        // return because the elements in the missileArray aren't on consequetive
+        // indices.
+        var cnt = 0;
+        for(var i in system.missileArray){
+            cnt++;
+        }
+        
+        if(system.missileArray!= null && cnt > 0){
             system.range = system.missileArray[system.firingMode].range;
             system.damage = system.missileArray[system.firingMode].damage;
         }
