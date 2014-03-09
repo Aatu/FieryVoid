@@ -310,11 +310,11 @@ window.gamedata = {
             return false;
         }
         
-		if (gamedata.canAfford(ship)){
+//		if (gamedata.canAfford(ship)){
 			window.confirm.showShipBuy(ship, gamedata.doBuyShip);
-		}else{
-			window.confirm.error("You cannot afford that ship!", function(){});
-		}
+//		}else{
+//			window.confirm.error("You cannot afford that ship!", function(){});
+//		}
 	},
 
 	doBuyShip: function(){
@@ -327,6 +327,12 @@ window.gamedata = {
                 
                 if($(".confirm .totalUnitCostAmount").length > 0){
                     ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+                }
+                
+                if (!gamedata.canAfford(ship)){
+                    $(".confirm").remove();
+                    window.confirm.error("You cannot afford that ship!", function(){});
+                    return;
                 }
                 
                 if($(".confirm .selectAmount").length > 0){
