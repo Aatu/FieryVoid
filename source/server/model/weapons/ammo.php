@@ -92,17 +92,12 @@ class MissileFB extends Ammo
         // first get the fighter that is armed with this weapon
         // We have to go looking for it because the shooter is a flight,
         // not an individual fighter.
-        foreach($shooter->systems as $fighterSys){
-            foreach($fighterSys->systems as $fighterWeapon){
-                if($fighterWeapon->id == $fireOrder->weaponid){
-                    // Found the right fighter
-                    // now recheck all the fighter's weapons
-                    foreach($fighterSys->systems as $weapon){
-                        if(!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)){
-                            return true;
-                        }
-                    }
-                }
+        $fighterSys = $shooter->getFighterBySystem($fireOrder->weaponid);
+
+        // now recheck all the fighter's weapons
+        foreach($fighterSys->systems as $weapon){
+            if(!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)){
+                return true;
             }
         }
 
@@ -145,20 +140,23 @@ class MissileFB extends Ammo
         $mod += $this->hitChanceMod;
         $mod -= Movement::getJinking($shooter, $gamedata->turn);
         
-        if($shooter->hasNavigator){
-            // Fighter has navigator. Flight always benefits from offensive bonus.
-            $oew = $shooter->offensivebonus;
-        }
-        else{
-            // Check if weapon is in current weapon arc
-            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($shooter, $target);
-            $tf = $shooter->getFacingAngle();
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
-                // Target is in current launcher arc. Flight benefits from offensive bonus.
-                // Now check if the fighter is not firing any non-ballistic weapons
-                if(!$this->isFiringNonBallisticWeapons($shooter, $fireOrder)){
-                    $oew = $shooter->offensivebonus;
+        // First check if the fighter/squad that fired this shot is still alive.
+        if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
+            if($shooter->hasNavigator){
+                // Fighter has navigator. Flight always benefits from offensive bonus.
+                $oew = $shooter->offensivebonus;
+            }
+            else{
+                // Check if weapon is in current weapon arc
+                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($shooter, $target);
+                $tf = $shooter->getFacingAngle();
+
+                if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
+                    // Target is in current launcher arc. Flight benefits from offensive bonus.
+                    // Now check if the fighter is not firing any non-ballistic weapons
+                    if(!$this->isFiringNonBallisticWeapons($shooter, $fireOrder)){
+                        $oew = $shooter->offensivebonus;
+                    }
                 }
             }
         }
