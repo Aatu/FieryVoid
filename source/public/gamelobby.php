@@ -49,6 +49,7 @@
         <script src="client/systems.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>
+        <script src="client/mathlib.js"></script>
 		<script src="client/UI/confirm.js"></script>
         <script src="client/UI/shipwindow.js"></script>
         <script src="client/UI/fleetList.js"></script>
