@@ -206,6 +206,8 @@ window.weaponManager = {
         var p = ship;
         if (ship.flight){
             p = shipManager.systems.getFighterBySystem(ship, weapon.id);
+        }else{
+            return false;
         }
         
         for (var i in p.systems){

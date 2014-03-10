@@ -70,13 +70,14 @@ class SMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
@@ -100,13 +101,14 @@ class LMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
@@ -129,13 +131,14 @@ class LHMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 

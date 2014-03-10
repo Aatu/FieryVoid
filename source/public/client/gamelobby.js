@@ -350,7 +350,7 @@ window.gamedata = {
                         for(var j in ship.systems[1].systems){
                             var fighterSystem = ship.systems[1].systems[j];
                             
-                            if(!gamedata.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                            if(!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
                                 nrOfLaunchers++;
                             }
                         }
@@ -373,7 +373,7 @@ window.gamedata = {
                                 for(var j in fighter.systems){
                                     var fighterSystem = fighter.systems[j];
 
-                                    if(!gamedata.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                                    if(!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
                                         // find the correct index, depending on the firingMode
                                         for(var index in fighterSystem.firingModes){
                                             if(fighterSystem.firingModes[index] == firingMode){
@@ -394,13 +394,13 @@ window.gamedata = {
 		gamedata.updateFleet(ship);
 	},
 
-        arrayIsEmpty: function(array){
-            for(var i in array){
-                return false;
-            }
-
-            return true;
-        },
+//        arrayIsEmpty: function(array){
+//            for(var i in array){
+//                return false;
+//            }
+//
+//            return true;
+//        },
 
 	getShipByType: function(type){
 

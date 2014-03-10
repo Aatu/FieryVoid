@@ -7,12 +7,17 @@ MissileLauncher.prototype.constructor = MissileLauncher;
 
 MissileLauncher.prototype.getAmmo = function(fireOrder)
 {
-    var mode = this.firingMode;
-    if (fireOrder)
-        mode = fireOrder.mode;
+    if(!mathlib.arrayIsEmpty(this.missileArray)){
+        var mode = this.firingMode;
+        if (fireOrder)
+            mode = fireOrder.mode;
+
+        console.log("returning ammo: " + this.missileArray[mode].name);
+        return this.missileArray[mode];
+    }else{
+        return null;
+    }
     
-    console.log("returning ammo: " + this.missileArray[mode].name);
-    return this.missileArray[mode];
 }
 
 MissileLauncher.prototype.changeFiringMode = function()

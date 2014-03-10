@@ -53,13 +53,13 @@ window.confirm = {
         return returnArray;
     },
 
-    arrayIsEmpty: function(array){
-        for(var i in array){
-            return false;
-        }
-        
-        return true;
-    },
+//    arrayIsEmpty: function(array){
+//        for(var i in array){
+//            return false;
+//        }
+//        
+//        return true;
+//    },
     
     doOnPlusMissile: function(e){
        e.stopPropagation(); 
@@ -122,7 +122,7 @@ window.confirm = {
                 
                 // If it is a fighter, put the option in this pane.
                 // A ship will need some more tricks.
-                if(!confirm.arrayIsEmpty(missileOptions)){
+                if(!mathlib.arrayIsEmpty(missileOptions)){
                     var totalTemplate = $(".totalUnitCost");
                     var totalItem = totalTemplate.clone(true).prependTo(e);
                     
