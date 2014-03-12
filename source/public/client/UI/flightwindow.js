@@ -288,7 +288,7 @@ flightWindowManager = {
 			var firing = weaponManager.hasFiringOrder(flight, system);
 			if (!weaponManager.isLoaded(system)){systemwindow.addClass("loading");}else{systemwindow.removeClass("loading");}
 			if (weaponManager.isSelectedWeapon(system)){systemwindow.addClass("selected");}else{systemwindow.removeClass("selected");}
-			if (firing){systemwindow.addClass("firing");}else{systemwindow.removeClass("firing");}
+			if (firing  && !(systemwindow.hasClass("loading"))){systemwindow.addClass("firing");}else{firing= false;systemwindow.removeClass("firing");}
 			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
 			
 			if (!firing){

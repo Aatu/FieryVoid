@@ -77,8 +77,10 @@ window.ajaxInterface = {
 
                     if (ship.flight){
                         var fighterSystems = Array();
+                        
                         for (var c in system.systems){
                             var fightersystem = system.systems[c];
+                            var ammoArray = Array();
 
                             for (var b = fightersystem.fireOrders.length-1; b>=0; b--){
                                 var fire = fightersystem.fireOrders[b];
@@ -86,7 +88,15 @@ window.ajaxInterface = {
                                     fightersystem.fireOrders.splice(b,1);
                                 }
                             }
-                            fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders};
+                            
+                            if(fightersystem.missileArray != null){
+                                for (var index in fightersystem.missileArray){
+                                    var amount = fightersystem.missileArray[index].amount;
+                                    ammoArray[index] = amount;
+                                }
+                            }
+                            
+                            fighterSystems[c] = {'id':fightersystem.id, 'fireOrders': fightersystem.fireOrders, 'ammo': ammoArray};
                         }
 
                         systems[a] = {'id': system.id, 'systems': fighterSystems};

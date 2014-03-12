@@ -23,6 +23,7 @@
         public $pointCost = 0;
         public $faction = null;
         public $flight = true;
+        public $hasNavigator = false;
         
         public $offensivebonus, $freethrust;
         public $jinkinglimit = 0;
@@ -51,6 +52,17 @@
         }
         
         private $autoid = 1;
+        
+        public function getInitiativebonus($gamedata){
+            $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+            
+            if($this->hasNavigator){
+                $initiativeBonusRet += 5;
+            }
+            
+            return $initiativeBonusRet;
+        }
+
         
         public function getSystemById($id){
             foreach ($this->systems as $system){

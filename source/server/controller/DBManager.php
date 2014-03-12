@@ -128,6 +128,7 @@ class DBManager {
             Debug::log($sql);
 			$id = $this->insert($sql);
 			
+                        return $id;
 			//$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
             //$this->insert($sql);			
 			
@@ -136,7 +137,18 @@ class DBManager {
             throw $e;
         }
 	}
-    
+
+	public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount){
+	
+            try{
+                $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $firingMode, $gameid, $ammoAmount)";
+                $id = $this->insert($sql);
+            }catch(Exception $e) {
+                $this->endTransaction(true);
+                throw $e;
+            }
+	}
+        
     public function deleteEmptyGames()
     {
         $ids = array();
@@ -1185,6 +1197,60 @@ class DBManager {
             }
             $stmt->close();
         }
+        
+        // Get ammo info
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, systemid, firingmode, ammo
+            FROM 
+                tac_ammo
+            WHERE 
+                gameid = ?"
+        );
+
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $systemid,
+                $firingmode,
+                $ammo
+            );
+
+            while( $stmt->fetch())
+            {
+                // This is a dual/duoweapon or a fightersystem
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
+            }
+            $stmt->close();
+        }
+    }
+    
+    public function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
+        try {
+            if ($stmt = $this->connection->prepare(
+                    "UPDATE 
+                        tac_ammo 
+                     SET
+                        ammo = ?
+                     WHERE 
+                        shipid = ?
+                        AND systemid = ?
+                        AND firingmode = ?
+                        AND gameid = ?
+                     "
+            ))
+            {
+                $stmt->bind_param('iiisi', $ammoAmount, $shipid, $systemid, $firingmode, $gameid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        catch(Exception $e) {
+            throw $e;
+        }
     }
     
     public function getFireOrdersForShips($gamedata)
@@ -1659,7 +1725,14 @@ class DBManager {
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
-			
+
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_ammo
+                WHERE
+                    gameid = ?"
+            );
+			$this->executeGameDeleteStatement($stmt, $ids);
         }
         catch(Exception $e) {
             throw $e;

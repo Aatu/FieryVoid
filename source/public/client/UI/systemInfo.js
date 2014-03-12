@@ -24,7 +24,10 @@ window.systemInfo = {
         
         if (system.firingModes)
             h += '<div><span class="header">Firing mode:</span><span class="value">' + system.firingModes[system.firingMode]+"</span></div>";
-		
+	
+            if(!mathlib.arrayIsEmpty(system.missileArray)){
+                h += '<div><span class="header">Ammo Amount:</span><span class="value">' + system.missileArray[system.firingMode].amount+"</span></div>";
+            }
         
 		for (var i in system.data){
 			h += '<div><span class="header">'+i+':</span><span class="value">' + system.data[i]+"</span></div>";

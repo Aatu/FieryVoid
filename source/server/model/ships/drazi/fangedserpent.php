@@ -18,7 +18,8 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 80;
+	$this->iniativebonus = 75;
+        $this->hasNavigator = true;
         
         $armour = array(4, 3, 4, 4);
         $fighter = new Fighter("skyserpent", $armour, 32, $this->id);
@@ -27,6 +28,9 @@ class FangedSerpent extends SuperHeavyFighter{
         $fighter->iconPath = "img/ships/skyserpent_large.png";
 
         $fighter->addFrontSystem(new PairedParticleGun(330, 30, 5));
+        $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
+        $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
+
         $particleBlaster = new ParticleBlaster(0, 0, 0, 330, 30);
         $particleBlaster->fireControl = array(-4, 0, 0);
         $particleBlaster->loadingtime = 3;

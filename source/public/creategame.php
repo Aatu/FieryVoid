@@ -30,6 +30,7 @@
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
         <script src="client/UI/createGame.js"></script>
 	</head>

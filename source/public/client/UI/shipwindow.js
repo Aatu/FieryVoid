@@ -766,9 +766,10 @@ setSystemData: function(ship, system, shipwindow){
             systemwindow.removeClass("selected");
         }
         
-        if (firing){
+        if (firing   && !(systemwindow.hasClass("loading"))){
             systemwindow.addClass("firing");
         }else{
+            firing = false;
             systemwindow.removeClass("firing");
         }
         

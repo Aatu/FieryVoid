@@ -1,13 +1,13 @@
 <?php
-class ThunderboltStarfury extends FighterFlight{
+class ThunderboltStarfuryNav extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 480;
+        $this->pointCost = 540;
         $this->faction = "EA";
-        $this->phpclass = "ThunderboltStarfury";
-        $this->shipClass = "Starfury: Thunderbolt Heavy flight";
+        $this->phpclass = "ThunderboltStarfuryNav";
+        $this->shipClass = "Starfury: Thunderbolt Heavy flight (with navigator)";
 	$this->imagePath = "img/ships/thunderboltStarfury.png";
         
         $this->forwardDefense = 8;
@@ -16,13 +16,14 @@ class ThunderboltStarfury extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+        $this->hasNavigator = true;
         
 	$this->iniativebonus = 80;
         
         for ($i = 0; $i<6; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("thunderboltStarfury", $armour, 15, $this->id);
-            $fighter->displayName = "Thunderbolt Heavy Fighter";
+            $fighter = new Fighter("ThunderboltStarfuryNav", $armour, 15, $this->id);
+            $fighter->displayName = "Thunderbolt Medium Fighter";
             $fighter->imagePath = "img/ships/thunderboltStarfury.png";
             $fighter->iconPath = "img/ships/thunderboltStarfury_large.png";
 

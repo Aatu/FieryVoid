@@ -25,6 +25,7 @@
         <script src="client/games.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>
+                <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
 		<script>
 			jQuery(function($){

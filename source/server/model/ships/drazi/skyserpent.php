@@ -17,7 +17,8 @@ class SkySerpent extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 75;
+	$this->iniativebonus = 70;
+        $this->hasNavigator = true;
         
         $armour = array(4, 2, 3, 3);
         $fighter = new Fighter("skyserpent", $armour, 30, $this->id);
@@ -26,6 +27,9 @@ class SkySerpent extends SuperHeavyFighter{
         $fighter->iconPath = "img/ships/skyserpent_large.png";
 
         $fighter->addFrontSystem(new PairedParticleGun(330, 30, 5));
+        $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
+        $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
+        
         $particleBlaster = new ParticleBlaster(0, 0, 0, 330, 30);
         $particleBlaster->fireControl = array(-4, 0, 0);
         $particleBlaster->loadingtime = 3;
@@ -35,9 +39,11 @@ class SkySerpent extends SuperHeavyFighter{
     }
     
     public function getInitiativebonus($gamedata){
+        $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+        
         if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
             // If within 5 hexes of a Fanged Serpent,
-            // as Sky Serpent gets +1 initiative.
+            // each Sky Serpent gets +1 initiative.
             $pixPos = $this->getCoPos();
             
             $ships = $gamedata->getShipsInDistance($pixPos, ((5*mathlib::$hexWidth) + 1));
@@ -46,11 +52,12 @@ class SkySerpent extends SuperHeavyFighter{
                 if(!$ship->isDestroyed()
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof FangedSerpent)){
-                    return ($this->iniativebonus+5);
+                    $initiativeBonusRet+=5;
+                    break;
                 }
             }
         }
         
-        return $this->iniativebonus;
+        return $initiativeBonusRet;
     }
 }
