@@ -355,6 +355,15 @@ class Manager{
                                }
                            }
                        } 
+                    }else{
+                       foreach($ship->systems as $systemIndex=>$system){
+                               if(isset($system->missileArray)){
+                                   // this system has a missileArray. It uses ammo
+                                   foreach($system->missileArray as $firingMode=>$ammo){
+                                       self::$dbManager->submitAmmo($id, $system->id, $gamedata->id, $firingMode, $ammo->amount);
+                               }
+                           }
+                       }  
                     }
                 }
             }

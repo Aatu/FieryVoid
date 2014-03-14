@@ -527,8 +527,9 @@ window.weaponManager = {
             mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
         }
         
-        if (calledid)
-			mod -= 8;
+        if (calledid){
+            mod += weapon.calledShotMod;
+        }
         
         var ammo = weapon.getAmmo(null);
         if (ammo)
@@ -613,7 +614,7 @@ window.weaponManager = {
         }
         
         if (calledid){
-            mod -= 8;
+            mod += weapon.calledShotMod;
         }
         
         var ammo = weapon.getAmmo(null);
@@ -844,6 +845,14 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems){
             var weapon = gamedata.selectedSystems[i];
             
+            if(weapon.targetImmobile){
+                confirm.error("A " + weapon.displayName + " can only target immobile enormous \
+                               units,<br> bases, or planets.<br>(Launching \
+                               ship must be speed zero.)");
+                toUnselect.push(weapon);
+                continue;
+            }
+        
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
         

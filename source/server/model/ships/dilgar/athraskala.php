@@ -31,10 +31,15 @@ class Athraskala extends BaseShip{
 
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new MassDriver(4, 18, 9, 330, 30));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new BombRack(1, 6, 0, 300, 60));
-        $this->addFrontSystem(new BombRack(1, 6, 0, 300, 60));
+        $bombrack1 = new BombRack(1, 6, 0, 300, 60);
+        $bombrack1->addAmmo("B", 8);
+        $this->addFrontSystem($bombrack1);
+        $bombrack2 = new BombRack(1, 6, 0, 300, 60);
+        $bombrack2->addAmmo("B", 8);
+        $this->addFrontSystem($bombrack2);
 
         $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
         $this->addAftSystem(new SMissileRack(1, 6, 0, 120, 240));
@@ -43,8 +48,12 @@ class Athraskala extends BaseShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Engine(3, 7, 0, 4, 4));
-        $this->addAftSystem(new BombRack(1, 6, 0, 300, 60));
-        $this->addAftSystem(new BombRack(1, 6, 0, 300, 60));
+        $bombrack3 = new BombRack(1, 6, 0, 120, 240);
+        $bombrack3->addAmmo("B", 8);
+        $this->addAftSystem($bombrack3);
+        $bombrack4 = new BombRack(1, 6, 0, 120, 240);
+        $bombrack4->addAmmo("B", 8);
+        $this->addAftSystem($bombrack4);
 
         $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
         $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 180, 360));

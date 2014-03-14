@@ -104,6 +104,8 @@ window.ajaxInterface = {
 
                     }else{
                         var fires = Array();
+                        var ammoArray = Array();
+                        
                         if (system.dualWeapon || system.duoWeapon){
 //                        if (system.duoWeapon){
                             for (var c in system.weapons){
@@ -133,7 +135,15 @@ window.ajaxInterface = {
                                 system.power.splice(b,1);
                             }
                         }
-                        systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': fires};
+                        
+                        if(system.missileArray != null){
+                            for (var index in system.missileArray){
+                                var amount = system.missileArray[index].amount;
+                                ammoArray[index] = amount;
+                            }
+                        }
+
+                        systems[a] = {'id': system.id, 'power': system.power, 'fireOrders': fires, 'ammo': ammoArray};
                     }
 
                 }

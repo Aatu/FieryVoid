@@ -8,7 +8,7 @@ class Abrithi extends BaseShip{
         $this->pointCost = 400;
         $this->faction = "Dilgar";
         $this->phpclass = "Abrithi";
-        $this->imagePath = "img/ships/hyperion.png";
+        $this->imagePath = "img/ships/abrithi.png";
         $this->shipClass = "Abrithi Assault Cruiser";
         $this->shipSizeClass = 3;
 

@@ -336,7 +336,7 @@
         public $grouping = 15;
 
         public $loadingtime = 1;
-		public $normalload = 2;
+	public $normalload = 2;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -427,6 +427,8 @@
 
         public $loadingtime = 2;
 	public $normalload = 2;
+        
+        public $calledShotMod = -4;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
@@ -441,6 +443,18 @@
             return 0;
         }
 
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
+
+            $this->data["Pulses"] = '3';
+            unset($this->data["Grouping range"]);
+            unset($this->data["Max pulses"]);
+        }
+        
         public function getDamage($fireOrder){ return 10 - $this->dp; }
  
         public function setMinDamage()
@@ -453,6 +467,48 @@
             $this->maxDamage = 10 - $this->dp;
         }
         
+        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+            if ($target->isDestroyed())
+                return;
+
+            $calledsystem = null;
+            
+            if ($fireOrder->calledid != -1){
+                $calledsystem = $target->getSystemById($fireOrder->calledid);
+            }
+
+            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+
+            if ($system == null)
+                return;
+    
+            if ($fireOrder->calledid == -1){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+                return;
+            }
+            
+            if($system->location == $calledsystem->location && $system === $calledsystem){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }else{
+                // we haven't yet overkilled into another location:
+                // check if there are more of the same type of systems in the same location
+                // if so, target those first. To strip a ship of systems is the main benefit of
+                // the point pulsar. (Implementation differs from official Bab5Wars rules. But
+                // this implementation needs less clicking and user interaction.)
+                foreach($target->systems as $targetSystem){
+                    if(!$targetSystem->isDestroyed()
+                            && $targetSystem->location == $calledsystem->location
+                            && $targetSystem->name == $calledsystem->name){
+                        $fireOrder->calledid = $targetSystem->id;
+                        $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location);
+                        return;
+                    }
+                }
+
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }
+        }
+
         protected function getPulses($turn)
         {
             return 3;

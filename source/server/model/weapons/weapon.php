@@ -71,6 +71,7 @@ class Weapon extends ShipSystem{
     public $exclusive = false;
     
     public $useOEW = true;
+    public $calledShotMod = -8;
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
@@ -92,6 +93,10 @@ class Weapon extends ShipSystem{
     
     public function getWeaponForIntercept(){
         return $this;
+    }
+    
+    public function getCalledShotMod(){
+        return $this->calledShotMod;
     }
     
     protected function getWeaponHitChanceMod($turn){
@@ -523,7 +528,7 @@ class Weapon extends ShipSystem{
                 $mod -=3;
         }
         if ($fireOrder->calledid != -1){
-            $mod -= 8;
+            $mod += $this->getCalledShotMod();
         }
 		
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);

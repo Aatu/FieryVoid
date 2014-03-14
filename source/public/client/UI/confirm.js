@@ -17,7 +17,8 @@ window.confirm = {
         
         if(!ship.flight){
             // it's a normal ship
-            
+            // Yeah, we have a bombrack with missiles, but that comes fully
+            // stocked. So don't pay attention to it atm.
         }else{
             // it's a fighter flight
             // all the systems are fighters of the same type.

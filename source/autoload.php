@@ -233,6 +233,7 @@ spl_autoload_register(
                 'mishakurb' => '/server/model/ships/dilgar/mishakurB.php',
                 'mishakurd' => '/server/model/ships/dilgar/mishakurD.php',
                 'missilelauncher' => '/server/model/weapons/missile.php',
+                'missileb' => '/server/model/weapons/ammo.php',
                 'missilefb' => '/server/model/weapons/ammo.php',
                 'missilefy' => '/server/model/weapons/ammo.php',
                 'mograth' => '/server/model/ships/centauri/mograth.php',

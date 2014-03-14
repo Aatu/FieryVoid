@@ -112,8 +112,8 @@ ReloadRack.prototype.constructor = ReloadRack;
 
 var BombRack = function(json, ship)
 {
-    ShipSystem.call( this, json, ship);
+    MissileLauncher.call( this, json, ship);
 }
-BombRack.prototype = Object.create( ShipSystem.prototype );
+BombRack.prototype = Object.create( MissileLauncher.prototype );
 BombRack.prototype.constructor = BombRack;
 

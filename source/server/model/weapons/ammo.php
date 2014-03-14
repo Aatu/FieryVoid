@@ -44,8 +44,23 @@ class Ammo extends Weapon
     }
 }
 
-class BasicMissile extends Ammo
+class MissileB extends Ammo
 {
+    public $name = "missileB";
+    public $missileClass = "B";
+    public $displayName = "Basic Missile";
+    public $cost = 0;
+    public $surCharge = 0;
+    public $damage = 20;
+    public $amount = 0;
+    public $range = 20;
+    public $hitChanceMod = 3;
+    public $ballistic = true;
+
+    function __construct($startArc, $endArc){
+        parent::__construct(0, 0, 0, $startArc, $endArc);
+    }
+
     public function setSystemDataWindow($turn)
     {
         $this->data["Weapon type"] = "Missile";
@@ -55,20 +70,23 @@ class BasicMissile extends Ammo
         parent::setSystemDataWindow($turn);
     }
     
-    public function getDamage($fireOrder)
-    {
-        return 20;
-    }
-    
     public function getHitChanceMod()
     {
-        return 3;
+        return $this->hitChanceMod;
     }
     
      public function getRange($fireOrder)
     {
-        return 20;
+        return $this->range;
     }
+
+    public function getDamage($fireOrder)
+    {
+        return $this->damage;
+    }
+    
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }    
 }
 
 class MissileFB extends Ammo

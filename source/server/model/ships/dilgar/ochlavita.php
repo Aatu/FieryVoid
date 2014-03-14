@@ -32,8 +32,10 @@ class Ochlavita extends HeavyCombatVessel{
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new PointPulsar(2, 6, 3, 240, 360));	
 	$this->addFrontSystem(new MediumBolter(3, 8, 4, 240, 360));
-	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
-	$this->addFrontSystem(new BombRack(2, 6, 0, 300, 60));
+	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
+        $bombrack1 = new BombRack(2, 6, 0, 300, 60);
+        $bombrack1->addAmmo("B", 8);
+	$this->addFrontSystem($bombrack1);
 	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
 	$this->addFrontSystem(new MediumBolter(3, 8, 4, 0, 120));
 	$this->addFrontSystem(new PointPulsar(2, 6, 3, 0, 120));	

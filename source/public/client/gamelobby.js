@@ -424,6 +424,10 @@ window.gamedata = {
                                             for(var j in shipRet.systems[i].systems){
                                                 shipRet.systems[i].systems[j] = jQuery.extend(true, {}, ship.systems[i].systems[j]);
                                             }
+                                        }else{
+                                            // to avoid problems with ammo and normal ships, also do the
+                                            // ship systems
+                                            
                                         }
                                     }
                                     

@@ -335,16 +335,87 @@ class ReloadRack extends ShipSystem
     }
 }
 
-class BombRack extends Weapon{
-    
-    // This needs to be implemented
+class BombRack extends MissileLauncher{
+
     public $name = "BombRack";
     public $displayName = "Bomb Rack";
-    public $ballistic = true;
-    public $targetImmobile = true;
+    public $loadingtime = 2;
     public $iconPath = "bombRack.png";
+    public $firingMode = 1;
+    public $maxAmount = 8;
+    public $ballistic = true;
+    public $animationExplosionScale = 0.25;
+    public $projectilespeed = 8;
+    public $animationWidth = 4;
+    public $trailLength = 100;
+    protected $distanceRangeMod = 0;
 
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "B"
+    );
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+        $this->missileArray = array(
+            1 => new MissileB($startArc, $endArc)
+        );
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Missile";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+
+    public function calculateHit($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        $ammo->calculateHit($gamedata, $fireOrder);
+    }
+    
+    protected function getAmmo($fireOrder)
+    {
+        return new $this->missileArray[$fireOrder->firingMode];
+    }
+
+    public function addAmmo($missileClass, $amount){
+        foreach($this->missileArray as $missile){
+            if(strcmp($missile->missileClass, $missileClass) == 0){
+                $missile->setAmount($amount);
+                break;
+            }
+        }
+    }
+
+    public function fire($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        
+        if($ammo->amount > 0){
+            $ammo->amount--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
+        }
+        else{
+            
+            $fireOrder->notes = "No ammo available of the selected type.";
+            $fireOrder->updated = true;
+            return;
+        }
+        
+        $ammo->fire($gamedata, $fireOrder);
+    }
+
+    public function getLaunchRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range * 3 + $this->distanceRangeMod;
     }
 }
