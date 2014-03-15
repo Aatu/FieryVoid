@@ -8,7 +8,7 @@ class LeskratiD extends BaseShip{
         $this->pointCost = 585;
         $this->faction = "Dilgar";
         $this->phpclass = "LeskratiD";
-        $this->imagePath = "img/ships/mishakur.png";
+        $this->imagePath = "img/ships/leskrati.png";
         $this->shipClass = "Leskrati-D Command Cruiser";
         $this->shipSizeClass = 3;
 

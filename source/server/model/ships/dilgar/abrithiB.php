@@ -9,7 +9,7 @@ class AbrithiB extends BaseShip{
         $this->faction = "Dilgar";
         $this->phpclass = "AbrithiB";
         $this->imagePath = "img/ships/abrithi.png";
-        $this->shipClass = "Abrithi Assault Cruiser";
+        $this->shipClass = "Abrithi-B Light Carrier";
         $this->shipSizeClass = 3;
 
         $this->forwardDefense = 14;

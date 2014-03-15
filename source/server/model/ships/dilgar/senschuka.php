@@ -7,7 +7,7 @@ class Senschuka extends MediumShip{
 	$this->pointCost = 325;
 	$this->faction = "Dilgar";
         $this->phpclass = "Senschuka";
-        $this->imagePath = "img/ships/haven.png";
+        $this->imagePath = "img/ships/senschuka.png";
         $this->shipClass = "Senschuka Patrol Ship";
         $this->agile = true;
         $this->canvasSize = 100;

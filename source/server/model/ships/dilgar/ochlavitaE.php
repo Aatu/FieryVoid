@@ -36,11 +36,11 @@ class OchlavitaE extends HeavyCombatVessel{
 	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 240, 360));
 	$this->addFrontSystem(new MediumBolter(3, 8, 4, 240, 360));
 	$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 60));	
-	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 60));
+	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 120));
 	$this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 60));	
 	$this->addFrontSystem(new MediumBolter(3, 8, 4, 0, 120));
 	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 120));
-	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 0, 120));
+	$this->addFrontSystem(new ScatterPulsar(2, 4, 2, 300, 60));
 
 	$this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 300));
 	$this->addAftSystem(new EnergyPulsar(3, 6, 3, 120, 240));        

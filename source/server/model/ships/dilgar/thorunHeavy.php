@@ -1,19 +1,19 @@
 <?php
-class Thorun extends FighterFlight{
+class ThorunHeavy extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
+	$this->pointCost = 312;
 	$this->faction = "Dilgar";
-        $this->phpclass = "Thorun";
-        $this->shipClass = "Thorun Dartfighters";
+        $this->phpclass = "ThorunHeavy";
+        $this->shipClass = "Thorun Heavy Dartfighters";
 	$this->imagePath = "img/ships/thorun.png";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
-        $this->freethrust = 12;
-        $this->offensivebonus = 4;
+        $this->freethrust = 10;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         
@@ -22,21 +22,22 @@ class Thorun extends FighterFlight{
         $this->dropOutBonus = -2;
         
         for ($i = 0; $i<6; $i++){
-            $armour = array(2, 1, 2, 2);
+            $armour = array(3, 2, 2, 2);
             
             $fighter = new Fighter("thorun", $armour, 11, $this->id);
             
             if($i == 0){
-                $fighter->displayName = "Thorun Dartfighter Leader";  
+                $fighter->displayName = "Thorun Heavy Dartfighter Leader";  
                 $this->flightLeader = $fighter;
             } else {
-                $fighter->displayName = "Thorun Dartfighter";
+                $fighter->displayName = "Thorun Heavy Dartfighter";
             }
             
             $fighter->imagePath = "img/ships/thorun.png";
             $fighter->iconPath = "img/ships/thorun_large.png";
             
             $fighter->addFrontSystem(new PairedLightBoltCannon(330, 30, 4));
+            $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
             
             $this->addSystem($fighter);
         }
