@@ -8,7 +8,7 @@ class ProtraI extends BaseShip{
         $this->pointCost = 500;
         $this->faction = "Dilgar";
         $this->phpclass = "ProtraI";
-        $this->imagePath = "img/ships/protra.png";
+        $this->imagePath = "img/ships/protrai.png";
         $this->shipClass = "Protra-I Improved Scoutship";
         $this->shipSizeClass = 3;
         $this->iniativebonus = 5;

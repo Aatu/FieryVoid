@@ -8,7 +8,7 @@ class AthraskalaC extends BaseShip{
         $this->pointCost = 700;
         $this->faction = "Dilgar";
         $this->phpclass = "AthraskalaC";
-        $this->imagePath = "img/ships/hyperion.png";
+        $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala-C War Bomber";
         $this->shipSizeClass = 3;
 
