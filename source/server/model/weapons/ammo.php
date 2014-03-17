@@ -156,7 +156,6 @@ class MissileFB extends Ammo
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         
         $mod += $this->hitChanceMod;
-        $mod -= Movement::getJinking($shooter, $gamedata->turn);
         
         // First check if the fighter/squad that fired this shot is still alive.
         if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
