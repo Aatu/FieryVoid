@@ -350,8 +350,6 @@ class BombRack extends MissileLauncher{
     public $trailLength = 100;
     protected $distanceRangeMod = 0;
 
-    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
-    
     public $firingModes = array(
         1 => "B"
     );
