@@ -430,6 +430,8 @@
         
         public $calledShotMod = -4;
 
+        public $intercept = 3;
+
         public $rangePenalty = 0.5;
         public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
 

@@ -32,8 +32,8 @@ class Jashakar extends MediumShip{
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));
 		
         $this->addFrontSystem(new MediumBolter(3, 8, 4, 240, 360));
-        $this->addFrontSystem(new MediumLaser(2, 6, 5, 240, 360));
-        $this->addFrontSystem(new MediumLaser(2, 6, 5, 0, 120));
+        $this->addFrontSystem(new MediumLaser(2, 6, 5, 300, 60));
+        $this->addFrontSystem(new MediumLaser(2, 6, 5, 300, 60));
         $this->addFrontSystem(new MediumBolter(3, 8, 4, 0, 120));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));

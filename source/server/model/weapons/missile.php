@@ -356,6 +356,8 @@ class BombRack extends MissileLauncher{
         1 => "B"
     );
     
+    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 

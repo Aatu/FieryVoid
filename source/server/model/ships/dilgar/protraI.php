@@ -5,7 +5,7 @@ class ProtraI extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 500;
+        $this->pointCost = 575;
         $this->faction = "Dilgar";
         $this->phpclass = "ProtraI";
         $this->imagePath = "img/ships/protrai.png";

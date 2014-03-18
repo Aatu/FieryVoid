@@ -820,6 +820,7 @@
 
         public $loadingtime = 2;
 
+        public $intercept = 1;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
@@ -847,6 +848,7 @@
 
         public $loadingtime = 1;
 
+        public $intercept = 1;
 
         public $rangePenalty = 1;
         public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
