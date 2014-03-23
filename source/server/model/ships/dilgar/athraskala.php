@@ -48,10 +48,10 @@ class Athraskala extends BaseShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Engine(3, 7, 0, 4, 4));
-        $bombrack3 = new BombRack(1, 6, 0, 120, 240);
+        $bombrack3 = new BombRack(1, 6, 0, 300, 60);
         $bombrack3->addAmmo("B", 8);
         $this->addAftSystem($bombrack3);
-        $bombrack4 = new BombRack(1, 6, 0, 120, 240);
+        $bombrack4 = new BombRack(1, 6, 0, 300, 60);
         $bombrack4->addAmmo("B", 8);
         $this->addAftSystem($bombrack4);
 
