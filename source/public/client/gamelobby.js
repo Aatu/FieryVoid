@@ -58,6 +58,10 @@ window.gamedata = {
         
         $(".ship.bought").remove();
         for (var i in gamedata.ships){
+            // Reset ship ids to avoid ending up with elements with the same id
+            // a number of times after you have removed a ship.
+            gamedata.ships[i].id = i;
+                        
             var ship = gamedata.ships[i];
             if (ship.slot != slotid)
                 continue;
@@ -70,7 +74,7 @@ window.gamedata = {
 
             for (var i in gamedata.ships)
             {
-                if (gamedata.ships[i].id === id)
+                if (gamedata.ships[i].id == id)
                 {
                     gamedata.ships.splice(i, 1);
                     break;
@@ -78,6 +82,9 @@ window.gamedata = {
             }
             $('.ship.bought.shipid_' + id).remove();
             gamedata.calculateFleet();
+            // This is done to update it immediately and more importantly,
+            // to assign new id's to all fleet entries
+            gamedata.constructFleetList();
         });
 
         gamedata.calculateFleet();
