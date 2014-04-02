@@ -38,8 +38,8 @@ class Senschuka extends MediumShip{
         $this->addFrontSystem(new MediumBolter(2, 8, 4, 300, 60));
         $this->addFrontSystem(new LightBolter(1, 6, 2, 300, 120));
 		
-        $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
-        $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
+        $this->addAftSystem(new Thruster(2, 7, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 7, 0, 3, 2));
         $this->addAftSystem(new Engine(2, 5, 0, 2, 2));
 	$this->addAftSystem(new LightBolter(1, 6, 2, 120, 300));
 	$this->addAftSystem(new LightBolter(1, 6, 2, 60, 240));
