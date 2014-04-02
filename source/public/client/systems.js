@@ -44,10 +44,21 @@ shipManager.systems = {
     },
     
     isEngineDestroyed: function(ship){
-		if (ship.flight)
-			return false;
+	if (ship.flight)
+            return false;
 		
-        return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "engine"));
+        // Check all engines, as Dilgar have two of them.
+        for (var i in ship.systems){
+            var system = ship.systems[i];
+            if (system.name == "engine"){
+                if(!shipManager.systems.isDestroyed(ship, system)){
+                    // At least one of the engines is still alive
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     },
     
     isReactorDestroyed: function(ship){
