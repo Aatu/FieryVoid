@@ -37,6 +37,13 @@ var LightRailGun = function(json, ship)
 LightRailGun.prototype = Object.create( Matter.prototype );
 LightRailGun.prototype.constructor = LightRailGun;
 
+var MassDriver = function(json, ship)
+{
+    Matter.call( this, json, ship);
+}
+MassDriver.prototype = Object.create( Matter.prototype );
+MassDriver.prototype.constructor = MassDriver;
+
 
 
 

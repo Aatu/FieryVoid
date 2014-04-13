@@ -128,8 +128,8 @@
             /* If fully boosted: test for possible crit. */
             if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
                 $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $crits = $this->testCritical($shooter, $gamedata->turn, $crits);
-                $this->setCriticals($crits, $gamedata->turn);
+                $crits = $this->testCritical($shooter, $gamedata, $crits);
+//                $this->setCriticals($crits, $gamedata->turn);
             }
             
             parent::fire($gamedata, $fireOrder);
@@ -219,15 +219,28 @@ class GraviticBolt extends Gravitic
 
         private function getBoostLevel($turn){
             $boostLevel = 0;
-            
-            foreach($this->power as $i){
-                if($i->turn === $turn){
-                    $boostLevel += $i->amount;
-                }
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
             }
-            
+
             return $boostLevel;
         }
+//        private function getBoostLevel($turn){
+//            $boostLevel = 0;
+//            
+//            foreach($this->power as $i){
+//                if($i->turn === $turn){
+//                    $boostLevel += $i->amount;
+//                }
+//            }
+//            
+//            return $boostLevel;
+//        }
         
         private function getCurDamage($turn){
             $dam = 9;
@@ -244,6 +257,48 @@ class GraviticBolt extends Gravitic
             }            
             
             return $dam;
+        }
+
+        public function getNormalLoad(){
+            return $this->loadingtime + $this->maxBoostLevel;
+        }
+        
+        public function getLoadingTime(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->loadingtime;
+            }
+        }
+
+        public function getTurnsloaded(){
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+            }
+            else{
+                return $this->turnsloaded;
+            }
+        }
+        
+        public function fire($gamedata, $fireOrder){
+            $this->setTimes();
+            
+            parent::fire($gamedata, $fireOrder);
+        }
+
+        public function setTimes(){
+            Debug::log("*** setTimes ***");
+            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
+                // In any other case, check the current boost.
+                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                Debug::log("Loading Time = ".$this->loadingtime);
+            }
+            Debug::log("*** END setTimes ***");
         }
         
         public function getDamage($fireOrder){        return $this->getCurDamage($fireOrder->turn);   }
@@ -590,7 +645,7 @@ class GraviticBolt extends Gravitic
         public function getLoadingTime(){
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                return 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
             }
             else{
                 return $this->loadingtime;
@@ -600,7 +655,7 @@ class GraviticBolt extends Gravitic
         public function getTurnsloaded(){
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                return 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
             }
             else{
                 return $this->turnsloaded;
@@ -610,14 +665,20 @@ class GraviticBolt extends Gravitic
         public function setTimes(){
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->loadingtime = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->turnsloaded = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
+                $this->normalload = 2 + $this->getBoostLevel(TacGamedata::$currentTurn);
             }
         }
         
         public function fire($gamedata, $fireOrder){
             $this->setTimes();
+            if($this->getBoostLevel($fireOrder->turn)==0){
+                $this->raking = 6;
+            }
+            else{
+                $this->raking = 8;
+            }
             
             parent::fire($gamedata, $fireOrder);
         }

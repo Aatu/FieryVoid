@@ -80,7 +80,11 @@ window.combatLog = {
             if (notes)
                notestext = '<span class="pubotes">'+notes+'</span>';
             
-            html += ' firing ' +counttext + weapon.displayName + targettext+'. '+chancetext +shottext + notestext;
+            if(mathlib.arrayIsEmpty(weapon.missileArray)){
+                html += ' firing ' +counttext + weapon.displayName + targettext+'. '+chancetext +shottext + notestext;
+            }else{
+                html += ' firing ' +counttext + weapon.missileArray[weapon.firingMode].displayName + targettext+'. '+chancetext +shottext + notestext;
+            }
         
             
         

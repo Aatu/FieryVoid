@@ -112,7 +112,13 @@
                     $amount = $foew;
             }
 
-            return $amount;
+            if($ship instanceof FighterFlight){
+                // Fighter flights only receive half the benefit of OEW
+                // Kitchensink rules page 191
+                return ($amount * 0.5);
+            }else{
+                return $amount;
+            }
         }
 
         public static function getSupportedDEW($gamedata, $ship)
@@ -129,7 +135,7 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 30)
+                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)
                     continue;
 
                 $fdew = $elint->getEWByType("SDEW", $gamedata->turn, $ship)*0.5;

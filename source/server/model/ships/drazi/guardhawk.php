@@ -30,13 +30,13 @@ class Guardhawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 1));
         $this->addPrimarySystem(new Thruster(5, 21, 0, 10, 2));
 
-        $this->addLeftSystem(new ParticleRepeater(4, 6, 0, 240, 0));
-        $this->addLeftSystem(new ParticleRepeater(4, 6, 0, 240, 0));
+        $this->addLeftSystem(new ParticleRepeater(4, 6, 4, 240, 0));
+        $this->addLeftSystem(new ParticleRepeater(4, 6, 4, 240, 0));
         $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
         $this->addLeftSystem(new StdParticleBeam(4, 4, 1, 240, 60));
 
-        $this->addRightSystem(new ParticleRepeater(4, 6, 0, 0, 120));
-        $this->addRightSystem(new ParticleRepeater(4, 6, 0, 0, 120));
+        $this->addRightSystem(new ParticleRepeater(4, 6, 4, 0, 120));
+        $this->addRightSystem(new ParticleRepeater(4, 6, 4, 0, 120));
         $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         $this->addRightSystem(new StdParticleBeam(4, 4, 1, 300, 120));
 

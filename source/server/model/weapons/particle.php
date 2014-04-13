@@ -572,6 +572,10 @@
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
 
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";
             }
@@ -780,14 +784,12 @@
 
     class HeavyBolter extends Particle{
 
-        public $trailColor = array(30, 170, 255);
-
         public $name = "heavyBolter";
         public $displayName = "Heavy Bolter";
         public $animation = "trail";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.5;
-        public $projectilespeed = 15;
+        public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 6;
 
@@ -807,5 +809,60 @@
         public function setMaxDamage(){     $this->maxDamage = 24 - $this->dp;      }
     }
     
+    class MediumBolter extends Particle{
+
+        public $name = "mediumBolter";
+        public $displayName = "Medium Bolter";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.4;
+        public $projectilespeed = 14;
+        public $animationWidth = 4;
+        public $trailLength = 4;
+
+        public $loadingtime = 2;
+
+        public $intercept = 1;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 18;   }
+        public function setMinDamage(){     $this->minDamage = 18 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+    }
+    
+    class LightBolter extends Particle{
+
+        public $name = "lightBolter";
+        public $displayName = "Light Bolter";
+        public $animation = "trail";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 16;
+        public $animationWidth = 3;
+        public $trailLength = 3;
+
+        public $loadingtime = 1;
+
+        public $intercept = 1;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return 12;   }
+        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+    }
 ?>
 

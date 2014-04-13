@@ -749,7 +749,7 @@
                         
                         $structure = $this->getStructureSystem($location);
                         if ($structure == null || $structure->isDestroyed()){
-                            if ($structure->location == 0){
+                            if ($structure != null && $structure->location == 0){
                                 return null;
                             }
                                 
@@ -759,13 +759,13 @@
                                 return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                             }
                             else{
-                                if($structure->isDestroyed($fire->turn -1)){
+                                if($structure != null && $structure->isDestroyed($fire->turn -1)){
                                     $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                                 }
                                 else{
                                     $structure = $this->getStructureSystem(0);
 
-                                    if($structure->isDestroyed()){
+                                    if($structure != null && $structure->isDestroyed()){
                                         return null;
                                     }
                                     else{
@@ -1123,6 +1123,133 @@
             }
             
             return $location;
+        }
+    }
+    
+    class LightShip extends BaseShip{
+    
+        public $shipSizeClass = 0;
+        
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name, $slot);
+        }
+        
+        public function getFireControlIndex(){
+              return 1;
+               
+        }
+        
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+            // Light ships only have a primary section
+            return 0;
+        }
+        
+        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = 0){
+
+            // Turn counter needed to keep track of when a section was destroyed.
+            $destroyedThisTurn = false;
+            
+            $system = null;
+            if ($fire->calledid != -1){
+                $system = $this->getSystemById($fire->calledid);
+            }
+            
+            if ($system != null && !$system->isDestroyed())
+                return $system;
+        
+            $systems = array();
+            $totalStructure = 0;
+
+            foreach ($this->systems as $system){
+                // For flash damage, only take into account the systems
+                // that are still alive and are not structure.
+                // The turn in which a system is destroyed is checked for each system
+                // this is done to keep track of when the last system was destroyed on
+                // this section, so we can decide whether to throw on the primary
+                // hit section, or if we need to go to primary structure for overkill
+                foreach ($system->damage as $damage){
+                    if ($damage->turn === $fire->turn && $damage->destroyed){
+                        // A system has had damage this turn. This means not all
+                        // of them were destroyed at the start of this turn.
+                        $destroyedThisTurn = true;
+                    }
+                }
+                
+                if ($weapon->flashDamage && ($system->isDestroyed() || $system instanceof Structure )){
+                    continue;
+                }
+                    
+                if ($system->location == $location || $system instanceof Structure){
+                     $systems[] = $system;
+                        
+                    if ($system instanceof Structure){
+                        $multiply = 0.5;
+                            
+                        $totalStructure += round($system->maxhealth * $multiply);
+                    }else{
+                        $totalStructure += $system->maxhealth;
+                    }
+                    
+                }
+            }   
+
+            
+            if(sizeof($systems) == 0){
+                // All normal systems have already been destroyed
+                // If structure is gone, return null
+                // else return structure
+                $structure = $this->getStructureSystem(0);
+
+                if($structure->isDestroyed()){
+                    return null;
+                }
+                else{
+                    return $structure;
+                }
+            }
+            
+            $roll = Dice::d($totalStructure);
+            $goneTrough = 0;
+            
+            foreach ($systems as $system){
+                $health = 0;
+            
+                if ($system->name == "structure"){
+                    $multiply = 0.5;
+                        
+                    $health = round($system->maxhealth * $multiply);
+                }else{
+                    $health = $system->maxhealth;
+                }
+                
+                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
+                    if ($system->isDestroyed())                        
+                    {
+                        $newSystem = $this->getUndamagedSameSystem($system, $location);
+                        
+                        if($newSystem != null){
+                            return $newSystem;
+                        }
+ 
+                        if ($system instanceof Structure){
+                            return null;}
+                                
+                        $structure = $this->getStructureSystem(0);
+                        if ($structure == null || $structure->isDestroyed()){
+                            return null;
+                          
+                        }else{
+                            return $structure;
+                        }
+                    }
+
+                    return $system;
+                }
+                
+                $goneTrough += $health;
+            }
+
+            return null;
         }
     }
 ?>

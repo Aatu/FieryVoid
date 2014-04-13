@@ -9,10 +9,162 @@ window.confirm = {
 		
 	
 	},
-	
+
+
+    getMissileOptions: function(ship){
+        var returnArray = new Array();
+        var numberOfLaunchers = 1;
+        
+        if(!ship.flight){
+            // it's a normal ship
+            // Yeah, we have a bombrack with missiles, but that comes fully
+            // stocked. So don't pay attention to it atm.
+        }else{
+            // it's a fighter flight
+            // all the systems are fighters of the same type.
+            // also, if you buy missiles for one of them,
+            // you buy the same amount for all of them.
+            
+            for(var i in ship.systems){
+                var fighter = ship.systems[i];
+                
+                for(var j in fighter.systems){
+                    var weapon = fighter.systems[j];
+                    
+                    if(weapon.missileArray != null){
+                        for(var k in weapon.firingModes){
+                            for(var l in weapon.missileArray){
+                                var missile = weapon.missileArray[l];
+                                
+                                if(returnArray[weapon.firingModes[k]]){
+                                    var maxAmount = returnArray[weapon.firingModes[k]][1];
+                                    returnArray[weapon.firingModes[k]] = ['Type '+ missile.missileClass + ' - ' +missile.displayName, (maxAmount + weapon.maxAmount), missile.cost, numberOfLaunchers];
+                                    numberOfLaunchers++;
+                                }else{
+                                    returnArray[weapon.firingModes[k]] = ['Type '+ missile.missileClass + ' - ' +missile.displayName, weapon.maxAmount, missile.cost, numberOfLaunchers];
+                                    numberOfLaunchers++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return returnArray;
+    },
+
+//    arrayIsEmpty: function(array){
+//        for(var i in array){
+//            return false;
+//        }
+//        
+//        return true;
+//    },
+    
+    doOnPlusMissile: function(e){
+       e.stopPropagation(); 
+       
+       var button = $(this);
+       var missileType = button.data("firingMode");
+       var target = $(".selectAmount." + missileType);
+       
+       var value = target.data("value");
+       var maxVal = target.data("max");
+       var increment = target.data("increment");
+       var cost = target.data("cost");
+
+       var unitCost = $(".confirm .totalUnitCostAmount");
+       var unitCostValue = unitCost.data("value");
+       
+       
+       value = value + increment;
+       
+       if(value <= maxVal){
+           target.data("value", value);
+           target.html(value);
+           
+           unitCost.data("value", unitCostValue+(increment*cost));
+           unitCost.html(unitCostValue+(increment*cost));
+       }
+    },
+
+    doOnMinusMissile: function(e){
+       e.stopPropagation();  
+       
+       var button = $(this);
+       var missileType = button.data("firingMode");
+       var target = $(".selectAmount." + missileType);
+       
+       var value = target.data("value");
+       var minVal = target.data("min");
+       var increment = target.data("increment");
+       var cost = target.data("cost");
+
+       var unitCost = $(".confirm .totalUnitCostAmount");
+       var unitCostValue = unitCost.data("value");
+       
+       value = value - increment;
+       
+       if(value >= minVal){
+           target.data("value", value);
+           target.html(value);
+
+           unitCost.data("value", unitCostValue-(increment*cost));
+           unitCost.html(unitCostValue-(increment*cost));
+       }
+    },
+
 	showShipBuy: function(ship, callback){
 		var e = $(this.whtml);
-		$('<label>Name your new '+ship.shipClass+':</label><input type="text" name="shipname" value="Nameless"></input>').prependTo(e);
+                
+                // Do lots of stuff to account for possible buying of missiles.
+                var missileOptions = confirm.getMissileOptions(ship);
+                
+                // If it is a fighter, put the option in this pane.
+                // A ship will need some more tricks.
+                if(!mathlib.arrayIsEmpty(missileOptions)){
+                    var totalTemplate = $(".totalUnitCost");
+                    var totalItem = totalTemplate.clone(true).prependTo(e);
+                    
+                    $(".totalUnitCostText", totalItem).html("Total unit cost");
+                    $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
+                    $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
+                    $(totalItem).show();
+                    
+                    for(var i in missileOptions){
+                        var missileOption = missileOptions[i];
+                        
+                        var template = $(".missileSelectItem");
+                        var item = template.clone(true).prependTo(e);
+                        
+                        $(".selectText", item).html(missileOption[0] +' (maximum amount: '
+                            + missileOption[1] +', cost: '+ missileOption[2] + ')');
+                        $(item).show();
+                        
+                        var selectAmountItem = $(".selectAmount", item);
+                        selectAmountItem.html("0");
+                        selectAmountItem.addClass(i);
+                        selectAmountItem.data('value', 0);
+                        selectAmountItem.data('min', 0);
+                        selectAmountItem.data('max', missileOption[1]);
+                        selectAmountItem.data('cost', missileOption[2]);
+                        selectAmountItem.data('increment', missileOption[3]);
+                        selectAmountItem.data("firingMode", i);
+                        var plusButton = $(".plusButton", item);
+                        plusButton.data("firingMode", i);
+                        $(".minusButton", item).data("firingMode", i);
+                    }
+                    
+                    $('<div class="missileselect"><label>This fighter type can carry fighter missiles.<br>\
+                            Please select the amount you wish to purchase.<br></label>').prependTo(e);
+                }
+                
+                $(".selectButtons .plusButton", e).on("click",confirm.doOnPlusMissile);
+                $(".selectButtons .minusButton", e).on("click",confirm.doOnMinusMissile);
+                
+                $('<label>Name your new '+ship.shipClass+':</label><input type="text" name="shipname" value="Nameless"></input><br>').prependTo(e);
+                
 		//$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
 		$(".confirmok", e).on("click", callback);
 		$(".confirmcancel",e).on("click", function(){$(".confirm").remove();});

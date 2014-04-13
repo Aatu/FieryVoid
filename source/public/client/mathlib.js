@@ -5,6 +5,14 @@ window.mathlib = {
 		return a;
 	},
 	
+        arrayIsEmpty: function(array){
+            for(var i in array){
+                return false;
+            }
+
+            return true;
+        },
+    
 	addToDirection: function(current, add){
         add = add % 360;
 

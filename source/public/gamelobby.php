@@ -49,6 +49,7 @@
         <script src="client/systems.js"></script>
         <script src="client/power.js"></script>
         <script src="client/movement.js"></script>
+        <script src="client/mathlib.js"></script>
 		<script src="client/UI/confirm.js"></script>
         <script src="client/UI/shipwindow.js"></script>
         <script src="client/UI/fleetList.js"></script>
@@ -439,6 +440,32 @@
         </div>
         
     </div>
-
+                                    
+    <div class="missileSelectItem" style="display:none">
+        <span>
+            <span class="selectText"></span>
+            <span class="selectAmount"></span>
+            <span class="selectButtons">
+                <table>
+                    <tr>
+                        <td><span class="plusButton"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="minusButton"></span></td>
+                    </tr>
+                </table>
+            </span>
+        </span>
+    </div>
+        
+    <div class="totalUnitCost" style="display: none">
+        <span>
+            <span class="totalUnitCostText"></span>
+            <span class="totalUnitCostAmount"></span>
+        </span>
+    </div>                                    
 	</body>
+
+
+
 </html>

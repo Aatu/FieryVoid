@@ -58,6 +58,10 @@ window.gamedata = {
         
         $(".ship.bought").remove();
         for (var i in gamedata.ships){
+            // Reset ship ids to avoid ending up with elements with the same id
+            // a number of times after you have removed a ship.
+            gamedata.ships[i].id = i;
+                        
             var ship = gamedata.ships[i];
             if (ship.slot != slotid)
                 continue;
@@ -70,7 +74,7 @@ window.gamedata = {
 
             for (var i in gamedata.ships)
             {
-                if (gamedata.ships[i].id === id)
+                if (gamedata.ships[i].id == id)
                 {
                     gamedata.ships.splice(i, 1);
                     break;
@@ -78,6 +82,9 @@ window.gamedata = {
             }
             $('.ship.bought.shipid_' + id).remove();
             gamedata.calculateFleet();
+            // This is done to update it immediately and more importantly,
+            // to assign new id's to all fleet entries
+            gamedata.constructFleetList();
         });
 
         gamedata.calculateFleet();
@@ -310,11 +317,11 @@ window.gamedata = {
             return false;
         }
         
-		if (gamedata.canAfford(ship)){
+//		if (gamedata.canAfford(ship)){
 			window.confirm.showShipBuy(ship, gamedata.doBuyShip);
-		}else{
-			window.confirm.error("You cannot afford that ship!", function(){});
-		}
+//		}else{
+//			window.confirm.error("You cannot afford that ship!", function(){});
+//		}
 	},
 
 	doBuyShip: function(){
@@ -324,9 +331,83 @@ window.gamedata = {
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.userid = gamedata.thisplayer;
+                
+                if($(".confirm .totalUnitCostAmount").length > 0){
+                    ship.pointCost = $(".confirm .totalUnitCostAmount").data("value");
+                }
+                
+                if (!gamedata.canAfford(ship)){
+                    $(".confirm").remove();
+                    window.confirm.error("You cannot afford that ship!", function(){});
+                    return;
+                }
+                
+                if($(".confirm .selectAmount").length > 0){
+                    if(ship.flight){
+                        // first get the number of fighters in the flight
+                        var nrOfFighters = 0;
+                        
+                        for(var i in ship.systems){
+                            nrOfFighters++;
+                        }
+                        
+                        // and get the amount of launchers on a fighter
+                        var nrOfLaunchers = 0;
+
+                        for(var j in ship.systems[1].systems){
+                            var fighterSystem = ship.systems[1].systems[j];
+                            
+                            if(!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                                nrOfLaunchers++;
+                            }
+                        }
+                        
+                        // get all selections of missiles
+                        var missileOptions = $(".confirm .selectAmount");
+                        
+                        for(var k=0; k < missileOptions.length; k++){
+                            var firingMode = $(missileOptions[k]).data("firingMode");
+
+                            // divide the bought missiles over the missileArrays
+                            var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
+                            // perLauncher should always get you an integer as result. The UI handles
+                            // buying of missiles that way.
+                            var perLauncher = boughtAmount/(nrOfFighters*nrOfLaunchers);
+
+                            for(var i in ship.systems){
+                                var fighter = ship.systems[i];
+
+                                for(var j in fighter.systems){
+                                    var fighterSystem = fighter.systems[j];
+
+                                    if(!mathlib.arrayIsEmpty(fighterSystem.firingModes) && fighterSystem.missileArray != null){
+                                        // find the correct index, depending on the firingMode
+                                        for(var index in fighterSystem.firingModes){
+                                            if(fighterSystem.firingModes[index] == firingMode){
+                                                fighterSystem.missileArray[index].amount = perLauncher;
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        
+                    }
+                }
+                
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 	},
+
+//        arrayIsEmpty: function(array){
+//            for(var i in array){
+//                return false;
+//            }
+//
+//            return true;
+//        },
 
 	getShipByType: function(type){
 
@@ -335,7 +416,29 @@ window.gamedata = {
 				var ship = gamedata.allShips[race][i];
 
 				if (ship.phpclass == type){
-					return jQuery.extend(true, {}, ship);
+                                    var shipRet = jQuery.extend(true, {}, ship);
+                                    
+                                    // to avoid two different flights pointing to the
+                                    // same fighter object, also extend each fighter
+                                    // individually. (This solves the bug of setting
+                                    // missile amounts, that suddenly are set for all
+                                    // the fighters of the same type.)
+                                    for(var i in shipRet.systems){
+                                        shipRet.systems[i] = jQuery.extend(true, {}, ship.systems[i]);
+                                        
+                                        if(shipRet.flight){
+                                            // in case of a flight, also do the systems of the fighters
+                                            for(var j in shipRet.systems[i].systems){
+                                                shipRet.systems[i].systems[j] = jQuery.extend(true, {}, ship.systems[i].systems[j]);
+                                            }
+                                        }else{
+                                            // to avoid problems with ammo and normal ships, also do the
+                                            // ship systems
+                                            
+                                        }
+                                    }
+                                    
+                                    return shipRet;
 				}
 			}
 		}

@@ -44,10 +44,21 @@ shipManager.systems = {
     },
     
     isEngineDestroyed: function(ship){
-		if (ship.flight)
-			return false;
+	if (ship.flight)
+            return false;
 		
-        return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "engine"));
+        // Check all engines, as Dilgar have two of them.
+        for (var i in ship.systems){
+            var system = ship.systems[i];
+            if (system.name == "engine"){
+                if(!shipManager.systems.isDestroyed(ship, system)){
+                    // At least one of the engines is still alive
+                    return false;
+                }
+            }
+        }
+        
+        return true;
     },
     
     isReactorDestroyed: function(ship){
@@ -165,23 +176,9 @@ shipManager.systems = {
                 selectedWeapon.damage = system.damage;
             }
             
-/* plopje           if(selectedWeapon.duoWeapon){
-                selectedWeapon.firingMode = system.firingMode;
-                selectedWeapon.firingModes = system.firingModes;
-                selectedWeapon.power = system.power;
-                selectedWeapon.dualWeapon = true;
-                selectedWeapon.initialized = true;
-                selectedWeapon.damage = system.weapons[1].damage;
-                selectedWeapon.destroyed = system.destroyed;
-                return selectedWeapon;
-            }*/
-            
             selectedWeapon.power = system.power;
             selectedWeapon.firingMode = system.firingMode;
             selectedWeapon.firingModes = system.firingModes;
-//            selectedWeapon.power = system.power;
-//            selectedWeapon.displayName = system.displayName;
-//            selectedWeapon.id = system.id;
             selectedWeapon.dualWeapon = true;
             selectedWeapon.initialized = true;
             
@@ -191,6 +188,20 @@ shipManager.systems = {
         
         if(system.boostable){
             system = system.initBoostableInfo();
+        }
+        
+        // Check the number of elements in missileArray
+        // This has to be done like this, as length doesn't give the correct
+        // return because the elements in the missileArray aren't on consequetive
+        // indices.
+        var cnt = 0;
+        for(var i in system.missileArray){
+            cnt++;
+        }
+        
+        if(system.missileArray!= null && cnt > 0){
+            system.range = system.missileArray[system.firingMode].range;
+            //system.damage = system.missileArray[system.firingMode].damage;
         }
 
         return system;

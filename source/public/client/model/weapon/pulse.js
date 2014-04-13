@@ -5,6 +5,13 @@ var Pulse = function(json, ship)
 Pulse.prototype = Object.create( Weapon.prototype );
 Pulse.prototype.constructor = Pulse;
 
+var EnergyPulsar = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+EnergyPulsar.prototype = Object.create( Pulse.prototype );
+EnergyPulsar.prototype.constructor = EnergyPulsar;
+
 var ScatterPulsar = function(json, ship)
 {
     Pulse.call( this, json, ship);
@@ -56,3 +63,18 @@ var GatlingPulseCannon = function(json, ship)
 }
 GatlingPulseCannon.prototype = Object.create( Pulse.prototype );
 GatlingPulseCannon.prototype.constructor = GatlingPulseCannon;
+
+var PointPulsar = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+PointPulsar.prototype = Object.create( Pulse.prototype );
+PointPulsar.prototype.constructor = PointPulsar;
+
+var PairedLightBoltCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+PairedLightBoltCannon.prototype = Object.create( Particle.prototype );
+PairedLightBoltCannon.prototype.constructor = PairedLightBoltCannon;
+

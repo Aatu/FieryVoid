@@ -18,11 +18,16 @@ window.systemInfo = {
         if (!ship.flight){
             h += '<div><span class="header">Structure:</span><span class="value">' + (system.maxhealth - damageManager.getDamage(ship, system))+'/'+ system.maxhealth+"</span></div>";
             h += '<div><span class="header">Armor:</span><span class="value">' + shipManager.systems.getArmour(ship, system)+"</span></div>";
-		}
+	}else{
+            h += '<div><span class="header">Offensive bonus:</span><span class="value">' + (ship.offensivebonus * 5) +"</span></div>";
+        }
         
         if (system.firingModes)
             h += '<div><span class="header">Firing mode:</span><span class="value">' + system.firingModes[system.firingMode]+"</span></div>";
-		
+	
+            if(!mathlib.arrayIsEmpty(system.missileArray)){
+                h += '<div><span class="header">Ammo Amount:</span><span class="value">' + system.missileArray[system.firingMode].amount+"</span></div>";
+            }
         
 		for (var i in system.data){
 			h += '<div><span class="header">'+i+':</span><span class="value">' + system.data[i]+"</span></div>";

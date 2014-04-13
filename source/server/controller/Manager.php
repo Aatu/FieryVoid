@@ -66,13 +66,17 @@ class Manager{
         
         try {
             self::initDBManager();
-            $games = self::$dbManager->getTacGames($userid);
-            if ($games == null)
-                return null;
             
-            foreach ($games as $game)
+            $games = self::$dbManager->getTacGames($userid);
+
+            if ($games == null){
+                return null;
+            }
+            
+            
+            foreach ($games as $game){
                 $game->prepareForPlayer(0, 0, -1);
-    
+            }
         }
         catch(exception $e) {
             throw $e;
@@ -212,6 +216,10 @@ class Manager{
         return $gamedata;
     }
     
+    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
+        self::$dbManager->updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount);
+    }
+    
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship){
         
         try{
@@ -262,7 +270,6 @@ class Manager{
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
-            // plopje
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
             }
@@ -334,7 +341,30 @@ class Manager{
                 $points += $ship->pointCost;
                 
                 if ($ship->userid == $gamedata->forPlayer){
-                    self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
+                    $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
+                    
+                    // Check if ship uses ammo
+                    if($ship instanceof FighterFlight){
+                       foreach($ship->systems as $fighterIndex=>$fighter){
+                           foreach($fighter->systems as $systemIndex=>$fighterSys){
+                               if(isset($fighterSys->missileArray)){
+                                   // this system has a missileArray. It uses ammo
+                                   foreach($fighterSys->missileArray as $firingMode=>$ammo){
+                                       self::$dbManager->submitAmmo($id, $fighterSys->id, $gamedata->id, $firingMode, $ammo->amount);
+                                   }
+                               }
+                           }
+                       } 
+                    }else{
+                       foreach($ship->systems as $systemIndex=>$system){
+                               if(isset($system->missileArray)){
+                                   // this system has a missileArray. It uses ammo
+                                   foreach($system->missileArray as $firingMode=>$ammo){
+                                       self::$dbManager->submitAmmo($id, $system->id, $gamedata->id, $firingMode, $ammo->amount);
+                               }
+                           }
+                       }  
+                    }
                 }
             }
 
@@ -667,9 +697,6 @@ class Manager{
         
         $gamedata->setActiveship(-1);
 
-        // plopje                               
-        Debug::log("changeTurn: status ".$gamedata->status);
-
         if (($gamedata->turn > 1 && $gamedata->isFinished()) || ($gamedata->status === "SURRENDERED")){
             $gamedata->status = "FINISHED";
         }
@@ -827,8 +854,18 @@ class Manager{
                                     $fires[] = $fireOrder;
                                 }
                             }
+                            
+                            // plopje
+                            if(isset($fightersys["ammo"])){
+                                foreach($fightersys["ammo"] as $i=>$ammo){
+                                    if(isset($ammo)){
+                                        $fig->setAmmo($i, $ammo);
+                                    }
+                                }
+                            }
+
                             $fig->setFireOrders($fires);
-                        }
+                        }                        
                     }
                     
                 }

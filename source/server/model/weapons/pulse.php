@@ -101,6 +101,41 @@
     
     }
 
+    class EnergyPulsar extends Pulse{
+
+        public $name = "energyPulsar";
+        public $displayName = "Energy Pulsar";
+        public $animation = "trail";
+        public $animationWidth = 5;
+        public $projectilespeed = 13;
+        public $animationExplosionScale = 0.30;
+        public $rof = 2;
+        public $trailLength = 12;
+        public $grouping = 25;
+        public $maxpulses = 3;
+
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 3, 3); // fighters, <mediums, <capitals 
+        
+        public $intercept = 1;
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getPulses($turn)
+        {
+            return Dice::d(2);
+        }
+        
+        public function getDamage($fireOrder){        return 10;   }
+        public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 - $this->dp;      }
+
+    }
+    
     class ScatterPulsar extends Pulse{
 
         public $name = "scatterPulsar";
@@ -301,7 +336,7 @@
         public $grouping = 15;
 
         public $loadingtime = 1;
-		public $normalload = 2;
+	public $normalload = 2;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -373,4 +408,157 @@
             
         }
     }
+    
+    class PointPulsar extends Pulse
+    {
+        public $name = "pointPulsar";
+        public $displayName = "Point Pulsar";
+        public $iconPath = "pointPulsar.png";
+        public $animation = "trail";
+        public $trailLength = 13;
+        public $animationWidth = 4;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.17;
+        public $animationColor =  array(175, 225, 175);
+        public $trailColor = array(110, 225, 110);
+        public $rof = 2;
+        public $maxpulses = 3;
+        public $grouping = 0;
+
+        public $loadingtime = 2;
+	public $normalload = 2;
+        
+        public $calledShotMod = -4;
+
+        public $intercept = 3;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
+
+            $this->data["Pulses"] = '3';
+            unset($this->data["Grouping range"]);
+            unset($this->data["Max pulses"]);
+        }
+        
+        public function getDamage($fireOrder){ return 10 - $this->dp; }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 10 - $this->dp;
+        }
+
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 10 - $this->dp;
+        }
+        
+        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+            if ($target->isDestroyed())
+                return;
+
+            $calledsystem = null;
+            
+            if ($fireOrder->calledid != -1){
+                $calledsystem = $target->getSystemById($fireOrder->calledid);
+            }
+
+            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+
+            if ($system == null)
+                return;
+    
+            if ($fireOrder->calledid == -1){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+                return;
+            }
+            
+            if($system->location == $calledsystem->location && $system === $calledsystem){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }else{
+                // we haven't yet overkilled into another location:
+                // check if there are more of the same type of systems in the same location
+                // if so, target those first. To strip a ship of systems is the main benefit of
+                // the point pulsar. (Implementation differs from official Bab5Wars rules. But
+                // this implementation needs less clicking and user interaction.)
+                foreach($target->systems as $targetSystem){
+                    if(!$targetSystem->isDestroyed()
+                            && $targetSystem->location == $calledsystem->location
+                            && $targetSystem->name == $calledsystem->name){
+                        $fireOrder->calledid = $targetSystem->id;
+                        $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location);
+                        return;
+                    }
+                }
+
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }
+        }
+
+        protected function getPulses($turn)
+        {
+            return 3;
+        }
+    }
+
+    class PairedLightBoltCannon extends LinkedWeapon{
+
+        public $name = "pairedLightBoltCannon";
+        public $displayName = "Light Bolt Cannon";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+
+        }
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Pulse";
+            $this->data["Damage type"] = "Standard";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    }
+
 ?>

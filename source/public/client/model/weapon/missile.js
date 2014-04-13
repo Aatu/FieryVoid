@@ -7,12 +7,17 @@ MissileLauncher.prototype.constructor = MissileLauncher;
 
 MissileLauncher.prototype.getAmmo = function(fireOrder)
 {
-    var mode = this.firingMode;
-    if (fireOrder)
-        mode = fireOrder.mode;
+    if(!mathlib.arrayIsEmpty(this.missileArray)){
+        var mode = this.firingMode;
+        if (fireOrder)
+            mode = fireOrder.mode;
+
+        console.log("returning ammo: " + this.missileArray[mode].name);
+        return this.missileArray[mode];
+    }else{
+        return null;
+    }
     
-    console.log("returning ammo: " + this.firingModes[mode]);
-    return new window[this.firingModes[mode]];
 }
 
 MissileLauncher.prototype.changeFiringMode = function()
@@ -84,11 +89,31 @@ var LHMissileRack = function(json, ship)
 LHMissileRack.prototype = Object.create( MissileLauncher.prototype );
 LHMissileRack.prototype.constructor = LHMissileRack;
 
+var FighterMissileRack = function(json, ship)
+{
+    MissileLauncher.call( this, json, ship);
+}
+FighterMissileRack.prototype = Object.create( MissileLauncher.prototype );
+FighterMissileRack.prototype.constructor = FighterMissileRack;
+
+var FighterTorpedoLauncher = function(json, ship)
+{
+    FighterMissileRack.call( this, json, ship);
+}
+FighterTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
+FighterTorpedoLauncher.prototype.constructor = FighterTorpedoLauncher;
+
 var ReloadRack = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
 }
-ReloadRack.prototype = Object.create( ReloadRack.prototype );
+ReloadRack.prototype = Object.create( ShipSystem.prototype );
 ReloadRack.prototype.constructor = ReloadRack;
 
+var BombRack = function(json, ship)
+{
+    MissileLauncher.call( this, json, ship);
+}
+BombRack.prototype = Object.create( MissileLauncher.prototype );
+BombRack.prototype.constructor = BombRack;
 

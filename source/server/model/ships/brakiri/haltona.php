@@ -8,7 +8,7 @@ class Haltona extends BaseShip{
 	$this->pointCost = 525;
 	$this->faction = "Brakiri";
         $this->phpclass = "Haltona";
-        $this->imagePath = "img/ships/halik.png";
+        $this->imagePath = "img/ships/haltona.png";
         $this->shipClass = "Haltona Frigate";
         $this->shipSizeClass = 1;
         $this->canvasSize = 100;

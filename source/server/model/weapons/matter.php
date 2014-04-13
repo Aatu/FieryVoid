@@ -129,4 +129,29 @@
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }    
     }
     
+    class MassDriver extends Matter
+    {
+        public $name = "massDriver";
+        public $displayName = "Mass Driver";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 10;
+        public $animationWidth = 6;
+        public $animationExplosionScale = 0.90;
+        public $targetImmobile = true;
+        
+        public $loadingtime = 4;
+		
+        public $rangePenalty = 0.17;
+        public $fireControl = array(null, null, 2); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 8)+ 60;   }
+        public function setMinDamage(){     $this->minDamage = 68 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 140 - $this->dp;      }
+    }
 ?>

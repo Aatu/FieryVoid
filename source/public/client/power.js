@@ -35,6 +35,7 @@ shipManager.power = {
 	
 
 	setPowerClasses: function (ship, system, systemwindow){
+<<<<<<< HEAD
 	
 		
 		
@@ -76,19 +77,90 @@ shipManager.power = {
                             systemwindow.addClass("canboost");
                         }
                     }else{
+=======
+            var off = shipManager.power.isOffline(ship, system);
+            
+            if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+                systemwindow.addClass("forcedoffline");
+
+                // Because of the crit, add a power entry to the power array
+                // of this system.
+                // A bit of code is necessary to make sure this only happens once.
+                var isOnline = true;
+
+
+                for (var i in system.power){
+                    var power = system.power[i];
+                    if (power.turn != gamedata.turn)
+                            continue;
+
+                    if (power.type == 1){
+                        isOnline = false;
+                        break;
+                    }
+                }   
+
+                if(isOnline){
+                    system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+                    shipManager.power.stopOverloading(ship, system);
+                }
+
+                return true;		
+            }
+
+            if (off){
+                if(system.name == "reactor"){
+                    // This is the reactor. It has recovered from a ForcedOffline crit
+                    // (If it still had one, it would have entered the previous if-statement)
+                    // Remove class offline and give user feedback.
+                    shipManager.power.setOnline(ship, system);
+                    systemwindow.removeClass("offline");
+                    
+                    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
+                    userMessage += "Power up all necessary systems.";
+                    
+                    window.confirm.error(userMessage, function(){});
+                    
+                    return;
+                }else{
+                    systemwindow.addClass("offline");
+                    return true;
+                }
+            }
+
+            if (shipManager.power.isOverloading(ship, system)){
+                    systemwindow.addClass("overload");
+            }
+
+            if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer)
+                    return;
+
+            if (system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system)){
+                    systemwindow.addClass("canoverload");
+            }
+
+            var boost = shipManager.power.getBoost(system);
+
+            if (system.boostable && !boost){
+                if(system.name == "scanner" || system.name == "elintScanner"){
+                    if(system.id == shipManager.power.getHighestSensorsId(ship)){
+                        // You can only boost the highest sensor rating
+                        // if multiple sensors are present on one ship
+>>>>>>> ef51b79ffd7e83946d7130e8c14efffe8da61876
                         systemwindow.addClass("canboost");
                     }
-		}else if (boost){
-			systemwindow.addClass("boosted");
-		}
+                }else{
+                    systemwindow.addClass("canboost");
+                }
+            }else if (boost){
+                    systemwindow.addClass("boosted");
+            }
 
-		if (system.canOffLine || (system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system))){
-			systemwindow.addClass("canoffline");
-		}
-		
-		return false;
+            if (system.canOffLine || (system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system))){
+                    systemwindow.addClass("canoffline");
+            }
 
-	
+            return false;
 	},
         
         getHighestSensorsId: function(ship){
@@ -206,11 +278,13 @@ shipManager.power = {
 	},
 	
 	isPowerless: function(ship){
-	
-		if (shipManager.systems.isReactorDestroyed(ship))
+                var reactor = shipManager.systems.getSystemByName(ship, "reactor");
+        
+		if (shipManager.systems.isReactorDestroyed(ship) ||
+                    shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn"))
 			return true;
 		
-		var power = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		var power = shipManager.power.getReactorPower(ship, reactor);
 		
 		if (this.countPossiblePower(ship) + power > 0)
 			return false;

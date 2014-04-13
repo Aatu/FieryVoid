@@ -14,7 +14,6 @@
 		public $fighter = true;
 		public $systems = array();
 		
-		
 		public $possibleCriticals = array();
 		
 			
@@ -24,8 +23,8 @@
 		function __construct($name, $armour, $maxhealth, $flight){
 			parent::__construct($armour, $maxhealth, 0, 0 );
 			
-            $this->name = $name;
-			$this->flightid = $flight;
+                    $this->name = $name;
+                    $this->flightid = $flight;
 			
 			
 		}
@@ -107,11 +106,13 @@
      
 		}
 		
-		public function testCritical($ship, $turn, $crits, $add = 0){
+		public function testCritical($ship, $gamedata, $crits, $add = 0){
 			$d = Dice::d(10);
 			
-			if ($d > $this->getRemainingHealth()){
-				$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $turn);
+                        $dropOutBonus = $gamedata->getShipById($this->flightid)->getDropOutBonus();
+                        
+			if (($d + $dropOutBonus) > $this->getRemainingHealth()){
+				$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $this->criticals[] =  $crit;
                 $crits[] = $crit;

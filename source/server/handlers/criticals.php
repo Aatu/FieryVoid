@@ -22,7 +22,7 @@ class Criticals{
 					
 					if ($overthrust > 0){
 					
-						$crits = $system->testCritical($ship, $gamedata->turn, $crits, $overthrust);
+						$crits = $system->testCritical($ship, $gamedata, $crits, $overthrust);
 						
 						
 						
@@ -36,7 +36,7 @@ class Criticals{
 				
                 if ($system->isDamagedOnTurn($gamedata->turn)){
        
-					$crits = $system->testCritical($ship, $gamedata->turn, $crits);
+					$crits = $system->testCritical($ship, $gamedata, $crits);
 		
 					
                 

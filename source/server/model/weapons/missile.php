@@ -14,14 +14,10 @@ class MissileLauncher extends Weapon
     public $distanceRange = 0;
     
     public $firingModes = array(
-        1 => "BasicMissile"
     );
     
-    public $missileCount = array(
-        1 => 20
-    );
-        
-
+    public $missileArray = array();
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -49,6 +45,12 @@ class MissileLauncher extends Weapon
         
         return true;
     }
+    
+    public function setAmmo($firingMode, $amount){
+        if(count($this->missileArray) > 0){
+            $this->missileArray[$firingMode]->amount = $amount;
+        }
+    }
 }
 
 class SMissileRack extends MissileLauncher
@@ -68,13 +70,14 @@ class SMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
@@ -98,13 +101,14 @@ class LMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
@@ -127,16 +131,196 @@ class LHMissileRack extends MissileLauncher
     }
     protected function getAmmo($fireOrder)
     {
-        return new $this->firingModes[$fireOrder->firingMode];
+        return null;
     }
     
     public function getDamage($fireOrder)
     {
-        $ammo = new $this->firingModes[$fireOrder->firingMode];
-        return $ammo->getDamage();
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
     public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
+}
+
+class FighterMissileRack extends MissileLauncher
+{
+    public $name = "FighterMissileRack";
+    public $displayName = "Fighter Missile Rack";
+    public $loadingtime = 1;
+    public $iconPath = "fighterMissile.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $ballistic = true;
+    public $animationExplosionScale = 0.15;
+    public $projectilespeed = 10;
+    public $animationWidth = 2;
+    public $trailLength = 60;
+    protected $distanceRangeMod = 0;
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "FB"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct(0, 0, 0, $startArc, $endArc);
+
+        $this->missileArray = array(
+            1 => new MissileFB($startArc, $endArc)
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Missile";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+
+    public function calculateHit($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        $ammo->calculateHit($gamedata, $fireOrder);
+    }
+    
+    public function setId($id){
+        
+        debug::log("Set ID");
+        parent::setId($id);
+        
+        $counter = 0;
+        
+        foreach ($this->missileArray as $missile){
+            debug::log("Set ID missile, $counter");
+            $missile->setId(1000 + ($id*10) + $counter);
+            $counter++;
+        } 
+    }
+
+    
+    public function setFireControl($fighterOffensiveBonus){
+        $this->fireControl[0] = $fighterOffensiveBonus;
+        $this->fireControl[1] = $fighterOffensiveBonus;
+        $this->fireControl[2] = $fighterOffensiveBonus;
+    }
+    
+    public function getLaunchRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range * 3 + $this->distanceRangeMod;
+    }
+    
+    public function isInDistanceRange($shooter, $target, $fireOrder)
+    {
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+    
+        if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->getDistanceRange())
+        {
+            $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+            return false;
+        }
+        
+        return true;
+    }
+
+    protected function getAmmo($fireOrder)
+    {
+        return new $this->missileArray[$fireOrder->firingMode];
+    }
+    
+    public function addAmmo($missileClass, $amount){
+        foreach($this->missileArray as $missile){
+            if(strcmp($missile->missileClass, $missileClass) == 0){
+                $missile->setAmount($amount);
+                break;
+            }
+        }
+    }
+    
+    public function fire($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        
+        if($ammo->amount > 0){
+            $ammo->amount--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
+        }
+        else{
+            
+            $fireOrder->notes = "No ammo available of the selected type.";
+            $fireOrder->updated = true;
+            return;
+        }
+        
+        $ammo->fire($gamedata, $fireOrder);
+    }
+    
+    public function getDamage($fireOrder)
+    {
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        return $ammo->getDamage();
+    }
+    
+    public function setMinDamage(){ 0;}
+    public function setMaxDamage(){ 0;}     
+}
+
+class FighterTorpedoLauncher extends FighterMissileRack
+{
+    public $name = "FighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "LBT"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $this->missileArray = array(
+            1 => new LightBallisticTorpedo($startArc, $endArc)
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Torpedo";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        if($this->missileArray[$this->firingMode]->minDamage != $this->missileArray[$this->firingMode]->maxDamage){
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage."-".$this->missileArray[$this->firingMode]->maxDamage;
+        }else{
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage;
+        }
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
 }
 
 class ReloadRack extends ShipSystem
@@ -148,5 +332,90 @@ class ReloadRack extends ShipSystem
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
 
+    }
+}
+
+class BombRack extends MissileLauncher{
+
+    public $name = "BombRack";
+    public $displayName = "Bomb Rack";
+    public $loadingtime = 2;
+    public $iconPath = "bombRack.png";
+    public $firingMode = 1;
+    public $maxAmount = 8;
+    public $ballistic = true;
+    public $animationExplosionScale = 0.25;
+    public $projectilespeed = 8;
+    public $animationWidth = 4;
+    public $trailLength = 100;
+    protected $distanceRangeMod = 0;
+
+    public $firingModes = array(
+        1 => "B"
+    );
+    
+    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+    
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+        $this->missileArray = array(
+            1 => new MissileB($startArc, $endArc)
+        );
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+
+        $this->data["Weapon type"] = "Missile";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+
+    public function calculateHit($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        $ammo->calculateHit($gamedata, $fireOrder);
+    }
+    
+    protected function getAmmo($fireOrder)
+    {
+        return new $this->missileArray[$fireOrder->firingMode];
+    }
+
+    public function addAmmo($missileClass, $amount){
+        foreach($this->missileArray as $missile){
+            if(strcmp($missile->missileClass, $missileClass) == 0){
+                $missile->setAmount($amount);
+                break;
+            }
+        }
+    }
+
+    public function fire($gamedata, $fireOrder){
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        
+        if($ammo->amount > 0){
+            $ammo->amount--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
+        }
+        else{
+            
+            $fireOrder->notes = "No ammo available of the selected type.";
+            $fireOrder->updated = true;
+            return;
+        }
+        
+        $ammo->fire($gamedata, $fireOrder);
+    }
+
+    public function getLaunchRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range * 3 + $this->distanceRangeMod;
     }
 }

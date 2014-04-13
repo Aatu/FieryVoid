@@ -1,0 +1,48 @@
+<?php
+
+class GammaStarfury extends FighterFlight{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+        $this->pointCost = 366;
+        $this->faction = "EA";
+        $this->phpclass = "GammaStarfury";
+        $this->shipClass = "Starfury: Gamma Heavy flight";
+        $this->imagePath = "img/ships/auroraStarfury.png";
+        
+        $this->forwardDefense = 8;
+        $this->sideDefense = 6;
+        $this->freethrust = 12;
+        $this->offensivebonus = 5;
+        $this->jinkinglimit = 6;
+        $this->turncost = 0.33;
+        
+	$this->iniativebonus = 80;
+        
+        for ($i = 0; $i<6; $i++){
+            $armour = array(3, 2, 2, 2);
+            $fighter = new Fighter("gammaStarfury", $armour, 13, $this->id);
+            $fighter->displayName = "Gamma Starfury Heavy Fighter";
+            $fighter->imagePath = "img/ships/auroraStarfury.png";
+            $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
+
+            $missileRack = new FighterMissileRack(4, 330, 30);
+            $missileRack->firingModes = array(
+                1 => "FY"
+            );
+
+            $missileRack->missileArray = array(
+                1 => new MissileFY(330, 30)
+            );
+
+            $frontGun = new PairedParticleGun(330, 30, 4);
+            $frontGun->displayName = "Uni-Pulse Cannon";
+            $fighter->addFrontSystem($missileRack);
+            $fighter->addFrontSystem($frontGun);
+            $this->addSystem($fighter);
+	}
+    }
+}
+
+?>

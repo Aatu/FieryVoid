@@ -26,6 +26,27 @@ window.ew = {
         return (ret > 0) ? ret : 0;
     },
     
+    isTargetDistByOtherElint: function(elint, target){
+        for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+            
+            if(ship.faction == elint.faction && ship.id != elint.id){
+                for (var i in ship.EW){
+                    var entry = ship.EW[i];
+                    
+                    if (entry.turn != gamedata.turn)
+                        continue;
+
+                    if (entry.type == "DIST"){
+                        return true;
+                    }
+                }                
+            }
+        }
+        
+        return false;
+    },
+    
     getUsedEW: function(ship){
         var used = 0;
     
@@ -519,6 +540,11 @@ window.ew = {
 
             if (foew > amount)
                amount = foew;
+        }
+        
+        if(ship.flight){
+            // fighters only receive half the amount of SOEW
+            return amount * 0.5;
         }
         
         return amount;

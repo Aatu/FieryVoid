@@ -46,6 +46,7 @@ class Weapon extends ShipSystem{
     public $ballistic = false;
     public $hextarget = false;
     public $hidetarget = false;
+    public $targetImmobile = false;
     
     
     public $shots = 1;
@@ -71,6 +72,7 @@ class Weapon extends ShipSystem{
     public $exclusive = false;
     
     public $useOEW = true;
+    public $calledShotMod = -8;
     
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
     
@@ -92,6 +94,10 @@ class Weapon extends ShipSystem{
     
     public function getWeaponForIntercept(){
         return $this;
+    }
+    
+    public function getCalledShotMod(){
+        return $this->calledShotMod;
     }
     
     protected function getWeaponHitChanceMod($turn){
@@ -446,7 +452,6 @@ class Weapon extends ShipSystem{
     }
     
     public function calculateHit($gamedata, $fireOrder){
-    
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
@@ -524,14 +529,12 @@ class Weapon extends ShipSystem{
                 $mod -=3;
         }
         if ($fireOrder->calledid != -1){
-            $mod -= 8;
+            $mod += $this->getCalledShotMod();
         }
 		
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 	
-        debug::log("calcHit modifier $mod");
-        
         if ($oew < 1)
         {
             $rangePenalty = $rangePenalty*2;
@@ -560,10 +563,13 @@ class Weapon extends ShipSystem{
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-            
-        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
         
-        debug::log("Goal is $goal");
+        // Fighters ignore all defensive EW, be it DEW, SDEW or BDEW
+        if (!($shooter instanceof FighterFlight)){
+            $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
+        }else{
+            $goal = ($defence - $jammermod - $rangePenalty - $intercept + $oew + $soew + $firecontrol + $mod);
+        }
         
         $change = round(($goal/20)*100);
         

@@ -23,6 +23,8 @@
         public $pointCost = 0;
         public $faction = null;
         public $flight = true;
+        public $hasNavigator = false;
+        protected $flightLeader = null;
         
         public $offensivebonus, $freethrust;
         public $jinkinglimit = 0;
@@ -38,7 +40,7 @@
         public $rolling = false;
         public $team;
         
-
+        protected $dropOutBonus = 0;
 
         public $movement = array();
         
@@ -51,6 +53,20 @@
         }
         
         private $autoid = 1;
+        
+        public function getInitiativebonus($gamedata){
+            $initiativeBonusRet = parent::getInitiativebonus($gamedata);
+            
+            if($this->hasNavigator){
+                $initiativeBonusRet += 5;
+            }
+            
+            return $initiativeBonusRet;
+        }
+
+        public function getDropOutBonus(){
+            return $this->dropOutBonus;
+        }
         
         public function getSystemById($id){
             foreach ($this->systems as $system){

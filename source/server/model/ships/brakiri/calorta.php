@@ -7,7 +7,7 @@ class Calorta extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 570;
 	$this->faction = "Brakiri";
         $this->phpclass = "Calorta";
-        $this->imagePath = "img/ships/ikorta.png";
+        $this->imagePath = "img/ships/calorta.png";
         $this->shipClass = "Calorta Elint Cruiser";
         $this->occurence = "uncommon";
         $this->limited = 33;
