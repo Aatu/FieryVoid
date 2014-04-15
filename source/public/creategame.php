@@ -1,7 +1,7 @@
 <?php
     include_once 'global.php';
     
-	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
+	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false || $_SESSION["user"] == null){
 		header('Location: index.php');
 	}
 	if (!Manager::canCreateGame($_SESSION["user"])){

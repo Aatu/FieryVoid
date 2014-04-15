@@ -12,10 +12,11 @@ include_once 'global.php';
         $pass = trim($_POST["pass"]);
         $pass2 = $_POST["pass2"];
         $secret = $_POST["secret"];
+        global $secret_phrase;
         
         if ($pass != $pass2 || $pass == ""){
             $error = "Both passwords must be set and must match!";
-        }else if($secret != "molecular pulsar"){
+        }else if($secret != $secret_phrase){
             $error = "Secret phrase is wrong";
         }else if ($user == ""){
             $error = "Username must be set!";
@@ -27,7 +28,8 @@ include_once 'global.php';
                 $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
 		
                 if ($userid != false){
-                    $_SESSION["user"] = $userid;
+                    $_SESSION["user"] = $userid['id'];
+                    $_SESSION["access"] = $userid['access'];
                     header('Location: games.php');
 
                 }

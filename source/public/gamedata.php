@@ -2,8 +2,10 @@
     include_once 'global.php';
 
         
-    if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-        print('{"error":"Not logged in."}');
+    if (!isset($_SESSION["user"]) || $_SESSION["user"] == false || $_SESSION["user"] == null)){
+        header('Location: index.php');
+        //print('{"error":"Not logged in."}');
+        
     }else{
     
     

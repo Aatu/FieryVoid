@@ -7,8 +7,9 @@
     require_once dirname(__DIR__) . '/server/lib/Debug.php';
     session_start();
         
-    if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-        print('{}');
+    if (!isset($_SESSION["user"]) || $_SESSION["user"] == false || $_SESSION["user"] == null){
+        header('Location: index.php');
+        //print('{}');
     }else{
     
     
