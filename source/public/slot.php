@@ -3,7 +3,8 @@
 
     $ret = '{"error":"AJAX request is omitting required data"}';    
     if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-        print('{"error":"Not logged in."}');
+		header('Location: games.php');
+//      print('{"error":"Not logged in."}');
     }else if (isset($_POST["action"])){
     
         $action = $_POST["action"];

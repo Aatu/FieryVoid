@@ -1,9 +1,9 @@
 <?php
     include_once 'global.php';
 
-	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false || $_SESSION["user"] == null){
+	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
-        return;
+//      return;
 	}
 	
 	$games = Manager::getTacGames($_SESSION["user"]);
