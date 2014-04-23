@@ -341,7 +341,7 @@ gamedata = {
         for (var i in gamedata.ships){
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
-        
+		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
         if (gamedata.gamephase == -1){
             if (gamedata.waiting == false){
                 combatLog.onTurnStart();
