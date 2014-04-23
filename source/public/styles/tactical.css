@@ -656,6 +656,10 @@ body.phase1 #botPanel .ewentry .button2{
     left:312px;
 }
 
+#settingsTab.logUiEntry{
+    left:417px;
+}
+
 #gameinfo.logPanelEntry{
     overflow-x:hidden;
     overflow-y:scroll;

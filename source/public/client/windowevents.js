@@ -63,6 +63,10 @@ jQuery(function(){
     $(".cancelturn").on("click", gamedata.onCancelClicked);
     $(".logUiEntry").on("click", botPanel.onLogUIClicked);
     
+	$("#helphide").on("click", window.helper.onClickHelpHide);
+	$("#autocommit").on("click", window.helper.onClickAutoCommit);
+	$(".ingamehelppanel").on("click", window.helper.onClickInHelp);
+
     hookEvent('pagecontainer', 'mousewheel', zooming.mouseWheel);
     document.onkeydown = function( event ){
         event = event || window.event;
