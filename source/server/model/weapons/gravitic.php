@@ -499,10 +499,10 @@ class GraviticBolt extends Gravitic
         	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         
-            $lance = new GravLance($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $lance = new GravLance($armour, $maxhealth, 8, $startArc, $endArc);
             $lance->dualWeapon = true;
             $lance->parentSystem = $this;
-            $beams = new DuoGravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beams = new DuoGravitonBeam($armour, $maxhealth, 8, $startArc, $endArc);
             $beams->dualWeapon = true;
             $beams->parentSystem = $this;
         
@@ -582,10 +582,10 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 4;
 	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-            $beam1 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam1 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
             //$beam1->duoWeapon = true;
             $beam1->parentSystem = $this;
-            $beam2 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam2 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
             //$beam2->duoWeapon = true;
             $beam2->parentSystem = $this;
             

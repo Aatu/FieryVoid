@@ -78,10 +78,10 @@ class ShipSystem{
         $this->damage = $damages;
     }
     
-    public function setPowers($power){
-        $this->power = $power;
-    }
-    
+//    public function setPowers($power){
+//        $this->power = $power;
+//    }
+//    
     public function setPower($power){
         $this->power[] = $power;
     }

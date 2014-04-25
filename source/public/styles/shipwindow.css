@@ -21,6 +21,14 @@
     color:#496791;
 }
 
+.shipwindow .iconduo .value{
+    margin-left:1px;
+    margin-right:3px;
+    margin-top: 10px;
+    display: inline-block;
+    color:#496791;
+}
+
 .shipwindow .valueheader{
     margin-left:3px;
     color:white;
@@ -408,6 +416,10 @@
 }
 
 body.phase3 .shipwindow  .system.firing .holdfire{
+    display:block;
+}
+
+body.phase3 .shipwindow  .system.duofiring .holdfire{
     display:block;
 }
 

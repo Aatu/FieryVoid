@@ -76,8 +76,19 @@ window.weaponManager = {
             return;
         
         if (ship.userid == gamedata.thisplayer){
-            weaponManager.cancelFire(ship, system);
-            
+            if(!system.duoWeapon){
+                weaponManager.cancelFire(ship, system);
+            }else{
+                systemwindow.removeClass("duofiring");
+                
+                for(var i in system.weapons){
+                    var duoweapon = system.weapons[i];
+                    
+                    if(weaponManager.hasFiringOrder(ship, duoweapon)){
+                        weaponManager.cancelFire(ship, duoweapon);
+                    }
+                }
+            }
         }
         
     },
@@ -101,7 +112,7 @@ window.weaponManager = {
         weaponManager.currentShip = gamedata.getShip(id);
         
         if ($(this).hasClass("fightersystem")){
-            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), t.data("id"));
+            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
 	}else{
             weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
         }
@@ -211,6 +222,14 @@ window.weaponManager = {
             if(gamedata.selectedSystems[i] == weapon){              
                 gamedata.selectedSystems.splice(i,1);
                 
+            }
+            
+            if(weapon.duoWeapon){
+                for(var j in weapon.weapons){
+                    var subweapon = weapon.weapons[j];
+                    
+                    weaponManager.unSelectWeapon(ship, subweapon);
+                }
             }
         }
         

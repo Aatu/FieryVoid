@@ -35,49 +35,6 @@ shipManager.power = {
 	
 
 	setPowerClasses: function (ship, system, systemwindow){
-<<<<<<< HEAD
-	
-		
-		
-		var off = shipManager.power.isOffline(ship, system);
-		
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
-			systemwindow.addClass("forcedoffline");
-			return true;		
-		}
-		
-		if (off){
-			systemwindow.addClass("offline");
-                        
-                        var duowindows = $(systemwindow).find(".iconduo");
-                        if(duowindows.length > 0){
-                            $(systemwindow).find(".iconduo").addClass("offline");
-                        }        
-			return true;
-		}
-		
-		if (shipManager.power.isOverloading(ship, system)){
-			systemwindow.addClass("overload");
-		}
-		
-		if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer)
-			return;
-		
-		if (system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system)){
-			systemwindow.addClass("canoverload");
-		}
-		
-		var boost = shipManager.power.getBoost(system);
-		
-		if (system.boostable && !boost){
-                    if(system.name == "scanner" || system.name == "elintScanner"){
-                        if(system.id == shipManager.power.getHighestSensorsId(ship)){
-                            // You can only boost the highest sensor rating
-                            // if multiple sensors are present on one ship
-                            systemwindow.addClass("canboost");
-                        }
-                    }else{
-=======
             var off = shipManager.power.isOffline(ship, system);
             
             if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
@@ -146,7 +103,6 @@ shipManager.power = {
                     if(system.id == shipManager.power.getHighestSensorsId(ship)){
                         // You can only boost the highest sensor rating
                         // if multiple sensors are present on one ship
->>>>>>> ef51b79ffd7e83946d7130e8c14efffe8da61876
                         systemwindow.addClass("canboost");
                     }
                 }else{
@@ -552,7 +508,6 @@ shipManager.power = {
                 
                 if(system.parentId > 0){
                     system = shipManager.systems.getSystem(ship, system.parentId);
-                    
                 }
                 
 		if (gamedata.gamephase != 1)
@@ -582,25 +537,6 @@ shipManager.power = {
                 }
 		
 		shipManager.power.stopOverloading(ship, system);
-    
-//                if(system.dualWeapon){
-//                    // dual weapons and all their subweapons share the same power
-//                    // array. I must 
-//                    for(var i in system.weapons){
-//                        var weapon = system.weapons[i];
-//                        
-//                        if(weapon.duoWeapon){
-//                            for(var index in weapon.weapons){
-//                                var subweapon = weapon.weapons[index];
-//
-//                                shipWindowManager.setDataForSystem(ship, subweapon);
-//                            }
-//                        }else{
-//                            shipWindowManager.setDataForSystem(ship, weapon);
-//                        }
-//                    }
-//                }
-                
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	},
