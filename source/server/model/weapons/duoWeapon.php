@@ -5,12 +5,37 @@ class DuoWeapon extends Weapon{
     
     public $duoWeapon = true;
     public $weapons = array();
-    //private $turnsFired = array();
 
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         
         $this->weapons = $weapons;
+    }
+    
+    public function setDamage($damage){
+        $this->damage[] = $damage;
+        
+        foreach($this->weapons as $weapon){
+            $weapon->setDamage($damage);
+        }
+    }
+    
+    public function setDamages($damages){
+        $this->damage = $damages;
+
+        foreach($this->weapons as $weapon){
+            $weapon->setDamages($damage);
+        }
+    }
+
+    public function setCritical($critical, $turn){
+        
+        if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
+            $this->criticals[] = $critical; 
+
+        foreach($this->weapons as $weapon){
+            $weapon->setCritical($critical, $turn);
+        }
     }
     
     public function getWeaponForIntercept(){
@@ -85,11 +110,6 @@ class DuoWeapon extends Weapon{
             
             if($data->loading < $curLoading){
                 $curLoading = $data->loading;
-            }else{
-//                if($curLoading == 0){
-//                    $data->loading = $curLoading;
-//                    $data->extrashots = 0;
-//                }
             }
             
             if ($data)

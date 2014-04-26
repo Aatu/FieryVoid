@@ -119,25 +119,7 @@ window.weaponManager = {
         
         var targetElement = $(this);
         
-/*        if(targetElement.hasClass("iconduo")){
-            // We are mousing over a duo weapon. Ignore this but put focus to the systemcontainer
-            
-            
-            do{
-                targetElement = targetElement.parent();
-                if(targetElement){
-                    if (targetElement.hasClass("system")) {
-                        weaponManager.mouseoverSystem = targetElement;
-                        break;
-                    }
-                }
-                else{
-                    break;
-                }
-            } while (targetElement)
-        } else{*/
             weaponManager.mouseoverSystem = targetElement;
-        //}
         
         weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
     },
@@ -175,26 +157,6 @@ window.weaponManager = {
             return;
         }
         
-/*        var t = weaponManager.mouseoverSystem;
-        
-        // Dirty work-around to avoid errors when moving over two systems.
-        // (This happens between two duo_icons
-        
-        
-        var id = t.data("shipid");
-               
-        var ship = gamedata.getShip(id);
-        var system = null;
-        
-        if (t.hasClass("fightersystem")){
-			system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
-		}else{
-			system = shipManager.systems.getSystem(ship, t.data("id"));
-		}*/
-        
-    
-        //weaponManager.addArcIndicators(ship, system);
-        //systemInfo.showSystemInfo(t, system, ship);
         weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
         systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
 
@@ -360,6 +322,10 @@ window.weaponManager = {
 		if (target.flight)
 			return false;
 		
+                while(system.parentId > 0){
+                    system = shipManager.systems.getSystem(target, system.parentId);
+                }
+                
 		if (system.location == loc || (system.location == 0 && (system.weapon || (system.name == "thruster") && system.direction == loc))){
 
 			return true;
@@ -452,8 +418,6 @@ window.weaponManager = {
         
         var mod = 0;
         
-        // plopje
-        //mod -= target.getHitChangeMod(shooter, launchPos);
         mod -= target.getHitChangeMod(shooter, ball.position);
         
         if (!shooter.flight)
@@ -471,8 +435,6 @@ window.weaponManager = {
         var change = Math.round((goal/20)*100);
         console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
-        //if (change > 100)
-        //  change = 100;
         return change;
         
     },
@@ -526,7 +488,6 @@ window.weaponManager = {
                 }
             }
         }else{
-//            if (!shooter )
                 dew = ew.getDefensiveEW(target);
         }
         
@@ -957,9 +918,6 @@ window.weaponManager = {
             if (weapon.ballistic){
                 type = 'ballistic';
             }
-                
-            
-            
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
@@ -968,8 +926,15 @@ window.weaponManager = {
                         var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
                         var calledid = -1;
                         
-                        if (system)
+                        if (system){
+                            // When the system is a subsystem, make all damage go through
+                            // the parent.
+                            while(system.parentId > 0){
+                                system = shipManager.systems.getSystem(ship, system.parentId);
+                            }
+                            
                             calledid = system.id;
+                        }
 							
                         var fire = {
                             id:fireid,
@@ -999,7 +964,6 @@ window.weaponManager = {
                         ballistics.calculateBallisticLocations();
                         ballistics.calculateDrawBallistics();                        
                         drawEntities();
-                        //$id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots
                     }
                     toUnselect.push(weapon);
                 }
@@ -1032,10 +996,7 @@ window.weaponManager = {
         
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
-        if (jammer
-            //&& !shipManager.power.isOffline(target, jammer)
-            //&& !shipManager.systems.isDestroyed(target, jammer)
-        )
+        if (jammer)
         {
             range = range / (shipManager.systems.getOutput(target, jammer)+1);
         }
@@ -1101,7 +1062,6 @@ window.weaponManager = {
                         ballistics.calculateBallisticLocations();
                         ballistics.calculateDrawBallistics();                        
                         drawEntities();
-                        //$id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots
                     }
                     
                     toUnselect.push(weapon);
@@ -1334,6 +1294,7 @@ window.weaponManager = {
     
     addArcIndicators: function(ship, weapon){
         weapon = shipManager.systems.initializeSystem(weapon);
+        
         weaponManager.removeArcIndicators(ship);
         var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
         
@@ -1411,10 +1372,6 @@ window.weaponManager = {
     },
     
     getFiringWeapon: function(weapon, fire){
-        //console.dir(weapon);
-//        if (weapon.dualWeapon){
-//            return weapon.weapons[fire.firingMode];
-//        }
         
         return weapon;
     }

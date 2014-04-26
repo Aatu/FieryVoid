@@ -26,6 +26,16 @@ shipManager.systems = {
 	
 	isDestroyed: function(ship, system){
         
+        if(system.parentId > 0){
+            var parentSystem = system;
+            
+            while(parentSystem.parentId > 0){
+                parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+            }
+            
+            return parentSystem.destroyed;
+        }
+        
         return system.destroyed;
         
 
@@ -201,7 +211,6 @@ shipManager.systems = {
         
         if(system.missileArray!= null && cnt > 0){
             system.range = system.missileArray[system.firingMode].range;
-            //system.damage = system.missileArray[system.firingMode].damage;
         }
 
         return system;
@@ -232,7 +241,6 @@ shipManager.systems = {
     
     getArcs: function (ship, weapon){
         
-//        if (shipManager.movement.isRolled(ship) && (weapon.location == 3 || weapon.location == 4)) {
         if (shipManager.movement.isRolled(ship)) {
             return {start: mathlib.addToDirection(weapon.endArc, (weapon.endArc*-2)), end: mathlib.addToDirection(weapon.startArc, (weapon.startArc*-2))}
         }else{

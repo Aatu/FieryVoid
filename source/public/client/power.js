@@ -497,12 +497,9 @@ shipManager.power = {
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 		
                 if(system.duoWeapon){
-                    // move the iconMask to the top of the DOM for the system.
+                    // create an iconMask at the top of the DOM for the system.
                     var iconmask_element = document.createElement('div');
                     iconmask_element.className = "iconmask";
-//                    var iconmask_element = systemwindow.find(".iconmask");
-//                    
-//                    iconmask_element.remove();
                     systemwindow.find(".icon").append(iconmask_element);
                 }
                 
@@ -551,11 +548,6 @@ shipManager.power = {
                 if(system.duoWeapon){
                     // remove the iconmask again.
                     systemwindow.find(".iconmask").remove();
-                    // move the iconMask to the start of the DOM for the system.
-//                    var iconmask_element = systemwindow.find(".iconmask");
-//            
-//                    iconmask_element.remove();
-//                    systemwindow.find(".icon").prepend(iconmask_element);
                 }
                 
                 if(system.parentId > 0){

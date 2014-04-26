@@ -5,7 +5,6 @@ class DualWeapon extends Weapon{
     
     public $dualWeapon = true;
     public $weapons = array();
-    //private $turnsFired = array();
     
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -15,6 +14,32 @@ class DualWeapon extends Weapon{
     
     public function getWeaponForIntercept(){
         return null;
+    }
+    
+    public function setDamage($damage){
+        $this->damage[] = $damage;
+        
+        foreach($this->weapons as $weapon){
+            $weapon->setDamage($damage);
+        }
+    }
+    
+    public function setDamages($damages){
+        $this->damage = $damages;
+
+        foreach($this->weapons as $weapon){
+            $weapon->setDamages($damage);
+        }
+    }
+
+    public function setCritical($critical, $turn){
+        
+        if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
+            $this->criticals[] = $critical; 
+
+        foreach($this->weapons as $weapon){
+            $weapon->setCritical($critical, $turn);
+        }
     }
     
     public function isOverloadingOnTurn($turn = null){
@@ -97,15 +122,12 @@ class DualWeapon extends Weapon{
         $duoWeaponFired = false;
         $data = null;
         
-        Debug::log("DualWeapon OnAdvancing id ".$this->id);
-        
         foreach ($this->weapons as $i=>$weapon)
         {
             if(!$weapon->duoWeapon){
                 if($weapon->firedOnTurn(TacGamedata::$currentTurn)
                         || (TacGamedata::$currentPhase == 2 && $weapon->turnsloaded == 0)){
                     $this->firingMode = $i;
-                    Debug::log("Weapon Fired");
                     $weaponFired = true;                    
                 }                
             }else{
@@ -113,7 +135,6 @@ class DualWeapon extends Weapon{
 
                 if($weapon->getTurnsloaded() == 0){
                     $this->firingMode = $i;
-                    Debug::log("DuoWeapon Fired");
                     $duoWeaponFired = true;                    
                 }
             }
@@ -121,10 +142,8 @@ class DualWeapon extends Weapon{
         
         foreach($this->weapons as $weapon){
             if($weapon->duoWeapon && $weaponFired){
-                Debug::log("DuoWeapon id: ".$weapon->id);
                 foreach($weapon->weapons as $subweapon){
                     $data = $subweapon->calculateLoading();
-                    Debug::log("SubWeapon id: ".$subweapon->id);
                     $data->loading = 0;
                     $data->overloading = 0;
                     $data->extrashots = 0;
@@ -138,7 +157,6 @@ class DualWeapon extends Weapon{
             $data = $weapon->calculateLoading();
 
             if($duoWeaponFired || ($weaponFired && $weapon->overloadshots <= 0)){
-                Debug::log("Weapon id: ".$weapon->id);
                 $data->loading = 0;
                 $data->overloading = 0;
                 $data->extrashots = 0;
