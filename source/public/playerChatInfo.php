@@ -8,7 +8,8 @@
     session_start();
         
     if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-        print('{}');
+		header('Location: index.php');
+//      print('{}');
     }else{
     
     
