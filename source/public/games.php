@@ -22,10 +22,11 @@
 		<link href="styles/games.css" rel="stylesheet" type="text/css">
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="client/helper.js"></script>
         <script src="client/games.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>
-                <script src="client/mathlib.js"></script>
+        <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
 		<script>
 			jQuery(function($){
@@ -39,6 +40,9 @@
 	<body>
 	
         <img src="img/logo.png">
+        <div class="helphide" onclick="window.helper.onClickHelpHide()">
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        </div>
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			
@@ -69,6 +73,14 @@
             $chatgameid = 0;
             $chatelement = "#globalchat";
             include("chat.php")
+        ?>
+        </div>
+        
+        <div id="globalhelp" class="helppanel">
+        <?php
+        	$messagelocation='games.php';
+        	$ingame=false;
+        	include("helper.php")
         ?>
         </div>
 

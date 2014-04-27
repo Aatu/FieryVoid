@@ -30,6 +30,7 @@
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="client/helper.js"></script>
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
         <script src="client/UI/createGame.js"></script>
@@ -37,6 +38,9 @@
 	<body class="creategame">
 	
         <img src="img/logo.png">
+        <div class="helphide" onclick="window.helper.onClickHelpHide()">
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        </div>
 		<div class="panel large">
 			<div class="panelheader">	<span>CREATE GAME</span>	</div>
 			<form id="createGameForm" method="post">
@@ -105,6 +109,14 @@
             $chatgameid = 0;
             $chatelement = "#globalchat";
             include("chat.php")
+        ?>
+        </div>
+
+        <div id="globalhelp" class="helppanel">
+        <?php
+        	$messagelocation='creategame.php';
+        	$ingame=false;
+        	include("helper.php")
         ?>
         </div>
 

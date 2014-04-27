@@ -3,6 +3,7 @@ window.ajaxInterface = {
     poll: null,
     pollcount: 0,
 	submiting: false,
+	fastpolling: false,
 
     submitGamedata: function(){
 	
@@ -330,7 +331,7 @@ window.ajaxInterface = {
 			}
            
         ajaxInterface.pollcount = 0;
-            
+        ajaxInterface.fastpolling = false;    
         ajaxInterface.pollGamedata();
     },
     
@@ -364,6 +365,7 @@ window.ajaxInterface = {
         
         
         if (ajaxInterface.pollcount > 100){
+        	ajaxInterface.fastpolling = false;
             time = 30000;
         }
         
@@ -374,6 +376,10 @@ window.ajaxInterface = {
         if (ajaxInterface.pollcount > 300){
             return;
         }   
+        
+        if (ajaxInterface.fastpolling) {
+         	time=1000;
+        }
        
 		ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },

@@ -1899,6 +1899,26 @@ class DBManager {
         ksort($messages);
         return $messages;
     }
+
+    public function getHelpMessage($gamehelpmessagelocation)
+    {
+    	$message = "";
+    	$helpimg = "";
+    	$nextpage=0;
+    	try {
+    		if ($stmt = $this->connection->prepare("SELECT message,HelpImage,nextpageid FROM fx_helpmessages WHERE HelpLocation = ?")) {
+	    		$stmt->bind_param('s', $gamehelpmessagelocation);
+   		 		$stmt->bind_result($message,$helpimg,$nextpage);
+    			$stmt->execute();
+    			$stmt->fetch();
+	            $stmt->close();
+	        }
+    	}
+        catch(Exception $e) {
+            throw $e;
+        }
+        return array('message' => $message, 'helpimg' => $helpimg, 'nextpageid' => $nextpage);
+    }
     
     public function deleteOldChatMessages(){
         $stmt = $this->connection->prepare("

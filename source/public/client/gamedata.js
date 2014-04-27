@@ -176,10 +176,18 @@ gamedata = {
             return;
         
         if(gamedata.gamephase!=4){
-            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+            if (window.helper.autocomm!=true) {
+	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+            } else {
+            	gamedata.doCommit();
+            }	
         }
         else{
-            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+            if (window.helper.autocomm!=true) {
+	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+            } else {
+	            confirm.askSurrender("Do you wish to SURRENDER?", gamedata.doCommit, gamedata.onSurrenderClicked);
+            }	
         }
     },
     
@@ -197,7 +205,7 @@ gamedata = {
     doCommit: function(){
         UI.shipMovement.hide();
         if (gamedata.gamephase == 1){
-        
+        	ajaxInterface.fastpolling=true;
             var shipNames = shipManager.power.getShipsNegativePower();
             
             if (shipNames.length > 0){
@@ -333,7 +341,7 @@ gamedata = {
         for (var i in gamedata.ships){
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
-        
+		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
         if (gamedata.gamephase == -1){
             if (gamedata.waiting == false){
                 combatLog.onTurnStart();

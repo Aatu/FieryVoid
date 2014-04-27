@@ -159,6 +159,7 @@ spl_autoload_register(
                 'heavypulse' => '/server/model/weapons/pulse.php',
                 'heavyrailgun' => '/server/model/weapons/matter.php',
                 'heavythentus' => '/server/model/ships/narn/HeavyThentus.php',
+                'helpmanager' => '/server/controller/HelpManager.php',
                 'hyperion' => '/server/model/ships/EA/hyperion.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
                 'hyperioncommand' => '/server/model/ships/EA/hyperionCommand.php',

@@ -1,5 +1,8 @@
 <?php
     include_once 'global.php';
+	if (!isset($_SESSION["hidehelper"])) {
+		$_SESSION['hidehelper'] = false;
+	}
 
 	if (isset($_SESSION["user"]) && $_SESSION["user"] != false){
 		header('Location: games.php');
@@ -24,9 +27,12 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="client/helper.js"></script>
 	</head>
 	<body>
         <img src="img/logo.png">
+        <div class="helphide"> <div id="helphideimg"></div>
+        </div>
 		<div class="panel" style="width:400px;margin:auto;">
 			<form method="post">
 				<table>
@@ -37,6 +43,14 @@
 				
 			</form>
 		</div>
+
+        <div id="globalhelp" class="helppanel">
+        <?php
+        	$messagelocation='index.php';
+        	$ingame=false;
+        	include("helper.php")
+        ?>
+        </div>
 
 	</body>
 </html>
