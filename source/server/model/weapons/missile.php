@@ -83,6 +83,35 @@ class SMissileRack extends MissileLauncher
     public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
 }
 
+class SoMissileRack extends MissileLauncher
+{
+    public $name = "soMissileRack";
+    public $displayName = "Class-SO Missile Rack";
+    public $range = 20;
+    public $distanceRange = 60;
+    public $loadingtime = 2;
+    public $iconPath = "missile1.png";
+
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+    }
+    protected function getAmmo($fireOrder)
+    {
+        return null;
+    }
+    
+    public function getDamage($fireOrder)
+    {
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
+    }
+    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
+    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
+}
 
 class LMissileRack extends MissileLauncher
 {

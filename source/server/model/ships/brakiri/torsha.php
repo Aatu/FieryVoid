@@ -7,7 +7,7 @@ class Torsha extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Brakiri";
         $this->phpclass = "Torsha";
-        $this->imagePath = "img/ships/devaskar.png";
+        $this->imagePath = "img/ships/torsha.png";
         $this->shipClass = "Torsha Scout Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6, "light"=>12);
