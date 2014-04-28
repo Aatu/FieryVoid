@@ -398,11 +398,11 @@
             }
         }
         
-        public function getIntercept($gamedata, $fireOrder){
-            $this->intercept = $this->getInterceptRating($gamedata->turn);
-            
-            parent::getIntercept($gamedata, $fireOrder);
-        }
+//        public function getIntercept($gamedata, $fireOrder){
+//            $this->intercept = $this->getInterceptRating($gamedata->turn);
+//            
+//            parent::getIntercept($gamedata, $fireOrder);
+//        }
 
         public function fire($gamedata, $fireOrder){
             $this->setTimes();
@@ -480,7 +480,7 @@
             return 1 + $this->getBoostLevel($turn);
         }
 
-        protected function getInterceptRating($turn){
+        public function getInterceptRating($turn){
             return 1 + $this->getBoostLevel($turn);            
         }
 

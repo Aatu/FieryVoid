@@ -599,7 +599,7 @@ class Weapon extends ShipSystem{
                         $deg = 0;
                     
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
-                    $i = $interceptWeapon->intercept - $deg;
+                    $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
                     
                     if ($i<0
                      || $interceptWeapon->destroyed
@@ -620,6 +620,10 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function getInterceptRating($turn){
+        return $this->intercept;
+    }
+
     public function getNumberOfIntercepts($gamedata, $fireOrder){
         $count = 0;
             

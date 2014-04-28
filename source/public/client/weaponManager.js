@@ -450,7 +450,7 @@ window.weaponManager = {
                 var fire = fires[a];
                 if (fire.type == "intercept" && fire.targetid == ball.fireOrderId){
                     var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-                    intercept += weapon.intercept;
+                    intercept += weapon.getInterceptRating();
                 }
             }
             
@@ -838,7 +838,7 @@ window.weaponManager = {
             }
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
-            if (weapon.intercept == 0)
+            if (weapon.getInterceptRating() == 0)
                 continue;
                 
             var type = 'intercept';
