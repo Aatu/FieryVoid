@@ -21,6 +21,14 @@
     color:#496791;
 }
 
+.shipwindow .iconduo .value{
+    margin-left:1px;
+    margin-right:3px;
+    margin-top: 10px;
+    display: inline-block;
+    color:#496791;
+}
+
 .shipwindow .valueheader{
     margin-left:3px;
     color:white;
@@ -341,14 +349,6 @@
 
 }
 
-.shipwindow .iconduo.selected {
-	background-color:#587aa5 !important;
-	-moz-box-shadow: 0px 0px 15px #0099ff;
-    -webkit-box-shadow: 0px 0px 15px #0099ff;
-    box-shadow: 0px 0px 15px #0099ff;
-
-}
-
 .system.selected .systembarcontainer{
     border:1px solid #84a5ce !important;
 }
@@ -359,6 +359,8 @@
 }
 
 .iconduo.selected{
+    width:15px;
+    height:30px;
     border:1px solid #84a5ce !important;
     background-color:#254e82 !important;
 }
@@ -390,6 +392,16 @@
     background-color:#e06f01;
     border-color:#eb5c15;
 }
+
+.shipwindow .duosystem .iconduo.firing{
+	-moz-box-shadow: 0px 0px 15px #eb5c15;
+    -webkit-box-shadow: 0px 0px 15px #eb5c15;
+    box-shadow: 0px 0px 15px #eb5c15;
+    background-color:#e06f01;
+    border: 1px solid;
+    border-color:#eb5c15;
+}
+
 .shipwindow  .fightersystem.firing .icon{
     -moz-box-shadow: 0px 0px 15px #eb5c15;
     -webkit-box-shadow: 0px 0px 15px #eb5c15;
@@ -404,6 +416,10 @@
 }
 
 body.phase3 .shipwindow  .system.firing .holdfire{
+    display:block;
+}
+
+body.phase3 .shipwindow  .system.duofiring .holdfire{
     display:block;
 }
 
@@ -472,7 +488,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     position:absolute;
     left:0px;
     top:0px;
-    width:15px;
+    width:13px;
     height:30px;
     margin:0px;
     text-align:center;
@@ -489,7 +505,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system .iconduo .iconmask{
+.shipwindow .system .iconduo .duoIconmask{
     position:absolute;
     left:0px;
     top:0px;
@@ -503,7 +519,7 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     background-color:orange;
 }
 
-.shipwindow .system.regular.weapon.loading .systemcontainer.duosystem .iconduo .iconmask{
+.shipwindow .system .systemcontainer.duosystem .iconduo.weapon.loading .duoIconmask{
     background-color:orange;
 }
 
@@ -523,11 +539,11 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system.offline .systemcontainer.duosystem .iconduo .iconmask{
+/*.shipwindow .system.offline .systemcontainer.duosystem .iconduo .duoIconmask{
     background-color:black;
     background-image:url(../img/offline.png);
     opacity:0.5;
-}
+}*/
 
 .shipwindow .system.forcedoffline .systemcontainer .icon .iconmask{
     background-color:black;
@@ -535,11 +551,11 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }
 
-.shipwindow .system.forcedoffline .systemcontainer.duosystem .iconduo .iconmask{
+/*.shipwindow .system.forcedoffline .systemcontainer.duosystem .iconduo .duoIconmask{
     background-color:black;
     background-image:url(../img/offline.png);
     opacity:0.5;
-}
+}*/
 
 .shipwindow .system.destroyed .systembarcontainer{
     border:1px solid #3d4755;

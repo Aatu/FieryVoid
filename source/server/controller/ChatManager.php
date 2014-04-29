@@ -1,4 +1,7 @@
 <?php
+
+require_once dirname(__DIR__) . '/varconfig.php'; 
+
 set_error_handler(
     function ($errno, $errstr, $file, $line)
     {
@@ -14,8 +17,11 @@ class ChatManager{
      *  @return DBManager dbManager
      */
     private static function initDBManager() {
+    	global $database_name;
+    	global $database_user;
+    	global $database_password;
         if (self::$dbManager == null)
-            self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
+            self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password);
     }
     
     public static function submitChatMessage($userid, $message, $gameid = 0)

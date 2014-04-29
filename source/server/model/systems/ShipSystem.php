@@ -78,10 +78,10 @@ class ShipSystem{
         $this->damage = $damages;
     }
     
-    public function setPowers($power){
-        $this->power = $power;
-    }
-    
+//    public function setPowers($power){
+//        $this->power = $power;
+//    }
+//    
     public function setPower($power){
         $this->power[] = $power;
     }
@@ -306,8 +306,8 @@ class ShipSystem{
         if ($turn === null)
             $turn = TacGamedata::$currentTurn;
         
-        if ($this->parentSystem && $this->parentSystem instanceof DualWeapon)
-            return $this->parentSystem->isOverloadingOnTurn($turn);
+//        if ($this->parentSystem && $this->parentSystem instanceof DualWeapon)
+//            return $this->parentSystem->isOverloadingOnTurn($turn);
         
         foreach ($this->power as $power){
             if ($power->type == 3 && $power->turn == $turn){

@@ -3,7 +3,8 @@
 
         
     if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-        print('{"error":"Not logged in."}');
+		header('Location: index.php');
+//      print('{"error":"Not logged in."}');
     }else{
     
     

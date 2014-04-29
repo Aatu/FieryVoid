@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__) . '/varconfig.php'; 
+
 set_error_handler(
     function ($errno, $errstr, $file, $line)
     {
@@ -15,8 +17,11 @@ class Manager{
      *  @return DBManager dbManager
      */
     private static function initDBManager() {
+    	global $database_name;
+    	global $database_user;
+    	global $database_password;
         if (self::$dbManager == null)
-            self::$dbManager = new DBManager("localhost", 3306, "B5CGM", "aatu", "Kiiski");
+            self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password);
     }
     
     private static function deleteOldGames()
@@ -810,7 +815,8 @@ class Manager{
             $ship->EW = $EW;
             
             foreach($value["systems"] as $i=>$system){
-                $sys = $ship->getSystemById($system['id']);
+                //$sys = $ship->getSystemById($system['id']);
+                $sys = $ship->getSystemById($i);
                 
                 if (isset($system["power"]) &&is_array($system["power"]))
                 {
@@ -833,6 +839,7 @@ class Manager{
                             $fires[] = $fireOrder;
                         }
                     }
+                    
                     $sys->setFireOrders($fires);
                 }
                 

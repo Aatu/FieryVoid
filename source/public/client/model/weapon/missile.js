@@ -74,6 +74,12 @@ var SMissileRack = function(json, ship)
 SMissileRack.prototype = Object.create( MissileLauncher.prototype );
 SMissileRack.prototype.constructor = SMissileRack;
 
+var SoMissileRack = function(json, ship)
+{
+    MissileLauncher.call( this, json, ship);
+}
+SoMissileRack.prototype = Object.create( MissileLauncher.prototype );
+SoMissileRack.prototype.constructor = SoMissileRack;
 
 var LMissileRack = function(json, ship)
 {

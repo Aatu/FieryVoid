@@ -5,7 +5,6 @@ class DuoWeapon extends Weapon{
     
     public $duoWeapon = true;
     public $weapons = array();
-    private $turnsFired = array();
 
     public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons) {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -13,25 +12,35 @@ class DuoWeapon extends Weapon{
         $this->weapons = $weapons;
     }
     
+    public function setDamage($damage){
+        $this->damage[] = $damage;
+        
+        foreach($this->weapons as $weapon){
+            $weapon->setDamage($damage);
+        }
+    }
+    
+    public function setDamages($damages){
+        $this->damage = $damages;
+
+        foreach($this->weapons as $weapon){
+            $weapon->setDamages($damage);
+        }
+    }
+
+    public function setCritical($critical, $turn){
+        
+        if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
+            $this->criticals[] = $critical; 
+
+        foreach($this->weapons as $weapon){
+            $weapon->setCritical($critical, $turn);
+        }
+    }
+    
     public function getWeaponForIntercept(){
         return null;
     }
-    
- /*   public function getFiringWeapon($fireOrder){
-        $id = $fireOrder->$weaponid;
-        
-        foreach( $this->weapons as $weapon){
-            if($weapon->id == $id){
-                return $weapon;
-            }
-        }
-    }*/
-    
-/*    public function fire($gamedata, $fireOrder){
-
-        $firingMode = $fireOrder->firingMode;
-        $this->weapons[$firingMode]->fire($gamedata, $fireOrder);
-    }*/
     
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
@@ -47,14 +56,11 @@ class DuoWeapon extends Weapon{
     }
     
     public function setId($id){
-        parent::setId($id);
+        $this->id = $id;
         
-        $count = 0;
-        
-        foreach ($this->weapons as $weapon){
-            $weapon->setId(1000 + ($id*10) + $count);
+        foreach ($this->weapons as $i=>$weapon){
+            $weapon->setId(1000 + ($id*10) + $i);
             $weapon->parentId = $id;
-            $count++;
         } 
     }
     
@@ -63,6 +69,7 @@ class DuoWeapon extends Weapon{
         foreach ($this->weapons as $weapon){
             $fires = array_merge($fires, $weapon->getFireOrders());
         } 
+        
         return $fires;
     }
     
@@ -76,27 +83,44 @@ class DuoWeapon extends Weapon{
     public function setFireOrder($fire)
     {
         $this->turnsFired[$fire->turn] = true;
-        $this->weapons[$fire->firingMode]->setFireOrder($fire);
+        
+        foreach($this->weapons as $weapon){
+            if($weapon->id == $fire->weaponid){
+                $weapon->setFireOrder($fire);
+            }
+        }
     }
     
     public function onAdvancingGamedata($ship)
     {
+        $data = parent::calculateLoading();
+        
+        $curLoading = $data->loading;
+        
         foreach ($this->weapons as $i=>$weapon)
         {
-            $data = $weapon->calculateLoading();
+            // first check if parent weapon is offline. If so, put all the child
+            // weapons offline as well.
+            if(!$this->isOfflineOnTurn(TacGamedata::$currentTurn)){
+                $data = $weapon->calculateLoading();
+            }else{
+                $data = new WeaponLoading(0, 0, $this->getLoadedAmmo(), 0, $this->getLoadingTime(), $this->firingMode);
+                continue;
+            }
+            
+            if($data->loading < $curLoading){
+                $curLoading = $data->loading;
+            }
+            
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($this->weapons[$i]->id, 0, $ship->id, $data->toJSON());
         }
-    }
-    
-    public function setSystemData($data, $subsystem)
-    {
-        //Debug::log("setSystemData: duoWeapon");
-        foreach ($this->weapons as $i=>$weapon){
-            $weapon->setSystemData($data, $subsystem);
-        }
-        //$this->weapons[$subsystem]->setSystemData($data, $subsystem);
         
+        if($data){
+            $this->turnsloaded = $curLoading;
+            $data->loading = $curLoading;
+            SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
+        }
     }
     
     public function setInitialSystemData($ship)
@@ -105,35 +129,12 @@ class DuoWeapon extends Weapon{
         {
             $data = $weapon->getStartLoading();
             if ($data)
-                SystemData::addDataForSystem($this->id, $i, $ship->id, $data->toJSON());
+                SystemData::addDataForSystem($weapon->id, $i, $ship->id, $data->toJSON());
         }
+
+        $data = $this->getStartLoading();
+        SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
-    
-    public function setLoading( $loading )
-    {
-        //Debug::log("Enter duo setLoading");
-        if (!$loading){
-            //Debug::log("Exit duo setLoading: nothing");
-            return;
-        }
-        
-        foreach ($this->weapons as $i=>$weapon){
-            
-            $weapon->setLoading($loading);
-        }
-        
-    }
-    
-/*    public function calculateLoading(){
-        if($this->duoWeapon){
-            foreach($this->weapons as $weapon){
-                $weapon->calculateLoading();
-            }
-            
-            return;
-        }        
-    }*/
-            
 }
 
 ?>

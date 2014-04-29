@@ -2,6 +2,8 @@ window.weaponManager = {
     mouseoverTimer: null,
     mouseOutTimer: null,
     mouseoverSystem: null,
+    currentSystem: null,
+    currentShip: null,
 
     getWeaponCurrentLoading: function(weapon)
     {
@@ -74,8 +76,19 @@ window.weaponManager = {
             return;
         
         if (ship.userid == gamedata.thisplayer){
-            weaponManager.cancelFire(ship, system);
-            
+            if(!system.duoWeapon){
+                weaponManager.cancelFire(ship, system);
+            }else{
+                systemwindow.removeClass("duofiring");
+                
+                for(var i in system.weapons){
+                    var duoweapon = system.weapons[i];
+                    
+                    if(weaponManager.hasFiringOrder(ship, duoweapon)){
+                        weaponManager.cancelFire(ship, duoweapon);
+                    }
+                }
+            }
         }
         
     },
@@ -87,7 +100,6 @@ window.weaponManager = {
 	},    
     
     onWeaponMouseover: function(e){
-        
         if (weaponManager.mouseOutTimer != null){
             clearTimeout(weaponManager.mouseOutTimer); 
             weaponManager.mouseOutTimer = null;
@@ -96,17 +108,40 @@ window.weaponManager = {
         if (weaponManager.mouseoverTimer != null)
             return;
 
-        weaponManager.mouseoverSystem = $(this);
+        var id = $(this).data("shipid");
+        weaponManager.currentShip = gamedata.getShip(id);
+        
+        if ($(this).hasClass("fightersystem")){
+            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
+	}else{
+            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
+        }
+        
+        var targetElement = $(this);
+        
+            weaponManager.mouseoverSystem = targetElement;
+        
         weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
     },
     
+    onWeaponMouseoverDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+    },
+    
+    onWeaponMouseOutDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+    },
+    
     onWeaponMouseOut: function(e){
+        //if($(this).is(weaponManager.mouseoverSystem) || $(this).is($(".UI"))){
+        
         if (weaponManager.mouseoverTimer != null){
             clearTimeout(weaponManager.mouseoverTimer); 
             weaponManager.mouseoverTimer = null;
         }
         
         weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
+        //}
     },
     
     doWeaponMouseOver: function(e){
@@ -118,28 +153,13 @@ window.weaponManager = {
         systemInfo.hideSystemInfo();
         weaponManager.removeArcIndicators();
 
-        var t = weaponManager.mouseoverSystem;
-        
-        // Dirty work-around to avoid errors when moving over two systems.
-        // (This happens between two duo_icons
-        if( t == null){
+        if( weaponManager.mouseoverSystem == null){
             return;
         }
         
-        var id = t.data("shipid");
-               
-        var ship = gamedata.getShip(id);
-        var system = null;
-        
-        if (t.hasClass("fightersystem")){
-			system = shipManager.systems.getFighterSystem(ship, t.data("fighterid"), t.data("id"));
-		}else{
-			system = shipManager.systems.getSystem(ship, t.data("id"));
-		}
-        
-    
-        weaponManager.addArcIndicators(ship, system);
-        systemInfo.showSystemInfo(t, system, ship);
+        weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
+        systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
+
         drawEntities();
     },
     
@@ -164,6 +184,14 @@ window.weaponManager = {
             if(gamedata.selectedSystems[i] == weapon){              
                 gamedata.selectedSystems.splice(i,1);
                 
+            }
+            
+            if(weapon.duoWeapon){
+                for(var j in weapon.weapons){
+                    var subweapon = weapon.weapons[j];
+                    
+                    weaponManager.unSelectWeapon(ship, subweapon);
+                }
             }
         }
         
@@ -294,6 +322,10 @@ window.weaponManager = {
 		if (target.flight)
 			return false;
 		
+                while(system.parentId > 0){
+                    system = shipManager.systems.getSystem(target, system.parentId);
+                }
+                
 		if (system.location == loc || (system.location == 0 && (system.weapon || (system.name == "thruster") && system.direction == loc))){
 
 			return true;
@@ -386,8 +418,6 @@ window.weaponManager = {
         
         var mod = 0;
         
-        // plopje
-        //mod -= target.getHitChangeMod(shooter, launchPos);
         mod -= target.getHitChangeMod(shooter, ball.position);
         
         if (!shooter.flight)
@@ -405,8 +435,6 @@ window.weaponManager = {
         var change = Math.round((goal/20)*100);
         console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
         
-        //if (change > 100)
-        //  change = 100;
         return change;
         
     },
@@ -422,7 +450,7 @@ window.weaponManager = {
                 var fire = fires[a];
                 if (fire.type == "intercept" && fire.targetid == ball.fireOrderId){
                     var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-                    intercept += weapon.intercept;
+                    intercept += weapon.getInterceptRating();
                 }
             }
             
@@ -460,7 +488,6 @@ window.weaponManager = {
                 }
             }
         }else{
-//            if (!shooter )
                 dew = ew.getDefensiveEW(target);
         }
         
@@ -811,7 +838,7 @@ window.weaponManager = {
             }
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
                 continue;
-            if (weapon.intercept == 0)
+            if (weapon.getInterceptRating() == 0)
                 continue;
                 
             var type = 'intercept';
@@ -891,20 +918,23 @@ window.weaponManager = {
             if (weapon.ballistic){
                 type = 'ballistic';
             }
-                
-            
-            
             
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
                     weaponManager.removeFiringOrder(selectedShip, weapon);
                     for (var s=0;s<weapon.guns;s++){
-                        
                         var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
+                        var calledid = -1;
                         
-                        var	calledid = -1;
-                        if (system)
-							calledid = system.id;
+                        if (system){
+                            // When the system is a subsystem, make all damage go through
+                            // the parent.
+                            while(system.parentId > 0){
+                                system = shipManager.systems.getSystem(ship, system.parentId);
+                            }
+                            
+                            calledid = system.id;
+                        }
 							
                         var fire = {
                             id:fireid,
@@ -934,7 +964,6 @@ window.weaponManager = {
                         ballistics.calculateBallisticLocations();
                         ballistics.calculateDrawBallistics();                        
                         drawEntities();
-                        //$id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots
                     }
                     toUnselect.push(weapon);
                 }
@@ -967,10 +996,7 @@ window.weaponManager = {
         
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
         
-        if (jammer
-            //&& !shipManager.power.isOffline(target, jammer)
-            //&& !shipManager.systems.isDestroyed(target, jammer)
-        )
+        if (jammer)
         {
             range = range / (shipManager.systems.getOutput(target, jammer)+1);
         }
@@ -1036,7 +1062,6 @@ window.weaponManager = {
                         ballistics.calculateBallisticLocations();
                         ballistics.calculateDrawBallistics();                        
                         drawEntities();
-                        //$id, $fireid, $position, $facing, $targetpos, $targetid, $shooterid, $weaponid, $shots
                     }
                     
                     toUnselect.push(weapon);
@@ -1168,7 +1193,16 @@ window.weaponManager = {
         
         if (system.dualWeapon || system.duoWeapon){
             for (var i in system.weapons){
-                fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(system.weapons[i]));
+                var weapon = system.weapons[i];
+                
+                if(weapon.duoWeapon){
+                    for(var index in weapon.weapons){
+                        var subweapon = weapon.weapons[index];
+                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
+                    }
+                }else{
+                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
+                }
             }
         }
         
@@ -1260,6 +1294,7 @@ window.weaponManager = {
     
     addArcIndicators: function(ship, weapon){
         weapon = shipManager.systems.initializeSystem(weapon);
+        
         weaponManager.removeArcIndicators(ship);
         var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
         
@@ -1337,10 +1372,6 @@ window.weaponManager = {
     },
     
     getFiringWeapon: function(weapon, fire){
-        //console.dir(weapon);
-//        if (weapon.dualWeapon){
-//            return weapon.weapons[fire.firingMode];
-//        }
         
         return weapon;
     }

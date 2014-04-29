@@ -300,6 +300,7 @@
         public $firingModes = array( 1 => "Sustained");
         
         // Set to make the weapon start already overloaded.
+        public $alwaysoverloading = true;
         public $overloadturns = 2;
         public $extraoverloadshots = 2;
         public $overloadshots = 2;
@@ -315,6 +316,7 @@
         public function setSystemDataWindow($turn){
             $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Raking";
+            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
 
             parent::setSystemDataWindow($turn);
         }
@@ -396,11 +398,11 @@
             }
         }
         
-        public function getIntercept($gamedata, $fireOrder){
-            $this->intercept = $this->getInterceptRating($gamedata->turn);
-            
-            parent::getIntercept($gamedata, $fireOrder);
-        }
+//        public function getIntercept($gamedata, $fireOrder){
+//            $this->intercept = $this->getInterceptRating($gamedata->turn);
+//            
+//            parent::getIntercept($gamedata, $fireOrder);
+//        }
 
         public function fire($gamedata, $fireOrder){
             $this->setTimes();
@@ -478,7 +480,7 @@
             return 1 + $this->getBoostLevel($turn);
         }
 
-        protected function getInterceptRating($turn){
+        public function getInterceptRating($turn){
             return 1 + $this->getBoostLevel($turn);            
         }
 
@@ -862,5 +864,34 @@
         public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
     }
+    
+    class LightParticleBeamShip extends StdParticleBeam{
+
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "lightParticleBeamShip";
+        public $displayName = "Light Particle Beam";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.12;
+        public $projectilespeed = 10;
+        public $animationWidth = 3;
+        public $trailLength = 8;
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+    }
+
 ?>
 

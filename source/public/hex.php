@@ -28,6 +28,7 @@
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
+	<link href="styles/helper.css" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
     <script>
@@ -51,6 +52,7 @@
         
             
     </script>
+	<script src="client/helper.js"></script>
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/hexgrid.js"></script>
     <script src="client/gamedata.js"></script>
@@ -102,10 +104,10 @@
     <script src="client/model/weapon/electromagnetic.js"></script>
     <script src="client/model/weapon/aoe.js"></script>
     <script src="client/model/weapon/molecular.js"></script>
-    <script src="client/model/weapon/gravitic.js"></script>
     <script src="client/model/weapon/antimatter.js"></script>
-    <script src="client/model/weapon/duoWeapon.js"></script>
     <script src="client/model/weapon/dualWeapon.js"></script>
+    <script src="client/model/weapon/duoWeapon.js"></script>
+    <script src="client/model/weapon/gravitic.js"></script>
     <script src="client/model/weapon/missile.js"></script>
     <script src="client/model/weapon/ion.js"></script>
 </head>
@@ -185,10 +187,10 @@
     
     <div class="iconduo">
         <span class="efficiency value"></span>
-            <div class="iconmask"></div>
-        <div class="UI">
+            <div class="duoIconmask"></div>
+<!--        <div class="iconUI">
             <div class="button holdfire"></div>
-        </div>
+        </div>-->
     </div>
     
     <div class="fighter">
@@ -350,6 +352,13 @@
         </div>
     </div>
     
+        <div id="globalhelp" class="ingamehelppanel">
+        <?php
+        	$messagelocation='hex.php';
+        	$ingame=true;
+        	include('helper.php');
+        ?>
+        </div>
     
     
     
@@ -708,6 +717,9 @@
         <div id="globalChatTab" data-select="#globalchat" class="logUiEntry">
             <span>GLOBAL CHAT</span>
         </div>
+        <div id="settingsTab" data-select="#settings" class="logUiEntry">
+            <span>SETTINGS</span>
+        </div>
     </div>
     <div id="log" class="logPanelEntry">
 
@@ -731,7 +743,18 @@
             include("chat.php")
         ?>
     </div>
-    
+ 
+    <div id="settings" class="logPanelEntry" style="display:none;">
+        <div id="helphide" class="helphide">
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        HELP
+        </div>
+        <div id="autocommit" class="autocommit">
+        <img id="autocommitimg" src="img/ok.png" height="30" width="30">	
+        <span id="autocommittext" class="autocommittext">COMMIT</span>
+        </div>
+    </div>
+        
     <div class="fleetlistentry">
         <div class="fleetheader">
         </div>

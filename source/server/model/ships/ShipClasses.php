@@ -63,13 +63,10 @@
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof PrimusMaximus)
                         && ($this != $ship)){
-                    debug::log("Extra ini for $this->name");
                     return ($this->iniativebonus+5);
                 }
             }
 
-            debug::log("No ini bonus for $this->name");
-            
             return $this->iniativebonus;
         }
         
@@ -234,13 +231,21 @@
                         foreach($system->weapons as $weapon){
                             if($weapon->id == $id){
                                 return $weapon;
+                            }else{
+                                if($weapon->duoWeapon){
+                                    foreach($weapon->weapons as $subweapon){
+                                        if($subweapon->id == $id){
+                                            return $subweapon;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
             
-            return null;
+        return null;
         }
         
         public function getSystemByName($name){

@@ -113,11 +113,11 @@
             }            
         }
 
-        public function getIntercept($gamedata, $fireOrder){
-            $this->intercept = $this->getInterceptRating($gamedata->turn);
-            
-            parent::getIntercept($gamedata, $fireOrder);
-        }
+//        public function getIntercept($gamedata, $fireOrder){
+//            $this->intercept = $this->getInterceptRating($gamedata->turn);
+//            
+//            parent::getIntercept($gamedata, $fireOrder);
+//        }
         
         public function fire($gamedata, $fireOrder){
             $this->maxpulses = $this->getMaxPulses($gamedata->turn);
@@ -157,7 +157,7 @@
             return 3 + $this->getBoostLevel($turn);
         }
 
-        private function getInterceptRating($turn){
+        public function getInterceptRating($turn){
             return 1 + $this->getBoostLevel($turn);            
         }
         
@@ -259,6 +259,10 @@ class GraviticBolt extends Gravitic
             return $dam;
         }
 
+        public function getInterceptRating($turn){
+            return 1 + $this->getBoostLevel($turn);            
+        }
+        
         public function getNormalLoad(){
             return $this->loadingtime + $this->maxBoostLevel;
         }
@@ -493,14 +497,17 @@ class GraviticBolt extends Gravitic
 		2 => "Beams"
 	);
 	
+        public $loadingtime = 4;
         public $name = "GraviticLance";
 	public $displayName = "Gravitic Lance";
         	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         
-            $lance = new GravLance($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $lance = new GravLance($armour, $maxhealth, 8, $startArc, $endArc);
+            $lance->dualWeapon = true;
             $lance->parentSystem = $this;
-            $beams = new DuoGravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beams = new DuoGravitonBeam($armour, $maxhealth, 8, $startArc, $endArc);
+            $beams->dualWeapon = true;
             $beams->parentSystem = $this;
         
             $weapons = array(
@@ -511,7 +518,7 @@ class GraviticBolt extends Gravitic
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
         
-        public function setLoading( $loading )
+/*        public function setLoading( $loading )
         {
             Debug::log("Enter gravlance setLoading");
             if (!$loading){
@@ -523,22 +530,24 @@ class GraviticBolt extends Gravitic
 
                 $weapon->setLoading($loading);
             }
-        }
+        }*/
     }
     
     // Don't use the GravLance. It's only here for the GraviticLance class!!
     class GravLance extends Raking{
         public $name = "graviticLance";
-        public $displayName = "Gravitic Lance 1";
+        public $displayName = "Gravitic Lance";
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 5;
+        public $firingModes = array( 1 => "Sustained");
+
         
         public $loadingtime = 4;
         // Set overloading and overloadturns to have GravLance ready for
         // sustained fire in turn 1
-        public $overloading = 4;
-        public $overloadturns = 4;
+        public $overloadable = true;
+        public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
         public $damageType = "raking";
         public $raking = 10;
@@ -554,6 +563,7 @@ class GraviticBolt extends Gravitic
 
             $this->data["Weapon type"] = "Gravitic";
             $this->data["Damage type"] = "Raking";
+            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
             
             parent::setSystemDataWindow($turn);
         }
@@ -571,11 +581,16 @@ class GraviticBolt extends Gravitic
     
         public $name = "duoGravitonBeam";
 	public $displayName = "Graviton Beams";
+        
+        // Just for testing!
+        public $loadingtime = 4;
 	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-            $beam1 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam1 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
+            //$beam1->duoWeapon = true;
             $beam1->parentSystem = $this;
-            $beam2 = new GravitonBeam($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $beam2 = new GravitonBeam($armour, $maxhealth, 0, $startArc, $endArc);
+            //$beam2->duoWeapon = true;
             $beam2->parentSystem = $this;
             
             $weapons = array(
@@ -585,6 +600,8 @@ class GraviticBolt extends Gravitic
  
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
+        
+        
     }
 
     class GraviticCutter extends Raking
@@ -615,6 +632,7 @@ class GraviticBolt extends Gravitic
             // Keep this consistent with the gravitic.js implementation.
             // Yeah, I know: dirty.
             $this->data["Weapon type"] = "Raking";
+            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
             $this->setTimes();
 //            $this->normalload = $this->loadingtime;
             

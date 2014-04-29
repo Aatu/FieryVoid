@@ -85,6 +85,12 @@ Weapon.prototype.getTurnsloaded = function()
     return this.turnsloaded;
 }
 
+Weapon.prototype.getInterceptRating = function()
+{
+    return this.intercept;
+}
+
+
 var Ballistic = function(json, ship)
 {
     Weapon.call( this, json, ship);

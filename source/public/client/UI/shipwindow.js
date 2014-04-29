@@ -20,7 +20,6 @@ shipWindowManager = {
     },
     
 	close: function(){
-		//shipWindowManager.cancelAssignThrust($(this).parent().parent());
 		$(this).parent().parent().hide();
 	},	
 	
@@ -109,7 +108,6 @@ shipWindowManager = {
         $(".close", shipwindow).on("click", shipWindowManager.close);
         $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
         $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
-  //      $(".system .mode", shipwindow).on("click", shipWindowManager.onModeClicked);
 
         $(".system .off", shipwindow).on("click", shipManager.power.onOfflineClicked);
         $(".system .on", shipwindow).on("click", shipManager.power.onOnlineClicked);
@@ -432,14 +430,20 @@ shipWindowManager = {
                 if (ship.flight){
                     flightWindowManager.setData(ship, system, shipwindow);
                 }else{
-                    if(system.duoWeapon ){
-                        for(var i in system.weapons){
-                            shipWindowManager.setSystemData(ship, system.weapons[i], shipwindow)
+                    shipWindowManager.setSystemData(ship, system, shipwindow)
+                    
+                    if(system.dualWeapon && system.weapons){
+                        var dualsystem = system.weapons[system.firingMode];
+                        shipWindowManager.setSystemData(ship, dualsystem, shipwindow);
+                        
+                        if(system.duoWeapon){
+                            for(var i in system.weapons){
+                                var subweapon = system.weapons[i];
+                                shipWindowManager.setSystemData(ship, subweapon, shipwindow);
+                            }
                         }
-//                    }
-//                    else if(system.dualWeapon){
-  //                      shipWindowManager.setSystemData(ship, system.weapons[system.firingMode], shipwindow);
-                    } else{
+                    }else
+                    {
                         shipWindowManager.setSystemData(ship, system, shipwindow);
                     }
 
@@ -464,12 +468,29 @@ shipWindowManager = {
 
                     for (var i in ship.systems){
                         var system = ship.systems[i];
-                        shipWindowManager.setSystemData(ship, system, shipwindow);
 
-                        if(system.duoWeapon || system.dualWeapon){
-                            for(var i in system.weapons){
-                                shipWindowManager.setSystemData(ship, system.weapons[i], shipwindow)
+                        if(system.dualWeapon){
+                            for(var index in system.weapons){
+                                var weapon = system.weapons[index];
+                                
+                                // ignore the weapon that isn't currently selected
+                                if(weapon.id != system.weapons[system.firingMode].id){
+                                    continue;
+                                }
+                                
+                                if(weapon.duoWeapon){
+                                    if (!shipManager.power.isOffline(ship, system)){
+                                        // Don't bother setting anything if the top system is offline
+                                        for(var subindex in weapon.weapons){
+                                            shipWindowManager.setSystemData(ship, weapon.weapons[subindex], shipwindow);
+                                        }
+                                    }
+                                }else if(!system.weapons[system.firingMode].duoWeapon){
+                                    shipWindowManager.setSystemData(ship, weapon, shipwindow);
+                                }
                             }
+                        } else {
+                            shipWindowManager.setSystemData(ship, system, shipwindow);
                         }
                     }
                 }
@@ -556,8 +577,6 @@ shipWindowManager = {
 		var systemwindow = template.clone(true).appendTo(destination);
 		systemwindow.addClass(system.name);
 
-		//systemwindow.find(".namevalue").html(shipManager.systems.getDisplayName(system).toUpperCase());
-
 		systemwindow.addClass(system.name);
 		systemwindow.addClass("system_" + system.id);
 		systemwindow.data("shipid", ship.id);
@@ -627,31 +646,63 @@ shipWindowManager = {
             systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
             systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
             systemwindow.on("click", shipWindowManager.clickSystem);
+            systemwindow.find(".holdfire").on("click", window.weaponManager.onHoldfireClicked);
             
             systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
-//            $(".system .icon .UI").on("click", shipWindowManager.onModeClicked);
         },
 
         addDualSystem: function (ship, system, dualwindow){
             var dualsystem = system.weapons[system.firingMode];
-            shipWindowManager.addRegularSystem(ship, dualsystem, dualwindow);
-            dualwindow.find(".systemcontainer").removeClass("duosystem");
-            dualwindow.find(".systemcontainer").removeClass("regular");
-            dualwindow.find(".systemcontainer").addClass("dualsystem");
-            dualwindow.addClass("parentsystem_"+dualsystem.parentId);
+            
+            if(dualsystem.duoWeapon){
+                shipWindowManager.addDuoSystem(ship, dualsystem, dualwindow);
+                dualwindow.find(".systemcontainer").addClass("dualsystem");
+                dualwindow.find(".systemcontainer").addClass("duosystem");
+                dualwindow.addClass("modes");
+                dualwindow.addClass("parentsystem_"+dualsystem.parentId);
+                dualwindow.addClass("weapon");
+                
+                if(dualsystem.parentId >= 0){
+                    var parentSystem = shipManager.systems.getSystem(ship, dualsystem.parentId);
+
+                    if(parentSystem.parentId >= 0){
+                        parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+                        $(".parentsystem_"+parentSystem.id).addClass("modes");
+                        var modebutton =  $(".mode", $(".parentsystem_"+parentSystem.id));
+                    }else{
+                        $(".parentsystem_"+parentSystem.id).addClass("modes");
+                        var modebutton =  $(".mode", dualwindow);
+                    }
+
+                    modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
+                }                
+                
+            }else{
+                shipWindowManager.addRegularSystem(ship, dualsystem, dualwindow);
+                dualwindow.find(".systemcontainer").removeClass("duosystem");
+                dualwindow.find(".systemcontainer").removeClass("regular");
+                dualwindow.find(".systemcontainer").addClass("dualsystem");
+                dualwindow.addClass("parentsystem_"+dualsystem.parentId);
+                dualwindow.addClass("weapon");
+            }
         },
         
 	addDuoSystem:function (ship, system, duowindow){
             var icon = duowindow.find(".systemcontainer").html("");
             icon.addClass("duosystem");
             icon.addClass("dualsystem");
+            duowindow.addClass("system_"+system.id);
+            
+            duowindow.data("shipid", ship.id);
+            duowindow.data("id", system.id);
+
             icon.removeClass("regular");
             var icon_template = $("#systemtemplatecontainer .system.regular .icon");
             icon_template.clone(true).appendTo(icon);
             icon_template = $("#systemtemplatecontainer .system.regular .health.systembarcontainer");
             icon_template.clone(true).appendTo(icon);
- //           duowindow.find(".icon").html("");
-            
+            icon.find(".efficiency.value").remove();
+                
             for(var i in system.weapons){
                 var weapon = system.weapons[i];
                 var iconduo_template = $("#systemtemplatecontainer .iconduo");
@@ -672,12 +723,25 @@ shipWindowManager = {
                 
                 iconduo_temp.addClass("weapon");
 
-                iconduo_temp.on("mouseover", weaponManager.onWeaponMouseover);
-                iconduo_temp.on("mouseout", weaponManager.onWeaponMouseOut);
+                iconduo_temp.on("mouseover", weaponManager.onWeaponMouseoverDuoSystem);
+                iconduo_temp.on("mouseout", weaponManager.onWeaponMouseOutDuoSystem);
                 iconduo_temp.on("click", shipWindowManager.clickSystem);
            }
 
-            $(".system .icon .UI .mode").on("click", shipWindowManager.onModeClicked);
+           // remove the iconmask because it's not needed (it will be added when
+           // necessary.
+           duowindow.find(".iconmask").remove();
+           duowindow.off("mouseover", weaponManager.onWeaponMouseover);
+           duowindow.off("mouseout", weaponManager.onWeaponMouseOut);
+           duowindow.find(".off").off("click", shipManager.power.onOfflineClicked);
+           duowindow.find(".on").off("click", shipManager.power.onOnlineClicked);
+
+           duowindow.on("mouseover", weaponManager.onWeaponMouseover);
+           duowindow.on("mouseout", weaponManager.onWeaponMouseOut);
+           duowindow.find(".off").on("click", shipManager.power.onOfflineClicked);
+           duowindow.find(".on").on("click", shipManager.power.onOnlineClicked);
+           duowindow.find(".holdfire").on("click", window.weaponManager.onHoldfireClicked);
+           $(".system .icon .UI .mode").on("click", shipWindowManager.onModeClicked);
 	},
         
 	removeSystemClasses: function(systemwindow){
@@ -686,6 +750,7 @@ shipWindowManager = {
 			"loading",
 			"selected",
 			"firing",
+                        "duofiring",
 			"critical",
 			"canoffline",
 			"offline",
@@ -700,28 +765,43 @@ shipWindowManager = {
 		
 		for (var i in classes){
 			systemwindow.removeClass(classes[i]);
+                        
+                        var duowindows = $(systemwindow).find(".iconduo");
+                        if(duowindows.length > 0){
+                            $(systemwindow).find(".iconduo").removeClass(classes[i]);
+                        }
 		}
 	},
 	
 setSystemData: function(ship, system, shipwindow){
     this.updateNotes(ship);
+    var parentWeapon = null;
+    var parentWindow = null;
 
-    system = shipManager.systems.initializeSystem(system);
+    if(system.parentId > 0){
+        parentWeapon = system;
+        
+        while(parentWeapon.parentId > 0){
+            parentWeapon = shipManager.systems.getSystem(ship, parentWeapon.parentId);
+        }
+        
+        system.damage = parentWeapon.damage;
+        
+        parentWindow = shipwindow.find(".parentsystem_"+parentWeapon.id);
+    }
+
+    shipManager.systems.initializeSystem(system);
+    
+    if(system.dualWeapon && system.weapons != null){
+            var weapon = system.weapons[system.firingMode];
+            shipManager.systems.initializeSystem(weapon);;
+    }
     
     var systemwindow = shipwindow.find(".system_"+system.id);
     
-//    if (system.dualWeapon && !system.duoWeapon){
-//        systemwindow = shipwindow.find(".system_"+system.parentId);
-//        shipWindowManager.addRegularSystem(ship, system, systemwindow);
-//        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/"+system.name +".png)");
-//    }
-    
- /*   if (system.duoWeapon){
-        // Set the info of one of the weapons.
-        // They're the same anyways with duoWeapons.
-        var subsystem = system.weapons[1];
-        shipWindowManager.setSystemData(ship, subsystem, shipwindow);
-    }*/
+    if(systemwindow.length == 0 && system.parentId > -1){
+        systemwindow = shipwindow.find(".parentsystem_"+system.parentId);
+    }
     
     var output = shipManager.systems.getOutput(ship, system);
     var field = systemwindow.find(".efficiency.value");
@@ -730,7 +810,11 @@ setSystemData: function(ship, system, shipwindow){
         systemwindow.find(".healthvalue ").html((system.maxhealth - damageManager.getDamage(ship, system)) +"/"+ system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
     }
 
-    systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*100) + "%");
+    if(system.parentId > 0){
+        parentWindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*100) + "%");
+    }else{
+        systemwindow.find(".healthbar").css("width", (((system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth)*100) + "%");
+    }
     
     if (system.name == "thruster"){
         systemwindow.data("direction", system.direction);
@@ -740,12 +824,28 @@ setSystemData: function(ship, system, shipwindow){
     shipWindowManager.removeSystemClasses(systemwindow);
     
     if (shipManager.systems.isDestroyed(ship, system)){
-        systemwindow.addClass("destroyed");
+        if(system.parentId > 0){
+            if(shipManager.systems.getSystem(ship, system.parentId).duoWeapon){
+                // create an iconMask at the top of the DOM for the system.
+                var iconmask_element = document.createElement('div');
+                iconmask_element.className = "iconmask";
+                parentWindow.find(".iconmask").remove();
+                parentWindow.find(".icon").append(iconmask_element);
+            }
+
+            parentWindow.addClass("destroyed");
+        }else{
+            systemwindow.addClass("destroyed");
+        }
         return;
     }
     
     if (shipManager.criticals.hasCriticals(system)){
-        systemwindow.addClass("critical");
+        if(system.parentId > 0){
+            parentWindow.addClass("critical");
+        }else{
+            systemwindow.addClass("critical");
+        }
     }
     
     if (shipManager.power.setPowerClasses(ship, system,  systemwindow))
@@ -754,7 +854,9 @@ setSystemData: function(ship, system, shipwindow){
     if (system.weapon){
         var firing = weaponManager.hasFiringOrder(ship, system);
         
-        if (!weaponManager.isLoaded(system)){
+        // To avoid double overlay of loading icon mask in case of a 
+        // duoWeapon in a dualWeapon
+        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)){
             systemwindow.addClass("loading");
         }else{
             systemwindow.removeClass("loading");
@@ -766,8 +868,17 @@ setSystemData: function(ship, system, shipwindow){
             systemwindow.removeClass("selected");
         }
         
-        if (firing   && !(systemwindow.hasClass("loading"))){
+        if (firing && !system.duoWeapon  && !(systemwindow.hasClass("loading"))){
             systemwindow.addClass("firing");
+            
+            if(system.parentId > -1){
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                
+                if(parentSystem.duoWeapon){
+                    $(".system_"+system.parentId).addClass("duofiring");
+                }
+            }
+            
         }else{
             firing = false;
             systemwindow.removeClass("firing");
@@ -781,21 +892,25 @@ setSystemData: function(ship, system, shipwindow){
 	
         if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon))
         {
-            systemwindow.addClass("modes");
-
-            var modebutton =  $(".modes", systemwindow);
-         
-            if(system.dualWeapon){
+            if(system.parentId >= 0){
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                
+                if(parentSystem.parentId >= 0){
+                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+                    $(".parentsystem_"+parentSystem.id).addClass("modes");
+                    var modebutton =  $(".mode", $(".parentsystem_"+parentSystem.id));
+                }else{
+                    $(".parentsystem_"+parentSystem.id).addClass("modes");
+                    var modebutton =  $(".mode", systemwindow);
+                }
+                
                 modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
             }else{
+                systemwindow.addClass("modes");
+
+                var modebutton =  $(".mode", systemwindow);
                 modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
             }
-            
-
-//            var modebutton =  $(".modes", systemwindow);
-            
-//            modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
         }
         
         if (firing && system.canChangeShots){
@@ -816,29 +931,20 @@ setSystemData: function(ship, system, shipwindow){
             field.html(fire.shots+ "/" + system.shots);
         }else if (!firing){
             if(system.duoWeapon){
-                //var turnsLoadedArray = weaponManager.getWeaponCurrentLoading(system);
+                var UI_active = systemwindow.find(".UI").hasClass("active");
+                
                 shipWindowManager.addDuoSystem(ship, system, systemwindow);
                 
-                var duoField;
-                
-                for(i in system.weapons){
-                    var subsystem = system.weapons[i];
-                    var load = subsystem.turnsloaded;
-                    var loadingtime = subsystem.loadingtime;
-
-                    duoField = systemwindow.find(".system_"+subsystem.id + " .efficiency.value");
-
-                    if (subsystem.normalload > 0){
-                        loadingtime = subsystem.normalload;
-                    }
-
-                    if(load > loadingtime){
-                        load = loadingtime;
-                    }
-                    
-                    duoField.html(load + "/" + loadingtime);
+                if(UI_active){
+                    systemwindow.find(".UI").addClass("active");
                 }
+                
+                
             }else{
+                if(system.dualWeapon && system.weapons){
+                    system = system.weapons[system.firingMode];
+                }
+                
                 var load = weaponManager.getWeaponCurrentLoading(system);
                 var loadingtime = system.loadingtime;
 
@@ -863,24 +969,6 @@ setSystemData: function(ship, system, shipwindow){
                 }
             }
 	}
-
-        // plopje
-        if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon))
-        {
-            if(!systemwindow.hasClass("modes")){
-                systemwindow.addClass("modes");
-            }
-
-            var modebutton =  $(".mode", systemwindow);
-
-            if(system.dualWeapon){
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-                modebutton.html("<span>"+parentSystem.firingModes[parentSystem.firingMode].substring(0, 1)+"</span>");
-            }else{
-                modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
-            }
-
-        }
     }else if (system.name == "thruster"){
         systemwindow.data("direction", system.direction);
         systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster"+system.direction+".png)");
@@ -985,7 +1073,6 @@ setSystemData: function(ship, system, shipwindow){
 		cont.addClass("assignThrust");
 		$("#botPanel").addClass("assignThrust");
 		$("#logContainer").addClass("assignThrust");
-		//shipwindow.find(".assignthrustcontainer .thrustsituation").html(current);
 
 		$(".thruster", shipwindow).each(function(){
 			var direction = $(this).data("direction");
@@ -1006,7 +1093,6 @@ setSystemData: function(ship, system, shipwindow){
 
 
 		shipwindow.addClass("assignThrust");
-		//shipWindowManager.open(ship);
 	},
 	
 	clickSystem: function(e){
@@ -1047,9 +1133,7 @@ setSystemData: function(ship, system, shipwindow){
 			&& gamedata.selectedSystems.length > 0 
 			&& weaponManager.canCalledshot(ship, system))
 		{
-			
-			weaponManager.targetShip(ship, system);
-									
+                    weaponManager.targetShip(ship, system);
 		}
 	
 	},
@@ -1192,13 +1276,18 @@ setSystemData: function(ship, system, shipwindow){
 
             var shipwindow = $(".shipwindow").has($(this));
             var systemwindow = $(".system").has($(this));
+            
+            if(shipwindow.length == 0 || systemwindow.length == 0){
+                // I have no idea why a mode switch should generate so many
+                // events. Just let the ones through that seem to make sense.
+                // by Jazz
+                return;
+            }
+
             var ship = gamedata.getShip(shipwindow.data("ship"));
             var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
             window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
 
-//            if(system.weapons[system.firingMode].duoWeapon){
-//                shipWindowManager.initializeDuoSystemWindow(ship, system, systemwindow);
-//            }
         }   
 }

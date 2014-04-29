@@ -34,6 +34,7 @@ class Weapon extends ShipSystem{
     public $overloadable = false;
     
     public $normalload = 0;
+    public $alwaysoverloading = false;
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
@@ -360,7 +361,7 @@ class Weapon extends ShipSystem{
                 
                 $newExtraShots = $this->overloadshots;
                 $overloading = $this->overloadturns+1;
-                if ($overloading == $normalload && $newExtraShots == 0)
+                if ($overloading >= $normalload && $newExtraShots == 0)
                     $newExtraShots = $this->extraoverloadshots;
 
                 if ($overloading > $normalload)
@@ -598,7 +599,7 @@ class Weapon extends ShipSystem{
                         $deg = 0;
                     
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
-                    $i = $interceptWeapon->intercept - $deg;
+                    $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
                     
                     if ($i<0
                      || $interceptWeapon->destroyed
@@ -619,6 +620,10 @@ class Weapon extends ShipSystem{
         
     }
     
+    public function getInterceptRating($turn){
+        return $this->intercept;
+    }
+
     public function getNumberOfIntercepts($gamedata, $fireOrder){
         $count = 0;
             

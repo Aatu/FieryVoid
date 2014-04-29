@@ -8,7 +8,7 @@ class Garasoch extends BaseShip{
         $this->pointCost = 550;
         $this->faction = "Dilgar";
         $this->phpclass = "Garasoch";
-        $this->imagePath = "img/ships/primus.png";
+        $this->imagePath = "img/ships/garasoch.png";
         $this->shipClass = "Garasoch Heavy Carrier";
         $this->shipSizeClass = 3;
         

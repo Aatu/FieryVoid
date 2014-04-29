@@ -294,7 +294,7 @@ shipManager.power = {
 				
 			if (power.type == 1){
 				system.power.splice(i, 1);
-				return;
+//				return;
 			}
 		}
 	
@@ -418,6 +418,9 @@ shipManager.power = {
 	},
 	
 	stopOverloading: function(ship, system){
+            if(system.alwaysoverloading){
+                return;
+            }
 	
 		for (var i in system.power){
 			var power = system.power[i];
@@ -433,6 +436,10 @@ shipManager.power = {
 	},
 	
 	isOverloading: function(ship, system){
+            if(system.alwaysoverloading){
+                return true;
+            }
+            
 		for (var i in system.power){
 			var power = system.power[i];
 			if (power.turn != gamedata.turn)
@@ -489,6 +496,13 @@ shipManager.power = {
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 		
+                if(system.duoWeapon){
+                    // create an iconMask at the top of the DOM for the system.
+                    var iconmask_element = document.createElement('div');
+                    iconmask_element.className = "iconmask";
+                    systemwindow.find(".icon").append(iconmask_element);
+                }
+                
                 if(system.parentId > 0){
                     system = shipManager.systems.getSystem(ship, system.parentId);
                 }
@@ -531,6 +545,11 @@ shipManager.power = {
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
+                if(system.duoWeapon){
+                    // remove the iconmask again.
+                    systemwindow.find(".iconmask").remove();
+                }
+                
                 if(system.parentId > 0){
                     system = shipManager.systems.getSystem(ship, system.parentId);
                 }
@@ -553,15 +572,27 @@ shipManager.power = {
                 }
                 
 		shipManager.power.setOnline(ship, system);
-                
+		shipWindowManager.setDataForSystem(ship, system);
+
+
                 if(system.dualWeapon || system.duoWeapon){
                     for(var i in system.weapons){
                         var weapon = system.weapons[i];
-                        shipManager.power.setOnline(ship, weapon);
+                        
+                        if(weapon.duoWeapon){
+                            for(var index in weapon.weapons){
+                                var subweapon = weapon.weapons[index];
+                                
+                                shipManager.power.setOnline(ship, subweapon);
+                                shipWindowManager.setDataForSystem(ship, subweapon);
+                            }
+                        }else{
+                            shipManager.power.setOnline(ship, weapon);
+                            shipWindowManager.setDataForSystem(ship, weapon);
+                        }
                     }
                 }
                 
-		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	},
 	

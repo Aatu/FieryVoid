@@ -104,6 +104,13 @@ var LightParticleBeam = function(json, ship)
 LightParticleBeam.prototype = Object.create( Particle.prototype );
 LightParticleBeam.prototype.constructor = LightParticleBeam;
 
+var LightParticleBeamShip = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+LightParticleBeamShip.prototype = Object.create( Particle.prototype );
+LightParticleBeamShip.prototype.constructor = LightParticleBeamShip;
+
 var ParticleRepeater = function(json, ship)
 {
     Particle.call( this, json, ship);

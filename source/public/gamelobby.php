@@ -40,6 +40,7 @@
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+		<script src="client/helper.js"></script>
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>
@@ -72,10 +73,10 @@
         <script src="client/model/weapon/electromagnetic.js"></script>
         <script src="client/model/weapon/aoe.js"></script>
         <script src="client/model/weapon/molecular.js"></script>
-        <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/antimatter.js"></script>
-        <script src="client/model/weapon/duoWeapon.js"></script>
         <script src="client/model/weapon/dualWeapon.js"></script>
+        <script src="client/model/weapon/duoWeapon.js"></script>
+        <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
 		<script>
@@ -179,6 +180,9 @@
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
 	
         <img src="img/logo.png">
+        <div class="helphide" onclick="window.helper.onClickHelpHide()">
+        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
+        </div>
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
@@ -221,6 +225,14 @@
             $chatgameid = 0;
             $chatelement = "#globalchat";
             include("chat.php")
+        ?>
+        </div>
+
+        <div id="globalhelp" class="helppanel">
+        <?php
+        	$messagelocation='gamelobby.php';
+        	$ingame=false;
+        	include("helper.php")
         ?>
         </div>
                     
