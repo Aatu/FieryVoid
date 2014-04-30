@@ -31,7 +31,7 @@
 	</head>
 	<body>
         <img src="img/logo.png">
-        <div class="helphide"> <div id="helphideimg"></div>
+        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>
 		<div class="panel" style="width:400px;margin:auto;">
 			<form method="post">

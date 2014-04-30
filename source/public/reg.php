@@ -57,7 +57,7 @@ include_once 'global.php';
 		<script src="client/helper.js"></script>
 	</head>
 	<body>
-        <div class="helphide"> <div id="helphideimg"></div>
+        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>
 		<div class="panel" style="width:400px;margin:auto;">
 			<form method="post">

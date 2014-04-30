@@ -746,12 +746,16 @@
  
     <div id="settings" class="logPanelEntry" style="display:none;">
         <div id="helphide" class="helphide">
+        <span title="Show or Hide Vir to help you">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         HELP
+        </span>
         </div>
+        <span title="Disable or Enable the extra Commit check to end a turn">
         <div id="autocommit" class="autocommit">
         <img id="autocommitimg" src="img/ok.png" height="30" width="30">	
         <span id="autocommittext" class="autocommittext">COMMIT</span>
+        </span>
         </div>
     </div>
         
