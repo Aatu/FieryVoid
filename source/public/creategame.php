@@ -38,7 +38,7 @@
 	<body class="creategame">
 	
         <img src="img/logo.png">
-        <div class="helphide" onclick="window.helper.onClickHelpHide()">
+        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>
 		<div class="panel large">
