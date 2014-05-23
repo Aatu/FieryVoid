@@ -186,8 +186,6 @@ window.UI = {
         }, 
         
         turnCallback: function(e, right){
-    
-            
             var ship = gamedata.getActiveShip();
             if (!ship)
                 ship = gamedata.getSelectedShip();

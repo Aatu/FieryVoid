@@ -210,7 +210,25 @@ window.confirm = {
 		
 	},
         
-    confirmOrSurrender: function(msg, callbackCommit, callbackSurrender){
+    confirmWithOptions: function(msg, trueOptionString, falseOptionString, callback){
+        var e = $('<div class="confirm error"><div class="ui"><div class="confirmokoption">'+trueOptionString+'</div><div class="confirmcanceloption">'+falseOptionString+'</div></div></div>');
+		$('<span>'+msg+'</span>').prependTo(e);
+                // As the callback needs a parameter, you can't just bind the callback.
+                // The method would then be executed as you bind the result of the callback,
+                // and not the callback itself. Hence the function(){callback(true);} thingy.
+		$(".ok", e).on("click", function(){callback(true);});
+		
+                $(".confirmokoption", e).on("click", function(){$(".confirm").remove();});
+		$(".confirmokoption", e).on("click", function(){callback(true);});
+                $(".confirmcanceloption",e).on("click", function(){$(".confirm").remove();});
+		$(".confirmcanceloption", e).on("click", function(){callback(false);});
+		$(".ok",e).css("left", "45%");
+		var a = e.appendTo("body");
+		a.fadeIn(250);
+		
+	},
+
+confirmOrSurrender: function(msg, callbackCommit, callbackSurrender){
         var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="surrender"></div><div class="confirmcancel"></div></div></div>');
 		$('<span>'+msg+'</span>').prependTo(e);
 		

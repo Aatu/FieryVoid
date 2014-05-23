@@ -318,7 +318,7 @@
                 return false;
 
             //if the system has arcs, check that the position is on arc
-            if($system->startArc && $system->endArc){
+            if(is_int($system->startArc) && is_int($system->endArc)){
 
                 $tf = $this->getFacingAngle();
 

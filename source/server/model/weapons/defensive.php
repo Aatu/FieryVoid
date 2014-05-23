@@ -38,7 +38,12 @@
         }
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
-            return $this->getOutput();
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+                return 0;
+
+            $output = $this->output;
+            $output -= $this->outputMod;
+            return $output;
         }
 
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
@@ -70,7 +75,12 @@
         public $intercept = 4;
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
-            return $this->getOutput();
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+                return 0;
+
+            $output = $this->output;
+            $output -= $this->outputMod;
+            return $output;
         }
 
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
@@ -91,7 +101,12 @@
         public $intercept = 2;
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
-            return $this->getOutput();
+            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
+                return 0;
+
+            $output = $this->output;
+            $output -= $this->outputMod;
+            return $output;
         }
 
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn){

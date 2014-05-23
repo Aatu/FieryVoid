@@ -287,6 +287,27 @@ shipManager.power = {
 	},
 	
 	setOnline: function(ship, system){
+            if(system.name == "graviticShield"){
+                if(ship.checkShieldGenerator()){
+                    for(var i in ship.systems){
+                        var syst = ship.systems[i];
+            
+                        if(syst.name == "shieldGenerator"){
+                            if(syst.destroyed){
+                                window.confirm.error("You cannot activate shields. Your shield generator has been destroyed.");
+                                return;
+                            }
+                            
+                             if(shipManager.power.isOffline(ship, syst)){
+                                 window.confirm.error("You cannot activate shields. Power up your shield generator first.");
+                                 return;
+                             }
+                        }
+                    }
+                }
+            }
+            
+            
 		for (var i in system.power){
 			var power = system.power[i];
 			if (power.turn != gamedata.turn)
@@ -566,14 +587,13 @@ shipManager.power = {
 		if (!shipManager.power.isOffline(ship, system))
 			return;
 
+		shipManager.power.setOnline(ship, system);
+		shipWindowManager.setDataForSystem(ship, system);
+
                 if(system.name=="shieldGenerator")
                 {
                     system.onTurnOn(ship);
                 }
-                
-		shipManager.power.setOnline(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-
 
                 if(system.dualWeapon || system.duoWeapon){
                     for(var i in system.weapons){

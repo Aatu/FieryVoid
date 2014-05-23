@@ -161,8 +161,10 @@ class Shield extends ShipSystem implements DefensiveSystem{
         
         if ($this->checkIsFighterUnderShield($target, $shooter))
             return 0;
-        
-        return $this->getOutput();
+
+        $output = $this->output;
+        $output -= $this->outputMod;
+        return $output;
     }
     
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
@@ -175,7 +177,9 @@ class Shield extends ShipSystem implements DefensiveSystem{
         if ($this->hasCritical('DamageReductionRemoved'))
             return 0;
         
-        return $this->getOutput();
+        $output = $this->output;
+        $output -= $this->outputMod;
+        return $output;
     }
 }
 
