@@ -263,7 +263,7 @@
 		        
         public $loadingtime = 1;
 			
-        public $rangePenalty = 1;
+        public $rangePenalty = 2;
         public $fireControl = array(null, 0, 2); // fighters, <=mediums, <=capitals 
 
 
