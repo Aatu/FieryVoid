@@ -37,20 +37,6 @@ shipManager.systems = {
         }
         
         return system.destroyed;
-        
-
-        /*
-        var d = damageManager.getDamage(ship, system);
-        var stru = shipManager.systems.getStructureSystem(ship, system.location);
-        if (stru && stru != system && shipManager.systems.isDestroyed(ship, stru))
-            return true;
-            
-        if (system.fighter && shipManager.criticals.hasCritical(system, "DisengagedFighter"))
-			return true;
-            
-            
-        return (d >= system.maxhealth);
-        */
     },
     
     isEngineDestroyed: function(ship){
@@ -372,20 +358,35 @@ shipManager.systems = {
         return grouped;
         
     },
-	
-	getThrusters: function(ship, direction){
-		var list = Array();
-		for (var i in ship.systems){
-			var system = ship.systems[i];
-			
-			if (system.name == "thruster" && system.direction == direction)
-				list.push(system);
-			
-		}
+
+    getMisc: function(ship){
+        var tc = ship.turncost;
+        var td = ship.turndelaycost;
+        
+        return "static TurnCost: " + tc + " TurnDelay: " + td;
+    },
+	  
+    getFlightArmour: function(ship, system){
+        var front = ship.systems[1].armour[0];
+        var aft = ship.systems[1].armour[1];
+        var side = ship.systems[1].armour[2];
+        
+        var armour = "Armor (F/S/A): " + front + " / " + side + " / " + aft;
+        
+        return armour;
+    },
 		
-		return list;
-	
-	}
+    getThrusters: function(ship, direction){
+        var list = Array();
+        for (var i in ship.systems){
+            var system = ship.systems[i];
+            
+            if (system.name == "thruster" && system.direction == direction)
+                list.push(system);
+            }
+		
+	return list;
+    }
     
 
 }

@@ -95,7 +95,10 @@ window.shipClickable = {
 			$(".entry", e).remove();
 
             var jinking = shipManager.movement.getJinking(ship) * 5;
-
+            var flightArmour = shipManager.systems.getFlightArmour(ship);
+            var misc = shipManager.systems.getMisc(ship);
+            
+            shipClickable.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
             shipClickable.addEntryElement('Evasion: -' +jinking+ ' to hit', ship.flight === true && jinking > 0);
             shipClickable.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight === true);
             shipClickable.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
@@ -103,8 +106,12 @@ window.shipClickable = {
             shipClickable.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
             shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
             shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
-            shipClickable.addEntryElement("Iniative: " + shipManager.getIniativeOrder(ship) + " ("+ship.iniative+")");
+            shipClickable.addEntryElement("Iniative: (D100 + " + ship.iniativebonus + ")");
+            shipClickable.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship));
             shipClickable.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
+            shipClickable.addEntryElement(misc, ship.flight != true);
+            shipClickable.addEntryElement(flightArmour, ship.flight === true);
+            
             var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
             var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
             shipClickable.addEntryElement("Defence (F/S): " + fDef +"("+
