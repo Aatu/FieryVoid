@@ -243,19 +243,19 @@ confirmOrSurrender: function(msg, callbackCommit, callbackSurrender){
 		a.fadeIn(250);
 	},
     
-    askSurrender: function(msg, callbackCommit, callbackSurrender){
-        var e = $('<div class="confirm error"><div class="ui"><div class="surrender2"></div><div class="confirmcancel"></div></div></div>'); //<div class="confirmok"></div>
-		$('<span>'+msg+'</span>').prependTo(e);
-		
-		$(".ok", e).on("click", callbackCommit);
-		$(".confirmcancel", e).on("click", function(){$(".confirm").remove();});
-		$(".confirmcancel", e).on("click", callbackCommit);
-        $(".surrender2",e).on("click", function(){$(".confirm").remove();});
-		$(".surrender2", e).on("click", callbackSurrender);
-		$(".ok",e).css("left", "45%");
-		var a = e.appendTo("body");
-		a.fadeIn(250);
-	},
+//    askSurrender: function(msg, callbackCommit, callbackSurrender){
+//        var e = $('<div class="confirm error"><div class="ui"><div class="surrender2"></div><div class="confirmcancel"></div></div></div>'); //<div class="confirmok"></div>
+//		$('<span>'+msg+'</span>').prependTo(e);
+//		
+//		$(".ok", e).on("click", callbackCommit);
+//		$(".confirmcancel", e).on("click", function(){$(".confirm").remove();});
+//		$(".confirmcancel", e).on("click", callbackCommit);
+//        $(".surrender2",e).on("click", function(){$(".confirm").remove();});
+//		$(".surrender2", e).on("click", callbackSurrender);
+//		$(".ok",e).css("left", "45%");
+//		var a = e.appendTo("body");
+//		a.fadeIn(250);
+//	},
 
     exception: function(data){
 		var e = $('<div style="z-index:999999"class="confirm error"></div>');

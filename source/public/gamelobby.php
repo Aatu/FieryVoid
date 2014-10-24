@@ -40,7 +40,7 @@
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
-		<script src="client/helper.js"></script>
+//		<script src="client/helper.js"></script>
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>
@@ -180,9 +180,9 @@
 	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
 	
         <img src="img/logo.png">
-        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
+<!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
-        </div>
+        </div>-->
 		<div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			<div class="">	<span class="panelheader">GAME:</span><span class="panelsubheader"><?php print($gamelobbydata->name); ?></span>	</div>
@@ -228,13 +228,13 @@
         ?>
         </div>
 
-        <div id="globalhelp" class="helppanel">
+<!--        <div id="globalhelp" class="helppanel">
         <?php
-        	$messagelocation='gamelobby.php';
-        	$ingame=false;
-        	include("helper.php")
+//        	$messagelocation='gamelobby.php';
+//        	$ingame=false;
+//        	include("helper.php")
         ?>
-        </div>
+        </div>-->
                     
     <div id="systemInfo">
 		<div class="name"><span class="name header">test</span></div>
