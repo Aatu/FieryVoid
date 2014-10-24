@@ -475,7 +475,7 @@
 		<div class="header"><span class="header">ASSIGN THRUST</span></div>
 		<table class="frontcontainer">
 			<tr>
-			<td><div class="system slot_3">
+                        <td><div class="system slot_3">
 				
 				<div class="icon">
 					<span class="efficiency value"></span>
@@ -522,7 +522,7 @@
 					<div class="button2"></div>
 
 			</div></td>
-			
+
 			</tr>
 		</table>
 		
@@ -634,6 +634,18 @@
 		
 		<table class="aftcontainer">
 			<tr>
+			<td><div class="system slot_5">
+				
+				<div class="icon">
+					<span class="efficiency value"></span>
+					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
+				</div>
+
+					<div class="button1"></div>
+					<div class="button2"></div>
+
+			</div></td>
+
 			<td><div class="system slot_3">
 				
 				<div class="icon">
@@ -682,6 +694,18 @@
 
 			</div></td>
 			
+			<td><div class="system slot_6">
+				
+				<div class="icon">
+					<span class="efficiency value"></span>
+					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
+				</div>
+
+					<div class="button1"></div>
+					<div class="button2"></div>
+
+			</div></td>
+
 			</tr>
 		</table>
 		
