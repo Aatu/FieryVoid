@@ -13,6 +13,8 @@ class MissileLauncher extends Weapon
     public $trailLength = 100;
     public $distanceRange = 0;
     public $firingMode = 1;
+    public $rangeMod = 0;
+    protected $distanceRangeMod = 0;
     
     public $firingModes = array(
         1 => "B"
@@ -23,8 +25,9 @@ class MissileLauncher extends Weapon
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
-            1 => new MissileB($startArc, $endArc)
+            1 => $MissileB
         );
     }
 
@@ -123,6 +126,8 @@ class LMissileRack extends MissileLauncher
     public $distanceRange = 70;
     public $loadingtime = 2;
     public $iconPath = "missile1.png";
+    public $rangeMod = 10;
+    protected $distanceRangeMod = 10;
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
@@ -149,6 +154,8 @@ class LHMissileRack extends MissileLauncher
     public $distanceRange = 70;
     public $loadingtime = 1;
     public $iconPath = "missile2.png";
+    public $rangeMod = 10;
+    protected $distanceRangeMod = 10;
     
     public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
     
@@ -192,8 +199,10 @@ class FighterMissileRack extends MissileLauncher
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct(0, 0, 0, $startArc, $endArc);
 
+        $MissileFB = new MissileFB($startArc, $endArc, $this->fireControl);
+        
         $this->missileArray = array(
-            1 => new MissileFB($startArc, $endArc)
+            1 => $MissileFB
         );
         
         $this->maxAmount = $maxAmount;
@@ -217,13 +226,11 @@ class FighterMissileRack extends MissileLauncher
     
     public function setId($id){
         
-        debug::log("Set ID");
         parent::setId($id);
         
         $counter = 0;
         
         foreach ($this->missileArray as $missile){
-            debug::log("Set ID missile, $counter");
             $missile->setId(1000 + ($id*10) + $counter);
             $counter++;
         } 
@@ -319,8 +326,10 @@ class FighterTorpedoLauncher extends FighterMissileRack
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
         
+        $LBTorp = new LightBallisticTorpedo($startArc, $endArc, $this->fireControl);
+        
         $this->missileArray = array(
-            1 => new LightBallisticTorpedo($startArc, $endArc)
+            1 => $LBTorp
         );
         
         $this->maxAmount = $maxAmount;
@@ -386,8 +395,10 @@ class BombRack extends MissileLauncher{
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
+        $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
+        
         $this->missileArray = array(
-            1 => new MissileB($startArc, $endArc)
+            1 => $MissileB
         );
     }
     

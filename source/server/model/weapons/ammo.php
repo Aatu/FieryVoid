@@ -8,9 +8,16 @@ class Ammo extends Weapon
     public $damage = 0; // is Warhead value
     public $range = 0;
     public $ballistic = true;
+    public $hitChanceMod = 0;
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $fireControl = null){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        
+        if($fireControl != null){
+            $this->fireControl = $fireControl;
+        }else{
+            $this->fireControl = array(0, 0, 0);
+        }
     }
     
     public function getDamage($fireOrder)
@@ -20,11 +27,6 @@ class Ammo extends Weapon
     
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }    
-    
-    public function getHitChanceMod()
-    {
-        return 0;
-    }
     
     public function setRangeMod($rangeMod){
         $this->range = $this->range + $rangeMod;
@@ -57,8 +59,8 @@ class MissileB extends Ammo
     public $hitChanceMod = 3;
     public $ballistic = true;
 
-    function __construct($startArc, $endArc){
-        parent::__construct(0, 0, 0, $startArc, $endArc);
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
     }
 
     public function setSystemDataWindow($turn)
@@ -70,7 +72,7 @@ class MissileB extends Ammo
         parent::setSystemDataWindow($turn);
     }
     
-    public function getHitChanceMod()
+    public function getWeaponHitChanceMod($turn)
     {
         return $this->hitChanceMod;
     }
@@ -102,8 +104,8 @@ class MissileFB extends Ammo
     public $hitChanceMod = 3;
     public $ballistic = true;
     
-    function __construct($startArc, $endArc){
-        parent::__construct(0, 0, 0, $startArc, $endArc);
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
     }
     
     protected function isFiringNonBallisticWeapons($shooter, $fireOrder){
@@ -155,7 +157,7 @@ class MissileFB extends Ammo
         $sdew = EW::getSupportedDEW($gamedata, $target);
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         
-        $mod += $this->hitChanceMod;
+//        $mod += $this->hitChanceMod;
         $mod -= Movement::getJinking($shooter, $gamedata->turn);
         
         // First check if the fighter/squad that fired this shot is still alive.
@@ -199,7 +201,7 @@ class MissileFB extends Ammo
         $fireOrder->updated = true;
     }
 
-    public function getHitChanceMod()
+    public function getWeaponHitChanceMod($turn)
     {
         return $this->hitChanceMod;
     }
@@ -218,8 +220,8 @@ class MissileFY extends MissileFB
     public $damage = 6;
     public $range = 8;
     
-    function __construct($startArc, $endArc){
-        parent::__construct($startArc, $endArc);
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct($startArc, $endArc, $fireControl);
     }
 
     public function getDamage($fireOrder){  return 8;   }
@@ -239,8 +241,8 @@ class LightBallisticTorpedo extends MissileFB
     public $range = 25;
     public $hitChanceMod = 0;
     
-    function __construct($startArc, $endArc){
-        parent::__construct($startArc, $endArc);
+    function __construct($startArc, $endArc, $fireControl){
+        parent::__construct($startArc, $endArc, $fireControl);
     }
 
     public function getDamage($fireOrder){        return Dice::d(6,2);   }
@@ -260,8 +262,8 @@ class LightIonTorpedo extends MissileFB
     public $range = 20;
     public $hitChanceMod = 0;
     
-    function __construct($startArc, $endArc){
-        parent::__construct($startArc, $endArc);
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct($startArc, $endArc, $fireControl);
     }
 
     public function getDamage($fireOrder){        return 10;   }

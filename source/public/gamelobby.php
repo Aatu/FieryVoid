@@ -21,7 +21,7 @@
 	if (!$gamelobbydata || $gamelobbydata->status != "LOBBY"){
 		header('Location: games.php');
 	}
-	//var_dump($gamelobbydata);
+//	var_dump($gamelobbydata);
 	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
 	
 	$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
@@ -40,7 +40,7 @@
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
-//		<script src="client/helper.js"></script>
+<!--		<script src="client/helper.js"></script>-->
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/player.js"></script>

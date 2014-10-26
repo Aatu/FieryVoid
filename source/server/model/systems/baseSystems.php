@@ -80,7 +80,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
         
         if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
         {
-            Debug::log("return 1");
             return 1;
         }
             
@@ -241,7 +240,6 @@ class Reactor extends ShipSystem{
     
     public function addCritical($shipid, $phpclass, $gamedata) {
         if(strcmp($phpclass, "ForcedOfflineOneTurn") == 0){
-            debug::log("On nooooos!");
             // This is the reactor. If it takes a ForcedOffLineForOneTurn,
             // propagate this crit to all systems that can be shut down.
             $ship = $gamedata->getShipById($shipid);
@@ -251,8 +249,6 @@ class Reactor extends ShipSystem{
                 }
             }
         }
-
-        debug::log("who cares?");
 
         parent::addCritical($shipid, $phpclass, $gamedata);
     }

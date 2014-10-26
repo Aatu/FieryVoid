@@ -112,13 +112,7 @@
         ?>
         </div>
 
-<!--        <div id="globalhelp" class="helppanel">
-        <?php
-//        	$messagelocation='creategame.php';
-//        	$ingame=false;
-//        	include("helper.php")
-        ?>
-        </div>-->
+
 
 <!--        <div id="gamespacetemplatecontainer">
             <div class="slot" >

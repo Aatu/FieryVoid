@@ -422,10 +422,15 @@ window.shipManager = {
 
         for (var i in ship.movement)
         {
-            if (ship.movement[i].turn == turn)
+            if (ship.movement[i].turn === turn){
                 movement = ship.movement[i];
+            }
         }
 
+        if(movement === null && ship.movement.length > 0){
+            movement = ship.movement[ship.movement.length-1];
+        }
+        
         var x = movement.x;
         var y = movement.y;
         var xO = movement.xOffset;

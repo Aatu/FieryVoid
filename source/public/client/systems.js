@@ -195,8 +195,8 @@ shipManager.systems = {
             cnt++;
         }
         
-        if(system.missileArray!= null && cnt > 0){
-            system.range = system.missileArray[system.firingMode].range;
+        if(system.missileArray!== null && cnt > 0){
+            system.range = system.missileArray[system.firingMode].range + system.rangeMod;
         }
 
         return system;

@@ -470,8 +470,9 @@ class Weapon extends ShipSystem{
         $rangePenalty = $rp["rp"];
         
         $dew = $target->getDEW($gamedata->turn);
-        if ($shooter instanceof FighterFlight)
-			$dew = 0;
+        if ($shooter instanceof FighterFlight){
+            $dew = 0;
+        }
 		
         $bdew = EW::getBlanketDEW($gamedata, $target);
         
@@ -499,34 +500,34 @@ class Weapon extends ShipSystem{
             $oew = $shooter->getOEW($target, $gamedata->turn);
             $oew -= $dist;
             
-            if ($oew < 0)
+            if ($oew < 0){
                 $oew = 0;
+            }
         }
         
-        $ammo = $this->getAmmo($fireOrder);
-        if ($ammo !== null)
-        {
-            $mod += $ammo->getHitChanceMod();
-        }
-        
+
         if ($shooter instanceof FighterFlight){
             $oew = $shooter->offensivebonus;
             $mod -= Movement::getJinking($shooter, $gamedata->turn);
             
-            if (Movement::getCombatPivots($shooter, $gamedata->turn)>0)
+            if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
                $mod -= 1;
+            }
         }
         
-        if ($this->piercing && $this->firingMode == 2)
+        if ($this->piercing && $this->firingMode == 2){
             $mod -= 4;
+        }
        
         if (!($shooter instanceof FighterFlight))
         {
-            if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic)
+            if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic){
                 $mod -=3;
+            }
 
-            if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic)
+            if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic){
                 $mod -=3;
+            }
         }
         if ($fireOrder->calledid != -1){
             $mod += $this->getCalledShotMod();
@@ -534,7 +535,13 @@ class Weapon extends ShipSystem{
 		
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
-	
+
+        $ammo = $this->getAmmo($fireOrder);
+        if ($ammo !== null)
+        {
+            $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
+        }
+                
         if ($oew < 1)
         {
             $rangePenalty = $rangePenalty*2;

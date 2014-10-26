@@ -180,13 +180,11 @@ class DualWeapon extends Weapon{
         foreach ($this->weapons as $i=>$weapon)
         {
             if($weapon->duoWeapon){
-                debug::log("setting initial data duo weapon $weapon->id");
                 $weapon->setInitialSystemData($ship);
                 continue;
             }
             
             $data = $weapon->getStartLoading();
-            debug::log("");
             if ($data)
                 SystemData::addDataForSystem($weapon->id, 0, $ship->id, $data->toJSON());
         }
