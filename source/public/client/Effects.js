@@ -80,6 +80,7 @@ window.effects = {
             effects.addBigExplosion(pos, weapon);
         if (type == "AoE")
             effects.addAoEExplosion(pos, weapon);
+            
     },
     
     addAoEExplosion: function(pos, weapon){
@@ -96,7 +97,7 @@ window.effects = {
             size:r,
             startsize:1,
             speed:speed,
-            dissappear:Math.floor(2*Math.random()+7),
+            dissappear:Math.floor(2*Math.random()+17),
             green:0,
             pos:pos,
             draw:function(self){
@@ -161,17 +162,20 @@ window.effects = {
                 var a = getAlpha();
                 var pos = self.pos;
                 
-                canvas.fillStyle = "rgba(250,"+(230+self.green)+",80,"+0.1*a+")";
+                canvas.fillStyle = "rgba(255,"+(75+self.green)+",0,"+0.1*a+")";
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size, 0);
-                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.7, 0);
-                canvas.fillStyle = "rgba(240,"+(155+self.green)+",12,"+0.1*a+")";
+                canvas.fillStyle = "rgba(255,"+(50+self.green)+",0,"+0.1*a+")";
+				graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.6, 0);
+                canvas.fillStyle = "rgba(255,"+(100+self.green)+",0,"+0.1*a+")";
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.5, 0);
-                canvas.fillStyle = "rgba(255,"+(255+self.green)+",170,"+0.1*a+")";
-                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.4, 0);
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.3, 0);
+                canvas.fillStyle = "rgba(255,"+(200+self.green)+",0,"+0.1*a+")";
+                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.3, 0);
+                canvas.fillStyle = "rgba(255,"+(150+self.green)+",0,"+0.5*a+")";
+                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.3, 0);
+                canvas.fillStyle = "rgba(255,255,255,"+8*a+")";
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.2, 0);
-                canvas.fillStyle = "rgba(255,255,255,"+0.8*a+")";
-                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.1, 0);
+
                 self.tics++;
                 
                 function getSize(){
@@ -330,7 +334,7 @@ window.effects = {
                     tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom, 
                     y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
                     
-                    effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.15)+0.15});
+                    effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.15)+0.15});										
                     
                     
                 }
@@ -350,7 +354,7 @@ window.effects = {
                         (Math.round(Math.random()*50)+50)*gamedata.zoom, Math.floor(Math.random()*360),
                          sPos.x, sPos.y);
                         
-                        effects.makeTrailAnimation(sPos, tPos, {projectilespeed:Math.floor(Math.random()*3+2), trailLength:40, animationColor:Array(160, 95, 10), trailColor:Array(248, 216, 65), animationWidth:Math.floor(Math.random()*3+1)}, false);
+                        effects.makeTrailAnimation(sPos, tPos, {projectilespeed:Math.floor(Math.random()*1+2), trailLength:20, animationColor:Array(255, 175, 50), trailColor:Array(255, 75, 50), animationWidth:Math.floor(Math.random()*4+2)}, false);
                     }
                 }
                 
@@ -391,18 +395,21 @@ window.effects = {
                 var pos = self.pos;
                 var step = Math.ceil(size/30);
                 //console.log("step " + step);
-                canvas.fillStyle = "rgba(250,"+(230+self.green)+",80,"+0.01*a+")";
+                canvas.fillStyle = "rgba(255,"+(150+self.green)+",0,"+0.01*a+")";
                 for (var i = size; i>=1; i -= step){
                     
                 
                     if (i< size*0.7){
-                        canvas.fillStyle = "rgba(250,"+(155+self.green)+",12,"+0.02*a+")";
+                        canvas.fillStyle = "rgba(255,"+(100+self.green)+",0,"+0.02*a+")";
                     }
                     if (i< size*0.4){
-                        canvas.fillStyle = "rgba(255,"+(255+self.green)+",170,"+0.02*a+")";
+                        canvas.fillStyle = "rgba(200,"+(50+self.green)+",0,"+0.05*a+")";
                     }
-                    if (i< Math.ceil(size*0.3)){
-                        canvas.fillStyle = "rgba(255,255,255,"+0.05*a+")";
+                    if (i< Math.ceil(size*0.27)){
+                        canvas.fillStyle = "rgba(255,255,255,"+0.08*a+")";
+                    }
+                    if (i< Math.ceil(size*0.15)){
+                        canvas.fillStyle = "rgba(255,255,255,"+0.18*a+")";
                     }
                     
                     graphics.drawCircleNoStroke(canvas, pos.x, pos.y, i, 0);
@@ -479,7 +486,7 @@ window.effects = {
     getCanvas: function(){
         if (effects.canvas == null){
             effects.canvas = graphics.getCanvas("effects");
-            }
+           }
         return effects.canvas;
             
     },
@@ -543,7 +550,7 @@ window.effects = {
     animateShots: function(fire, weapon){
         var details = effects.getShotDetails(fire, weapon);
                
-            
+		var hitSystem = fire.hitSystem;
                         
         var animation = {
             tics:0,
@@ -837,8 +844,8 @@ window.effects = {
                     return;
                 }
                 
-                //canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.02)";
-                //graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5*gamedata.zoom, 0);
+         //       canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.02)";
+         //       graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 5*gamedata.zoom, 0);
                 
                 
                 c = self.weapon.trailColor;
@@ -890,9 +897,14 @@ window.effects = {
     
     },
     
-    makeLaserAnimation: function(sPos, tPos, weapon, hit){
+    makeLaserAnimation: function(sPos, tPos, weapon, hit, currentlocation){
         
-        var step ={x:Math.random()*0.5-0.25, y:Math.random()*0.5-0.25};
+        
+                var step ={x:Math.random()*0.5-0.25, y:Math.random()*0.5-0.25};
+        
+     //   var step = if (self.weapon.step = 0) 
+      //  {x = 0, y = 0};
+	//	else {x:Math.random()*0.5-0.25, y:Math.random()*0.5-0.25};
                 
         var animation = {
             tics:0,
@@ -910,10 +922,11 @@ window.effects = {
                 var sPos = self.sPos;
                 var tPos = self.tPos;
                 var c = self.weapon.animationColor;
+                var b = self.weapon.animationColor2;
                 var a = getAlpha();
                 
-                tPos.x += step.x* gamedata.zoom;
-                tPos.y += step.y* gamedata.zoom;
+                tPos.x += step.x*gamedata.zoom;
+                tPos.y += step.y*gamedata.zoom;
                 
                 if (self.tics == 20 && self.hit && !self.explo)
                     effects.addExplosion(tPos, weapon);
@@ -930,11 +943,13 @@ window.effects = {
                     }
                     canvas.strokeStyle = "rgba("+c[0]+","+c[1]+","+c[2]+","+a+")";
                     graphics.drawLine(canvas, sPos.x, sPos.y, tPos.x, tPos.y, i*gamedata.zoom);
-                    
-                    
+                    canvas.strokeStyle = "rgba("+b[0]+","+b[1]+","+b[2]+","+8*a+")";
+                    graphics.drawLine(canvas, sPos.x, sPos.y, tPos.x, tPos.y, i*gamedata.zoom*self.weapon.animationWidth2);
+
+
                 }
                 
-                for (var i = Math.round(self.weapon.animationWidth*2*gamedata.zoom); i>=1; i--){
+                for (var i = Math.round(self.weapon.animationWidth*1.5*gamedata.zoom); i>=1; i--){
                     if (i == 1){
                         canvas.fillStyle = "rgba(255,255,255,"+a*2+")";
                     }else{
@@ -1242,9 +1257,11 @@ window.effects = {
                         graphics.drawCircleNoStroke(canvas, cur.x, cur.y, 2*gamedata.zoom, 0);
                         continue;
                     }
-                    canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.01)";
+                    canvas.fillStyle = "rgba("+c[0]+","+c[1]+","+c[2]+",0.02)";
                     graphics.drawCircleNoStroke(canvas, cur.x, cur.y, i*gamedata.zoom, 0);
-                    //graphics.drawLine(canvas, sPos.x, sPos.y, cur.x, cur.y, i*gamedata.zoom);
+                    canvas.fillStyle = "rgba(255,255,255,0.6)";
+                    graphics.drawCircleNoStroke(canvas, cur.x, cur.y, i*0.1, 0);
+                  //  graphics.drawLine(canvas, sPos.x, sPos.y, cur.x, cur.y, i*gamedata.zoom);
                     
                     
                 }
