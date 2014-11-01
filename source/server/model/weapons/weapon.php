@@ -12,6 +12,7 @@ class Weapon extends ShipSystem{
     public $animationImg = null;
     public $animationImgSprite = 0;
     public $animationColor = null;
+    public $animationColor2 = array(255, 255, 255);
     public $animationWidth = 3;
     public $animationExplosionScale = 0.25;
     public $animationExplosionType = "normal";

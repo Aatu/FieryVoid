@@ -133,6 +133,7 @@
         public $animationExplosionScale = 0.15;
 
         public $animationWidth = 1;
+        public $animationWidth2 = 0;
             
         public $intercept = 3;
              

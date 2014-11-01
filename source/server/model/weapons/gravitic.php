@@ -313,6 +313,7 @@ class GraviticBolt extends Gravitic
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 4;
+        public $animationWidth2 = 0.4;
         
         public $loadingtime = 4;
         public $damageType = "raking";
@@ -460,6 +461,7 @@ class GraviticBolt extends Gravitic
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 1;
+        public $animationWidth2 = 0;
         
         public $loadingtime = 3;
         public $damageType = "raking";
@@ -537,6 +539,8 @@ class GraviticBolt extends Gravitic
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 5;
+        public $animationWidth2 = 0.5;
+
         public $firingModes = array( 1 => "Sustained");
 
         
@@ -608,6 +612,7 @@ class GraviticBolt extends Gravitic
         public $animation = "laser";
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
         
         public $damageType = "raking";
         public $raking = 6;
