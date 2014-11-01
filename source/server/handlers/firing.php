@@ -102,13 +102,32 @@ class Firing{
         
         foreach($ship->systems as $fighter)
         {
-            if ($fighter->isDestroyed())
+            $exclusiveWasFired = false;
+            
+            if ($fighter->isDestroyed()){
                 continue;
+            }
+            
+            // check if fighter is firing weapons that exclude other
+            // weapons from firing. (Like IonBolt on a Rutarian.)
+            foreach ($fighter->systems as $weapon){
+                if($weapon instanceof Weapon){
+                    if($weapon->exclusive && $weapon->firedOnTurn($gd->turn)){
+                        $exclusiveWasFired = true;
+                        break;
+                    }
+                }
+            }
+            
+            if($exclusiveWasFired){
+                continue;
+            }
             
             foreach ($fighter->systems as $weapon)
             {
-            if (self::isValidInterceptor($gd, $weapon) === false)
-                continue;
+                if (self::isValidInterceptor($gd, $weapon) === false){
+                    continue;
+                }
 
                 $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
                 $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
