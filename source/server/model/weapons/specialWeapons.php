@@ -64,6 +64,7 @@
         public $trailColor = array(175, 225, 175);
         public $projectilespeed = 15;
         public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
 
@@ -119,7 +120,8 @@
 		public $trailColor = array(158, 240, 255);
 		public $projectilespeed = 15;
         public $animationWidth = 2;
-		public $animationExplosionScale = 0.10;
+	        public $animationWidth2 = 0.2;
+	public $animationExplosionScale = 0.10;
 		public $trailLength = 30;
 		        
 	    public $loadingtime = 1;
@@ -193,6 +195,7 @@
         public $projectilespeed = 15;
         // You have to take a look at this.
         public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
         // You have to take a look at this.
         public $animationExplosionScale = 0.10;
         // You have to take a look at this.
