@@ -29,8 +29,11 @@ window.hexgrid = {
         canvas.fillStyle   = hexgrid.hexlinecolor;
         canvas.strokeStyle = hexgrid.hexlinecolor;
         
-        
+    /*     console.log(gamedata.zoom);
          
+        draw thinner hex-grid the more you zoom out, eventually disabling hexgrid.
+        BAD.
+
         if (gamedata.zoom <= 0.8)
             canvas.strokeStyle = "rgba(255,255,255,0.16)";
         
@@ -44,7 +47,7 @@ window.hexgrid = {
             
         if (gamedata.zoom < 0.7)
             return;
-        
+     */   
         canvas.lineWidth = hexgrid.hexlinewidth;
 
             

@@ -873,6 +873,9 @@
     }
     
     class BaseShipNoAft extends BaseShip{
+
+        public $draziCap = true;
+
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
@@ -922,6 +925,7 @@
 
     class HeavyCombatVesselLeftRight extends BaseShip{
     
+        public $draziHCV = true;
         public $shipSizeClass = 2;
         
         function __construct($id, $userid, $name, $slot){

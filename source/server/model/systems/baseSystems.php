@@ -47,7 +47,11 @@ class Jammer extends ShipSystem implements SpecialAbility{
         
         return $this->getOutput();
     }
-     
+
+     public function setSystemDataWindow($turn){
+        $this->data["Ability:"] = "Denies a hostile OEW-lock versus this ship.";
+    }
+
 }
 
 class Stealth extends ShipSystem implements SpecialAbility{

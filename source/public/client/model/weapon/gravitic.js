@@ -24,16 +24,16 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
 
     switch(shipManager.power.getBoost(this)){
         case 0:
-            this.data["Pulses"] = '1-2';
+            this.data["Pulses"] = 'D2';
             break;
         case 1:
-            this.data["Pulses"] = '1-3';
+            this.data["Pulses"] = 'D3 +1';
             break;
         case 2:
-            this.data["Pulses"] = '1-3';
+            this.data["Pulses"] = 'D3 +2';
             break;
         default:
-            this.data["Pulses"] = '1-2';
+            this.data["Pulses"] = 'D2';
             break;
     }            
 

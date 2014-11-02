@@ -595,7 +595,7 @@ body.phase1 #botPanel .ewentry .button2{
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
 	font-family:arial;
-	font-size:10px;
+	font-size:12px;
     -webkit-transition: all 0.1s linear;
 	-moz-transition: all 0.1s linear;
 	-o-transition: all 0.1s linear;
@@ -698,25 +698,31 @@ body.phase1 #botPanel .ewentry .button2{
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:45%;
+    width:35%;
 }
 
 .fleetlist .shipclass{
     margin-top: 3px;
     float: left;
-    width:30%;
+    width:25%;
 }
 
 .fleetlist .shiptype{
     margin-top: 3px;
     float: left;
-    width: 10%;
+    width: 15%;
 }
 
 .fleetlist .shipstatus{
     margin-top: 3px;
     float: left;
     width: 10%;
+}
+
+.fleetlist .initiative{
+	margin-top: 3px;
+	float: left;
+	width: 10%;
 }
 
 #logcontainer #gameinfo{
