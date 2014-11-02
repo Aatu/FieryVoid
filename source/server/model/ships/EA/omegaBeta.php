@@ -27,30 +27,30 @@ class OmegaBeta  extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 8, 3));
-	$this->addPrimarySystem(new Hangar(6, 26));
+		$this->addPrimarySystem(new Hangar(6, 26));
         $this->addPrimarySystem(new JumpEngine(6, 20, 3, 20));
 
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 0));
-	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
-	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 0));
-	$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
+		$this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 0));
+		$this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 0));
+		$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
+		$this->addFrontSystem(new HeavyPulse(4, 6, 4, 0, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 300, 120));
 
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-	$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
+		$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-	$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-	$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
-	$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
-	$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
-	$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
+		$this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
+		$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
+		$this->addAftSystem(new MediumPulse(4, 6, 3, 180, 240));
+		$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
+		$this->addAftSystem(new MediumPulse(4, 6, 3, 120, 180));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
         $this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
         
-	$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
+		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));

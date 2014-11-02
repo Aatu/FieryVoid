@@ -52,6 +52,7 @@
         
         public function setSystemDataWindow($turn){
             $this->data["DEFENSIVE BONUS:"] = "-15 to hit on arc";
+            parent::setSystemDataWindow($turn);
         }
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -89,6 +90,7 @@
         
         public function setSystemDataWindow($turn){
             $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
+            parent::setSystemDataWindow($turn);
         }
     }
     
@@ -115,6 +117,7 @@
         
         public function setSystemDataWindow($turn){
             $this->data["DEFENSIVE BONUS:"] = "-10 to hit on arc";
+            parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
