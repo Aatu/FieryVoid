@@ -1,167 +1,160 @@
 window.weaponManager = {
-	mouseoverTimer: null,
-	mouseOutTimer: null,
-	mouseoverSystem: null,
-	currentSystem: null,
-	currentShip: null,
+    mouseoverTimer: null,
+    mouseOutTimer: null,
+    mouseoverSystem: null,
+    currentSystem: null,
+    currentShip: null,
+    
+    getWeaponCurrentLoading: function(weapon)
+    {
+        if(weapon.duoWeapon){
+            var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
+            return returnArray;
+        }
+        
+        return weapon.turnsloaded;
+    },
+    
+    onModeClicked: function(shipwindow, systemwindow, ship, system)
+    {
+        if (!system)
+            return;
+        
+        if (gamedata.gamephase != 3 && !system.ballistic)
+            return;
+        
+        if (gamedata.gamephase != 1 && system.ballistic)
+            return;
+        
+        if (weaponManager.hasFiringOrder(ship, system))
+            return;
+        
+        if (gamedata.isMyShip(ship)){
+            weaponManager.unSelectWeapon(ship, system);
+            
+            if(system.dualWeapon){
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                parentSystem.changeFiringMode();
+                shipWindowManager.setDataForSystem(ship, parentSystem);
+                
+                var newSystem = parentSystem.weapons[parentSystem.firingMode];
+                var parentwindow = shipwindow.find(".parentsystem_"+newSystem.parentId);
+                
+                parentwindow.removeClass("system_"+system.id);
+                parentwindow.addClass("modes");
+                parentwindow.removeClass(system.name);
+                shipWindowManager.addDualSystem(ship, parentSystem, parentwindow);
+                shipWindowManager.setDataForSystem(ship, newSystem);
+                parentwindow.find(".UI").addClass("active");
+                parentwindow.find(".UI").focus();
+                weaponManager.mouseoverSystem = parentwindow;
+                clearTimeout(weaponManager.mouseOutTimer);
+                clearTimeout(weaponManager.mouseoverTimer);
+                weaponManager.mouseOutTimer = null;
+                weaponManager.mouseoverTimer = null;
+                systemInfo.showSystemInfo(parentwindow, newSystem, ship);
+            }else{
+                system.changeFiringMode();
+                shipWindowManager.setDataForSystem(ship, newSystem);
+            }
+        }
+    },
 
-	getWeaponCurrentLoading: function(weapon)
-	{
-		if(weapon.duoWeapon){
-			var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
-			return returnArray;
-		}
-		
-		return weapon.turnsloaded;
-	},
-			
-	onModeClicked: function(shipwindow, systemwindow, ship, system)
-	{
-		if (!system)
-			return;
-		
-		if (gamedata.gamephase != 3 && !system.ballistic)
-			return;
-			
-		if (gamedata.gamephase != 1 && system.ballistic)
-			return;
-		
-		if (weaponManager.hasFiringOrder(ship, system))
-			return;
-		
-		if (gamedata.isMyShip(ship)){
-			weaponManager.unSelectWeapon(ship, system);
+    onHoldfireClicked: function(e){
+        e.stopPropagation();
+        var shipwindow = $(".shipwindow").has($(this));
+        var systemwindow = $(".system").has($(this));
+        var ship = gamedata.getShip(shipwindow.data("ship"));
+        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+        
+        if (gamedata.gamephase != 3 && !system.ballistic)
+            return;
+        
+        if (gamedata.gamephase != 1 && system.ballistic)
+            return;
+        
+        if (ship.userid == gamedata.thisplayer){
+            if(!system.duoWeapon){
+                weaponManager.cancelFire(ship, system);
+            }else{
+                systemwindow.removeClass("duofiring");
+                
+                for(var i in system.weapons){
+                    var duoweapon = system.weapons[i];
+                    
+                    if(weaponManager.hasFiringOrder(ship, duoweapon)){
+                        weaponManager.cancelFire(ship, duoweapon);
+                    }
+                }
+            }
+        }
+    },
 
-			if(system.dualWeapon){
-				var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-				parentSystem.changeFiringMode();
-				shipWindowManager.setDataForSystem(ship, parentSystem);
+    cancelFire: function(ship, system){
+        weaponManager.removeFiringOrder(ship, system);
+        ballistics.updateList();
+        shipWindowManager.setDataForSystem(ship, system);
+    },    	
+    
+    onWeaponMouseover: function(e){
+        if (weaponManager.mouseOutTimer != null){
+            clearTimeout(weaponManager.mouseOutTimer); 
+            weaponManager.mouseOutTimer = null;
+        }
+        
+        if (weaponManager.mouseoverTimer != null)
+            return;
+        
+        var id = $(this).data("shipid");
+        weaponManager.currentShip = gamedata.getShip(id);
+        
+        if ($(this).hasClass("fightersystem")){
+            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
+        }else{
+            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
+        }
+        
+        var targetElement = $(this);
+        
+        weaponManager.mouseoverSystem = targetElement;
+        
+        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
+    },
+    
+    onWeaponMouseoverDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+    },
 
-				var newSystem = parentSystem.weapons[parentSystem.firingMode];
+    onWeaponMouseOutDuoSystem: function(e){
+        // ignore this. We've already entered the parent of this duosystem
+    },
 
-				var parentwindow = shipwindow.find(".parentsystem_"+newSystem.parentId);
-				parentwindow.removeClass("system_"+system.id);
-				parentwindow.addClass("modes");
-				parentwindow.removeClass(system.name);
-				shipWindowManager.addDualSystem(ship, parentSystem, parentwindow);
-				shipWindowManager.setDataForSystem(ship, newSystem);
-				parentwindow.find(".UI").addClass("active");
-				parentwindow.find(".UI").focus();
-				weaponManager.mouseoverSystem = parentwindow;
-				clearTimeout(weaponManager.mouseOutTimer);
-				clearTimeout(weaponManager.mouseoverTimer);
-				weaponManager.mouseOutTimer = null;
-				weaponManager.mouseoverTimer = null;
-				systemInfo.showSystemInfo(parentwindow, newSystem, ship);
-			}else{
-				system.changeFiringMode();
-				shipWindowManager.setDataForSystem(ship, newSystem);
-			}
-
-			
-		}
-	},
+    onWeaponMouseOut: function(e){
+        if (weaponManager.mouseoverTimer != null){
+            clearTimeout(weaponManager.mouseoverTimer); 
+            weaponManager.mouseoverTimer = null;
+        }
 	
-	onHoldfireClicked: function(e){
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-		
-		if (gamedata.gamephase != 3 && !system.ballistic)
-			return;
-			
-		if (gamedata.gamephase != 1 && system.ballistic)
-			return;
-		
-		if (ship.userid == gamedata.thisplayer){
-			if(!system.duoWeapon){
-				weaponManager.cancelFire(ship, system);
-			}else{
-				systemwindow.removeClass("duofiring");
-				
-				for(var i in system.weapons){
-					var duoweapon = system.weapons[i];
-					
-					if(weaponManager.hasFiringOrder(ship, duoweapon)){
-						weaponManager.cancelFire(ship, duoweapon);
-					}
-				}
-			}
-		}
-		
-	},
-	
-	cancelFire: function(ship, system){
-		weaponManager.removeFiringOrder(ship, system);
-		ballistics.updateList();
-		shipWindowManager.setDataForSystem(ship, system);
-	},    
-	
-	onWeaponMouseover: function(e){
-		if (weaponManager.mouseOutTimer != null){
-			clearTimeout(weaponManager.mouseOutTimer); 
-			weaponManager.mouseOutTimer = null;
-		}
-		
-		if (weaponManager.mouseoverTimer != null)
-			return;
-
-		var id = $(this).data("shipid");
-		weaponManager.currentShip = gamedata.getShip(id);
-		
-		if ($(this).hasClass("fightersystem")){
-			weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
-	}else{
-			weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
-		}
-		
-		var targetElement = $(this);
-		
-			weaponManager.mouseoverSystem = targetElement;
-		
-		weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
-	},
-	
-	onWeaponMouseoverDuoSystem: function(e){
-		// ignore this. We've already entered the parent of this duosystem
-	},
-	
-	onWeaponMouseOutDuoSystem: function(e){
-		// ignore this. We've already entered the parent of this duosystem
-	},
-	
-	onWeaponMouseOut: function(e){
-		//if($(this).is(weaponManager.mouseoverSystem) || $(this).is($(".UI"))){
-		
-		if (weaponManager.mouseoverTimer != null){
-			clearTimeout(weaponManager.mouseoverTimer); 
-			weaponManager.mouseoverTimer = null;
-		}
-		
-		weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
-		//}
-	},
-	
-	doWeaponMouseOver: function(e){
-		if (weaponManager.mouseoverTimer != null){
-			clearTimeout(weaponManager.mouseoverTimer); 
-			weaponManager.mouseoverTimer = null;
-		}
-		
-		systemInfo.hideSystemInfo();
-		weaponManager.removeArcIndicators();
-
-		if( weaponManager.mouseoverSystem == null){
-			return;
-		}
-		
-		weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
-		systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
-
-		drawEntities();
-	},
+        weaponManager.mouseOutTimer = setTimeout(weaponManager.doWeaponMouseout, 50);
+    },
+    
+    doWeaponMouseOver: function(e){
+        if (weaponManager.mouseoverTimer != null){
+            clearTimeout(weaponManager.mouseoverTimer); 
+            weaponManager.mouseoverTimer = null;
+        }
+        
+        systemInfo.hideSystemInfo();
+        weaponManager.removeArcIndicators();
+        
+        if( weaponManager.mouseoverSystem == null){
+            return;
+        }
+        
+        weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
+        systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
+        drawEntities();
+    },
 	
 	doWeaponMouseout: function(){
 		if (weaponManager.mouseOutTimer != null){

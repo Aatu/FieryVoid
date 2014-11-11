@@ -113,7 +113,7 @@ fleetListManager = {
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
                 $("#" + ship.id).addClass("destroyed");
-                $("#" + ship.id + " .shipstatus").html("destroyed");
+                $("#" + ship.id + " .initiative").html("destroyed");
             }
         }        
     }
