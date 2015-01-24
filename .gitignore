@@ -5,3 +5,5 @@
 .DS_Store
 source/server/lib/Debug.php
 source/server/varconfig.php
+source/server/lib/Debug.php
+source/server/varconfig.php

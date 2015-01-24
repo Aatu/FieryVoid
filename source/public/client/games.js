@@ -89,7 +89,7 @@ window.gamedata = {
             if (game.slots[i].playerid != null)
                 count++;
         }
-        console.log(game.name +": "+ count);
+   //     console.log(game.name +": "+ count);
         return count;
     },
             

@@ -40,6 +40,7 @@ window.shipClickable = {
 	doMouseOver: function(){
         var selectedShip = gamedata.getSelectedShip();
 	var ship = shipClickable.ship;
+ // console.log(ship);
         
         if(ship == null){
             // something was moused over that isn't a ship
@@ -124,6 +125,7 @@ window.shipClickable = {
             if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
                 
                 var dis = (mathlib.getDistanceBetweenShipsInHex(selectedShip, ship)).toFixed(2);
+        //        var dis = (mathlib.getDistanceBetweenShips(selectedShip, ship)).toFixed(2);
                 shipClickable.addEntryElement('DISTANCE: ' + dis);
             }
 		}

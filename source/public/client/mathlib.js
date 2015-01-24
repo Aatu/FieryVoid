@@ -37,6 +37,7 @@ window.mathlib = {
 	},
 	
 	getDistance: function(start, end){
+//		console.log(start, end);
 		if (!end || !start)
 			console.trace();
 		return Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));

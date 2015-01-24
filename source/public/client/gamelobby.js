@@ -164,7 +164,7 @@ window.gamedata = {
 
     expandFaction: function(event)
     {
-        console.log("clicked");
+     //   console.log("clicked");
         var clickedElement = $(this);
         clickedElement.parent().toggleClass("shipshidden");
     },
@@ -233,7 +233,7 @@ window.gamedata = {
             slotElement = $('.slot.slotid_'+slot.slot);
             var data = slotElement.data();
             if (playerManager.isOccupiedSlot(slot)){
-                console.log("slot " +slot.slot+" is occupied");
+            //    console.log("slot " +slot.slot+" is occupied");
 				var player = playerManager.getPlayerInSlot(slot);
                 slotElement.data("playerid", player.id);
                 slotElement.addClass("taken");
@@ -485,7 +485,7 @@ window.gamedata = {
         var id = $(e).data("id");
         var faction = $(e).data("faction");
         
-        console.log("id: " + id + " faction: " + faction);
+     //   console.log("id: " + id + " faction: " + faction);
         var ship = gamedata.getShip(id, faction);
         
         if (! ship.shipStatusWindow)

@@ -7,6 +7,7 @@ class Weapon extends ShipSystem{
 
     public $name = null;
     public $displayName ="";
+    public $priority = 1;
 
     public $animation = "none";
     public $animationImg = null;
@@ -185,6 +186,7 @@ class Weapon extends ShipSystem{
 
     public function setSystemDataWindow($turn){
 
+        $this->data["Resolution Priority"] = $this->priority;
         $this->data["Loading"] = $this->getTurnsloaded()."/".$this->getNormalLoad();
 
         $dam = $this->minDamage."-".$this->maxDamage;
@@ -517,13 +519,14 @@ class Weapon extends ShipSystem{
             }
         }
 
-        if ($this->piercing && $this->firingMode == 2){
+        if ($this->piercing && $this->firingMode == 2 && $this->firingModes[1] == "Standard"){
             $mod -= 4;
         }
 
         if (!($shooter instanceof FighterFlight))
         {
-            if (Movement::hasRolled($shooter, $gamedata->turn) && !$this->ballistic){
+            if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
+                debug::log("apllying malus for rolling");
                 $mod -=3;
             }
 
@@ -690,9 +693,11 @@ class Weapon extends ShipSystem{
         $fireOrder->rolled = 1;//Marks that fire order has been handled
     }
 
-    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
-    {
-        if ($this->piercing && $this->firingMode == 2){
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+
+//Debug::Log($this->firingMode);
+
+        if ($this->piercing && $this->firingMode == 2 || $this->firingModes[1] == "Piercing"){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);

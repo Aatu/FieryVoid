@@ -2,7 +2,7 @@ gamedata = {
 
     gamewidth: 1600,
     gameheight: 1000,
-    zoom:1,
+    zoom: 0.6,
     zoomincrement: 0.1,
     scroll:  {x:0,y:0},
     scrollOffset: {x:0,y:0},
@@ -133,6 +133,7 @@ gamedata = {
     
     getShip: function(id){
         for (var i in gamedata.ships){
+      //      console.log(gamedata.ships[i].id);
             if (gamedata.ships[i].id == id){
                 return gamedata.ships[i];
             }
