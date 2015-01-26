@@ -60,7 +60,7 @@ spl_autoload_register(
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
                 'basicmissile' => '/server/model/weapons/ammo.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
-                'battlewagon' => '/server/model/ships/raiders/battleWagon.php',
+                'battlewagon' => '/server/model/ships/raiders/battle_Wagon.php',
                 'bintak' => '/server/model/ships/narn/bintak.php',
                 'bombrack' => '/server/model/weapons/missile.php',
                 'brahassa' => '/server/model/ships/balosian/brahassa.php',
