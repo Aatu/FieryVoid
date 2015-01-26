@@ -9,6 +9,7 @@ class Ammo extends Weapon
     public $range = 0;
     public $ballistic = true;
     public $hitChanceMod = 0;
+    public $priority = 10;
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $fireControl = null){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

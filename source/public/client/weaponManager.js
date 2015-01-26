@@ -640,13 +640,16 @@ window.weaponManager = {
 		}
 		else
 		{
-			if (weapon.piercing && weapon.firingMode == 2)
+			if (weapon.piercing && weapon.firingMode == 2 && weapon.firingModes[1] !== "Piercing"){
 				mod -= 4;
+			}
 
-			if (shipManager.movement.hasRolled(shooter)){
-				console.log("rolled");
+//			if (shipManager.movement.hasRolled(shooter)){
+			if (shipManager.movement.isRolling(shooter)){
+				console.log("is rolling -3");
 				mod -= 3;
 			}
+
 
 			if (shipManager.movement.hasPivotedForShooting(shooter)){
 				console.log("pivoting");
@@ -692,7 +695,7 @@ window.weaponManager = {
 		var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
 
 		var change = Math.round((goal/20)*100);
-		//console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+		console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
 
 	// makes no sense to cap hit % visuals at 100. You wanne calc your estimated pulses, right ?
 	//    if (change > 100)

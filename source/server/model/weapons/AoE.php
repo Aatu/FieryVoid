@@ -133,6 +133,7 @@
         public $hidetarget = true;
         
         public $flashDamage = true;
+        public $priority = 1;
         
             
         public $trailColor = array(141, 240, 255);

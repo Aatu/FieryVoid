@@ -33,8 +33,7 @@ window.combatLog = {
         var highC = 0;
         var notes = "";
         
-        for (var a in orders){
-            
+        for (var a in orders){            
                         
             count++;
             var fire = orders[a];

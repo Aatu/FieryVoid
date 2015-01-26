@@ -29,6 +29,7 @@
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
         public $maxpulses = 3;
+        public $priority = 5;
 		
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
@@ -181,6 +182,7 @@ class GraviticBolt extends Gravitic
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
         public $curDamage = 9;
+        public $priority = 7;
 		
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
@@ -350,6 +352,9 @@ class GraviticBolt extends Gravitic
         public $animationWidth = 2;
         public $animationExplosionScale = 0.15;
         public $loadingtime = 1;
+
+        public $priority = 7;
+
 		
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 2, 2); // fighters, <mediums, <capitals 
@@ -490,7 +495,9 @@ class GraviticBolt extends Gravitic
     }
     
     class GraviticLance extends DualWeapon{
-    
+
+    public $priority = 7;
+
 	public $firingModes = array( 
 		1 => "Lance",
 		2 => "Beams"

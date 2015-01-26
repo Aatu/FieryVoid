@@ -7,6 +7,21 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
+
+
+         /*       'hastan' => '/server/model/ships/yolu/hastan.php',
+
+                'maishan' => '/server/model/ships/yolu/maishan.php',
+                'maitau' => '/server/model/ships/yolu/maitau.php',
+                'malau' => '/server/model/ships/yolu/malau.php',
+                'aluin' => '/server/model/ships/yolu/aluin.php',
+
+                'utan' => '/server/model/ships/yolu/utan.php',
+
+
+                'maltra' => '/server/model/ships/yolu/maltra.php',
+
+*/
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
@@ -45,11 +60,13 @@ spl_autoload_register(
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
                 'basicmissile' => '/server/model/weapons/ammo.php',
                 'battlelaser' => '/server/model/weapons/lasers.php',
+                'battlewagon' => '/server/model/ships/raiders/battleWagon.php',
                 'bintak' => '/server/model/ships/narn/bintak.php',
                 'bombrack' => '/server/model/weapons/missile.php',
                 'brahassa' => '/server/model/ships/balosian/brahassa.php',
                 'brathon' => '/server/model/ships/brakiri/brathon.php',
                 'brathoncannon' => '/server/model/ships/brakiri/brathonCannon.php',
+                'brigantine' => '/server/model/ships/raiders/brigantine.php',
                 'brikorta' => '/server/model/ships/brakiri/brikorta.php',
                 'brokados' => '/server/model/ships/brakiri/brokados.php',
                 'burstbeam' => '/server/model/weapons/specialWeapons.php',
@@ -78,7 +95,10 @@ spl_autoload_register(
                 'dbmanager' => '/server/controller/DBManager.php',
                 'debug' => '/server/lib/Debug.php',
                 'decurion' => '/server/model/ships/centauri/decurion.php',
+                'destabilizerbeam' => '/server/model/weapons/molecular.php',
                 'defensivesystem' => '/server/model/systems/baseSystems.php',
+                'deltav' => '/server/model/ships/raiders/deltaV.php',
+                'doublev' => '/server/model/ships/raiders/doubleV.php',
                 'delphi' => '/server/model/ships/EA/delphi.php',
                 'demos' => '/server/model/ships/centauri/demos.php',
                 'deployment' => '/server/handlers/Deployment.php',
@@ -121,7 +141,9 @@ spl_autoload_register(
                 'folshotb' => '/server/model/ships/brakiri/folshotB.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
                 'frazi' => '/server/model/ships/narn/frazi.php',
+                'fusionagitator' => '/server/model/weapons/molecular.php',
                 'fusioncannon' => '/server/model/weapons/molecular.php',
+                'galleon' => '/server/model/ships/raiders/galleon.php',
                 'garasoch' => '/server/model/ships/dilgar/garasoch.php',
                 'garasochd' => '/server/model/ships/dilgar/garasochD.php',
                 'gammastarfury' => '/server/model/ships/EA/gammaStarfury.php',
@@ -150,12 +172,14 @@ spl_autoload_register(
                 'halik' => '/server/model/ships/brakiri/halik.php',
                 'halos' => '/server/model/ships/brakiri/halos.php',
                 'haltona' => '/server/model/ships/brakiri/haltona.php',
+             //   'hastan' => '/server/model/ships/yolu/hastan.php',
                 'hangar' => '/server/model/systems/baseSystems.php',
                 'haven' => '/server/model/ships/centauri/haven.php',
                 'heavyarray' => '/server/model/weapons/particle.php',
                 'heavybolter' => '/server/model/weapons/particle.php',
                 'heavycombatvessel' => '/server/model/ships/ShipClasses.php',
                 'heavycombatvesselleftright' => '/server/model/ships/ShipClasses.php',
+                'heavyfusioncannon' => '/server/model/weapons/molecular.php',
                 'heavylaser' => '/server/model/weapons/lasers.php',
                 'heavyplasma' => '/server/model/weapons/plasma.php',
                 'heavypulse' => '/server/model/weapons/pulse.php',
@@ -163,6 +187,7 @@ spl_autoload_register(
                 'heavythentus' => '/server/model/ships/narn/HeavyThentus.php',
                 'hecatealpha' => '/server/model/ships/EA/hecateAlpha.php',
                 'helpmanager' => '/server/controller/HelpManager.php',
+                'hermes' => '/server/model/ships/EA/hermes.php',
                 'hyperion' => '/server/model/ships/EA/hyperion.php',
                 'hyperionalpha' => '/server/model/ships/EA/hyperionAlpha.php',
                 'hyperionassault' => '/server/model/ships/EA/hyperionAssault.php',
@@ -211,6 +236,7 @@ spl_autoload_register(
                 'lightfusioncannon' => '/server/model/weapons/molecular.php',
                 'lightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'lightgravitonbeam' => '/server/model/weapons/gravitic.php',
+                'lightmoleculardistruptor' => '/server/model/weapons/moelcular.php',
                 'lightiontorpedo' => '/server/model/weapons/ammo.php',
                 'lightlaser' => '/server/model/weapons/lasers.php',
                 'lightpulse' => '/server/model/weapons/pulse.php',
@@ -250,6 +276,7 @@ spl_autoload_register(
                 'mogratti' => '/server/model/ships/centauri/mogratti.php',
                 'molecular' => '/server/model/weapons/molecular.php',
                 'moleculardisruptor' => '/server/model/weapons/molecular.php',
+                'molecularflayer' => '/server/model/weapons/molecular.php',
                 'molecularpulsar' => '/server/model/weapons/pulse.php',
                 'morshin' => '/server/model/ships/minbari/morshin.php',
                 'movement' => '/server/handlers/movement.php',
@@ -365,6 +392,7 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi/skua.php',
                 'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
+                'sloop' => '/server/model/ships/raiders/sloop.php',
                 'smissilerack' => '/server/model/weapons/missile.php',
                 'solarcannon' => '/server/model/weapons/particle.php',
                 'solarhawk' => '/server/model/ships/drazi/solarhawk.php',
@@ -439,7 +467,8 @@ spl_autoload_register(
                 'wartalon' => '/server/model/ships/drazi/wartalon.php',
                 'weapon' => '/server/model/weapons/weapon.php',
                 'weaponloading' => '/server/model/BaseClasses.php',
-                'whitestar' => '/server/model/ships/minbari/whitestar.php'
+                'whitestar' => '/server/model/ships/minbari/whitestar.php',
+                'xebec' => '/server/model/ships/raiders/xebec.php'
             );
         }
         $cn = strtolower($class);

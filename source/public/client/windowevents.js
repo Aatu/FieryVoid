@@ -91,7 +91,7 @@ window.windowEvents = {
         if (windowEvents.chatfocus)
             return;
         
-        console.log("keycode: " +  e.keyCode);
+    //    console.log("keycode: " +  e.keyCode);
 
         switch(e.keyCode){
             case 81:
@@ -118,6 +118,8 @@ window.zooming = {
     zoominprogress: false,
     
     mouseWheel: function(e){
+
+   //     console.log("ding");
 		if (gamedata.effectsDrawing)
 			return;
 			
@@ -205,8 +207,10 @@ window.zooming = {
         offsetY = Math.round(zoomdifference*halfY);// + ((cY - halfY));
         
         gamedata.zoom = newzoom;
+
+   //     console.log(gamedata.zoom);
         
-        //console.log("zd: " + zoomdifference + ", " + offsetX + "," + offsetY);
+    //    console.log("zd: " + zoomdifference + ", " + offsetX + "," + offsetY);
 
         //resizeGame();
         
@@ -294,8 +298,7 @@ window.scrolling = {
     },
     
     scroll: function (dx, dy){
-        
-    
+
         offsetX = gamedata.scrollOffset.x - dx;
         if ((offsetX / hexgrid.hexWidth()) >= 1){
             gamedata.scroll.x += Math.floor(offsetX / hexgrid.hexWidth());
@@ -329,15 +332,20 @@ window.scrolling = {
     },
     
     scrollToShip: function(ship){
-        //console.log("scrolling to ship: " + ship.name);
+   // console.log("scrolling to ship: " + ship.shipClass);
+
         var gameWidth = gamedata.gamewidth;
         var gameHeight = gamedata.gameheight;
+
         var hexHeight = hexgrid.hexHeight();
         var hexWidth = hexgrid.hexWidth();
         
         var x = Math.ceil((gameWidth / hexWidth) /2);
         var y = Math.ceil((gameHeight / hexHeight) /2);
         var pos = shipManager.getShipPosition(ship);
+
+      //  console.log(x, y, pos);
+
         gamedata.scroll.x = pos.x - x;
         gamedata.scroll.y = pos.y - y;
         gamedata.scrollOffset.x = 0;
@@ -347,7 +355,8 @@ window.scrolling = {
     },
     
     scrollToPos: function(pos){
-        //console.log("scrolling to ship: " + ship.name);
+
+
         var gameWidth = gamedata.gamewidth;
         var gameHeight = gamedata.gameheight;
         var hexHeight = hexgrid.hexHeight();
@@ -355,6 +364,9 @@ window.scrolling = {
         
         var x = Math.ceil((gameWidth / hexWidth) /2);
         var y = Math.ceil((gameHeight / hexHeight) /2);
+
+      //  console.log(x, y, pos); {x: -11, y: -2, xO: 0, yO: 0}
+
         gamedata.scroll.x = pos.x - x;
         gamedata.scroll.y = pos.y - y;
         gamedata.scrollOffset.x = 0;
@@ -364,6 +376,7 @@ window.scrolling = {
     },
 
 	scrollTo: function(x, y){
+
 		gamedata.scroll.x = x;
         gamedata.scroll.y = y;
         gamedata.scrollOffset.x = 0;

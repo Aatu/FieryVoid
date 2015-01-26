@@ -15,11 +15,18 @@
             
             foreach ($this->intercepts as $candidate){
                 $fire = $candidate->fire;
-                $shooter = $gd->getShipById($fire->shooterid);
+
                 $target = $gd->getShipById($fire->targetid);
-                $firingweapon = $shooter->getSystemById($fire->weaponid);
-                            
+
+                if ( $target->isDisabled() ){
+                    continue;
+                }
                 
+
+                $shooter = $gd->getShipById($fire->shooterid);
+
+                $firingweapon = $shooter->getSystemById($fire->weaponid);
+                                            
                 $damage = $firingweapon->getAvgDamage() * ceil($fire->shots/2);
                 //$hitChance = $firingweapon->calculateHit($gd, $fire);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
@@ -325,17 +332,44 @@ class Firing{
     
     
     public static function fireWeapons($gamedata){
+
+
+        $ordered = array();
+        $unordered  = array();
+
         
         foreach ($gamedata->ships as $ship){
             if ($ship instanceof FighterFlight){
                 continue;
             }
-                
-	    //FIRE all ships
+
             foreach($ship->getAllFireOrders() as $fire){
-                self::fire($ship, $fire, $gamedata);
+                $unordered[] = $fire;
+            }
+        }       
+
+        for ($i = 1; $i < 10; $i++){
+            foreach($unordered as $fire){
+
+            $ship = $gamedata->getShipById($fire->shooterid);
+            $wpn = $ship->getSystemById($fire->weaponid);
+            $p = $wpn->priority;
+
+            if ($p == $i){
+                $ordered[] = $fire;
+                }                        
             }
         }
+
+        foreach ($ordered as $fire){
+            $ship = $gamedata->getShipById($fire->shooterid);
+            $wpn = $ship->getSystemById($fire->weaponid);
+            $p = $wpn->priority;
+       //     debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p);
+            self::fire($ship, $fire, $gamedata);
+        }
+
+
 
         // From here on, only fighter units are left.
         $chosenfires = array();

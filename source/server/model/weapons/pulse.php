@@ -12,6 +12,7 @@
         public $grouping = 20;
         public $rof = 1;
         public $maxpulses = 6;
+        public $priority = 8;
         
 
         public function setSystemDataWindow($turn){
@@ -113,6 +114,7 @@
         public $trailLength = 12;
         public $grouping = 25;
         public $maxpulses = 3;
+        public $priority = 5;
 
         public $loadingtime = 2;
         
@@ -150,6 +152,7 @@
         
         public $loadingtime = 1;
         public $intercept = 2;
+        public $priority = 2;
         
         public $rangePenalty = 2;
         public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals 
@@ -207,6 +210,7 @@
         public $trailLength = 10;
         
         public $loadingtime = 1;
+        public $priority = 7;
         
         public $rangePenalty = 2;
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
@@ -235,6 +239,7 @@
         public $rof = 2;
         
         public $loadingtime = 2;
+        public $priority = 5;
         
         public $rangePenalty = 1;
         public $fireControl = array(1, 3, 4); // fighters, <mediums, <capitals 
@@ -263,6 +268,7 @@
         public $projectilespeed = 20;
         public $animationExplosionScale = 0.20;
         public $rof = 2;
+        public $priority = 8;
         
         public $loadingtime = 3;
         
@@ -334,9 +340,10 @@
         public $rof = 2;
         public $maxpulses = 7;
         public $grouping = 15;
+        public $priority = 5;
 
         public $loadingtime = 1;
-	public $normalload = 2;
+    	public $normalload = 2;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -426,7 +433,8 @@
         public $grouping = 0;
 
         public $loadingtime = 2;
-	public $normalload = 2;
+        public $normalload = 2;
+        public $priority = 5;
         
         public $calledShotMod = -4;
 

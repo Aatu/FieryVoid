@@ -2,6 +2,8 @@
 
 	class Plasma extends Weapon{
 
+        public $priority = 6;
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -139,6 +141,7 @@
 		public $animationExplosionScale = 0.50;
 		public $trailLength = 30;
         public $flashDamage = true;
+        public $priority = 1;
 		        
         public $loadingtime = 3;
 			
@@ -159,29 +162,29 @@
 	
 	class HeavyPlasma extends Plasma{
 
-	public $name = "heavyPlasma";
+    	public $name = "heavyPlasma";
         public $displayName = "Heavy Plasma";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 15;
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
         public $animationWidth = 5;
-	public $animationExplosionScale = 0.30;
-	public $trailLength = 20;
-	public $rangeDamagePenalty = 0.5;
-		        
+    	public $animationExplosionScale = 0.30;
+    	public $trailLength = 20;
+    	public $rangeDamagePenalty = 0.5;
+    		        
         public $loadingtime = 3;
 			
         public $rangePenalty = 0.66;
         public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
-	public function getDamage($fireOrder){        return Dice::d(10,3)+13;   }
+    	public function getDamage($fireOrder){        return Dice::d(10,3)+13;   }
         public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 43 - $this->dp;      }
 
@@ -189,16 +192,16 @@
     
     class MediumPlasma extends Plasma{
 
-	public $name = "mediumPlasma";
+    	public $name = "mediumPlasma";
         public $displayName = "Medium Plasma";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 13;
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 13;
         public $animationWidth = 4;
-	public $animationExplosionScale = 0.25;
-	public $trailLength = 16;
-	public $rangeDamagePenalty = 0.5;
+    	public $animationExplosionScale = 0.25;
+    	public $trailLength = 16;
+    	public $rangeDamagePenalty = 0.5;
 		        
         public $loadingtime = 3;
 			
@@ -206,12 +209,12 @@
         public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
-	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
+    	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
         public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
 
@@ -219,16 +222,16 @@
 
         class LightPlasma extends Plasma{
 
-	public $name = "lightPlasma";
+    	public $name = "lightPlasma";
         public $displayName = "Light Plasma";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 11;
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 11;
         public $animationWidth = 3;
-	public $animationExplosionScale = 0.20;
-	public $trailLength = 12;
-	public $rangeDamagePenalty = 0.5;
+    	public $trailLength = 12;
+        public $animationExplosionScale = 0.20;
+    	public $rangeDamagePenalty = 0.5;
 		        
         public $loadingtime = 2;
 			
@@ -236,12 +239,12 @@
         public $fireControl = array(-5, 1, 3); // fighters, <=mediums, <=capitals 
 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
-	public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
+    	public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
         public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
 
@@ -250,16 +253,16 @@
 
     class PlasmaTorch extends Plasma{
 
-	public $name = "plasmaTorch";
+    	public $name = "plasmaTorch";
         public $displayName = "Plasma Torch";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 15;
+    	public $trailColor = array(75, 250, 90);
+    	public $projectilespeed = 15;
         public $animationWidth = 5;
-	public $animationExplosionScale = 0.4;
-	public $trailLength = 10;
-	public $rangeDamagePenalty = 1;
+    	public $animationExplosionScale = 0.4;
+    	public $trailLength = 10;
+    	public $rangeDamagePenalty = 1;
 		        
         public $loadingtime = 1;
 			
@@ -267,12 +270,12 @@
         public $fireControl = array(null, 0, 2); // fighters, <=mediums, <=capitals 
 
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
-	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
+    	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
         public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
 

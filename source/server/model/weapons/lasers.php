@@ -7,6 +7,7 @@
         }
         public $raking = 10;
         private $damages = array();
+        public $priority = 4;
         
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
             
@@ -122,7 +123,7 @@
         public $animation = "laser";
         public $animationColor = array(255, 11, 11);
         public $animationWidth = 4;
-        public $animationWidth2 = 0.3;
+        public $animationWidth2 = 0.2;
         
         public $loadingtime = 4;
         public $overloadable = true;
@@ -189,6 +190,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 3;
         
         public $rangePenalty = 1;
         public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals 
@@ -209,7 +211,7 @@
         public $animation = "laser";
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 4;
-        public $animationWidth2 = 0.4;
+        public $animationWidth2 = 0.2;
         
         public $loadingtime = 3;
         
@@ -250,6 +252,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 3;
         
         public $rangePenalty = 0.33;
         public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals 
