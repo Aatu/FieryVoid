@@ -44,7 +44,7 @@ class IonCannon extends Raking{
     public $animationWidth = 4;
     public $trailLength = 24;
     public $intercept = 1;
-    public $priority = 3;
+    public $priority = 4;
 
     public $loadingtime = 2;
     public $shots = 1;
@@ -84,7 +84,7 @@ class ImprovedIonCannon extends Raking{
     public $animationWidth = 5;
     public $trailLength = 24;
     public $intercept = 1;
-    public $priority = 3;
+    public $priority = 4;
 
     public $loadingtime = 2;
     public $shots = 1;

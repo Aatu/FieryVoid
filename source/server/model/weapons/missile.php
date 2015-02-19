@@ -14,7 +14,7 @@ class MissileLauncher extends Weapon
     public $distanceRange = 0;
     public $firingMode = 1;
     public $rangeMod = 0;
-    public $priority = 6;
+    public $priority = 8;
     protected $distanceRangeMod = 0;
     
     public $firingModes = array(

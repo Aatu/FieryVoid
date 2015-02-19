@@ -193,7 +193,7 @@
 
         public $intercept = 1;
         public $loadingtime = 2;
-        public $priority = 3;
+        public $priority = 4;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals

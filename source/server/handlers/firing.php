@@ -446,9 +446,12 @@ class Firing{
 			
 		if ($fire->rolled > 0)
 			return;
+
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
 		
+        debug::log("resolving: ".$ship->shipClass." weapon: ".$weapon->displayName);
+
 		$weapon->fire($gamedata, $fire);
 		
 	}

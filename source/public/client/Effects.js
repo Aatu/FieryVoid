@@ -241,15 +241,23 @@ window.effects = {
 
 
         var fo = [];
+        var fof = [];
 
         for (var x in gamedata.ships){
             var ship = gamedata.ships[x];
             
             var fires = weaponManager.getAllFireOrders(ship);
-            for (var y in fires){                
-                var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);
-                fires[y].priority = weapon.priority;
-                fo.push(fires[y]);
+
+
+            for (var y in fires){
+                if (ship.shipSizeClass === -1){
+                    fof.push(fires[y]);
+                }
+                else {
+                    var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);
+                    fires[y].priority = weapon.priority;
+                    fo.push(fires[y]);
+                }       
             }   
         }
             
@@ -261,6 +269,10 @@ window.effects = {
                 return obj1.priority-obj2.priority; 
             }
         });
+
+        for (var x in fof){
+            fo.push(fof[x]);
+        }
 
 //        console.log(fo);
 

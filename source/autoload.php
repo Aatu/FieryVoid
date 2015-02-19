@@ -99,6 +99,7 @@ spl_autoload_register(
                 'defensivesystem' => '/server/model/systems/baseSystems.php',
                 'deltav' => '/server/model/ships/raiders/deltaV.php',
                 'doublev' => '/server/model/ships/raiders/doubleV.php',
+                'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
                 'delphi' => '/server/model/ships/EA/delphi.php',
                 'demos' => '/server/model/ships/centauri/demos.php',
                 'deployment' => '/server/handlers/Deployment.php',
