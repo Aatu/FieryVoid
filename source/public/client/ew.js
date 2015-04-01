@@ -404,14 +404,17 @@ window.ew = {
         if (left < 1 || (type == "DIST" && left < 3)){
             return;
         }
-            
-		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
-			var def = ew.getDefensiveEW(selected);
-			var all = ew.getScannerOutput(selected);
-			
-			if (def-1 < all*0.5)
-				return false;
-		}
+        
+        if (ship.osat == false){            
+    		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+    			var def = ew.getDefensiveEW(selected);
+    			var all = ew.getScannerOutput(selected);
+    			
+    			if (def-1 < all*0.5)
+    				return false;
+    		}
+        }
+
 		var amount = 1;
         if (type == "DIST")
             amount = 3;
@@ -432,13 +435,15 @@ window.ew = {
 		if (left < 1)
             return;
         
-        if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
-			var def = ew.getDefensiveEW(ship);
-			var all = ew.getScannerOutput(ship);
-			
-			if (def-1 < all*0.5)
-				return false;
-		}
+        if (ship.osat == false){    
+            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
+    			var def = ew.getDefensiveEW(ship);
+    			var all = ew.getScannerOutput(ship);
+    			
+    			if (def-1 < all*0.5)
+    				return false;
+    		}
+        }
 		
         if (entry == "CCEW"){
             ship.EW.push({shipid:ship.id, type:"CCEW", amount:1, targetid:-1, turn:gamedata.turn});

@@ -146,38 +146,41 @@ class ShipSystem{
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
-        
-        $roll = Dice::d(20)+$this->getTotalDamage() + $add;
-        $criticalTypes = -1;
 
-        foreach ($this->possibleCriticals as $i=>$value){
-        
-            //print("i: $i value: $value");
-            if ($roll >= $i){
-                $criticalTypes = $value;
+        if ($ship instanceof OSAT){
+            if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
+                if ($this->getTotalDamage() > ($this->maxhealth/2)){
+          //      if ($this->getTotalDamage() > 1){
+                    $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
+                    $crits[] = $crit;
+                }
             }
-        }
-        
-        if ($criticalTypes != -1){
+        } else {
+            $roll = Dice::d(20)+$this->getTotalDamage() + $add;
+            $criticalTypes = -1;
+
+            foreach ($this->possibleCriticals as $i=>$value){
             
-            if (is_array($criticalTypes)){
-                foreach ($criticalTypes as $phpclass){
-                    $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
+                //print("i: $i value: $value");
+                if ($roll >= $i){
+                    $criticalTypes = $value;
+                }
+            }            
+            if ($criticalTypes != -1){                
+                if (is_array($criticalTypes)){
+                    foreach ($criticalTypes as $phpclass){
+                        $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
+                        if ($crit)
+                            $crits[] = $crit;
+                    }
+                }else{
+                    $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
                     if ($crit)
                         $crits[] = $crit;
-                }
-            }else{
-                $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
-                if ($crit)
-                    $crits[] = $crit;
-            }
-            
-            
-            
-        }
-        
-        return $crits;
-         
+                }                
+            }            
+        }       
+        return $crits;         
     }
     
     public function addCritical($shipid, $phpclass, $gamedata)

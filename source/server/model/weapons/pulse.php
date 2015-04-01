@@ -1,10 +1,6 @@
 <?php
 
-    class Pulse extends Weapon{
-    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+    class Pulse extends Weapon{   
         
         
         public $trailColor = array(190, 75, 20);
@@ -13,7 +9,12 @@
         public $rof = 1;
         public $maxpulses = 6;
         public $priority = 8;
-        
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            $this->shots = $this->maxpulses;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
 
         public function setSystemDataWindow($turn){
 
@@ -99,7 +100,6 @@
 
         }
         */
-    
     }
 
     class EnergyPulsar extends Pulse{

@@ -252,6 +252,17 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Molecular";
+            $this->data["Damage type"] = "Standard";
+            $this->data["Remark"] = "Destroys 1 point of Armour on hit section and all exposed systems.";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }

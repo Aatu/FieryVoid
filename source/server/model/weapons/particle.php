@@ -257,12 +257,11 @@
 
         public $name = "hvyParticleCannon";
         public $displayName = "Heavy Particle Cannon";
-        public $animation = "beam";
-        public $animationColor = array(252, 252, 252);
+        public $animation = "laser";
+        public $animationColor = array(255, 230, 100);
+        public $animationColor2 = array(255, 255, 255);
         public $animationExplosionScale = 0.45;
-        public $projectilespeed = 33;
-        public $animationWidth = 7;
-        public $trailLength = 2400;
+        public $animationWidth = 5;
         public $damageType = "raking";
         public $priority = 4;
 

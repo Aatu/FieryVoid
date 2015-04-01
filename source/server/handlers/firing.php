@@ -26,9 +26,17 @@
                 $shooter = $gd->getShipById($fire->shooterid);
 
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
+
+                $armour = 4;
+
+                if ($firingweapon instanceof Matter){
+                    $armour = 0;
+                } else if ($firingweapon instanceof Plasma){
+                    $armour = 2;
+                }
                                             
-                $damage = $firingweapon->getAvgDamage() * ceil($fire->shots/2);
-                //$hitChance = $firingweapon->calculateHit($gd, $fire);
+                $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($firingweapon->shots / 2));
+                debug::log($firingweapon->displayName.", total estimated dmg:".$damage.", considering armour of:".$armour);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
                 
                 $perc = 0;

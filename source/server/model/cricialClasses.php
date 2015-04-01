@@ -180,7 +180,6 @@ class FirstThrustIgnored extends Critical{
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
-
 }
 
 class HalfEfficiency extends Critical{
@@ -191,7 +190,15 @@ class HalfEfficiency extends Critical{
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
+}
 
+class OSATThrusterCrit extends Critical{
+
+    public $description = "Can only turn once per turn.";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
 }
 
 class SensorsDisrupted extends Critical{

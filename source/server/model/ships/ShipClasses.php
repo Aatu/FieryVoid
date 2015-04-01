@@ -1256,4 +1256,13 @@
             return null;
         }
     }
+
+    class OSAT extends MediumShip{
+        public $osat = true;        
+        public $canvasSize = 100;
+
+        public function isDisabled(){
+           return false;
+        }
+    }
 ?>
