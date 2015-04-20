@@ -12,7 +12,7 @@ class DoubleV extends FighterFlight{
 								
 								$this->forwardDefense = 5;
 								$this->sideDefense = 7;
-								$this->freethrust = 1;
+								$this->freethrust = 10;
 								$this->offensivebonus = 4;
 								$this->jinkinglimit = 8;
 								$this->turncost = 0.33;
