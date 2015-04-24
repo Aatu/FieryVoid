@@ -6,7 +6,7 @@ class Aluin extends BaseShip{
         
         $this->pointCost = 1100;
         $this->faction = "Yolu";
-        $this->phpclass = "Maltra";
+        $this->phpclass = "Aluin";
         $this->imagePath = "img/ships/aluin.png";
         $this->shipClass = "Aluin Gunship";
         $this->gravitic = true;

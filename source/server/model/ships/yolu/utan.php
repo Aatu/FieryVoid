@@ -29,10 +29,8 @@ class Utan extends FighterFlight{
             $fighter->imagePath = "img/ships/utan.png";
             $fighter->iconPath = "img/ships/utan_large.png";
 
-
             $fighter->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
-            $fighter->addFrontSystem(new LightMolecularDistruptor(330, 30, 0));
-
+            $fighter->addFrontSystem(new LightMolecularDisruptor(330, 30, 0));
 
             $this->addSystem($fighter);
 

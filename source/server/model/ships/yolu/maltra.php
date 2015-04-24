@@ -24,7 +24,7 @@ class Maltra extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(6, 20, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 32, 6, 14));
+        $this->addPrimarySystem(new ElintScanner(6, 32, 6, 14));
         $this->addPrimarySystem(new Engine(5, 18, 0, 10, 5));
         $this->addPrimarySystem(new Hangar(4, 2));
         

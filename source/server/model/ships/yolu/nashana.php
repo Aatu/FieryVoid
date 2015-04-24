@@ -1,56 +1,62 @@
 <?php
-class Notali extends BaseShip{
+class Nashana extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1000;
+	$this->pointCost = 950;
 	$this->faction = "Yolu";
-        $this->phpclass = "Notali";
-        $this->imagePath = "img/ships/notali.png";
-        $this->shipClass = "Notali Carrier";
+        $this->phpclass = "Nashana";
+        $this->imagePath = "img/ships/nashana.png";
+        $this->shipClass = "Nashana Light Cruiser";
         
         $this->forwardDefense = 15;
-        $this->sideDefense = 17;
+        $this->sideDefense = 16;
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.5;
         $this->accelcost = 3;
-        $this->rollcost = 4;
+        $this->rollcost = 3;
         $this->pivotcost = 3;
+        $this->iniativebonus = 5;
+        $this->fighters=array("normal"=>6);
         
         $this->gravitic = true;
 
-        $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 24, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 28, 12, 4);
-        $this->addPrimarySystem(new Engine(5, 23, 0, 10, 5));
-		$this->addPrimarySystem(new Hangar(4, 2));
-		$this->addPrimarySystem(new JumpDrive(5, 15, 4));
-   
-   
-        $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
+        $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
+        $this->addPrimarySystem(new CnC(7, 20, 0, 0));
+        $this->addPrimarySystem(new Scanner(6, 24, 12, 4));
+        $this->addPrimarySystem(new Engine(7, 23, 0, 12, 5));
+		$this->addPrimarySystem(new Hangar(5, 8));
+		$this->addPrimarySystem(new JumpEngine(5, 15, 4, 20));
 
-		
-        $this->addAftSystem(new GraviticThruster(5, 32, 0, 10, 2));
+        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 3, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 3, 1));
+        $this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
+        $this->addFrontSystem(new DestabilizerBeam(4, 10, 8, 300, 60));
+        $this->addFrontSystem(new FusionAgitator(5, 10, 4, 300, 60));
 
-		
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 300));
+        $this->addAftSystem(new GraviticThruster(6, 28, 0, 12, 2));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 240));
+
         $this->addLeftSystem(new GraviticThruster(5, 18, 0, 6, 3));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
 
-		
         $this->addRightSystem(new GraviticThruster(5, 18, 0, 5, 4));
-		
-		
-   
-		$this->addPrimarySystem(new Hangar(5, 12));
-		$this->addPrimarySystem(new Hangar(4, 12));
-        
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
+
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-		primary 6, 58
-		front 6 52
-		aft 5 58
-		left 6, 66
-		
-		24 fighter
+        $this->addFrontSystem(new Structure( 6, 49));
+        $this->addAftSystem(new Structure( 6, 52));
+        $this->addPrimarySystem(new Structure( 7, 60 ));
+        $this->addLeftSystem(new Structure( 6, 65));
+        $this->addRightSystem(new Structure( 6, 65 ));
     }
 }

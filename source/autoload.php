@@ -237,7 +237,7 @@ spl_autoload_register(
                 'lightfusioncannon' => '/server/model/weapons/molecular.php',
                 'lightgraviticbolt' => '/server/model/weapons/gravitic.php',
                 'lightgravitonbeam' => '/server/model/weapons/gravitic.php',
-                'lightmoleculardistruptor' => '/server/model/weapons/moelcular.php',
+                'lightmoleculardisruptor' => '/server/model/weapons/molecular.php',
                 'lightiontorpedo' => '/server/model/weapons/ammo.php',
                 'lightlaser' => '/server/model/weapons/lasers.php',
                 'lightpulse' => '/server/model/weapons/pulse.php',
