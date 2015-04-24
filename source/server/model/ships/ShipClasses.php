@@ -52,7 +52,11 @@
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
             }
-            
+
+            if($this->faction == "Yolu"){
+                return $this->doYoluInitiativeBonus($gamedata);
+            }
+
             return $this->iniativebonus;
         }
         
@@ -69,7 +73,21 @@
 
             return $this->iniativebonus;
         }
-        
+
+        private function doYoluInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                    && ($ship->faction == "Yolu")
+                    && ($this->userid == $ship->userid)
+                    && ($ship instanceof Udran)
+                    && ($this != $ship)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+
+            return $this->iniativebonus;
+        }
+
         public function setEW($ew)
         {
             $this->EW[] = $ew;
