@@ -11,6 +11,7 @@ class Yuan extends BaseShip{
         $this->shipClass = "Yuan Dreadnought";
         $this->gravitic = true;
         $this->fighters = array("normal"=>12);
+        $this->canvasSize = 280;
 
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
