@@ -44,7 +44,7 @@ class Maltra extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
 
-        $this->addRightSystem(new GraviticThruster(5, 14, 0, 4, 3)); 
+        $this->addRightSystem(new GraviticThruster(5, 14, 0, 4, 4));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         
