@@ -22,6 +22,8 @@ spl_autoload_register(
                 'maltra' => '/server/model/ships/yolu/maltra.php',
 
 */
+                'ammoexplosion' => '/server/model/cricialClasses.php',
+                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',

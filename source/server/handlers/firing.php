@@ -24,18 +24,25 @@
                 
 
                 $shooter = $gd->getShipById($fire->shooterid);
-
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
 
-                $armour = 4;
+
+                $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
+
+
+                $structure = $target->getStructureByIndex($hitLocation);
+                $armour = $structure->armour;
 
                 if ($firingweapon instanceof Matter){
                     $armour = 0;
                 } else if ($firingweapon instanceof Plasma){
-                    $armour = 2;
+                    $armour = ceil($armour/2);
                 }
                                             
                 $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($firingweapon->shots / 2));
+                if ($firingweapon instanceof Raking){
+                    $damage = $firingweapon->getAvgDamage() - (($firingweapon->getAvgDamage()/10) * $armour);
+                }
                 debug::log($firingweapon->displayName.", total estimated dmg:".$damage.", considering armour of:".$armour);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
                 

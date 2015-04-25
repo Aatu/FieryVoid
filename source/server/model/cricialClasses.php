@@ -201,6 +201,15 @@ class OSATThrusterCrit extends Critical{
     }
 }
 
+class AmmoExplosion extends Critical{
+
+    public $description = "Stored Ammunition did explode.";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+}
+
 class SensorsDisrupted extends Critical{
     public $description = "Sensors disrupted. Cannot change sensor settings. [TODO]";
     function __construct($id, $shipid, $systemid, $phpclass, $turn){

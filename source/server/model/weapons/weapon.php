@@ -213,7 +213,7 @@ class Weapon extends ShipSystem{
             $this->data["Number of guns"] = $this->guns;
         }
 
-        if ($this->shots > 1){
+        if ( !($this instanceof Pulse) && $this->shots > 1){
             $this->data["Number of shots"] = $this->shots;
         }
 
@@ -888,6 +888,8 @@ class Weapon extends ShipSystem{
     }
 
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
+
+//        var_dump($fireOrder);
 
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();

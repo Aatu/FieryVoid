@@ -52,6 +52,9 @@
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
             }
+            if($this->faction == "Dilgar"){
+                return $this->doDilgarInitiativeBonus($gamedata);
+            }
             
             return $this->iniativebonus;
         }
@@ -69,7 +72,35 @@
 
             return $this->iniativebonus;
         }
-        
+                
+        private function doDilgarInitiativeBonus($gamedata){
+
+            $mod = 0;                
+
+            if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
+                $pixPos = $this->getCoPos();
+                $ships = $gamedata->getShipsInDistance($pixPos, ((8*mathlib::$hexWidth) + 1));
+
+                foreach($ships as $ship){
+                    if( !$ship->isDestroyed()
+                            && ($ship->faction == "Dilgar")
+                            && ($this->userid == $ship->userid)
+                            && ($ship->shipSizeClass == 3)
+                            && ($this != $ship)){
+                                $cnc = $ship->getSystemByName("CnC");
+                                $bonus = $cnc->output;
+                                if ($bonus > $mod){
+                                    $mod = $bonus;
+                                } else continue;
+                    }
+                    
+                }
+            }
+            debug::log($this->phpclass."- bonus: ".$mod);
+            return $this->iniativebonus + $mod*5;
+        }
+
+
         public function setEW($ew)
         {
             $this->EW[] = $ew;
@@ -265,6 +296,14 @@
             }
             
             return null;
+        }
+
+        public function getStructureByIndex($index){
+            foreach ($this->systems as $system){
+                if ($system->displayName == "Structure" && $system->location == $index){
+                    return $system;
+                }
+            }
         }
         
         public function getHitChanceMod($shooter, $pos, $turn){

@@ -38,9 +38,9 @@ window.shipClickable = {
 	},
 	
 	doMouseOver: function(){
-        var selectedShip = gamedata.getSelectedShip();
-	var ship = shipClickable.ship;
-  console.log(ship);
+		var selectedShip = gamedata.getSelectedShip();
+		var ship = shipClickable.ship;
+		console.log(ship);
         
         if(ship == null){
             // something was moused over that isn't a ship

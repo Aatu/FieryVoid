@@ -165,7 +165,7 @@ window.effects = {
                 canvas.fillStyle = "rgba(255,"+(75+self.green)+",0,"+0.1*a+")";
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size, 0);
                 canvas.fillStyle = "rgba(255,"+(50+self.green)+",0,"+0.1*a+")";
-				graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.6, 0);
+                graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.6, 0);
                 canvas.fillStyle = "rgba(255,"+(100+self.green)+",0,"+0.1*a+")";
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.5, 0);
                 graphics.drawCircleNoStroke(canvas, pos.x, pos.y, size*0.3, 0);
@@ -323,22 +323,78 @@ window.effects = {
         
         for (var i in gamedata.ships){
             ship = gamedata.ships[i];
-            
+            for (var j = 0; j < ship.systems.length; j++){
+                system = ship.systems[j];
+                if (shipManager.criticals.hasCriticalOnTurn(system, "AmmoExplosion", gamedata.turn) && !system.destructionAnimated){
+                    scrolling.scrollToShip(ship);
+                    effects.displayAmmoExplosion(ship, system, effects.doDisplayAllWeaponFire);
+                }
+            }            
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn && ship.destructionAnimated == false){
                 scrolling.scrollToShip(ship);
+             //   effects.displayAmmoExplosion(ship, effects.doDisplayAllWeaponFire);
                 effects.displayShipDestroyed(ship, effects.doDisplayAllWeaponFire);
                 return;
-            }
-        
+            }        
         }
-        
         gamedata.effectsDrawing = false;
         windows.show();
         effects.callback();
-    
-    
-    
     },
+
+
+
+    displayAmmoExplosion: function(ship, system, call){
+    
+        combatLog.logAmmoExplosion(ship);
+        effects.animationcallback = call;
+
+        var pos = shipManager.getShipPositionInWindowCo(ship);
+        
+         var animation = {
+        
+            tics:0,
+            totalTics:40+Math.floor(Math.random()*25),
+            pos:pos,
+            variance: ship.canvasSize / 8*gamedata.zoom,
+            draw:function(self){
+               
+                if (Math.random()*self.totalTics < self.totalTics && Math.random()>0.8 && self.tics < Math.floor(self.totalTics*0.5) ){
+                    var tPos = {};
+                    tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom, 
+                    y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
+                    
+                    effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.10)+0.10}); 
+                }
+                
+                if (self.tics > Math.floor(self.totalTics*0.3) && Math.random()>0.8){
+                    var tPos = {};
+                    tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom,
+                    y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
+                    effects.addBigExplosion(tPos, {animationExplosionScale:(Math.random()*0.10)+0.10});
+                }
+                
+                if (self.tics > Math.floor(self.totalTics*0.6) && self.tics < Math.floor(self.totalTics*0.9) && Math.random()>0.2){
+                
+                    for (var i = Math.floor(Math.random()*3+1); i>0;i--){
+                        sPos = self.pos;
+                        var tPos = mathlib.getPointInDirection(
+                        (Math.round(Math.random()*20)+20)*gamedata.zoom, Math.floor(Math.random()*180),
+                         sPos.x, sPos.y);
+                        
+                        effects.makeTrailAnimation(sPos, tPos, {projectilespeed:Math.floor(Math.random()*1+1), trailLength:35, animationColor:Array(255, 175, 50), trailColor:Array(255, 75, 50), animationWidth:Math.floor(Math.random()*3+2)}, false);
+                    }
+                }   
+                self.tics++;                   
+                if (self.tics == Math.floor(self.totalTics*0.9)){
+                    system.destructionAnimated = true;
+                }
+                             
+            },
+            callback:effects.doneDisplayingWeaponFire        
+        }
+        effects.frontAnimations.push(animation);
+    },   
     
     displayShipDestroyed: function(ship, call){
     
@@ -360,7 +416,7 @@ window.effects = {
                     tPos ={x:self.pos.x + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom, 
                     y:self.pos.y + Math.floor((Math.random()*self.variance-(self.variance/2)))*gamedata.zoom};
                     
-                    effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.15)+0.15});										
+                    effects.addExplosion(tPos, {animationExplosionScale:(Math.random()*0.15)+0.15});                                        
                     
                     
                 }
@@ -631,7 +687,7 @@ window.effects = {
 
         var details = effects.getShotDetails(fire, weapon);
 
-		var hitSystem = fire.hitSystem;
+        var hitSystem = fire.hitSystem;
 
         var animation = {
             tics:0,
@@ -985,7 +1041,7 @@ window.effects = {
         
      //   var step = if (self.weapon.step = 0) 
       //  {x = 0, y = 0};
-	//	else {x:Math.random()*0.5-0.25, y:Math.random()*0.5-0.25};
+    //  else {x:Math.random()*0.5-0.25, y:Math.random()*0.5-0.25};
                 
         var animation = {
             tics:0,
@@ -1421,12 +1477,12 @@ window.effects = {
         var sPos = effects.getWeaponLocation(shooter, weapon);
         
         if (fire.rolled > fire.needed){
-			tPos = mathlib.getPointInDistanceBetween(sPos, tPos, mathlib.getDistance(sPos, tPos)+(((Math.random()*101)+200)*gamedata.zoom));
+            tPos = mathlib.getPointInDistanceBetween(sPos, tPos, mathlib.getDistance(sPos, tPos)+(((Math.random()*101)+200)*gamedata.zoom));
             tPos.x += Math.floor((Math.random()*51+40)*gamedata.zoom)-65*gamedata.zoom;
             tPos.y += Math.floor((Math.random()*51+40)*gamedata.zoom)-65*gamedata.zoom;
         }else{
-			tPos ={x:tPos.x + Math.floor((Math.random()*20-10))*gamedata.zoom, y:tPos.y + Math.floor((Math.random()*20-10))*gamedata.zoom};
-			
+            tPos ={x:tPos.x + Math.floor((Math.random()*20-10))*gamedata.zoom, y:tPos.y + Math.floor((Math.random()*20-10))*gamedata.zoom};
+            
         }
         
         
@@ -1439,15 +1495,15 @@ window.effects = {
         var shippos = shipManager.getShipPositionInWindowCo(ship);
         
         if (ship.flight){
-			
-			var fighter = shipManager.systems.getFighterBySystem(ship, weapon.id);
-			var offset = shipManager.getFighterPosition(fighter.location, 0, 1);
-		
-			shippos.x += offset.x;
-			shippos.y += offset.y;
-			
-			return shippos;
-		}
+            
+            var fighter = shipManager.systems.getFighterBySystem(ship, weapon.id);
+            var offset = shipManager.getFighterPosition(fighter.location, 0, 1);
+        
+            shippos.x += offset.x;
+            shippos.y += offset.y;
+            
+            return shippos;
+        }
         
         
         if (weapon.location == 0)

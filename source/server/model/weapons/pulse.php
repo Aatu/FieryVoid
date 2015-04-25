@@ -22,7 +22,7 @@
             $this->data["Damage type"] = "Standard";
             $this->data["Grouping range"] = $this->grouping + "%";
             $this->data["Max pulses"] = $this->maxpulses;
-            $this->data["Pulses"] = '1-5';
+            $this->data["Pulses"] = 'D 5';
             
             parent::setSystemDataWindow($turn);
         }
@@ -126,6 +126,14 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+
+        public function setSystemDataWindow($turn){
+            
+            parent::setSystemDataWindow($turn);
+            $this->data["Pulses"] = 'D 2';
+        }
+
         
         protected function getPulses($turn)
         {
@@ -154,8 +162,8 @@
         public $intercept = 2;
         public $priority = 2;
         
-        public $rangePenalty = 2;
-        public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals 
+        public $rangePenalty = 0.2;
+        public $fireControl = array(3, 20, 10); // fighters, <mediums, <capitals 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -187,7 +195,12 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
+
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);
+            $this->data["Pulses"] = 'D 3';            
+        }
+
         protected function getPulses($turn)
         {
             return Dice::d(3);
@@ -441,7 +454,7 @@
         public $intercept = 3;
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 3, 15); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -465,7 +478,7 @@
             unset($this->data["Max pulses"]);
         }
         
-        public function getDamage($fireOrder){ return 10 - $this->dp; }
+        public function getDamage($fireOrder){ return 5 - $this->dp; }
  
         public function setMinDamage()
         {
@@ -521,7 +534,8 @@
 
         protected function getPulses($turn)
         {
-            return 3;
+            return 1;
+         //   return 3;
         }
     }
 
