@@ -312,7 +312,7 @@
         public $animationExplosionScale = 0.15;
 
         public $intercept = 0;
-        public $loadingtime = 1;
+        public $loadingtime = 3;
         public $raking = 6;
         public $addedDice;
         public $priority = 4;

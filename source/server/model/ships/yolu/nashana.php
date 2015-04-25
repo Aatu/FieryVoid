@@ -25,7 +25,7 @@ class Nashana extends BaseShip{
 
         $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
         $this->addPrimarySystem(new CnC(7, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 24, 12, 4));
+        $this->addPrimarySystem(new Scanner(6, 24, 4, 12));
         $this->addPrimarySystem(new Engine(7, 23, 0, 12, 5));
 		$this->addPrimarySystem(new Hangar(5, 8));
 		$this->addPrimarySystem(new JumpEngine(5, 15, 4, 20));
