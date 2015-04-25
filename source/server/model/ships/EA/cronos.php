@@ -4,8 +4,8 @@ class Cronos extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 800;
-	$this->faction = "EA";
+        $this->pointCost = 800;
+        $this->faction = "EA";
         $this->phpclass = "Cronos";
         $this->imagePath = "img/ships/cronos.png";
         $this->shipClass = "Cronos Attack Frigate";

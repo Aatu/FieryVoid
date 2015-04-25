@@ -40,7 +40,7 @@ window.shipClickable = {
 	doMouseOver: function(){
         var selectedShip = gamedata.getSelectedShip();
 	var ship = shipClickable.ship;
- // console.log(ship);
+  console.log(ship);
         
         if(ship == null){
             // something was moused over that isn't a ship
@@ -106,9 +106,8 @@ window.shipClickable = {
             shipClickable.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
             shipClickable.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
             shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
-            shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
-            shipClickable.addEntryElement("Iniative: (D100 + " + ship.iniativebonus + ")");
-            shipClickable.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship));
+            shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship) + "    (" + ship.accelcost + ")");
+            shipClickable.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
             shipClickable.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
             shipClickable.addEntryElement(misc, ship.flight != true);
             shipClickable.addEntryElement(flightArmour, ship.flight === true);
