@@ -27,8 +27,7 @@ class Vakar extends BaseShip{
         //primary
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 21, 6, 10));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new ElintScanner(5, 21, 6, 10));
         $this->addPrimarySystem(new Engine(4, 14, 0, 12, 2));
         $this->addPrimarySystem(new JumpEngine(5, 18, 3, 20));
         $this->addPrimarySystem(new Hangar(5, 7));

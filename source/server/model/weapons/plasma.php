@@ -2,7 +2,7 @@
 
 	class Plasma extends Weapon{
 
-        public $priority = 6;
+        public $priority = 8;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

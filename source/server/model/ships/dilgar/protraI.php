@@ -14,6 +14,7 @@ class ProtraI extends BaseShip{
         $this->iniativebonus = 5;
         
         $this->limited = 33;
+        $this->occurence = "uncommon";
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

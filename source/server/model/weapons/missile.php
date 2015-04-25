@@ -1,7 +1,6 @@
     <?php
 
-class MissileLauncher extends Weapon
-{
+class MissileLauncher extends Weapon{
     public $useOEW = false;
     public $ballistic = true;
     public $trailColor = array(141, 240, 255);
@@ -14,7 +13,9 @@ class MissileLauncher extends Weapon
     public $distanceRange = 0;
     public $firingMode = 1;
     public $rangeMod = 0;
-    public $priority = 6;
+    public $priority = 8;
+    public $hits = array();
+
     protected $distanceRangeMod = 0;
     
     public $firingModes = array(
@@ -23,8 +24,7 @@ class MissileLauncher extends Weapon
     
     public $missileArray = array();
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-    {
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
@@ -32,8 +32,7 @@ class MissileLauncher extends Weapon
         );
     }
 
-    public function setSystemDataWindow($turn)
-    {
+    public function setSystemDataWindow($turn){
         $this->data["Weapon type"] = "Missile";
         $this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = "Basic missile";
@@ -41,8 +40,7 @@ class MissileLauncher extends Weapon
         parent::setSystemDataWindow($turn);
     }
     
-    public function isInDistanceRange($shooter, $target, $fireOrder)
-    {
+    public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
         $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
     
@@ -51,7 +49,6 @@ class MissileLauncher extends Weapon
             $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
             return false;
         }
-        
         return true;
     }
     
@@ -61,14 +58,144 @@ class MissileLauncher extends Weapon
         }
     }
     
-    protected function getAmmo($fireOrder)
-    {
+    protected function getAmmo($fireOrder){
         return $this->missileArray[$fireOrder->firingMode];
     }
-}
 
-class SMissileRack extends MissileLauncher
-{
+    public function testAmmoExplosion($ship, $gamedata){
+        $roll = Dice::d(20);
+        if ($roll){
+            $amount = 60;
+            $this->ammoExplosion($ship, $gamedata, $amount);
+            $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
+        }
+    }
+
+
+    public function ammoExplosion($ship, $gamedata, $amount){
+        $rake = 10;
+        $left = $amount;
+
+        while ($left > 0){
+            if ($ship->isDestroyed()){
+                break;
+            }
+        $system = $this->getHitSystem($ship);
+        $this->ammoExplosionDamage($ship, $system, $rake, $gamedata);
+        $left -= $rake;
+        }
+    }
+
+
+    public function getHitSystem($ship){
+
+        $systems = array();
+        $total = 0;
+        $current = 0;
+        foreach ($ship->systems as $system){
+            if ($system->location == $this->location){
+                $systems[] = $system;
+
+                $multi = 1;
+
+                if ($system instanceof Structure){
+                    $multi = 0.5;
+                }
+                $total += $system->maxhealth * $multi;
+            }
+        }
+
+        foreach ($systems as $system){
+            $multi = 1;
+            if ($system instanceof Structure){
+                $multi = 0.5;
+            }
+
+            $current += $system->maxhealth * $multi;
+            $roll = Dice::d($total);
+
+            if ($roll <= $current){
+                if ($system->isDestroyed()){
+                    foreach ($ship->systems as $sys){
+                        if ( $sys->location == $system->location && !$sys->isDestroyed() && get_class($sys) == get_class($system) ){
+               //     debug::log($system->displayName." destroyed, taking new one");
+                            $system = $sys;
+                        }
+                    }
+                }
+                if ($system->isDestroyed()){
+                    $system = $ship->getStructureSystem($this->location);
+                }
+                return $system;
+            }
+        }
+    }
+
+
+    public function ammoExplosionDamage($ship, $system, $damage, $gamedata){
+
+        $armour = $system->armour;
+        foreach ($this->hits as $previous){
+            if ($previous->systemid == $system->id)
+                $armour -= $previous->damage;
+        }
+        
+        $systemHealth = $system->getRemainingHealth();
+        $modifiedDamage = $damage;
+        
+        if ($armour < 0)
+            $armour = 0;
+        
+        $destroyed = false;
+
+        if ($damage-$armour >= $systemHealth){
+            $destroyed = true;
+            $modifiedDamage = $systemHealth + $armour;
+        }
+        
+        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, $modifiedDamage, $armour, 0, -1, $destroyed, "");
+        $damageEntry->updated = true;
+        $system->damage[] = $damageEntry;
+        $this->hits[] = $damageEntry;
+        debug::log("dmg vs:".$system->displayName." for: ".$modifiedDamage." armour: ".$armour." destroyed: ".$destroyed);
+
+        if ($damage-$armour > $systemHealth){        
+            $damage = $damage-$modifiedDamage;             
+            $okSystem = $ship->getStructureSystem($this->location);
+                if ($okSystem->isDestroyed()){
+                    $okSystem = $ship->getStructureSystem(0);
+                }
+            $armour = $okSystem->armour;
+            $destroyed = false;
+
+            if ($damage-$armour >= $systemHealth){
+                $destroyed = true;
+            }
+
+
+
+        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $okSystem->id, $damage, $armour, 0, -1, $destroyed, "");
+        $okSystem->damage[] = $damageEntry;
+        $this->hits[] = $damageEntry;
+        //$this->damages[] = $damageEntry;
+        debug::log("OK vs:".$okSystem->displayName." for: ".$damage." armour: ".$armour." destroyed: ".$destroyed);
+        }
+    }
+
+    
+    public function addCritical($shipid, $phpclass, $gamedata){
+
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+        return $crit;
+    }
+
+}       
+
+
+
+class SMissileRack extends MissileLauncher{
     public $name = "sMissileRack";
     public $displayName = "Class-S Missile Rack";
     public $range = 20;

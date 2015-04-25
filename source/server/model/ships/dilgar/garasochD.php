@@ -26,7 +26,7 @@ class GarasochD extends BaseShip{
         $this->pivotcost = 3;
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 25, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 25, 0, 2));
         $this->addPrimarySystem(new Scanner(5, 14, 3, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 4));
         $this->addPrimarySystem(new Hangar(4, 28));

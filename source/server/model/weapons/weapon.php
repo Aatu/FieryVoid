@@ -213,7 +213,7 @@ class Weapon extends ShipSystem{
             $this->data["Number of guns"] = $this->guns;
         }
 
-        if ($this->shots > 1){
+        if ( !($this instanceof Pulse) && $this->shots > 1){
             $this->data["Number of shots"] = $this->shots;
         }
 
@@ -526,7 +526,7 @@ class Weapon extends ShipSystem{
         if (!($shooter instanceof FighterFlight))
         {
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
-                debug::log("apllying malus for rolling");
+        //        debug::log("apllying malus for roll");
                 $mod -=3;
             }
 
@@ -536,6 +536,11 @@ class Weapon extends ShipSystem{
         }
         if ($fireOrder->calledid != -1){
             $mod += $this->getCalledShotMod();
+        }
+
+        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
+            debug::log("applying turn malus");
+            $mod -= 1;
         }
 
         $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
@@ -568,7 +573,8 @@ class Weapon extends ShipSystem{
             }
         }
 
-        if (!($shooter instanceof FighterFlight)){
+        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
+
 			$CnC = $shooter->getSystemByName("CnC");
 			$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
 		}
@@ -592,6 +598,7 @@ class Weapon extends ShipSystem{
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
+    
     }
 
     public function getIntercept($gamedata, $fireOrder){
@@ -881,6 +888,8 @@ class Weapon extends ShipSystem{
     }
 
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
+
+//        var_dump($fireOrder);
 
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();

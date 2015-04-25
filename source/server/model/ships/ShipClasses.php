@@ -186,13 +186,13 @@
         }
         
         public function getMovementById($id){
-			foreach ($this->movement as $move){
-				if ($move->id === $id)
-					return $move;
-			}
-			
-			return null;
-		}
+            foreach ($this->movement as $move){
+                if ($move->id === $id)
+                    return $move;
+            }
+            
+            return null;
+        }
         
         public function getLastMovement(){
             $m = 0;
@@ -302,10 +302,10 @@
                 
             }
             return (-array_sum($affectingSystems));
-	}
+    }
         
         public function getDamageMod($shooter, $pos, $turn){
-			$affectingSystems = array();
+            $affectingSystems = array();
             foreach($this->systems as $system){
                 
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
@@ -320,7 +320,7 @@
                 
             }
             return array_sum($affectingSystems);
-		}
+        }
         
         private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn){
             if (!($system instanceof DefensiveSystem))
@@ -443,17 +443,17 @@
 
         public function getOEW($target, $turn){
         
-			if ($target instanceof FighterFlight){
-				foreach ($this->EW as $EW){
-					if ($EW->type == "CCEW" && $EW->turn == $turn)
-						return $EW->amount;
-				}
-			}else{
-				foreach ($this->EW as $EW){
-					if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
-						return $EW->amount;
-				}
-			}
+            if ($target instanceof FighterFlight){
+                foreach ($this->EW as $EW){
+                    if ($EW->type == "CCEW" && $EW->turn == $turn)
+                        return $EW->amount;
+                }
+            }else{
+                foreach ($this->EW as $EW){
+                    if ($EW->type == "OEW" && $EW->targetid == $target->id && $EW->turn == $turn)
+                        return $EW->amount;
+                }
+            }
         
             
             
@@ -462,7 +462,7 @@
         
         public function getOEWTargetNum($turn){
         
-			$amount = 0;
+            $amount = 0;
             foreach ($this->EW as $EW){
                 if ($EW->type == "OEW" && $EW->turn == $turn)
                     $amount++;
@@ -556,7 +556,7 @@
             
             if ($location != 0){
                 if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) 
-					&& !$weapon->flashDamage){
+                    && !$weapon->flashDamage){
                     return 0;
                 }
                     
@@ -607,7 +607,7 @@
                 return true;
             
             $CnC = $this->getSystemByName("CnC");
-			if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
+            if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
                 return true;
             
             return false;
@@ -812,7 +812,7 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-						
+                        
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
             $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
