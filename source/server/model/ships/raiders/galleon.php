@@ -27,8 +27,6 @@ class Galleon extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 8));
-        $this->addPrimarySystem(new CargoBay(3, 70));
-        $this->addPrimarySystem(new CargoBay(3, 70));
         $this->addPrimarySystem(new Hangar(3, 8));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
@@ -42,10 +40,12 @@ class Galleon extends HeavyCombatVessel{
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 240, 360));
         $this->addFrontSystem(new MediumPlasma(3, 6, 3, 0, 120));
         $this->addFrontSystem(new ParticleCannon(3, 8, 8, 0, 120));
+        $this->addFrontSystem(new CargoBay(3, 35));
 
+        $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
+        $this->addAftSystem(new CargoBay(3, 35));
         $this->addAftSystem(new TwinArray(2, 6, 2, 180, 360));
         $this->addAftSystem(new TwinArray(2, 6, 2, 0, 180));
-        $this->addAftSystem(new Thruster(4, 20, 0, 8, 2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));

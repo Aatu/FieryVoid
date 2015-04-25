@@ -97,7 +97,7 @@
 
 
         function __construct($startArc, $endArc, $damagebonus, $shots){
-			$this->damagebonus = $damagebonus;
+            $this->damagebonus = $damagebonus;
             $this->shots = $shots;
             $this->defaultShots = $shots;
             

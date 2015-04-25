@@ -25,7 +25,7 @@
             parent::setSystemDataWindow($turn);
         }
 
-        public $priority = 8;
+        public $priority = 9;
     }
 
     class MatterCannon extends Matter

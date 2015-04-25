@@ -7,9 +7,9 @@
         }
         public $raking = 10;
         private $damages = array();
-        public $priority = 4;
+        public $priority = 3;
         
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
             
             $rake = $this->raking;
             
@@ -87,13 +87,7 @@
                 if ($overkillSystem != null)
                     $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
             }
-        
-            
-        
         }
-        
-        
-    
     }
     
     class Laser extends Raking{
@@ -113,7 +107,6 @@
         }
     
         
-    
     }
 
     class HeavyLaser extends Laser{
@@ -144,8 +137,8 @@
         public function setMaxDamage(){     $this->maxDamage = 60 - $this->dp;      }
         
         
-        
     }
+
     
     class MediumLaser extends Laser{
         
@@ -190,7 +183,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
-        public $priority = 3;
+        public $priority = 4;
         
         public $rangePenalty = 1;
         public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals 
@@ -252,7 +245,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
-        public $priority = 3;
+        public $priority = 4;
         
         public $rangePenalty = 0.33;
         public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals 

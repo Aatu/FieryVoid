@@ -57,13 +57,13 @@
             
             switch($this->getBoostLevel($turn)){
                 case 0:
-                    $this->data["Pulses"] = '1-2';
+                    $this->data["Pulses"] = 'D 2';
                     break;
                 case 1:
-                    $this->data["Pulses"] = '1-3';
+                    $this->data["Pulses"] = 'D 3 +1';
                     break;
                 case 2:
-                    $this->data["Pulses"] = '1-3';
+                    $this->data["Pulses"] = 'D 3 +2';
                     break;
             }            
 

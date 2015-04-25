@@ -24,11 +24,27 @@
                 
 
                 $shooter = $gd->getShipById($fire->shooterid);
-
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
+
+
+                $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
+
+
+                $structure = $target->getStructureByIndex($hitLocation);
+                $armour = $structure->armour;
+
+                if ($firingweapon instanceof Matter){
+                    $armour = 0;
+                } else if ($firingweapon instanceof Plasma){
+                    $armour = ceil($armour/2);
+                }
                                             
-                $damage = $firingweapon->getAvgDamage() * ceil($fire->shots/2);
-                //$hitChance = $firingweapon->calculateHit($gd, $fire);
+                $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($firingweapon->shots / 2));
+
+                if ($firingweapon instanceof Raking){
+                    $damage = $firingweapon->getAvgDamage() - (($firingweapon->getAvgDamage() / $firingweapon->raking) * $armour);
+                }
+                debug::log($firingweapon->displayName.", total estimated dmg:".$damage.", considering armour of:".$armour);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
                 
                 $perc = 0;
@@ -446,9 +462,12 @@ class Firing{
 			
 		if ($fire->rolled > 0)
 			return;
+
 		
 		$weapon = $ship->getSystemById($fire->weaponid);
 		
+        debug::log("resolving: ".$ship->shipClass." weapon: ".$weapon->displayName);
+
 		$weapon->fire($gamedata, $fire);
 		
 	}

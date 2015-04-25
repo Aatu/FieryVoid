@@ -1,13 +1,13 @@
 <?php
-class DoubleV extends FighterFlight{
+class DoubleV_Nav extends FighterFlight{
 				
 				function __construct($id, $userid, $name,  $slot){
 								parent::__construct($id, $userid, $name,  $slot);
 								
-	$this->pointCost = 288;
+	$this->pointCost = 348;
 	$this->faction = "Raiders";
-						$this->phpclass = "DoubleV";
-							$this->shipClass = "Double-V Medium Flight";
+$this->phpclass = "DoubleV_Nav";
+$this->shipClass = "Double-V Medium Flight (with navigator)";
 	$this->imagePath = "img/ships/doubleV.png";
 								
 								$this->forwardDefense = 5;
@@ -16,6 +16,7 @@ class DoubleV extends FighterFlight{
 								$this->offensivebonus = 4;
 								$this->jinkinglimit = 8;
 								$this->turncost = 0.33;
+        $this->hasNavigator = true;
 								
 	$this->iniativebonus = 90;
 								
@@ -27,6 +28,7 @@ class DoubleV extends FighterFlight{
 		$fighter->iconPath = "img/ships/doubleV_large.png";
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
+		$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 			
 		$this->addSystem($fighter);
 	}

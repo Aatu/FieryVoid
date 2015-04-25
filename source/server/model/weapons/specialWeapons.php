@@ -68,7 +68,7 @@
         public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
-        public $priority = 1;
+        public $priority = 5;
 
         public $loadingtime = 2;
 
@@ -203,7 +203,7 @@
         public $animationExplosionScale = 0.10;
         // You have to take a look at this.
         public $trailLength = 30;
-        public $priority = 10;
+        public $priority = 1;
 
         public $loadingtime = 2;
         public $rangePenalty = 3;

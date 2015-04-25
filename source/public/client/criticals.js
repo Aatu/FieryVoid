@@ -3,9 +3,9 @@ window.shipManager.criticals = {
     hasCritical: function(system, name){
         var amount = 0;
         if (!system)
-			console.trace();
+            console.trace();
      
-		
+        
         for (var i in system.criticals){
             var crit = system.criticals[i];
             if (crit.phpclass == name)
@@ -13,6 +13,17 @@ window.shipManager.criticals = {
         }
         return amount;
     },
+
+    hasCriticalOnTurn: function(system, name, turn){        
+        for (var i in system.criticals){
+            var crit = system.criticals[i];
+            if (crit.phpclass == name && crit.turn == turn){
+                return true;
+            }
+        }
+        return false
+    },
+
     
     getCritical: function(system, name){
 		for (var i in system.criticals){

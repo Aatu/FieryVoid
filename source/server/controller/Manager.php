@@ -622,12 +622,12 @@ class Manager{
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-        Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
+     //   Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
-        Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
+    //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
         
         
         Criticals::setCriticals($servergamedata);
@@ -727,24 +727,25 @@ class Manager{
             $mod = 0;
             $speed = $ship->getSpeed();
         
-            if ( $speed < 5){
-                $mod = (5-$speed)*10;
-            }
-            
-            $CnC = $ship->getSystemByName("CnC");
-            
-            if ($CnC){
-				$mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
-				$mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-				$mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+            if ( !($ship instanceof OSAT) ){
+           //     debug::log("speed check for: ".$ship->shipClass);
+                if ($speed < 5){
+                    $mod = (5-$speed)*10;
+                }
+
+                $CnC = $ship->getSystemByName("CnC");
+
+                if ($CnC){
+                    $mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
+                    $mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
+                    $mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+                }
 			}
-            
-            
-                        
             $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
+           //debug::log("ini submit for: ".$ship->shipClass."---:".$ship->iniative);
+
         }
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
-        
     }
     
     private static function getShipsFromJSON($json){
