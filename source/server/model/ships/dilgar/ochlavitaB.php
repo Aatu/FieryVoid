@@ -13,6 +13,8 @@ class OchlavitaB extends HeavyCombatVessel{
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
         
+        $this->occurence = "uncommon";
+        
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
         $this->accelcost = 2;

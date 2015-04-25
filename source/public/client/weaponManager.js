@@ -270,14 +270,13 @@ window.weaponManager = {
 		}
 
 		if (weaponManager.checkConflictingFireOrder(ship, weapon, alert)){
-			return;
+			return;selectWeapon
 		}
 
 		if (!weaponManager.isLoaded(weapon))
 			return;
 
 		if (ship.shipSizeClass < 0){
-			console.log(ship);
 			for (var i = 0; i < ship.systems.length; i++){
 				for (var b = 0; i < ship.systems.systems; b++){
 					if (ship.systems[i].systems[b].weapon){
@@ -286,6 +285,7 @@ window.weaponManager = {
 					}
 				}
 			}
+
 		}
 
 		gamedata.selectedSystems.push(weapon);
@@ -520,8 +520,13 @@ window.weaponManager = {
 
 		mod -= target.getHitChangeMod(shooter, ball.position);
 
-		if (!shooter.flight)
+		if (!shooter.flight || !shooter.osat)
 			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+
+		if (shooter.osat && shipManager.movement.hasTurned(shooter)){
+			console.log("osat turn -1");
+			mod -= 1;
+		}
 
 		if (calledid)
 			mod -= 8;
@@ -533,7 +538,7 @@ window.weaponManager = {
 		var goal = (baseDef - rangePenalty - intercept + oew + soew + firecontrol + mod);
 
 		var change = Math.round((goal/20)*100);
-		console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+	//	console.log("rangePenalty: " + rangePenalty + "intercept: " + intercept + " baseDef: " + baseDef + " oew: " + oew + " defence: " + defence + " firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
 
 		return change;
 
@@ -646,16 +651,24 @@ window.weaponManager = {
 
 //			if (shipManager.movement.hasRolled(shooter)){
 			if (shipManager.movement.isRolling(shooter)){
-				console.log("is rolling -3");
+		//		console.log("is rolling -3");
 				mod -= 3;
 			}
 
 
 			if (shipManager.movement.hasPivotedForShooting(shooter)){
-				console.log("pivoting");
+		//		console.log("pivoting");
 				mod -= 3;
 			}
-			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+
+			if (shooter.osat && shipManager.movement.hasTurned(shooter)){
+				console.log("osat turn -1");
+				mod -= 1;
+			}
+
+			if (!shooter.osat){
+				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+			}
 		}
 
 		if (calledid){

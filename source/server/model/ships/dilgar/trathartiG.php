@@ -24,7 +24,7 @@ class TrathartiG extends BaseShip{
         $this->pivotcost = 2;
 
         $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 15, 0, 2));
+        $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 9));
         $this->addPrimarySystem(new Engine(4, 13, 0, 6, 3));
         $this->addPrimarySystem(new Hangar(3, 2));

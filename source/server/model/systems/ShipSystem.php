@@ -21,6 +21,7 @@ class ShipSystem{
 
     public $data = array();
     public $critData = array();
+    public $destructionAnimated = false;
     public $imagePath, $iconPath;
     
     public $possibleCriticals = array();
@@ -146,7 +147,21 @@ class ShipSystem{
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
-        
+
+        if ($ship instanceof OSAT){
+            if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
+                if ($this->getTotalDamage() > ($this->maxhealth/2)){
+          //      if ($this->getTotalDamage() > 1){
+                    $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
+                    $crits[] = $crit;
+                }
+            }
+        }
+        if ($this instanceof MissileLauncher){
+            $crit = $this->testAmmoExplosion($ship, $gamedata);
+            $crits[] = $crit;
+        }
+
         $roll = Dice::d(20)+$this->getTotalDamage() + $add;
         $criticalTypes = -1;
 
@@ -156,10 +171,8 @@ class ShipSystem{
             if ($roll >= $i){
                 $criticalTypes = $value;
             }
-        }
-        
-        if ($criticalTypes != -1){
-            
+        }            
+        if ($criticalTypes != -1){                
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){
                     $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
@@ -170,18 +183,13 @@ class ShipSystem{
                 $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
                 if ($crit)
                     $crits[] = $crit;
-            }
-            
-            
-            
+            }                
         }
-        
-        return $crits;
-         
+        return $crits;         
     }
     
-    public function addCritical($shipid, $phpclass, $gamedata)
-    {
+    public function addCritical($shipid, $phpclass, $gamedata){
+
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
@@ -199,9 +207,7 @@ class ShipSystem{
                 $count++;
                 }
             }
-                
         }
-    
         return $count;
     }
     

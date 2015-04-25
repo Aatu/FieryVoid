@@ -94,7 +94,16 @@
                 if ($move->type == "isPivotingRight" || $move->type == "isPivotingLeft" )
                     return true;
             }
+            return false;
+        }
 
+        public static function hasTurned($ship, $turn){
+            foreach ($ship->movement as $move){
+                if ($move->turn != $turn)
+                    continue;
+                if ($move->type == "turneleft" || $move->type == "turnright" )
+                    return true;
+           }
             return false;
         }
         

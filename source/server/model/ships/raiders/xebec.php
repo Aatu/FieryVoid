@@ -4,8 +4,8 @@ class Xebec extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
-	$this->faction = "Raiders";
+    	$this->pointCost = 300;
+    	$this->faction = "Raiders";
         $this->phpclass = "Xebec";
         $this->imagePath = "img/ships/xebec.png";
         $this->shipClass = "Xebec";
@@ -27,6 +27,7 @@ class Xebec extends MediumShip{
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
 
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
+        $this->addPrimarySystem(new Engine(3, 18, 0, 12, 2));
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 3));
         $this->addPrimarySystem(new CargoBay(2, 18));

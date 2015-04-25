@@ -40,7 +40,7 @@ shipManager.systems = {
     },
     
     isEngineDestroyed: function(ship){
-	if (ship.flight)
+	if (ship.flight || ship.osat)
             return false;
 		
         // Check all engines, as Dilgar have two of them.
@@ -362,8 +362,9 @@ shipManager.systems = {
     getMisc: function(ship){
         var tc = ship.turncost;
         var td = ship.turndelaycost;
-        
-        return "static TurnCost: " + tc + " TurnDelay: " + td;
+
+
+        return "TurnCost: " + tc + " TurnDelay: " + td;
     },
 	  
     getFlightArmour: function(ship, system){

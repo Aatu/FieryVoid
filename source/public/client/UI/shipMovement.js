@@ -39,7 +39,10 @@ window.UI = {
                 
                 UI.shipMovement.cancelElement.on("click", UI.shipMovement.cancelCallback);
                 
-                UI.shipMovement.moveElement.on("click", UI.shipMovement.moveCallback);
+                if (gamedata.gamephase != -1){
+                   UI.shipMovement.moveElement.on("click", UI.shipMovement.moveCallback);
+                }
+
                 UI.shipMovement.turnrightElement.on("click", UI.shipMovement.turnrightCallback);
                 UI.shipMovement.turnleftElement.on("click", UI.shipMovement.turnleftCallback);
                 UI.shipMovement.sliprightElement.on("click", UI.shipMovement.sliprightCallback);
@@ -112,6 +115,9 @@ window.UI = {
             e.stopPropagation();
                 
             var ship = gamedata.getActiveShip();
+                if (!ship)
+                ship = gamedata.getSelectedShip();
+
             shipManager.movement.changeSpeed(ship, true);
         },
         
@@ -119,6 +125,8 @@ window.UI = {
             e.stopPropagation();
                 
             var ship = gamedata.getActiveShip();
+                if (!ship)
+                ship = gamedata.getSelectedShip();
             shipManager.movement.changeSpeed(ship, false);
         },
         
@@ -198,10 +206,9 @@ window.UI = {
         
         moveCallback: function(e){
             e.stopPropagation();
+            
             if (UI.shipMovement.checkUITimeout())
                 return false;
-                
-            
     
             var ship = gamedata.getActiveShip();
             
@@ -235,12 +242,18 @@ window.UI = {
             
             var move = UI.shipMovement.moveElement;
             var s = 40;
+
             
             if (shipManager.movement.canMove(ship)){
                 UI.shipMovement.drawUIElement(move, pos.x, pos.y, s*1.3, dis*1.4, angle, "img/move.png", "movecanvas", shipHeading);
                 UI.shipMovement.speedElement.html(shipManager.movement.getRemainingMovement(ship));
             }else{
                 move.hide();
+            }
+            
+            if (gamedata.gamephase == -1 && shipManager.movement.canChangeSpeed(ship)){                
+                UI.shipMovement.drawUIElement(move, pos.x, pos.y, s*1.3, dis*1.4, angle, "img/move.png", "movecanvas", shipHeading);
+                UI.shipMovement.speedElement.html(shipManager.movement.getRemainingMovement(ship));
             }
             
             dis = 55;
