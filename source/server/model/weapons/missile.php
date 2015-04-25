@@ -83,7 +83,6 @@ class MissileLauncher extends Weapon{
         $system = $this->getHitSystem($ship);
         $this->ammoExplosionDamage($ship, $system, $rake, $gamedata);
         $left -= $rake;
-        $this->various[] = $system->id;
         }
     }
 

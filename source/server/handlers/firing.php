@@ -40,8 +40,9 @@
                 }
                                             
                 $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($firingweapon->shots / 2));
+
                 if ($firingweapon instanceof Raking){
-                    $damage = $firingweapon->getAvgDamage() - (($firingweapon->getAvgDamage()/10) * $armour);
+                    $damage = $firingweapon->getAvgDamage() - (($firingweapon->getAvgDamage() / $firingweapon->raking) * $armour);
                 }
                 debug::log($firingweapon->displayName.", total estimated dmg:".$damage.", considering armour of:".$armour);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);

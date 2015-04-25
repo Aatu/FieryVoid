@@ -55,6 +55,9 @@
             if($this->faction == "Dilgar"){
                 return $this->doDilgarInitiativeBonus($gamedata);
             }
+            if($this->faction == "Yolu"){
+                return $this->doYoluInitiativeBonus($gamedata);
+            }
             
             return $this->iniativebonus;
         }
@@ -92,12 +95,24 @@
                                 if ($bonus > $mod){
                                     $mod = $bonus;
                                 } else continue;
-                    }
-                    
+                    }                    
                 }
             }
-            debug::log($this->phpclass."- bonus: ".$mod);
+        //    debug::log($this->phpclass."- bonus: ".$mod);
             return $this->iniativebonus + $mod*5;
+        }
+
+        private function doYoluInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                    && ($ship->faction == "Yolu")
+                    && ($this->userid == $ship->userid)
+                    && ($ship instanceof Udran)
+                    && ($this != $ship)){
+                    return ($this->iniativebonus+5);
+                }
+            }
+        return $this->iniativebonus;
         }
 
 

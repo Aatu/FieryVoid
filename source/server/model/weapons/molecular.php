@@ -97,7 +97,7 @@
 
 
         function __construct($startArc, $endArc, $damagebonus, $shots){
-			$this->damagebonus = $damagebonus;
+            $this->damagebonus = $damagebonus;
             $this->shots = $shots;
             $this->defaultShots = $shots;
             
@@ -156,7 +156,7 @@
 
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
 
-            if ( $target instanceof FighterFlight)
+            if ( $target instanceof FighterFlight || $target instanceof SuperHeavyFighter)
             {
                 return;
             }
@@ -175,7 +175,7 @@
             $crit->updated = true;
             $crit->inEffect = false;
 
-            if ( $structTarget != null ){
+            if ( $structTarget != null &&  $structTarget->armour > 0){
                 $structTarget->criticals[] = $crit;
             }
             //$structTarget->setCriticals($crit, $gamedata->turn);
@@ -252,17 +252,6 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Molecular";
-            $this->data["Damage type"] = "Standard";
-            $this->data["Remark"] = "Destroys 1 point of Armour on hit section and all exposed systems.";
-
-            parent::setSystemDataWindow($turn);
-        }
-
-
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
@@ -283,7 +272,9 @@
                     $crit->updated = true;
                     $crit->inEffect = false;
 
-                    $system->criticals[] = $crit;
+                    if($system->armor > 0) {
+                        $system->criticals[] = $crit;
+                    }
                 }
             }
             else{
@@ -297,7 +288,9 @@
                         $crit->updated = true;
                         $crit->inEffect = false;
 
-                       $system->criticals[] = $crit;
+                        if ( $system->armour > 0) {
+                            $system->criticals[] = $crit;
+                        }
                     }
                 }
             }
@@ -319,7 +312,7 @@
         public $animationExplosionScale = 0.15;
 
         public $intercept = 0;
-        public $loadingtime = 1;
+        public $loadingtime = 3;
         public $raking = 6;
         public $addedDice;
         public $priority = 4;
@@ -420,7 +413,7 @@
         public function setMaxDamage(){     $this->maxDamage = 50 + ($this->addedDice * 10) + $this->damagebonus - $this->dp;      }
     }
 
-        class LightMolecularDistruptor extends Weapon{
+        class LightMolecularDisruptor extends Weapon{
         public $name = "molecularDisruptor";
         public $displayName = "Light Molecular Distruptor";
         public $animation = "trail";
@@ -450,10 +443,105 @@
             
             parent::setSystemDataWindow($turn);
         }
-        
+
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+            Debug::log("in damage");
+
+            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
+
+            if(LightMolecularDisrupterHandler::doArmorReduction($target, $shooter)){
+
+                if ( $target instanceof FighterFlight || $target instanceof SuperHeavyFighter)
+                {
+                    return;
+                }
+
+                $structTarget = null;
+
+                if ( $target instanceof MediumShip ){
+                    $structTarget = $target->getStructureSystem(0);
+                }
+                else{
+                    $tf = $target->getFacingAngle();
+                    $shooterCompassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
+                    $location =  $target->doGetHitSection($tf, $shooterCompassHeading, TacGamedata::$currentTurn, $this);
+
+                    $rolled = Movement::isRolled($target);
+
+                    if ($rolled && $location == 3){
+                        $location = 4;
+                    }else if ($rolled && $location == 4){
+                        $location = 3;
+                    }
+
+                    if ($location != 0){
+                        $structure = $target->getStructureSystem($location);
+                        if ($structure != null && $structure->isDestroyed(TacGamedata::$currentTurn-1))
+                            $location = 0;
+                    }
+
+                    $structTarget = $target->getStructureSystem($location);
+//                    $locTarget = $target->getHitSection($pos, $shooter, $fireOrder->turn, $this);
+//                    $structTarget = $target->getStructureSystem($locTarget);
+                }
+
+                $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
+                $crit->updated = true;
+                $crit->inEffect = false;
+
+                if ( $structTarget != null && $structTarget->armour > 0){
+                    $structTarget->criticals[] = $crit;
+                }
+            }
+        }
+
         public function getDamage($fireOrder){        return Dice::d(2, 10)+10;   }
         public function setMinDamage(){   return  $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){   return  $this->maxDamage = 30 - $this->dp;      }
+    }
+
+    class LightMolecularDisrupterHandler{
+
+        private static $hits = array();
+
+        public static function doArmorReduction($target, $shooter){
+            $currentTurn = TacGamedata::$currentTurn;
+
+            Debug::log("doArmorReduction");
+
+            // Always clean-up first.
+            foreach (LightMolecularDisrupterHandler::$hits as $hit){
+                Debug::log("1");
+                if($hit['turn'] != $currentTurn){
+                    Debug::log("2");
+                    unset($hit);
+                    Debug::log("3");
+                }
+            }
+
+            Debug::log("4");
+            // add new hit to the array
+            LightMolecularDisrupterHandler::$hits[] = array('turn'=>$currentTurn, 'shooter'=>$shooter->id ,'target'=>$target->id);
+            Debug::log("5");
+
+            // Check if this was number 3 for a certain target. If so, decrease armor of the structure
+            $count = 0;
+
+            foreach(LightMolecularDisrupterHandler::$hits as $hit){
+                Debug::log("Checking array");
+                if($hit['shooter'] == $shooter->id && $hit['target'] == $target->id){
+                    $count++;
+                    Debug::log("Count is ".$count." for shooter id ".$shooter->id);
+                }
+            }
+
+            if($count===3){
+                Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
+                return true;
+            }
+
+            return false;
+        }
     }
 
 

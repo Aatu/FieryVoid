@@ -8,20 +8,20 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
-
-         /*       'hastan' => '/server/model/ships/yolu/hastan.php',
-
+                'aluin' => '/server/model/ships/yolu/aluin.php',
+                'hastan' => '/server/model/ships/yolu/hastan.php',
                 'maishan' => '/server/model/ships/yolu/maishan.php',
                 'maitau' => '/server/model/ships/yolu/maitau.php',
                 'malau' => '/server/model/ships/yolu/malau.php',
-                'aluin' => '/server/model/ships/yolu/aluin.php',
-
-                'utan' => '/server/model/ships/yolu/utan.php',
-
-
                 'maltra' => '/server/model/ships/yolu/maltra.php',
+                'nashana' => '/server/model/ships/yolu/nashana.php',
+                'notali' => '/server/model/ships/yolu/notali.php',
+                'udran' => '/server/model/ships/yolu/udran.php',
+                'ulana' => '/server/model/ships/yolu/ulana.php',
+                'utan' => '/server/model/ships/yolu/utan.php',
+                'xebec' => '/server/model/ships/raiders/xebec.php',
+                'yuan' => '/server/model/ships/yolu/yuan.php',
 
-*/
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
