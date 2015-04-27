@@ -272,7 +272,7 @@
                     $crit->updated = true;
                     $crit->inEffect = false;
 
-                    if($system->armor > 0) {
+                    if($system->armour > 0) {
                         $system->criticals[] = $crit;
                     }
                 }
