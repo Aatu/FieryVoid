@@ -323,13 +323,15 @@ window.effects = {
         
         for (var i in gamedata.ships){
             ship = gamedata.ships[i];
-            for (var j = 0; j < ship.systems.length; j++){
-                system = ship.systems[j];
-                if (shipManager.criticals.hasCriticalOnTurn(system, "AmmoExplosion", gamedata.turn) && !system.destructionAnimated){
-                    scrolling.scrollToShip(ship);
-                    effects.displayAmmoExplosion(ship, system, effects.doDisplayAllWeaponFire);
+            if (ship.shipSizeClass > 0){
+                for (var j = 0; j < ship.systems.length; j++){
+                    system = ship.systems[j];
+                    if (shipManager.criticals.hasCriticalOnTurn(system, "AmmoExplosion", gamedata.turn) && !system.destructionAnimated){
+                        scrolling.scrollToShip(ship);
+                        effects.displayAmmoExplosion(ship, system, effects.doDisplayAllWeaponFire);
+                    }
                 }
-            }            
+            }           
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn && ship.destructionAnimated == false){
                 scrolling.scrollToShip(ship);
              //   effects.displayAmmoExplosion(ship, effects.doDisplayAllWeaponFire);

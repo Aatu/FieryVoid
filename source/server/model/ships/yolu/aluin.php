@@ -32,10 +32,10 @@ class Aluin extends BaseShip{
 
         $this->addFrontSystem(new DestabilizerBeam(4, 10, 8, 300, 60));
         $this->addFrontSystem(new DestabilizerBeam(4, 10, 8, 300, 60));
-        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
-        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
-        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
-        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
+        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addFrontSystem(new JumpEngine(6, 20, 6, 20));
 
 

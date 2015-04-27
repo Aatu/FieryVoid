@@ -12,26 +12,35 @@
         
         public function chooseTarget($gd){
             $best = null;
-            
             foreach ($this->intercepts as $candidate){
                 $fire = $candidate->fire;
 
                 $target = $gd->getShipById($fire->targetid);
 
-                if ( $target->isDisabled() ){
+
+                if ( $target->isDisabled() && $target->shipSizeClass > 0){
                     continue;
                 }
                 
-
                 $shooter = $gd->getShipById($fire->shooterid);
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
 
 
                 $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
+                $armour;
 
+       //         debug::log("intercepting fire from: ".$target->phpclass." versus opposing ".$firingweapon->displayName." from ".$shooter->phpclass);
 
-                $structure = $target->getStructureByIndex($hitLocation);
-                $armour = $structure->armour;
+                if ($target->shipSizeClass == -1){
+                    $armour = $target->systems[1]->armour[$hitLocation];
+                //    debug::log("flight armour: ".$armour);
+
+                }
+                else {
+                    $structure = $target->getStructureByIndex($hitLocation);
+                    $armour = $structure->armour;
+                 //   debug::log("non-flight armour: ".$armour);
+                }
 
                 if ($firingweapon instanceof Matter){
                     $armour = 0;
@@ -42,9 +51,13 @@
                 $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($firingweapon->shots / 2));
 
                 if ($firingweapon instanceof Raking){
-                    $damage = $firingweapon->getAvgDamage() - (($firingweapon->getAvgDamage() / $firingweapon->raking) * $armour);
+                    $avg = $firingweapon->getAvgDamage();
+                    $rakes = $avg / $firingweapon->raking;
+                    $totalReduction = floor($armour *  $rakes); //floor to account for ability for rakes to hit same sys, hence NO armour
+                    $damage = $avg - $totalReduction;
                 }
-                debug::log($firingweapon->displayName.", total estimated dmg:".$damage.", considering armour of:".$armour);
+
+            //    debug::log($firingweapon->displayName.", total estimated dmg: ".$damage.", considering armour of:".$armour);
                 $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
                 
                 $perc = 0;
@@ -60,10 +73,14 @@
                     
                 if (!$best || $best->blocked < $candidate->blocked )
                     $best = $candidate;
-                
             }
             
-            if ($best){
+            if ($best && $best->blocked > 0){
+
+            //    $shooter = $gd->getShipById($best->fire->shooterid);
+             //   $firingweapon = $shooter->getSystemById($best->fire->weaponid);
+              //  debug::log("intercepting: ".$firingweapon->displayName." for ".$best->blocked);
+
                 for ($i = 0; $i<$this->weapon->guns;$i++){
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);

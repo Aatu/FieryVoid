@@ -1023,6 +1023,14 @@
                 
             return $location;
         }
+
+        public function getStructureByIndex($index){
+            foreach ($this->systems as $system){
+                if ($system->displayName == "Structure"){
+                    return $system;
+                }
+            }
+        }
         
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
 

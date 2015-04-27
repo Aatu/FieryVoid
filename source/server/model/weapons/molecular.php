@@ -100,6 +100,7 @@
             $this->damagebonus = $damagebonus;
             $this->shots = $shots;
             $this->defaultShots = $shots;
+            $this->intercept = $shots;
             
             $this->iconPath = "lightfusionCannon$shots.png";
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -246,6 +247,13 @@
 
         public $rangePenalty = 0.33;
         public $fireControl = array(null, 0, 4); // fighters, <mediums, <capitals
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Special"] = "Reduces armor of hit section and all systems.";
+            
+            parent::setSystemDataWindow($turn);
+        }
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

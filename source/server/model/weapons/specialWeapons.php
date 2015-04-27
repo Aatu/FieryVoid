@@ -34,7 +34,9 @@
 	
 		public function setSystemDataWindow($turn){
 
-			$this->data["Weapon type"] = "Plasma";
+            $this->data["Damage type"] = "Raking (5)";
+            $this->data["Weapon type"] = "Plasma";
+            $this->data["Special"] = "Reduces armor of hit systems.";
 						
 			parent::setSystemDataWindow($turn);
 		}

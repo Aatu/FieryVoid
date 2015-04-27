@@ -41,7 +41,7 @@ class Hastan extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 300));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 60));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

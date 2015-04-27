@@ -21,7 +21,7 @@ class Debug
         $date = date('Y-m-d H:i:s');
        $UID = uniqid();
         $msg = "[$UID][$date] $msg \n";
-     //   file_put_contents('C:\log/fieryvoid.log', $msg, FILE_APPEND);
+      //  file_put_contents('C:\log/fieryvoid.log', $msg, FILE_APPEND);
         file_put_contents('/tmp/fieryvoid.log', $msg, FILE_APPEND);
         return $UID;
     }
