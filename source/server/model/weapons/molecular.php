@@ -421,7 +421,7 @@
         public function setMaxDamage(){     $this->maxDamage = 50 + ($this->addedDice * 10) + $this->damagebonus - $this->dp;      }
     }
 
-        class LightMolecularDisruptor extends Weapon{
+        class LightMolecularDisruptor extends Raking{
         public $name = "molecularDisruptor";
         public $displayName = "Light Molecular Distruptor";
         public $animation = "trail";
