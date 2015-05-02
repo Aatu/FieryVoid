@@ -54,7 +54,7 @@ class Yuan extends BaseShip{
         $this->addLeftSystem(new GraviticThruster(5, 25, 0, 8, 3));
         $this->addLeftSystem(new FusionCannon(4, 8, 1, 180, 0));
         $this->addLeftSystem(new FusionCannon(4, 8, 1, 180, 0));
-        $this->addLeftSystem(new MolecularFlayer(5, 8, 4, 240, 30));
+        $this->addLeftSystem(new MolecularFlayer(5, 8, 4, 240, 300));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 240, 300));
         $this->addLeftSystem(new FusionAgitator(5, 10, 4, 240, 0));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 180, 300));
