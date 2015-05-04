@@ -520,7 +520,7 @@ window.weaponManager = {
 
 		mod -= target.getHitChangeMod(shooter, ball.position);
 
-		if (!shooter.flight || !shooter.osat)
+		if (!shooter.flight && !shooter.osat)
 			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
 
 		if (shooter.osat && shipManager.movement.hasTurned(shooter)){
