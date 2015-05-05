@@ -162,7 +162,7 @@
         public $intercept = 2;
         public $priority = 2;
         
-        public $rangePenalty = 0.2;
+        public $rangePenalty = 2;
         public $fireControl = array(3, 20, 10); // fighters, <mediums, <capitals 
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -454,7 +454,7 @@
         public $intercept = 3;
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 3, 15); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
