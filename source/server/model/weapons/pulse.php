@@ -163,7 +163,7 @@
         public $priority = 2;
         
         public $rangePenalty = 2;
-        public $fireControl = array(3, 20, 10); // fighters, <mediums, <capitals 
+        public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
