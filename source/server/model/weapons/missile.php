@@ -64,8 +64,8 @@ class MissileLauncher extends Weapon{
 
     public function testAmmoExplosion($ship, $gamedata){
         $roll = Dice::d(20);
-        if ($roll){
-            $amount = 60;
+        if ($roll >= 18){
+            $amount = 65;
             $this->ammoExplosion($ship, $gamedata, $amount);
             $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
         }
@@ -80,7 +80,11 @@ class MissileLauncher extends Weapon{
             if ($ship->isDestroyed()){
                 break;
             }
-        $system = $this->getHitSystem($ship);
+
+        $system = $this;
+            if ($this->isDestroyed()){
+                $system = $this->getHitSystem($ship);
+            }
         $this->ammoExplosionDamage($ship, $system, $rake, $gamedata);
         $left -= $rake;
         }
@@ -190,7 +194,6 @@ class MissileLauncher extends Weapon{
         $this->criticals[] =  $crit;
         return $crit;
     }
-
 }       
 
 

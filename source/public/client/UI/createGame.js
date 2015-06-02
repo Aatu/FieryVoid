@@ -17,8 +17,8 @@ window.createGame = {
     gamespace_data: {width: 42, height: 30},
     
     slots: Array(
-        {id:1, team:1, name:"BLUE", points:1000, depx:-21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0},
-        {id:2, team:2, name:"RED",  points:1000, depx:21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0}
+        {id:1, team:1, name:"BLUE", points:3500, depx:-21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0},
+        {id:2, team:2, name:"RED",  points:3500, depx:21, depy:0, deptype:"box", depwidth:10, depheight:30, depavailable:0}
     ),
     slotid: 2,
 
@@ -166,7 +166,7 @@ window.createGame = {
     createNewSlot: function(e){
         var team = ($(this).hasClass("team1")) ? 1 : 2;
         createGame.slotid++;
-        var data = {id:createGame.slotid, team:team, name:"RED",  points:1000, depx:0, depy:0, deptype:"box", depwidth:0, depheight:0, depavailable:0}
+        var data = {id:createGame.slotid, team:team, name:"RED",  points:3500, depx:0, depy:0, deptype:"box", depwidth:0, depheight:0, depavailable:0}
         createGame.slots.push(data);
         createGame.createSlot(data);
     },

@@ -7,7 +7,7 @@ class OchlavitaM extends HeavyCombatVessel{
 	$this->pointCost = 525;
 	$this->faction = "Dilgar";
         $this->phpclass = "OchlavitaM";
-        $this->imagePath = "img/ships/ochlavita.png";
+        $this->imagePath = "img/ships/ochlavita_m.png";
         $this->shipClass = "Ochlavita-M Missile Destroyer";
         
         $this->forwardDefense = 13;

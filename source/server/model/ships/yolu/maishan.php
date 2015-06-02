@@ -11,9 +11,8 @@ class Maishan extends MediumShip{
         $this->shipClass = "Maishan Strike Frigate";
         $this->occurence = "uncommon";
         $this->gravitic = true;
-        $this->canvasSize = 120;
-
-
+        $this->canvasSize = 100;
+        
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         

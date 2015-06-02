@@ -168,11 +168,16 @@ class Weapon extends ShipSystem{
         if ($this instanceof DualWeapon && isset($this->turnsFired[$turn]))
             return true;
 
+
         foreach ($this->fireOrders as $fire){
-            if ($fire->weaponid == $this->id && $fire->turn == $turn){
+
+            if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
             }
-        }
+            else if($fire->type == "selfIntercept" && checkForSelfInterceptFire::checkFired($this->id, $turn)){
+                return true;
+            }
+        } 
         return false;
     }
 
@@ -385,13 +390,6 @@ class Weapon extends ShipSystem{
 
 
         if ($this->firedOnTurn(TacGamedata::$currentTurn)){
-            /* if overloading ja ampuu:
-
-                    JOS ON EXTRASHOTTEJA laske extrashotteja. Jos extrashotit menee nollaan, pistä -1 (cooldown)
-                    ja loading ja overloading 0
-             *
-             *      JOS EI OLE EXTRASHOTTEJA: laske overloading ja loading 0
-           */
 
             if ($this->overloadshots > 0)
             {
@@ -929,3 +927,26 @@ class Weapon extends ShipSystem{
         return;
     }
 }
+
+    class checkForSelfInterceptFire{
+        private static $fired = array();
+
+        public static function setFired($id, $turn){
+
+            if ($turn != TacGamedata::$currentTurn){
+                $fired = array();
+            }
+            checkForSelfInterceptFire::$fired[] = $id;
+        }
+        public static function checkFired($id, $turn){  
+            if ($turn != TacGamedata::$currentTurn){
+                $fired = array();
+            }
+            foreach (checkForSelfInterceptFire::$fired as $weapon){
+                if ($weapon == $id){
+                    return true;
+                }
+            }
+        return false;
+        }
+    }

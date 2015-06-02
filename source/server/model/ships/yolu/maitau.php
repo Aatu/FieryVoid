@@ -10,7 +10,7 @@ class Maitau extends MediumShip{
         $this->imagePath = "img/ships/maitau.png";
         $this->shipClass = "Maitau Pursuit Frigate";
         $this->gravitic = true;
-        $this->canvasSize = 120;
+        $this->canvasSize = 100;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

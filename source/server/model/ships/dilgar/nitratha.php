@@ -8,7 +8,7 @@ class Nitratha extends BaseShip{
         $this->pointCost = 475;
         $this->faction = "Dilgar";
         $this->phpclass = "Nitratha";
-        $this->imagePath = "img/ships/hyperion.png";
+        $this->imagePath = "img/ships/nitratha.png";
         $this->shipClass = "Ni'Tratha Jumpcruiser";
         $this->shipSizeClass = 3;
 

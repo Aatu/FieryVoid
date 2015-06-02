@@ -512,14 +512,12 @@ class Manager{
             }
             
             if (TacGamedata::$currentPhase > 0){
-                foreach ($gamedata->ships as $ship)
-                {
-                    foreach ($ship->systems as $system)
-                    {
+                foreach ($gamedata->ships as $ship){
+                    foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship);
                     }
                 }
-
+                
                 self::$dbManager->updateSystemData(SystemData::$allData);
             }
             self::$dbManager->endTransaction(false);
@@ -587,10 +585,10 @@ class Manager{
                 $y = (($t-1)/2)*-1;
             }
             
-            $x = -50;
+            $x = -30;
             
             if ($ship->team == 2){
-                $x=50;
+                $x=30;
             }
             
             
@@ -711,7 +709,10 @@ class Manager{
             
         self::generateIniative($gamedata);
         self::$dbManager->updateGamedata($gamedata);
-        
+
+       // if ($gamedata->turn > 1){
+         //   self::checkRegen($gamedata);
+        //}   
                
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
@@ -720,6 +721,29 @@ class Manager{
             self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
         }
             
+    }
+
+    private static function checkRegen($gamedata){
+        foreach ($gamedata->ships as $ship){
+            if ($ship->isDisabled()){
+                continue;
+            }
+            else if ($ship->selfRegen === true){
+                foreach ($ship->systems as $system){
+                    if ($system instanceof Structure || $system instanceof Thruster){
+                        if ($system->getRemainingHealth() < $system->maxhealth){
+
+                            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, -2, $system->armour, 0, 0, false, "");
+                            $damageEntry->updated = true;
+                            $system->damage[] = $damageEntry;
+                            debug::log("regen hit");
+                        }
+                    }
+                    else {
+                    }
+                }
+            }
+        }
     }
     
     private static function generateIniative($gamedata){
@@ -833,8 +857,7 @@ class Manager{
                 if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
                 {
                     $fires = Array();
-                    foreach($system["fireOrders"] as $i=>$fo)
-                    {
+                    foreach($system["fireOrders"] as $i=>$fo){
                         $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
                         if (isset($sys)){
                             $fires[] = $fireOrder;

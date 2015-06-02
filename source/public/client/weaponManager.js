@@ -180,6 +180,7 @@ window.weaponManager = {
 
 	unSelectWeapon: function(ship, weapon){
 
+
 		for(var i = gamedata.selectedSystems.length-1; i >= 0; i--){
 			if(gamedata.selectedSystems[i] == weapon){
 				gamedata.selectedSystems.splice(i,1);
@@ -270,7 +271,7 @@ window.weaponManager = {
 		}
 
 		if (weaponManager.checkConflictingFireOrder(ship, weapon, alert)){
-			return;selectWeapon
+			return;
 		}
 
 		if (!weaponManager.isLoaded(weapon))
@@ -1041,6 +1042,71 @@ window.weaponManager = {
 		gamedata.shipStatusChanged(selectedShip);
 
 	},
+	
+
+	canSelfIntercept: function(ship){
+		for (var i in gamedata.selectedSystems){
+			var weapon = gamedata.selectedSystems[i];
+			
+			if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1){
+				return true
+			}
+		}
+		return false;
+	},
+
+
+
+	checkSelfIntercept: function(ship){
+
+		var invalid = Array();
+		var valid = Array();
+
+
+		for (var i in gamedata.selectedSystems){
+			var weapon = gamedata.selectedSystems[i];
+
+				if(weaponManager.hasFiringOrder(ship, weapon)){
+					weaponManager.removeFiringOrder(ship, weapon);
+				}
+				
+				if (weaponManager.isLoaded(weapon) && weapon.intercept >= 1 && weapon.loadingtime > 1){
+					valid.push(weapon);
+				} else invalid.push(weapon);
+		}
+		for (var i in valid){
+			weaponManager.setSelfIntercept(ship, valid[i]);
+		}
+		for (var i in invalid){
+			weaponManager.unSelectWeapon(ship, invalid[i]);
+		}
+	},
+
+
+	setSelfIntercept: function(ship, weapon){
+
+		var fireid = ship.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
+
+		var fire = {
+			id:fireid,
+			type:"selfIntercept",
+			shooterid:ship.id,
+			targetid:ship.id,
+			weaponid:weapon.id,
+			calledid:-1,
+			turn:gamedata.turn,
+			firingMode:weapon.firingMode,
+			shots:weapon.defaultShots,
+			x:"null",
+			y:"null",
+			addToDB: true
+		};
+
+		weapon.fireOrders.push(fire);
+		weaponManager.unSelectWeapon(ship, weapon);
+	//	gamedata.shipStatusChanged(ship);
+
+	},
 
 	//system is for called shot!
 	targetShip: function(ship, system){
@@ -1284,16 +1350,19 @@ window.weaponManager = {
 
 	},
 
+
+
 	hasFiringOrder: function(ship, system){
 
 		for (var i in system.fireOrders){
 			var fire = system.fireOrders[i];
 			if (fire.weaponid == system.id && fire.turn == gamedata.turn && !fire.rolled){
 				if (((gamedata.gamephase == 1 || gamedata.gamephase == 3 ) && system.ballistic) || (gamedata.gamephase == 3 && !system.ballistic)){
-					return true;
+					if (fire.type == "selfIntercept"){
+						return "self";
+					} else return true;
 				}
 			}
-
 		}
 
 		if(system.duoWeapon){

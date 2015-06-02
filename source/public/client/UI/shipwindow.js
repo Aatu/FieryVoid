@@ -1,6 +1,7 @@
-
 jQuery(function(){
-	
+      $(".iconmask").bind("contextmenu", function(e) {
+            e.preventDefault();
+        }); 
 });
 
 shipWindowManager = {
@@ -118,7 +119,9 @@ shipWindowManager = {
 
 	populateShipWindow: function(ship, shipwindow){
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
-                
+		var thumb = shipwindow.find(".icon img");
+
+
                 if(gamedata.turn != 0){
                     shipwindow.find(".topbar .value.shipclass").html("");
                     shipwindow.find(".topbar .valueheader.shipclass").html("");
@@ -147,6 +150,30 @@ shipWindowManager = {
             var abilities = Array();
             var notes = Array();
             
+
+			var belowIcon = shipWindow.find(".notes");
+	//		$(belowIcon).addClass("selfIntercept");
+
+			var input = document.createElement("input");
+				input.type = "button";
+				input.value = "Defensive Fire";
+				input.className = "interceptButton";
+				input.className += " interceptDisabled";
+
+			$(input).click(function(){
+				weaponManager.checkSelfIntercept(ship);
+			})
+
+			$(belowIcon).append(input);
+
+			if (gamedata.gamephase == 3){
+				if (weaponManager.canSelfIntercept(ship)){
+					input.className = "interceptButton";
+					input.className += " interceptEnabled";
+				}
+			}
+
+
             if(ship.agile){
                 abilities.push("&nbsp;Agile ship");
             }
@@ -750,7 +777,7 @@ shipWindowManager = {
 			"loading",
 			"selected",
 			"firing",
-                        "duofiring",
+            "duofiring",
 			"critical",
 			"canoffline",
 			"offline",
@@ -760,7 +787,8 @@ shipWindowManager = {
 			"overload",
 			"forcedoffline",
             "modes",
-            "ballistic"
+            "ballistic",
+            "selfIntercept"
 		);
 		
 		for (var i in classes){
@@ -853,6 +881,7 @@ setSystemData: function(ship, system, shipwindow){
     
     if (system.weapon){
         var firing = weaponManager.hasFiringOrder(ship, system);
+
         
         // To avoid double overlay of loading icon mask in case of a 
         // duoWeapon in a dualWeapon
@@ -868,7 +897,7 @@ setSystemData: function(ship, system, shipwindow){
             systemwindow.removeClass("selected");
         }
         
-        if (firing && !system.duoWeapon  && !(systemwindow.hasClass("loading"))){
+        if (firing && firing != "self" && !system.duoWeapon  && !(systemwindow.hasClass("loading"))){
             systemwindow.addClass("firing");
             
             if(system.parentId > -1){
@@ -878,10 +907,17 @@ setSystemData: function(ship, system, shipwindow){
                     $(".system_"+system.parentId).addClass("duofiring");
                 }
             }
-            
-        }else{
+        }
+
+        else if (firing == "self"){
+        	systemwindow.addClass("firing");
+        	systemwindow.addClass("selfIntercept");
+        }
+
+        else{
             firing = false;
             systemwindow.removeClass("firing");
+        	systemwindow.removeClass("selfIntercept");
         }
         
         if (system.ballistic){
@@ -1096,7 +1132,6 @@ setSystemData: function(ship, system, shipwindow){
 	},
 	
 	clickSystem: function(e){
-
 		e.stopPropagation();
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
@@ -1104,6 +1139,7 @@ setSystemData: function(ship, system, shipwindow){
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
                 system = shipManager.systems.initializeSystem(system);
                 
+	//	console.log(system);
 		var selectedShip = gamedata.getSelectedShip();
 		
 		if (gamedata.waiting)
@@ -1133,7 +1169,7 @@ setSystemData: function(ship, system, shipwindow){
 			&& gamedata.selectedSystems.length > 0 
 			&& weaponManager.canCalledshot(ship, system))
 		{
-                    weaponManager.targetShip(ship, system);
+			weaponManager.targetShip(ship, system);
 		}
 	
 	},

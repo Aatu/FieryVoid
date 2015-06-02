@@ -12,7 +12,6 @@
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            $this->shots = $this->maxpulses;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -23,6 +22,8 @@
             $this->data["Grouping range"] = $this->grouping + "%";
             $this->data["Max pulses"] = $this->maxpulses;
             $this->data["Pulses"] = 'D 5';
+
+            $this->defaultShots = $this->maxpulses;
             
             parent::setSystemDataWindow($turn);
         }
@@ -478,7 +479,9 @@
             unset($this->data["Max pulses"]);
         }
         
-        public function getDamage($fireOrder){ return 5 - $this->dp; }
+        public function getDamage($fireOrder){
+            return 10 - $this->dp;
+        }
  
         public function setMinDamage()
         {

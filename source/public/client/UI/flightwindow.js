@@ -92,7 +92,7 @@ flightWindowManager = {
     
     bindEvents: function(shipwindow){
 
-        $(".fightersystem", shipwindow).on("contextmenu", flightWindowManager.clickSystem);
+        $(".fightersystem", shipwindow).on("contextmenu", flightWindowManager.selectAllSystems);
         $(".fightersystem", shipwindow).on("click", flightWindowManager.clickSystem);
 
         $(".close", shipwindow).on("click", shipWindowManager.close);
@@ -306,80 +306,82 @@ flightWindowManager = {
 		}
 		
 	},
-	
-	clickSystem: function(e){
 
-        var type;
-        if (e.type == "click"){
-            type = 1;
-        } else type = 2;
 
-		e.stopPropagation();    
+	selectAllSystems: function(e){
+		e.stopPropagation();
 
         var shipwindow = $(".shipwindow").has($(this));
         var systemwindow = $(this);
-
         var flight = gamedata.getShip(systemwindow.data("shipid"));
-        var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
-        var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));
-        
-        if (type == 1){
-    		
-    		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
-    			return;
-    			
-    		if (flight.userid != gamedata.thisplayer)
-    			return;
-    			
-    		if (system.weapon){
-    			
-    			if (gamedata.gamephase != 3 && !system.ballistic)
-    				return;
-    			
-    			if (gamedata.gamephase != 1 && system.ballistic)
-    				return;
-    		
-    			if (weaponManager.hasFiringOrder(flight, system)){
-    				weaponManager.cancelFire(flight, system);
-    				
-    			} else if (weaponManager.isSelectedWeapon(system)){
-    				weaponManager.unSelectWeapon(flight, system);
-    			}else{
-    				weaponManager.selectWeapon(flight, system);
-    			}    			
-    		}
-        }
-        else {
-            for (var i = 0; i < flight.systems.length; i++){
-                if (flight.systems[i] != undefined){   
-                    var fighter = flight.systems[i]        
 
-                    if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
-                        continue;
-                        
-                    if (flight.userid != gamedata.thisplayer)
-                        continue;
-                        
-                    if (system.weapon){
-                        
-                        if (gamedata.gamephase != 3 && !system.ballistic)
-                            continue;
-                        
-                        if (gamedata.gamephase != 1 && system.ballistic)
-                            continue;
+        for (var i = 0; i < flight.systems.length; i++){
+        	if (typeof (flight.systems[i]) != "undefined"){
+        		if (!shipManager.isDestroyed(flight, flight.systems[i])){
+	        		var gunIndex = flight.systems[i].id + 1;
+	        		var system = flight.systems[i].systems[gunIndex];
+					if (system.weapon){
+						
+						if (gamedata.gamephase != 3 && !system.ballistic)
+							return;
+						
+						if (gamedata.gamephase != 1 && system.ballistic)
+							return;
 
-                        else{
-                            weaponManager.selectWeapon(flight, system);
-
-                        }               
-                    }
-                }
-            }
+						if (weaponManager.hasFiringOrder(flight, system)){
+							weaponManager.cancelFire(flight, system);
+							
+						}
+						else if (weaponManager.isSelectedWeapon(system)){
+							weaponManager.unSelectWeapon(flight, system);
+						}
+						else{
+							weaponManager.selectWeapon(flight, system);
+						}			
+					}
+	        	}
+	        }
         }
 	},
 	
-	
 
+	clickSystem: function(e){
+
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(this);
+
+        var flight = gamedata.getShip(systemwindow.data("shipid"));
+        
+		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
+		var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));
+		
+		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
+			return;
+			
+		if (flight.userid != gamedata.thisplayer)
+			return;
+			
+		if (system.weapon){
+			
+			if (gamedata.gamephase != 3 && !system.ballistic)
+				return;
+			
+			if (gamedata.gamephase != 1 && system.ballistic)
+				return;
+		
+			if (weaponManager.hasFiringOrder(flight, system)){
+				weaponManager.cancelFire(flight, system);
+				
+			}
+			else if (weaponManager.isSelectedWeapon(system)){
+				weaponManager.unSelectWeapon(flight, system);
+			}
+			else{
+				weaponManager.selectWeapon(flight, system);
+			}			
+		}
+	},
 
 
 

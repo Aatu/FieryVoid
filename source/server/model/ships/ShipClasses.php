@@ -80,7 +80,7 @@
 
             if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
                 $pixPos = $this->getCoPos();
-                $ships = $gamedata->getShipsInDistance($pixPos, ((8*mathlib::$hexWidth) + 1));
+                $ships = $gamedata->getShipsInDistance($pixPos, ((9*mathlib::$hexWidth) + 1));
 
                 foreach($ships as $ship){
                     if( !$ship->isDestroyed()
@@ -107,7 +107,9 @@
                     && ($this->userid == $ship->userid)
                     && ($ship instanceof Udran)
                     && ($this != $ship)){
-                    return ($this->iniativebonus+5);
+                        $cnc = $ship->getSystemByName("CnC");
+                        $bonus = $cnc->output;
+                        return ($this->iniativebonus+$bonus*5);
                 }
             }
 		return $this->iniativebonus;

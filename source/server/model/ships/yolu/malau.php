@@ -10,8 +10,7 @@ class Malau extends MediumShip{
         $this->imagePath = "img/ships/maitau.png";
         $this->shipClass = "Malau Attack Frigate";
         $this->gravitic = true;
-        $this->canvasSize = 120;
-
+        $this->canvasSize = 100;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

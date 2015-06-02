@@ -25,8 +25,8 @@
         public $trailColor = array(110, 225, 110);
         public $animationExplosionScale = 0.20;
         public $projectilespeed = 12;
-        public $animationWidth = 7;
-        public $trailLength = 20;
+        public $animationWidth = 6;
+        public $trailLength = 16;
 
         public $intercept = 2;
         public $priority = 8;
@@ -59,7 +59,7 @@
         public $animation = "beam";
 
         public $animationExplosionScale = 0.30;
-        public $projectilespeed = 18;
+        public $projectilespeed = 10;
         public $animationWidth = 9;
         public $trailLength = 25;
 
@@ -421,7 +421,8 @@
         public function setMaxDamage(){     $this->maxDamage = 50 + ($this->addedDice * 10) + $this->damagebonus - $this->dp;      }
     }
 
-        class LightMolecularDisruptor extends Raking{
+    class LightMolecularDisruptor extends Raking{
+        
         public $name = "molecularDisruptor";
         public $displayName = "Light Molecular Distruptor";
         public $animation = "trail";
@@ -438,7 +439,7 @@
         
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
- 
+
         function __construct($startArc, $endArc, $damagebonus){
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -453,7 +454,7 @@
         }
 
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            Debug::log("in damage");
+       //     Debug::log("in damage");
 
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
 
@@ -489,8 +490,7 @@
                     }
 
                     $structTarget = $target->getStructureSystem($location);
-//                    $locTarget = $target->getHitSection($pos, $shooter, $fireOrder->turn, $this);
-//                    $structTarget = $target->getStructureSystem($locTarget);
+
                 }
 
                 $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
@@ -503,10 +503,10 @@
             }
         }
 
-        public function getDamage($fireOrder){        return Dice::d(2, 10)+10;   }
-        public function setMinDamage(){   return  $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 30 - $this->dp;      }
-    }
+        public function getDamage($fireOrder){        return Dice::d(2, 10)+15;   }
+        public function setMinDamage(){   return  $this->minDamage = 17 - $this->dp;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 35 - $this->dp;      }
+        }
 
     class LightMolecularDisrupterHandler{
 

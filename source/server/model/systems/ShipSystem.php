@@ -157,7 +157,7 @@ class ShipSystem{
                 }
             }
         }
-        if ($this instanceof MissileLauncher){
+        if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }

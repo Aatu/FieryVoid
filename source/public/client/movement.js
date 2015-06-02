@@ -108,8 +108,7 @@ shipManager.movement = {
         return false;
     },
     
-    deleteMove: function(ship){
-		
+    deleteMove: function(ship){	
       
 		
         var movement = ship.movement[ship.movement.length -1];
@@ -857,7 +856,7 @@ shipManager.movement = {
             if (movement.turn != gamedata.turn)
                 continue;
                 
-            if ( movement.commit == false )
+            if (movement.commit == false )
                 continue;
             
             if (movement.type == "isPivotingLeft")
@@ -888,7 +887,6 @@ shipManager.movement = {
                 pivoting = "no";
             }            
         }
-     
         return pivoting;
     },
     
@@ -982,19 +980,12 @@ shipManager.movement = {
     },
     
     canChangeSpeed: function(ship, accel){
-
         if (ship.osat){
         	return false;
         }
 
         if (gamedata.gamephase == -1 && ship.deploymove)
             return true;
-
-
-    	if (ship.shipSizeClass === -1 && shipManager.movement.isPivoting(ship) !== "no" && (!ship.gravitic)){
-   // 		console.log(shipManager.movement.isPivoting(ship));
-    		return false;
-    	}
 
         if (gamedata.gamephase != 2){
             return false;
@@ -1015,12 +1006,12 @@ shipManager.movement = {
 
 		if (!ship.gravitic){
 			if (heading !== facing){
-				if (heading < 3){
+				if (heading <= 3){
 					if (heading + 3 !== facing){
 						return false;
 					}		
 				}
-				else if (heading > 3){
+				if (heading >= 3){
 					if (heading - 3 !== facing){
 						return false;
 					}		
@@ -1899,8 +1890,8 @@ shipManager.movement = {
         var reversed = ((back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship)));
         
 
-		console.log("head: " + heading + " face:" + facing);
-		if (right){console.log("right");}
+	//	console.log("head: " + heading + " face:" + facing);
+	//	if (right){console.log("right");}
 
 		if (facing != heading){
 			if (ship.gravitic){

@@ -405,7 +405,7 @@ window.ew = {
             return;
         }
         
-        if (ship.osat == false){            
+        if (!ship.osat){
     		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
     			var def = ew.getDefensiveEW(selected);
     			var all = ew.getScannerOutput(selected);
@@ -431,17 +431,18 @@ window.ew = {
         var e = $(this).parent();
         var ship = e.data("ship");
         var entry = e.data("EW");
-	var left = ew.getDefensiveEW(ship);
+    	var left = ew.getDefensiveEW(ship);
+
 		if (left < 1)
             return;
         
-        if (ship.osat == false){    
+        if (!ship.osat){
             if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
-    			var def = ew.getDefensiveEW(ship);
-    			var all = ew.getScannerOutput(ship);
-    			
-    			if (def-1 < all*0.5)
-    				return false;
+			var def = ew.getDefensiveEW(ship);
+			var all = ew.getScannerOutput(ship);
+			
+			if (def-1 < all*0.5)
+				return false;
     		}
         }
 		

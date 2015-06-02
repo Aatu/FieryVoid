@@ -32,6 +32,8 @@ class Haltona extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 9, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 2));
         $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
+        $this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 270, 90));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 270, 90));
@@ -44,9 +46,6 @@ class Haltona extends BaseShip{
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 90, 270));
         $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
-
-        $this->addLeftSystem(new GraviticThruster(4, 10, 0, 5, 3));
-        $this->addRightSystem(new GraviticThruster(4, 10, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 54));

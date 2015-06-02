@@ -29,9 +29,9 @@ class Halik extends MediumShip{
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 2));
-	$this->addPrimarySystem(new Hangar(3, 1));
-	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
-	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
+    	$this->addPrimarySystem(new Hangar(3, 1));
+    	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
+    	$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
 		
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 180, 0));
         $this->addFrontSystem(new GravitonPulsar(3, 6, 2, 270, 90));

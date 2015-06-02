@@ -153,7 +153,6 @@ window.combatLog = {
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
             html +=  ' suffered from a critical hit on its missile ordnance.';
             html +=  ' <br>';
-            html +=  ' <li>Hit:';
             html +='</span></div></ul>';
         $(html).prependTo("#log");
     },
