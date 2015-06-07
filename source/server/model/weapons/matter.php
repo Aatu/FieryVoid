@@ -156,4 +156,63 @@
         public function setMinDamage(){     $this->minDamage = 68 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 140 - $this->dp;      }
     }
+
+
+        class GaussCannon extends MatterCannon
+    {
+        public $name = "gaussCannon";
+        public $displayName = "Gauss Cannon";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 20;
+        public $animationWidth = 3;
+        public $animationExplosionScale = 0.20;
+        public $trailLength = 8;
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 1;
+        public $fireControl = array(-3, 1, 2); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
+        public function setMinDamage(){     $this->minDamage = 11 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 21 - $this->dp;      }
+    }
+
+
+        class RapidGatling extends Matter
+    {
+        public $name = "rapidGatling";
+        public $displayName = "Rapid Gatling Railgun";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 24;
+        public $animationWidth = 2;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.15;
+        public $guns = 2;
+        
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+    }
+
+
+
+
 ?>

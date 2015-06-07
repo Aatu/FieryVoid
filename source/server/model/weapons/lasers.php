@@ -354,4 +354,42 @@ class NeutronLaser extends Laser{
         public function setMinDamage(){ $this->minDamage = 22 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 58-  $this->dp; }
     }
+
+
+
+class LaserLance extends Laser{
+
+        public $name = "laserLance";
+        public $displayName = "Laser Lance";
+        public $animation = "laser";
+        public $animationColor = array(255, 100, 0);
+        public $animationWidth = 2.5;
+        public $animationWidth2 = 0.4;
+        public $loadingtime = 3;
+
+        public $damageType = "raking";
+        public $raking = 10;
+
+        public $firingModes = array(
+            1 => "Standard",
+            2 => "Piercing"
+        );
+
+        public $piercing = true;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+6; }
+        public function setMinDamage(){ $this->minDamage = 9 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 36 - $this->dp; }
+    }
+
+
+
+
 ?>

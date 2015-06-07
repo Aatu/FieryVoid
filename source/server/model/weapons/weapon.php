@@ -460,6 +460,7 @@ class Weapon extends ShipSystem{
         $jink = 0;
         $defence = 0;
 
+
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
@@ -521,8 +522,8 @@ class Weapon extends ShipSystem{
             $mod -= 4;
         }
 
-        if (!($shooter instanceof FighterFlight))
-        {
+        if (!($shooter instanceof FighterFlight)){
+
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
         //        debug::log("apllying malus for roll");
                 $mod -=3;
@@ -537,7 +538,7 @@ class Weapon extends ShipSystem{
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
-            debug::log("applying turn malus");
+       //     debug::log("applying turn malus");
             $mod -= 1;
         }
 
@@ -545,13 +546,18 @@ class Weapon extends ShipSystem{
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 
         $ammo = $this->getAmmo($fireOrder);
-        if ($ammo !== null)
-        {
+        if ($ammo !== null){
             $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
         }
 
-        if ($oew < 1)
-        {
+        if ($target instanceof FighterFlight){
+            $dis = mathlib::getDistanceHex($shooter->getCoPos(),  $target->getCoPos());
+            if ($dis > 10){
+                $oew = 0;
+            }
+        }
+
+        if ($oew < 1){
             $rangePenalty = $rangePenalty*2;
         }
         else

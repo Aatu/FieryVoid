@@ -663,7 +663,7 @@ window.weaponManager = {
 			}
 
 			if (shooter.osat && shipManager.movement.hasTurned(shooter)){
-				console.log("osat turn -1");
+		//		console.log("osat turn -1");
 				mod -= 1;
 			}
 
@@ -681,6 +681,10 @@ window.weaponManager = {
 			mod += ammo.hitChanceMod;
 
 		var jammermod = 0;
+
+		if (target.flight && distance > 10){
+			oew = 0;
+		}
 		if (oew < 1){
 			rangePenalty = rangePenalty*2;
 		 }else if (shooter.faction != target.faction){
@@ -1044,6 +1048,7 @@ window.weaponManager = {
 	},
 	
 
+
 	canSelfIntercept: function(ship){
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
@@ -1057,11 +1062,11 @@ window.weaponManager = {
 
 
 
+
 	checkSelfIntercept: function(ship){
 
-		var invalid = Array();
-		var valid = Array();
-
+		var invalid = [];
+		var valid = [];
 
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
@@ -1074,36 +1079,55 @@ window.weaponManager = {
 					valid.push(weapon);
 				} else invalid.push(weapon);
 		}
-		for (var i in valid){
-			weaponManager.setSelfIntercept(ship, valid[i]);
-		}
-		for (var i in invalid){
-			weaponManager.unSelectWeapon(ship, invalid[i]);
+
+
+		if (valid.length > 0){
+			weaponManager.confirmSelfIntercept(ship, valid, invalid, "Do you want to order the selected weapons to intercept incoming fire ?");
 		}
 	},
 
 
-	setSelfIntercept: function(ship, weapon){
 
-		var fireid = ship.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
+    confirmSelfIntercept: function(ship, valid, invalid, message){
+        confirm.confirmWithOptions(message, "Yessss", "Nope", function(response){
+        	if (response){
+        		weaponManager.setSelfIntercept(ship, valid);
+	        	for (var i in invalid){
+					weaponManager.unSelectWeapon(ship, invalid[i]);
+				}
+			}
+        });
+    },
 
-		var fire = {
-			id:fireid,
-			type:"selfIntercept",
-			shooterid:ship.id,
-			targetid:ship.id,
-			weaponid:weapon.id,
-			calledid:-1,
-			turn:gamedata.turn,
-			firingMode:weapon.firingMode,
-			shots:weapon.defaultShots,
-			x:"null",
-			y:"null",
-			addToDB: true
-		};
 
-		weapon.fireOrders.push(fire);
-		weaponManager.unSelectWeapon(ship, weapon);
+
+
+
+	setSelfIntercept: function(ship, valid){
+
+		for (var weapon in valid){
+			var weapon = valid[weapon];
+
+			var fireid = ship.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
+
+			var fire = {
+				id:fireid,
+				type:"selfIntercept",
+				shooterid:ship.id,
+				targetid:ship.id,
+				weaponid:weapon.id,
+				calledid:-1,
+				turn:gamedata.turn,
+				firingMode:weapon.firingMode,
+				shots:weapon.defaultShots,
+				x:"null",
+				y:"null",
+				addToDB: true
+			};
+
+			weapon.fireOrders.push(fire);
+			weaponManager.unSelectWeapon(ship, weapon);
+		}
 	//	gamedata.shipStatusChanged(ship);
 
 	},
@@ -1468,8 +1492,10 @@ window.weaponManager = {
 			var fires = weaponManager.getAllFireOrders(ship);
 			for (var i in fires){
 				var fire = fires[i];
-				if (fire.targetid == id && fire.turn == gamedata.turn && fire.type == "intercept")
+				if (fire.targetid == id && fire.turn == gamedata.turn && fire.type == "intercept" ||
+					fire.type == "selfIntercept" && fire.targetid == id && fire.turn == gamedata.turn){
 					intercepts.push(fire);
+				}
 			}
 		}
 

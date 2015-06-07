@@ -198,7 +198,7 @@
         public $animationColor = array(100, 100, 255);
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.3;
-        public $priority = 4;
+        public $priority = 3;
 
         public $animationExplosionScale = 0.35;
 

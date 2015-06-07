@@ -4,20 +4,20 @@ class SkySerpent extends SuperHeavyFighter{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 130;
-	$this->faction = "Drazi";
+        $this->pointCost = 130;
+        $this->faction = "Drazi";
         $this->phpclass = "SkySerpent";
         $this->shipClass = "Sky Serpent Heavy Fighter";
-	$this->imagePath = "img/ships/skyserpent.png";
-        
+        $this->imagePath = "img/ships/skyserpent.png";
+
         $this->forwardDefense = 10;
         $this->sideDefense = 9;
         $this->freethrust = 10;
         $this->offensivebonus = 7;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
-        
-	$this->iniativebonus = 70;
+
+        $this->iniativebonus = 70;
         $this->hasNavigator = true;
         
         $armour = array(4, 2, 3, 3);

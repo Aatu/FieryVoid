@@ -823,7 +823,7 @@
         public $projectilespeed = 14;
         public $animationWidth = 4;
         public $trailLength = 4;
-        public $priority = 8;
+        public $priority = 7;
 
         public $loadingtime = 2;
 

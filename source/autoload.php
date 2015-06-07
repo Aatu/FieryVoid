@@ -8,6 +8,8 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
+
+                // Yolu ships
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',
                 'maishan' => '/server/model/ships/yolu/maishan.php',
@@ -22,8 +24,24 @@ spl_autoload_register(
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
 
+           /*     //orieni ships
+                'commune' => '/server/model/ships/orieni/commune.php',
+                'obedient' => '/server/model/ships/orieni/obedient.php',
+                'steadfast' => '/server/model/ships/orieni/steadfast.php',
+
+                //orieni systems
+                'rapidgatling' => '/server/model/weapons/matter.php',
+                'gausscannon' => '/server/model/weapons/matter.php',
+                'laserlance' => '/server/model/weapons/lasers.php',
+
+*/
+
+                // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 
+
+
+                //stock 
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',

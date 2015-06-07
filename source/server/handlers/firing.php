@@ -426,8 +426,8 @@ class Firing{
 
         foreach ($ordered as $fire){
             $ship = $gamedata->getShipById($fire->shooterid);
-            $wpn = $ship->getSystemById($fire->weaponid);
-            $p = $wpn->priority;
+        //    $wpn = $ship->getSystemById($fire->weaponid);
+        //    $p = $wpn->priority;
         //    debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p);
             self::fire($ship, $fire, $gamedata);
         }
