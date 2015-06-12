@@ -161,7 +161,7 @@ class MissileLauncher extends Weapon{
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->hits[] = $damageEntry;
-        debug::log("dmg vs:".$system->displayName." for: ".$modifiedDamage." armour: ".$armour." destroyed: ".$destroyed);
+       // debug::log("dmg vs:".$system->displayName." for: ".$modifiedDamage." armour: ".$armour." destroyed: ".$destroyed);
 
         if ($damage-$armour > $systemHealth){        
             $damage = $damage-$modifiedDamage;             
@@ -182,7 +182,7 @@ class MissileLauncher extends Weapon{
         $okSystem->damage[] = $damageEntry;
         $this->hits[] = $damageEntry;
         //$this->damages[] = $damageEntry;
-        debug::log("OK vs:".$okSystem->displayName." for: ".$damage." armour: ".$armour." destroyed: ".$destroyed);
+       // debug::log("OK vs:".$okSystem->displayName." for: ".$damage." armour: ".$armour." destroyed: ".$destroyed);
         }
     }
 

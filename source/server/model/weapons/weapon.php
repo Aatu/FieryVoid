@@ -550,13 +550,13 @@ class Weapon extends ShipSystem{
             $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
         }
 
-        if ($target instanceof FighterFlight){
+   /*     if ($target instanceof FighterFlight){
             $dis = mathlib::getDistanceHex($shooter->getCoPos(),  $target->getCoPos());
             if ($dis > 10){
                 $oew = 0;
             }
         }
-
+*/
         if ($oew < 1){
             $rangePenalty = $rangePenalty*2;
         }
@@ -616,6 +616,7 @@ class Weapon extends ShipSystem{
         foreach ($gamedata->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach ($fireOrders as $fire){
+
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
 
                     $deg = $count;
@@ -623,6 +624,13 @@ class Weapon extends ShipSystem{
                         $deg = 0;
 
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
+                    if (!$interceptWeapon instanceof Weapon){
+                        debug::log("DING. You cant intercept with a non-weapon....");
+                        debug::log($interceptWeapon->displayName);
+                        continue;
+                    }
+              //      debug::log($ship->shipClass);
+              //      debug::log($interceptWeapon->displayName);
                     $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
 
                     if ($i<0

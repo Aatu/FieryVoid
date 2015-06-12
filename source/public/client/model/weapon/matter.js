@@ -58,7 +58,11 @@ var RapidGatling = function(json, ship)
 RapidGatling.prototype = Object.create( Matter.prototype );
 RapidGatling.prototype.constructor = RapidGatling;
 
-
-
+var PairedGatlingGun = function(json, ship)
+{
+    Matter.call( this, json, ship);
+}
+PairedGatlingGun.prototype = Object.create( Matter.prototype );
+PairedGatlingGun.prototype.constructor = PairedGatlingGun;
 
 

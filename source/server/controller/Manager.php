@@ -358,6 +358,13 @@ class Manager{
                                        self::$dbManager->submitAmmo($id, $fighterSys->id, $gamedata->id, $firingMode, $ammo->amount);
                                    }
                                }
+                               else if ($ship instanceof Templar){
+                                   foreach($fighter->systems as $systemIndex=>$fighterSys){
+                                       if($fighterSys instanceof PairedGatlingGun){
+                                           self::$dbManager->submitAmmo($id, $fighterSys->id, $gamedata->id, $fighterSys->firingMode, $fighterSys->ammunition);
+                                       }
+                                   }
+                               }
                            }
                        } 
                     }else{

@@ -191,7 +191,7 @@
         public $displayName = "Rapid Gatling Railgun";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 24;
+        public $projectilespeed = 2;
         public $animationWidth = 2;
         public $trailLength = 12;
         public $animationExplosionScale = 0.15;
@@ -213,6 +213,77 @@
     }
 
 
+    class PairedGatlingGun extends LinkedWeapon{
 
+        // take a look
+        public $name = "pairedGatlingGun";
+        public $displayName = "Paired Gatling Guns";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 24;
+        public $animationWidth = 2;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.15;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $ammunition = 6;
+        
+        public $loadingtime = 1;
+
+        public $intercept = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+
+
+            $this->data["Weapon type"] = "Matter";
+            $this->data["Damage type"] = "Standard";
+            parent::setSystemDataWindow($turn);
+
+
+            $this->data["Ammunition"] = $this->ammunition;
+        }
+
+        protected function getSystemArmour($system, $gamedata, $fireOrder)
+        {
+            return 0;
+        }
+
+        protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
+        {
+            return null;
+        }
+
+
+        public function getDamage($fireOrder){
+            $dmg = Dice::d(6, 2);
+            return $dmg;
+       }
+
+        public function setAmmo($firingMode, $amount){
+            debug::log("setammo: ".$amount);
+            $this->ammunition = $amount;
+        }
+
+
+       public function fire($gamedata, $fireOrder){
+            parent::fire($gamedata, $fireOrder);
+
+            $this->ammunition--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $this->ammunition);
+        }
+    
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 12;      }
+
+    }
 
 ?>

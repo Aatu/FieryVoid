@@ -35,7 +35,7 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
         default:
             this.data["Pulses"] = 'D2';
             break;
-    }            
+    }
 
     if(window.weaponManager.isLoaded(this)){
         this.loadingtime = 1 + shipManager.power.getBoost(this);

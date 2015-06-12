@@ -788,7 +788,6 @@ window.effects = {
     },
     
     animateIntercept: function(fire, weapon, tPos, currentlocation, shotPos, succesfull, targethit){
-        
         if (weapon.animation == "laser")
             return;
         
@@ -820,7 +819,6 @@ window.effects = {
         
         for (var i in chosens){
             var chosen = chosens[i];
-            
             var shots = 1;
             
             if (!succesfull){

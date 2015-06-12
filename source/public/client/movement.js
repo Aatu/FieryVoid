@@ -1691,6 +1691,8 @@ shipManager.movement = {
     
     doTurn: function(ship, right){
 
+
+
         if (!ship.osat){
 	        if (!shipManager.movement.canTurn(ship, right)){
 	            return false;
@@ -1915,16 +1917,26 @@ shipManager.movement = {
 						rearindex = 2;
 					}
 				}
-				if (heading + 2 === facing || heading - 4 === facing){
-					if (right){
-						sideindex = 4;
-						rearindex = 1;
-					}
-					else {
-						sideindex = 4;
-						rearindex = 2;
-					}
-				}
+                if (heading + 3 === facing || heading - 3 === facing){
+                    if (right){
+                        sideindex = 4;
+                        rearindex = 1;
+                    }
+                    else {
+                        sideindex = 3;
+                        rearindex = 1;
+                    }
+                }
+                if (heading + 2 === facing || heading - 4 === facing){
+                    if (right){
+                        sideindex = 4;
+                        rearindex = 1;
+                    }
+                    else {
+                        sideindex = 4;
+                        rearindex = 2;
+                    }
+                }
 				if (heading + 1 === facing || heading - 5 === facing){
 					if (right){
 						sideindex = 4;

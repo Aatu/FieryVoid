@@ -29,7 +29,7 @@
         public $trailLength = 16;
 
         public $intercept = 2;
-        public $priority = 8;
+        public $priority = 7;
 
 
         public $loadingtime = 1;
@@ -65,6 +65,7 @@
 
         public $loadingtime = 2;
         public $intercept = 1;
+        public $priority = 8;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
@@ -344,8 +345,7 @@
 
             $this->data["Weapon type"] = "Molecular";
             $this->data["Damage type"] = "Raking (6)";
-            $this->data["Boostlevel"] = $boost;
-
+            $this->data["<font color='red'>Boostlevel</font>"] = $boost;
             parent::setSystemDataWindow($turn);
         }
 
@@ -369,7 +369,7 @@
                     break;
                 default:
                     break;
-            }            
+            }
             return $add;
         }
 
@@ -410,16 +410,37 @@
 
             $dmg = Dice::d(10, (5 + $add))+$this->damagebonus;
 
-           // debug::log("addedDice: ".$add);
-          //  debug::log("damage rolled: ".$dmg);
+//            debug::log("addedDice: ".$add);
+  //          debug::log("damage rolled: ".$dmg);
 
             return $dmg;
         }
 
+        public function getAvgDamage(){
+            $this->setMinDamage();
+            $this->setMaxDamage();
 
-        public function setMinDamage(){     $this->minDamage = 5 + ($this->addedDice * 1)+ $this->damagebonus - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 50 + ($this->addedDice * 10) + $this->damagebonus - $this->dp;      }
-    }
+            $min = $this->minDamage;
+            $max = $this->maxDamage;
+            $avg = round(($min+$max)/2);
+            return $avg;
+        }
+
+
+        public function setMinDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->minDamage = 5 + ($boost * 1) + $this->damagebonus;
+        }   
+
+
+        public function setMaxDamage(){
+            $turn = TacGamedata::$currentTurn;
+            $boost = $this->getBoostLevel($turn);
+            $this->maxDamage = 50 + ($boost * 10) + $this->damagebonus;
+        }  
+
+   }
 
     class LightMolecularDisruptor extends Raking{
         

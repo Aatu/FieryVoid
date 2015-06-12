@@ -46,24 +46,22 @@
             $this->data["Weapon type"] = "Pulse";
             $this->data["Damage type"] = "Standard";
             $this->data["Grouping range"] = $this->grouping + "%";
-            $this->data["Max pulses"] = $this->getMaxPulses($turn);
             $this->data["REMARK"] = "Max. power might cause<br> crits on this system";
             $this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
-        
-            $this->maxpulses = $this->getMaxPulses($turn);
 
+            $this->shots = $this->defaultShots;
             $this->setTimes();
             
             switch($this->getBoostLevel($turn)){
                 case 0:
-                    $this->data["Pulses"] = 'D 2';
+                    $this->maxpulses = 3;
                     break;
                 case 1:
-                    $this->data["Pulses"] = 'D 3 +1';
+                    $this->maxpulses = 4;
                     break;
                 case 2:
-                    $this->data["Pulses"] = 'D 3 +2';
+                    $this->maxpulses = 5;
                     break;
             }            
 

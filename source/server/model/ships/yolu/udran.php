@@ -25,13 +25,14 @@ class Udran extends BaseShip{
 
         $this->addPrimarySystem(new Reactor(6, 25, 0, 4));
         $this->addPrimarySystem(new CnC(7, 24, 0, 1));
-        $this->addPrimarySystem(new Scanner(6, 28, 4, 12));
+        $this->addPrimarySystem(new Scanner(6, 28, 4, 13));
         $this->addPrimarySystem(new Engine(7, 25, 0, 12, 6));
         $this->addPrimarySystem(new Hangar(4, 2));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new DestabilizerBeam(4, 8, 6, 300, 60));
         $this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
+        $this->addFrontSystem(new JumpEngine(6, 25, 6, 18));
         $this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
         $this->addFrontSystem(new DestabilizerBeam(4, 8, 6, 300, 60));
 
@@ -40,18 +41,20 @@ class Udran extends BaseShip{
         $this->addAftSystem(new HeavyFusionCannon(4, 8, 6, 120, 240));
 
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
+        $this->addLeftSystem(new HeavyFusionCannon(4, 8, 6, 240, 0));
+        $this->addLeftSystem(new MolecularFlayer(5, 8, 4, 300, 360));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
-        $this->addLeftSystem(new HeavyFusionCannon(4, 8, 6, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
 
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
+        $this->addRightSystem(new HeavyFusionCannon(4, 8, 6, 0, 120));
+        $this->addRightSystem(new MolecularFlayer(5, 8, 4, 0, 60));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
-        $this->addRightSystem(new HeavyFusionCannon(4, 8, 6, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
 

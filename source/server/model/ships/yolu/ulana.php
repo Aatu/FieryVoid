@@ -30,6 +30,7 @@ class Ulana extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
+        $this->addFrontSystem(new JumpEngine(6, 25, 6, 18));
         $this->addFrontSystem(new FusionAgitator(4, 10, 4, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
 

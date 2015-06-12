@@ -154,7 +154,7 @@
         public $animation = "trail";
         public $trailLength = 12;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 16;
         public $animationExplosionScale = 0.10;
         public $rof = 1;
         public $grouping = 25;

@@ -795,7 +795,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 6;
-        public $priority = 8;
+        public $priority = 9;
 
         public $loadingtime = 3;
 
@@ -811,6 +811,30 @@
         public function getDamage($fireOrder){        return 24;   }
         public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 24 - $this->dp;      }
+
+
+
+
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            $crit = null;
+            
+            $system = $ship->getSystemByName("CnC");
+            $crit = new RestrictedEW(-1, $ship->id, $system->id, "RestrictedEW", $gamedata->turn);
+            $crit->updated = true;
+            $crit->inEffect = true;
+            $system->criticals[] =  $crit;
+            
+            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+        }
+        
+
+
+
+
+
+
+
+
     }
     
     class MediumBolter extends Particle{

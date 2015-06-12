@@ -84,22 +84,28 @@ FusionAgitator.prototype.initBoostableInfo = function(){
 
     switch(shipManager.power.getBoost(this)){
         case 0:
-            this.data["Damage"] = '15 - 65';
+            this.data["Damage"] = '15 - 60';
+            this.data["<font color='red'>Boostlevel</font>"] = '0';
             break;
         case 1:
-            this.data["Damage"] = '16 - 75';
+            this.data["Damage"] = '16 - 70';
+            this.data["<font color='red'>Boostlevel</font>"] = '1';
             break;
         case 2:
-            this.data["Damage"] = '17 - 85';
+            this.data["Damage"] = '17 - 80';
+            this.data["<font color='red'>Boostlevel</font>"] = '2';
             break;
         case 3:
-            this.data["Damage"] = '18 - 95';
+            this.data["Damage"] = '18 - 90';
+            this.data["<font color='red'>Boostlevel</font>"] = '3';
             break;
         case 4:
-            this.data["Damage"] = '19 - 105';
+            this.data["Damage"] = '19 - 100';
+            this.data["<font color='red'>Boostlevel</font>"] = '4';
             break;
         default:
-            this.data["Damage"] = '15 - 65';
+            this.data["Damage"] = '15 - 60';
+            this.data["<font color='red'>Boostlevel</font>"] = '0';
             break;
     }            
     return this;

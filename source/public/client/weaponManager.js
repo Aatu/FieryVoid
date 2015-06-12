@@ -239,12 +239,21 @@ window.weaponManager = {
 			return false;
 		}
 
+		if (weapon.ammunition){
+			if (weapon.ammunition > 0)
+				return false;
+		} else 
+			confirm.error("This fighter gun is out of ammunition.");
+			return true;
+
+
 		for (var i in p.systems){
 			var system = p.systems[i];
 			if (system.id != weapon.id)
 				continue;
 
 			if(system.missileArray){
+				var string = "missile rack";
 				for(var j in system.missileArray){
 					var missile = system.missileArray[j];
 
@@ -252,9 +261,11 @@ window.weaponManager = {
 						return false;
 					}
 				}
-			} else {
+			}
+			else {
 				return false;
 			}
+
 
 			confirm.error("This missile rack is out of ammo.");
 
@@ -682,9 +693,10 @@ window.weaponManager = {
 
 		var jammermod = 0;
 
-		if (target.flight && distance > 10){
-			oew = 0;
-		}
+//		if (target.flight && distance > 10){
+//			oew = 0;
+//		}
+
 		if (oew < 1){
 			rangePenalty = rangePenalty*2;
 		 }else if (shooter.faction != target.faction){

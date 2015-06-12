@@ -43,13 +43,13 @@ class Nashana extends BaseShip{
         $this->addLeftSystem(new GraviticThruster(5, 18, 0, 6, 3));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 60));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addLeftSystem(new HeavyFusionCannon(4, 10, 4, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 120, 300));
 
         $this->addRightSystem(new GraviticThruster(5, 18, 0, 5, 4));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 300, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new HeavyFusionCannon(4, 10, 4, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 240));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
