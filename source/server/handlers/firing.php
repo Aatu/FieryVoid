@@ -435,9 +435,14 @@ class Firing{
                     return $a->targetid - $b->targetid;
                 }
                 else {
-                    $ship = $gamedata->getShipById($a->shooterid);
-                    $wpnA = $ship->getSystemById($a->weaponid);
-                    $wpnB = $ship->getSystemById($b->weaponid);
+                    $shipA = $gamedata->getShipById($a->shooterid);
+                    $shipB = $gamedata->getShipById($b->shooterid);
+                    $wpnA = $shipA->getSystemById($a->weaponid);
+                    $wpnB = $shipB->getSystemById($b->weaponid);
+
+                    if($wpnA->priority == 1 || $wpnB->priority == 1){
+                        debug::log("DING".$wpnA->displayName."__".$wpnB->displayName);
+                    }
 
                     return $wpnA->priority - $wpnB->priority;
                 }
@@ -452,7 +457,7 @@ class Firing{
                 $ship = $gamedata->getShipById($fire->shooterid);
                 $wpn = $ship->getSystemById($fire->weaponid);
                 $p = $wpn->priority;
-                debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p);
+             //   debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p);
             }
 
                 self::fire($ship, $fire, $gamedata);

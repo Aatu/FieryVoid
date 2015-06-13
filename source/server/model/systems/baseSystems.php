@@ -450,6 +450,19 @@ class Hangar extends ShipSystem{
     }
 }
 
+
+class HkControlNode extends ShipSystem{
+
+    public $name = "hkControlNode";
+    public $displayName = "HK-Control Node";
+    public $primary = true;
+    
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, 0, $output );
+ 
+    }
+}
+
 class Catapult extends ShipSystem{
 
     public $name = "catapult";

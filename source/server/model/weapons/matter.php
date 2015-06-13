@@ -181,8 +181,36 @@
 
         public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
         public function setMinDamage(){     $this->minDamage = 11 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 21 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
     }
+
+
+        class HeavyGaussCannon extends GaussCannon{
+
+        public $name = "HeavyGaussCannon";
+        public $displayName = "Heavy Gauss Cannon";
+        public $animation = "trail";
+        public $animationColor = array(250, 250, 190);
+        public $projectilespeed = 16;
+        public $animationWidth = 4;
+        public $animationExplosionScale = 0.25;
+        public $trailLength = 10;
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.66;
+        public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
+        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 - $this->dp;      }
+
+        }
 
 
         class RapidGatling extends Matter

@@ -919,8 +919,7 @@
         {
             $orders = array();
             
-            foreach ($this->systems as $system)
-            {
+            foreach ($this->systems as $system){
                 $orders = array_merge($orders, $system->getFireOrders());
             }
             

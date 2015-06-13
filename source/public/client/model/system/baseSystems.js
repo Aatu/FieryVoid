@@ -121,3 +121,10 @@ var Stealth = function(json, ship)
 }
 Stealth.prototype = Object.create( ShipSystem.prototype );
 Stealth.prototype.constructor = Stealth;
+
+var HkControlNode = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+HkControlNode.prototype = Object.create( ShipSystem.prototype );
+HkControlNode.prototype.constructor = HkControlNode;

@@ -24,24 +24,28 @@ spl_autoload_register(
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
 
-       /*         //orieni ships
+    /*            //orieni ships
                 'commune' => '/server/model/ships/orieni/commune.php',
                 'obedient' => '/server/model/ships/orieni/obedient.php',
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
-               'shininglight' => '/server/model/ships/orieni/shininglight.php',
+                'prophet' => '/server/model/ships/orieni/prophet.php',
+                'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
                 'gausscannon' => '/server/model/weapons/matter.php',
+                'heavygausscannon' => '/server/model/weapons/matter.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
+                'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
 
                 //various
 
                 'hkflight' => '/server/model/ships/hk.php',
-*/
+                'hkcontrolnode' => '/server/model/systems/baseSystems.php',
+    /*
 
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',

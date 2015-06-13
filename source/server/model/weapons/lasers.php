@@ -390,6 +390,38 @@ class LaserLance extends Laser{
     }
 
 
+class HeavyLaserLance extends Laser{
+
+        public $name = "heavyLaserLance";
+        public $displayName = "Heavy Laser Lance";
+        public $animation = "laser";
+        public $animationColor = array(255, 100, 0);
+        public $animationWidth = 3.5;
+        public $animationWidth2 = 0.6;
+        public $loadingtime = 4;
+
+        public $damageType = "raking";
+        public $raking = 10;
+
+        public $firingModes = array(
+            1 => "Standard",
+            2 => "Piercing"
+        );
+
+        public $piercing = true;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 4)+10; }
+        public function setMinDamage(){ $this->minDamage = 14 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 50 - $this->dp; }
+    }
+
 
 
 ?>
