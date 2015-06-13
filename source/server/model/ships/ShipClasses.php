@@ -424,6 +424,23 @@
         
         }
         
+
+        public function getHexPos(){
+        
+            $movement = null;
+            if (!is_array($this->movement)){
+                return array("x"=>0, "y"=>0);
+            }
+            foreach ($this->movement as $move){
+                $movement = $move;
+            }
+            debug::log($this->phpclass);
+            debug::log($movement->x."_".$movement->y);
+            return [$movement->x, $movement->y];
+        }
+
+
+
         public function getPreviousCoPos(){
             $pos = $this->getCoPos();
             

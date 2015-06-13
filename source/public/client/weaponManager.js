@@ -239,13 +239,15 @@ window.weaponManager = {
 			return false;
 		}
 
-		if (weapon.ammunition){
-			if (weapon.ammunition > 0)
+		if (weapon.hasOwnProperty("ammunition")){
+			if (weapon.ammunition > 0){
 				return false;
-		} else 
-			confirm.error("This fighter gun is out of ammunition.");
-			return true;
-
+			}
+			else {
+				confirm.error("This fighter gun is out of ammunition.");
+				return true;
+			}
+		}
 
 		for (var i in p.systems){
 			var system = p.systems[i];
@@ -253,23 +255,18 @@ window.weaponManager = {
 				continue;
 
 			if(system.missileArray){
-				var string = "missile rack";
 				for(var j in system.missileArray){
 					var missile = system.missileArray[j];
 
 					if(missile.amount > 0){
 						return false;
 					}
+					else {
+						confirm.error("This missile rack is out of ammo.");
+						return true;
+					}
 				}
 			}
-			else {
-				return false;
-			}
-
-
-			confirm.error("This missile rack is out of ammo.");
-
-			return true;
 		}
 
 		return false;
@@ -1662,7 +1659,36 @@ window.weaponManager = {
 	getFiringWeapon: function(weapon, fire){
 
 		return weapon;
-	}
+	},
+
+
+
+    canRam: function(ship){
+        if (ship.hasOwnProperty("hunterkiller")){
+
+        }
+    },
+
+
+    askForRam: function(target){
+
+		var selectedShip = gamedata.getSelectedShip();
+
+
+        confirm.confirmWithOptions("CONFIRM movement ?", "Yup", "Nah, too risky yo", function(respons){
+            if(respons){
+                console.log("ye");
+            }
+            else{
+                console.log("na");
+            }
+        });
+    }
+
+
+
+
+
 
 }
 

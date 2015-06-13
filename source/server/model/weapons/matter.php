@@ -249,7 +249,7 @@
             parent::setSystemDataWindow($turn);
 
 
-            $this->data["Ammunition"] = $this->ammunition;
+            $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
         }
 
         protected function getSystemArmour($system, $gamedata, $fireOrder)
