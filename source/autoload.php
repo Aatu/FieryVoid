@@ -45,7 +45,7 @@ spl_autoload_register(
 
                 'hkflight' => '/server/model/ships/hk.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
-    /*
+    */
 
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
