@@ -436,7 +436,7 @@
             }
             debug::log($this->phpclass);
             debug::log($movement->x."_".$movement->y);
-            return [$movement->x, $movement->y];
+            return array($movement->x, $movement->y);
         }
 
 
