@@ -814,27 +814,6 @@
 
 
 
-
-        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;
-            
-            $system = $ship->getSystemByName("CnC");
-            $crit = new RestrictedEW(-1, $ship->id, $system->id, "RestrictedEW", $gamedata->turn);
-            $crit->updated = true;
-            $crit->inEffect = true;
-            $system->criticals[] =  $crit;
-            
-            parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-        }
-        
-
-
-
-
-
-
-
-
     }
     
     class MediumBolter extends Particle{

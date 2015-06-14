@@ -24,13 +24,27 @@ spl_autoload_register(
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
 
-    /*            //orieni ships
+        /*        //orieni ships
                 'commune' => '/server/model/ships/orieni/commune.php',
+                'crusader' => '/server/model/ships/orieni/crusader.php',
+
                 'obedient' => '/server/model/ships/orieni/obedient.php',
+
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
+                'seeker' => '/server/model/ships/orieni/seeker.php',
+                'staunch' => '/server/model/ships/orieni/staunch.php',
+                'virtue' => '/server/model/ships/orieni/virtue.php',
+                'stormfront' => '/server/model/ships/orieni/stormfront.php',
+
                 'templar' => '/server/model/ships/orieni/templar.php',
+                'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+
                 'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
+                'pariah' => '/server/model/ships/orieni/pariah.php',
+
                 'prophet' => '/server/model/ships/orieni/prophet.php',
+                'paragon' => '/server/model/ships/orieni/paragon.php',
+
                 'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
                 //orieni systems

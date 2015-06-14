@@ -27,10 +27,10 @@ class Delphi extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 12));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 5, 24));
-	$this->addPrimarySystem(new Hangar(4, 4));
+        $this->addPrimarySystem(new Hangar(4, 4));
 
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-	$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new MediumPulse(4, 6, 3, 240, 60));
         $this->addFrontSystem(new MediumPulse(4, 6, 3, 300, 120));
         $this->addFrontSystem(new InterceptorMkII(2, 4, 2, 240, 60));
@@ -40,21 +40,21 @@ class Delphi extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
         $this->addAftSystem(new MediumPulse(4, 6, 3, 120, 300));
         $this->addAftSystem(new MediumPulse(4, 6, 3, 60, 240));
-	$this->addAftSystem(new InterceptorMkII(2, 4, 2, 90, 270));
+        $this->addAftSystem(new InterceptorMkII(2, 4, 2, 90, 270));
 
-	$this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
-	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
-	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
-	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
-	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+        $this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
+        $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+        $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+        $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
+        $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 0));
         $this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 0));
 
-	$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
-	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
-	$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
+        $this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
+        $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+        $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+        $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+        $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
+        $this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 50));

@@ -1,14 +1,14 @@
 <?php
-class Commune extends MediumShip{
+class Crusader extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 440;
+        $this->pointCost = 490;
         $this->faction = "Orieni";
-        $this->phpclass = "Commune";
+        $this->phpclass = "Crusader";
         $this->imagePath = "img/ships/commune.png";
-        $this->shipClass = "Commune Battle Leader";
+        $this->shipClass = "Crusader Heavy Frigate";
 
         $this->canvasSize = 100;
         
@@ -22,6 +22,7 @@ class Commune extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 65;
         
+        $this->occurence = "uncommon";
          
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
@@ -35,10 +36,10 @@ class Commune extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-        $this->addFrontSystem(new LaserLance(3, 6, 4, 240, 60));
-        $this->addFrontSystem(new LaserLance(3, 10, 4, 300, 120));
+        $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 240, 60));
+        $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 300, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-        $this->addFrontSystem(new HKControlNode(5, 12, 1, 1));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
 
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));

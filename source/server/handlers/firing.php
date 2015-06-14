@@ -440,9 +440,9 @@ class Firing{
                     $wpnA = $shipA->getSystemById($a->weaponid);
                     $wpnB = $shipB->getSystemById($b->weaponid);
 
-                    if($wpnA->priority == 1 || $wpnB->priority == 1){
-                        debug::log("DING".$wpnA->displayName."__".$wpnB->displayName);
-                    }
+             //       if($wpnA->priority == 1 || $wpnB->priority == 1){
+             //           debug::log("DING".$wpnA->displayName."__".$wpnB->displayName);
+             //       }
 
                     return $wpnA->priority - $wpnB->priority;
                 }
