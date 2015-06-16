@@ -457,8 +457,9 @@ class HkControlNode extends ShipSystem{
     public $displayName = "HK-Control Node";
     public $primary = true;
     
+
     function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, 0, $output );
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
  
     }
 }

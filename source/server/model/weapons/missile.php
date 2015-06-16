@@ -64,7 +64,7 @@ class MissileLauncher extends Weapon{
 
     public function testAmmoExplosion($ship, $gamedata){
         $roll = Dice::d(20);
-        if ($roll >= 18){
+        if ($roll >= 19){
             $amount = 65;
             $this->ammoExplosion($ship, $gamedata, $amount);
             $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
@@ -521,7 +521,7 @@ class BombRack extends MissileLauncher{
     // For FV, the only option for a bomb rack is to load it with missiles.
     // In that case, it behaves exactly like a SMissile-rack, including
     // the FC.
-    public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
+    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

@@ -166,7 +166,9 @@ shipWindowManager = {
 
 			$(belowIcon).append(input);
 
-			if (gamedata.gamephase == 3){
+			if (gamedata.gamephase == 3 &&
+				ship.userid == gamedata.thisplayer){
+				
 				if (weaponManager.canSelfIntercept(ship)){
 					input.className = "interceptButton";
 					input.className += " interceptEnabled";

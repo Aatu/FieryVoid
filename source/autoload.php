@@ -23,8 +23,8 @@ spl_autoload_register(
                 'utan' => '/server/model/ships/yolu/utan.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
-
-        /*        //orieni ships
+ /*              
+                //orieni ships
                 'commune' => '/server/model/ships/orieni/commune.php',
                 'crusader' => '/server/model/ships/orieni/crusader.php',
 
@@ -59,7 +59,7 @@ spl_autoload_register(
 
                 'hkflight' => '/server/model/ships/hk.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
-    */
+*/   
 
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',

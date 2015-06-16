@@ -156,7 +156,7 @@
         public $animationWidth = 4;
         public $projectilespeed = 16;
         public $animationExplosionScale = 0.10;
-        public $rof = 1;
+        public $rof = 3;
         public $grouping = 25;
         
         public $loadingtime = 1;

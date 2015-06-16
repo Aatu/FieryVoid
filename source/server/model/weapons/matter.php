@@ -218,14 +218,16 @@
         public $name = "rapidGatling";
         public $displayName = "Rapid Gatling Railgun";
         public $animation = "trail";
-        public $animationColor = array(250, 250, 190);
+        public $trailColor = array(225, 255, 150);
+        public $animationColor = array(225, 225, 150);
         public $projectilespeed = 2;
         public $animationWidth = 2;
-        public $trailLength = 12;
+        public $trailLength = 14;
         public $animationExplosionScale = 0.15;
         public $guns = 2;
-        
+        public $intercept = 1;
         public $loadingtime = 1;
+        public $ballisticIntercept = true;
         
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
@@ -297,7 +299,6 @@
        }
 
         public function setAmmo($firingMode, $amount){
-            debug::log("setammo: ".$amount);
             $this->ammunition = $amount;
         }
 

@@ -103,6 +103,9 @@
                 $interceptor = $target->getSystemById($this->weapon->id);
 
                 for ($i = 0; $i<$this->weapon->guns;$i++){
+                    if ($this->weapon->displayName == "Point Pulsar"){
+                        debug::log("shots: ".$this->weapon->defaultsShots);
+                    }    
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
 //                    var_dump($interceptFire);
@@ -230,6 +233,10 @@ class Firing{
             return false;
 
         $weapon = $weapon->getWeaponForIntercept();
+
+        if(property_exists($weapon, "ballisticIntercept")){
+            return false;
+        }
 
         if (!$weapon)
             return false;

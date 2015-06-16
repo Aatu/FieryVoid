@@ -357,14 +357,15 @@ class NeutronLaser extends Laser{
 
 
 
-class LaserLance extends Laser{
+class LaserLance extends HeavyLaser{
 
         public $name = "laserLance";
         public $displayName = "Laser Lance";
         public $animation = "laser";
-        public $animationColor = array(255, 100, 0);
-        public $animationWidth = 2.5;
-        public $animationWidth2 = 0.4;
+        public $animationColor = array(220, 100, 11);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+
         public $loadingtime = 3;
 
         public $damageType = "raking";
@@ -390,14 +391,13 @@ class LaserLance extends Laser{
     }
 
 
-class HeavyLaserLance extends Laser{
+class HeavyLaserLance extends LaserLance{
 
         public $name = "heavyLaserLance";
         public $displayName = "Heavy Laser Lance";
-        public $animation = "laser";
-        public $animationColor = array(255, 100, 0);
-        public $animationWidth = 3.5;
+        public $animationWidth = 4;
         public $animationWidth2 = 0.6;
+
         public $loadingtime = 4;
 
         public $damageType = "raking";
