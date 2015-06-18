@@ -572,9 +572,9 @@ class TacGamedata{
     
     }
     
-    private function getIsWaitingForThisPlayer()
-    {
+    private function getIsWaitingForThisPlayer(){
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
+
         
         $activeship = $this->getShipById($this->activeship);
         
@@ -584,15 +584,21 @@ class TacGamedata{
                 return true;
         }
         
-        foreach ($slots as $slot)
-        {
+        foreach ($slots as $slot){
+            
+
             if ($slot->lastturn < $this->turn) 
                 return true;
             
             if ($slot->lastphase < $this->phase && $this->phase != 2)
                 return true;
+
+            if ( ($slot->lastphase == 3 || $slot->lastphase == 4) &&
+                $this->phase == 1){
+                return true;
+            }
         }
-                
+
         return false;
     }
 }

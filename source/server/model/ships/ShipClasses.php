@@ -67,7 +67,7 @@
                         && ($ship->faction == "Centauri")
                         && ($this->userid == $ship->userid)
                         && ($ship instanceof PrimusMaximus)
-                        && ($this != $ship)){
+                        && ($this->id != $ship->id)){
                     return ($this->iniativebonus+5);
                 }
             }
@@ -87,7 +87,7 @@
                             && ($ship->faction == "Dilgar")
                             && ($this->userid == $ship->userid)
                             && ($ship->shipSizeClass == 3)
-                            && ($this != $ship)){
+                            && ($this->id != $ship->id)){
                                 $cnc = $ship->getSystemByName("CnC");
                                 $bonus = $cnc->output;
                                 if ($bonus > $mod){
@@ -106,7 +106,7 @@
                     && ($ship->faction == "Yolu")
                     && ($this->userid == $ship->userid)
                     && ($ship instanceof Udran)
-                    && ($this != $ship)){
+                    && ($this->id != $ship->id)){
                         $cnc = $ship->getSystemByName("CnC");
                         $bonus = $cnc->output;
                         return ($this->iniativebonus+$bonus*5);
