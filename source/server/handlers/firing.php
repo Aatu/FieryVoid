@@ -232,14 +232,16 @@ class Firing{
         if (!($weapon instanceof Weapon))
             return false;
 
+
         $weapon = $weapon->getWeaponForIntercept();
+        
+        if (!$weapon)
+            return false;
+
 
         if(property_exists($weapon, "ballisticIntercept")){
             return false;
         }
-
-        if (!$weapon)
-            return false;
         
         if ($weapon->intercept == 0)
             return false;
