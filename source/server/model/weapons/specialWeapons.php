@@ -42,7 +42,7 @@
 		}
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-						
+				
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
             $crit->inEffect = false;
@@ -163,6 +163,18 @@
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			}
+            else {
+                $crits = array();
+                debug::log($system->displayName);
+                $crits = $system->testCritical($ship, $gamedata, $crits, $add = 4);
+                if ($crits){
+                    debug::log("crit!");
+                    $system->criticals[] =  $crits;
+                } else 
+                    debug::log("no crit!");
+            }
+
+
 			
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		}

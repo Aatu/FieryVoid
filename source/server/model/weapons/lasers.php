@@ -367,6 +367,7 @@ class LaserLance extends HeavyLaser{
         public $animationWidth2 = 0.3;
 
         public $loadingtime = 3;
+        public $overloadable = false;
 
         public $damageType = "raking";
         public $raking = 10;
@@ -422,6 +423,33 @@ class HeavyLaserLance extends LaserLance{
         public function setMaxDamage(){ $this->maxDamage = 50 - $this->dp; }
     }
 
+
+
+class TacLaser extends Laser{
+
+        public $name = "tacLaser";
+        public $displayName = "Tactical Laser";
+        public $animation = "laser";
+        public $animationColor = array(205, 5, 85);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+
+        public $loadingtime = 2;
+
+        public $damageType = "raking";
+        public $raking = 10;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+8; }
+        public function setMinDamage(){ $this->minDamage = 10 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 28 - $this->dp; }
+    }
 
 
 ?>

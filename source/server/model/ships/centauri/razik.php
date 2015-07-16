@@ -19,8 +19,16 @@ class Razik extends FighterFlight{
         $this->turncost = 0.33;
         
 	$this->iniativebonus = 100;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 2, 2);
             $fighter = new Fighter("razik", $armour, 8, $this->id);
             $fighter->displayName = "Razik Light Fighter";

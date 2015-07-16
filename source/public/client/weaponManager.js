@@ -319,6 +319,7 @@ window.weaponManager = {
 			var html = "";
 			var section = weaponManager.getShipHittingSide(selectedShip, ship);
 
+
 			for (var i = 0; i < section.length; i++){
 				if (section[i] == 1){
 					html += "-FRONT-";
@@ -722,7 +723,7 @@ window.weaponManager = {
 		var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
 
 		var change = Math.round((goal/20)*100);
-		console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+	//	console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
 
 	// makes no sense to cap hit % visuals at 100. You wanne calc your estimated pulses, right ?
 	//    if (change > 100)

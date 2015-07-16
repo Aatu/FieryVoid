@@ -92,8 +92,8 @@ flightWindowManager = {
     
     bindEvents: function(shipwindow){
 
-        $(".fightersystem", shipwindow).on("contextmenu", flightWindowManager.selectAllSystems);
         $(".fightersystem", shipwindow).on("click", flightWindowManager.clickSystem);
+        $(".fightersystem", shipwindow).on("contextmenu", flightWindowManager.selectAllSystems);
 
         $(".close", shipwindow).on("click", shipWindowManager.close);
     },
@@ -314,14 +314,18 @@ flightWindowManager = {
         var shipwindow = $(".shipwindow").has($(this));
         var systemwindow = $(this);
         var flight = gamedata.getShip(systemwindow.data("shipid"));
+        var fighterid = systemwindow.data("fighterid");
+        var systemid = systemwindow.data("id")
+
+        var targetSystem;
+
+        var offset = systemid - fighterid;
 
         for (var i = 0; i < flight.systems.length; i++){
         	if (typeof (flight.systems[i]) != "undefined"){
-        		if (!shipManager.isDestroyed(flight, flight.systems[i])){
-	        		var gunIndex = flight.systems[i].id + 1;
-	        		var system = flight.systems[i].systems[gunIndex];
-					if (system.weapon){
-						
+        		if (!flight.systems[i].destroyed){
+	        		var system = flight.systems[i].systems[i+offset];
+					if (system.weapon){					
 						if (gamedata.gamephase != 3 && !system.ballistic)
 							return;
 						
@@ -337,13 +341,12 @@ flightWindowManager = {
 						}
 						else{
 							weaponManager.selectWeapon(flight, system);
-						}			
-					}
+						}
+	    			}
 	        	}
 	        }
-        }
-	},
-	
+	    }
+    },
 
 	clickSystem: function(e){
 

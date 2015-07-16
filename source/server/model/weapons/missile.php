@@ -63,9 +63,15 @@ class MissileLauncher extends Weapon{
     }
 
     public function testAmmoExplosion($ship, $gamedata){
+        $amount;
+
         $roll = Dice::d(20);
         if ($roll >= 19){
-            $amount = 65;
+            if ($this instanceof BombRack){
+                $amount = 35;
+            }
+            else $amount = 75;
+
             $this->ammoExplosion($ship, $gamedata, $amount);
             $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
         }
@@ -147,9 +153,10 @@ class MissileLauncher extends Weapon{
         $systemHealth = $system->getRemainingHealth();
         $modifiedDamage = $damage;
         
-        if ($armour < 0)
+        if ($armour < 0){
             $armour = 0;
-        
+        }        
+
         $destroyed = false;
 
         if ($damage-$armour >= $systemHealth){
@@ -161,15 +168,25 @@ class MissileLauncher extends Weapon{
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->hits[] = $damageEntry;
-       // debug::log("dmg vs:".$system->displayName." for: ".$modifiedDamage." armour: ".$armour." destroyed: ".$destroyed);
+        debug::log("REGULAR vs:".$system->displayName." id: ".$system->id." for: ".$modifiedDamage." armour: ".$armour." destroyed: ".$destroyed);
 
-        if ($damage-$armour > $systemHealth){        
+        if ($damage-$armour > $systemHealth){
             $damage = $damage-$modifiedDamage;             
             $okSystem = $ship->getStructureSystem($this->location);
                 if ($okSystem->isDestroyed()){
                     $okSystem = $ship->getStructureSystem(0);
                 }
             $armour = $okSystem->armour;
+
+            foreach ($this->hits as $previous){
+                if ($previous->systemid == $okSystem->id)
+                    $armour -= $previous->damage;
+            }
+
+            if ($armour < 0){
+                $armour = 0;
+            }       
+
             $destroyed = false;
 
             if ($damage-$armour >= $systemHealth){
@@ -182,7 +199,7 @@ class MissileLauncher extends Weapon{
         $okSystem->damage[] = $damageEntry;
         $this->hits[] = $damageEntry;
         //$this->damages[] = $damageEntry;
-       // debug::log("OK vs:".$okSystem->displayName." for: ".$damage." armour: ".$armour." destroyed: ".$destroyed);
+        debug::log("OVERKILL vs:".$okSystem->displayName." id: ".$okSystem->id." for: ".$damage." armour: ".$armour." destroyed: ".$destroyed);
         }
     }
 

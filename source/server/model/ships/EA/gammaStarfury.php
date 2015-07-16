@@ -18,9 +18,17 @@ class GammaStarfury extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 80;
-        
-        for ($i = 0; $i<6; $i++){
+    	$this->iniativebonus = 80;
+        $this->populate();        
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){        
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("gammaStarfury", $armour, 13, $this->id);
             $fighter->displayName = "Gamma Starfury Heavy Fighter";
@@ -41,7 +49,7 @@ class GammaStarfury extends FighterFlight{
             $fighter->addFrontSystem($missileRack);
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);
-	}
+	   }
     }
 }
 

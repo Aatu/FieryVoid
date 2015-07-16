@@ -43,13 +43,13 @@ class Secundus extends BaseShip{
 		$this->addAftSystem(new JumpEngine(6, 25, 3, 16));
         
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
+        $this->addLeftSystem(new TractorBeam(4, 4, 0, 0));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
-		
-        
         
 		
 		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
+        $this->addRightSystem(new TractorBeam(4, 4, 0, 0));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
 		

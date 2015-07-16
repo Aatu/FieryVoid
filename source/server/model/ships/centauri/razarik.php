@@ -20,8 +20,16 @@ class Razarik extends FighterFlight{
         $this->occurence = "rare";
         
 	$this->iniativebonus = 100;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 2, 2);
             $fighter = new Fighter("razarik", $armour, 8, $this->id);
             $fighter->displayName = "Razarik Torpedo Fighter";

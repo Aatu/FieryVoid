@@ -19,8 +19,16 @@ class Nial extends FighterFlight{
         $this->turncost = 0.33;
         $this->iniativebonus = 85;
         $this->gravitic = true;
+        $this->populate();
+    }
 
-        for ($i = 0; $i<6; $i++){
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 4, 4, 4);
             $nial = new Fighter("nial", $armour, 14, $this->id);
             $nial->displayName = "Nial Heavy Fighter";

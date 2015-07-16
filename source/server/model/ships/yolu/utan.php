@@ -3,26 +3,33 @@ class Utan extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
-        
-	$this->pointCost = 660;
-	$this->faction = "Yolu";
-	$this->phpclass = "Utan";
-	$this->shipClass = "Utan Heavy Fighters";
-	$this->imagePath = "img/ships/utan.png";
-	
-	$this->forwardDefense = 7;
-	$this->sideDefense = 9;
-	$this->freethrust = 8;
-	$this->offensivebonus = 5;
-	$this->jinkinglimit = 6;
-	$this->turncost = 0.33;
-	$this->iniativebonus = 80;
-	
-	$this->gravitic = true; 
-	$this->dropOutBonus = -2; 
+	        
+		$this->pointCost = 660;
+		$this->faction = "Yolu";
+		$this->phpclass = "Utan";
+		$this->shipClass = "Utan Heavy Fighters";
+		$this->imagePath = "img/ships/utan.png";
+		
+		$this->forwardDefense = 7;
+		$this->sideDefense = 9;
+		$this->freethrust = 8;
+		$this->offensivebonus = 5;
+		$this->jinkinglimit = 6;
+		$this->turncost = 0.33;
+		$this->iniativebonus = 80;
+		
+		$this->gravitic = true; 
+		$this->dropOutBonus = -2; 
+        $this->populate();
+    }
 
-        
-        for ($i = 0; $i<6; $i++){
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(5, 4, 4, 4);
             $fighter = new Fighter("utan", $armour, 15, $this->id);
             $fighter->displayName = "Utan Heavy Fighter";

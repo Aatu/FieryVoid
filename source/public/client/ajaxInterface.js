@@ -71,12 +71,15 @@ window.ajaxInterface = {
                         newShip.EW[a] = ew;
                     }
                 }
+
+
                 var systems = Array();
 
                 for (var a in ship.systems){
                     var system = ship.systems[a];
 
                     if (ship.flight){
+
                         var fighterSystems = Array();
                         
                         for (var c in system.systems){
@@ -89,7 +92,7 @@ window.ajaxInterface = {
                                     fightersystem.fireOrders.splice(b,1);
                                 }
                             }
-                            
+
                             if(fightersystem.missileArray != null){
                                 for (var index in fightersystem.missileArray){
                                     var amount = fightersystem.missileArray[index].amount;
@@ -174,8 +177,14 @@ window.ajaxInterface = {
                     }
 
                 }
-            
+
                 newShip.systems = systems;
+
+                if (ship.flight){
+                    newShip.flightSize = ship.flightSize;
+                }
+
+
                 tidyships.push(newShip);
             }
         }

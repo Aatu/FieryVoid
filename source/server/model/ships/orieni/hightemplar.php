@@ -19,8 +19,16 @@ class HighTemplar extends FighterFlight{
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 100;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("templar", $armour, 9, $this->id);
             $fighter->displayName = "Templar Light Fighter";

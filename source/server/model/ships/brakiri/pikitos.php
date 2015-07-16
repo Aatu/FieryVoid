@@ -20,7 +20,16 @@ class Pikitos extends FighterFlight{
         
         $this->gravitic = true;
         
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 4, 4);
             $fighter = new Fighter("pikitos", $armour, 15, $this->id);
             $fighter->displayName = "Pikitos Heavy Fighter";

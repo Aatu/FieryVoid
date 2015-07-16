@@ -19,8 +19,16 @@ class Sitara extends FighterFlight{
         
 		$this->iniativebonus = 90;
         
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
 
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sitara", $armour, 10, $this->id);
 			$fighter->displayName = "Sitara Medium Fighter";

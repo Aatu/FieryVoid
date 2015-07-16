@@ -304,11 +304,21 @@
 				<td class="fightercontainer 1"></td>
 				<td class="fightercontainer 2"></td>
 			</tr>
-			<tr>
-				<td class="fightercontainer 3"></td>
-				<td class="fightercontainer 4"></td>
-				<td class="fightercontainer 5"></td>
-			</tr>
+            <tr>
+                <td class="fightercontainer 3"></td>
+                <td class="fightercontainer 4"></td>
+                <td class="fightercontainer 5"></td>
+            </tr>
+            <tr>
+                <td class="fightercontainer 6"></td>
+                <td class="fightercontainer 7"></td>
+                <td class="fightercontainer 8"></td>
+            </tr>
+            <tr>
+                <td class="fightercontainer 9"></td>
+                <td class="fightercontainer 10"></td>
+                <td class="fightercontainer 11"></td>
+            </tr>
 		</table>
     </div>
 

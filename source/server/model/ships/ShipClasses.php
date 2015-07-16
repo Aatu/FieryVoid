@@ -172,6 +172,8 @@
             $i = sizeof($this->systems);
             $system->setId($i);
             $system->location = $loc;
+
+
             $this->systems[$i] = $system;
             
             if ($system instanceof Structure)

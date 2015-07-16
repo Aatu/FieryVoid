@@ -558,8 +558,8 @@
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+        public $intercept;
 
-        public $intercept = 2;
 
         public $loadingtime = 1;
         public $shots = 2;
@@ -574,6 +574,7 @@
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
 
             if($nrOfShots === 1){
                 $this->iconPath = "particleGun.png";
@@ -901,6 +902,42 @@
         public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
     }
+
+
+    class ParticleProjector extends Particle{
+
+        public $trailColor = array(30, 170, 255);
+
+        public $name = "particleProjector";
+        public $displayName = "Particle Projector";
+        public $animation = "beam";
+        public $animationColor = array(255, 250, 230);
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 14;
+        public $animationWidth = 4;
+        public $trailLength = 20;
+
+        public $intercept = 2;
+        public $loadingtime = 2;
+        public $priority = 4;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
+    }
+
+
 
 ?>
 

@@ -58,3 +58,17 @@ var PlasmaTorch = function(json, ship)
 PlasmaTorch.prototype = Object.create( Plasma.prototype );
 PlasmaTorch.prototype.constructor = PlasmaTorch;
 
+var PairedPlasmaBlaster = function(json, ship)
+{
+    Plasma.call( this, json, ship);
+}
+PairedPlasmaBlaster.prototype = Object.create( Plasma.prototype );
+PairedPlasmaBlaster.prototype.constructor = PairedPlasmaBlaster;
+
+var PlasmaGun = function(json, ship)
+{
+    Plasma.call( this, json, ship);
+}
+PlasmaGun.prototype = Object.create( Plasma.prototype );
+PlasmaGun.prototype.constructor = PlasmaGun;
+

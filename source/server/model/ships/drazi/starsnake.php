@@ -17,8 +17,16 @@ class Starsnake extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         $this->iniativebonus = 110;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("starsnake", $armour, 8, $this->id);
             $fighter->displayName = "Starsnake Light Fighter";

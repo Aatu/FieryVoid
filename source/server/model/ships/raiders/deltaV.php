@@ -18,8 +18,16 @@ class DeltaV extends FighterFlight{
         $this->turncost = 0.33;
         
 	$this->iniativebonus = 100;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(2, 0, 1, 1);
 		$fighter = new Fighter("deltaV", $armour, 7, $this->id);
 		$fighter->displayName = "Delta-V Light Fighter";

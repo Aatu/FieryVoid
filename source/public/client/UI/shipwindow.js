@@ -1,7 +1,7 @@
 jQuery(function(){
-      $(".iconmask").bind("contextmenu", function(e) {
-            e.preventDefault();
-        }); 
+   //   $(".iconmask").bind("contextmenu", function(e) {
+    //        e.preventDefault();
+     //   }); 
 });
 
 shipWindowManager = {
@@ -106,6 +106,10 @@ shipWindowManager = {
 	},
     
     bindEvents: function(shipwindow){
+
+
+
+
         $(".close", shipwindow).on("click", shipWindowManager.close);
         $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
         $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
@@ -667,6 +671,7 @@ shipWindowManager = {
             systemwindow.off("mouseover", weaponManager.onWeaponMouseover);
             systemwindow.off("mouseout", weaponManager.onWeaponMouseOut);
             systemwindow.off("click", shipWindowManager.clickSystem);
+            systemwindow.off("contextmenu", shipWindowManager.selectAllGuns);
             
             systemwindow.find(".mode").off("click", shipWindowManager.onModeClicked);
             
@@ -674,7 +679,11 @@ shipWindowManager = {
             systemwindow.find(".on").on("click", shipManager.power.onOnlineClicked);
             systemwindow.on("mouseover", weaponManager.onWeaponMouseover);
             systemwindow.on("mouseout", weaponManager.onWeaponMouseOut);
+
             systemwindow.on("click", shipWindowManager.clickSystem);
+            systemwindow.on("contextmenu", shipWindowManager.selectAllGuns);
+
+
             systemwindow.find(".holdfire").on("click", window.weaponManager.onHoldfireClicked);
             
             systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
@@ -1131,6 +1140,59 @@ setSystemData: function(ship, system, shipwindow){
 
 
 		shipwindow.addClass("assignThrust");
+	},
+
+	selectAllGuns: function(e){
+
+		var array = [];
+
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(this);
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+
+		for (var i = 0; i < ship.systems.length; i++){
+			if (system.displayName === ship.systems[i].displayName){
+				array.push(ship.systems[i]);
+			}
+		}
+
+		var selectedShip = gamedata.getSelectedShip();
+
+		for (var i = 0; i < array.length; i++){
+			var system = array[i];
+
+			if (gamedata.waiting)
+				return
+			
+			if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+				return;
+						
+			if (system.weapon && selectedShip.id == ship.id){
+				
+				if (gamedata.gamephase != 3 && !system.ballistic)
+					return;
+				
+				if (gamedata.gamephase != 1 && system.ballistic)
+					return;
+			
+				if (weaponManager.isSelectedWeapon(system)){
+					weaponManager.unSelectWeapon(ship, system);
+				}else{
+					weaponManager.selectWeapon(ship, system);
+				}
+				
+			}
+			
+			if (gamedata.isEnemy(ship, selectedShip) 
+				&& gamedata.gamephase == 3 
+				&& gamedata.selectedSystems.length > 0 
+				&& weaponManager.canCalledshot(ship, system))
+			{
+				weaponManager.targetShip(ship, system);
+			}
+		}
 	},
 	
 	clickSystem: function(e){

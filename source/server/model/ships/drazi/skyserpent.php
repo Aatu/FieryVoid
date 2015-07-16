@@ -37,6 +37,10 @@ class SkySerpent extends SuperHeavyFighter{
         
         $this->addSystem($fighter);
     }
+
+    public function populate(){
+        return;
+    }
     
     public function getInitiativebonus($gamedata){
         $initiativeBonusRet = parent::getInitiativebonus($gamedata);

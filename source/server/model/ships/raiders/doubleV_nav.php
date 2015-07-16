@@ -19,8 +19,16 @@ class DoubleV_Nav extends FighterFlight{
 		$this->hasNavigator = true;
 
 		$this->iniativebonus = 90;
-								
-								for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(3, 0, 2, 2);
 		$fighter = new Fighter("doubleV", $armour, 10, $this->id);
 		$fighter->displayName = "Double-V Medium Fighter";

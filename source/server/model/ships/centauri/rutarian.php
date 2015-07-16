@@ -18,8 +18,16 @@ class Rutarian extends FighterFlight{
         $this->turncost = 0.33;
         
 		$this->iniativebonus = 90;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 
 			$armour = array(4, 1, 3, 3);
 			$fighter = new Fighter("rutarian", $armour, 11, $this->id);

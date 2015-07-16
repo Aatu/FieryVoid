@@ -537,8 +537,7 @@
 
         protected function getPulses($turn)
         {
-            return 1;
-         //   return 3;
+            return 3;
         }
     }
 

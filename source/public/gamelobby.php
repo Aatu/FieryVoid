@@ -427,13 +427,13 @@
             <table class="divider">
                 <tr>
                     <td class="fightercontainer 0"></td>
-                    <td class="fightercontainer 1"></td>
+       <!---             <td class="fightercontainer 1"></td>
                     <td class="fightercontainer 2"></td>
                 </tr>
                 <tr>
                     <td class="fightercontainer 3"></td>
                     <td class="fightercontainer 4"></td>
-                    <td class="fightercontainer 5"></td>
+                    <td class="fightercontainer 5"></td>        -->
                 </tr>
             </table>
         </div>

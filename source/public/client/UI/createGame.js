@@ -9,6 +9,7 @@ jQuery(function($){
     $(".close").on("click", createGame.removeSlot);
     $("#createGameForm").on("submit", createGame.setData);
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
+    $("#gamespacecheck").on("click", createGame.doFlightCheck);
 
     createGame.createSlotsFromArray();
 });
@@ -94,8 +95,15 @@ window.createGame = {
         }
 
     },
-    
-    doGameSpaceCheck: function(data){
+
+    doFlightCheck: function(data){
+		var checkval = $("#flightSizeCheck:checked").val();
+		if(checkval == "on"){
+			createGame.variableFlights = 1;
+		} else createGame.variableFlights = 0;
+	},
+
+	doGameSpaceCheck: function(data){
       var checkval = $("#gamespacecheck:checked").val();
       
       if(checkval == "on"){
@@ -203,12 +211,17 @@ window.createGame = {
         var gamename = $("#gamename").val();
         var background = $("#mapselect").val();
         var gamespace = "-1x-1";
+        var flight = "";
         
         if($("#gamespacecheck:checked").val() == "on"){
             gamespace = ""+createGame.gamespace_data.width + "x" + createGame.gamespace_data.height;
         }
         
-        var data = ({gamename:gamename, background:background, slots:createGame.slots, gamespace:gamespace});
+        if($("#flightSizeCheck:checked").val() == "on"){
+            flight = 1;
+        }
+        
+        var data = ({gamename:gamename, background:background, slots:createGame.slots, gamespace:gamespace, flight:flight});
         data = JSON.stringify(data);
         $("#createGameData").val(data);
     }

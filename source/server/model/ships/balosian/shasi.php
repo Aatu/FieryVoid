@@ -6,20 +6,28 @@ class Shasi extends FighterFlight{
         
 	$this->pointCost = 150;
 	$this->faction = "Balosian";
-        $this->phpclass = "Shasi";
-        $this->shipClass = "Shasi Light Fighters";
+	$this->phpclass = "Shasi";
+	$this->shipClass = "Shasi Light Fighters";
 	$this->imagePath = "img/ships/shasi.png";
-        
-        $this->forwardDefense = 7;
-        $this->sideDefense = 6;
-        $this->freethrust = 12;
-        $this->offensivebonus = 3;
-        $this->jinkinglimit = 10;
-        $this->turncost = 0.33;
-        
+
+	$this->forwardDefense = 7;
+	$this->sideDefense = 6;
+	$this->freethrust = 12;
+	$this->offensivebonus = 3;
+	$this->jinkinglimit = 10;
+	$this->turncost = 0.33;
+
 	$this->iniativebonus = 100;
-        
-        for ($i = 0; $i<6; $i++){
+	$this->populate();
+	}
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(1, 1, 2, 2);
 		$fighter = new Fighter("shasi", $armour, 9, $this->id);
 		$fighter->displayName = "Shasi Light Fighter";

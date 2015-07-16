@@ -19,8 +19,16 @@ class Tishat extends FighterFlight{
         $this->turncost = 0.33;
         $this->iniativebonus = 95;
         $this->gravitic = true;
+        $this->populate();
+    }
 
-        for ($i = 0; $i<6; $i++){
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
             $tishat = new Fighter("tishat", $armour, 9, $this->id);
             $tishat->displayName = "Tishat Medium Fighter";

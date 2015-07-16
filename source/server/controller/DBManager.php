@@ -123,12 +123,10 @@ class DBManager {
 	public function submitShip($gameid, $ship, $userid){
 	
 		try{
-			
 			$sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '".$this->DBEscape($ship->name)."', '".$ship->phpclass."', 0, 0, 0, 0, 0, $ship->slot)";
-            Debug::log($sql);
-			$id = $this->insert($sql);
-			
-                        return $id;
+            //   Debug::log($sql);
+            $id = $this->insert($sql);
+            return $id;
 			//$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
             //$this->insert($sql);			
 			
@@ -137,6 +135,23 @@ class DBManager {
             throw $e;
         }
 	}
+
+    
+    public function submitFlightSize($gameid, $shipid, $flightSize){
+            try{
+                $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
+                VALUES ($gameid, $shipid, $flightSize)";
+
+                $id = $this->insert($sql);
+                Debug::log($sql);
+
+            }catch(Exception $e) {
+                $this->endTransaction(true);
+                throw $e;
+            }
+    }
+
+
 
 	public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount){
 	
@@ -353,8 +368,7 @@ class DBManager {
         return $gameid;
 	}
     
-    public function submitCriticals($gameid, $criticals, $turn){
-        
+    public function submitCriticals($gameid, $criticals, $turn){        
         try {
             
             //print(var_dump($criticals));
@@ -912,8 +926,7 @@ class DBManager {
         return $ship;
     }
     
-    public function getTacShips($gamedata)
-    {
+    public function getTacShips($gamedata){
         
         $starttime = time();  
         $ships = array();
@@ -934,7 +947,7 @@ class DBManager {
             $stmt->bind_result($id, $playerid, $name, $phpclass, $slot);
             $stmt->execute();
             while ($stmt->fetch())
-            {
+            {                
                 $ship = new $phpclass($id, $playerid, $name, $slot);
                 $ship->team = $gamedata->slots[$slot]->team;
                 $ships[] = $ship;
@@ -944,6 +957,7 @@ class DBManager {
         
         $gamedata->setShips($ships);
         
+        $this->getFlightSize($gamedata);
         $this->getIniativeForShips($gamedata);
         $this->getMovesForShips($gamedata);
         $this->getEWForShips($gamedata);
@@ -958,6 +972,32 @@ class DBManager {
         
         
     }
+    
+    public function getFlightSize($gamedata){
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, flightsize
+            FROM 
+                tac_flightsize
+            WHERE 
+                gameid = ?"
+            );
+
+        if ($stmt){
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->bind_result($shipid, $flightsize);
+            $stmt->execute();
+
+            while($stmt->fetch()){
+                $flight = $gamedata->getShipById($shipid);
+                $flight->flightSize = $flightsize;
+                $flight->populate();
+            }
+
+            $stmt->close();
+        }
+    }
+
     
     private function getIniativeForShips($gamedata){
         
@@ -974,15 +1014,15 @@ class DBManager {
             "
         );
 
-        if ($stmt)
-        {
+        if ($stmt){
             $stmt->bind_param('ii', $gamedata->id, $gamedata->turn);
             $stmt->bind_result($iniative, $shipid);
             $stmt->execute();
-            while ($stmt->fetch())
-            {
+
+            while ($stmt->fetch()){
                 $gamedata->getShipById($shipid)->iniative = $iniative;
             }
+
             $stmt->close();
         }
         
@@ -1169,6 +1209,39 @@ class DBManager {
     public function getSystemDataForShips($gamedata)
     {
         $loading = array();
+
+
+  /*      // Get and set flight size
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, flightsize
+            FROM 
+                tac_flightsize
+            WHERE 
+                gameid = ?"
+        );
+
+        if ($stmt){
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $flightsize
+            );
+
+            while( $stmt->fetch()){
+                // flight, bind flightsize ?
+                debug::log("flight populate ini");
+                $gamedata->getShipById($shipid)->populate($flightsize);
+                debug::log("flight populate done");
+            }
+            $stmt->close();
+        }
+
+
+*/
+
+
         $stmt = $this->connection->prepare(
             "SELECT 
                 data, shipid, systemid, subsystem
@@ -1222,11 +1295,13 @@ class DBManager {
             while( $stmt->fetch())
             {
                 // This is a dual/duoweapon or a fightersystem
+           //     debug::log("system: ".$systemid. "___".$gamedata->getShipById($shipid)->getSystemById($systemid)->displayName);
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
             }
             $stmt->close();
         }
     }
+
     
     public function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
         try {
@@ -1252,6 +1327,7 @@ class DBManager {
             throw $e;
         }
     }
+
     
     public function getFireOrdersForShips($gamedata)
     {
@@ -1266,8 +1342,7 @@ class DBManager {
                 turn = ?"
         );
 
-        if ($stmt)
-        {
+        if ($stmt){
             $stmt->bind_param('ii', $gamedata->id, $gamedata->turn);
             $stmt->execute();
             $stmt->bind_result(

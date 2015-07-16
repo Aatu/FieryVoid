@@ -47,11 +47,11 @@ class LeskratiD extends BaseShip{
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 60, 180));
 
         $this->addLeftSystem(new QuadPulsar(1, 10, 4, 240, 0));
-        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 210, 330));
+        $this->addLeftSystem(new ScatterPulsar(2, 4, 2, 210, 330));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
         $this->addRightSystem(new QuadPulsar(1, 10, 4, 0, 120));
-        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 30, 150));
+        $this->addRightSystem(new ScatterPulsar(2, 4, 2, 30, 150));
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

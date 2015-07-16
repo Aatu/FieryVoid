@@ -24,13 +24,15 @@
         public $faction = null;
         public $flight = true;
         public $hasNavigator = false;
+        public $superheavy = false;
+        public $flightSize = 1;
         protected $flightLeader = null;
         
         public $offensivebonus, $freethrust;
         public $jinkinglimit = 0;
         
         
-        public $canvasSize = 100;
+        public $canvasSize = 200;
 
         public $fireOrders = array();
         

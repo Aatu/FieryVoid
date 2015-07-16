@@ -1,25 +1,33 @@
 <?php
 class DoubleV extends FighterFlight{
 				
-				function __construct($id, $userid, $name,  $slot){
-								parent::__construct($id, $userid, $name,  $slot);
-								
-	$this->pointCost = 288;
-	$this->faction = "Raiders";
-						$this->phpclass = "DoubleV";
-							$this->shipClass = "Double-V Medium Flight";
-	$this->imagePath = "img/ships/doubleV.png";
-								
-								$this->forwardDefense = 5;
-								$this->sideDefense = 7;
-								$this->freethrust = 10;
-								$this->offensivebonus = 4;
-								$this->jinkinglimit = 8;
-								$this->turncost = 0.33;
-								
-	$this->iniativebonus = 90;
-								
-								for ($i = 0; $i<6; $i++){
+		function __construct($id, $userid, $name,  $slot){
+		parent::__construct($id, $userid, $name,  $slot);
+
+		$this->pointCost = 288;
+		$this->faction = "Raiders";
+		$this->phpclass = "DoubleV";
+		$this->shipClass = "Double-V Medium Flight";
+		$this->imagePath = "img/ships/doubleV.png";
+
+		$this->forwardDefense = 5;
+		$this->sideDefense = 7;
+		$this->freethrust = 10;
+		$this->offensivebonus = 4;
+		$this->jinkinglimit = 8;
+		$this->turncost = 0.33;
+
+		$this->iniativebonus = 90;
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(3, 0, 2, 2);
 		$fighter = new Fighter("doubleV", $armour, 10, $this->id);
 		$fighter->displayName = "Double-V Medium Fighter";

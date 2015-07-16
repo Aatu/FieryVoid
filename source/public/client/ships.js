@@ -613,7 +613,6 @@ window.shipManager = {
     }
 
         if (ship.flight){
-
 			for (var i in ship.systems){
 				var fighter = ship.systems[i];
 				if (!shipManager.systems.isDestroyed(ship, fighter))
@@ -761,16 +760,16 @@ window.shipManager = {
 		var dir = 0;
 		if (pos == 0){
 			dir = mathlib.addToDirection(0, angle);
-			return mathlib.getPointInDirection(12*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(18*zoom, dir, 0, 0 );
 		}
 		if (pos == 1){
-			dir = mathlib.addToDirection(270, angle);
-			return mathlib.getPointInDirection(9*zoom, dir, 0, 0 );
+			dir = mathlib.addToDirection(300, angle);
+			return mathlib.getPointInDirection(13*zoom, dir, 0, 0 );
 		}
 
 		if (pos == 2){
-			dir = mathlib.addToDirection(90, angle);
-			return mathlib.getPointInDirection(9*zoom, dir, 0, 0 );
+			dir = mathlib.addToDirection(60, angle);
+			return mathlib.getPointInDirection(13*zoom, dir, 0, 0 );
 		}
 
 		if (pos == 3){
@@ -778,13 +777,25 @@ window.shipManager = {
 			return mathlib.getPointInDirection(12*zoom, dir, 0, 0 );
 		}
 		if (pos == 4){
-			dir = mathlib.addToDirection(240, angle);
-			return mathlib.getPointInDirection(19*zoom, dir, 0, 0 );
+			dir = mathlib.addToDirection(250, angle);
+			return mathlib.getPointInDirection(21*zoom, dir, 0, 0 );
 		}
-		if (pos == 5){
-			dir = mathlib.addToDirection(120, angle);
-			return mathlib.getPointInDirection(19*zoom, dir, 0, 0 );
-		}
+        if (pos == 5){
+            dir = mathlib.addToDirection(110, angle);
+            return mathlib.getPointInDirection(21*zoom, dir, 0, 0 );
+        }
+        if (pos == 6){
+            dir = mathlib.addToDirection(180, angle);
+            return mathlib.getPointInDirection(27*zoom, dir, 0, 0 );
+        }
+        if (pos == 7){
+            dir = mathlib.addToDirection(230, angle);
+            return mathlib.getPointInDirection(32*zoom, dir, 0, 0 );
+        }
+        if (pos == 8){
+            dir = mathlib.addToDirection(130, angle);
+            return mathlib.getPointInDirection(32*zoom, dir, 0, 0 );
+        }
 
 
 		return {x:0, y:0};

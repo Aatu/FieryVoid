@@ -79,3 +79,11 @@ var HeavyLaserLance = function(json, ship)
 HeavyLaserLance.prototype = Object.create( Laser.prototype );
 HeavyLaserLance.prototype.constructor = HeavyLaserLance;
 
+
+var TacLaser = function(json, ship)
+{
+    Laser.call( this, json, ship);
+}
+TacLaser.prototype = Object.create( Laser.prototype );
+TacLaser.prototype.constructor = TacLaser;
+

@@ -5,22 +5,30 @@ class Shadras extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 300;
-	$this->faction = "Balosian";
+        $this->pointCost = 300;
+        $this->faction = "Balosian";
         $this->phpclass = "shadras";
         $this->shipClass = "Shadras flight";
-	$this->imagePath = "img/ships/shadras.png";
-        
+        $this->imagePath = "img/ships/shadras.png";
+
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
         $this->freethrust = 10;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
-        
-	$this->iniativebonus = 96;
-        
-        for ($i = 0; $i<6; $i++){
+
+        $this->iniativebonus = 96;
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
 			
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("shadras", $armour, 12, $this->id);

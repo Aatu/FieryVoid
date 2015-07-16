@@ -213,7 +213,7 @@ window.damageDrawer = {
     },
     
     drawFlight: function(flight, image){
-	var images = shipManager.shipImages[flight.id];
+    	var images = shipManager.shipImages[flight.id];
         var width = flight.canvasSize;
         var height = flight.canvasSize;
         var canvas  = $('<canvas id="constcanFlight" width="'+width+'" height="'+height+'"></canvas>');
@@ -227,12 +227,12 @@ window.damageDrawer = {
             var y;
             
             if(flight.superheavy){
-                x = 30;
-                y = 30;
+                x = 75;
+                y = 75;
             }else{
                 var offset = shipManager.getFighterPosition(fighter.location, 0, 2);
-                x = 50;
-                y = 50;
+                x = 110;
+                y = 100;
 
                 x += offset.x;
                 y += offset.y;

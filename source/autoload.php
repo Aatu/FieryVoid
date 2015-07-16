@@ -23,8 +23,13 @@ spl_autoload_register(
                 'utan' => '/server/model/ships/yolu/utan.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
- /*              
+
+
                 //orieni ships
+                'benevolent' => '/server/model/ships/orieni/benevolent.php',
+
+                'faithful' => '/server/model/ships/orieni/faithful.php',
+
                 'commune' => '/server/model/ships/orieni/commune.php',
                 'crusader' => '/server/model/ships/orieni/crusader.php',
 
@@ -47,6 +52,10 @@ spl_autoload_register(
 
                 'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
+                'vigilant' => '/server/model/ships/orieni/vigilant.php',
+                'righteous' => '/server/model/ships/orieni/righteous.php',
+
+
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
                 'gausscannon' => '/server/model/weapons/matter.php',
@@ -55,15 +64,59 @@ spl_autoload_register(
                 'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
 
+
+
+
+                //WotC Centauri
+                'balciron' => '/server/model/ships/centauri_old/balciron.php',
+                'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
+                'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
+
+                'celerian' => '/server/model/ships/centauri_old/celerian.php',
+                'soladon' => '/server/model/ships/centauri_old/soladon.php',
+                'nalor' => '/server/model/ships/centauri_old/nalor.php',
+                'kasta' => '/server/model/ships/centauri_old/kasta.php',
+
+                'jenas' => '/server/model/ships/centauri_old/jenas.php',
+                'tatros' => '/server/model/ships/centauri_old/tatros.php',
+
+                'kendari' => '/server/model/ships/centauri_old/kendari.php',
+                'ventrus' => '/server/model/ships/centauri_old/ventrus.php',
+
+                'navask' => '/server/model/ships/centauri_old/navask.php',
+                'leevan' => '/server/model/ships/centauri_old/leevan.php',
+
+                'tacit' => '/server/model/ships/centauri_old/tacit.php',
+                'taras' => '/server/model/ships/centauri_old/taras.php',
+
+                'glaive' => '/server/model/ships/centauri_old/glaive.php',
+                'phalan' => '/server/model/ships/centauri_old/phalan.php',
+
+                'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
+
+
+                //WotC Centauri systems
+                'taclaser' => '/server/model/weapons/lasers.php',
+                'sentinelpd' => '/server/model/weapons/defensive.php',
+                'pairedplasmablaster' => '/server/model/weapons/plasma.php',
+                'plasmagun' => '/server/model/weapons/plasma.php',
+                'particleprojector' => '/server/model/weapons/particle.php',
+
                 //various
 
                 'hkflight' => '/server/model/ships/hk.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
-*/   
+
+
+
 
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 
+
+
+                //raiders
+                'pinnace' => '/server/model/ships/raiders/pinnace.php',
 
 
                 //stock 

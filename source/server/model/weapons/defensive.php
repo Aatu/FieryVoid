@@ -158,4 +158,41 @@
         
 
     }
+
+
+        class SentinelPD extends GuardianArray{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "sentinelPD";
+        public $displayName = "Sentinel Point Defense";
+        public $animation = "laser";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+
+        public $animationWidth = 1;
+        public $animationWidth2 = 0;
+            
+        public $intercept = 3;
+             
+        public $freeintercept = true;
+        public $loadingtime = 1;
+  
+        
+        public $rangePenalty = 6;
+        public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+        
+
+    }
+
+
 ?>

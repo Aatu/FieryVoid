@@ -20,7 +20,16 @@ class FolshotB extends FighterFlight{
         
         $this->gravitic = true;
         
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("folshotB", $armour, 7, $this->id);
             $fighter->displayName = "Folshot B Light Fighter";

@@ -29,7 +29,7 @@ class Xebec extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new Engine(3, 18, 0, 12, 2));
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 3, 3));
+        $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new CargoBay(2, 18));
         $this->addPrimarySystem(new CargoBay(2, 18));
         $this->addPrimarySystem(new Hangar(3, 2));
@@ -39,9 +39,8 @@ class Xebec extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
 
-
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));
 	

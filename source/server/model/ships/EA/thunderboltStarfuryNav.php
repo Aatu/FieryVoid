@@ -4,23 +4,31 @@ class ThunderboltStarfuryNav extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 540;
-        $this->faction = "EA";
-        $this->phpclass = "ThunderboltStarfuryNav";
-        $this->shipClass = "Starfury: Thunderbolt Heavy flight (with navigator)";
-	$this->imagePath = "img/ships/thunderboltStarfury.png";
-        
-        $this->forwardDefense = 8;
-        $this->sideDefense = 7;
-        $this->freethrust = 13;
-        $this->offensivebonus = 5;
-        $this->jinkinglimit = 6;
-        $this->turncost = 0.33;
-        $this->hasNavigator = true;
+    $this->pointCost = 540;
+    $this->faction = "EA";
+    $this->phpclass = "ThunderboltStarfuryNav";
+    $this->shipClass = "Starfury: Thunderbolt Heavy flight (with navigator)";
+    $this->imagePath = "img/ships/thunderboltStarfury.png";
+
+    $this->forwardDefense = 8;
+    $this->sideDefense = 7;
+    $this->freethrust = 13;
+    $this->offensivebonus = 5;
+    $this->jinkinglimit = 6;
+    $this->turncost = 0.33;
+    $this->hasNavigator = true;
         
 	$this->iniativebonus = 80;
-        
-        for ($i = 0; $i<6; $i++){
+    $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("ThunderboltStarfuryNav", $armour, 15, $this->id);
             $fighter->displayName = "Thunderbolt Heavy Fighter";

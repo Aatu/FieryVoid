@@ -18,8 +18,16 @@ class NovaStarfury extends FighterFlight{
         $this->turncost = 0.33;
         
 	$this->iniativebonus = 80;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("novaStarfury", $armour, 12, $this->id);
             $fighter->displayName = "Nova StarFury Heavy Fighter";

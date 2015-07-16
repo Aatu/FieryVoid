@@ -8,7 +8,7 @@ class ThunderboltStarfury extends FighterFlight{
         $this->faction = "EA";
         $this->phpclass = "ThunderboltStarfury";
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
-	$this->imagePath = "img/ships/thunderboltStarfury.png";
+        $this->imagePath = "img/ships/thunderboltStarfury.png";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
@@ -17,9 +17,17 @@ class ThunderboltStarfury extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 80;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->iniativebonus = 80;
+        $this->populate();        
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){            
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("thunderboltStarfury", $armour, 15, $this->id);
             $fighter->displayName = "Thunderbolt Heavy Fighter";

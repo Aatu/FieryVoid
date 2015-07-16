@@ -38,4 +38,8 @@ class FangedSerpent extends SuperHeavyFighter{
         
         $this->addSystem($fighter);
     }
+    
+    public function populate(){
+        return;
+    }
 }

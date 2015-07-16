@@ -26,7 +26,7 @@ class AltarianMagnus extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(6, 17, 0, -2));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 8));
-        $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(5, 15, 0, 12, 3));
         $this->addPrimarySystem(new Hangar(5, 7));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
@@ -42,8 +42,8 @@ class AltarianMagnus extends HeavyCombatVessel{
         $this->addFrontSystem(new MatterCannon(4, 7, 4, 0, 120));
         
         $this->addAftSystem(new MatterCannon(4, 7, 4, 120, 240));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
+        $this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
         $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));

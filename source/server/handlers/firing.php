@@ -30,12 +30,17 @@
                 $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
                 $armour;
 
-       //         debug::log("intercepting fire from: ".$target->phpclass." versus opposing ".$firingweapon->displayName." from ".$shooter->phpclass);
+        //        debug::log("intercepting fire from: ".$target->phpclass." versus opposing ".$firingweapon->displayName." from ".$shooter->phpclass);
 
                 if ($target->shipSizeClass == -1){
                     $armour = $target->systems[1]->armour[$hitLocation];
                 //    debug::log("flight armour: ".$armour);
 
+                }
+                else if ($target->shipSizeClass == 1){
+                    $structure = $target->getStructureByIndex(0);
+                    $armour = $structure->armour;
+                //    debug::log("MCV armour: ".$armour);
                 }
                 else {
                     $structure = $target->getStructureByIndex($hitLocation);

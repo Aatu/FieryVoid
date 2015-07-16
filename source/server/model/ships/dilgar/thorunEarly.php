@@ -4,24 +4,32 @@ class ThorunEarly extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 264;
-	$this->faction = "Dilgar";
+        $this->pointCost = 264;
+        $this->faction = "Dilgar";
         $this->phpclass = "ThorunEarly";
         $this->shipClass = "Thorun Dartfighters (early version)";
-	$this->imagePath = "img/ships/thorun.png";
-        
+        $this->imagePath = "img/ships/thorun.png";
+
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
         $this->freethrust = 12;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
-        
-	$this->iniativebonus = 80;
-        
+
+        $this->iniativebonus = 80;
+
         $this->dropOutBonus = -2;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 2, 2);
             
             $fighter = new Fighter("thorun", $armour, 11, $this->id);
@@ -29,7 +37,7 @@ class ThorunEarly extends FighterFlight{
             $fighter->imagePath = "img/ships/thorun.png";
             $fighter->iconPath = "img/ships/thorun_large.png";
 
-            if($i == 0){
+            if(count($this->systems) == 0 ){
                 $fighter->displayName = "Thorun Dartfighter Leader";  
                 $this->flightLeader = $fighter;
                 $fighter->iconPath = "img/ships/thorun_leader_large.png";

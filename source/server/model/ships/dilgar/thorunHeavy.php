@@ -20,8 +20,16 @@ class ThorunHeavy extends FighterFlight{
 	$this->iniativebonus = 80;
         
         $this->dropOutBonus = -2;
-        
-        for ($i = 0; $i<6; $i++){
+        $this->populate();
+    }
+
+    public function populate(){
+
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
             
             $fighter = new Fighter("thorun", $armour, 11, $this->id);
@@ -29,7 +37,7 @@ class ThorunHeavy extends FighterFlight{
             $fighter->imagePath = "img/ships/thorun.png";
             $fighter->iconPath = "img/ships/thorun_large.png";
             
-            if($i == 0){
+            if(count($this->systems) == 0 ){
                 $fighter->displayName = "Thorun Heavy Dartfighter Leader";  
                 $this->flightLeader = $fighter;
                 $fighter->iconPath = "img/ships/thorun_leader_large.png";

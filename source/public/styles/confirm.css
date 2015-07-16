@@ -58,6 +58,15 @@
     text-align: right;
 }
 
+.fighterAmount{
+    display: inline-block;
+    width: 7%;
+    border: 1px solid #496791;
+    background-color: #072731;
+    padding: 3px 5px;
+    text-align: right;
+}
+
 .totalUnitCost .totalUnitCostText{
     font-style: italic;
     font-weight: bold;

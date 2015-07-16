@@ -79,6 +79,8 @@
                                 <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">                
                             </span>
                         </div>
+                      <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)
+                  -->
                     </div>
                 </div>
                 

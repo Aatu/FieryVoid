@@ -299,4 +299,117 @@
         }
     }
 
+
+
+    class PairedPlasmaBlaster extends LinkedWeapon{
+
+        public $name = "PairedPlasmaBlaster";
+        public $displayName = "Paired Plasma Blaster";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $animationExplosionScale = 0.4;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 1;
+
+
+
+        function __construct($startArc, $endArc, $damagebonus, $shots = 2){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+
+        protected function getSystemArmour($system, $gamedata, $fireOrder){
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+            if (is_numeric($armor))
+                return round($armor / 2);
+            
+            return 0;
+        }
+    
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Plasma";
+            $this->data["Damage type"] = "Standard";
+            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
+            
+            parent::setSystemDataWindow($turn);
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(3)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 - $this->dp;      }
+
+    }
+
+
+    class PlasmaGun extends Plasma{
+
+        public $name = "plasmaGun";
+        public $displayName = "Plasma Gun";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 11;
+        public $animationWidth = 4;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.25;
+        public $rangeDamagePenalty = 1;
+                
+        public $loadingtime = 2;
+        public $exlusive = true;
+            
+        public $rangePenalty = 0.66;
+        public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
+
+
+        function __construct($startArc, $endArc, $damagebonus, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }   
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Plasma";
+            $this->data["Damage type"] = "Standard";
+            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
+            
+            parent::setSystemDataWindow($turn);
+        }
+        
+
+        protected function getSystemArmour($system, $gamedata, $fireOrder){
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+            if (is_numeric($armor))
+                return round($armor / 2);
+            
+            return 0;
+        }
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 9 - $this->dp;      }
+
+    }
+
+
+
 ?>
