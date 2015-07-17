@@ -104,7 +104,7 @@ spl_autoload_register(
 
                 //various
 
-                'hkflight' => '/server/model/ships/hk.php',
+                'hkflight' => '/server/model/ships/HK.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
 
 
