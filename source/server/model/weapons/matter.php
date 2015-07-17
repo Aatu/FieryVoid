@@ -187,7 +187,7 @@
 
         class HeavyGaussCannon extends GaussCannon{
 
-        public $name = "HeavyGaussCannon";
+        public $name = "heavyGaussCannon";
         public $displayName = "Heavy Gauss Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
