@@ -11,7 +11,7 @@ class Enlightenment extends BaseShip{
         $this->shipClass = "Enlightenment Invasion Ship";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>18);
-        $this->canvasSize = 280;
+        $this->canvasSize = 200;
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 18;

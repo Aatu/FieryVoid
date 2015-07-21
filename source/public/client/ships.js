@@ -760,41 +760,51 @@ window.shipManager = {
 		var dir = 0;
 		if (pos == 0){
 			dir = mathlib.addToDirection(0, angle);
-			return mathlib.getPointInDirection(18*zoom, dir, 0, 0 );
+			return mathlib.getPointInDirection(19*zoom, dir, 0, 0 );
 		}
-		if (pos == 1){
+		else if (pos == 1){
 			dir = mathlib.addToDirection(300, angle);
 			return mathlib.getPointInDirection(13*zoom, dir, 0, 0 );
 		}
-
-		if (pos == 2){
+        else if (pos == 2){
 			dir = mathlib.addToDirection(60, angle);
 			return mathlib.getPointInDirection(13*zoom, dir, 0, 0 );
 		}
-
-		if (pos == 3){
+        else if (pos == 3){
 			dir = mathlib.addToDirection(180, angle);
 			return mathlib.getPointInDirection(12*zoom, dir, 0, 0 );
 		}
-		if (pos == 4){
+        else if (pos == 4){
 			dir = mathlib.addToDirection(250, angle);
 			return mathlib.getPointInDirection(21*zoom, dir, 0, 0 );
 		}
-        if (pos == 5){
+        else if (pos == 5){
             dir = mathlib.addToDirection(110, angle);
             return mathlib.getPointInDirection(21*zoom, dir, 0, 0 );
         }
-        if (pos == 6){
+        else if (pos == 6){
             dir = mathlib.addToDirection(180, angle);
-            return mathlib.getPointInDirection(27*zoom, dir, 0, 0 );
+            return mathlib.getPointInDirection(29*zoom, dir, 0, 0 );
         }
-        if (pos == 7){
+        else if (pos == 7){
             dir = mathlib.addToDirection(230, angle);
             return mathlib.getPointInDirection(32*zoom, dir, 0, 0 );
         }
-        if (pos == 8){
+        else if (pos == 8){
             dir = mathlib.addToDirection(130, angle);
             return mathlib.getPointInDirection(32*zoom, dir, 0, 0 );
+        }
+        else if (pos == 9){
+            dir = mathlib.addToDirection(0, angle);
+            return mathlib.getPointInDirection(35*zoom, dir, 0, 0 );
+        }
+        else if (pos == 10){
+            dir = mathlib.addToDirection(295, angle);
+            return mathlib.getPointInDirection(28*zoom, dir, 0, 0 );
+        }
+        else if (pos == 11){
+            dir = mathlib.addToDirection(65, angle);
+            return mathlib.getPointInDirection(28*zoom, dir, 0, 0 );
         }
 
 

@@ -949,6 +949,11 @@ class DBManager {
             while ($stmt->fetch())
             {                
                 $ship = new $phpclass($id, $playerid, $name, $slot);
+                if ($ship instanceof FighterFlight && $ship->superheavy === false){
+                    debug::log("backwards adjust");
+                    $ship->flightSize = 6;
+                    $ship->populate();
+                }
                 $ship->team = $gamedata->slots[$slot]->team;
                 $ships[] = $ship;
             }
@@ -1264,9 +1269,7 @@ class DBManager {
 
             while( $stmt->fetch())
             {
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData(
-                    $data, $subsystem
-                );
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData($data, $subsystem);
             }
             $stmt->close();
         }
