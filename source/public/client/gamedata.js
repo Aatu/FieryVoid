@@ -175,8 +175,109 @@ gamedata = {
         
         if(gamedata.status == "FINISHED")
             return;
+
+        if (gamedata.gamephase == 1){
+            var myShips = [];
+
+            for (var ship in gamedata.ships){
+                if (gamedata.ships[ship].userid == gamedata.thisplayer){
+                    myShips.push(gamedata.ships[ship]);
+                }
+            }
+
+
+
+            var hasNoEW = [];
+
+            for (var ship in myShips){
+                if (!myShips[ship].flight){
+                    if (gamedata.turn == 1){
+                        if (myShips[ship].EW.length == 0){
+                            hasNoEW.push(myShips[ship]);
+                        }
+                    }
+                    else if (gamedata.turn > 1 && myShips[ship].EW.length < 2){
+                        hasNoEW.push(myShips[ship]);    
+                    }
+                }
+            }
+
+            if (hasNoEW.length == 0){
+                confirm.confirm("Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
+            }
+            else {
+                var html = "You have not assigned any EW for the following ships: ";
+                    html += "<br>";
+                for (var ship in hasNoEW){
+                    html += hasNoEW[ship].name + " (" + hasNoEW[ship].phpclass + ")";
+                    html += "<br>";
+                }
+                confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
+            }
+        }
+
+        else if(gamedata.gamephase == 3){
+            var myShips = [];
+
+            for (var ship in gamedata.ships){
+                if (gamedata.ships[ship].userid == gamedata.thisplayer){
+                    if (!gamedata.ships[ship].destroyed){
+                        myShips.push(gamedata.ships[ship]);
+                    }
+                }
+            }
+
+            var hasNoFO = [];
+
+            for (var ship in myShips){
+                var fired = 0;
+
+                if (!myShips[ship].flight){
+                    for (var i = 0; i < myShips[ship].systems.length; i++){
+                        if (myShips[ship].systems[i].fireOrders.length > 0){
+                            fired = 1;
+                            break;
+                        }
+                    }
+                    if (fired == 0){
+                        hasNoFO.push(myShips[ship]);
+                    }
+                }
+
+                else if (myShips[ship].flight){
+                    for (var i = 0; i < myShips[ship].systems.length; i++){
+                        if (typeof myShips[ship].systems[i] != "undefined"){
+                            for (var j = 0; j < myShips[ship].systems[i].systems.length; j++){
+                                if (typeof myShips[ship].systems[i].systems[j] != "undefined"){
+                                    if (myShips[ship].systems[i].systems[j].fireOrders.length > 0){
+                                        fired = 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (fired == 0){
+                        hasNoFO.push(myShips[ship]);
+                    }
+                }
+            }
+
+            if (hasNoFO.length == 0){
+                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+            }
+            else {
+                var html = "You have not assigned any fire orders for the following ships: ";
+                    html += "<br>";
+                for (var ship in hasNoFO){
+                    html += hasNoFO[ship].name + " (" + hasNoFO[ship].phpclass + ")";
+                    html += "<br>";
+                }
+                confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?"), gamedata.doCommit);
+            } 
+        }
         
-        if(gamedata.gamephase!=4){
+        else if(gamedata.gamephase != 4){
             confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
 //            if (window.helper.autocomm!=true) {
 //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);

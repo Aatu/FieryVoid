@@ -950,7 +950,7 @@ class DBManager {
             {                
                 $ship = new $phpclass($id, $playerid, $name, $slot);
                 if ($ship instanceof FighterFlight && $ship->superheavy === false){
-                    debug::log("backwards adjust");
+             //       debug::log("backwards adjust");
                     $ship->flightSize = 6;
                     $ship->populate();
                 }

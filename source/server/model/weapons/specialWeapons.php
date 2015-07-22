@@ -150,6 +150,7 @@
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
 			
+            debug::log($system->displayName);
 			if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
@@ -165,7 +166,6 @@
 			}
             else {
                 $crits = array();
-                debug::log($system->displayName);
                 $crits = $system->testCritical($ship, $gamedata, $crits, $add = 4);
                 if ($crits){
                     debug::log("crit!");
