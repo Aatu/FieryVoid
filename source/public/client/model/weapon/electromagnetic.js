@@ -30,3 +30,33 @@ ElectroPulseGun.prototype = Object.create( Electromagnetic.prototype );
 ElectroPulseGun.prototype.constructor = ElectroPulseGun;
 
 
+var DualBurstBeam = function(json, ship)
+{
+    Electromagnetic.call( this, json, ship);
+}
+DualBurstBeam.prototype = Object.create( Electromagnetic.prototype );
+DualBurstBeam.prototype.constructor = DualBurstBeam;
+
+
+var MediumBurstBeam = function(json, ship)
+{
+    Electromagnetic.call( this, json, ship);
+}
+MediumBurstBeam.prototype = Object.create( Electromagnetic.prototype );
+MediumBurstBeam.prototype.constructor = MediumBurstBeam;
+
+
+var HeavyBurstBeam = function(json, ship)
+{
+    Electromagnetic.call( this, json, ship);
+}
+HeavyBurstBeam.prototype = Object.create( Electromagnetic.prototype );
+HeavyBurstBeam.prototype.constructor = HeavyBurstBeam;
+
+
+var BurstPulseCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+BurstPulseCannon.prototype = Object.create( Pulse.prototype );
+BurstPulseCannon.prototype.constructor = BurstPulseCannon;

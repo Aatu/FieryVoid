@@ -949,11 +949,12 @@ class DBManager {
             while ($stmt->fetch())
             {                
                 $ship = new $phpclass($id, $playerid, $name, $slot);
-                if ($ship instanceof FighterFlight && $ship->superheavy === false){
-             //       debug::log("backwards adjust");
+            /*    if ($ship instanceof FighterFlight && $ship->superheavy === false){
+                    debug::log("backwards adjust");
                     $ship->flightSize = 6;
                     $ship->populate();
                 }
+            */
                 $ship->team = $gamedata->slots[$slot]->team;
                 $ships[] = $ship;
             }
@@ -963,6 +964,7 @@ class DBManager {
         $gamedata->setShips($ships);
         
         $this->getFlightSize($gamedata);
+        $this->flightSizeFix($ships);
         $this->getIniativeForShips($gamedata);
         $this->getMovesForShips($gamedata);
         $this->getEWForShips($gamedata);
@@ -977,6 +979,24 @@ class DBManager {
         
         
     }
+
+/*
+    public function submitFlightSize($gameid, $shipid, $flightSize){
+            try{
+                $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
+                VALUES ($gameid, $shipid, $flightSize)";
+
+                $id = $this->insert($sql);
+                Debug::log($sql);
+
+            }catch(Exception $e) {
+                $this->endTransaction(true);
+                throw $e;
+            }
+    }
+
+*/
+
     
     public function getFlightSize($gamedata){
         $stmt = $this->connection->prepare(
@@ -992,7 +1012,14 @@ class DBManager {
             $stmt->bind_param('i', $gamedata->id);
             $stmt->bind_result($shipid, $flightsize);
             $stmt->execute();
+        /*    $stmt->store_result();
 
+            $num = $stmt->num_rows;
+
+            if ($num === 0){
+                for ($))
+            }
+*/
             while($stmt->fetch()){
                 $flight = $gamedata->getShipById($shipid);
                 $flight->flightSize = $flightsize;
@@ -1000,6 +1027,17 @@ class DBManager {
             }
 
             $stmt->close();
+        }
+    }
+
+    public function flightSizeFix($ships){
+        foreach ($ships as $ship){
+            if ($ship instanceof FighterFlight && !$ship->superheavy){
+                if ($ship->flightSize == 1){
+                    $ship->flightSize = 6;
+                    $ship->populate();
+                }
+            }
         }
     }
 
@@ -1214,37 +1252,6 @@ class DBManager {
     public function getSystemDataForShips($gamedata)
     {
         $loading = array();
-
-
-  /*      // Get and set flight size
-        $stmt = $this->connection->prepare(
-            "SELECT 
-                shipid, flightsize
-            FROM 
-                tac_flightsize
-            WHERE 
-                gameid = ?"
-        );
-
-        if ($stmt){
-            $stmt->bind_param('i', $gamedata->id);
-            $stmt->execute();
-            $stmt->bind_result(
-                $shipid,
-                $flightsize
-            );
-
-            while( $stmt->fetch()){
-                // flight, bind flightsize ?
-                debug::log("flight populate ini");
-                $gamedata->getShipById($shipid)->populate($flightsize);
-                debug::log("flight populate done");
-            }
-            $stmt->close();
-        }
-
-
-*/
 
 
         $stmt = $this->connection->prepare(

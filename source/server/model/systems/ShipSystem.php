@@ -104,6 +104,13 @@ class ShipSystem{
     }
     
     public function setCritical($critical, $turn){
+
+        if ($critical->param){            
+            $currentTurn = TacGamedata::$currentTurn;
+            if ($currentTurn > $critical->turn + $critical->param){
+                return;
+            }
+        }
         
         if (!$critical->oneturn || ($critical->oneturn && $critical->turn >= $turn-1))
             $this->criticals[] = $critical; 
@@ -199,12 +206,11 @@ class ShipSystem{
     public function hasCritical($type, $turn = false){
         $count = 0;
         foreach ($this->criticals as $critical){
-            if (strcmp($critical->phpclass, $type) == 0 && $critical->inEffect){
-				
+            if (strcmp($critical->phpclass, $type) == 0 && $critical->inEffect){				
                 if ($turn === false){
-                        $count++;
+                    $count++;
                 }else if ((($critical->oneturn && $critical->turn+1 == $turn) || !$critical->oneturn) && $critical->turn<= $turn){
-                $count++;
+                    $count++;
                 }
             }
         }
@@ -301,6 +307,10 @@ class ShipSystem{
         }
         
         if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1)){
+            return true;
+        }
+
+        if ($this->hasCritical("ForcedOfflineForTurn")){
             return true;
         }
         

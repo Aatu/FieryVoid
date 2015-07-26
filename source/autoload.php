@@ -9,6 +9,20 @@ spl_autoload_register(
             $classes = array(
 
 
+                //Streib
+            //    'collector' => '/server/model/ships/streib/collector.php',
+
+                //Streib guns
+
+                'dualburstbeam' => '/server/model/weapons/specialWeapons.php',
+                'mediumburstbeam' => '/server/model/weapons/specialWeapons.php',
+                'heavyburstbeam' => '/server/model/weapons/specialWeapons.php',
+                'burstpulsecannon' => '/server/model/weapons/specialWeapons.php',
+
+                //new crit
+                'forcedofflineturns' => '/server/model/cricialClasses.php',
+
+
                 // Yolu ships
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',

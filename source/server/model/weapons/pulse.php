@@ -158,6 +158,7 @@
         public $animationExplosionScale = 0.10;
         public $rof = 3;
         public $grouping = 25;
+        public $maxpulses = 6;
         
         public $loadingtime = 1;
         public $intercept = 2;

@@ -89,8 +89,8 @@
         }
         
         public function setSystemDataWindow($turn){
-            $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
             parent::setSystemDataWindow($turn);
+            $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
         }
     }
     

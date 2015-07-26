@@ -864,10 +864,8 @@ class Manager{
             $ship->EW = $EW;
 
             if ($ship instanceof FighterFlight){
-                debug::log($ship->phpclass);
-                $ship->flightSize = $value["flightSize"];                
+                $ship->flightSize = $value["flightSize"];  
                 $ship->populate();
-         //       debug::log("ajax conversion: ".count($ship->systems));
             }
 
             

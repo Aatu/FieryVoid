@@ -167,16 +167,7 @@
             else {
                 $crits = array();
                 $crits = $system->testCritical($ship, $gamedata, $crits, $add = 4);
-                if ($crits){
-                    debug::log("crit!");
-                    $system->criticals[] =  $crits;
-                } else 
-                    debug::log("no crit!");
             }
-
-
-			
-			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		}
 		
 		
@@ -185,6 +176,206 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
 	}
+
+	class DualBurstBeam extends BurstBeam{
+        public $name = "dualBurstBeam";
+        public $displayName = "Dual Burst Beam";
+		public $guns = 2;
+	}
+
+
+	class BurstPulseCannon extends Pulse {
+		public $name = "burstPulseCannon";
+        public $displayName = "Burst Pulse Cannon";
+
+        public $animationColor = array(158, 240, 255);
+		public $trailColor = array(158, 240, 255);
+
+        public $animation = "trail";
+        public $trailLength = 2;
+        public $animationWidth = 4;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.05;
+        public $rof = 5;
+        public $grouping = 25;
+        public $maxpulses = 6;
+		        
+	    public $loadingtime = 1;
+        public $priority = 10;
+        
+			
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 3, 4); // fighters, <=mediums, <=capitals 
+
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+       
+		public function setSystemDataWindow($turn){
+
+			$this->data["Weapon type"] = "Electromagnetic";
+						
+			parent::setSystemDataWindow($turn);
+		}
+
+		
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$crit = null;
+			
+            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+                $crit->inEffect = true;
+				$system->criticals[] =  $crit;
+            }else if ($system instanceof Structure){
+				$reactor = $ship->getSystemByName("Reactor");
+				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+				$crit->updated = true;
+				$reactor->criticals[] =  $crit;
+			}else if ($system->powerReq > 0 || $system->canOffLine ){
+                $crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+            	$system->criticals[] = $crit;
+			}
+            else {
+                $crits = array();
+                $crits = $system->testCritical($ship, $gamedata, $crits, $add = 4);
+            }
+		}
+		
+		
+		public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+	}
+
+
+    class MediumBurstBeam extends BurstBeam{
+        public $name = "mediumBurstBeam";
+        public $displayName = "Medium Burst Beam";
+
+        public $animationColor = array(158, 240, 255);
+		public $trailColor = array(158, 240, 255);
+		public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.4;
+        public $animationExplosionScale = 0.20;
+		public $trailLength = 40;
+
+        public $loadingtime = 2;
+        public $priority = 10;
+
+        public $rangePenalty = 0.5;
+        public $fireControl = array(0, 3, 40); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            $crit = null;
+
+            if ($system instanceof Fighter){
+                if (!$system instanceof SuperHeavyFighter){
+                    $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                    $crit->updated = true;
+                    $crit->inEffect = true;
+                    $system->criticals[] =  $crit;
+                }
+                else {
+                    $roll = Dice::d(6);
+                    if ($roll < 2){
+                        $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                        $crit->updated = true;
+                        $crit->inEffect = true;
+                        $system->criticals[] =  $crit;
+                    }
+                }
+            }
+            else if ($system instanceof Structure){
+                $reactor = $ship->getSystemByName("Reactor");
+                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced2", $gamedata->turn);
+                $crit->updated = true;
+                $reactor->criticals[] =  $crit;
+            }
+            else if ($system->powerReq > 0 || $system->canOffLine ){
+                $crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 2);
+                $crit->updated = true;
+                $system->criticals[] = $crit;
+            }
+            else {
+                $crits = array();
+                $crits = $system->testCritical($ship, $gamedata, $crits, $add = 6);
+            }
+        }    
+    }
+
+
+    class HeavyBurstBeam extends BurstBeam{
+        public $name = "heavyBurstBeam";
+        public $displayName = "Heavy Burst Beam";
+
+        public $animationColor = array(158, 240, 255);
+		public $trailColor = array(158, 240, 255);
+		public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.5;
+        public $animationExplosionScale = 0.30;
+		public $trailLength = 50;
+
+        public $loadingtime = 3;
+        public $priority = 10;
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(2, 4, 5); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            $crit = null;
+            
+            debug::log($system->displayName);
+            if ($system instanceof Fighter){
+                if (!$system instanceof SuperHeavyFighter){
+                    $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                    $crit->updated = true;
+                    $crit->inEffect = true;
+                    $system->criticals[] =  $crit;
+                }
+                else {
+                    $roll = Dice::d(6);
+                    if ($roll < 3){
+                        $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+                        $crit->updated = true;
+                        $crit->inEffect = true;
+                        $system->criticals[] =  $crit;
+                    }
+                }
+            }
+            else if ($system instanceof Structure){
+                $reactor = $ship->getSystemByName("Reactor");
+                $crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced4", $gamedata->turn);
+                $crit->updated = true;
+                $reactor->criticals[] =  $crit;
+            }
+            else if ($system->powerReq > 0 || $system->canOffLine ){
+                $crit = new ForcedOfflineForTurns (-1, $ship->id, $system->id, "ForcedOfflineForTurns", $gamedata->turn, 3);
+                $crit->updated = true;
+            	$system->criticals[] = $crit;
+            }
+            else {
+                $crits = array();
+                $crits = $system->testCritical($ship, $gamedata, $crits, $add = 6);
+            }
+        }    
+    }
+
+
+
+
     
     class TractorBeam extends ShipSystem{
 

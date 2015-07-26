@@ -169,7 +169,17 @@ class ForcedOfflineOneTurn extends Critical{
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
+}
 
+class ForcedOfflineForTurns extends Critical{
+
+    public $description = "";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $time){
+        $this->$time = $time;
+        $this->description = "Forced offline until end of turn ".($turn + $time);
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $time);
+    }
 }
 
 class FirstThrustIgnored extends Critical{
