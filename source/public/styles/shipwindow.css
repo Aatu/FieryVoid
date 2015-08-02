@@ -21,6 +21,12 @@
     color:#496791;
 }
 
+.shipwindow .shipclass{
+    margin-left: 30px;
+    font-size: 10px;
+    color: white;
+}
+
 .shipwindow .iconduo .value{
     margin-left:1px;
     margin-right:3px;

@@ -660,6 +660,29 @@ body.phase1 #botPanel .ewentry .button2{
     left:417px;
 }
 
+#expandBotPanel{
+    position:absolute;
+    top:-26px;
+    border-top: 1px solid #496791;
+    border-right: 1px solid #496791;
+    border-left: 1px solid #496791;
+    border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    width:100px;
+    height:18px;
+    text-align: center;
+    font-size: 10px;
+    padding-top:6px;
+    z-index: 9999;
+    background-color:#020E12;
+    cursor:pointer;
+    left:500px;
+    width: 40px;
+    color: white;
+
+}
+
 #gameinfo.logPanelEntry{
     overflow-x:hidden;
     overflow-y:scroll;
@@ -887,4 +910,68 @@ body.phase1 #botPanel .ewentry .button2{
 
 .shipSelectList .shiplistentry .ally.name{
     color:#2f5123;
+}
+
+#iniGui {
+    z-index:9999;
+    border:1px solid #496791;
+    color:#deebff;
+    background-color:#0a3340;
+    margin-top: 50px;
+    width: 250px;
+    position: absolute;
+    display: inline-block;
+    opacity: 0.8;
+    -moz-box-shadow: 5px 5px 10px black;
+    -webkit-box-shadow: 5px 5px 10px black;
+    box-shadow: 5px 5px 10px black;
+    padding-top:10px;
+    border-radius: 0px 10px 10px 0px;
+}
+
+#iniTable {
+    display: table;
+    background-color: #04161C;
+    position: relative;
+    margin: auto;
+    margin-top: 10px;
+    width: 95%;
+    border-radius: 15px;
+    border: 1px solid #496791;
+    font-family: arial;
+    font-size: 12px;
+    padding-left: 5px;
+}
+
+.ini_tr {
+}
+
+#iniTd {
+    border-bottom: 1px solid white;
+}
+
+#iniTopic {
+    font-family: arial;
+    font-size: 18px;
+    margin-left: 60px;
+    color: red;
+}
+
+.iniActive {
+    color: red;
+}
+
+#cancelButton {
+    width: 25px;
+    height: 25px;
+    margin-left: 35px;
+    cursor: pointer;
+}
+
+.red {
+    color: red;
+}
+
+.green {
+    color: green;
 }

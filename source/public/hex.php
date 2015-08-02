@@ -126,6 +126,9 @@
     </table>
 </div>
 
+<div id="iniGui" style="">
+</div>
+
 <div id="infowindow">
 <h2></h2>
 <div class="container"></div>
@@ -750,6 +753,9 @@
         </div>
         <div id="globalChatTab" data-select="#globalchat" class="logUiEntry">
             <span>GLOBAL CHAT</span>
+        </div>
+        <div id="expandBotPanel">
+            <span>Click!</span>
         </div>
 <!--        <div id="settingsTab" data-select="#settings" class="logUiEntry">
             <span>SETTINGS</span>

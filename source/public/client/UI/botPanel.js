@@ -11,6 +11,26 @@ jQuery(function(){
     $("#botPanel").on("mouseover", windowEvents.botElementMouseOver);
     $("#botPanel").on("mouseout", windowEvents.botElementMouseOut);
     $("#logcontainer").on("mouseover", windowEvents.botElementMouseOver);
+
+    $("#expandBotPanel").click(function(){
+    	if ($("#logcontainer").data("large") == 1){
+
+	    	$("#logcontainer").data("large", 0);
+	    	$("#logcontainer").height(150);
+	    	$("#log").height(150);
+
+	    	$(".chatMessages").height(150);
+    	}
+    	else {
+
+	    	$("#logcontainer").data("large", 1);
+	    	$("#logcontainer").height(300);
+	    	$("#log").height(300);
+
+	    	$(".chatMessages").height(300);
+    	}
+    });
+
     $("#logcontainer").on("mouseout", windowEvents.botElementMouseOut);
 });
 

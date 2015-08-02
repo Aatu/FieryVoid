@@ -213,3 +213,28 @@ var ParticleProjector = function(json, ship)
 ParticleProjector.prototype = Object.create( Particle.prototype );
 ParticleProjector.prototype.constructor = ParticleProjector;
 
+
+var EMWaveDisruptor = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+EMWaveDisruptor.prototype = Object.create( Particle.prototype );
+EMWaveDisruptor.prototype.constructor = EMWaveDisruptor;
+
+EMWaveDisruptor.prototype.initBoostableInfo = function(){
+    // Needed because it can chance during initial phase
+    // because of adding extra power.
+    
+    this.data["Weapon type"] ="Electromagnetic";
+    this.data["Damage type"] ="Intercept / Dropout";
+
+
+    var count = shipManager.power.getBoost(this);
+    
+    this.data["Charges"] = count+2;
+
+    this.intercept = this.getInterceptRating();
+    this.data.Intercept = this.getInterceptRating()*(-5);
+
+    return this;
+}

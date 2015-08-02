@@ -109,6 +109,7 @@ window.combatLog = {
             for (var i in damages){
                 var victim = damages[i].ship;
                 var totaldam = 0; 
+                var armour = 0;
                 var damagehtml = "";
                 for (var a in damages[i].damages){
                     var d = damages[i].damages[a];
@@ -116,6 +117,7 @@ window.combatLog = {
                         continue;
                         
                     totaldam += d.damage-d.armour;
+                    armour += d.armour;
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid); 
                     
                     if (!d.destroyed){
@@ -134,7 +136,12 @@ window.combatLog = {
                 }
                 
                 if (totaldam > 0){
-                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for '+totaldam +'. '+ damagehtml+'</li>';   
+          //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';   
+            
+                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ armour reduction: ' + armour + ').</li>';
+                    if (damagehtml.length > 1){
+                        html += '<li>' + damagehtml + '</li>';
+                    }
                 }
                 
             }

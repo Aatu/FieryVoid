@@ -265,9 +265,10 @@ window.effects = {
             if(obj1.targetid !== obj2.targetid){
                  return obj1.targetid-obj2.targetid;
             }
-            else {
+            else if (obj1.priority !== obj2.priority){
                 return obj1.priority-obj2.priority; 
             }
+            else return obj1.shooterid - obj2.shooterid;
         });
 
         for (var x in fighterFire){

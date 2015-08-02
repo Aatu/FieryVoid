@@ -606,13 +606,19 @@
                 $location = 4;
             }else if ($rolled && $location == 4){
                 $location = 3;
-            }   
-            
+            }
+
+
             if ($location != 0){
-                if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) 
-					&& !$weapon->flashDamage){
-                    return 0;
-                }
+                if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
+                    if ($weapon instanceof ImprovedBlastLaser){
+                        debug::log("ding");
+                        $loc = array();
+                        $loc[] = -1;
+                        $loc[] = $location;
+                        return $loc;
+                    }
+                }   
                     
                 $structure = $this->getStructureSystem($location);
                 if ($structure != null && $structure->isDestroyed($turn-1))
@@ -635,7 +641,6 @@
         
         public function getFireControlIndex(){
               return 2;
-               
         }
         
         public function isDestroyed($turn = false){
@@ -655,8 +660,7 @@
             return false;
         }
         
-        public function isDisabled()
-        {
+        public function isDisabled(){
             if ($this->isPowerless())
                 return true;
             
@@ -695,15 +699,19 @@
         {  
             $system = null;
             
-            if ($fire->calledid != -1){
+            if ($fire->calledid != -1)
                 $system = $this->getSystemById($fire->calledid);
-            }
             
             if ($system != null && !$system->isDestroyed())
                 return $system;
         
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
+
+            if (is_array($location)){
+                $system = $this->getStructureByIndex($system[1]);
+                return $system;
+            }
             
             $systems = array();
             $totalStructure = 0;

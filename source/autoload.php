@@ -10,7 +10,7 @@ spl_autoload_register(
 
 
                 //Streib
-            //    'collector' => '/server/model/ships/streib/collector.php',
+                'collector' => '/server/model/ships/streib/collector.php',
 
                 //Streib guns
 
@@ -18,6 +18,9 @@ spl_autoload_register(
                 'mediumburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'heavyburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'burstpulsecannon' => '/server/model/weapons/specialWeapons.php',
+                'improvedblastlaser' => '/server/model/weapons/lasers.php',
+                'emwavedisruptor' => '/server/model/weapons/defensive.php',
+
 
                 //new crit
                 'forcedofflineturns' => '/server/model/cricialClasses.php',

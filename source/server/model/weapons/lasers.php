@@ -285,40 +285,40 @@
         public function setMaxDamage(){     $this->maxDamage = 40 - $this->dp;      }
     }
     
-// Jasper
-class NeutronLaser extends Laser{
+    // Jasper
+    class NeutronLaser extends Laser{
 
-        public $name = "neutronLaser";
-        public $displayName = "Neutron Laser";
-        public $animation = "laser";
-        public $animationColor = array(175, 225, 175);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.4;
+            public $name = "neutronLaser";
+            public $displayName = "Neutron Laser";
+            public $animation = "laser";
+            public $animationColor = array(175, 225, 175);
+            public $animationWidth = 4;
+            public $animationWidth2 = 0.4;
 
-        public $extraoverloadshots = 2;
-        public $loadingtime = 3;
-        public $overloadable = true;
+            public $extraoverloadshots = 2;
+            public $loadingtime = 3;
+            public $overloadable = true;
 
-        public $damageType = "raking";
-        public $raking = 10;
+            public $damageType = "raking";
+            public $raking = 10;
 
-        public $firingModes = array(
-            1 => "Standard",
-            2 => "Piercing"
-            );
-        public $piercing = true;
+            public $firingModes = array(
+                1 => "Standard",
+                2 => "Piercing"
+                );
+            public $piercing = true;
 
-        public $rangePenalty = 0.25;
-        public $fireControl = array(1, 4, 4); // fighters, <mediums, <capitals
+            public $rangePenalty = 0.25;
+            public $fireControl = array(1, 4, 4); // fighters, <mediums, <capitals
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            }
+
+            public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
+            public function setMinDamage(){ $this->minDamage = 19 - $this->dp; }
+            public function setMaxDamage(){ $this->maxDamage = 55 - $this->dp; }
         }
-
-        public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
-        public function setMinDamage(){ $this->minDamage = 19 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 55 - $this->dp; }
-    }
 
     class ImprovedNeutronLaser extends Laser{
 
@@ -357,7 +357,7 @@ class NeutronLaser extends Laser{
 
 
 
-class LaserLance extends HeavyLaser{
+    class LaserLance extends HeavyLaser{
 
         public $name = "laserLance";
         public $displayName = "Laser Lance";
@@ -389,10 +389,10 @@ class LaserLance extends HeavyLaser{
         public function getDamage($fireOrder){ return Dice::d(10, 3)+6; }
         public function setMinDamage(){ $this->minDamage = 9 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 36 - $this->dp; }
-    }
+        }
 
 
-class HeavyLaserLance extends LaserLance{
+    class HeavyLaserLance extends LaserLance{
 
         public $name = "heavyLaserLance";
         public $displayName = "Heavy Laser Lance";
@@ -425,7 +425,7 @@ class HeavyLaserLance extends LaserLance{
 
 
 
-class TacLaser extends Laser{
+    class TacLaser extends Laser{
 
         public $name = "tacLaser";
         public $displayName = "Tactical Laser";
@@ -449,6 +449,32 @@ class TacLaser extends Laser{
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8; }
         public function setMinDamage(){ $this->minDamage = 10 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 28 - $this->dp; }
+    }
+
+
+    class ImprovedBlastLaser extends Weapon{
+
+        public $name = "improvedBlastLaser";
+        public $displayName = "Improved Blast Laser";
+        public $animation = "laser";
+        public $animationColor = array(205, 5, 85);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+        public $uninterceptable = true;
+
+        public $loadingtime = 3;
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-1, 3, 5); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+14; }
+        public function setMinDamage(){ $this->minDamage = 17 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 44 - $this->dp; }
+
     }
 
 

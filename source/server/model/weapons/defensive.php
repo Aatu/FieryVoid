@@ -160,7 +160,7 @@
     }
 
 
-        class SentinelPD extends GuardianArray{
+    class SentinelPD extends GuardianArray{
 
         public $trailColor = array(30, 170, 255);
         
@@ -192,6 +192,52 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
         
 
+    }
+
+    class EMWaveDisruptor extends Weapon{
+
+        public $trailColor = array(30, 170, 255);
+        
+        public $name = "eMWaveDisruptor";
+        public $displayName = "EM-Wave Disruptor";
+        public $animation = "laser";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+        public $animationWidth = 1;
+        public $animationWidth2 = 0;
+        public $boostable = true;
+        public $boostEfficiency = 4;            
+        public $intercept = 3;
+        public $loadingtime = 1;
+        public $charges = 2;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 0;   }
+        public function setMinDamage(){     $this->minDamage = 0;      }
+        public function setMaxDamage(){     $this->maxDamage = 0;      }
+
+
+        protected function adjustIntercept($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+
+            $this->charges += $boostLevel;
+
+        }
     }
 
 
