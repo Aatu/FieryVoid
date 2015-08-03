@@ -451,7 +451,7 @@ class Firing{
                     debug::log($ship->displayName);
                     debug::log($ship->phpclass);
                     debug::log($weapon->location);
-                    debug::log($weapon->fireOrders[0]);
+             //       debug::log($weapon->fireOrders[0]);
                     continue;
 
                 }
