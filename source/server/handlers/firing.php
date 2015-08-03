@@ -448,7 +448,6 @@ class Firing{
 
                 if ($weapon instanceof Thruster){
                     debug::log("DING");
-                    debug::log($ship->displayName);
                     debug::log($ship->phpclass);
                     debug::log($weapon->location);
              //       debug::log($weapon->fireOrders[0]);

@@ -588,6 +588,8 @@ gamedata = {
             ini_gui.appendChild(cancel);
 
         for (var i = 0; i < ships.length; i++){
+
+            console.log(ships[i]);
             var tr = document.createElement("tr");
                 tr.className = "iniTr";
                 tr.id = ships[i].id;
