@@ -67,7 +67,7 @@ spl_autoload_register(
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'paragon' => '/server/model/ships/orieni/paragon.php',
 
-                'shininglight' => '/server/model/ships/orieni/shininglight.php',
+             //   'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
                 'righteous' => '/server/model/ships/orieni/righteous.php',

@@ -13,8 +13,8 @@
 
 
             if (is_numeric($armor)){
-                $toIgnore = ceil($armour /2);
-                $new = $armour - $toIgnore;
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
                 return $new;
             }
             else {

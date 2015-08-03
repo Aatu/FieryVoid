@@ -628,7 +628,7 @@ gamedata = {
                 span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px'>" + ships[i].shipClass;
 
             if (gamedata.activeship == ships[i].id){
-                span.className = "iniActive";
+                td.className = "iniActive";
             }
 
                 td.appendChild(span);

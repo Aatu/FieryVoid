@@ -56,7 +56,7 @@
                     $armour = $armour - 3;
                 }
 
-                if ($armour < 0){
+                if ($armour < 0 || !$armour){
                     $armour = 0;
                 }
                       
@@ -102,7 +102,7 @@
 
                 $shooter = $gd->getShipById($best->fire->shooterid);
                 $firingweapon = $shooter->getSystemById($best->fire->weaponid);
-           //     debug::log("intercepting: ".$firingweapon->displayName." for a reduction of: ".$perc. " using: ".$this->weapon->displayName);
+                debug::log("intercepting: ".$firingweapon->displayName." for a reduction of: ".$perc. " using: ".$this->weapon->displayName);
 
 
                 $interceptor = $target->getSystemById($this->weapon->id);
@@ -225,6 +225,8 @@ class Firing{
         {
             if (self::isValidInterceptor($gd, $weapon) === false)
                continue;
+
+        debug::log($weapon->displayName." intercepts");
 
             $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
             $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
@@ -438,8 +440,23 @@ class Firing{
 
             foreach($ship->getAllFireOrders() as $fire){
 
-                $wpn = $ship->getSystemById($fire->weaponid);
-                $fire->priority = $wpn->priority;
+
+
+                $weapon = $ship->getSystemById($fire->weaponid);
+
+                debug::log($ship->id."___".$weapon->displayName." fireOrder");
+
+                if ($weapon instanceof Thruster){
+                    debug::log("DING");
+                    debug::log($ship->displayName);
+                    debug::log($ship->phpclass);
+                    debug::log($weapon->location);
+                    debug::log($weapon->fireOrders[0])
+                    continue;
+
+                }
+
+                $fire->priority = $weapon->priority;
 
                 $fireOrders[] = $fire;
             }

@@ -943,11 +943,10 @@ body.phase1 #botPanel .ewentry .button2{
     padding-left: 5px;
 }
 
-.ini_tr {
+.iniTr {
 }
 
 #iniTd {
-    border-bottom: 1px solid white;
 }
 
 #iniTopic {
@@ -958,7 +957,9 @@ body.phase1 #botPanel .ewentry .button2{
 }
 
 .iniActive {
-    color: red;
+    border: 1px solid #84A5CE !important;
+    background-color: #254E82 !important;
+    box-shadow: 0px 0px 15px #09F;
 }
 
 #cancelButton {
@@ -968,10 +969,10 @@ body.phase1 #botPanel .ewentry .button2{
     cursor: pointer;
 }
 
-.red {
+.redIni {
     color: red;
 }
 
-.green {
+.greenIni {
     color: green;
 }

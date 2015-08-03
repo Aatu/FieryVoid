@@ -11,7 +11,7 @@ class Pariah extends BaseShip{
         $this->shipClass = "Pariah Light Command Ship";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>24);
-        $this->canvasSize = 280;
+        $this->canvasSize = 200;
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 18;
