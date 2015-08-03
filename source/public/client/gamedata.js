@@ -549,20 +549,20 @@ gamedata = {
 
     drawIniGUI: function(){
 
+
         var ini_gui = document.getElementById("iniGui");
             ini_gui.innerHTML = "";
+
+        var topicDiv = document.createElement("div");
+            topicDiv.className = "topicDiv";
 
         var span = document.createElement("span");
             span.id = "iniTopic";
             span.innerHTML = "Order of Battle";
 
-        var img = new Image();
-            img.src = "img/cancel.png";
-            img.id = "cancelButton";
+        topicDiv.appendChild(span);
 
-        span.appendChild(img);
-
-        ini_gui.appendChild(span);
+        ini_gui.appendChild(topicDiv);
 
 
         var allShips = gamedata.ships;
@@ -575,21 +575,15 @@ gamedata = {
         }
         
         ships.sort(function(a, b){
-            if (a.initiative > b.initiative){
+            if (a.iniative > b.iniative){
                 return 1;
             } else return -1;
         })
-
         var table = document.createElement("table");
             table.id = "iniTable";
 
-        var cancel = document.createElement("div");
-            cancel.className = "confirmcancel";
-            ini_gui.appendChild(cancel);
-
         for (var i = 0; i < ships.length; i++){
 
-            console.log(ships[i]);
             var tr = document.createElement("tr");
                 tr.className = "iniTr";
                 tr.id = ships[i].id;
@@ -665,22 +659,44 @@ gamedata = {
             ini_gui.appendChild(table);
 
 
-            var button = document.getElementById("cancelButton");
+        var backDiv = document.getElementById("backDiv");
+            backDiv.style.paddingBottom = "10px";
+            $(backDiv).data("on", 1);
 
-            button.addEventListener("click", function(){                
-                var ini_table = document.getElementById("iniTable");                
+            var img = new Image();
+                img.id = "iniSlider";
+                img.src = "img/pullIn.png";
+                img.style.width = "30px";
+                img.style.height = "30px";
+                img.style.marginLeft = "12px";
 
-                if (ini_table.style.display == "none"){
-                    ini_table.style.display = "table";
-                    ini_gui.style.marginLeft = "0px";
-                    button.src = "img/cancel.png";
+
+
+            backDiv.appendChild(img);
+
+            backDiv.addEventListener("click", function(){
+                if ($(this).data("on") == 1){
+                    $("#iniGui").hide();
+                    $(this).data("on", 0);
+                    this.style.marginLeft = "0px";
+                    document.getElementById("iniSlider").src = "img/pullOut.png";
+
                 }
                 else {
-                    ini_table.style.display = "none";
-                    ini_gui.style.marginLeft = "-180px";
-                    button.src = "img/move.png";
+                    $("#iniGui").show();
+                    $(this).data("on", 1);
+                    this.style.marginLeft = "250px";
+                    document.getElementById("iniSlider").src = "img/pullIn.png";
                 }
+
             });
+
+
+
+
+
+
+
 
 
     },

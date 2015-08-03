@@ -444,7 +444,7 @@ class Firing{
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
-                debug::log($ship->id."___".$weapon->displayName." fireOrder");
+         //       debug::log($ship->id."___".$weapon->displayName." fireOrder");
 
                 if ($weapon instanceof Thruster){
                     debug::log("DING");
@@ -486,7 +486,7 @@ class Firing{
                 $wpn = $ship->getSystemById($fire->weaponid);
                 $p = $wpn->priority;
 
-                debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
+          //      debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
             }
 
                 self::fire($ship, $fire, $gamedata);

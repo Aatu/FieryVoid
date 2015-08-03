@@ -952,8 +952,11 @@ body.phase1 #botPanel .ewentry .button2{
 #iniTopic {
     font-family: arial;
     font-size: 18px;
-    margin-left: 60px;
-    color: red;
+    color: white;}
+
+.topicDiv {
+    width: 50%;
+    margin: 0 auto;
 }
 
 .iniActive {
@@ -962,17 +965,29 @@ body.phase1 #botPanel .ewentry .button2{
     box-shadow: 0px 0px 15px #09F;
 }
 
-#cancelButton {
-    width: 25px;
-    height: 25px;
-    margin-left: 35px;
-    cursor: pointer;
-}
-
 .redIni {
     color: red;
 }
 
 .greenIni {
     color: green;
+}
+
+#backDiv {
+    display: inline-block;
+    position: absolute;
+    z-index: 9998;
+    margin-top: 65px;
+    margin-left: 250px;
+    width: 55px;
+    height: 25px;    
+    border:1px solid #496791;
+    color:#deebff;
+    background-color:#0a3340;
+    opacity: 0.8;
+    -moz-box-shadow: 5px 5px 10px black;
+    -webkit-box-shadow: 5px 5px 10px black;
+    box-shadow: 5px 5px 10px black;
+    padding-top:10px;
+    border-radius: 0px 10px 10px 0px;
 }
