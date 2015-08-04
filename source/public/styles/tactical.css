@@ -919,6 +919,7 @@ body.phase1 #botPanel .ewentry .button2{
     background-color:#0a3340;
     margin-top: 50px;
     width: 250px;
+    height: 50px;
     position: absolute;
     display: inline-block;
     opacity: 0.8;
@@ -927,10 +928,11 @@ body.phase1 #botPanel .ewentry .button2{
     box-shadow: 5px 5px 10px black;
     padding-top:10px;
     border-radius: 0px 10px 10px 0px;
+    max-height: 550px;
+    overflow-y: auto;
 }
 
 #iniTable {
-    display: table;
     background-color: #04161C;
     position: relative;
     margin: auto;
@@ -939,7 +941,7 @@ body.phase1 #botPanel .ewentry .button2{
     border-radius: 15px;
     border: 1px solid #496791;
     font-family: arial;
-    font-size: 12px;
+    font-size: 10px;
     padding-left: 5px;
 }
 
@@ -951,13 +953,12 @@ body.phase1 #botPanel .ewentry .button2{
 
 #iniTopic {
     font-family: arial;
-    font-size: 18px;
-    color: white;}
-
-.topicDiv {
-    width: 50%;
-    margin: 0 auto;
+    font-size: 16px;
+    color: white;
+    width: 100%;
+    margin-left: 63px;
 }
+
 
 .iniActive {
     border: 1px solid #84A5CE !important;

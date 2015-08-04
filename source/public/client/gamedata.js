@@ -552,6 +552,7 @@ gamedata = {
 
         var ini_gui = document.getElementById("iniGui");
             ini_gui.innerHTML = "";
+            ini_gui.style.height = "auto";
 
         var topicDiv = document.createElement("div");
             topicDiv.className = "topicDiv";
@@ -640,13 +641,13 @@ gamedata = {
                 img.src = ships[i].imagePath;
 
                 if (!ships[i].flight){
-                    img.style.width = "50px";
-                    img.style.height = "50px";
+                    img.style.width = "40px";
+                    img.style.height = "40px";
                 }
                 else {
-                    img.style.width = "25px";
-                    img.style.height = "25px";
-                    td.style.paddingLeft = "20px";
+                    img.style.width = "20px";
+                    img.style.height = "20px";
+                    td.style.paddingLeft = "12px";
                 }
 
             td.appendChild(img)
@@ -660,6 +661,7 @@ gamedata = {
 
 
         var backDiv = document.getElementById("backDiv");
+            backDiv.innerHTML = "";
             backDiv.style.paddingBottom = "10px";
             $(backDiv).data("on", 1);
 

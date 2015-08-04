@@ -309,7 +309,7 @@
 
     class PairedPlasmaBlaster extends LinkedWeapon{
 
-        public $name = "PairedPlasmaBlaster";
+        public $name = "pairedPlasmaBlaster";
         public $displayName = "Paired Plasma Blaster";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -317,7 +317,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
-        public $animationExplosionScale = 0.4;
+        public $animationExplosionScale = 0.1;
 
         public $intercept = 2;
 

@@ -72,6 +72,8 @@ class MissileLauncher extends Weapon{
             }
             else $amount = 75;
 
+            debug::log("ammo exp for: ".$amount);
+
             $this->ammoExplosion($ship, $gamedata, $amount);
             $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
         }
@@ -88,9 +90,11 @@ class MissileLauncher extends Weapon{
             }
 
         $system = $this;
-            if ($this->isDestroyed()){
-                $system = $this->getHitSystem($ship);
-            }
+
+        if ($this->isDestroyed()){
+            $system = $this->getHitSystem($ship);
+        }
+
         $this->ammoExplosionDamage($ship, $system, $rake, $gamedata);
         $left -= $rake;
         }

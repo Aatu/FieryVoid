@@ -226,7 +226,7 @@ class Firing{
             if (self::isValidInterceptor($gd, $weapon) === false)
                continue;
 
-        debug::log($weapon->displayName." intercepts");
+    //    debug::log($weapon->displayName." intercepts");
 
             $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
             $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
@@ -440,16 +440,20 @@ class Firing{
 
             foreach($ship->getAllFireOrders() as $fire){
 
-
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                    continue;
+                }
 
                 $weapon = $ship->getSystemById($fire->weaponid);
 
          //       debug::log($ship->id."___".$weapon->displayName." fireOrder");
 
-                if ($weapon instanceof Thruster){
+                if ($weapon instanceof Thruster || $weapon instanceof Structure){
                     debug::log("DING");
                     debug::log($ship->phpclass);
                     debug::log($weapon->location);
+                    debug::log($weapon->displayName);
+                    debug::log("DING_2");
              //       debug::log($weapon->fireOrders[0]);
                     continue;
 
@@ -481,14 +485,10 @@ class Firing{
 
 
         foreach ($fireOrders as $fire){
-            if ($fire->type !== "intercept" || $fire->type !== "selfIntercept"){
                 $ship = $gamedata->getShipById($fire->shooterid);
                 $wpn = $ship->getSystemById($fire->weaponid);
                 $p = $wpn->priority;
-
-          //      debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
-            }
-
+                // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
         }
 
