@@ -663,7 +663,7 @@ gamedata = {
         var backDiv = document.getElementById("backDiv");
             backDiv.innerHTML = "";
             backDiv.style.paddingBottom = "10px";
-            $(backDiv).data("on", 1);
+            $(backDiv).removeData();
 
             var img = new Image();
                 img.id = "iniSlider";
@@ -676,31 +676,29 @@ gamedata = {
 
             backDiv.appendChild(img);
 
-            backDiv.addEventListener("click", function(){
-                if ($(this).data("on") == 1){
-                    $("#iniGui").hide();
-                    $(this).data("on", 0);
-                    this.style.marginLeft = "0px";
-                    document.getElementById("iniSlider").src = "img/pullOut.png";
-
-                }
-                else {
-                    $("#iniGui").show();
-                    $(this).data("on", 1);
-                    this.style.marginLeft = "250px";
-                    document.getElementById("iniSlider").src = "img/pullIn.png";
-                }
-
-            });
+            backDiv.addEventListener("click", gamedata.sliderToggle);
 
 
 
 
+    },
 
+    sliderToggle: function(){
+        var backDiv = document.getElementById("backDiv");
 
+        if ($(backDiv).data("on") == 0){
+            $("#iniGui").show();
+            $(backDiv).data("on", 1);
+            backDiv.style.marginLeft = "250px";
+            document.getElementById("iniSlider").src = "img/pullIn.png";
 
-
-
+        }
+        else {
+            $("#iniGui").hide();
+            $(backDiv).data("on", 0);
+            backDiv.style.marginLeft = "0px";
+            document.getElementById("iniSlider").src = "img/pullOut.png";
+        }
     },
             
     checkGameStatus: function(){

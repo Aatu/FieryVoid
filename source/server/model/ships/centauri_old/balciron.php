@@ -41,7 +41,7 @@ class Balciron extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));        
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
-        $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
+        $this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
