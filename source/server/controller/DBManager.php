@@ -754,7 +754,7 @@ class DBManager {
 
     
 	public function getTacGames($playerid){
-		$games = $this->getTacGame(0, $playerid, false);
+		$games = $this->getTacGame(0, $playerid);
 		if ($games == null)
 			return array();
         
@@ -794,18 +794,25 @@ class DBManager {
         return $gamedata;
     }
     
-    public function getTacGame($gameid, $playerid, $finished = true){
+    public function getTacGame($gameid, $playerid){
 	
 		if ($gameid >0){
+			// gameid is set. We only need that particular one game.
 			$sql = "SELECT * FROM `B5CGM`.`tac_game` where id = $gameid";
-			if (!$finished){
-				$sql .= " AND `status` <> 'FINISHED'";
-			}
 		}else{
-			$sql = "SELECT * FROM `B5CGM`.`tac_game`";
-			if (!$finished){
-				$sql .= " WHERE `status` <> 'FINISHED'";
-			}
+			// gameid is not set. We are looking for all games that might be interesting
+			// for a player.
+			// Only select those games that are either relevant to the current player.
+			// So the ones he is participating in, or those games that are in the lobby
+			// and still have player spots left.
+			$sql = "SELECT * FROM tac_game tg RIGHT JOIN
+		 			(SELECT id
+		 					FROM tac_playeringame pg
+		 					LEFT JOIN tac_game tgs
+		 					on tgs.id = pg.gameid
+		 					WHERE tgs.status <> 'finished' AND (pg.playerid = $playerid OR pg.playerid IS NULL OR pg.playerid = '')
+		 			) AS result1
+	 			ON tg.id = result1.id;";
 		}
 		
 		
