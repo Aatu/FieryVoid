@@ -5,6 +5,17 @@ window.ajaxInterface = {
 	submiting: false,
 //	fastpolling: false,
 
+	getShipsForFaction: function(factionRequest, getFactionShipsCallback){
+		$.ajax({
+            type : 'GET',
+            url : 'gamelobbyloader.php',
+            dataType : 'json',
+            data: {faction:factionRequest},
+            success : getFactionShipsCallback,
+            error : ajaxInterface.errorAjax
+        });
+	},
+	
     submitGamedata: function(){
 	
 		if ( ajaxInterface.submiting )

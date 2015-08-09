@@ -192,11 +192,15 @@ window.gamedata = {
 
     expandFaction: function(event)
     {
-     //   console.log("clicked");
+        console.log("faction click");
         var clickedElement = $(this);
-        clickedElement.parent().toggleClass("shipshidden");
+        
+        window.ajaxInterface.getShipsForFaction(clickedElement.data-faction, function(factionShips){
+        	clickedElement.parent().toggleClass("shipshidden");
+        	console.log("succes on faction click");
+        });
     },
-
+    
     goToWaiting: function(){
         
     },
