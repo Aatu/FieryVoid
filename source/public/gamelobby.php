@@ -24,7 +24,13 @@
 //	var_dump($gamelobbydata);
 	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
 	
-	$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
+	// Getting all ships in one go causes memory overload on the server.
+	// Get the factions first. When a faction is opened to buy ships,
+	// go bother the server for the ships of that faction only.
+	
+	$factions = json_encode(Manager::getAllFactions(), JSON_NUMERIC_CHECK);
+	
+	//$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
 	
 	
 ?>
@@ -166,7 +172,8 @@
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
-				gamedata.parseShips(<?php print($ships); ?>);
+//				gamedata.parseShips(<?php print($ships); ?>);
+				gamedata.parseFactions(<?php print($factions); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);

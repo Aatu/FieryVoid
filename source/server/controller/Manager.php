@@ -157,6 +157,10 @@ class Manager{
         return $list;
     }
     
+    public static function getAllFactions(){
+    	return ShipLoader::getAllFactions();
+    }
+    
     public static function getAllShips(){
         
         return ShipLoader::getAllShips();

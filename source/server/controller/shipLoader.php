@@ -47,7 +47,24 @@
 		
 		}
 		
-	
+		public static function getAllFactions(){
+			$names = self::getShipClassnames();
+			$factions = array();
+			$count = 0;
+			
+			foreach($names as $name){
+				if (class_exists($name)){
+					$count++;
+					$ship = new $name($count, 0, "", 0, 0, false, false, array());
+				
+					if (!isset($ship->faction)){
+						$factions[] = $ship->faction;
+					}
+				}
+			}
+			
+			return $factions;
+		}
 	}
 	
 	

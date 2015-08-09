@@ -132,7 +132,39 @@ window.gamedata = {
             }
         }
     },
+    
+    orderStringList: function(stringList){
+        var swapped = true;
         
+        for(var x=1; x< stringList.length && swapped; x++){
+            swapped = false;
+            
+            for(var y=0; y < stringList.length - x; y++){
+                if(stringList[y+1] < stringList[y]){
+                    var temp = stringList[y];
+                    stringList[y] = stringList[y+1];
+                    stringList[y+1] = temp;
+                    swapped = true;
+                }
+            }
+        }
+    },
+    
+    parseFactions: function(jsonFactions){
+		this.orderStringList(jsonFactions);
+
+		gamedata.setFactionsFromJson(jsonFactions);
+		
+    	for (var i in gamedata.allShips){
+			var faction = gamedata.allShips[i];
+			
+			var group = $('<div class="'+i+' faction shipshidden" data-faction="'+i+'"><div class="factionname name"><span>'+i+ '</span><span class="tooltip">(click to expand)</span></div>')
+            .appendTo("#store");
+
+            group.find('.factionname').on("click", this.expandFaction);
+    	}
+    },
+    
 	parseShips: function(json){
 
 		gamedata.setShipsFromJson(json);
@@ -545,6 +577,11 @@ window.gamedata = {
     },
 
 
+    setFactionsFromJson: function(jsonFactions){
+    	this.orderAllFactionNames(jsonFactions);
+    	
+    	gamedata.allShips = jsonFactions;
+    }
 }
 
 window.animation = {
