@@ -30,7 +30,7 @@
 	
 	$factions = json_encode(Manager::getAllFactions(), JSON_NUMERIC_CHECK);
 	
-//	$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
+	$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
 	
 	
 ?>
@@ -173,7 +173,7 @@
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 				gamedata.parseFactions(<?php print($factions); ?>);
-//				gamedata.parseShips(<?php print($ships); ?>);
+				gamedata.parseShips(<?php print($ships); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
