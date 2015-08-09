@@ -37,8 +37,8 @@
         
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
-						
 					}
+					
 					$ships[$ship->faction][] = $ship;
 				}
 			}
@@ -57,7 +57,7 @@
 					$count++;
 					$ship = new $name($count, 0, "", 0, 0, false, false, array());
 				
-					if (!isset($factions[$ship->faction])){
+					if (!in_array( $ship->faction , $factions )){
 						$factions[] = $ship->faction;
 					}
 				}
