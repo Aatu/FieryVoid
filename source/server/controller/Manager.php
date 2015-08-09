@@ -163,7 +163,8 @@ class Manager{
     
     public static function getAllShips(){
         
-        return ShipLoader::getAllShips();
+        //return ShipLoader::getAllShips();
+        return array();
     }
     
     public static function canCreateGame($userid){
