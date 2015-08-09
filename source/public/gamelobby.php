@@ -172,8 +172,8 @@
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
-//				gamedata.parseShips(<?php print($ships); ?>);
 				gamedata.parseFactions(<?php print($factions); ?>);
+				gamedata.parseShips(<?php print($ships); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
