@@ -195,7 +195,7 @@ window.gamedata = {
         console.log("faction click");
         var clickedElement = $(this);
         
-        window.ajaxInterface.getShipsForFaction(clickedElement.data["faction"], function(factionShips){
+        window.ajaxInterface.getShipsForFaction(clickedElement.parent().data["faction"], function(factionShips){
         	clickedElement.parent().toggleClass("shipshidden");
         	console.log("succes on faction click");
         });
