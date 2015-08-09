@@ -11,11 +11,12 @@
 		if (isset($_GET["faction"])){
 			$factionRequest = $_GET["faction"]; 
 			$ret = ShipLoader::getAllShips($factionRequest);
+			$retJSON = json_encode($ret, JSON_NUMERIC_CHECK);
 		}else{
-            $ret = '{"error":"Omitting required data"}';
+            $retJSON = '{"error":"Omitting required data"}';
 		}
 		
-		print($ret);
+		print($retJSON);
 	}
     
 ?>
