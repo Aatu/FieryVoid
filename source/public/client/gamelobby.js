@@ -578,8 +578,6 @@ window.gamedata = {
 
 
     setFactionsFromJson: function(jsonFactions){
-    	this.orderAllFactionNames(jsonFactions);
-    	
     	gamedata.allShips = jsonFactions;
     }
 }
