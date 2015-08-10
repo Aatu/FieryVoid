@@ -171,7 +171,7 @@ window.gamedata = {
     
 	parseShips: function(jsonShips){
 		
-		gamedata.setShipsFromJson(jsonShips);
+		gamedata.setAllShipsFromJson(jsonShips);
 		
 		for (var faction in jsonShips){
 			var shipList = jsonShips[faction];
@@ -571,7 +571,7 @@ window.gamedata = {
         return null;
     },
             
-    setShipsFromJson: function(jsonShips)
+    setAllShipsFromJson: function(jsonShips)
     {
         for (var f in jsonShips)
         {
