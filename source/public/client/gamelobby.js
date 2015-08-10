@@ -189,7 +189,7 @@ window.gamedata = {
         
         if(clickedElement.parent().hasClass("shipshidden")){
 	        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
-	        	parseShips(faction, factionShips);
+	        	gamedata.parseShips(faction, factionShips);
 	        	console.log("succes on faction click");
 	        });
         }
