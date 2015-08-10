@@ -11,7 +11,7 @@ window.gamedata = {
 	maxpoints:0,
 	status: "LOBBY",
     selectedSlot:null,
-    allShips: [],
+    allShips: null,
 
 	canAfford: function(ship){
 
@@ -153,15 +153,20 @@ window.gamedata = {
     
     parseFactions: function(jsonFactions){
 		this.orderStringList(jsonFactions);
+		var factionList = new Array();
 
     	for (var i in jsonFactions){
 			var faction = jsonFactions[i];
+			
+			factionList[faction] = new Array();
 			
 			var group = $('<div class="'+ faction +' faction shipshidden listempty" data-faction="'+ faction +'"><div class="factionname name"><span>'+ faction + '</span><span class="tooltip">(click to expand)</span></div>')
             .appendTo("#store");
 
             group.find('.factionname').on("click", this.expandFaction);
     	}
+    	
+    	gamedata.allShips = factionList;
     },
     
 	parseShips: function(jsonShips){
