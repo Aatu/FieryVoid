@@ -827,14 +827,14 @@ gamedata = {
 
     },
             
-    setShipsFromJson: function(jsonShips)
+    setShipsFromJson: function(faction, jsonShips)
     {
-        //gamedata.ships = Array();
+        gamedata.ships[faction] = Array();
         
         for (var i in jsonShips)
         {
             var ship = jsonShips[i];
-            gamedata.ships[i] = new Ship(ship);
+            gamedata.ships[faction] = new Ship(ship);
         }
     },
     

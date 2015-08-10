@@ -163,27 +163,18 @@ window.gamedata = {
     	}
     },
     
-	parseShips: function(json){
+	parseShips: function(faction, jsonShips){
 
-		gamedata.setShipsFromJson(json);
-                
-       for (var i in gamedata.allShips){
-			var faction = gamedata.allShips[i];
-                        
-            this.orderShipListOnName(faction);
-                        
-			var group = $('<div class="'+i+' faction shipshidden" data-faction="'+i+'"><div class="factionname name"><span>'+i+ '</span><span class="tooltip">(click to expand)</span></div>')
-                .appendTo("#store");
+		gamedata.setShipsFromJson(faction, jsonShips);
 
-                group.find('.factionname').on("click", this.expandFaction);
-
-			for (var index = 0; index < faction.length; index++){
-				var ship = faction[index];
-				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-                if (ship.faction == "The Lion"){
-                    h.appendTo(".The" + ".Lion" +".faction");
-                } else h.appendTo("."+i+".faction");
-			}
+		this.orderShipListOnName(jsonShips);
+		
+		for (var index = 0; index < jsonShips.length; index++){
+			var ship = jsonShips[index];
+			var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+            if (ship.faction == "The Lion"){
+                h.appendTo(".The" + ".Lion" +".faction");
+            } else h.appendTo("."+ faction +".faction");
 		}
 
 		$(".addship").bind("click", this.buyShip);
@@ -194,11 +185,16 @@ window.gamedata = {
     {
         console.log("faction click");
         var clickedElement = $(this);
+        var faction = clickedElement.parent().data("faction");
         
-        window.ajaxInterface.getShipsForFaction(clickedElement.parent().data("faction"), function(factionShips){
-        	clickedElement.parent().toggleClass("shipshidden");
-        	console.log("succes on faction click");
-        });
+        if(!clickedElement.parent().hasClass("shipshidden")){
+	        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
+	        	parseShips(faction, factionShips);
+	        	console.log("succes on faction click");
+	        });
+        }
+
+        clickedElement.parent().toggleClass("shipshidden");
     },
     
     goToWaiting: function(){
@@ -558,25 +554,25 @@ window.gamedata = {
         return null;
     },
             
-    setShipsFromJson: function(jsonShips)
-    {
-        //gamedata.ships = Array();
-        
-        var factions = Array();
-        for (var f in jsonShips)
-        {
-            var faction = jsonShips[f];
-            factions[f] = Array();
-            
-            for (var i in faction)
-            {
-                var ship = faction[i];
-                factions[f][i] = new Ship(ship);
-            }
-        }
-        
-        gamedata.allShips = factions; 
-    },
+//    setShipsFromJson: function(jsonShips)
+//    {
+//        //gamedata.ships = Array();
+//        
+//        var factions = Array();
+//        for (var f in jsonShips)
+//        {
+//            var faction = jsonShips[f];
+//            factions[f] = Array();
+//            
+//            for (var i in faction)
+//            {
+//                var ship = faction[i];
+//                factions[f][i] = new Ship(ship);
+//            }
+//        }
+//        
+//        gamedata.allShips = factions; 
+//    },
 
 }
 
