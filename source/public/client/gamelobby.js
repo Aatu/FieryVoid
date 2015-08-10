@@ -186,7 +186,7 @@ window.gamedata = {
 	
 			for (var index = 0; index < jsonShips[faction].length; index++){
 				var ship = shipList[index];
-				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 	            if (ship.faction == "The Lion"){
 	                h.appendTo(".The" + ".Lion" +".faction");
 	            } else h.appendTo("."+ faction +".faction");
