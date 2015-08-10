@@ -187,7 +187,7 @@ window.gamedata = {
         var clickedElement = $(this);
         var faction = clickedElement.parent().data("faction");
         
-        if(!clickedElement.parent().hasClass("shipshidden")){
+        if(clickedElement.parent().hasClass("shipshidden")){
 	        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
 	        	parseShips(faction, factionShips);
 	        	console.log("succes on faction click");
