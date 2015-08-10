@@ -165,10 +165,14 @@ window.gamedata = {
     
 	parseShips: function(faction, jsonShips){
 
-		gamedata.setShipsFromJson(faction, jsonShips);
-
 		this.orderShipListOnName(jsonShips);
 		
+        for (var i in jsonShips)
+        {
+            var ship = jsonShips[i];
+            gamedata.ships[faction] = new Ship(ship);
+        }
+
 		for (var index = 0; index < jsonShips.length; index++){
 			var ship = jsonShips[index];
 			var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
