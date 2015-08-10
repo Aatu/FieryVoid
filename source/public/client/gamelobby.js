@@ -163,26 +163,28 @@ window.gamedata = {
     	}
     },
     
-	parseShips: function(faction, jsonShips){
-
-		this.orderShipListOnName(jsonShips);
-		
-        for (var i in jsonShips)
-        {
-            var ship = jsonShips[i];
-            gamedata.ships[faction] = new Ship(ship);
-        }
-
-		for (var index = 0; index < jsonShips.length; index++){
-			var ship = jsonShips[index];
-			var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-            if (ship.faction == "The Lion"){
-                h.appendTo(".The" + ".Lion" +".faction");
-            } else h.appendTo("."+ faction +".faction");
+	parseShips: function(jsonShips){
+		for (var faction in jsonShips){
+			var shipList = jsonShips[faction];
+			
+			this.orderShipListOnName(shipList);
+			
+	        for (var i in shipList)
+	        {
+	            var ship = shipList[i];
+	            gamedata.ships[faction] = new Ship(ship);
+	        }
+	
+			for (var index = 0; index < jsonShips[faction].length; index++){
+				var ship = shipList[index];
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+i+'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+	            if (ship.faction == "The Lion"){
+	                h.appendTo(".The" + ".Lion" +".faction");
+	            } else h.appendTo("."+ faction +".faction");
+			}
+	
+			$(".addship").bind("click", this.buyShip);
 		}
-
-		$(".addship").bind("click", this.buyShip);
-
 	},
 
     expandFaction: function(event)
@@ -193,7 +195,7 @@ window.gamedata = {
         
         if(clickedElement.parent().hasClass("shipshidden")){
 	        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
-	        	gamedata.parseShips(faction, factionShips);
+	        	gamedata.parseShips(factionShips);
 	        	console.log("succes on faction click");
 	        });
         }
