@@ -164,6 +164,9 @@ window.gamedata = {
     },
     
 	parseShips: function(jsonShips){
+		
+		gamedata.setShipsFromJson(jsonShips);
+		
 		for (var faction in jsonShips){
 			var shipList = jsonShips[faction];
 			
@@ -562,25 +565,25 @@ window.gamedata = {
         return null;
     },
             
-//    setShipsFromJson: function(jsonShips)
-//    {
-//        //gamedata.ships = Array();
-//        
-//        var factions = Array();
-//        for (var f in jsonShips)
-//        {
-//            var faction = jsonShips[f];
-//            factions[f] = Array();
-//            
-//            for (var i in faction)
-//            {
-//                var ship = faction[i];
-//                factions[f][i] = new Ship(ship);
-//            }
-//        }
-//        
-//        gamedata.allShips = factions; 
-//    },
+    setShipsFromJson: function(jsonShips)
+    {
+        //gamedata.ships = Array();
+        
+        var factions = Array();
+        for (var f in jsonShips)
+        {
+            var faction = jsonShips[f];
+            factions[f] = Array();
+            
+            for (var i in faction)
+            {
+                var ship = faction[i];
+                factions[f][i] = new Ship(ship);
+            }
+        }
+        
+        gamedata.allShips = factions; 
+    },
 
 }
 
