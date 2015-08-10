@@ -156,7 +156,7 @@ window.gamedata = {
     	for (var i in jsonFactions){
 			var faction = jsonFactions[i];
 			
-			var group = $('<div class="'+ faction +' faction shipshidden" data-faction="'+ faction +'"><div class="factionname name"><span>'+ faction + '</span><span class="tooltip">(click to expand)</span></div>')
+			var group = $('<div class="'+ faction +' faction shipshidden listempty" data-faction="'+ faction +'"><div class="factionname name"><span>'+ faction + '</span><span class="tooltip">(click to expand)</span></div>')
             .appendTo("#store");
 
             group.find('.factionname').on("click", this.expandFaction);
@@ -189,15 +189,17 @@ window.gamedata = {
 
     expandFaction: function(event)
     {
-        console.log("faction click");
         var clickedElement = $(this);
         var faction = clickedElement.parent().data("faction");
         
         if(clickedElement.parent().hasClass("shipshidden")){
-	        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
-	        	gamedata.parseShips(factionShips);
-	        	console.log("succes on faction click");
-	        });
+            if(clickedElement.parent().hasClass("listempty")){
+		        window.ajaxInterface.getShipsForFaction(faction, function(factionShips){
+		        	gamedata.parseShips(factionShips);
+		        });
+		        
+		        clickedElement.parent().removeClass("listempty")
+            }
         }
 
         clickedElement.parent().toggleClass("shipshidden");
