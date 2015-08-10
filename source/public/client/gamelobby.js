@@ -11,6 +11,7 @@ window.gamedata = {
 	maxpoints:0,
 	status: "LOBBY",
     selectedSlot:null,
+    allShips: array(),
 
 	canAfford: function(ship){
 
@@ -567,22 +568,18 @@ window.gamedata = {
             
     setShipsFromJson: function(jsonShips)
     {
-        //gamedata.ships = Array();
+        var faction = Array();
         
-        var factions = Array();
         for (var f in jsonShips)
         {
-            var faction = jsonShips[f];
-            factions[f] = Array();
+            gamedata.allShips[f] = Array();
             
             for (var i in faction)
             {
                 var ship = faction[i];
-                factions[f][i] = new Ship(ship);
+                gamedata.allShips[f][i] = new Ship(ship);
             }
         }
-        
-        gamedata.allShips = factions; 
     },
 
 }
