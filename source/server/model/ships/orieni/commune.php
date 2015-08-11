@@ -23,7 +23,7 @@ class Commune extends MediumShip{
         $this->iniativebonus = 65;
         
          
-        $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 18, 0, 3));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));

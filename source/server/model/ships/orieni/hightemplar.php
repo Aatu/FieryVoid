@@ -29,7 +29,7 @@ class HighTemplar extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(1, 1, 1, 1);
+            $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("templar", $armour, 9, $this->id);
             $fighter->displayName = "High Templar Light Fighter";
             $fighter->imagePath = "img/ships/highTemplar.png";

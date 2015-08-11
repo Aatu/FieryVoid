@@ -261,6 +261,7 @@
         public $loadingtime = 1;
 
         public $intercept = 2;
+        public $ballisticIntercept = true;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -294,7 +295,7 @@
 
 
         public function getDamage($fireOrder){
-            $dmg = Dice::d(6, 2);
+            $dmg = Dice::d(6, 1);
             return $dmg;
        }
 
@@ -304,14 +305,15 @@
 
 
        public function fire($gamedata, $fireOrder){
+        debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
 
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $this->ammunition);
         }
     
-        public function setMinDamage(){     $this->minDamage = 2;      }
-        public function setMaxDamage(){     $this->maxDamage = 12;      }
+        public function setMinDamage(){     $this->minDamage = 1;      }
+        public function setMaxDamage(){     $this->maxDamage = 6;      }
 
     }
 

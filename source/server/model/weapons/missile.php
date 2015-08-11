@@ -66,18 +66,18 @@ class MissileLauncher extends Weapon{
         $toDO;
 
         $roll = Dice::d(20);
-        if ($roll >= 1){
+        if ($roll >= 19){
             if ($this instanceof BombRack){
                 $toDO = 35;
             } else if ($this instanceof ReloadRack){
                 $toDO = 120;
             }
-            else $toDO = 75;
+            else $toDO = 70;
 
-            debug::log("ammo exp for: ".$toDO);
+            debug::log("ammo exp for: ".$toDO." on".$this->displayName." id: ".$this->id);
 
             $this->ammoExplosion($ship, $gamedata, $toDO);
-    //        $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
+            $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
         }
     }
 
