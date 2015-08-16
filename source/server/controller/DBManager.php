@@ -1089,7 +1089,7 @@ class DBManager {
             WHERE
                 gameid = ?
             AND
-                ( turn >= ? 
+                ( turn >= ?-2 
                 OR 
                 s1.id = 
                     (

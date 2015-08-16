@@ -5,7 +5,7 @@ class Tacit extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 325;
-    $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
     $this->phpclass = "Tacit";
     $this->imagePath = "img/ships/tacit.png";
     $this->shipClass = "Tacit Police Cruiser";

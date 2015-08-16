@@ -5,7 +5,7 @@ class Tatros extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-        $this->faction = "The Lion";
+    $this->faction = "Centauri (WotCR)";
     $this->phpclass = "Tatros";
     $this->imagePath = "img/ships/jenas.png";
     $this->shipClass = "Tatros Escort Frigate";

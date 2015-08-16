@@ -348,9 +348,14 @@ class Manager{
                     continue;
                 
                 $seenSlots[$slot->slot] = true;
-                
-                $points += $ship->pointCost;
-                
+
+                if (!$ship instanceof FighterFlight){
+                    $points += $ship->pointCost;
+                }
+                else {
+                    $points += ($ship->pointCost / 6) * $ship->flightSize;
+                }
+
                 if ($ship->userid == $gamedata->forPlayer){
                     $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
                     
@@ -401,8 +406,8 @@ class Manager{
                 }
             }
 
-            if ($points > $slot->points)    
-                throw new Exception("Fleet too expensive.");
+            if ($points > $slot->points)
+            throw new Exception("Fleet too expensive.");
         }
     
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn, $seenSlots);

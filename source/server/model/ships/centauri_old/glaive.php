@@ -5,7 +5,7 @@ class Glaive extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 168;
-        $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Glaive";
         $this->shipClass = "Glaive flight";
 		$this->imagePath = "img/ships/glaive.png";

@@ -188,7 +188,6 @@ gamedata = {
             }
 
 
-
             var hasNoEW = [];
 
             for (var ship in myShips){
@@ -198,8 +197,18 @@ gamedata = {
                             hasNoEW.push(myShips[ship]);
                         }
                     }
-                    else if (gamedata.turn > 1 && myShips[ship].EW.length < 3){
-                        hasNoEW.push(myShips[ship]);    
+                    else if (gamedata.turn > 1){
+                        var hasEW = 0;
+                        for (var entry in myShips[ship].EW){
+                            var ew = myShips[ship].EW[entry];
+                            if (ew.turn == gamedata.turn && ew.type != "DEW"){
+                                hasEW = 1;
+                                break;
+                            }
+                        }
+                        if (hasEW == 0){
+                            hasNoEW.push(myShips[ship]);    
+                        } else continue;
                     }
                 }
             }

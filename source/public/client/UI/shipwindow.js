@@ -1166,9 +1166,14 @@ setSystemData: function(ship, system, shipwindow){
 			if (gamedata.waiting)
 				return
 			
-			if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
+			if (shipManager.isDestroyed(ship)  || shipManager.isAdrift(ship)){
 				return;
-						
+			}
+
+			if (system.destroyed){
+				continue;
+			}
+
 			if (system.weapon && selectedShip.id == ship.id){
 				
 				if (gamedata.gamephase != 3 && !system.ballistic)

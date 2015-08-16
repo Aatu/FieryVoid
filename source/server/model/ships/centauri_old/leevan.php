@@ -5,7 +5,7 @@ class Leevan extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 340;
-        $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Leevan";
         $this->imagePath = "img/ships/navask.png";
         $this->shipClass = "Leevan Mine Sweeper";        

@@ -9,6 +9,22 @@ spl_autoload_register(
             $classes = array(
 
 
+
+                // early drazi adds
+                'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
+                'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
+                'merlin' => '/server/model/ships/drazi_old/merlin.php',
+                'heron' => '/server/model/ships/drazi_old/heron.php',
+                'auk' => '/server/model/ships/drazi_old/auk.php',
+                'dragon' => '/server/model/ships/drazi_old/dragon.php',
+                'egret' => '/server/model/ships/drazi_old/egret.php',
+                'nightowl' => '/server/model/ships/drazi_old/nightowl.php',
+                'shrike' => '/server/model/ships/drazi_old/shrike.php',
+                'skua' => '/server/model/ships/drazi_old/skua.php',
+                'swallow' => '/server/model/ships/drazi_old/swallow.php',
+                'swift' => '/server/model/ships/drazi_old/swift.php',
+
+
                 //Streib
             //    'collector' => '/server/model/ships/streib/collector.php',
 
@@ -161,7 +177,6 @@ spl_autoload_register(
                 'athasa' => '/server/model/ships/balosian/athasa.php',
                 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
                 'athraskalac' => '/server/model/ships/dilgar/athraskalaC.php',
-                'auk' => '/server/model/ships/drazi/auk.php',
                 'aurorastarfury' => '/server/model/ships/EA/auroraStarfury.php',
                 'avenger' => '/server/model/ships/EA/avenger.php',
                 'avengerbeta' => '/server/model/ships/EA/avengerBeta.php',
@@ -222,12 +237,10 @@ spl_autoload_register(
                 'devaskar' => '/server/model/ships/brakiri/devaskar.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
-                'dragon' => '/server/model/ships/drazi/dragon.php',
                 'drikorta' => '/server/model/ships/brakiri/drikorta.php',
                 'dualweapon' => '/server/model/weapons/dualWeapon.php',
                 'duoweapon' => '/server/model/weapons/duoWeapon.php',
                 'duogravitonbeam' => '/server/model/weapons/gravitic.php',
-                'egret' => '/server/model/ships/drazi/egret.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
                 'elintarray' => '/server/model/systems/baseSystems.php',
                 'elintscanner' => '/server/model/systems/baseSystems.php',
@@ -388,7 +401,6 @@ spl_autoload_register(
                 'mediumpulse' => '/server/model/weapons/pulse.php',
                 'mediumship' => '/server/model/ships/ShipClasses.php',
                 'mediumshipleftright' => '/server/model/ships/ShipClasses.php',
-                'merlin' => '/server/model/ships/drazi/merlin.php',
                 'mishakur' => '/server/model/ships/dilgar/mishakur.php',
                 'mishakurb' => '/server/model/ships/dilgar/mishakurB.php',
                 'mishakurd' => '/server/model/ships/dilgar/mishakurD.php',
@@ -410,7 +422,6 @@ spl_autoload_register(
                 'neutronlaser' => '/server/model/weapons/lasers.php',
                 'nial' => '/server/model/ships/minbari/nial.php',
                 'nightfalcon' => '/server/model/ships/drazi/nightfalcon.php',
-                'nightowl' => '/server/model/ships/drazi/nightowl.php',
                 'nitratha' => '/server/model/ships/dilgar/nitratha.php',
                 'notai' => '/server/model/ships/yolu/notai.php',
                 'notali' => '/server/model/ships/yolu/notali.php',
@@ -519,9 +530,7 @@ spl_autoload_register(
                 'shokar' => '/server/model/ships/narn/shokar.php',
                 'shokos' => '/server/model/ships/narn/shokos.php',
                 'shokov' => '/server/model/ships/narn/shokov.php',
-                'shrike' => '/server/model/ships/drazi/shrike.php',
                 'sitara' => '/server/model/ships/centauri/sitara.php',
-                'skua' => '/server/model/ships/drazi/skua.php',
                 'skyserpent' => '/server/model/ships/drazi/skyserpent.php',
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
@@ -542,8 +551,6 @@ spl_autoload_register(
                 'sunhawk' => '/server/model/ships/drazi/sunhawk.php',
                 'superheavyfighter' => '/server/model/ships/FighterFlight.php',
                 'sussha' => '/server/model/ships/balosian/sussha.php',
-                'swallow' => '/server/model/ships/drazi/swallow.php',
-                'swift' => '/server/model/ships/drazi/swift.php',
                 'systemdata' => '/server/model/BaseClasses.php',
                 'tacgamedata' => '/server/model/TacGamedata.php',
                 'taileagle' => '/server/model/ships/drazi/taileagle.php',

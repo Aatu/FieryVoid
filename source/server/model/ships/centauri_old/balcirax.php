@@ -5,7 +5,7 @@ class Balcirax extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 430;
-        $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Balcirax";
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balcirax Attack Destroyer";

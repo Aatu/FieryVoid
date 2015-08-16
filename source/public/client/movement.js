@@ -144,22 +144,22 @@ shipManager.movement = {
 				continue;
 	
 			if ((movement.value != accel && movement.heading == curheading) || (movement.value == accel && movement.heading != curheading)){
-                            // adjust the current turn delay if the new speed changes the turn delay
-                            var oldspeed = shipManager.movement.getSpeed(ship);
+                // adjust the current turn delay if the new speed changes the turn delay
+                var oldspeed = shipManager.movement.getSpeed(ship);
 
-                            ship.movement.splice(ship.movement.length -1, 1);
+                ship.movement.splice(ship.movement.length -1, 1);
 
-                            var speed = shipManager.movement.getSpeed(ship);
-        
+                var speed = shipManager.movement.getSpeed(ship);
+
 //                            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
-                            ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
-                            
-                            var shipwindow = $(".shipwindow_"+ship.id);
-                            shipWindowManager.cancelAssignThrust(shipwindow);
-                            shipManager.drawShip(ship);
-                            gamedata.shipStatusChanged(ship);
+                ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+                
+                var shipwindow = $(".shipwindow_"+ship.id);
+                shipWindowManager.cancelAssignThrust(shipwindow);
+                shipManager.drawShip(ship);
+                gamedata.shipStatusChanged(ship);
 
-                            return true;
+                return true;
 			}
 		}
 		
@@ -2083,47 +2083,96 @@ shipManager.movement = {
     },
     
     calculateCurrentTurndelay: function(ship){
+        if (ship.phpclass == "Paragon"){
+            var turndelay = Math.ceil(ship.movement[ship.movement.length-1].speed * ship.turndelaycost);
+            console.log("turndelay");
+            console.log(turndelay);
+
+            var last = null;
+            
+            if(gamedata.turn == 1){
+                turndelay = 0;
+            }
+            
+            for (var i in ship.movement){
+                var movement = ship.movement[i];
+                if (movement.turn < gamedata.turn-2)
+                    continue;
+                    
+                if (movement.commit == false)
+                    continue;
+                    
+                if ((movement.type == "move" 
+                    || movement.type == "slipright" 
+                    || movement.type == "slipleft" ) && turndelay > 0)
+                    turndelay--;
+                    
+                
+                    
+                if (shipManager.movement.isTurn(movement)){
+                    if (!ship.agile || !last || !shipManager.movement.isTurn(last)){
+                        // calculate the turndelay using the NEW speed, iso of the one
+                        // in this old movement.
+                        turndelay = 
+                            shipManager.movement.calculateTurndelay(ship,
+                                movement, ship.movement[ship.movement.length-1].speed);
+                    }
+                }
+                last = movement;
+                
+            }
+            
+            if (turndelay < 0)
+                turndelay = 0;
+            console.log(turndelay);
+            return turndelay;
+        }
         // Get the current speed, whether it's commited or not. (If it's cancelled,
         // We recalculate the turndelay anyway.
-        var turndelay = Math.ceil(ship.movement[ship.movement.length-1].speed * ship.turndelaycost);
-        var last = null;
-        
-        if(gamedata.turn == 1){
-            turndelay = 0;
-        }
-        
-        for (var i in ship.movement){
-            var movement = ship.movement[i];
-            if (movement.turn < gamedata.turn-1)
-                continue;
-                
-            if (movement.commit == false)
-                continue;
-                
-            if ((movement.type == "move" 
-                || movement.type == "slipright" 
-                || movement.type == "slipleft" ) && turndelay > 0)
-                turndelay--;
-                
+
+        else {
+            var turndelay = Math.ceil(ship.movement[ship.movement.length-1].speed * ship.turndelaycost);
+            var last = null;
             
-                
-            if (shipManager.movement.isTurn(movement)){
-                if (!ship.agile || !last || !shipManager.movement.isTurn(last)){
-                    // calculate the turndelay using the NEW speed, iso of the one
-                    // in this old movement.
-                    turndelay = 
-                        shipManager.movement.calculateTurndelay(ship,
-                            movement, ship.movement[ship.movement.length-1].speed);
-                }
+            if(gamedata.turn == 1){
+                turndelay = 0;
             }
-            last = movement;
             
+            for (var i in ship.movement){
+                var movement = ship.movement[i];
+                if (movement.turn < gamedata.turn-1)
+                    continue;
+                    
+                if (movement.commit == false)
+                    continue;
+                    
+                if ((movement.type == "move" 
+                    || movement.type == "slipright" 
+                    || movement.type == "slipleft" ) && turndelay > 0)
+                    turndelay--;
+                    
+                
+                    
+                if (shipManager.movement.isTurn(movement)){
+                    if (!ship.agile || !last || !shipManager.movement.isTurn(last)){
+                        // calculate the turndelay using the NEW speed, iso of the one
+                        // in this old movement.
+                        turndelay = 
+                            shipManager.movement.calculateTurndelay(ship,
+                                movement, ship.movement[ship.movement.length-1].speed);
+                    }
+                }
+                last = movement;
+                
+            }
+            
+            if (turndelay < 0)
+                turndelay = 0;
+            
+            return turndelay;
+
         }
-        
-        if (turndelay < 0)
-            turndelay = 0;
-        
-        return turndelay;
+
         
         
     },

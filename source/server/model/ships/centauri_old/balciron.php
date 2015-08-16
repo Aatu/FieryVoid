@@ -5,7 +5,7 @@ class Balciron extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 450;
-        $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Balciron";
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balciron Destroyer";
@@ -31,17 +31,20 @@ class Balciron extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));       
-        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 3, 300, 60));
-        $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
+        $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 
         $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));        
-        $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 300));
-        $this->addAftSystem(new LightPlasma(2, 4, 2, 60, 240));
+        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 300));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 240));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

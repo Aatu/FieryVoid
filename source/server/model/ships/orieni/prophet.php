@@ -23,7 +23,6 @@ class Prophet extends BaseShip{
         $this->pivotcost = 3;
 
         $this->limited = 33;
-
         
         $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
@@ -63,6 +62,7 @@ class Prophet extends BaseShip{
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new HeavyGausscannon(4, 10, 4, 180, 360));
 
 
         $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
@@ -73,6 +73,7 @@ class Prophet extends BaseShip{
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new HeavyGausscannon(4, 10, 4, 0, 180));
 
 
 		//structures

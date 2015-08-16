@@ -102,9 +102,9 @@ flightWindowManager = {
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
 		
                 if(gamedata.turn != 0){
-                    shipwindow.find(".topbar .value.name").html(ship.name);
-                    shipwindow.find(".topbar .value.shipclass").html("");
                     shipwindow.find(".topbar .valueheader.shipclass").html("");
+                    shipwindow.find(".topbar .value.name").html(ship.name);
+                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
                 }
                 else{
                     shipwindow.find(".topbar .value.name").html("");

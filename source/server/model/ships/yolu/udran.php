@@ -27,7 +27,7 @@ class Udran extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 24, 0, 1));
         $this->addPrimarySystem(new Scanner(6, 28, 4, 13));
         $this->addPrimarySystem(new Engine(7, 25, 0, 12, 6));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 6));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new DestabilizerBeam(4, 8, 6, 300, 60));

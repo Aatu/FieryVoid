@@ -4,11 +4,11 @@ class Dragon extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 210;
-	$this->faction = "Drazi";
+    	$this->pointCost = 210;
+        $this->faction = "Drazi (WotCR)";
         $this->phpclass = "Dragon";
         $this->shipClass = "Dragon Light Fighters";
-	$this->imagePath = "img/ships/dragon.png";
+    	$this->imagePath = "img/ships/dragon.png";
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;

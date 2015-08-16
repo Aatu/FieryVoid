@@ -5,7 +5,7 @@ class Jenas extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 275;
-    $this->faction = "The Lion";
+        $this->faction = "Centauri (WotCR)";
     $this->phpclass = "Jenas";
     $this->imagePath = "img/ships/jenas.png";
     $this->shipClass = "Jenas Attack Frigate";
