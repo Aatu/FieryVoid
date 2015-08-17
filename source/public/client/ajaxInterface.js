@@ -15,6 +15,21 @@ window.ajaxInterface = {
             error : ajaxInterface.errorAjax
         });
 	},
+
+    testAjax: function(){
+        $.ajax({
+            type : 'GET',
+            url : 'test.php',
+            dataType : 'json',
+            data: {string:"test"},
+            success : ajaxInterface.alert,
+            error : ajaxInterface.errorAjax
+        });
+    },
+
+    alert: function(){
+        alert("ding");
+    },
 	
     submitGamedata: function(){
 	

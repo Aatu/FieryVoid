@@ -59,9 +59,11 @@
                         </div>
                     </td>
                     <td>
-                        <a class="link" href="creategame.php">TUTORIAL</a>
+                    <!---    <a class="link" href="creategame.php">TUTORIAL</a>
                         <a class="link" href="creategame.php">AUTOMATCH</a>
-                        <a class="link" href="creategame.php">CREATE GAME</a>
+                    
+                        <a class="link" id="test" onclick="ajaxInterface.testAjax()">test function</a>
+                    -->    <a class="link" href="creategame.php">CREATE GAME</a>
                     </td>
                 </tr>
             </table>

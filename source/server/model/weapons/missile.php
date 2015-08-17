@@ -65,6 +65,14 @@ class MissileLauncher extends Weapon{
     public function testAmmoExplosion($ship, $gamedata){
         $toDO;
 
+        foreach ($this->damage as $entry){
+            if ($entry->fireorderid == -1){
+                debug::log("chain hit");
+                return;
+            }
+        }
+
+
         $roll = Dice::d(20);
         if ($roll >= 19){
             if ($this instanceof BombRack){
@@ -76,8 +84,8 @@ class MissileLauncher extends Weapon{
 
             debug::log("ammo exp for: ".$toDO." on".$this->displayName." id: ".$this->id);
 
-            $this->ammoExplosion($ship, $gamedata, $toDO);
-            $crit = $this->addCritical($ship->id, "AmmoExplosion", $gamedata);
+            $this->ammoExplosion($ship, $gamedata, $toDO);            
+            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
         }
     }
 
@@ -222,12 +230,11 @@ class MissileLauncher extends Weapon{
     }
 
     
-    public function addCritical($shipid, $phpclass, $gamedata){
+    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
 
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
-        return $crit;
     }
 }       
 

@@ -138,7 +138,7 @@ window.combatLog = {
                 if (totaldam > 0){
           //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';   
             
-                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ armour reduction: ' + armour + ').</li>';
+                    html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
                     if (damagehtml.length > 1){
                         html += '<li>' + damagehtml + '</li>';
                     }
@@ -154,13 +154,61 @@ window.combatLog = {
     },
             
         
-    logAmmoExplosion: function(ship){
+    logAmmoExplosion: function(ship, system){
+
+        var dmg;
+
+        var damages = "Systems damaged: ";
+        var destroyed = "Systems destroyed: ";
+
+        if (system.displayName == "Bomb Rack"){
+            dmg = 35;
+        } else if (system.displayName == "Reload Rack"){
+            dmg = 120;
+        } else dmg = 70;
+
+
+        for (var i = 0; i < ship.systems.length; i++){
+            var sys = ship.systems[i];
+            for (var j = 0; j < sys.damage.length; j++){
+                var entry = sys.damage[j];
+                if (entry.fireorderid == -1 && entry.turn == gamedata.turn){
+                    if (entry.destroyed == 1){
+                        destroyed += '<span class="damage">' + shipManager.systems.getDisplayName(sys) + '</span>';
+                        destroyed += ', ';
+                        break;
+                    }
+                    else {
+                        damages += shipManager.systems.getDisplayName(sys);
+                        damages += ', ';
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
 
         var html = '<div class="logentry">';
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
-            html +=  ' suffered from a critical hit on its missile ordnance.';
-            html +=  ' <br>';
+            html +=  ' suffered ' + dmg + ' damage due to exploding ammunition from its ' + system.displayName + '.';
+
+            if (damages.length >15){
+                var length = damages.length;
+                damages = damages.substring(0, length-2);
+                html +=  '<li>' + damages + '</li>';
+            }
+            if (destroyed.length >15){
+                var length = destroyed.length;
+                destroyed = destroyed.substring(0, length-2);
+                html +=  '<li>' + destroyed + '</li>';
+            }
+
+
             html +='</span></div></ul>';
+
+
         $(html).prependTo("#log");
     },
     

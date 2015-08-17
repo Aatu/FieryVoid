@@ -213,7 +213,7 @@ class OSATThrusterCrit extends Critical{
 
 class AmmoExplosion extends Critical{
 
-    public $description = "Stored Ammunition did explode.";
+    public $description = "Stored ammunition did explode.";
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);

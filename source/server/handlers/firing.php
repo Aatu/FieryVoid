@@ -71,9 +71,13 @@
                    $damage = ($firingweapon->getAvgDamage() - $armour) * (ceil($fire->shots / 2));
                 }
 
+                if ($firingweapon instanceof SolarCannon){
+                    $damage = $damage * 2;
+                }
+
 
                 //disable interception of low-threat weapons with medium reload weapons
-                if ($damage < 15){
+                if ($damage < 14){
                     if ($this->weapon->loadingtime > 1){
                         continue;
                     }
@@ -108,9 +112,6 @@
                 $interceptor = $target->getSystemById($this->weapon->id);
 
                 for ($i = 0; $i<$this->weapon->guns;$i++){
-                    if ($this->weapon->displayName == "Point Pulsar"){
-            //            debug::log("shots: ".$this->weapon->defaultsShots);
-                    }    
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
 //                    var_dump($interceptFire);

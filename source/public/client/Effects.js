@@ -349,7 +349,7 @@ window.effects = {
 
     displayAmmoExplosion: function(ship, system, call){
     
-        combatLog.logAmmoExplosion(ship);
+        combatLog.logAmmoExplosion(ship, system);
         effects.animationcallback = call;
 
         var pos = shipManager.getShipPositionInWindowCo(ship);
