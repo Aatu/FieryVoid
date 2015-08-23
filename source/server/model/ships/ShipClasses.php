@@ -613,10 +613,10 @@
                 if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
                     if ($weapon instanceof ImprovedBlastLaser){
                         debug::log("ding");
-                        $loc = array();
-                        $loc[] = -1;
-                        $loc[] = $location;
-                        return $loc;
+                        $location = 0;
+                    }
+                    else {
+                        $location = 0;
                     }
                 }   
                     

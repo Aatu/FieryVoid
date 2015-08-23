@@ -164,8 +164,8 @@
         public $displayName = "Gauss Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 20;
-        public $animationWidth = 3;
+        public $projectilespeed = 28;
+        public $animationWidth = 4;
         public $animationExplosionScale = 0.20;
         public $trailLength = 8;
         
@@ -191,10 +191,10 @@
         public $displayName = "Heavy Gauss Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
-        public $projectilespeed = 16;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.25;
-        public $trailLength = 10;
+        public $projectilespeed = 25;
+        public $animationWidth = 5;
+        public $animationExplosionScale = 0.30;
+        public $trailLength = 12;
         
         public $loadingtime = 3;
         
@@ -213,16 +213,16 @@
         }
 
 
-        class RapidGatling extends Matter
-    {
+        class RapidGatling extends Matter{
+
         public $name = "rapidGatling";
         public $displayName = "Rapid Gatling Railgun";
         public $animation = "trail";
         public $trailColor = array(225, 255, 150);
         public $animationColor = array(225, 225, 150);
-        public $projectilespeed = 2;
+        public $projectilespeed = 16;
         public $animationWidth = 2;
-        public $trailLength = 14;
+        public $trailLength = 40;
         public $animationExplosionScale = 0.15;
         public $guns = 2;
         public $intercept = 1;
@@ -230,7 +230,7 @@
         public $ballisticIntercept = true;
         
         public $rangePenalty = 2;
-        public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
+        public $fireControl = array(4, 2, 8); // fighters, <mediums, <capitals 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {

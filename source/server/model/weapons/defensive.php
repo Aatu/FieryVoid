@@ -217,6 +217,8 @@
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $this->data["Weapon type"] = "Electromagnetic";
+            $this->data["Damage type"] = "Intercept / Dropout";
         }
         
         public function getDamage($fireOrder){        return 0;   }
@@ -224,7 +226,7 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
 
-        protected function adjustIntercept($turn){
+        protected function getBoostLevel($turn){
             $boostLevel = 0;
             foreach ($this->power as $i){
                     if ($i->turn != $turn)
@@ -234,10 +236,14 @@
                             $boostLevel += $i->amount;
                     }
             }
-
-            $this->charges += $boostLevel;
-
+            return $boostLevel;
         }
+
+        public function getInterceptRating($turn){
+            return 3 + 3 * ($this->getBoostLevel($turn));            
+        }
+
+
     }
 
 

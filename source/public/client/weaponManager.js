@@ -343,7 +343,16 @@ window.weaponManager = {
 
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
 				if(weaponManager.checkIsInRange(selectedShip, ship, weapon)){
-					$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
+
+					var value = weapon.firingMode;
+						value = weapon.firingModes[value];
+
+					if (value != "Standard"){
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
+					}
+					else {
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
+					}
 				}
 				else{
 					$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);

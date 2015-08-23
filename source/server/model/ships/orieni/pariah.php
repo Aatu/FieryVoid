@@ -57,7 +57,7 @@ class Pariah extends BaseShip{
 
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
         $this->addRightSystem(new Hangar(3, 14, 6));     
-        $this->addRightSystem(new HeavyLaserLance(3, 10, 4, 0, 120));
+        $this->addRightSystem(new HeavyGaussCannon(3, 10, 4, 0, 120));
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));

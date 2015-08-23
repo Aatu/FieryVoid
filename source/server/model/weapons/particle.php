@@ -884,7 +884,7 @@
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.12;
-        public $projectilespeed = 10;
+        public $projectilespeed = 12;
         public $animationWidth = 3;
         public $trailLength = 8;
 
@@ -911,9 +911,9 @@
         public $name = "particleProjector";
         public $displayName = "Particle Projector";
         public $animation = "beam";
-        public $animationColor = array(255, 250, 230);
+        public $animationColor = array(205, 200, 200);
         public $animationExplosionScale = 0.25;
-        public $projectilespeed = 14;
+        public $projectilespeed = 15;
         public $animationWidth = 4;
         public $trailLength = 20;
 

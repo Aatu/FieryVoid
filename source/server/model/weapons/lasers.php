@@ -424,13 +424,12 @@
     }
 
 
-
     class TacLaser extends Laser{
 
         public $name = "tacLaser";
         public $displayName = "Tactical Laser";
         public $animation = "laser";
-        public $animationColor = array(205, 5, 85);
+        public $animationColor = array(220, 60, 120);
         public $animationWidth = 3;
         public $animationWidth2 = 0.2;
 
@@ -457,9 +456,9 @@
         public $name = "improvedBlastLaser";
         public $displayName = "Improved Blast Laser";
         public $animation = "laser";
-        public $animationColor = array(205, 5, 85);
-        public $animationWidth = 3;
-        public $animationWidth2 = 0.2;
+        public $animationColor = array(130, 25, 200);
+        public $animationWidth = 5;
+        public $animationWidth2 = 0.5;
         public $uninterceptable = true;
 
         public $loadingtime = 3;
