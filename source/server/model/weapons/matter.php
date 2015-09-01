@@ -185,7 +185,7 @@
     }
 
 
-        class HeavyGaussCannon extends GaussCannon{
+    class HeavyGaussCannon extends GaussCannon{
 
         public $name = "heavyGaussCannon";
         public $displayName = "Heavy Gauss Cannon";
@@ -213,7 +213,7 @@
         }
 
 
-        class RapidGatling extends Matter{
+    class RapidGatling extends Matter{
 
         public $name = "rapidGatling";
         public $displayName = "Rapid Gatling Railgun";
@@ -230,7 +230,7 @@
         public $ballisticIntercept = true;
         
         public $rangePenalty = 2;
-        public $fireControl = array(4, 2, 8); // fighters, <mediums, <capitals 
+        public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
