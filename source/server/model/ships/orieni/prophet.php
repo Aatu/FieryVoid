@@ -52,7 +52,7 @@ class Prophet extends BaseShip{
         $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-
+        $this->addAftSystem(new CargoBay(2, 25));
 		
         $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
         $this->addLeftSystem(new CargoBay(2, 25));

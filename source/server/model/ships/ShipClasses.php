@@ -314,13 +314,6 @@
             return null;
         }
 
-        public function getStructureByIndex($index){
-            foreach ($this->systems as $system){
-                if ($system->displayName == "Structure" && $system->location == $index){
-                    return $system;
-                }
-            }
-        }
         
         public function getHitChanceMod($shooter, $pos, $turn){
             $affectingSystems = array();
@@ -611,13 +604,7 @@
 
             if ($location != 0){
                 if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
-                    if ($weapon instanceof ImprovedBlastLaser){
-                        debug::log("ding");
-                        $location = 0;
-                    }
-                    else {
-                        $location = 0;
-                    }
+                    $location = 0;
                 }   
                     
                 $structure = $this->getStructureSystem($location);
@@ -708,10 +695,6 @@
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
 
-            if (is_array($location)){
-                $system = $this->getStructureByIndex($system[1]);
-                return $system;
-            }
             
             $systems = array();
             $totalStructure = 0;
@@ -1051,15 +1034,8 @@
                 
             return $location;
         }
-
-        public function getStructureByIndex($index){
-            foreach ($this->systems as $system){
-                if ($system->displayName == "Structure"){
-                    return $system;
-                }
-            }
-        }
         
+
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
 
             // Turn counter needed to keep track of when a section was destroyed.

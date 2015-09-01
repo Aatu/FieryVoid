@@ -10,6 +10,12 @@ spl_autoload_register(
 
 
 
+                // drazi raiders
+                'raven' => '/server/model/ships/drazi_raiders/raven.php',
+                'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
+                'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
+
+
                 // early drazi adds
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
@@ -485,7 +491,6 @@ spl_autoload_register(
                 'rakartacannon' => '/server/model/ships/brakiri/rakartaCannon.php',
                 'rakartalaser' => '/server/model/ships/brakiri/rakartaLaser.php',
                 'raking' => '/server/model/weapons/lasers.php',
-                'raven' => '/server/model/ships/drazi/raven.php',
                 'razik' => '/server/model/ships/centauri/razik.php',
                 'razarik' => '/server/model/ships/centauri/razarik.php',
                 'reactor' => '/server/model/systems/baseSystems.php',
@@ -570,7 +575,6 @@ spl_autoload_register(
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 'thosalsi' => '/server/model/ships/balosian/thosalsi.php',
-                'throkan' => '/server/model/ships/drazi/throkan.php',
                 'thruster' => '/server/model/systems/baseSystems.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
@@ -604,7 +608,6 @@ spl_autoload_register(
                 'vasachi' => '/server/model/ships/centauri/vasachi.php',
                 'vorchan' => '/server/model/ships/centauri/vorchan.php',
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
-                'vulture' => '/server/model/ships/drazi/vulture.php',
                 'warbird' => '/server/model/ships/drazi/warbird.php',
                 'wareagle' => '/server/model/ships/drazi/wareagle.php',
                 'warlock' => '/server/model/ships/EA/warlock.php',
@@ -622,4 +625,9 @@ spl_autoload_register(
         }
     }
 );
+
+
+
+
+
 // @codeCoverageIgnoreEnd

@@ -42,10 +42,8 @@ class StormFront extends MediumShip{
         $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
         $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
-        $this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
-        $this->addAftSystem(new LightLaser(1, 4, 3, 0, 180));        
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240)); 
         
        
         $this->addPrimarySystem(new Structure(4, 46));

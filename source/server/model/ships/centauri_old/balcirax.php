@@ -28,7 +28,7 @@ class Balcirax extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
+        $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));       

@@ -341,11 +341,17 @@
 
         protected function getSystemArmour($system, $gamedata, $fireOrder){
             $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
-            if (is_numeric($armor))
-                return round($armor / 2);
-            
-            return 0;
+
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
         }
+        
     
         public function setSystemDataWindow($turn){
 
@@ -395,18 +401,23 @@
 
             $this->data["Weapon type"] = "Plasma";
             $this->data["Damage type"] = "Standard";
-            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
             
             parent::setSystemDataWindow($turn);
+            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
         }
-        
+
 
         protected function getSystemArmour($system, $gamedata, $fireOrder){
             $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
-            if (is_numeric($armor))
-                return round($armor / 2);
-            
-            return 0;
+
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
         }
         
         
