@@ -11,7 +11,6 @@ class Ventrus extends BaseShip{
         $this->shipClass = "Ventrus Light Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
-        $this->limited = 33;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -23,14 +22,12 @@ class Ventrus extends BaseShip{
         $this->pivotcost = 3;
 
         $this->occurence = "uncommon";
-		
-        
-         
-        $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
-        $this->addPrimarySystem(new CnC(7, 18, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 20, 4, 10));
-        $this->addPrimarySystem(new Engine(6, 20, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(6, 14));
+		       
+        $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
+        $this->addPrimarySystem(new CnC(6, 16, 0, 0));
+        $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
+        $this->addPrimarySystem(new Engine(5, 20, 0, 10, 2));
+		$this->addPrimarySystem(new Hangar(4, 8));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));        
 		
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
@@ -39,8 +36,8 @@ class Ventrus extends BaseShip{
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 240, 60));
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 120));
 
-        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 15, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 300));
@@ -52,10 +49,7 @@ class Ventrus extends BaseShip{
 		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         $this->addRightSystem(new TacLaser(3, 5, 4, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0 , 180));
-		
-
-        
-        
+		        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));
         $this->addAftSystem(new Structure( 4, 44));
