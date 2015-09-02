@@ -39,9 +39,10 @@
         public $slotid;
 
         public $movement = array();
-        public $adaptiveArmourLimit = 0; //write display to ignore adaptive armour if this value is zero -TKS
-        public $adaptiveArmourTypeLimit = 0;
-        public $adaptiveArmourValues = array(
+        public $aALimit = 0; //write display to ignore adaptive armour if this value is zero -TKS
+        public $aATypeLimit = 0; //The limit of assignment to each damageClass
+        public $aAInitialAssignmentLimit = 0; //How many aA points can be assigned during Deployment
+        public $aAAssignments = array(
         		"particle" => 0,
         		"laser" => 0,
         		"plasma" => 0,
@@ -53,7 +54,18 @@
         		"ionic" => 0,
         		"ballistic" => 0
         ); //array of the current adaptive armour setting for the ship. -TKS
-        
+        public $aAReleased = array(
+        		"particle" => 0,
+        		"laser" => 0,
+        		"plasma" => 0,
+        		"molecular" => 0,
+        		"electromagnetic" => 0,
+        		"matter" => 0,
+        		"gravitic" => 0,
+        		"antimatter" => 0,
+        		"ionic" => 0,
+        		"ballistic" => 0
+        ); //Number of aA points released either through initial assignement or damage.
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
             $this->userid = (int)$userid;
@@ -62,7 +74,7 @@
 
         }
         public function getAdaptiveArmour($damageClass){ //get current adaptive armour value based upon passed damage class
-        	return $this->adaptiveArmourValues($damageClass);
+        	return $this->aAAssignments($damageClass);
         }
         public function getInitiativebonus($gamedata){
             if($this->faction == "Centauri"){
