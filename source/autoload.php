@@ -89,6 +89,10 @@ spl_autoload_register(
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'paragon' => '/server/model/ships/orieni/paragon.php',
 
+                'vengeful' => '/server/model/ships/orieni/vengeful.php',
+
+
+
              //   'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
@@ -132,6 +136,21 @@ spl_autoload_register(
                 'phalan' => '/server/model/ships/centauri_old/phalan.php',
 
                 'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
+
+                'equata' => '/server/model/ships/centauri_old/equata.php',
+                'strela' => '/server/model/ships/centauri_old/strela.php',
+
+                'falassa' => '/server/model/ships/centauri_old/falassa.php',
+                'falenna' => '/server/model/ships/centauri_old/falenna.php',
+
+                'optine' => '/server/model/ships/centauri_old/optine.php',
+
+
+                'valtor' => '/server/model/ships/centauri_old/valtor.php',
+                'varilon' => '/server/model/ships/centauri_old/varilon.php',
+
+
+
 
 
                 //WotC Centauri systems

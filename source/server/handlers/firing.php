@@ -38,12 +38,12 @@
 
                 }
                 else if ($target->shipSizeClass == 1){
-                    $structure = $target->getStructureByIndex(0);
+                    $structure = $target->getStructureSystem(0);
                     $armour = $structure->armour;
                 //    debug::log("MCV armour: ".$armour);
                 }
                 else {
-                    $structure = $target->getStructureByIndex($hitLocation);
+                    $structure = $target->getStructureSystem($hitLocation);
                     $armour = $structure->armour;
                  //   debug::log("non-flight armour: ".$armour);
                 }

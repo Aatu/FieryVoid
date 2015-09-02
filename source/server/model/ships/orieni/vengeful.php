@@ -1,12 +1,12 @@
 <?php
-class Obedient extends MediumShip{
+class Vengeful extends MediumShip{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
 		$this->pointCost = 415;
 		$this->faction = "Orieni";
-		$this->phpclass = "vengeful";
+		$this->phpclass = "Vengeful";
 		$this->imagePath = "img/ships/vengeful.png"; //image still needs to be uploaded
 		$this->shipClass = "Vengeful Laser Frigate";
 		$this->agile = true;
