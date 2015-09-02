@@ -630,8 +630,8 @@ gamedata = {
             var span = document.createElement("span");
                 span.style.textAlign = "center";
                 span.style.fontSize = "12px";
-                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px'>" + ships[i].name;
-                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px'>" + ships[i].shipClass;
+                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
+                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
 
             if (gamedata.activeship == ships[i].id){
                 td.className = "iniActive";
