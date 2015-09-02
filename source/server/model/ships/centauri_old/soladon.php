@@ -34,10 +34,9 @@ class Soladon extends BaseShip{
         $this->addFrontSystem(new ParticleProjector(3, 6, 1, 300, 120));
         $this->addFrontSystem(new ParticleProjector(3, 6, 1, 300, 60));
 		
-        $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
-        $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
+        $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addAftSystem(new ParticleProjector(3, 6, 1, 60, 240));
         $this->addAftSystem(new ParticleProjector(3, 6, 1, 90, 270));
         $this->addAftSystem(new ParticleProjector(3, 6, 1, 120, 300));
@@ -50,9 +49,7 @@ class Soladon extends BaseShip{
 		$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
         $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
         $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 180));
-        $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 120));
-	
-        
+        $this->addRightSystem(new ParticleProjector(3, 6, 1, 0, 120));        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 38));
