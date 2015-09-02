@@ -61,8 +61,8 @@
             $this->slot = $slot;
 
         }
-        public function getAdaptiveArmour($gamedata){ //get current adaptive armour value based upon passed damage class
-        	return $this->adaptiveArmourValues($gamedata);
+        public function getAdaptiveArmour($damageClass){ //get current adaptive armour value based upon passed damage class
+        	return $this->adaptiveArmourValues($damageClass);
         }
         
         public function getInitiativebonus($gamedata){

@@ -863,7 +863,7 @@ class Weapon extends ShipSystem{
             $armor = $system->getArmour($target, $shooter);
         }
 
-		$armor = armor + $target->getAdaptiveArmour($this->damageClass);
+		$armor = $armor + $target->getAdaptiveArmour($this->damageClass);
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
         $armor -= $mod;
         if ($armor<0)
