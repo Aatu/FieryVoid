@@ -39,6 +39,20 @@
         public $slotid;
 
         public $movement = array();
+        public $adaptiveArmourLimit = 0; //write display to ignore adaptive armour if this value is zero -TKS
+        public $adaptiveArmourTypeLimit = 0;
+        public $adaptiveArmourValues = array(
+        		"particle" => 0,
+        		"laser" => 0,
+        		"plasma" => 0,
+        		"molecular" => 0,
+        		"electromagnetic" => 0,
+        		"matter" => 0,
+        		"gravitic" => 0,
+        		"antimatter" => 0,
+        		"ionic" => 0,
+        		"ballistic" => 0
+        ); //array of the current adaptive armour setting for the ship. -TKS
         
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -46,6 +60,9 @@
             $this->name = $name;
             $this->slot = $slot;
 
+        }
+        public function getAdaptiveArmour($damageClass){ //get current adaptive armour value based upon passed damage class
+        	return $this->adaptiveArmourValues($damageClass);
         }
         
         public function getInitiativebonus($gamedata){

@@ -68,8 +68,9 @@ class Weapon extends ShipSystem{
     public $firingModes = array( 1 => "Standard");
 
     public $flashDamage = false;
-    public $damageType = "standard";
-    public $minDamage, $maxDamage;
+    public $damageType = "standard"; //How dmg is done, Raking, STD etc. -TKS
+   	public $damageClass = "particle"; //Type of damage done by weapon for Adaptive armour - TKS
+   	public $minDamage, $maxDamage;
 
     public $exclusive = false;
 
@@ -862,7 +863,7 @@ class Weapon extends ShipSystem{
             $armor = $system->getArmour($target, $shooter);
         }
 
-
+		$armor = $armor + $target->getAdaptiveArmour($this->damageClass);
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
         $armor -= $mod;
         if ($armor<0)
