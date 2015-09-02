@@ -24,10 +24,10 @@ class Leevan extends HeavyCombatVessel{
         
          
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 14, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 15, 3, 7));
+        $this->addPrimarySystem(new CnC(6, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(5, 15, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 9, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 5));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));        
         
@@ -41,9 +41,9 @@ class Leevan extends HeavyCombatVessel{
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
         
-        $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
         $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 240, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 0, 240));
         
