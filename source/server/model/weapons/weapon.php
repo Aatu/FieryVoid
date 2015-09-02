@@ -907,9 +907,8 @@ class Weapon extends ShipSystem{
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();
         $modifiedDamage = $damage;
-
-
-
+        $target = $gamedata->getShipById($fireOrder->targetid);
+        $target->releaseAdaptiveArmour($damageClass);
         //print("damage: $damage armour: $armour\n");
 
         $destroyed = false;

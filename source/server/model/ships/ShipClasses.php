@@ -76,6 +76,9 @@
         public function getAdaptiveArmour($damageClass){ //get current adaptive armour value based upon passed damage class
         	return $this->aAAssignments($damageClass);
         }
+        public function releaseAdaptiveArmour($damageClass){
+        	$aAReleased[$damageClass] = $aAReleased[$damageClass]+1;
+        }
         public function getInitiativebonus($gamedata){
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
