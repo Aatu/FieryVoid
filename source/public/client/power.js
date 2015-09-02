@@ -299,6 +299,7 @@ shipManager.power = {
 	},
 	
 	setOnline: function(ship, system){
+		console.log("online");
             if(system.name == "graviticShield"){
                 if(ship.checkShieldGenerator()){
                     for(var i in ship.systems){
@@ -518,7 +519,51 @@ shipManager.power = {
 		
 	
 	},
-	
+
+	offlineAll: function(e){
+		var array = [];
+
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(".system").has($(this));
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+
+
+		if (system.duoWeapon || system.dualWeapon){
+			return;
+		}
+		
+
+		for (var i = 0; i < ship.systems.length; i++){
+			if (system.displayName === ship.systems[i].displayName){
+				if (system.weapon){
+					array.push(ship.systems[i]);
+				}
+			}
+		}
+
+		for (var i = 0; i < array.length; i++){
+			if (gamedata.gamephase != 1)
+				continue;
+			
+			if (shipManager.systems.isDestroyed(ship, array[i]))
+				continue;
+			
+			if (ship.userid != gamedata.thisplayer)
+				continue;
+			
+			if (shipManager.power.isOffline(ship, array[i]))
+				continue;
+		
+            array[i].power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+
+			shipManager.power.stopOverloading(ship, array[i]);
+			shipWindowManager.setDataForSystem(ship, array[i]);
+			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		}
+	},
+
 	onOfflineClicked: function(e){
 		e.stopPropagation();
 		var shipwindow = $(".shipwindow").has($(this));
@@ -526,16 +571,16 @@ shipManager.power = {
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 		
-                if(system.duoWeapon){
-                    // create an iconMask at the top of the DOM for the system.
-                    var iconmask_element = document.createElement('div');
-                    iconmask_element.className = "iconmask";
-                    systemwindow.find(".icon").append(iconmask_element);
-                }
-                
-                if(system.parentId > 0){
-                    system = shipManager.systems.getSystem(ship, system.parentId);
-                }
+        if(system.duoWeapon){
+            // create an iconMask at the top of the DOM for the system.
+            var iconmask_element = document.createElement('div');
+            iconmask_element.className = "iconmask";
+            systemwindow.find(".icon").append(iconmask_element);
+        }
+        
+        if(system.parentId > 0){
+            system = shipManager.systems.getSystem(ship, system.parentId);
+        }
                 
 		if (gamedata.gamephase != 1)
 			return;
@@ -550,7 +595,7 @@ shipManager.power = {
 		if (shipManager.power.isOffline(ship, system))
 			return;
 		
-                system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+        system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
 		
 		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 			
@@ -559,14 +604,50 @@ shipManager.power = {
             return;
 		}
                 
-                if(system.name=="shieldGenerator"){
-                    system.onTurnOff(ship);
-                }
+        if(system.name=="shieldGenerator"){
+            system.onTurnOff(ship);
+        }
 		
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	},
+
+	onlineAll: function(e){
+		var array = [];
+
+		e.stopPropagation();
+		var shipwindow = $(".shipwindow").has($(this));
+		var systemwindow = $(".system").has($(this));
+		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+
+
+		if (system.duoWeapon || system.dualWeapon){
+			return;
+		}
+
+		for (var i = 0; i < ship.systems.length; i++){
+			if (system.displayName === ship.systems[i].displayName){
+				if (system.weapon){
+					array.push(ship.systems[i]);
+				}
+			}
+		}
+
+		for (var i = 0; i < array.length; i++){
+
+			if (shipManager.systems.isDestroyed(ship, array[i])){
+				continue;
+			}
+			else if (shipManager.power.isOffline(ship, array[i])){
+				shipManager.power.setOnline(ship, array[i]);
+				shipWindowManager.setDataForSystem(ship, array[i]);
+				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+			}
+		}
+	},
+
 	
 	onOnlineClicked: function(e){
 		e.stopPropagation();
@@ -575,14 +656,14 @@ shipManager.power = {
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
-                if(system.duoWeapon){
-                    // remove the iconmask again.
-                    systemwindow.find(".iconmask").remove();
-                }
-                
-                if(system.parentId > 0){
-                    system = shipManager.systems.getSystem(ship, system.parentId);
-                }
+        if(system.duoWeapon){
+            // remove the iconmask again.
+            systemwindow.find(".iconmask").remove();
+        }
+        
+        if(system.parentId > 0){
+            system = shipManager.systems.getSystem(ship, system.parentId);
+        }
                 
 		if (gamedata.gamephase != 1)
 			return;
@@ -599,28 +680,28 @@ shipManager.power = {
 		shipManager.power.setOnline(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 
-                if(system.name=="shieldGenerator")
-                {
-                    system.onTurnOn(ship);
-                }
+        if(system.name=="shieldGenerator")
+        {
+            system.onTurnOn(ship);
+        }
 
-                if(system.dualWeapon || system.duoWeapon){
-                    for(var i in system.weapons){
-                        var weapon = system.weapons[i];
+        if(system.dualWeapon || system.duoWeapon){
+            for(var i in system.weapons){
+                var weapon = system.weapons[i];
+                
+                if(weapon.duoWeapon){
+                    for(var index in weapon.weapons){
+                        var subweapon = weapon.weapons[index];
                         
-                        if(weapon.duoWeapon){
-                            for(var index in weapon.weapons){
-                                var subweapon = weapon.weapons[index];
-                                
-                                shipManager.power.setOnline(ship, subweapon);
-                                shipWindowManager.setDataForSystem(ship, subweapon);
-                            }
-                        }else{
-                            shipManager.power.setOnline(ship, weapon);
-                            shipWindowManager.setDataForSystem(ship, weapon);
-                        }
+                        shipManager.power.setOnline(ship, subweapon);
+                        shipWindowManager.setDataForSystem(ship, subweapon);
                     }
+                }else{
+                    shipManager.power.setOnline(ship, weapon);
+                    shipWindowManager.setDataForSystem(ship, weapon);
                 }
+            }
+        }
                 
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 	},

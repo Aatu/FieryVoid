@@ -1,7 +1,10 @@
 jQuery(function(){
-   //   $(".iconmask").bind("contextmenu", function(e) {
-    //        e.preventDefault();
-     //   }); 
+	$(".system .on").bind("contextmenu", function(e) {
+		e.preventDefault();
+	}); 
+	$(".system .off").bind("contextmenu", function(e) {
+		e.preventDefault();
+	}); 
 });
 
 shipWindowManager = {
@@ -107,15 +110,16 @@ shipWindowManager = {
     
     bindEvents: function(shipwindow){
 
-
-
-
         $(".close", shipwindow).on("click", shipWindowManager.close);
         $(".system .plus", shipwindow).on("click", shipWindowManager.clickPlus);
         $(".system .minus", shipwindow).on("click", shipWindowManager.clickMinus);
 
         $(".system .off", shipwindow).on("click", shipManager.power.onOfflineClicked);
         $(".system .on", shipwindow).on("click", shipManager.power.onOnlineClicked);
+
+        $(".system .off", shipwindow).on("contextmenu", shipManager.power.offlineAll);
+        $(".system .on", shipwindow).on("contextmenu", shipManager.power.onlineAll);
+
         $(".system .overload", shipwindow).on("click", shipManager.power.onOverloadClicked);
         $(".system .stopoverload", shipwindow).on("click", shipManager.power.onStopOverloadClicked);
         $(".system .holdfire", shipwindow).on("click", window.weaponManager.onHoldfireClicked);
