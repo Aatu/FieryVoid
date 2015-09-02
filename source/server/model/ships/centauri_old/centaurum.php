@@ -39,10 +39,10 @@ class Centaurum extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
 		
-        $this->addAftSystem(new Thruster(5, 10, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-        $this->addAftSystem(new Thruster(5, 10, 0, 2, 2));
+        $this->addAftSystem(new Thruster(4, 10, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(6, 18, 4, 20));      
         $this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 90, 270));  
 		$this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
