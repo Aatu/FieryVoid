@@ -22,7 +22,7 @@ class Falenna extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;        
          
-        $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 14, 0, 0));
         $this->addPrimarySystem(new CnC(5, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 3, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
@@ -30,7 +30,7 @@ class Falenna extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 5, 1));
-        $this->addFrontSystem(new Hangar(4, 16, 6));
+        $this->addFrontSystem(new Hangar(4, 14, 6));
         $this->addFrontSystem(new Thruster(4, 10, 0, 5, 1));
         $this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
