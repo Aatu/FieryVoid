@@ -2064,5 +2064,28 @@ class DBManager {
             throw $e;
         }
     }
+    
+    public function submitAdaptiveArmour($gameid, $ships){
+    	$aa;
+    	$raa;
+    	try {
+    
+    		foreach ($ships as $ship){
+    			$aa = $ship->aAAssingments;
+    			$raa = $ship->aAReleased;
+    			$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, ".$ship->id.", ".$aa["particle"].", ".$aa["laser"].", 
+    					".$aa["plasma"].", ".$aa["molecular"].", ".$aa["electormagentic"].", ".$aa["matter"].", ".$aa["gravitic"].", 
+    					".$aa["antimatter"].", ".$aa["ionic"].", ".$aa["ballistic"].", 
+    					".$raa["particle"].", ".$raa["laser"].", ".$raa["plasma"].", ".$raa["molecular"].", ".$raa["electormagentic"].", 
+    					".$raa["matter"].", ".$raa["gravitic"].", ".$raa["antimatter"].", ".$raa["ionic"].", ".$raa["ballistic"].", 		
+    					)";
+    			$this->update($sql);
+    		}
+    	}
+    	catch(Exception $e) {
+    		throw $e;
+    	}
+    
+    }
 }
 ?>
