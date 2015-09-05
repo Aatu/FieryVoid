@@ -27,7 +27,7 @@ class Dragon extends FighterFlight{
         $toAdd = $new - $current;
 
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(1, 1, 1, 1);
+            $armour = array(2, 0, 0, 0);
             $fighter = new Fighter("dragon", $armour, 6, $this->id);
             $fighter->displayName = "Dragon Light Fighter";
             $fighter->imagePath = "img/ships/dragon.png";

@@ -45,20 +45,20 @@ class Centaurum extends BaseShip{
         $this->addAftSystem(new Thruster(4, 10, 0, 2, 2));
 		$this->addAftSystem(new JumpEngine(6, 18, 4, 20));      
         $this->addAftSystem(new LightParticleBeamShip(3, 2, 1, 90, 270));  
-		$this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
-        $this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
-        $this->addAftSystem(new AssaultLaser(3, 6, 4, 60, 180));
-        $this->addAftSystem(new AssaultLaser(3, 6, 4, 60, 180));
+		$this->addAftSystem(new AssaultLaser(4, 6, 4, 120, 240));
+        $this->addAftSystem(new AssaultLaser(4, 6, 4, 120, 240));
+        $this->addAftSystem(new AssaultLaser(4, 6, 4, 180, 300));
+        $this->addAftSystem(new AssaultLaser(4, 6, 4, 60, 180));
 
 		$this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-        $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 360));
+        $this->addLeftSystem(new AssaultLaser(4, 6, 4, 240, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
 
 		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
-        $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 120));
+        $this->addRightSystem(new AssaultLaser(4, 6, 4, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));
