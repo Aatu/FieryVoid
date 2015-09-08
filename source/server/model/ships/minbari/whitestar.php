@@ -23,6 +23,9 @@ class WhiteStar extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 65;
+        $this->aALimit = 3;
+        $this->aAInitialAssignmentLimit = 0;
+        $this->aATypeLimit =1;
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, -7));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
