@@ -25,14 +25,14 @@ class Kendari extends BaseShip{
         $this->addPrimarySystem(new Reactor(6, 14, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 4, 10));
-        $this->addPrimarySystem(new Engine(5, 18, 0, 8, 2));
+        $this->addPrimarySystem(new Engine(5, 18, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(4, 8));      
 		
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
 
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
         $this->addFrontSystem(new SentinelPD(1, 4, 1, 240, 60));
         $this->addFrontSystem(new SentinelPD(1, 4, 1, 300, 120));
 
