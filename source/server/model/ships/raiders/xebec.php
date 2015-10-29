@@ -22,8 +22,8 @@ class Xebec extends MediumShip{
     	$this->iniativebonus = 30;
          
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360));
-        $this->addPrimarySystem(new MediumLaser(3, 6, 3, 240, 60));
-        $this->addPrimarySystem(new MediumLaser(3, 6, 3, 300, 120));
+        $this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 60));
+        $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 120));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
 
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
