@@ -4,58 +4,52 @@ class Barque extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 360;
+        $this->pointCost = 525;
         $this->faction = "Raiders";
-        $this->phpclass = "Aspar";
+        $this->phpclass = "Barque";
         $this->imagePath = "img/ships/brigantine.png"; //need to change
-        $this->shipClass = "Aspar Corvette";
+        $this->shipClass = "Barque";
         $this->occurence = "common";
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>6);
         
-        $this->forwardDefense = 18;
-        $this->sideDefense = 18;
+        $this->forwardDefense = 13;
+        $this->sideDefense = 14;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
-        $this->accelcost = 4;
-        $this->rollcost = 999;
-        $this->pivotcost = 999;
-        $this->iniativebonus = 0;
+        $this->turncost = 0.5;
+        $this->turndelaycost = 0.5;
+        $this->accelcost = 2;
+        $this->rollcost = 2;
+        $this->pivotcost = 2;
+        $this->iniativebonus = 30;
         
-        $this->addPrimarySystem(new Reactor(3, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
-        $this->addPrimarySystem(new Engine(3, 9, 0, 6, 4));
-        $this->addPrimarySystem(new CargoBay(2, 28));
-        $this->addPrimarySystem(new CargoBay(2, 28));
-        $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 240, 0));
-		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 0, 120));
-		
-        $this->addFrontSystem(new Thruster(3, 6, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 6, 0, 3, 1));
-		$this->addFrontSystem(new PlasmaTorch(1, 4, 2, 240, 0));
-		$this->addFrontSystem(new PlasmaTorch(1, 4, 2, 0, 120));
-		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));		
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 240, 0));
-		$this->addFrontSystem(new MediumLaser(2, 6, 5, 0, 120));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 240, 0));
-		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 0, 120));
-		
-        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 300));
-        $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 180));
-        $this->addAftSystem(new LightLaser(2, 4, 3, 9, 270));
-        $this->addAftSystem(new Hangar(3, 3));
-        $this->addAftSystem(new Hangar(3, 3));
-        $this->addAftSystem(new Hangar(3, 3));
+        $this->addPrimarySystem(new Reactor(4, 21, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
+        $this->addPrimarySystem(new Engine(4, 16, 0, 9, 2));
+        $this->addPrimarySystem(new CargoBay(3, 6));
+        $this->addPrimarySystem(new CargoBay(3, 6));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
+		$this->addPrimarySystem(new Hangar(3, 8));
+        
+        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
+		$this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+		$this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
+		$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 120));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 270, 60));		
+        
+        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
+        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 180, 270));
+        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 60, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 32));
-        $this->addPrimarySystem(new Structure( 3, 36));
-        $this->addAftSystem(new Structure( 3, 32));
+        $this->addFrontSystem(new Structure( 4, 50));
+        $this->addPrimarySystem(new Structure( 4, 50));
+        $this->addAftSystem(new Structure( 4, 42));
         
         $this->hitChart = array(
         	0=> array(
