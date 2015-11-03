@@ -10,7 +10,7 @@ class Battlewagon extends BaseShip{
         $this->imagePath = "img/ships/battlewagon.png";
         $this->shipClass = "Battlewagon";
         $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>24);
+        $this->fighters = array("light"=>24);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

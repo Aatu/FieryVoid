@@ -26,8 +26,12 @@ class Aspar extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 4));
-        $this->addPrimarySystem(new CargoBay(2, 28));
-        $this->addPrimarySystem(new CargoBay(2, 28));
+        $tempAdd = new CargoBay(2, 28);
+        $tempAdd->name = "cargoBayA";
+        $this->addPrimarySystem($tempAdd);
+        $tempAdd2 = new CargoBay(2, 28);
+        $tempAdd2->name = "cargoBayB";
+		$this->addPrimarySystem($tempAdd2);       
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
 		$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 240, 0));
@@ -56,6 +60,75 @@ class Aspar extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 3, 32));
         $this->addPrimarySystem(new Structure( 3, 36));
         $this->addAftSystem(new Structure( 3, 32));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				1 => "structure",
+        				2 => "structure",
+        				3 => "structure",
+        				4 => "structure",
+        				5 => "structure",
+        				6 => "thruster",
+        				7 => "thruster",
+        				8 => "lightParticleBeam",
+        				9 => "cargoBayA",
+        				10 => "cargoBayA",
+        				11 => "cargoBayB",
+        				12 => "cargoBayB",
+        				13 => "scanner",
+        				14 => "scanner",
+        				15 => "engine",
+        				16 => "engine",
+        				17 => "reactor",
+        				18 => "reactor",
+        				19 => "CnC",
+        				20 => "CnC",
+        		),
+        		1=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "plasmaTorch",
+        				5 => "plasmaTorch",
+        				6 => "lightParticleBeam",
+        				7 => "lightLaser",
+        				8 => "mediumLaser",
+        				9 => "mediumLaser",
+        				10 => "mediumLaser",
+        				11 => "structure",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        		2=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "lightParticleBeam",
+        				6 => "lightParticleBeam",
+        				7 => "lightLaser",
+        				8 => "lightLaser",
+        				9 => "hanger",
+        				10 => "hanger",
+        				11 => "structure",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        );
     }
 }
 
