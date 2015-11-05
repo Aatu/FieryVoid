@@ -20,6 +20,7 @@ class Sloop extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
     	$this->iniativebonus = 60;
+    	$this->fighters = array("light"=>6);
          
         $this->addPrimarySystem(new Reactor(3, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -42,7 +43,76 @@ class Sloop extends MediumShip{
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	
-        $this->addPrimarySystem(new Structure( 4, 40));
+        $this->addPrimarySystem(new Structure( 4, 46));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "thruster",
+        				7 => "thruster",
+        				8 => "thruster",
+        				9 => "thruster",
+        				10 => "thruster",
+        				11 => "cargoBay",
+        				12 => "cargoBay",
+        				13 => "cargoBay",
+        				14 => "scanner",
+        				15 => "scanner",
+        				16 => "scanner",
+        				17 => "hanger",
+        				18 => "reactor",
+        				19 => "reactor",
+        				20 => "CnC",
+        		),
+        		1=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "thruster",
+        				7 => "mediumPulse",
+        				8 => "mediumPulse",
+        				9 => "stdParticleBeam",
+        				10 => "stdParticleBeam",
+        				11 => "structure",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        		2=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "thruster",
+        				7 => "stdParticleBeam",
+        				8 => "stdParticleBeam",
+        				9 => "engine",
+        				10 => "structure",
+        				11 => "structure",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        );
     }
 
 }
