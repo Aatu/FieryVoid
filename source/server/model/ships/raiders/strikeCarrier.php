@@ -4,7 +4,7 @@ class StrikeCarrier extends BaseShip{
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 540;
+		$this->pointCost = 400;
 		$this->faction = "Raiders";
 		$this->phpclass = "StrikeCarrier";
 		$this->imagePath = "img/ships/battlewagon.png"; //need to change
