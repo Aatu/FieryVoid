@@ -487,7 +487,7 @@ shipManager.power = {
 	
 	clickPlus: function(ship, system){
             if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
-                confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+                confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
                 return;
             }
             
@@ -507,7 +507,7 @@ shipManager.power = {
 		
 		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 			
-            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             
             return;
 		}
@@ -599,7 +599,7 @@ shipManager.power = {
 		
 		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 			
-            confirm.error("You need to unassing all electronic warfare before changing scanner power management.");
+            confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             
             return;
 		}

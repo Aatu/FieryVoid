@@ -218,7 +218,7 @@ class ShieldGenerator extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         
-        $this->boostEfficiency = $output;
+        $this->boostEfficiency = $powerReq;
     }    
 }
 
