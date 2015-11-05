@@ -22,8 +22,8 @@ class Xebec extends MediumShip{
     	$this->iniativebonus = 30;
          
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360));
-        $this->addPrimarySystem(new MediumLaser(3, 6, 3, 240, 60));
-        $this->addPrimarySystem(new MediumLaser(3, 6, 3, 300, 120));
+        $this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 60));
+        $this->addPrimarySystem(new MediumLaser(3, 6, 5, 300, 120));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 180));
 
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
@@ -45,6 +45,76 @@ class Xebec extends MediumShip{
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));
 	
         $this->addPrimarySystem(new Structure( 4, 48));
+        
+        $this->hitChart = array(
+        		0=> array( //Possible issue, Primary hit chart specifically calls for Port/Stb Thrust, this will select any thruster, if this is consistant among medium ships we might be able to do a check when thruster is damaged.
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "thruster",
+        				7 => "thruster",
+        				8 => "stdParticleBeam",
+        				9 => "stdParticleBeam",
+        				10 => "scanner",
+        				11 => "scanner",
+        				12 => "scanner",
+        				13 => "engine",
+        				14 => "engine",
+        				15 => "engine",
+        				16 => "hanger",
+        				17 => "hanger",
+        				18 => "reactor",
+        				19 => "reactor",
+        				20 => "CnC",
+        		),
+        		1=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "mediumLaser",
+        				7 => "mediumLaser",
+        				8 => "mediumLaser",
+        				9 => "stdParticleBeam",
+        				10 => "stdParticleBeam",
+        				11 => "stdParticleBeam",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        		2=> array(
+        				1 => "thruster",
+        				2 => "thruster",
+        				3 => "thruster",
+        				4 => "thruster",
+        				5 => "thruster",
+        				6 => "cargoBay",
+        				7 => "cargoBay",
+        				8 => "cargoBay",
+        				9 => "cargoBay",
+        				10 => "cargoBay",
+        				11 => "cargoBay",
+        				12 => "structure",
+        				13 => "structure",
+        				14 => "structure",
+        				15 => "structure",
+        				16 => "structure",
+        				17 => "structure",
+        				18 => "primary",
+        				19 => "primary",
+        				20 => "primary",
+        		),
+        );
+        
     }
 
 }
