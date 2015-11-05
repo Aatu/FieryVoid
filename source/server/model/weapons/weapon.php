@@ -193,6 +193,7 @@ class Weapon extends ShipSystem{
 
         $this->data["Resolution Priority"] = $this->priority;
         $this->data["Loading"] = $this->getTurnsloaded()."/".$this->getNormalLoad();
+        $this->data["Weapon type"] = "Particle";
 
         $dam = $this->minDamage."-".$this->maxDamage;
         if ($this->minDamage == $this->maxDamage)
@@ -859,7 +860,7 @@ class Weapon extends ShipSystem{
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $armor = $system->getArmourPos($gamedata, $pos);
         }else{
-            $armor = $system->getArmour($target, $shooter);
+            $armor = $system->getArmour($target, $shooter, $fireOrder->damageclass);
         }
 
 
@@ -919,7 +920,7 @@ class Weapon extends ShipSystem{
         }
 
 
-        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
+        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);

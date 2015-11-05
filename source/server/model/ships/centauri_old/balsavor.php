@@ -37,10 +37,10 @@ class Balsavor extends HeavyCombatVessel{
         $this->addFrontSystem(new TacLaser(3, 5, 3, 300, 60));
         $this->addFrontSystem(new TacLaser(3, 5, 3, 300, 60));
 
-        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));        
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));        
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         
         

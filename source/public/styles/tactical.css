@@ -419,7 +419,7 @@ body.phase1 #botPanel .ewentry .button2{
 }
 
 .phase2 #botPanel.assignThrust .thrusters{
-	display:block;
+	display:block
 }
 
 #botPanel .thrusters table{

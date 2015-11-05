@@ -73,8 +73,9 @@
                 $destroyed = true;
                 $modifiedDamage = $systemHealth + $armour;
             }
+
             
-            $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "");
+            $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
             $damageEntry->updated = true;
             $system->damage[] = $damageEntry;
             $this->damages[] = $damageEntry;

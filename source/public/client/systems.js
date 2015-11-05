@@ -185,6 +185,10 @@ shipManager.systems = {
         if(system.boostable){
             system = system.initBoostableInfo();
         }
+
+        if(system.name == "engine"){
+            system.addInfo();
+        }
         
         // Check the number of elements in missileArray
         // This has to be done like this, as length doesn't give the correct

@@ -33,9 +33,10 @@ class MissileLauncher extends Weapon{
     }
 
     public function setSystemDataWindow($turn){
-        $this->data["Weapon type"] = "Missile";
+        $this->data["Weapon type"] = "Ballistic";
         $this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = "Basic missile";
+        $this->data["Missile Hit Mod"] = $this->missileArray[1]->hitChanceMod*5;
 
         parent::setSystemDataWindow($turn);
     }

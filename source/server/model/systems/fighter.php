@@ -143,7 +143,7 @@
 			return $this->doGetArmour($tf,  $shooterCompassHeading);
         }
         
-        public function getArmour($target, $shooter){
+        public function getArmour($target, $shooter, $dmgType){
             $tf = $target->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
           

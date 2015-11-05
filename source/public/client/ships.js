@@ -14,6 +14,7 @@ window.shipManager = {
 
     createHexShipDiv: function(ship){
 
+
         if (ship.htmlContainer)
             return;
 

@@ -136,7 +136,21 @@ class DBManager {
         }
 	}
 
-    
+
+    public function submitAdaptiveArmour($gameid, $shipid){
+            try{
+                $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
+                VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
+
+                debug::log($sql);
+                $id = $this->insert($sql);
+
+            }catch(Exception $e) {
+                $this->endTransaction(true);
+                throw $e;
+            }
+    }
+
     public function submitFlightSize($gameid, $shipid, $flightSize){
             try{
                 $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
@@ -447,7 +461,7 @@ class DBManager {
                 continue;
 
             $sql = "INSERT INTO `B5CGM`.`tac_fireorder` VALUES (null, '".$fire->type."', ".$fire->shooterid.", ".$fire->targetid.", ".$fire->weaponid.", ".$fire->calledid.", ".$fire->turn.", "
-                    .$fire->firingMode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."')";
+                    .$fire->firingMode.", ". $fire->needed.", ".$fire->rolled.", $gameid, '".$fire->notes."', ".$fire->shotshit.", ".$fire->shots.", '".$fire->pubnotes."', 0, '".$fire->x."', '".$fire->y."', '".$fire->damageclass."')";
 
             $this->update($sql);
         }
@@ -579,20 +593,80 @@ class DBManager {
             foreach ($damages as $damage){
                                     
                 $des = ($damage->destroyed) ? 1 : 0;
+
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
-                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.", '".$damage->pubnotes."')";
+                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
+
 
                 $this->update($sql);
-            }
-                
-            
+            }            
         }
         catch(Exception $e) {
             throw $e;
+        }    
+    }
+
+
+
+    public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages){ 
+
+        $obj = array();
+        $id;
+
+
+
+        usort($damages, 
+            function($a, $b){
+                if ($a->fireorderid !== $b->fireorderid){
+                    return $a->fireorderid - $b->fireorderid;
+                }
+            }
+        );
+
+
+        foreach ($damages as $damage){
+            if (isset($id)){
+                if ($id == $damage->fireorderid){
+                //    debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
+                    continue;
+                }
+            }
+
+            if (isset($obj[$damage->damageclass])){
+                $obj[$damage->damageclass] += 1;
+            //    debug::log("+ 1");
+            } else {                
+                $obj[$damage->damageclass] = 1;
+            //   debug::log("init = 1");
+            }
+
+            $id = $damage->fireorderid;
+            //  debug::log("setting id to ".$id);
         }
-    
+
+
+        foreach ($obj as $key => $value){
+            if (is_string($key) && strlen($key) > 2){
+                debug::log($key." => ".$value);
+
+                try {
+                    $sql = "
+                    UPDATE `B5CGM`.`tac_adaptivearmour` 
+                    SET `".$key."points` = `".$key."points` + $value 
+                    WHERE gameid = '".$gameid."' 
+                    AND shipid ='".$shipid = $damage->shipid."'";
+
+                    debug::log($sql);
+
+                $this->update($sql);
+                }
+                catch(Exception $e) {
+                    throw $e;
+                }
+            }
+        }
     }
     
     public function submitIniative($gameid, $turn, $ships){
@@ -660,8 +734,45 @@ class DBManager {
 
             throw $e;
         }
-        
     }
+
+
+    public function updateAdaptiveArmour($gameid, $shipid, $settings){
+
+        try {
+            if ($stmt = $this->connection->prepare(
+                    "UPDATE 
+                        tac_adaptivearmour
+                     SET
+                        particlealloc = ?,
+                        laseralloc = ?,
+                        molecularalloc = ?,
+                        matteralloc = ?,
+                        plasmaalloc = ?,
+                        electromagneticalloc = ?,
+                        antimatteralloc = ?,
+                        ionalloc = ?,
+                        graviticalloc = ?,
+                        ballisticalloc = ?
+                     WHERE 
+                        gameid = ?
+                        AND shipid = ?
+                     "
+            ))
+            {
+                $stmt->bind_param('iiiiiiiiiiii', $settings["particle"][1], $settings["laser"][1], $settings["molecular"][1], $settings["matter"][1], $settings["plasma"][1], $settings["electromagnetic"][1], $settings["antimatter"][1], $settings["ion"][1], $settings["gravitic"][1], $settings["ballistic"][1], $gameid, $shipid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        catch(Exception $e) {
+
+            throw $e;
+        }
+    }
+
+
+
     
     public function insertShips($gameid, $ships)
     {
@@ -972,6 +1083,7 @@ class DBManager {
         
         $this->getFlightSize($gamedata);
         $this->flightSizeFix($ships);
+        $this->getAdaptiveArmourSettings($gamedata);
         $this->getIniativeForShips($gamedata);
         $this->getMovesForShips($gamedata);
         $this->getEWForShips($gamedata);
@@ -987,22 +1099,40 @@ class DBManager {
         
     }
 
-/*
-    public function submitFlightSize($gameid, $shipid, $flightSize){
-            try{
-                $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
-                VALUES ($gameid, $shipid, $flightSize)";
+    public function getAdaptiveArmourSettings($gamedata){
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc
+            FROM 
+                tac_adaptivearmour
+            WHERE 
+                gameid = ?"
+            );
 
-                $id = $this->insert($sql);
-                Debug::log($sql);
+        if ($stmt){
+            $stmt->bind_param('i', $gamedata->id);
+            $stmt->bind_result($shipid, $particlepoints, $particlealloc, $laserpoints, $laseralloc, $molecularpoints, $molecularalloc, $matterpoints, $matteralloc, $plasmapoints, $plasmaalloc, $electromagneticpoints, $electromagneticalloc, $antimatterpoints, $antimatteralloc, $ionpoints, $ionalloc, $graviticpoints, $graviticalloc, $ballisticpoints, $ballisticalloc);
+            $stmt->execute();
 
-            }catch(Exception $e) {
-                $this->endTransaction(true);
-                throw $e;
+
+            while($stmt->fetch()){
+                $ship = $gamedata->getShipById($shipid);
+
+                $ship->armourSettings["particle"] = [$particlepoints, $particlealloc];
+                $ship->armourSettings["laser"] = [$laserpoints, $laseralloc];
+                $ship->armourSettings["molecular"] = [$molecularpoints, $molecularalloc];
+                $ship->armourSettings["matter"] = [$matterpoints, $matteralloc];
+                $ship->armourSettings["plasma"] = [$plasmapoints, $plasmaalloc];
+                $ship->armourSettings["electromagnetic"] = [$electromagneticpoints, $electromagneticalloc];
+                $ship->armourSettings["antimatter"] = [$antimatterpoints, $antimatteralloc];
+                $ship->armourSettings["ion"] = [$ionpoints, $ionalloc];
+                $ship->armourSettings["gravitic"] = [$graviticpoints, $graviticalloc];
+                $ship->armourSettings["ballistic"] = [$ballisticpoints, $ballisticalloc];
             }
-    }
 
-*/
+            $stmt->close();
+        }
+    }
 
     
     public function getFlightSize($gamedata){
@@ -1048,6 +1178,8 @@ class DBManager {
         }
     }
 
+
+
     
     private function getIniativeForShips($gamedata){
         
@@ -1085,35 +1217,15 @@ class DBManager {
             SELECT 
                 id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust, at_initiative
             FROM 
-                tac_shipmovement as s1
+                tac_shipmovement
             WHERE
                 gameid = ?
-            AND
-                ( turn >= ?-2 
-                OR 
-                s1.id = 
-                    (
-                    SELECT
-                        id
-                    FROM 
-                        tac_shipmovement as s2
-                    WHERE 
-                        gameid = ? 
-                        AND
-                        shipid = s1.shipid
-                    ORDER BY id DESC
-                    LIMIT 1
-                    ) 
-                ) 
             ORDER BY
                 id ASC
-            
         ");
 
-        if ($stmt)
-        {
-            $fetchturn = $gamedata->turn-1;
-            $stmt->bind_param('iii', $gamedata->id, $fetchturn, $gamedata->id);
+        if ($stmt){
+            $stmt->bind_param('i', $gamedata->id);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             while ($stmt->fetch())
@@ -1169,7 +1281,7 @@ class DBManager {
     {
         $damageStmt = $this->connection->prepare(
             "SELECT 
-                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes 
+                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes, damageclass 
             FROM
                 tac_damage
             WHERE 
@@ -1180,12 +1292,12 @@ class DBManager {
         if ($damageStmt)
         {
             $damageStmt->bind_param('i', $gamedata->id);
-            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes );
+            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass );
             $damageStmt->execute();
             while ($damageStmt->fetch())
             {
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setDamage(
-                    new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes )
+                    new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass )
                 );
             }
             $damageStmt->close();
@@ -1380,7 +1492,8 @@ class DBManager {
                 $pubnotes,
                 $intercepted,
                 $x,
-                $y
+                $y,
+                $damageclass
             );
 
             while( $stmt->fetch())
@@ -1388,7 +1501,7 @@ class DBManager {
                 $entry = new FireOrder(
                     $id, $type, $shooterid, $targetid,
                     $weaponid, $calledid, $turn, $firingMode, $needed, 
-                    $rolled, $shots, $shotshit, $intercepted, $x, $y
+                    $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass
                 );
 
                 $entry->notes = $notes;

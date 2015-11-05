@@ -274,15 +274,24 @@
 					<table></table>
 				</div>
 			</td><td class="col3">
-				<div class="EW">
-					<div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
-					<div class="EWcontainer">
-						<div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-						<div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                        <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-			
+
+                <div class="EW">
+                    <div class="ewheader">
+                        <span class="header">ELECTRONIC WARFARE</span>
                     </div>
-				</div>
+                    <div class="EWcontainer">
+                        <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
+                        <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
+                        <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
+                    </div>
+
+                    <div class="AA" style="display: none">
+                        <table class="AAtable" style="width: 100%; border: 1px solid #496791">
+                        </table>
+                    </div>
+                </div>
+
+
 				<div id="shipSection_4" class="shipSection">
 					<table></table>
 				</div>

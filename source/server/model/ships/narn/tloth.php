@@ -27,7 +27,7 @@ class Tloth extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 21, 3, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 26));
         
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
         

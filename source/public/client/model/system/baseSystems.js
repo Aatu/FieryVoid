@@ -28,6 +28,12 @@ var Engine = function(json, ship)
 }
 Engine.prototype = Object.create( ShipSystem.prototype );
 Engine.prototype.constructor = Engine;
+Engine.prototype.addInfo = function(){
+    this.data["Effiency"] = this.boostEfficiency;
+}
+
+  //  this.data["Weapon type"] ="Gravitic";
+  //  this.data["Damage type"] ="Standard";
 
 
 var CnC = function(json, ship)
@@ -41,9 +47,11 @@ CnC.prototype.constructor = CnC;
 var Thruster = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
+    this.channeled = 0;
 }
 Thruster.prototype = Object.create( ShipSystem.prototype );
 Thruster.prototype.constructor = Thruster;
+
 
 
 var GraviticThruster = function(json, ship)

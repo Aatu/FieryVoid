@@ -1,7 +1,6 @@
 <?php
 
-    class Pulse extends Weapon{   
-        
+    class Pulse extends Weapon{
         
         public $trailColor = array(190, 75, 20);
         public $animationColor = array(190, 75, 20);
@@ -9,6 +8,7 @@
         public $rof = 1;
         public $maxpulses = 6;
         public $priority = 8;
+        public $damageClass = "particle";
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -17,8 +17,9 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Pulse";
+            $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Standard";
+            $this->data["Firing Mode"] = "Pulse";
             $this->data["Grouping range"] = $this->grouping + "%";
             $this->data["Max pulses"] = $this->maxpulses;
             $this->data["Pulses"] = 'D 5';
@@ -228,7 +229,7 @@
         public $priority = 7;
         
         public $rangePenalty = 2;
-        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
+        public $fireControl = array(4, 300, 3); // fighters, <mediums, <capitals 
         
         public $intercept = 2;
 
@@ -367,6 +368,7 @@
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
         
         public function setSystemData($data, $subsystem){
 			parent::setSystemData($data, $subsystem);
@@ -382,15 +384,16 @@
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            if ($this->turnsloaded == 1)
-            {
-                $this->data["Pulses"] = '1-3';
+            if ($this->turnsloaded == 1){
+                $this->data["Pulses"] = 'D 3';
                 $this->data["Grouping range"] = 'NONE';
             }
-            else
-            {
-                $this->data["Pulses"] = '1-5';
+            else {
+                $this->data["Pulses"] = 'D 5';
             }
+
+            $this->data["Weapon type"] = "Molecular";
+            
         }
         
         protected function getExtraPulses($needed, $rolled)

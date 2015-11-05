@@ -344,6 +344,7 @@ class Manager{
             
             $points = 0;
             foreach ($ships as $ship){
+
                 if ($ship->slot != $slot->slot)
                     continue;
                 
@@ -352,6 +353,8 @@ class Manager{
                 if (!$ship instanceof FighterFlight){
                     $points += $ship->pointCost;
                 }
+
+
                 else {
                     $points += ($ship->pointCost / 6) * $ship->flightSize;
                 }
@@ -394,6 +397,10 @@ class Manager{
                         }
                     }
                     else{
+                        if (isset($ship->adaptiveArmour)){
+                            self::$dbManager->submitAdaptiveArmour($gamedata->id, $id);
+                        }
+
                        foreach($ship->systems as $systemIndex=>$system){
                                if(isset($system->missileArray)){
                                    // this system has a missileArray. It uses ammo
@@ -470,20 +477,22 @@ class Manager{
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
-                continue;
-            
-            
+                continue;            
             
             if (EW::validateEW($ship->EW, $gd)){
                 self::$dbManager->submitEW($gamedata->id, $ship->id, $ship->EW, $gamedata->turn);
             }else{
                 throw new Exception("Failed to validate EW");
             }
+        }
 		   			
             
-            
-            
+        foreach ($ships as $ship){
+            if ($ship instanceof WhiteStar){
+                self::$dbManager->updateAdaptiveArmour($gamedata->id, $ship->id, $ship->armourSettings);
+            }
         }
+
 		
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
@@ -497,10 +506,6 @@ class Manager{
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
-			
-            
-            
-            
         }
         
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
@@ -509,8 +514,7 @@ class Manager{
     
     }
     
-    public static function advanceGameState($playerid, $gameid)
-    {
+    public static function advanceGameState($playerid, $gameid){
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
@@ -666,10 +670,24 @@ class Manager{
 		//throw new Exception();
 		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
+
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
-        self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+
+
+        $damagesAA = $servergamedata->getNewDamagesForAA();
+
+        if ($damagesAA){
+            self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $damagesAA);
+        }
         
+
+        self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+
+
+
     }
+
+
     
     private static function handleDeployment( $ships, $gamedata)
     {
@@ -878,6 +896,10 @@ class Manager{
                 $ship->populate();
             }
 
+            if ($ship instanceof WhiteStar){
+                $ship->armourSettings = $value["armourSettings"];
+            }
+
             
             foreach($value["systems"] as $i=>$system){
                 //$sys = $ship->getSystemById($system['id']);
@@ -899,7 +921,7 @@ class Manager{
                 {
                     $fires = Array();
                     foreach($system["fireOrders"] as $i=>$fo){
-                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                        $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
                         if (isset($sys)){
                             $fires[] = $fireOrder;
                         }
@@ -918,7 +940,7 @@ class Manager{
                             $fires = Array();
                             foreach($fightersys["fireOrders"] as $i=>$fo)
                             {
-                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"]);
+                                $fireOrder = new FireOrder(-1, $fo["type"], $fo["shooterid"], $fo["targetid"], $fo["weaponid"], $fo["calledid"], $fo["turn"], $fo["firingMode"], 0, 0, $fo["shots"], 0, 0, $fo["x"], $fo["y"], $fo["damageclass"]);
                                 if (isset($fig)){
                                     $fires[] = $fireOrder;
                                 }

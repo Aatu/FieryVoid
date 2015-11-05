@@ -4,11 +4,11 @@ class DeltaVAlt extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 168;
-	$this->faction = "Raiders";
-      $this->phpclass = "DeltaVAlt";
-       $this->shipClass = "Delta-V Alternate Light Fighters";
-	$this->imagePath = "img/ships/deltaV.png";
+        $this->pointCost = 168;
+        $this->faction = "Raiders";
+        $this->phpclass = "DeltaVAlt";
+        $this->shipClass = "Delta-V Alternate Light Fighters";
+        $this->imagePath = "img/ships/deltaV.png";
         
         $this->forwardDefense = 5;
         $this->sideDefense = 5;
@@ -17,7 +17,7 @@ class DeltaVAlt extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-	$this->iniativebonus = 100;
+    	$this->iniativebonus = 100;
         $this->populate();
     }
 

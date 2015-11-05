@@ -82,7 +82,6 @@ shipWindowManager = {
 	
 	
 	createShipWindow: function(ship){
-
 		
 	
 		var template = $("#shipwindowtemplatecontainer .shipwindow.ship");
@@ -131,9 +130,9 @@ shipWindowManager = {
 
 
                 if(gamedata.turn != 0){
-                    shipwindow.find(".topbar .valueheader.shipclass").html("");
-                    shipwindow.find(".topbar .value.name").html(ship.name);
-                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass);
+                    shipwindow.find(".topbar .value.name").html("");
+                    shipwindow.find(".topbar .valueheader.name").html(ship.name);
+                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
                 }
                 else{
                     shipwindow.find(".topbar .value.name").html("");
@@ -159,8 +158,8 @@ shipWindowManager = {
             var notes = Array();
             
 
+        	//BUTTONS like Defensive Fire
 			var belowIcon = shipWindow.find(".notes");
-	//		$(belowIcon).addClass("selfIntercept");
 
 			var input = document.createElement("input");
 				input.type = "button";
@@ -183,6 +182,47 @@ shipWindowManager = {
 				}
 			}
 
+
+
+ // adaptive Armour
+
+
+			var input = document.createElement("input");
+				input.type = "button";
+				input.value = "Adaptive Armour";
+				input.className = "interceptButton";
+				input.className += " interceptDisabled";
+
+	//		$(input).click(function(){
+	//			ajaxInterface.getAdaptiveArmour(ship.id, function(id){
+	//				console.log(id);
+	//			});
+	//		});
+
+			$(input).click(function(){
+				if (document.getElementById("outerArmourDiv" + ship.id) == null){
+					shipWindowManager.createAdaptiveArmourGUI(ship);
+				}
+				else if (document.getElementById("outerArmourDiv" + ship.id).style.display == "none"){
+					document.getElementById("outerArmourDiv" + ship.id).style.display = "block";
+				}
+			});
+
+			$(belowIcon).append(input);
+
+			if (ship.adaptiveArmour){
+				if (gamedata.gamephase == 1 && ship.userid == gamedata.thisplayer){
+					input.className = "interceptButton";
+					input.className += " interceptEnabled";
+				}
+			}
+
+
+
+            if(!ship.fighter){
+
+                abilities.push("&nbsp;TD: " + ship.turncost + " TC: " + ship.turndelaycost);
+            }
 
             if(ship.agile){
                 abilities.push("&nbsp;Agile ship");
@@ -455,15 +495,25 @@ shipWindowManager = {
 	},
 	
 
-	getDestinationForSystem: function(ship, location){
-		
-		return $(".shipwindow.ship_"+ship.id+" #shipSection_" + location + " table");
-		
+	getDestinationForSystem: function(ship, location){		
+		return $(".shipwindow.ship_"+ship.id+" #shipSection_" + location + " table");		
 	},
+
 	
 	setDataForSystem: function(ship, system){
             var shipwindow = ship.shipStatusWindow;
             if (shipwindow){
+            	if (ship.adaptiveArmour == true){
+        			shipWindowManager.setAdaptiveArmour(ship);
+        			if (gamedata.gamephase != 1){
+        				var div = document.getElementById("outerArmourDiv" + ship.id);
+
+        				if (div){
+							div.style.display = "none";
+						}
+        			}
+            	}
+
                 if (ship.flight){
                     flightWindowManager.setData(ship, system, shipwindow);
                 }else{
@@ -491,10 +541,98 @@ shipWindowManager = {
                 }
             }
 	},
+
+
+	setAdaptiveArmour: function(ship){
+        var shipwindow = ship.shipStatusWindow;
+        var div = shipwindow.find(".AA");
+        var table = div.find("table");
+
+        if (table.length > 0){
+	    	table = table[0];
+	    	table.innerHTML = "";
+
+	        var tr = document.createElement("tr");
+		        var th = document.createElement("th");
+		        	th.style.border = "1px solid #496791";
+	    			th.colSpan = "2"
+					th.innerHTML = "Adaptive Armour";
+				tr.appendChild(th);
+			table.appendChild(tr);
+
+
+	        var tr = document.createElement("tr");
+		        var th = document.createElement("th");
+	    			th.innerHTML = "Type";
+				tr.appendChild(th);
+			table.appendChild(tr);
+
+	        var th = document.createElement("th");
+		        var th = document.createElement("th");
+	    			th.innerHTML = "Active Amount";
+				tr.appendChild(th);
+			table.appendChild(tr);
+	        if (div[0].style.display == "none"){
+		        for (var type in ship.armourSettings){
+		        	if (ship.armourSettings[type][1] > 0){
+						var tr = document.createElement("tr");
+
+						var td = document.createElement("td");
+						td.innerHTML = type;
+						td.style.textAlign = "center";
+			        	tr.appendChild(td);
+
+						var td = document.createElement("td");
+						td.innerHTML = ship.armourSettings[type][1];
+						td.style.textAlign = "center";
+			        	tr.appendChild(td);
+
+		        	}
+
+		        $(table).append(tr);
+		        } 
+	        } 
+	        else {
+		        for (var type in ship.armourSettings){
+		        	if (ship.armourSettings[type][1] > 0){
+						var tr = document.createElement("tr");
+
+						var td = document.createElement("td");
+						td.innerHTML = type;
+						td.style.textAlign = "center";
+			        	tr.appendChild(td);
+
+						var td = document.createElement("td");
+						td.innerHTML = ship.armourSettings[type][1];
+						td.style.textAlign = "center";
+			        	tr.appendChild(td);
+
+		        	}
+
+		        $(table).append(tr);
+		        }     
+	        }
+
+	        $(div).append(table);
+	        $(div).show();
+		}
+	},
+
 	
 	setData: function(ship){
             var shipwindow = ship.shipStatusWindow;
             if (shipwindow){
+            	if (ship.adaptiveArmour == true){
+        			shipWindowManager.setAdaptiveArmour(ship);
+        			if (gamedata.gamephase != 1){
+        				var div = document.getElementById("outerArmourDiv" + ship.id);
+
+        				if (div){
+							div.style.display = "none";
+						}
+        			}
+            	}
+
                 if (ship.flight){
                     for (var i in ship.systems){
                         var fighter = ship.systems[i];
@@ -1333,6 +1471,7 @@ setSystemData: function(ship, system, shipwindow){
 	
 	cancelAssignThrustEvent: function(){
 
+
 		var e = $(".shipwindow").has($(this));
 		
 		
@@ -1361,42 +1500,251 @@ setSystemData: function(ship, system, shipwindow){
 		if (!ship)
 			return;
 
-		ship.movement.splice(ship.movement.length -1, 1);
-	
+		shipManager.movement.revertAutoThrust(ship);
+
+		ship.movement.splice(ship.movement.length -1, 1);	
 		
 		shipWindowManager.setData(ship);
 		shipManager.drawShip(ship);
 	},
 
-
-/* plopje        initializeDuoSystemWindow: function(ship, system, systemwindow){
-            
-            
-            if(system.weapons[system.firingMode].duoWeapon){
-                shipWindowManager.addDuoSystem(ship, system.weapons[system.firingMode], systemwindow);
-            }
-            else{
-                shipWindowManager.addRegularSystem(ship, system.weapons[system.firingMode], systemwindow);
-            }
-        },*/
         
-        onModeClicked: function(e){
-            e.stopPropagation();
+    onModeClicked: function(e){
+        e.stopPropagation();
 
-            var shipwindow = $(".shipwindow").has($(this));
-            var systemwindow = $(".system").has($(this));
-            
-            if(shipwindow.length == 0 || systemwindow.length == 0){
-                // I have no idea why a mode switch should generate so many
-                // events. Just let the ones through that seem to make sense.
-                // by Jazz
-                return;
-            }
+        var shipwindow = $(".shipwindow").has($(this));
+        var systemwindow = $(".system").has($(this));
+        
+        if(shipwindow.length == 0 || systemwindow.length == 0){
+            // I have no idea why a mode switch should generate so many
+            // events. Just let the ones through that seem to make sense.
+            // by Jazz
+            return;
+        }
 
-            var ship = gamedata.getShip(shipwindow.data("ship"));
-            var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+        var ship = gamedata.getShip(shipwindow.data("ship"));
+        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
-            window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
+        window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
 
-        }   
+    },
+
+
+	createAdaptiveArmourGUI: function(ship){
+
+		var damageTypes = [];
+		var damageValues = [];
+
+		for (var key in ship.armourSettings){
+			if (ship.armourSettings[key][0] > 0){
+				damageTypes.push(key);
+				damageValues.push(ship.armourSettings[key]);
+			}
+		}
+
+		var div = document.createElement("div");
+			div.id = "outerArmourDiv" + ship.id;
+
+		var table = document.createElement("table");
+			table.className = "armourTable";
+
+		var tr = document.createElement("tr");
+			tr.style.border = "1px solid #496791";
+				var th = document.createElement("th");
+					th.innerHTML = "Type";
+			tr.appendChild(th);
+					
+				var th = document.createElement("th");
+					th.innerHTML = "Type Maximum";
+			tr.appendChild(th);
+			
+				var th = document.createElement("th");
+					th.innerHTML = "Allocated";
+			tr.appendChild(th);
+		
+		table.appendChild(tr);
+			
+
+		for (var i = 0; i < damageValues.length; i++){
+		
+				var tr = document.createElement("tr");
+				
+					var td = document.createElement("td");
+						td.innerHTML = damageTypes[i];
+						td.className = "damageTypes";
+				tr.appendChild(td);				
+						
+					var td = document.createElement("td");
+						td.innerHTML = damageValues[i][0];
+						td.id = damageTypes[i].toLowerCase() + "Max" + ship.id;
+				tr.appendChild(td);					
+						
+					var td = document.createElement("td");
+						td.innerHTML = damageValues[i][1];
+						td.id = damageTypes[i].toLowerCase() + "Current" + ship.id;
+				tr.appendChild(td);
+				
+					var td = document.createElement("td");
+					var span = document.createElement("span");
+						span.id = damageTypes[i].toLowerCase();
+						$(span).data("max", ship.adaptiveArmourLimits[1]);
+						$(span).data("shipid", ship.id);
+						span.className = "armourPlusButton";
+
+						span.onclick = function(){
+							var globalAvail = Math.floor(document.getElementById("available" + $(this).data("shipid")).innerHTML);
+							var globalAlloc = Math.floor(document.getElementById("allocated" + $(this).data("shipid")).innerHTML);
+							
+							var localAvail = Math.floor(document.getElementById(this.id + "Max" + $(this).data("shipid")).innerHTML);
+							var localAlloc = Math.floor(document.getElementById(this.id + "Current" + $(this).data("shipid")).innerHTML);
+
+
+							if (globalAlloc < globalAvail){
+								if (localAlloc < localAvail){
+									if (localAlloc < $(this).data("max")){
+									document.getElementById(this.id + "Current" + $(this).data("shipid")).innerHTML = localAlloc +1;
+									document.getElementById("allocated" + $(this).data("shipid")).innerHTML = globalAlloc +1;
+									}
+								}
+							}
+						};
+
+						td.appendChild(span);
+						
+
+					
+				tr.appendChild(td);
+				
+					var td = document.createElement("td");
+
+					var span = document.createElement("span");
+						span.id = damageTypes[i].toLowerCase();
+						span.className = "armourMinusButton";
+						$(span).data("min", damageValues[i][1]);
+						$(span).data("shipid", ship.id)
+
+						span.onclick = function(){
+							var globalAvail = Math.floor(document.getElementById("available" + $(this).data("shipid")).innerHTML);
+							var globalAlloc = Math.floor(document.getElementById("allocated" + $(this).data("shipid")).innerHTML);
+							
+							var localAvail = Math.floor(document.getElementById(this.id + "Max" + $(this).data("shipid")).innerHTML);
+							var localAlloc = Math.floor(document.getElementById(this.id + "Current" + $(this).data("shipid")).innerHTML);
+
+							if (localAlloc > 0 && localAlloc > $(this).data("min")){
+								document.getElementById(this.id + "Current" + $(this).data("shipid")).innerHTML = localAlloc -1;
+								document.getElementById("allocated" + $(this).data("shipid")).innerHTML = globalAlloc -1;
+							}
+						};
+						
+						td.appendChild(span);
+
+
+				
+			tr.appendChild(td);
+			
+		table.appendChild(tr);
+		}
+
+				
+		var tr = document.createElement("tr");
+			tr.style.color = "red";
+			
+				var th = document.createElement("th");
+					th.innerHTML = "Total Maximum";
+			tr.appendChild(th);
+					
+				var th = document.createElement("th");
+					th.innerHTML = ship.adaptiveArmourLimits[0];
+					th.id = "available" + ship.id;
+			tr.appendChild(th);
+			
+				var th = document.createElement("th");
+
+					var alloc = 0;
+					for (var i in ship.armourSettings){
+						if (ship.armourSettings[i][1] > 0){
+							alloc += ship.armourSettings[i][1];
+						}
+					}
+
+					th.innerHTML = alloc;
+					th.id = "allocated" + ship.id;
+			tr.appendChild(th);
+			
+				var th = document.createElement("th");
+					th.colSpan = "2";						
+					
+				var input = document.createElement("button");
+					input.innerHTML = "confirm";
+					input.className = "interceptButton";
+					input.style.margin = "auto";
+
+					$(input).data("shipid", ship.id);
+					
+					input.onclick = function(){
+						console.log("confirm");
+
+						var ret = {};						
+						var types = document.getElementsByClassName("damageTypes");
+						
+						for (var i = 0; i < types.length; i++){
+							var string = types[i].innerHTML.toLowerCase();
+							var value = document.getElementById(string + "Current" + $(this).data("shipid")).innerHTML;
+							
+							if (value == 0){
+								ret[string] = 0;
+								continue;
+							}
+
+							while(value > 0){
+								if (ret.hasOwnProperty(string)){
+									ret[string] +=1;
+									value--
+								}
+								else {
+									ret[string] = 1;
+									value--
+								}
+							}
+						}
+
+						var ship = gamedata.getShip($(this).data("shipid"));
+
+						for (var a in ship.armourSettings){
+							for  (var b in ret){
+								if (a == b){
+									if (ret[b] > 0 && ret[b] > ship.armourSettings[a][1]){
+										ship.armourSettings[a][1] += ret[b];
+									}
+									else {
+										ship.armourSettings[a][1] = ret[b];
+									}		
+								}
+							}
+						}
+						shipWindowManager.setData(ship);
+						document.getElementById("outerArmourDiv" + ship.id).style.display = "none";
+
+						console.log(ship.armourSettings);
+					};
+
+
+
+						
+				th.appendChild(input);
+					
+			tr.appendChild(th);
+		
+		table.appendChild(tr);				
+		
+	div.appendChild(table);
+
+	var name = "shipwindow ship ui-draggable owned ship_" + ship.id;
+
+
+	var goal = document.getElementsByClassName(name);
+
+		goal[0].appendChild(div);
+
+	}
 }

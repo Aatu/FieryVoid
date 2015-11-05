@@ -27,7 +27,7 @@ class Falenna extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(5, 15, 3, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
+        $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 5, 1));
         $this->addFrontSystem(new Hangar(4, 14, 6));

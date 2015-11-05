@@ -12,6 +12,7 @@
 
             parent::setSystemDataWindow($turn);
         }
+
     }
     
     class GravitonPulsar extends Pulse
@@ -43,7 +44,6 @@
         public function setSystemDataWindow($turn){
             // Keep this consistent with the gravitic.js implementation.
             // Yeah, I know: dirty.
-            $this->data["Weapon type"] = "Pulse";
             $this->data["Damage type"] = "Standard";
             $this->data["Grouping range"] = $this->grouping + "%";
             $this->data["REMARK"] = "Max. power might cause<br> crits on this system";
@@ -66,6 +66,7 @@
             }            
 
             parent::setSystemDataWindow($turn);
+            $this->data["Weapon type"] = "Gravitic";
         }
         
         public function getLoadingTime(){

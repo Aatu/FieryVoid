@@ -17,7 +17,7 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
     // Needed because it can chance during initial phase
     // because of adding extra power.
     
-    this.data["Weapon type"] ="Pulse";
+    this.data["Weapon type"] ="Gravitic";
     this.data["Damage type"] ="Standard";
     this.data["Grouping range"] = "" + this.grouping + "%";
     this.data["Max pulses"] = shipManager.power.getBoost(this) + 3;

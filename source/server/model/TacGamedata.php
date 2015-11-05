@@ -257,7 +257,27 @@ class TacGamedata{
         return $list;
     
     }
+
+    public function getNewDamagesForAA(){
+        $list = array();
+        
+        foreach ($this->ships as $ship){
+            if (isset($ship->adaptiveArmour)){
+                foreach($ship->systems as $system){
+                    foreach($system->damage as $damage){
+                        if ($damage->updated == true){
+                            $list[] = $damage;
+                        }
+                    }
+                }                       
+            }
+        }
+        
+        return $list;    
+    }
     
+
+
     public function addDamageEntry($damage){
     
         $ship = $this->getShipById($damage->shipid);

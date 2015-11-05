@@ -14,6 +14,10 @@ class WhiteStar extends MediumShip{
         $this->gravitic = true;
         $this->limited = 33;
 
+        $this->adaptiveArmour = true;
+        $this->adaptiveArmourLimits = [3, 1];
+        $this->armourSettings = array();
+
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
 
@@ -49,7 +53,7 @@ class WhiteStar extends MediumShip{
         $this->addAftSystem(new JumpEngine(5, 20, 4, 24));
         $this->addAftSystem(new GraviticThruster(4, 10, 0, 4, 2));
 
-        $this->addPrimarySystem(new Structure( 5, 48));                                                 
+        $this->addPrimarySystem(new Structure( 5, 48));
     }
 
 }

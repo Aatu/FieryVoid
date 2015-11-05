@@ -37,9 +37,9 @@ class Balcirax extends HeavyCombatVessel{
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 
-        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
-        $this->addAftSystem(new Thruster(3, 14, 0, 3, 2));
+        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 
         $this->addAftSystem(new ParticleProjector(2, 6, 1, 180, 360));
         $this->addAftSystem(new ParticleProjector(2, 6, 1, 0, 180));

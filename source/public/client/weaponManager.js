@@ -55,10 +55,8 @@ window.weaponManager = {
 				systemInfo.showSystemInfo(parentwindow, newSystem, ship);
 			}else{
 				system.changeFiringMode();
-				shipWindowManager.setDataForSystem(ship, newSystem);
+				shipWindowManager.setDataForSystem(ship, system);
 			}
-
-
 		}
 	},
 
@@ -347,7 +345,7 @@ window.weaponManager = {
 					var value = weapon.firingMode;
 						value = weapon.firingModes[value];
 
-					if (value != "Standard"){
+					if (value == "Piercing"){
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
 					}
 					else {
@@ -1051,8 +1049,14 @@ window.weaponManager = {
 
 			if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
 				weaponManager.removeFiringOrder(selectedShip, weapon);
+				var type = weapon.data["Weapon Type"].toLowerCase();
+
 				for (var s=0;s<weapon.guns;s++){
-					weapon.fireOrders.push({id:null,type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null"});
+					weapon.fireOrders.push(
+						{
+							id:null, type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null", damageclass: type
+						}
+					);
 				}
 				toUnselect.push(weapon);
 			}
@@ -1226,6 +1230,9 @@ window.weaponManager = {
 							calledid = system.id;
 						}
 
+
+						var damageClass = weapon.data["Weapon type"].toLowerCase();
+						
 						var fire = {
 							id:fireid,
 							type:type,
@@ -1237,9 +1244,13 @@ window.weaponManager = {
 							firingMode:weapon.firingMode,
 							shots:weapon.defaultShots,
 							x:"null",
-							y:"null"
+							y:"null",
+							damageclass: damageClass
 						};
 						weapon.fireOrders.push(fire);
+
+
+
 
 					}
 					if (weapon.ballistic){
@@ -1336,7 +1347,7 @@ window.weaponManager = {
 					for (var s=0;s<weapon.guns;s++){
 
 						var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
-						var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y};
+						var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y, damageclass: weapon.data["Weapon type"].toLowerCase()};
 						weapon.fireOrders.push(fire);
 
 					}

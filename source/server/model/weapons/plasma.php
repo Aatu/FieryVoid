@@ -11,7 +11,6 @@
 		protected function getSystemArmour($system, $gamedata, $fireOrder){
 			$armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
 
-
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
                 $new = $armor - $toIgnore;
@@ -74,7 +73,7 @@
                     return Dice::d(10, 2)+8;
                 case 3:
                 default:
-                    return Dice::d(10,3)+17;
+                    return Dice::d(10,4)+12;
             }
 	}
         
@@ -92,7 +91,7 @@
                 case 3:
                 default:
                     $this->animationExplosionScale = 0.35;
-                    $this->minDamage = 20 - $this->dp;  
+                    $this->minDamage = 16 - $this->dp;  
                     break;
             }
 
@@ -121,7 +120,7 @@
                     break;
                 case 3:
                 default:
-                    $this->maxDamage = 47 - $this->dp;  
+                    $this->maxDamage = 52 - $this->dp;  
                     break;
             }
 /*			if ($this->turnsloaded == 1)
@@ -191,9 +190,9 @@
         }
 		
 		
-    	public function getDamage($fireOrder){        return Dice::d(10,3)+13;   }
-        public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 43 - $this->dp;      }
+    	public function getDamage($fireOrder){        return Dice::d(10,4)+8;   }
+        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 48 - $this->dp;      }
 
 	}
     

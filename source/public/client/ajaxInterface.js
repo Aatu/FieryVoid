@@ -30,6 +30,21 @@ window.ajaxInterface = {
     alert: function(){
         alert("ding");
     },
+
+    getAdaptiveArmour: function(shipId, getAdaptiveArmourCallback){
+        $.ajax({
+            type : 'GET',
+            url : 'adaptiveArmour.php',
+            dataType : 'json',
+            data: {id: shipId},
+            success : getAdaptiveArmourCallback,
+            error : ajaxInterface.errorAjax
+        });
+    },
+
+    react: function(){
+        alert("callback");
+    },
 	
     submitGamedata: function(){
 	
@@ -137,7 +152,6 @@ window.ajaxInterface = {
                         var ammoArray = Array();
                         
                         if (system.dualWeapon || system.duoWeapon){
-//                        if (system.duoWeapon){
                             for (var c in system.weapons){
                                 var weapon = system.weapons[c];
                                 if(weapon.duoWeapon){
@@ -210,8 +224,13 @@ window.ajaxInterface = {
                     newShip.flightSize = ship.flightSize;
                 }
 
+                if (ship.adaptiveArmour){
+                    newShip.armourSettings = ship.armourSettings
+                }
+
 
                 tidyships.push(newShip);
+                console.log(newShip);
             }
         }
        

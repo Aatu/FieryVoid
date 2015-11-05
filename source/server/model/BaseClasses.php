@@ -191,7 +191,7 @@ class DamageEntry{
     public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes){
+    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass = null){
         $this->id = $id;
         $this->shipid = $shipid;
         $this->gameid = $gameid;
@@ -203,6 +203,7 @@ class DamageEntry{
         $this->fireorderid = $fireorderid;
         $this->destroyed = $destroyed;
         $this->pubnotes = $pubnotes;
+        $this->damageclass = $damageclass;
     }
 
 }
@@ -223,7 +224,7 @@ class EWentry{
 
 class FireOrder{
     
-    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingMode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y;
+    public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingMode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass;
     public $notes = "";
     public $pubnotes = "";
     public $updated = false;
@@ -244,23 +245,25 @@ class FireOrder{
         $shotshit = 0, 
         $intercepted = 0, 
         $x, 
-        $y
+        $y,
+        $damageclass = null
     ){
-         $this->id = $id;
-         $this->type = $type;
-         $this->shooterid = $shooterid;
-         $this->targetid = $targetid;
-         $this->weaponid = $weaponid;
-         $this->calledid = $calledid;
-         $this->turn = $turn;
-         $this->firingMode = $firingmode;
-         $this->needed = $needed;
-         $this->rolled = $rolled;
-         $this->shots = $shots;
-         $this->shotshit = $shotshit;
-         $this->intercepted = $intercepted;
-         $this->x = $x;
-         $this->y = $y;
+        $this->id = $id;
+        $this->type = $type;
+        $this->shooterid = $shooterid;
+        $this->targetid = $targetid;
+        $this->weaponid = $weaponid;
+        $this->calledid = $calledid;
+        $this->turn = $turn;
+        $this->firingMode = $firingmode;
+        $this->needed = $needed;
+        $this->rolled = $rolled;
+        $this->shots = $shots;
+        $this->shotshit = $shotshit;
+        $this->intercepted = $intercepted;
+        $this->x = $x;
+        $this->y = $y;
+        $this->damageclass = $damageclass;
     }
 
 }

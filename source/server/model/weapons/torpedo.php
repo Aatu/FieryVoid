@@ -21,6 +21,14 @@
 
             return true;
         }
+
+        public function setSystemDataWindow($turn){
+        $this->data["Weapon type"] = "Ballistic";
+
+        parent::setSystemDataWindow($turn);
+    }
+
+
     }
     
     class IonTorpedo extends Torpedo{

@@ -121,7 +121,6 @@ window.confirm = {
 	},
 
 
-
     getTotalCost: function(){ 
 
 		var flightSize = $(".fighterAmount").html();
@@ -150,7 +149,7 @@ window.confirm = {
 			launchers = 0;
 		}
 
-		console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
+	//	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
 
 		var totalCost = (flightSize * (fighterCost + (launchers * missileAmount * missileCost)));
 
@@ -208,7 +207,7 @@ window.confirm = {
         var variableSize = confirm.getVariableSize(ship);
         var missileOptions = confirm.getMissileOptions(ship);
 
-        if (variableSize || missileOptions || ship.superheavy){
+        if (variableSize || missileOptions.length > 0 || ship.superheavy){
             var totalTemplate = $(".totalUnitCost");
             var totalItem = totalTemplate.clone(true).prependTo(e);
             
@@ -312,7 +311,10 @@ window.confirm = {
                 
 		//$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
 		$(".confirmok", e).on("click", callback);
-		$(".confirmcancel",e).on("click", function(){$(".confirm").remove();});
+		$(".confirmcancel",e).on("click", function(){
+			console.log("remove");
+			$(".confirm").remove();
+		});
 		$(".confirmok",e).data("shipclass", ship.phpclass);
 
 		var a = e.appendTo("body");

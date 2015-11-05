@@ -122,8 +122,22 @@ class ShipSystem{
         }
     }
     
-    public function getArmour($gamedata, $shooter){
-        return $this->armour;
+    public function getArmour($target, $shooter, $dmgClass){
+        $armour = $this->armour;
+        $activeAA = 0;
+
+    //    debug::log("hit by: ".$dmgClass);
+
+        if (isset($target->adaptiveArmour)){
+            if (isset($target->armourSettings[$dmgClass][1])){
+                $activeAA = $target->armourSettings[$dmgClass][1];
+                //      debug::log("hit by: ".$dmgClass.", applying mod: ".$activeAA);
+                $armour += $activeAA;
+            }
+        }
+
+        return $armour;
+
     }
 	
     public function getArmourPos($gamedata, $pos){

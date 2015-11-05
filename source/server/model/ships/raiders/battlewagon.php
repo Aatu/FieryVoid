@@ -4,8 +4,8 @@ class Battlewagon extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-  $this->pointCost = 540;
-  $this->faction = "Raiders";
+        $this->pointCost = 540;
+        $this->faction = "Raiders";
         $this->phpclass = "Battlewagon";
         $this->imagePath = "img/ships/battlewagon.png";
         $this->shipClass = "Battlewagon";
@@ -20,8 +20,6 @@ class Battlewagon extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 1;
         $this->pivotcost = 3;
-  
-        
          
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
@@ -40,18 +38,18 @@ class Battlewagon extends BaseShip{
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 
         $this->addAftSystem(new JumpEngine(4, 16, 3, 24));
-  $this->addAftSystem(new TwinArray(2, 6, 2, 120, 300));
+        $this->addAftSystem(new TwinArray(2, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(2, 6, 2, 60, 240));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
         
-  $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
+        $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 180, 360));
   
-  $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
+        $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
         

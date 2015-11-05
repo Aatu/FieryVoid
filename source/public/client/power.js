@@ -58,7 +58,11 @@ shipManager.power = {
                         isOnline = false;
                         break;
                     }
-                }   
+                }
+
+                if (system.name == "engine"){
+            		system.power = [];
+                }
 
                 if(isOnline){
                     system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
@@ -299,7 +303,6 @@ shipManager.power = {
 	},
 	
 	setOnline: function(ship, system){
-		console.log("online");
             if(system.name == "graviticShield"){
                 if(ship.checkShieldGenerator()){
                     for(var i in ship.systems){
@@ -556,7 +559,7 @@ shipManager.power = {
 			if (shipManager.power.isOffline(ship, array[i]))
 				continue;
 		
-            array[i].power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
+            array[i].power.push({id:null, shipid:ship.id, systemid:array[i].id, type:1, turn:gamedata.turn, amount:0});
 
 			shipManager.power.stopOverloading(ship, array[i]);
 			shipWindowManager.setDataForSystem(ship, array[i]);

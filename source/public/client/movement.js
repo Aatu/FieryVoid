@@ -120,6 +120,8 @@ shipManager.movement = {
             // adjust the current turn delay if the new speed changes the turn delay
             var oldspeed = shipManager.movement.getSpeed(ship);
 
+            shipManager.movement.revertAutoThrust(ship);
+
             ship.movement.splice(ship.movement.length -1, 1);
 
             var speed = shipManager.movement.getSpeed(ship);
@@ -146,6 +148,8 @@ shipManager.movement = {
 			if ((movement.value != accel && movement.heading == curheading) || (movement.value == accel && movement.heading != curheading)){
                 // adjust the current turn delay if the new speed changes the turn delay
                 var oldspeed = shipManager.movement.getSpeed(ship);
+
+                shipManager.movement.revertAutoThrust(ship);
 
                 ship.movement.splice(ship.movement.length -1, 1);
 
@@ -640,9 +644,11 @@ shipManager.movement = {
         
         hexgrid.unSelectHex();
         shipManager.drawShip(ship);
-        if (!ship.flight)
-			shipWindowManager.assignThrust(ship);
 
+        if (!ship.flight){
+            shipManager.movement.autoAssignThrust(ship)
+            shipWindowManager.assignThrust(ship);
+        }
     },
     
     isEndingPivot: function(ship, right){
@@ -1000,22 +1006,39 @@ shipManager.movement = {
         if (shipManager.systems.isEngineDestroyed(ship))
             return false;
 
+        if (ship.accelcost > shipManager.movement.getRemainingEngineThrust(ship)){
+            return false;
+        }
 
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
 
 		if (!ship.gravitic){
 			if (heading !== facing){
-				if (heading <= 3){
+				if (heading < 3){
 					if (heading + 3 !== facing){
+                        console.log("a");
+                        console.log(heading);
+                        console.log(facing);
 						return false;
 					}		
 				}
-				if (heading >= 3){
-					if (heading - 3 !== facing){
-						return false;
-					}		
-				}
+                else if (heading > 3){
+                    if (heading - 3 !== facing){
+                        console.log("b");
+                        console.log(heading);
+                        console.log(facing);
+                        return false;
+                    }       
+                }
+                else{
+                    if (heading - 3 !== 0){
+                        console.log("c");
+                        console.log(heading);
+                        console.log(facing);
+                        return false;
+                    }       
+                }
 			}		
 		}
         
@@ -1239,11 +1262,14 @@ shipManager.movement = {
         
         gamedata.shipStatusChanged(ship);
         shipManager.drawShip(ship);
+
         if (!ship.flight){
+            shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
         }
     },
-        
+
+
             
     getRemainingEngineThrust: function(ship){
         
@@ -1426,9 +1452,7 @@ shipManager.movement = {
     },
     
     assignThrust: function(ship, system){
-	
-		
-		
+
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
 			
@@ -1437,7 +1461,6 @@ shipManager.movement = {
 			
 		if (shipManager.systems.isDestroyed(ship, system))
 			return false;
-			
 		
 		
 		var movement = ship.movement[ship.movement.length-1];
@@ -1691,8 +1714,6 @@ shipManager.movement = {
     
     doTurn: function(ship, right){
 
-
-
         if (!ship.osat){
 	        if (!shipManager.movement.canTurn(ship, right)){
 	            return false;
@@ -1845,8 +1866,101 @@ shipManager.movement = {
 
         hexgrid.unSelectHex();
 
-        if(!ship.flight){
+        if (!ship.flight){
+            shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
+        }
+    },
+
+
+
+    autoAssignThrust: function(ship){
+        var move = ship.movement[ship.movement.length-1];
+        var needArray = ship.movement[ship.movement.length-1].requiredThrust;
+        var thrusterLoc = 0;
+
+        for (var loc in needArray){
+
+            var checked = 0;
+
+            if (needArray[loc] == null || needArray[loc] < 1){
+                continue;
+            }
+
+            var thrusters = [];
+            var toDo = needArray[loc];
+
+            thrusterLoc = loc;
+
+            if (thrusterLoc == 0){
+                if (shipManager.movement.isGoingBackwards(ship)){
+                    thrusterLoc = 1;
+                }
+                else 
+                    thrusterLoc = 2;
+            }
+
+            for (var sys in ship.systems){
+                if (ship.systems[sys].displayName == "Thruster"){
+                    if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed){
+                        if (ship.systems[sys].channeled +1 < ship.systems[sys].output *2){
+                            if (ship.systems[sys].criticals.length == 0){
+                                thrusters.push(ship.systems[sys]);
+                            }
+                        }
+                    }
+                }       
+            }
+
+            while (toDo > 0){
+
+                for (var j in thrusters){
+                    if (checked > 10){
+                        console.log("return");
+                        return;
+                    }
+
+                    if (thrusters[j].channeled +1 > thrusters[j].output){
+                        checked++;
+                        continue;
+                    }
+                    else if (thrusters[j].channeled +1 > thrusters[j].output *2){
+                        checked++;
+                        continue;
+                    }
+                    if (typeof move.assignedThrust[thrusters[j].id] == "undefined"){
+                        move.assignedThrust[thrusters[j].id] = 1;
+                        thrusters[j].channeled++;
+                        toDo--;
+                    }
+                    else {
+                        move.assignedThrust[thrusters[j].id]++;
+                        thrusters[j].channeled++;
+                        toDo--;
+                    }
+
+                    shipWindowManager.setDataForSystem(ship, thrusters[j]);
+                    if (toDo < 1 ){
+                        break;
+                    }
+                }
+            }
+        }
+    },
+
+    revertAutoThrust: function(ship){
+        var move = ship.movement[ship.movement.length-1];
+        var assignArray = ship.movement[ship.movement.length-1].assignedThrust
+
+        for (var id in assignArray){
+            if (assignArray[id] != null){
+                for (var sys in ship.systems){
+                    if (ship.systems[sys].id == id){
+                        ship.systems[sys].channeled -= assignArray[id];
+                        break;
+                    }
+                }
+            }
         }
     },
 
@@ -2083,18 +2197,19 @@ shipManager.movement = {
     },
     
     calculateCurrentTurndelay: function(ship){
+
         var turndelay = Math.ceil(ship.movement[ship.movement.length-1].speed * ship.turndelaycost);
 
         var last = null;
-        
+        var didTurn = false;
+    
         if(gamedata.turn == 1){
             turndelay = 0;
         }
         
         for (var i in ship.movement){
+
             var movement = ship.movement[i];
-            if (movement.turn < gamedata.turn-2)
-                continue;
                 
             if (movement.commit == false)
                 continue;
@@ -2103,10 +2218,11 @@ shipManager.movement = {
                 || movement.type == "slipright" 
                 || movement.type == "slipleft" ) && turndelay > 0)
                 turndelay--;
-                
-            
-                
+
             if (shipManager.movement.isTurn(movement)){
+
+                didTurn = true;
+
                 if (!ship.agile || !last || !shipManager.movement.isTurn(last)){
                     // calculate the turndelay using the NEW speed, iso of the one
                     // in this old movement.
@@ -2121,6 +2237,13 @@ shipManager.movement = {
         
         if (turndelay < 0)
             turndelay = 0;
+
+        if (turndelay > 0 && ship.turndelaycost > 1){
+            if (!didTurn){
+                turndelay = 0;
+            }
+        }
+
         return turndelay;
     },
     

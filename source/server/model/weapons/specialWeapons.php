@@ -25,12 +25,19 @@
         }
         
         protected function getSystemArmour($system, $gamedata, $fireOrder){
-            $armor = $system->armour;
-            if (is_numeric($armor))
-                return round($armor / 2);
-            
-            return 0;
-		}
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
+        }
+
+
 	
 		public function setSystemDataWindow($turn){
 
@@ -393,20 +400,13 @@
 
         public $name = "electroPulseGun";
         public $displayName = "Electro-Pulse Gun";
-        // You have to take a look at this.
         public $animation = "laser";
-        // You have to take a look at this.
         public $animationColor = array(158, 240, 255);
-        // You have to take a look at this.
         public $trailColor = array(158, 240, 255);
-        // You have to take a look at this.
         public $projectilespeed = 15;
-        // You have to take a look at this.
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
-        // You have to take a look at this.
         public $animationExplosionScale = 0.10;
-        // You have to take a look at this.
         public $trailLength = 30;
         public $priority = 1;
 

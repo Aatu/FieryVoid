@@ -680,7 +680,7 @@
                 $structDamage = $systemHealth;
             }
 
-            $damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $structTarget->id, $structDamage, $structArmour, 0, $fireOrder->id, $destroyed, "");
+            $damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $structTarget->id, $structDamage, $structArmour, 0, $fireOrder->id, $destroyed, "", $fireOrder->weapontype);
             $damageEntry->updated = true;
             $structTarget->damage[] = $damageEntry;
         }

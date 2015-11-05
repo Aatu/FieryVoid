@@ -25,7 +25,7 @@ class Nightowl extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 6, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
-        $this->addPrimarySystem(new JumpEngine(5, 15, 0, 4, 38));
+        $this->addPrimarySystem(new JumpEngine(5, 15, 4, 38));
         $this->addPrimarySystem(new Hangar(3, 8));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));

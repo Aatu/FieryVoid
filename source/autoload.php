@@ -145,11 +145,10 @@ spl_autoload_register(
 
                 'optine' => '/server/model/ships/centauri_old/optine.php',
 
-
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
                 'varilon' => '/server/model/ships/centauri_old/varilon.php',
 
-
+                'sakar' => '/server/model/ships/centauri_old/sakar.php',
 
 
 
@@ -167,7 +166,6 @@ spl_autoload_register(
 
 
 
-
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
                 
@@ -175,6 +173,15 @@ spl_autoload_register(
 
                 //raiders
                 'pinnace' => '/server/model/ships/raiders/pinnace.php',
+                'adder' => '/server/model/ships/raiders/adder.php',
+                'asper' => '/server/model/ships/raiders/asper.php',
+                'barque' => '/server/model/ships/raiders/barque.php',
+                'deltavalt' => '/server/model/ships/raiders/deltaValt.php',
+                'schooner' => '/server/model/ships/raiders/schooner.php',
+                'skiff' => '/server/model/ships/raiders/skiff.php',
+                'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
+                'uidace' => '/server/model/ships/raiders/uidace.php',
+                'wolf' => '/server/model/ships/raiders/wolf.php',
 
 
                 //stock 

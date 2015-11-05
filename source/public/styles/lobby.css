@@ -93,16 +93,19 @@
 
 .mediumSize{
     width:200px;
+    text-align: center;
     
 }
 
 .smallSize{
     width:100px;
+    text-align: center;
     
 }
 
 .tinySize{
-    width:20px;
+    width:30px;
+    text-align: center;
     
 }
 .slot input{

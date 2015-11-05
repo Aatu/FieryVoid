@@ -10,6 +10,7 @@ class Soladon extends BaseShip{
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Soladon Escort Cruiser";
         $this->shipSizeClass = 3;
+        $this->occurence = "uncommon";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
