@@ -81,8 +81,7 @@ shipWindowManager = {
 	},
 	
 	
-	createShipWindow: function(ship){
-		
+	createShipWindow: function(ship){		
 	
 		var template = $("#shipwindowtemplatecontainer .shipwindow.ship");
 		var shipwindow = template.clone(true).appendTo("body");
@@ -101,8 +100,15 @@ shipWindowManager = {
 		
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_"+ship.id);
+		shipwindow.attr('id', 'shipWindow' + ship.id);
+
 		shipWindowManager.populateShipWindow(ship, shipwindow);
-                shipWindowManager.bindEvents(shipwindow);
+
+		//if (ship.hitChart.length > 0){
+		//	shipWindowManager.hitChartSetup(ship, shipwindow);			
+		//}
+
+        shipWindowManager.bindEvents(shipwindow);
 		
 		return shipwindow;
 	},
@@ -125,22 +131,20 @@ shipWindowManager = {
     },
 
 	populateShipWindow: function(ship, shipwindow){
+
 		shipwindow.find(".icon img").attr("src", "./"+ship.imagePath);
-		var thumb = shipwindow.find(".icon img");
 
+        if(gamedata.turn != 0){
+            shipwindow.find(".topbar .value.name").html("");
+            shipwindow.find(".topbar .valueheader.name").html(ship.name);
+            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
+        }
+        else{
+            shipwindow.find(".topbar .value.name").html("");
+            shipwindow.find(".topbar .valueheader.name").html("");
+            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
+        }
 
-                if(gamedata.turn != 0){
-                    shipwindow.find(".topbar .value.name").html("");
-                    shipwindow.find(".topbar .valueheader.name").html(ship.name);
-                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
-                }
-                else{
-                    shipwindow.find(".topbar .value.name").html("");
-                    shipwindow.find(".topbar .valueheader.name").html("");
-                    shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
-                }
-                
-		
 		
 		shipWindowManager.addSystems(ship, shipwindow, 1);
 		shipWindowManager.addSystems(ship, shipwindow, 0);
@@ -149,135 +153,271 @@ shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 4);
 
 	},
-	
-        updateNotes: function(ship){
-            var shipWindow = ship.shipStatusWindow;
-            shipWindow.find(".notes").html("");
-            
-            var abilities = Array();
-            var notes = Array();
-            
 
-        	//BUTTONS like Defensive Fire
-			var belowIcon = shipWindow.find(".notes");
+	hitArraySetup: function(ship){
+		var system = [];
+		var chance = [];
 
-			var input = document.createElement("input");
-				input.type = "button";
-				input.value = "Defensive Fire";
-				input.className = "interceptButton";
-				input.className += " interceptDisabled";
+		var name = null;
+		var count = 0;
+		var totalCount = 0;
 
-			$(input).click(function(){
-				weaponManager.checkSelfIntercept(ship);
-			})
+		var loc = ship.hitChart[0];
 
-			$(belowIcon).append(input);
+		for (var i in loc){
+			if (name == null){
+				name = loc[i];
+				count = Math.floor(i);
+				totalCount += count;
+				system.push(name);
+				chance.push(count);
+			}
 
-			if (gamedata.gamephase == 3 &&
-				ship.userid == gamedata.thisplayer){
-				
-				if (weaponManager.canSelfIntercept(ship)){
-					input.className = "interceptButton";
-					input.className += " interceptEnabled";
-				}
+			else if (name != loc[i]){
+				name = loc[i];
+				count = i - totalCount;
+				totalCount += count;
+				system.push(name);
+				chance.push(count);
 			}
 
 
+			console.log(system);
+			console.log(chance);
+		}
 
- // adaptive Armour
+
+				},
+
+	hitCalc: function(index, array){
+
+		var string = array[index];
+		var from = index;
+		var hits = 1;
+
+		for (var i = index; i > 1; i--){
+			if (array[i] != undefined && array[i] != string){
+				break;
+			} else hits++;
+		}
+
+		return Math.floor(hits/20*100) + " %";
+},
 
 
-			var input = document.createElement("input");
-				input.type = "button";
-				input.value = "Adaptive Armour";
-				input.className = "interceptButton";
-				input.className += " interceptDisabled";
+	getName: function(name){
+		var string = name;
 
-	//		$(input).click(function(){
-	//			ajaxInterface.getAdaptiveArmour(ship.id, function(id){
-	//				console.log(id);
-	//			});
-	//		});
+		if (name == "interceptorMkII"){
+			return "Interceptor";
+		}
+		else if (name == "stdParticleBeam"){
+			return "SPB";
+		}
+		else return string;
 
-			$(input).click(function(){
-				if (document.getElementById("outerArmourDiv" + ship.id) == null){
-					shipWindowManager.createAdaptiveArmourGUI(ship);
+	},
+
+
+
+	hitChartSetup: function(ship, shipwindow){
+
+		shipWindowManager.hitArraySetup(ship);
+
+		var parentDiv = shipwindow.find(".EWcontainer")[0]
+
+		var button = document.createElement("button");
+			button.type = "input";
+			button.innerHTML = "Display Hit Chart";
+			button.id = "hitChartButton" + ship.id;
+			$(button).data("id", ship.id);
+
+			
+			var div = shipwindow.find(".hitChartDiv");
+				div = div[0];
+				div.id = "hitChartDiv" + ship.id;
+				$(div).addClass("hitChartDisabled");
+
+			var names = ["Primary", "Front", "Aft", "Left", "Right"];
+
+				for (var i = 0; i < ship.hitChart.length; i++){
+
+					var template = $("#hitChartTable");
+					var table = template.clone(true);
+						table = table[0];
+						table.className = "hitChartTable";
+
+						var tr = document.createElement("tr");
+							var th = document.createElement("th")
+								th.colSpan = 2;
+								th.innerHTML = names[i];
+
+							tr.appendChild(th);
+						table.appendChild(tr);
+
+
+					for (var index in ship.hitChart[i]){
+						var tr = document.createElement("tr");
+
+							var td = document.createElement("td")
+								td.innerHTML = shipWindowManager.getName(ship.hitChart[i][index]);
+							tr.appendChild(td);
+
+							var td = document.createElement("td")
+								td.innerHTML = shipWindowManager.hitCalc(index, ship.hitChart[i]);
+							tr.appendChild(td);
+						table.appendChild(tr);
+					}
+
+					div.appendChild(table);
 				}
-				else if (document.getElementById("outerArmourDiv" + ship.id).style.display == "none"){
-					document.getElementById("outerArmourDiv" + ship.id).style.display = "block";
-				}
+
+			var target = shipwindow[0];
+				target.appendChild(div);
+
+
+			button.addEventListener("click", function(){
+				var div = document.getElementById("hitChartDiv" + $(this).data("id"));
+				if (div.className == "hitChartDiv hitChartDisabled"){
+					div.className = "hitChartDiv"
+				}	
+				else if (div.className == "hitChartDiv"){
+					div.className = "hitChartDiv hitChartDisabled"
+				}	
 			});
 
-			$(belowIcon).append(input);
+			$(button).appendTo(parentDiv);
 
-			if (ship.adaptiveArmour){
-				if (gamedata.gamephase == 1 && ship.userid == gamedata.thisplayer){
-					input.className = "interceptButton";
-					input.className += " interceptEnabled";
-				}
+	},
+	
+    updateNotes: function(ship){
+        var shipWindow = ship.shipStatusWindow;
+        shipWindow.find(".notes").html("");
+        
+        var abilities = Array();
+        var notes = Array();
+        
+
+    	//BUTTONS like Defensive Fire
+		var belowIcon = shipWindow.find(".notes");
+
+		var input = document.createElement("input");
+			input.type = "button";
+			input.value = "Defensive Fire";
+			input.className = "interceptButton";
+			input.className += " interceptDisabled";
+
+		$(input).click(function(){
+			weaponManager.checkSelfIntercept(ship);
+		})
+
+		$(belowIcon).append(input);
+
+		if (gamedata.gamephase == 3 &&
+			ship.userid == gamedata.thisplayer){
+			
+			if (weaponManager.canSelfIntercept(ship)){
+				input.className = "interceptButton";
+				input.className += " interceptEnabled";
 			}
+		}
 
 
 
-            if(!ship.fighter){
+// adaptive Armour
 
-                abilities.push("&nbsp;TD: " + ship.turncost + " TC: " + ship.turndelaycost);
-            }
 
-            if(ship.agile){
-                abilities.push("&nbsp;Agile ship");
-            }
+		var input = document.createElement("input");
+			input.type = "button";
+			input.value = "Adaptive Armour";
+			input.className = "interceptButton";
+			input.className += " interceptDisabled";
 
-            if(shipManager.movement.isRolled(ship)){
-                notes.push("&nbsp;Ship is rolled.");
-            }
+//		$(input).click(function(){
+//			ajaxInterface.getAdaptiveArmour(ship.id, function(id){
+//				console.log(id);
+//			});
+//		});
 
-            if(shipManager.movement.isRolling(ship)){
-                notes.push("&nbsp;Ship is rolling.</p><p>");
-            }
+		$(input).click(function(){
+			if (document.getElementById("outerArmourDiv" + ship.id) == null){
+				shipWindowManager.createAdaptiveArmourGUI(ship);
+			}
+			else if (document.getElementById("outerArmourDiv" + ship.id).style.display == "none"){
+				document.getElementById("outerArmourDiv" + ship.id).style.display = "block";
+			}
+		});
 
-            if(gamedata.turn == 0){
-                notes.push("&nbsp;This ship carries:");
-                if(ship.fighters.length != 0){
-                    for (var i in ship.fighters){
-                        var amount = ship.fighters[i];
-                        
-                        if(i == "normal"){
-                            notes.push("&nbsp;&nbsp;&nbsp;"+amount+" fighters");
-                        }
-                        else{
-                            notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
-                        }
+		$(belowIcon).append(input);
+
+		if (ship.adaptiveArmour){
+			if (gamedata.gamephase == 1 && ship.userid == gamedata.thisplayer){
+				input.className = "interceptButton";
+				input.className += " interceptEnabled";
+			}
+		}
+
+
+
+        if(!ship.fighter){
+
+            abilities.push("&nbsp;TD: " + ship.turncost + " TC: " + ship.turndelaycost);
+        }
+
+        if(ship.agile){
+            abilities.push("&nbsp;Agile ship");
+        }
+
+        if(shipManager.movement.isRolled(ship)){
+            notes.push("&nbsp;Ship is rolled.");
+        }
+
+        if(shipManager.movement.isRolling(ship)){
+            notes.push("&nbsp;Ship is rolling.</p><p>");
+        }
+
+        if(gamedata.turn == 0){
+            notes.push("&nbsp;This ship carries:");
+            if(ship.fighters.length != 0){
+                for (var i in ship.fighters){
+                    var amount = ship.fighters[i];
+                    
+                    if(i == "normal"){
+                        notes.push("&nbsp;&nbsp;&nbsp;"+amount+" fighters");
+                    }
+                    else{
+                        notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
                     }
                 }
-                else{
-                    notes.push("&nbsp;&nbsp;&nbsp;no fighters");
-                }
-               
-                if(ship.limited != 0){
-                    notes.push("&nbsp;Limited: " + ship.limited + "%");
-                }
             }
-            
-            /* Set everything into the notes decently. */
-            /* If we have both abilities and notes, insert a hr as seperator*/
-            for(var i = 0; i < abilities.length; i++){
-                shipWindow.find(".notes").append("<p>");
-                shipWindow.find(".notes").append(abilities[i]);
-                shipWindow.find(".notes").append("</p>");
+            else{
+                notes.push("&nbsp;&nbsp;&nbsp;no fighters");
             }
-            
-            if(abilities.length > 0 && notes.length > 0){
-                /* Insert fancy hr. */
-                shipWindow.find(".notes").append('<hr width=90% height=1px border=0 color=#496791>');
+           
+            if(ship.limited != 0){
+                notes.push("&nbsp;Limited: " + ship.limited + "%");
             }
-            
-            for(var index = 0; index < notes.length; index++){
-                shipWindow.find(".notes").append("<p>");
-                shipWindow.find(".notes").append(notes[index]);
-                shipWindow.find(".notes").append("</p>");
-            }
-        },
+        }
+        
+        /* Set everything into the notes decently. */
+        /* If we have both abilities and notes, insert a hr as seperator*/
+        for(var i = 0; i < abilities.length; i++){
+            shipWindow.find(".notes").append("<p>");
+            shipWindow.find(".notes").append(abilities[i]);
+            shipWindow.find(".notes").append("</p>");
+        }
+        
+        if(abilities.length > 0 && notes.length > 0){
+            /* Insert fancy hr. */
+            shipWindow.find(".notes").append('<hr width=90% height=1px border=0 color=#496791>');
+        }
+        
+        for(var index = 0; index < notes.length; index++){
+            shipWindow.find(".notes").append("<p>");
+            shipWindow.find(".notes").append(notes[index]);
+            shipWindow.find(".notes").append("</p>");
+        }
+    },
         
 	addSystems: function (ship, shipwindow, location){
 		

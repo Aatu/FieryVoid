@@ -681,8 +681,83 @@
         
             return true;
         }
+
+
+    /*    public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+            $system = null;
+            
+            if ($fire->calledid != -1)
+                $system = $this->getSystemById($fire->calledid);
+            
+            if ($system != null && !$system->isDestroyed())
+                return $system;
         
-        
+            if ($location === null)
+                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
+
+            $hitChart = $this->hitChart[$location];
+            $roll = mt_rand(1, 20);
+            $name = $hitChart[$roll];
+
+
+            if ($name == "primary"){
+                debug::log("redirecting to PRIMARY");
+                $location = 0;
+                $hitchart = $this->hitChart[$location];
+                $roll = mt_rand(1, 20);
+                $name = $hitChart[$roll];
+            }
+
+            debug::log("hitLoc: ".$location.", roll: ".$roll.", hitting: ".$name);
+
+            $systems = array();
+
+            foreach ($this->systems as $system){
+                if ($system->location == $location){
+                    if ($system->name == $name){
+                        $systems[] = $system;
+                    }
+                }
+            }
+
+            $allTargets = sizeof($systems);
+            $legit = array();
+            $dest = array();
+
+
+            foreach ($systems as $system){
+                if (!$system->isDestroyed()){
+                    $legit[] = $system;
+                }
+                else $dest[] = $system;
+            }
+
+
+            if (sizeof($legit) > 0){
+                $roll = mt_rand(1, sizeof($legit));
+                debug::log("legit.length > 1 systems of name ".$name." in legit array, rolled: ".$roll);
+                debug::log($legit[$roll-1]->name);
+                $system = $legit[$roll-1];
+                    return $system;
+            }
+            else {
+                debug::log("legit < 2, redirecting to structure of location ".$location);
+                $system = $this->getStructureSystem($location);
+                if ($system->isDestroyed()){
+                    debug::log("structure destryed");
+                    return null;
+                }
+                else {
+                    debug::log("return structure");
+                    return $system;
+                }
+            }
+        }
+
+
+        */
+
+
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null)
         {  
             $system = null;
@@ -852,6 +927,7 @@
             
             return null;
         }
+
         
         public function getPiercingDamagePerLoc($damage){
             return ceil($damage/3);

@@ -2,11 +2,11 @@
 
 
 $db = 'b5cgm';
-//$user='aatu';
-//$pw='Kiiski';
+$user='aatu';
+$pw='Kiiski';
 
-$user='root';
-$pw='';
+//$user='root';
+//$pw='';
 
 
 mysql_connect("localhost", $user, $pw) or die(mysql_error());

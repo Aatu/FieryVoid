@@ -259,52 +259,49 @@
                         
             
 		<table class="divider">
-			<tr><td class="col1">
-				<div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
-				<div class="notes"></div>
-				
-			</td><td class="col2">
-				<div id="shipSection_1" class="shipSection">
-					<table></table>
-				</div>
-				<div id="shipSection_0" class="shipSection primary">
-					<table></table>
-				</div>
-				<div id="shipSection_2" class="shipSection">
-					<table></table>
-				</div>
-			</td><td class="col3">
-
-                <div class="EW">
-                    <div class="ewheader">
-                        <span class="header">ELECTRONIC WARFARE</span>
+			<tr>
+                <td class="col1">
+    				<div class="icon rotate90"><img src="" alt="" border="" width="120" height="120"></div>
+    				<div class="notes"></div>
+				</td>
+                <td class="col2">
+    				<div id="shipSection_1" class="shipSection">
+    					<table></table>
+    				</div>
+    				<div id="shipSection_0" class="shipSection primary">
+    					<table></table>
+    				</div>
+    				<div id="shipSection_2" class="shipSection">
+    					<table></table>
+    				</div>
+    			</td>
+                <td class="col3">
+                    <div class="EW">
+                        <div class="ewheader">
+                            <span class="header">ELECTRONIC WARFARE</span>
+                        </div>
+                        <div class="EWcontainer">
+                            <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
+                            <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
+                            <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
+                        </div>
+                        <div class="AA" style="display: none">
+                            <table class="AAtable" style="width: 100%; border: 1px solid #496791">
+                            </table>
+                        </div>
                     </div>
-                    <div class="EWcontainer">
-                        <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-                        <div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-                        <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-                    </div>
-
-                    <div class="AA" style="display: none">
-                        <table class="AAtable" style="width: 100%; border: 1px solid #496791">
-                        </table>
-                    </div>
-                </div>
-
-
-				<div id="shipSection_4" class="shipSection">
-					<table></table>
-				</div>
-				
-			</td></tr>
-		</table>
-            
-            
-        
-       
-        
-        
+    				<div id="shipSection_4" class="shipSection">
+    					<table></table>
+    				</div>
+    			</td>
+            </tr>
+		</table>   
+        <div class="hitChartDiv">
+        </div>     
     </div>
+
+    <table id="hitChartTable">
+    </table>
     
     <div class="shipwindow flight">
         <div class="topbar">

@@ -66,9 +66,43 @@ class Primus extends BaseShip{
         $this->addRightSystem(new Structure( 5, 56));
         $this->addPrimarySystem(new Structure( 7, 40));
 		
-		
+        $this->hitChart = array(
+            0=> array(
+                    9 => "structure",
+                    12 => "scanner",
+                    15 => "engine",
+                    17 => "hanger",
+                    19 => "reactor",
+                    20 => "CnC",
+            ),
+            1=> array(
+                    3 => "thruster",
+                    7 => "twinArray",
+                    18 => "structure",
+                    20 => "primary",
+            ),
+            2=> array(
+                    7 => "thruster",
+                    8 => "jumpEngine",
+                    18 => "structure",
+                    19 => "primary",
+            ),
+            3=> array(
+                    3 => "thruster",
+                    7 => "battleLaser",
+                    11 => "twinArray",
+                    18 => "structure",
+                    19 => "primary",
+            ),
+            4=> array(
+                    3 => "thruster",
+                    7 => "battleLaser",
+                    11 => "twinArray",
+                    18 => "structure",
+                    19 => "primary",
+            )
+        );
     }
-
 }
 
 

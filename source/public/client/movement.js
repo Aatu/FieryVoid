@@ -1912,11 +1912,13 @@ shipManager.movement = {
                 }       
             }
 
-            while (toDo > 0){
+            if (thrusters.length < 1){
+                continue;
+            }
 
+            while (toDo > 0){
                 for (var j in thrusters){
                     if (checked > 10){
-                        console.log("return");
                         return;
                     }
 

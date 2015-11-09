@@ -20,8 +20,7 @@ class Omega  extends BaseShip{
         $this->turndelaycost = 1;
         $this->accelcost = 3;
         $this->rollcost = 2;
-        $this->pivotcost = 3;
-		
+        $this->pivotcost = 3;	
         
          
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
@@ -69,13 +68,53 @@ class Omega  extends BaseShip{
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
 		
 
-        
-        
+                
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 60));
         $this->addAftSystem(new Structure( 4, 50 ));
         $this->addLeftSystem(new Structure( 4, 70));
         $this->addRightSystem(new Structure( 4, 70));
         $this->addPrimarySystem(new Structure( 6,60));
+
+        $this->hitChart = array(
+                0=> array(
+                        8 => "structure",
+                        10 => "jumpEngine",
+                        14 => "scanner",
+                        15 => "engine",
+                        17 => "hanger",
+                        19 => "reactor",
+                        20 => "CnC",
+                ),
+                1=> array(
+                        3 => "thruster",
+                        6 => "heavyLaser",
+                        7 => "heavyPulse",
+                        11 => "interceptorMkII",
+                        18 => "structure",
+                        20 => "primary",
+                ),
+                2=> array(
+                        6 => "thruster",
+                        9 => "heavyLaser",
+                        12 => "interceptorMkII",
+                        18 => "structure",
+                        20 => "primary",
+                ),
+                3=> array(
+                        4 => "thruster",
+                        9 => "stdParticleBeam",
+                        12 => "interceptorMkII",
+                        18 => "structure",
+                        20 => "primary",
+                ),
+                4=> array(
+                        4 => "thruster",
+                        9 => "stdParticleBeam",
+                        12 => "interceptorMkII",
+                        18 => "structure",
+                        19 => "primary",
+                ),
+        );
     }
 }
