@@ -27,10 +27,10 @@ class Aspar extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 4));
         $tempAdd = new CargoBay(2, 28);
-        $tempAdd->name = "cargoBayA";
+        $tempAdd->displayName = "cargoBayA";
         $this->addPrimarySystem($tempAdd);
         $tempAdd2 = new CargoBay(2, 28);
-        $tempAdd2->name = "cargoBayB";
+        $tempAdd2->displayName = "cargoBayB";
 		$this->addPrimarySystem($tempAdd2);       
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
@@ -70,7 +70,7 @@ class Aspar extends HeavyCombatVessel{
         				5 => "structure",
         				6 => "thruster",
         				7 => "thruster",
-        				8 => "lightParticleBeam",
+        				8 => "Light Particle Beam",
         				9 => "cargoBayA",
         				10 => "cargoBayA",
         				11 => "cargoBayB",
@@ -81,20 +81,20 @@ class Aspar extends HeavyCombatVessel{
         				16 => "engine",
         				17 => "reactor",
         				18 => "reactor",
-        				19 => "CnC",
-        				20 => "CnC",
+        				19 => "C&C",
+        				20 => "C&C",
         		),
         		1=> array(
         				1 => "thruster",
         				2 => "thruster",
         				3 => "thruster",
-        				4 => "plasmaTorch",
-        				5 => "plasmaTorch",
-        				6 => "lightParticleBeam",
-        				7 => "lightLaser",
-        				8 => "mediumLaser",
-        				9 => "mediumLaser",
-        				10 => "mediumLaser",
+        				4 => "Plasma Torch",
+        				5 => "Plasma Torch",
+        				6 => "Light Particle Beam",
+        				7 => "Light laser",
+        				8 => "Medium laser",
+        				9 => "Medium laser",
+        				10 => "Medium laser",
         				11 => "structure",
         				12 => "structure",
         				13 => "structure",
@@ -111,10 +111,10 @@ class Aspar extends HeavyCombatVessel{
         				2 => "thruster",
         				3 => "thruster",
         				4 => "thruster",
-        				5 => "lightParticleBeam",
-        				6 => "lightParticleBeam",
-        				7 => "lightLaser",
-        				8 => "lightLaser",
+        				5 => "Light Particle Beam",
+        				6 => "Light Particle Beam",
+        				7 => "Light laser",
+        				8 => "Light laser",
         				9 => "hanger",
         				10 => "hanger",
         				11 => "structure",

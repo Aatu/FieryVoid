@@ -40,7 +40,30 @@ class Pinnace extends MediumShip{
                
         $this->addPrimarySystem(new Structure(4, 52));
 		
-		
+        $this->hitChart = array (
+        		0=> array (
+        				7=>"Thruster",
+        				9=>"Twin Array",
+        				12=>"Scanner",
+        				15=>"Engine",
+        				17=>"Hanger",
+        				19=>"Reactor",
+        				20=>"C&C",
+        		),
+        		1=> array (
+        				5=>"Thruster",
+        				9=>"Medium Plasma",
+        				17=>"Structure",
+        				20=>"Primary",
+        		),
+        		2=> array(
+        				6=>"Thruster",
+        				9=>"Twin Array",
+        				11=>"Cargo Bay",
+        				17=>"Structure",
+        				20=>"Primary",
+        		),
+        );
     }
 
 }
