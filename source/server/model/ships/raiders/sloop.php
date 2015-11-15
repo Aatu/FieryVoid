@@ -4,8 +4,8 @@ class Sloop extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 380;
-	$this->faction = "Raiders";
+		$this->pointCost = 380;
+		$this->faction = "Raiders";
         $this->phpclass = "Sloop";
         $this->imagePath = "img/ships/sloop.png";
         $this->shipClass = "Sloop";
