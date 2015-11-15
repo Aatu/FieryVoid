@@ -61,7 +61,7 @@ class Brigantine extends HeavyCombatVessel{
         				12=>"Medium Plasma",
         				14=>"Scanner",
         				16=>"Engine",
-        				17=>"Hanger",
+        				17=>"Hangar",
         				19=>"Reactor",
         				20=>"C&C",
         		),

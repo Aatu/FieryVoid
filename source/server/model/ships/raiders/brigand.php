@@ -62,7 +62,7 @@ class Brigand extends HeavyCombatVesselLeftRight{
         				14 => "engine",
         				15 => "engine",
         				16 => "cargo Bay",
-        				17 => "hanger",
+        				17 => "hangar",
         				18 => "reactor",
         				19 => "reactor",
         				20 => "C&C",

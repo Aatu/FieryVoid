@@ -59,7 +59,7 @@ class Galleon extends HeavyCombatVessel{
         				11=>"Cargo",
         				13=>"Scanner",
         				15=>"Engine",
-        				17=>"Hanger",
+        				17=>"Hangar",
         				19=>"Reactor",
         				20=>"C&C",
         		),

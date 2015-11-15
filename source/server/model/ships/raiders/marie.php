@@ -50,7 +50,7 @@ class MaRie extends MediumShip{
         				10=>"Cargo Bay",
         				12=>"Scanner",
         				14=>"Engine",
-        				17=>"Hanger",
+        				17=>"Hangar",
         				19=>"Reactor",
         				20=>"C&C",
         		),

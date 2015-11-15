@@ -50,7 +50,7 @@ class MaRiu extends MediumShip{
         				11=>"Cargo Bay",
         				14=>"Scanner",
         				16=>"Engine",
-        				17=>"Hanger",
+        				17=>"Hangar",
         				19=>"Reactor",
         				20=>"C&C",
         		),

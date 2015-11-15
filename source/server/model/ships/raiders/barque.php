@@ -69,7 +69,7 @@ class Barque extends HeavyCombatVessel{
         		14 => "scanner",
         		15 => "engine",
         		16 => "engine",
-        		17 => "hanger",
+        		17 => "hangar",
         		18 => "reactor",
         		19 => "reactor",
         		20 => "C&C",	

@@ -46,7 +46,7 @@ class Hawk extends MediumShipLeftRight{
         				10=>"Light Particle Cannon",
         				13=>"Scanner",
         				15=>"Engine",
-        				17=>"Hanger",
+        				17=>"Hangar",
         				19=>"Reactor",
         				20=>"C&C",
         		),
