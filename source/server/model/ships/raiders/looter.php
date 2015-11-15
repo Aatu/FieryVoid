@@ -4,8 +4,8 @@ class Looter extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-  $this->pointCost = 340;
-  $this->faction = "Raiders";
+  		$this->pointCost = 340;
+  		$this->faction = "Raiders";
         $this->phpclass = "Looter";
         $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
         $this->shipClass = "Looter Support Cruiser";
