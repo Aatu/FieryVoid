@@ -15,7 +15,7 @@ class WhiteStar extends MediumShip{
         $this->limited = 33;
 
         $this->adaptiveArmour = true;
-        $this->adaptiveArmourLimits = [3, 1];
+        $this->adaptiveArmourLimits = array(3, 1);
         $this->armourSettings = array();
 
         $this->forwardDefense = 13;
