@@ -176,7 +176,7 @@ spl_autoload_register(
                 'adder' => '/server/model/ships/raiders/adder.php',
                 'asper' => '/server/model/ships/raiders/asper.php',
                 'barque' => '/server/model/ships/raiders/barque.php',
-                'deltavalt' => '/server/model/ships/raiders/deltaValt.php',
+                'deltavalt' => '/server/model/ships/raiders/deltaVAlt.php',
                 'schooner' => '/server/model/ships/raiders/schooner.php',
                 'skiff' => '/server/model/ships/raiders/skiff.php',
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
