@@ -1118,16 +1118,16 @@ class DBManager {
             while($stmt->fetch()){
                 $ship = $gamedata->getShipById($shipid);
 
-                $ship->armourSettings["particle"] = [$particlepoints, $particlealloc];
-                $ship->armourSettings["laser"] = [$laserpoints, $laseralloc];
-                $ship->armourSettings["molecular"] = [$molecularpoints, $molecularalloc];
-                $ship->armourSettings["matter"] = [$matterpoints, $matteralloc];
-                $ship->armourSettings["plasma"] = [$plasmapoints, $plasmaalloc];
-                $ship->armourSettings["electromagnetic"] = [$electromagneticpoints, $electromagneticalloc];
-                $ship->armourSettings["antimatter"] = [$antimatterpoints, $antimatteralloc];
-                $ship->armourSettings["ion"] = [$ionpoints, $ionalloc];
-                $ship->armourSettings["gravitic"] = [$graviticpoints, $graviticalloc];
-                $ship->armourSettings["ballistic"] = [$ballisticpoints, $ballisticalloc];
+                $ship->armourSettings["particle"] = array($particlepoints, $particlealloc);
+                $ship->armourSettings["laser"] = array($laserpoints, $laseralloc);
+                $ship->armourSettings["molecular"] = array($molecularpoints, $molecularalloc);
+                $ship->armourSettings["matter"] = array($matterpoints, $matteralloc);
+                $ship->armourSettings["plasma"] = array($plasmapoints, $plasmaalloc);
+                $ship->armourSettings["electromagnetic"] = array($electromagneticpoints, $electromagneticalloc);
+                $ship->armourSettings["antimatter"] = array($antimatterpoints, $antimatteralloc);
+                $ship->armourSettings["ion"] = array($ionpoints, $ionalloc);
+                $ship->armourSettings["gravitic"] = array($graviticpoints, $graviticalloc);
+                $ship->armourSettings["ballistic"] = array($ballisticpoints, $ballisticalloc);
             }
 
             $stmt->close();
