@@ -803,9 +803,20 @@
             if(sizeof($systems) == 0){
                 // all systems were destroyed. If there still is structure,
                 // return that. If not, go to primary.
+                debug::log("size of 0");
+                debug::log("location: ".$location);
+
                 $structure = $this->getStructureSystem($location);
-                
+
+                if ($structure){
+                    debug::log("strcuture: ".$structure->displayName);
+                }
+                else {
+                    debug::log("no structure");
+                }
+
                 if($structure->isDestroyed()){
+                    debug::log("structure true");
                     if ($location == 0)
                                 return null;
                     // Go to primary

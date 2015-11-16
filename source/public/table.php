@@ -1,7 +1,7 @@
 <?php
 
 
-$db = 'b5cgm';
+$db = 'B5CGM';
 $user='aatu';
 $pw='Kiiski';
 
