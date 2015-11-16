@@ -104,7 +104,7 @@ shipWindowManager = {
 
 		shipWindowManager.populateShipWindow(ship, shipwindow);
 
-		if (ship.hitChart.length > 0){
+		if (ship.hitChart.length > 0 && gamedata.gamephase > -2){
 			shipWindowManager.hitChartSetup(ship, shipwindow);			
 		}
 
