@@ -290,6 +290,10 @@
                             </table>
                         </div>
                     </div>
+                    <div class ="buttons">
+                        <div class="HitChart" style="display: none">
+                        </div>
+                    </div>
     				<div id="shipSection_4" class="shipSection">
     					<table></table>
     				</div>

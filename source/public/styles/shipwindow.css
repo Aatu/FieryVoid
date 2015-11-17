@@ -175,8 +175,13 @@
     vertical-align:top;
 }
 
+.shipwindow .buttons{
+    height:80px;
+    overflow-y:auto;
+}
+
 .shipwindow .EW .EWcontainer{
-    height:170px;
+    height:100px;
     overflow-y:auto;
 }
 
@@ -232,7 +237,6 @@
 .shipwindow .notes{
     border:1px solid #496791;
     margin-top:4px;
-    text-indent: 8px;
     background-color:#072731;
     overflow-y:auto;
     text-align: center
@@ -1109,7 +1113,7 @@ body .shipwindow .system.modes.firing .mode
     font-size: 12px;    
     margin-top: 8px;
     background-color: black;
-    border: 2px solid red;
+    border: 1px solid red;
     color: red;
 }
 
@@ -1175,4 +1179,6 @@ body .shipwindow .system.modes.firing .mode
     margin-left: 25px;
     background-color: #072731;
     border: 1px solid #496791;
+    text-align: center;
+    border-collapse: collapse;
 }

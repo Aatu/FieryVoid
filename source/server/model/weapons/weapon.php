@@ -193,7 +193,6 @@ class Weapon extends ShipSystem{
 
         $this->data["Resolution Priority"] = $this->priority;
         $this->data["Loading"] = $this->getTurnsloaded()."/".$this->getNormalLoad();
-        $this->data["Weapon type"] = "Particle";
 
         $dam = $this->minDamage."-".$this->maxDamage;
         if ($this->minDamage == $this->maxDamage)

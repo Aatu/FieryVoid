@@ -629,21 +629,21 @@ class DBManager {
         foreach ($damages as $damage){
             if (isset($id)){
                 if ($id == $damage->fireorderid){
-                //    debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
+                    debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
                     continue;
                 }
             }
 
             if (isset($obj[$damage->damageclass])){
                 $obj[$damage->damageclass] += 1;
-            //    debug::log("+ 1");
+                debug::log("+ 1");
             } else {                
                 $obj[$damage->damageclass] = 1;
-            //   debug::log("init = 1");
+               debug::log("init = 1");
             }
 
             $id = $damage->fireorderid;
-            //  debug::log("setting id to ".$id);
+              debug::log("setting id to ".$id);
         }
 
 

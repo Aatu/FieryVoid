@@ -154,55 +154,6 @@ shipWindowManager = {
 
 	},
 
-	hitArraySetup: function(ship){
-		var system = [];
-		var chance = [];
-
-		var name = null;
-		var count = 0;
-		var totalCount = 0;
-
-		var loc = ship.hitChart[0];
-
-		for (var i in loc){
-			if (name == null){
-				name = loc[i];
-				count = Math.floor(i);
-				totalCount += count;
-				system.push(name);
-				chance.push(count);
-			}
-
-			else if (name != loc[i]){
-				name = loc[i];
-				count = i - totalCount;
-				totalCount += count;
-				system.push(name);
-				chance.push(count);
-			}
-
-
-			console.log(system);
-			console.log(chance);
-		}
-
-
-				},
-
-	hitCalc: function(index, array){
-
-		var string = array[index];
-		var from = index;
-		var hits = 1;
-
-		for (var i = index; i > 1; i--){
-			if (array[i] != undefined && array[i] != string){
-				break;
-			} else hits++;
-		}
-
-		return Math.floor(hits/20*100) + " %";
-},
 
 
 	getName: function(name){
@@ -218,20 +169,9 @@ shipWindowManager = {
 
 	},
 
-
-
 	hitChartSetup: function(ship, shipwindow){
 
-		shipWindowManager.hitArraySetup(ship);
-
-		var parentDiv = shipwindow.find(".EWcontainer")[0]
-
-		var button = document.createElement("button");
-			button.type = "input";
-			button.innerHTML = "Display Hit Chart";
-			button.id = "hitChartButton" + ship.id;
-			$(button).data("id", ship.id);
-
+		var parentDiv = shipwindow.find(".buttons")[0];
 			
 			var div = shipwindow.find(".hitChartDiv");
 				div = div[0];
@@ -256,15 +196,38 @@ shipWindowManager = {
 						table.appendChild(tr);
 
 
-					for (var index in ship.hitChart[i]){
+					var list = [];
+					var current = 0;
+
+					for (var key in ship.hitChart[i]){
+
+						var name = shipWindowManager.getName(ship.hitChart[i][key]);
+						var hitChance = Math.round(((key-current) / 21)*100);
+						var item = [name, hitChance];
+
+						current = Math.floor(key);
+
+						list.push(item);
+
+						list.sort(function(a, b){
+							if (a[1] < b[1]){
+								return 1;
+							}
+							else return -1;
+						})
+					}
+
+					for (var j = 0; j < list.length; j++){
 						var tr = document.createElement("tr");
 
 							var td = document.createElement("td")
-								td.innerHTML = shipWindowManager.getName(ship.hitChart[i][index]);
+								td.innerHTML = list[j][0]
+								td.style.borderBottom = "1px solid #496791";
 							tr.appendChild(td);
 
 							var td = document.createElement("td")
-								td.innerHTML = shipWindowManager.hitCalc(index, ship.hitChart[i]);
+								td.innerHTML = list[j][1] + " %";
+								td.style.borderBottom = "1px solid #496791";
 							tr.appendChild(td);
 						table.appendChild(tr);
 					}
@@ -276,6 +239,13 @@ shipWindowManager = {
 				target.appendChild(div);
 
 
+		var button = document.createElement("button");
+			button.type = "input";
+			button.innerHTML = "Display Hit Chart";
+			button.id = "hitChartButton" + ship.id;
+			button.className = "interceptButton";
+			button.style.marginLeft = "8px";
+			$(button).data("id", ship.id);
 			button.addEventListener("click", function(){
 				var div = document.getElementById("hitChartDiv" + $(this).data("id"));
 				if (div.className == "hitChartDiv hitChartDisabled"){
@@ -289,6 +259,19 @@ shipWindowManager = {
 			$(button).appendTo(parentDiv);
 
 	},
+
+
+	getName: function(name){
+		if (name == "stdParticleBeam"){
+			return "SPB";
+		}
+		else if (name == "interceptorMkII"){
+			return ("Interceptor");
+		}
+		else 
+			return name;
+	},
+
 	
     updateNotes: function(ship){
         var shipWindow = ship.shipStatusWindow;

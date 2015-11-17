@@ -1250,8 +1250,6 @@ window.weaponManager = {
 						weapon.fireOrders.push(fire);
 
 
-
-
 					}
 					if (weapon.ballistic){
 						gamedata.ballistics.push({id:(gamedata.ballistics.length), fireid:fireid, position:shipManager.getShipPosition(selectedShip),

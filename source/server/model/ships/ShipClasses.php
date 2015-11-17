@@ -683,8 +683,28 @@
         }
 
 
-    /*    public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+
+        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+            debug::log("gethitystem for: ".$this->phpclass);
+
+            if (isset($this->hitChart[0])){
+                debug::log("TABLE");
+                $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
+            }
+            else {
+                debug::log("DICE");
+                $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
+            }
+
+            return $system;
+        }
+
+
+        public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
+                debug::log("TABLE!!");
             $system = null;
+            $name = false;
+
             
             if ($fire->calledid != -1)
                 $system = $this->getSystemById($fire->calledid);
@@ -697,18 +717,48 @@
 
             $hitChart = $this->hitChart[$location];
             $roll = mt_rand(1, 20);
-            $name = $hitChart[$roll];
+            debug::log("roll: ".$roll);
 
+            if (isset($hitChart[$roll])){
+                $name = $hitChart[$roll];
+                debug::log("name: ".$name);
+            }
+            else {
+                debug::log("no name for that roll -> while");
+                while (!$name){
+                    $roll++;
+                    if (isset($hitChart[$roll])){
+                        $name = $hitChart[$roll];
+                        debug::log("WHILE name: ".$name);
+                    }
+                }
+            }
 
             if ($name == "primary"){
                 debug::log("redirecting to PRIMARY");
                 $location = 0;
                 $hitchart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
+
+                if (isset($hitChart[$roll])){
+                    $name = $hitChart[$roll];
+                    debug::log("name: ".$name);
+                }
+                else {
+                    debug::log("no name for that roll -> while");
+                    while (!$name){
+                        $roll++;
+                        if (isset($hitChart[$roll])){
+                            $name = $hitChart[$roll];
+                            debug::log("WHILE name: ".$name);
+                        }
+                    }
+                }
+
                 $name = $hitChart[$roll];
             }
 
-            debug::log("hitLoc: ".$location.", roll: ".$roll.", hitting: ".$name);
+            debug::log("hitLoc: ".$location.", hitting: ".$name);
 
             $systems = array();
 
@@ -732,34 +782,33 @@
                 else $dest[] = $system;
             }
 
+            debug::log(sizeof($legit)." legit systems of that name found");
 
             if (sizeof($legit) > 0){
                 $roll = mt_rand(1, sizeof($legit));
                 debug::log("legit.length > 1 systems of name ".$name." in legit array, rolled: ".$roll);
                 debug::log($legit[$roll-1]->name);
                 $system = $legit[$roll-1];
-                    return $system;
+                return $system;
             }
             else {
-                debug::log("legit < 2, redirecting to structure of location ".$location);
+                debug::log("legit < 2, checking for structure of location ".$location);
                 $system = $this->getStructureSystem($location);
                 if ($system->isDestroyed()){
-                    debug::log("structure destryed");
+                    debug::log("structure destroyed");
                     return null;
                 }
                 else {
-                    debug::log("return structure");
+                    debug::log("structure valid");
                     return $system;
                 }
             }
         }
 
 
-        */
+        public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
 
-
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null)
-        {  
+                debug::log("DICE");
             $system = null;
             
             if ($fire->calledid != -1)
