@@ -6,6 +6,7 @@
         public $systems = array();
         public $EW = array();
         public $fighters = array();
+        public $hitChart = array();
 
         public $occurence = "common";
         public $limited = 0;

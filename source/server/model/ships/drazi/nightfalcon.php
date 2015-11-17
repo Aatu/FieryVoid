@@ -56,6 +56,42 @@ class Nightfalcon extends BaseShipNoAft{
         $this->addLeftSystem(new Structure( 4, 44));
         $this->addRightSystem(new Structure( 4, 44));
         $this->addPrimarySystem(new Structure( 5, 44));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				8=> "Structure",
+        				9=> "Jump Engine",
+        				11=> "Thruster",
+        				13=> "Scanner",
+        				15=> "Engine",
+        				17=> "Hangar",
+        				18=> "Catapult",
+        				19=> "Reactor",
+        				20=> "C&C",
+        		),
+        		1=> array(
+        				4=> "Thruster",
+        				6=> "Particle Cutter",
+        				8=> "Catapult",
+        				9=> "Particle Cannon",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        		3=> array(
+        				4=> "Thruster",
+        				8=> "Particle Cannon",
+        				9=> "Twin Array",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        		4=> array(
+        				4=> "Thruster",
+        				8=> "Particle Cannon",
+        				9=> "Twin Array",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        );
     }
 }
 ?>

@@ -43,5 +43,18 @@ class GODALpha extends OSAT{
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 60));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				6=> "Structure",
+        				8=> "Thruster",
+        				10=> "Heavy Laser",
+        				13=> "Class-LH Missile Rack",
+        				15=> "Light Pulse",
+        				17=> "Scanner",
+        				19=> "Reactor",
+        				20=> "Interceptor MK II",
+        		),
+        );
     }
 }
