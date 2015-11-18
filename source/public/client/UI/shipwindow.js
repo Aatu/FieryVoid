@@ -104,9 +104,9 @@ shipWindowManager = {
 
 		shipWindowManager.populateShipWindow(ship, shipwindow);
 
-		if (ship.hitChart.length > 0 && gamedata.gamephase > -2){
-			shipWindowManager.hitChartSetup(ship, shipwindow);			
-		}
+	//	if (ship.hitChart.length > 0 && gamedata.gamephase > -2){
+	//		shipWindowManager.hitChartSetup(ship, shipwindow);			
+	//	}
 
         shipWindowManager.bindEvents(shipwindow);
 		

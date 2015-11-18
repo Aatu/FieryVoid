@@ -603,16 +603,20 @@
             }
 
 
+
             if ($location != 0){
-                if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
-                    $location = 0;
-                }   
-                    
+               // if (!isset($this->hitChart[0])){
+               //     debug::log("!isset ship->hitchart[0] getHitSection");
+                    if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
+                        $location = 0;
+                    }
+              //  }
+
                 $structure = $this->getStructureSystem($location);
                 if ($structure != null && $structure->isDestroyed($turn-1))
                     return 0;
-            }
-            
+                }
+        
             return $location;
             
         }
@@ -685,26 +689,24 @@
 
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-            debug::log("gethitystem for: ".$this->phpclass);
+           // debug::log("gethitystem for: ".$this->phpclass);
 
-            if (isset($this->hitChart[0])){
-                debug::log("TABLE");
-                $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
-            }
-            else {
-                debug::log("DICE");
+           // if (isset($this->hitChart[0])){
+            //    debug::log("TABLE");
+           //     $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
+            //}
+           // else {
+           ///     debug::log("DICE");
                 $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
-            }
+           // }
 
             return $system;
         }
 
 
         public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
-                debug::log("TABLE!!");
             $system = null;
             $name = false;
-
             
             if ($fire->calledid != -1)
                 $system = $this->getSystemById($fire->calledid);
@@ -717,10 +719,10 @@
 
             $hitChart = $this->hitChart[$location];
             $roll = mt_rand(1, 20);
-            debug::log("roll: ".$roll);
+            debug::log("roll: ".$roll." on loc: ".$location);
 
-            if (isset($hitChart[$roll])){
-                $name = $hitChart[$roll];
+            if (isset($this->hitChart[$location][$roll])){
+                $name = $this->hitChart[$location][$roll];
                 debug::log("name: ".$name);
             }
             else {
@@ -736,71 +738,85 @@
 
             if ($name == "primary"){
                 debug::log("redirecting to PRIMARY");
+                $name = false;
                 $location = 0;
-                $hitchart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
+            debug::log("NEW roll: ".$roll." on loc: ".$location);
 
-                if (isset($hitChart[$roll])){
-                    $name = $hitChart[$roll];
+            if (isset($this->hitChart[$location][$roll])){
+                    $name = $this->hitChart[$location][$roll];
                     debug::log("name: ".$name);
                 }
                 else {
                     debug::log("no name for that roll -> while");
                     while (!$name){
                         $roll++;
-                        if (isset($hitChart[$roll])){
-                            $name = $hitChart[$roll];
+                        if (isset($this->hitChart[$location][$roll])){
+                            $name = $this->hitChart[$location][$roll];
                             debug::log("WHILE name: ".$name);
                         }
                     }
                 }
-
-                $name = $hitChart[$roll];
             }
 
             debug::log("hitLoc: ".$location.", hitting: ".$name);
 
             $systems = array();
 
-            foreach ($this->systems as $system){
-                if ($system->location == $location){
-                    if ($system->name == $name){
+
+            if ($weapon->flashDamage){
+                foreach ($this->systems as $system){
+                    if ($system->location == $location && !$system->isDestroyed() && !$system instanceof Structure){
                         $systems[] = $system;
                     }
                 }
             }
-
-            $allTargets = sizeof($systems);
-            $legit = array();
-            $dest = array();
-
-
-            foreach ($systems as $system){
-                if (!$system->isDestroyed()){
-                    $legit[] = $system;
+            else {
+                foreach ($this->systems as $system){
+                    if ($system->location == $location){
+                        if ($system->name == $name){
+                            if (!$system->isDestroyed()){
+                                $systems[] = $system;
+                            }
+                        }
+                    }
                 }
-                else $dest[] = $system;
             }
 
-            debug::log(sizeof($legit)." legit systems of that name found");
-
-            if (sizeof($legit) > 0){
-                $roll = mt_rand(1, sizeof($legit));
-                debug::log("legit.length > 1 systems of name ".$name." in legit array, rolled: ".$roll);
-                debug::log($legit[$roll-1]->name);
-                $system = $legit[$roll-1];
+            if (sizeof($systems) > 0){
+                $roll = mt_rand(1, sizeof($systems));
+                $system = $systems[$roll-1];
+                debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 return $system;
             }
             else {
-                debug::log("legit < 2, checking for structure of location ".$location);
+
                 $system = $this->getStructureSystem($location);
+                debug::log("systems <= 0, checking for structure of location ".$location);
+
+
                 if ($system->isDestroyed()){
                     debug::log("structure destroyed");
-                    return null;
-                }
-                else {
-                    debug::log("structure valid");
-                    return $system;
+                    if ($location != 0){
+                        debug::log("but not 0");
+                        if($system->isDestroyed($fire->turn -1)){
+                            debug::log("destroyed last turn, get hitsystem on loc 0");
+                            $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
+                        }
+                        else {
+                            debug::log("destroyed this turn");
+                            $system = $this->getStructureSystem(0);
+                            debug::log("got structure 0");
+                            if ($system->isDestroyed()){
+                            debug::log("is destroyed, return null");
+                                return null;
+                            }
+                            else { 
+                            debug::log("alive, returning prim sturcture");
+                                return $system;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -808,7 +824,6 @@
 
         public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
 
-                debug::log("DICE");
             $system = null;
             
             if ($fire->calledid != -1)

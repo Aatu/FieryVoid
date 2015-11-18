@@ -113,7 +113,7 @@ class Omega  extends BaseShip{
                         9 => "stdParticleBeam",
                         12 => "interceptorMkII",
                         18 => "structure",
-                        19 => "primary",
+                        20 => "primary",
                 ),
         );
     }
