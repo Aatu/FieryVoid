@@ -1,6 +1,6 @@
 
 <?php
-class Haltona extends BaseShip{
+class Haltona extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
