@@ -921,7 +921,7 @@
             foreach ($systems as $system){
                 $health = 0;
                     
-          //      if ($system->name == "structure"){
+                if ($system->name == "structure"){
                     $multiply = 0.5;
                     if ($location == 0)
                         $multiply = 2;

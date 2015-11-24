@@ -1049,12 +1049,11 @@ window.weaponManager = {
 
 			if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
 				weaponManager.removeFiringOrder(selectedShip, weapon);
-				var type = weapon.data["Weapon Type"].toLowerCase();
 
 				for (var s=0;s<weapon.guns;s++){
 					weapon.fireOrders.push(
 						{
-							id:null, type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null", damageclass: type
+							id:null, type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null", damageclass: weapon.data["Weapon type"].toLowerCase()
 						}
 					);
 				}

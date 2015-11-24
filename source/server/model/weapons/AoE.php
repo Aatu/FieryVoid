@@ -149,6 +149,10 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Ballistic";
+        }
         
         public function getDamage($fireOrder){        return 10;   }
         public function setMinDamage(){     $this->minDamage = 10;      }
