@@ -824,6 +824,9 @@
 
         public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
 
+            debug::log("hit system for ".$this->displayName."__".$this->phpclass);
+            debug::log("loc: ".$location);
+
             $system = null;
             
             if ($fire->calledid != -1)
@@ -833,7 +836,9 @@
                 return $system;
         
             if ($location === null)
+            debug::log("loc null");
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
+            debug::log("gethitsection loc: ".$location);
 
             
             $systems = array();
