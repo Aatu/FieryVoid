@@ -154,6 +154,14 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Molecular";
+            $this->data["Damage type"] = "Raking";
+
+            parent::setSystemDataWindow($turn);
+        }
+
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
 
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);

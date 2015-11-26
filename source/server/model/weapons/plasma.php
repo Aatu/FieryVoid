@@ -9,17 +9,19 @@
         }
 		
 		protected function getSystemArmour($system, $gamedata, $fireOrder){
-			$armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+			$armour = parent::getSystemArmour($system, $gamedata, $fireOrder);
 
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
+            if (is_numeric($armour)){
+                $toIgnore = ceil($armour /2);
+                $new = $armour - $toIgnore;
                 return $new;
             }
             else {
                 return 0;
             }
         }
+
+
     	
 		public function setSystemDataWindow($turn){
 

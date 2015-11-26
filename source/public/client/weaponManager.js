@@ -1144,7 +1144,8 @@ window.weaponManager = {
 				shots:weapon.defaultShots,
 				x:"null",
 				y:"null",
-				addToDB: true
+				addToDB: true,
+				damageclass: weapon.data["Weapon type"].toLowerCase()
 			};
 
 			weapon.fireOrders.push(fire);

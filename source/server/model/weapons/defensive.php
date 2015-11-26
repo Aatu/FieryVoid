@@ -24,6 +24,7 @@
         
         public $tohitPenalty = 0;
         public $damagePenalty = 0;
+
     
         public function getDefensiveType()
         {
@@ -51,6 +52,8 @@
         }
         
         public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
             $this->data["DEFENSIVE BONUS:"] = "-15 to hit on arc";
             parent::setSystemDataWindow($turn);
         }

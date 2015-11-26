@@ -24,7 +24,13 @@ class IonBolt extends Weapon{
         parent::__construct(0, 1, 0, $startArc, $endArc);
 
     }
+    public function setSystemDataWindow($turn){
 
+        $this->data["Weapon type"] = "Ion";
+        $this->data["Damage type"] = "Standard";
+
+        parent::setSystemDataWindow($turn);
+    }
     public function getDamage($fireOrder){        return Dice::d(6, 3);  }
     public function setMinDamage(){     $this->minDamage = 3 - $this->dp;      }
     public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }

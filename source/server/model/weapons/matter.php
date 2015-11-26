@@ -7,9 +7,23 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder)
-        {
-            return 0;
+        protected function getSystemArmour($system, $gamedata, $fireOrder){
+            $target = $gamedata->getShipById($fireOrder->targetid);
+            if (!$target instanceof WhiteStar){
+                return 0;
+            }
+            else {
+                $shooter = $gamedata->getShipById($fireOrder->shooterid);
+                $armour = 0;
+                $activeAA = 0;
+            //    debug::log("hit by: ".$dmgClass);
+                if (isset($target->armourSettings[$fireOrder->damageclass][1])){
+                    $activeAA = $target->armourSettings[$fireOrder->damageclass][1];
+                    //      debug::log("hit by: ".$dmgClass.", applying mod: ".$activeAA);
+                    $armour = $activeAA;
+                }
+                return $armour;
+            }
         }
 
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
@@ -283,9 +297,22 @@
             $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder)
-        {
-            return 0;
+        protected function getSystemArmour($system, $gamedata, $fireOrder){
+            $target = $gamedata->getShipById($fireOrder->targetid);
+            if (!$target instanceof WhiteStar){
+                return 0;
+            }
+            else {
+                $shooter = $gamedata->getShipById($fireOrder->shooterid);
+                $armour = 0;
+                $activeAA = 0;
+                if (isset($target->armourSettings[$fireOrder->damageclass][1])){
+                    $activeAA = $target->armourSettings[$fireOrder->damageclass][1];
+                 //   debug::log("hit by: ".$fireOrder->damageclass.", applying mod: ".$activeAA);
+                    $armour = $activeAA;
+                }
+                return $armour;
+            }
         }
 
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
