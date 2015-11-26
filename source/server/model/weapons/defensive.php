@@ -154,6 +154,14 @@
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+
+
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
+            parent::setSystemDataWindow($turn);
+        }
+
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
