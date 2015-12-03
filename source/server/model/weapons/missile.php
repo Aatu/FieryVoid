@@ -386,7 +386,7 @@ class FighterMissileRack extends MissileLauncher
     {
         parent::setSystemDataWindow($turn);
 
-        $this->data["Weapon type"] = "Missile";
+        $this->data["Weapon type"] = "Ballistic";
         $this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
         $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
@@ -513,7 +513,7 @@ class FighterTorpedoLauncher extends FighterMissileRack
     {
         parent::setSystemDataWindow($turn);
 
-        $this->data["Weapon type"] = "Torpedo";
+        $this->data["Weapon type"] = "Ballistic";
         $this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
         if($this->missileArray[$this->firingMode]->minDamage != $this->missileArray[$this->firingMode]->maxDamage){
@@ -579,8 +579,7 @@ class BombRack extends MissileLauncher{
     public function setSystemDataWindow($turn)
     {
         parent::setSystemDataWindow($turn);
-
-        $this->data["Weapon type"] = "Missile";
+        
         $this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
         $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;

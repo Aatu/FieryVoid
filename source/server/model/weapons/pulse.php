@@ -229,7 +229,7 @@
         public $priority = 7;
         
         public $rangePenalty = 2;
-        public $fireControl = array(4, 300, 3); // fighters, <mediums, <capitals 
+        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
         
         public $intercept = 2;
 

@@ -9,6 +9,13 @@ spl_autoload_register(
             $classes = array(
 
 
+                // drazi and wotc centauro osat
+                'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
+                'dudromab' => '/server/model/ships/drazi/dudromaB.php',
+
+                'legiona' => '/server/model/ships/centauri_old/legionA.php',
+                'legionb' => '/server/model/ships/centauri_old/legionB.php',
+                'imperiallaser' => '/server/model/weapons/lasers.php',
 
                 // drazi raiders
                 'raven' => '/server/model/ships/drazi_raiders/raven.php',

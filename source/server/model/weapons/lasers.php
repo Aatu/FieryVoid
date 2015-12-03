@@ -451,6 +451,32 @@
         public function setMaxDamage(){ $this->maxDamage = 28 - $this->dp; }
     }
 
+    class ImperialLaser extends Laser{
+
+        public $name = "imperialLaser";
+        public $displayName = "Imperial Laser";
+        public $animation = "laser";
+        public $animationColor = array(220, 60, 120);
+        public $animationWidth = 5;
+        public $animationWidth2 = 0.5;
+
+        public $loadingtime = 4;
+
+        public $damageType = "raking";
+        public $raking = 10;
+
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-5, 2, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 4)+8; }
+        public function setMinDamage(){ $this->minDamage = 12 - $this->dp; }
+        public function setMaxDamage(){ $this->maxDamage = 48 - $this->dp; }
+    }
+
 
     class ImprovedBlastLaser extends Weapon{
 
