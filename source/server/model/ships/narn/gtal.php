@@ -29,7 +29,7 @@ class Gtal extends BaseShip{
         $this->addPrimarySystem(new Hangar(6, 16));
         
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
-	$this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
+		$this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
         $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));
@@ -40,7 +40,7 @@ class Gtal extends BaseShip{
         $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
         $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
         $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
-	$this->addAftSystem(new HeavyLaser(4, 8, 6, 120, 240));
+		$this->addAftSystem(new HeavyLaser(4, 8, 6, 120, 240));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
@@ -58,6 +58,50 @@ class Gtal extends BaseShip{
         $this->addLeftSystem(new Structure(4, 70));
         $this->addRightSystem(new Structure(4, 70));
         $this->addPrimarySystem(new Structure(6, 50));
+		
+			
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Jump Engine",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				3 => "Thruster",
+				8 => "Heavy Laser",
+				12 => "Energy Mine",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				5 => "Thruster",
+				7 => "Heavy Laser",
+				9 => "Twin Array",
+				11 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			3=> array(
+				4 => "Thruster",
+				7 => "Light Pulse Cannon",
+				9 => "Twin Array",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				4 => "Thruster",
+				7 => "Light Pulse Cannon",
+				9 => "Twin Array",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);
     }
+	
+
 }
 ?>

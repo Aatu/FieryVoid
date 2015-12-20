@@ -8,7 +8,7 @@ class HyperionPulse extends BaseShip{
 		$this->faction = "EA";
         $this->phpclass = "HyperionPulse";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Pulse Cruiser (Delta Model)";
+        $this->shipClass = "Hyperion Delta (Pulse Cruiser)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
         $this->occurence = "uncommon";
@@ -20,9 +20,7 @@ class HyperionPulse extends BaseShip{
         $this->turndelaycost = 1;
         $this->accelcost = 3;
         $this->rollcost = 2;
-        $this->pivotcost = 3;
-
-        
+        $this->pivotcost = 3;        
          
         $this->addPrimarySystem(new Reactor(5, 23, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
@@ -58,8 +56,6 @@ class HyperionPulse extends BaseShip{
 		$this->addRightSystem(new HeavyPulse(4, 6, 4, 0, 60));
 		$this->addRightSystem(new HeavyPulse(4, 6, 4, 120, 180));
 		$this->addRightSystem(new MediumPulse(3, 6, 3, 0, 180));
-
-
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -68,5 +64,48 @@ class HyperionPulse extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 60));
         $this->addRightSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 5, 54));
+
+
+        $this->hitChart = array(
+                0=> array(
+                        10 => "Structure",
+                        12 => "Standard Particle Beam",
+                        14 => "Scanner",
+                        16 => "Engine",
+                        18 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        4 => "Thruster",
+                        5 => "Medium Plasma Cannon",
+                        8 => "Medium Pulse Cannon",
+                        12 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        6 => "Thruster",
+                        10 => "Jump Engine",
+                        13 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                3=> array(
+                        4 => "Thruster",
+                        9 => "Heavy Pulse Cannon",
+                        11 => "Medium Pulse Cannon",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                4=> array(
+                        4 => "Thruster",
+                        9 => "Heavy Pulse Cannon",
+                        11 => "Medium Pulse Cannon",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );
+
     }
 }

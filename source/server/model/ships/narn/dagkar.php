@@ -59,6 +59,30 @@ class Dagkar extends MediumShip{
         //structures
         $this->addPrimarySystem(new Structure(4, 55));
         
+		
+		$this->hitChart = array(
+			0=> array(
+				8 => "Thruster",
+				11 => "Scanner",
+				14 => "Engine",
+				16 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				4 => "Thruster",
+				8 => "Energy Mine",
+				12 => "Ion torpedo",
+				17 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				8 => "Thruster",
+				14 => "Structure",
+				20 => "Primary",
+			),
+		);
+	
     }
-
+	
 }

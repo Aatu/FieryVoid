@@ -47,7 +47,34 @@ class KatanPulseDestroyer extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 56));
         $this->addAftSystem(new Structure( 4, 54));
         $this->addPrimarySystem(new Structure( 5, 50));
+			
+			
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Thruster",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+				),
+			1=> array(
+				4 => "Thruster",
+				8 => "Heavy Pulse Cannon",
+				10 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+				),
+			2=> array(
+				6 => "Thruster",
+				8 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		); 
     }
+	
 }
 
 ?>

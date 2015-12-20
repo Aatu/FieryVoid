@@ -125,7 +125,7 @@
     class EnergyMine extends AoE{
     
         public $name = "energyMine";
-        public $displayName = "Energy mine";
+        public $displayName = "Energy Mine";
         public $range = 50;
         public $loadingtime = 2;
         public $ballistic = true;

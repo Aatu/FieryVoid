@@ -538,7 +538,7 @@ window.weaponManager = {
 		mod -= target.getHitChangeMod(shooter, ball.position);
 
 		if (!shooter.flight && !shooter.osat)
-			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 
 		if (shooter.osat && shipManager.movement.hasTurned(shooter)){
 			console.log("osat turn -1");
@@ -684,7 +684,7 @@ window.weaponManager = {
 			}
 
 			if (!shooter.osat){
-				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "CnC"), "PenaltyToHit");
+				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 			}
 		}
 

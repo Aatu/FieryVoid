@@ -50,10 +50,41 @@ class Cronos extends HeavyCombatVessel{
 	$this->addAftSystem(new InterceptorMkII(2, 4, 2, 120, 300));
 	$this->addAftSystem(new InterceptorMkII(2, 4, 2, 60, 240));
  
-        //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure(5, 48));
-        $this->addAftSystem(new Structure(5, 48));
-        $this->addPrimarySystem(new Structure(5, 50));
+    //0:primary, 1:front, 2:rear, 3:left, 4:right;
+    $this->addFrontSystem(new Structure(5, 48));
+    $this->addAftSystem(new Structure(5, 48));
+    $this->addPrimarySystem(new Structure(5, 50));
+
+    $this->hitChart = array(
+        0=> array(
+                7 => "Structure",
+                9 => "Standard Particle Beam",
+                12 => "Thruster",
+                14 => "Scanner",
+                16 => "Engine",
+                17 => "Hangar",
+                19 => "Reactor",
+                20 => "C&C",
+        ),
+        1=> array(
+                3 => "Thruster",
+                6 => "Heavy Pulse Cannon",
+                8 => "Railgun",
+                10 => "Interceptor II",
+                18 => "Structure",
+                20 => "Primary",
+        ),
+        2=> array(
+                5 => "Thruster",
+                7 => "Heavy Pulse Cannon",
+                9 => "Railgun",
+                11 => "Interceptor I",
+                18 => "Structure",
+                20 => "Primary",
+        ),
+	);
+
+
     }
 }
 ?>

@@ -48,6 +48,32 @@ class Rothan extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 34));
+		
+		$this->hitChart = array(
+			0=> array(
+				7 => "Structure",
+				11 => "Thruster",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+				1=> array(
+				5 => "Thruster",
+				9 => "Heavy Plasma Cannon",
+				12 => "Twin Array",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				7 => "Thruster",
+				9 => "Twin Array",
+				11 => "Light Plasma Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		); 
     }
 }
 ?>

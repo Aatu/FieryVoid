@@ -647,7 +647,7 @@ window.shipManager = {
             return true;
 
 
-        if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "CnC"))){
+        if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "cnC"))){
             return true;
         }
 

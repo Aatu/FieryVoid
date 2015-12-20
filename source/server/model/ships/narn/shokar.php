@@ -33,38 +33,68 @@ class ShoKar extends BaseShip{
         
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
-        
+        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));        
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-
-		//aft
+		
         $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        
+        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));        
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
 		
-        
-		//left
 		$this->addLeftSystem(new BurstBeam(3, 6, 3, 240, 0));
 		$this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
-              
-
-		//right
+		
 		$this->addRightSystem(new BurstBeam(3, 6, 3, 0, 120));
 		$this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
-        
 		
 		//structures
         $this->addFrontSystem(new Structure(4, 42));
         $this->addAftSystem(new Structure(3, 38));
         $this->addLeftSystem(new Structure(4, 42));
         $this->addRightSystem(new Structure(4, 42));
-        $this->addPrimarySystem(new Structure(5, 36));
-        
+        $this->addPrimarySystem(new Structure(5, 36));        
+		
+		
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Jump Engine",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				6 => "Thruster",
+				8 => "Twin Array",
+				11 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				8 => "Light Pulse Cannon",
+				11 => "Twin Array",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			3=> array(
+				6 => "Thruster",
+				9 => "Burst Beam",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				6 => "Thruster",
+				9 => "Burst Beam",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);
     }
 
 }

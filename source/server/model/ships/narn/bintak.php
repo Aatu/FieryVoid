@@ -82,9 +82,55 @@ class Bintak extends BaseShip{
         $this->addLeftSystem(new Structure(5, 96));
         $this->addRightSystem(new Structure(5, 96));
         $this->addPrimarySystem(new Structure(6, 72));
-        
+     
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Jump Engine",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				3 => "Thruster",
+				5 => "Heavy Laser",
+				6 => "Mag gun",
+				8 => "Energy Mine",
+				9 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				8 => "Heavy Laser",
+				9 => "Twin Array",
+				11 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			3=> array(
+				3 => "Thruster",
+				5 => "Heavy Laser",
+				6 => "Light Pulse Cannon",
+				8 => "Twin Array",
+				9 => "Ion torpedo",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			4=> array(
+				3 => "Thruster",
+				5 => "Heavy Laser",
+				6 => "Light Pulse Cannon",
+				8 => "Twin Array",
+				9 => "Ion torpedo",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);
+	 
     }
-
 }
 
 

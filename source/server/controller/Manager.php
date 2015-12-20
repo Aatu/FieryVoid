@@ -673,14 +673,17 @@ class Manager{
 
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
 
-
+        // check if adaptive Armour events did happen and submit
         $damagesAA = $servergamedata->getNewDamagesForAA();
 
         if ($damagesAA){
-            self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $damagesAA);
+            foreach ($damagesAA as $entry){
+            self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
+            }
         }
-        
 
+        
+        // submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 
 

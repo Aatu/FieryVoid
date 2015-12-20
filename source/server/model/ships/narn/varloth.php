@@ -57,6 +57,46 @@ class Varloth extends BaseShip{
         $this->addLeftSystem(new Structure(5, 60));
         $this->addRightSystem(new Structure(4, 39));
         $this->addPrimarySystem(new Structure(5, 36));
+		
+		
+		
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Jump Engine",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+				),
+			1=> array(
+				5 => "Thruster",
+				8 => "Heavy Plasma Cannon",
+				18 => "Structure",
+				20 => "Primary",
+				),
+			2=> array(
+				6 => "Thruster",
+				9 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+				),
+			3=> array(
+				4 => "Thruster",
+				6 => "Light Pulse Cannon",
+				10 => "Medium Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+				),
+			4=> array(
+				4 => "Thruster",
+				7 => "Ion Torpedo",
+				9 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);		
     }
 }
 ?>

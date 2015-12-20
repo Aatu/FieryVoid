@@ -32,36 +32,46 @@ class Trakk extends HeavyCombatVessel{
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
         
-        //front
-        
-        
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 0));
-        $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));
-        
+        $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));        
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-    
-        
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
-
-		//aft
-		          
-
 		
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 60, 300));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-        
-		
-     
-        
 		
 		//structures
         $this->addFrontSystem(new Structure(4, 36));
         $this->addAftSystem(new Structure(4, 40));
-        $this->addPrimarySystem(new Structure(4, 36));
-        
+        $this->addPrimarySystem(new Structure(4, 36));		
+		
+		
+		$this->hitChart = array(
+			0=> array(
+				7 => "Structure",
+				12 => "Thruster",
+				14 => "Scanner",
+				16 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				4 => "Thruster",
+				8 => "Heavy Plasma Cannon",
+				10 => "Standard Particle Beam",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				8 => "Standard Particle Beam",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);        
     }
-
 }
 
 

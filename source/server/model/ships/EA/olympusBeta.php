@@ -51,6 +51,36 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 48));
         $this->addAftSystem(new Structure( 5, 42));
         $this->addPrimarySystem(new Structure( 5, 50));
+
+        
+        $this->hitChart = array(
+                0=> array(
+                        8 => "Structure",
+                        11 => "Thruster",
+                        13 => "Scanner",
+                        15 => "Engine",
+                        16 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        3 => "Thruster",
+                        5 => "Medium Pulse Cannon",
+                        7 => "Railgun",
+                        9 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        6 => "Thruster",
+                        8 => "Class-S Missile Rack",
+                        10 => "Railgun",
+                        12 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );
+        
     }
 }
 

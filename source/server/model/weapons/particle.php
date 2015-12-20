@@ -118,7 +118,7 @@
         public $trailColor = array(30, 170, 255);
 
         public $name = "twinArray";
-        public $displayName = "Twin array";
+        public $displayName = "Twin Array";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.15;

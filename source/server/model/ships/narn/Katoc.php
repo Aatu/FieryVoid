@@ -30,8 +30,6 @@ class Katoc extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));
         
-        
-        
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
@@ -44,17 +42,40 @@ class Katoc extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
         $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        
+        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 54));
         $this->addAftSystem(new Structure( 4, 54));
         $this->addPrimarySystem(new Structure( 5, 50));
-        
-        
+		
+	
+		$this->hitChart = array(
+			0=> array(
+				8 => "Structure",
+				11 => "Thruster",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				4 => "Thruster",
+				6 => "Heavy Laser",
+				8 => "Mag Gun",
+				10 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				8 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		);         
     }
-
 }
 
 

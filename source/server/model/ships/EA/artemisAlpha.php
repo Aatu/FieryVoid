@@ -34,7 +34,7 @@ class ArtemisAlpha extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(4, 7, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 7, 0, 2, 1));
-	$this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 0));
+    	$this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 0));
         $this->addFrontSystem(new MediumPlasma(4, 5, 3, 0, 120));
         $this->addFrontSystem(new InterceptorPrototype(2, 4, 1, 270, 90));
                 
@@ -54,6 +54,34 @@ class ArtemisAlpha extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 4, 40));
         $this->addAftSystem(new Structure( 4, 40));
         $this->addPrimarySystem(new Structure( 5, 45));
+
+        $this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+                    9 => "Medium Plasma Cannon",
+                    11 => "Thruster",
+                    13 => "Scanner",
+                    15 => "Engine",
+                    16 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    3 => "Thruster",
+                    6 => "Medium Plasma Cannon",
+                    8 => "Interceptor Prototype",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    5 => "Thruster",
+                    8 => "Light Standard Particle Beam",
+                    10 => "Medium Plasma Cannon",
+                    12 => "Interceptor Prototype",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 

@@ -30,33 +30,50 @@ class Thentus extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 14, 0, 12, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
-        
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
         $this->addPrimarySystem(new BurstBeam(4, 6, 3, 180, 0));
         $this->addPrimarySystem(new BurstBeam(4, 6, 3, 0, 180));
-        
-        //front
-        
+		
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 270, 90));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 270, 90));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
-        
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));        
         $this->addFrontSystem(new Thruster(4, 13, 0, 6, 1));
-   
-		//aft
 		          
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
-		
-        $this->addAftSystem(new Thruster(4, 20, 0, 12, 2));
-        
+        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));		
+        $this->addAftSystem(new Thruster(4, 20, 0, 12, 2));        
 		
 		//structures
         $this->addPrimarySystem(new Structure(4, 60));
-        
+		
+		
+		
+		$this->hitChart = array(
+			0=> array(
+				7 => "Thruster",
+				9 => "Burst Beam",
+				12 => "Scanner",
+				15 => "Engine",
+				16 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				5 => "Thruster",
+				8 => "Medium Laser",
+				11 => "Twin Array",
+				17 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				9 => "Twin Array",
+				17 => "Structure",
+				20 => "Primary",
+			),
+		);
     }
-
 }
 
 

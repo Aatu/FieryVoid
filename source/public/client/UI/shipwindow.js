@@ -81,7 +81,7 @@ shipWindowManager = {
 	},
 	
 	
-	createShipWindow: function(ship){		
+	createShipWindow: function(ship){
 	
 		var template = $("#shipwindowtemplatecontainer .shipwindow.ship");
 		var shipwindow = template.clone(true).appendTo("body");
@@ -104,9 +104,10 @@ shipWindowManager = {
 
 		shipWindowManager.populateShipWindow(ship, shipwindow);
 
-	//	if (ship.hitChart.length > 0 && gamedata.gamephase > -2){
-	//		shipWindowManager.hitChartSetup(ship, shipwindow);			
-	//	}
+		if (ship.hitChart.length > 0 && gamedata.gamephase > -2){
+			shipWindowManager.hitChartSetup(ship, shipwindow);
+		}
+
 
         shipWindowManager.bindEvents(shipwindow);
 		
@@ -155,20 +156,6 @@ shipWindowManager = {
 	},
 
 
-
-	getName: function(name){
-		var string = name;
-
-		if (name == "interceptorMkII"){
-			return "Interceptor";
-		}
-		else if (name == "stdParticleBeam"){
-			return "SPB";
-		}
-		else return string;
-
-	},
-
 	hitChartSetup: function(ship, shipwindow){
 
 		var parentDiv = shipwindow.find(".buttons")[0];
@@ -200,12 +187,11 @@ shipWindowManager = {
 					var current = 0;
 
 					for (var key in ship.hitChart[i]){
-
 						var name = shipWindowManager.getName(ship.hitChart[i][key]);
-						var hitChance = Math.round(((key-current) / 21)*100);
+						var hitChance = Math.floor(((key-current) / 20)*100);
 						var item = [name, hitChance];
 
-						current = Math.floor(key);
+						current = key;
 
 						list.push(item);
 
@@ -260,16 +246,45 @@ shipWindowManager = {
 
 	},
 
-
 	getName: function(name){
-		if (name == "stdParticleBeam"){
+
+		if (name == "Standard Particle Beam"){
 			return "SPB";
 		}
-		else if (name == "interceptorMkII"){
-			return ("Interceptor");
+		else if (name == "Light Pulse Cannon"){
+			return "Light Pulse";
 		}
-		else 
-			return name;
+		else if (name == "Medium Pulse Cannon"){
+			return "Medium Pulse";
+		}
+		else if (name == "Heavy Pulse Cannon"){
+			return "Heavy Pulse";
+		}
+		else if (name == "Medium Plasma Cannon"){
+			return "Medium Plasma";
+		}
+		else if (name == "Heavy Plasma Cannon"){
+			return "Heavy Plasma";
+		}
+		else if (name == "Class-S Missile Rack"){
+			return "S-Missile Rack";
+		}
+		else if (name == "Class-L Missile Rack"){
+			return "L-Missile Rack";
+		}
+		else if (name == "Class-LH Missile Rack"){
+			return "LH-Missile Rack";
+		}
+		else if (name == "Interceptor Prototype"){
+			return "Interceptor";
+		}
+		else if (name == "Interceptor I"){
+			return "Interceptor";
+		}
+		else if (name == "Interceptor II"){
+			return "Interceptor";
+		}
+		else return name;
 	},
 
 	
@@ -280,6 +295,9 @@ shipWindowManager = {
         var abilities = Array();
         var notes = Array();
         
+		if (ship.hitChart.length > 0){
+            notes.push("&nbsp;has HitChart.");
+        }
 
     	//BUTTONS like Defensive Fire
 		var belowIcon = shipWindow.find(".notes");
@@ -1814,6 +1832,10 @@ setSystemData: function(ship, system, shipwindow){
 							var string = types[i].innerHTML.toLowerCase();
 							var value = document.getElementById(string + "Current" + $(this).data("shipid")).innerHTML;
 							
+							if (!value){
+								return;
+							}
+
 							if (value == 0){
 								ret[string] = 0;
 								continue;

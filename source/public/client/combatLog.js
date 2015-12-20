@@ -188,8 +188,6 @@ window.combatLog = {
         }
 
 
-
-
         var html = '<div class="logentry">';
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
             html +=  ' suffered ' + dmg + ' damage due to exploding ammunition from its ' + system.displayName + '.';
@@ -209,6 +207,18 @@ window.combatLog = {
             html +='</span></div></ul>';
 
 
+        $(html).prependTo("#log");
+    },
+
+
+    logCriticals: function(ship, string){
+        console.log(string);
+
+        var html = '<div class="logentry">';
+            html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
+            html += string;
+            html +='</span></div></ul>';
+            
         $(html).prependTo("#log");
     },
     

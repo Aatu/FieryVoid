@@ -5,7 +5,7 @@
         public $trailColor = array(30, 170, 255);
         
         public $name = "interceptorMkI";
-        public $displayName = "Interceptor MK I";
+        public $displayName = "Interceptor I";
         public $animation = "trail";
         public $iconPath = "interceptor.png";
         public $animationColor = array(30, 170, 255);
@@ -73,7 +73,7 @@
     class InterceptorMkII extends InterceptorMkI
     {
         public $name = "interceptorMkII";
-        public $displayName = "Interceptor MK II";
+        public $displayName = "Interceptor II";
         
         public $output = 4;
         public $intercept = 4;

@@ -56,7 +56,7 @@ class ArtemisEscort extends HeavyCombatVessel{
         $this->hitChart = array(
         		0=> array(
         				7=> "Structure",
-        				9=> "Medium Pulse",
+        				9=> "Medium Pulse Cannon",
         				11=> "Thruster",
         				13=> "Scanner",
         				15=> "Engine",
@@ -66,22 +66,21 @@ class ArtemisEscort extends HeavyCombatVessel{
         		),
         		1=> array(
         				3=> "Thruster",
-        				6=> "Medium Pulse",
-        				8=> "Interceptor MK I",
+                        9=> "Medium Pulse Cannon",
+        				8=> "Interceptor I",
         				18=> "Structure",
         				20=> "Primary",
         		),
         		2=> array(
         				5=> "Thruster",
         				8=> "Standard Particle Beam",
-        				10=> "Medium Pulse",
-        				12=> "Interceptor MK I",
+                        10=> "Medium Pulse Cannon",
+                        12=> "Interceptor I",
         				18=> "Structure",
         				20=> "Primary",
         		),
         );
     }
-
 }
 
 

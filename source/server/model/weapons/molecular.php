@@ -158,6 +158,7 @@
 
             $this->data["Weapon type"] = "Molecular";
             $this->data["Damage type"] = "Raking";
+            $this->data["Special"] = "Reduces armor of hit section and all systems.";
 
             parent::setSystemDataWindow($turn);
         }

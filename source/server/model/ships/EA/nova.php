@@ -36,48 +36,35 @@ class Nova extends BaseShip{
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-        
+        $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));        
         $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 300, 0));
-        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 300, 0));
-        
+        $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 300, 0));        
         $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 0, 60));
         $this->addFrontSystem(new LaserPulseArray(4, 9, 5, 0, 60));
-		//aft
-		          
-
 		
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-        $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-        
+        $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));        
         $this->addAftSystem(new LaserPulseArray(3, 9, 5, 180, 300));
-        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 180, 300));
-        
+        $this->addAftSystem(new LaserPulseArray(3, 9, 5, 180, 300));        
         $this->addAftSystem(new LaserPulseArray(3, 9, 5, 60, 180));
         $this->addAftSystem(new LaserPulseArray(3, 9, 5, 60, 180));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
         
-		//left
-        
         $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
 		$this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
         $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
         $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
-        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));
-        
+        $this->addLeftSystem(new LaserPulseArray(3, 9, 5, 240, 0));        
 		$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
-              
 
-		//right
 		$this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
         $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
         $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
         $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
-        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));
-        
+        $this->addRightSystem(new LaserPulseArray(3, 9, 5, 0, 120));        
 		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
         
 		
@@ -87,6 +74,47 @@ class Nova extends BaseShip{
         $this->addLeftSystem(new Structure(4, 60));
         $this->addRightSystem(new Structure(4, 60));
         $this->addPrimarySystem(new Structure(6, 55));
+
+
+        $this->hitChart = array(
+                0=> array(
+                        8 => "Structure",
+                        10 => "Jump Engine",
+                        13 => "Scanner",
+                        15 => "Engine",
+                        17 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        3 => "Thruster",
+                        7 => "Laser/Pulse Array",
+                        10 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        6 => "Thruster",
+                        7 => "Laser/Pulse Array",
+                        12 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                3=> array(
+                        4 => "Thruster",
+                        11 => "Laser/Pulse Array",
+                        12 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                4=> array(
+                        4 => "Thruster",
+                        11 => "Laser/Pulse Array",
+                        12 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );  
         
     }
 

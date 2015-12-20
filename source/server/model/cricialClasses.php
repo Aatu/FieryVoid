@@ -23,10 +23,11 @@ class Critical{
     protected function setParam($param){
         $this->param = $param;
     }
-        public function getDescription(){
-                return $this->description;
-        }
+
+    public function getDescription(){
+        return $this->description;
     }
+}
 	
 class DisengagedFighter extends Critical{
 
@@ -37,37 +38,31 @@ class DisengagedFighter extends Critical{
     }
 }
 	
-class OutputReduced extends Critical
-{
+class OutputReduced extends Critical{
     public $description = "Output reduced.";
-
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param)
-    {
-        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
-    }
-
-    function setParam($param)
-    {
-        $this->outputMod = $param;
-        parent::setParam($param);
-    }
-}
-
-class OutputReduced1 extends Critical{
-
-    public $description = "Output reduced.";
-    public $outputMod = -1;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
 
+    function setParam($param){
+        parent::setParam($param);
+    }
+}
+
+class OutputReduced1 extends Critical{
+    public $description;
+    public $outputMod = -1;
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+        $this->description = "Output altered by ".$this->outputMod;
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
 }
 	
 	
-class OutputReduced2 extends Critical{
+class OutputReduced2 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -2;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -76,9 +71,8 @@ class OutputReduced2 extends Critical{
 
 }
 
-class OutputReduced3 extends Critical{
+class OutputReduced3 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -3;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -87,9 +81,8 @@ class OutputReduced3 extends Critical{
 
 }
 
-class OutputReduced4 extends Critical{
+class OutputReduced4 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -4;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -98,9 +91,8 @@ class OutputReduced4 extends Critical{
 
 }
 
-class OutputReduced6 extends Critical{
+class OutputReduced6 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -6;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -108,9 +100,8 @@ class OutputReduced6 extends Critical{
     }
 
 }
-class OutputReduced8 extends Critical{
+class OutputReduced8 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -8;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
@@ -119,9 +110,8 @@ class OutputReduced8 extends Critical{
 
 }
 
-class OutputReduced10 extends Critical{
+class OutputReduced10 extends OutputReduced1{
 
-    public $description = "Output reduced.";
     public $outputMod = -10;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){

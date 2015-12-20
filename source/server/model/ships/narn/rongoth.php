@@ -28,9 +28,7 @@ class Rongoth extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(5, 16, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));
-        
-        
+        $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));   
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
@@ -40,16 +38,13 @@ class Rongoth extends HeavyCombatVessel{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
         $this->addFrontSystem(new HeavyPulse(5, 6, 4, 300, 60));
         $this->addFrontSystem(new HeavyPulse(5, 6, 4, 300, 60));
-        
-        
+		
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new LightPulse(3, 4, 2, 120, 300));
-        $this->addAftSystem(new LightPulse(3, 4, 2, 60, 240));
-        
+        $this->addAftSystem(new LightPulse(3, 4, 2, 60, 240));        
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
-        
+        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));        
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 6, 0, 3, 2));
         
@@ -58,10 +53,35 @@ class Rongoth extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 50));
         $this->addPrimarySystem(new Structure( 5, 34));
-        
-        
+		
+			
+		
+		$this->hitChart = array(
+			0=> array(
+				7 => "Structure",
+				11 => "Thruster",
+				13 => "Scanner",
+				15 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				5 => "Thruster",
+				9 => "Heavy Pulse Cannon",
+				12 => "Twin Array",
+				18 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				7 => "Thruster",
+				9 => "Twin Array",
+				11 => "Light Pulse Cannon",
+				18 => "Structure",
+				20 => "Primary",
+			),
+		); 
     }
-
 }
 
 

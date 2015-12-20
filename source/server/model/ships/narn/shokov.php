@@ -42,17 +42,35 @@ class Shokov extends MediumShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));
 		$this->addAftSystem(new LightPulse(2, 4, 2, 180, 60));
         $this->addAftSystem(new LightPulse(2, 4, 2, 300, 180));
-		
-
-        
-        
         
        
-        $this->addPrimarySystem(new Structure( 3, 48));
+        $this->addPrimarySystem(new Structure( 3, 48));		
 		
 		
+	
+		$this->hitChart = array(
+			0=> array(
+				7 => "Thruster",
+				11 => "Scanner",
+				14 => "Engine",
+				16 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
+			1=> array(
+				6 => "Thruster",
+				12 => "Ion Torpedo",
+				17 => "Structure",
+				20 => "Primary",
+			),
+			2=> array(
+				6 => "Thruster",
+				10 => "Light Pulse Cannon",
+				17 => "Structure",
+				20 => "Primary",
+			),
+		);	
     }
-
 }
 
 

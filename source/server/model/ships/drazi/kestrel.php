@@ -42,9 +42,9 @@ class Kestrel extends MediumShip{
         $this->hitChart = array(
         		0=> array(
         				8=> "Thruster",
-        				11=> "scanner",
-        				14=> "engine",
-        				16=> "hangar",
+        				11=> "Scanner",
+        				14=> "Engine",
+        				16=> "Hangar",
         				19=> "Reactor",
         				20=> "C&C",
         		),

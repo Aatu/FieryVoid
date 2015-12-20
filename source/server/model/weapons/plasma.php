@@ -171,7 +171,7 @@
 	class HeavyPlasma extends Plasma{
 
     	public $name = "heavyPlasma";
-        public $displayName = "Heavy Plasma";
+        public $displayName = "Heavy Plasma Cannon";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -201,7 +201,7 @@
     class MediumPlasma extends Plasma{
 
     	public $name = "mediumPlasma";
-        public $displayName = "Medium Plasma";
+        public $displayName = "Medium Plasma Cannon";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);
@@ -231,7 +231,7 @@
         class LightPlasma extends Plasma{
 
     	public $name = "lightPlasma";
-        public $displayName = "Light Plasma";
+        public $displayName = "Light Plasma Cannon";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
     	public $trailColor = array(75, 250, 90);

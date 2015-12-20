@@ -17,7 +17,7 @@ window.ew = {
                     ret += output;
             }
             
-            if (system.name == "CnC" && shipManager.criticals.hasCritical(system, "RestrictedEW"))
+            if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW"))
                 ret -= 2;
             
         }
@@ -406,7 +406,7 @@ window.ew = {
         }
 
         if (!selected.osat){
-    		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "CnC"), "RestrictedEW")){
+    		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "cnC"), "RestrictedEW")){
     			var def = ew.getDefensiveEW(selected);
     			var all = ew.getScannerOutput(selected);
     			
@@ -438,7 +438,7 @@ window.ew = {
 
 
         if (!ship.osat){
-            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "CnC"), "RestrictedEW")){
+            if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "cnC"), "RestrictedEW")){
     		var def = ew.getDefensiveEW(ship);
     		var all = ew.getScannerOutput(ship);
     		

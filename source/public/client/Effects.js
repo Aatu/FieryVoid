@@ -335,11 +335,29 @@ window.effects = {
             }           
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn && ship.destructionAnimated == false){
                 scrolling.scrollToShip(ship);
-             //   effects.displayAmmoExplosion(ship, effects.doDisplayAllWeaponFire);
                 effects.displayShipDestroyed(ship, effects.doDisplayAllWeaponFire);
                 return;
             }        
         }
+
+
+    /*    for (var i in gamedata.ships){
+            var ship = gamedata.ships[i];
+            if (ship.shipSizeClass > 0){
+                for (var j = 0; j < ship.systems.length; j++){
+                    for (var k = 0; k < ship.systems[j].criticals.length; k++){
+                        if (ship.systems[j].criticals[k].turn == gamedata.turn){
+                            var html = ship.phpclass + " got " + ship.systems[j].criticals[k].phpclass;
+                            console.log(html);
+                            combatLog.logCriticals(ship, html);
+                        }
+                    }
+                }
+            }  
+        }
+*/
+
+
         gamedata.effectsDrawing = false;
         windows.show();
         effects.callback();

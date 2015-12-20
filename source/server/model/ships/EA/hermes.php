@@ -50,6 +50,34 @@ class Hermes extends HeavyCombatVessel{
         $this->addAftSystem(new Structure( 4, 45));
         $this->addPrimarySystem(new Structure( 6, 36));
         
+        $this->hitChart = array(
+                0=> array(
+                        6 => "Structure",
+                        8 => "Cargo",
+                        10 => "Thruster",
+                        12 => "Class-S Missile Rack",
+                        14 => "Scanner",
+                        16 => "Engine",
+                        17 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        4 => "Thruster",
+                        6 => "Standard Particle Beam",
+                        8 => "Interceptor I",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+                        6 => "Thruster",
+                        8 => "Standard Particle Beam",
+                        10 => "Interceptor I",
+                        12 => "Jump Engine",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );
         
     }
 

@@ -113,7 +113,7 @@
     class HeavyLaser extends Laser{
         
         public $name = "heavyLaser";
-        public $displayName = "Heavy laser";
+        public $displayName = "Heavy Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 11);
         public $animationWidth = 4;
@@ -144,7 +144,7 @@
     class MediumLaser extends Laser{
         
         public $name = "mediumLaser";
-        public $displayName = "Medium laser";
+        public $displayName = "Medium Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 11);
         public $animationExplosionScale = 0.18;
@@ -173,7 +173,7 @@
     
     class LightLaser extends Laser{
         public $name = "lightLaser";
-        public $displayName = "Light laser";
+        public $displayName = "Light Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 11);
         public $animationExplosionScale = 0.15;
@@ -201,7 +201,7 @@
     class BattleLaser extends Laser{
         
         public $name = "battleLaser";
-        public $displayName = "Battle laser";
+        public $displayName = "Battle Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 4;
@@ -236,7 +236,7 @@
     class AssaultLaser extends Laser{
         
         public $name = "assaultLaser";
-        public $displayName = "Assault laser";
+        public $displayName = "Assault Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 3;
@@ -263,7 +263,7 @@
     class AdvancedAssaultLaser extends Laser{
         
         public $name = "advancedAssaultLaser";
-        public $displayName = "Adv. Assault laser";
+        public $displayName = "Adv. Assault Laser";
         public $animation = "laser";
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 4;

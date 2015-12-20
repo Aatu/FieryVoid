@@ -338,7 +338,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
 
 class CnC extends ShipSystem{
 
-    public $name = "CnC";
+    public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
     
@@ -480,7 +480,7 @@ class Catapult extends ShipSystem{
 class JumpEngine extends ShipSystem{
 
     public $name = "jumpEngine";
-    public $displayName = "Jump engine";
+    public $displayName = "Jump Engine";
     public $delay = 0;
     public $primary = true;
     

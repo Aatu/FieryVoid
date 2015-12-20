@@ -263,13 +263,17 @@ class TacGamedata{
         
         foreach ($this->ships as $ship){
             if (isset($ship->adaptiveArmour)){
+                $entry = array();
+
                 foreach($ship->systems as $system){
                     foreach($system->damage as $damage){
                         if ($damage->updated == true){
-                            $list[] = $damage;
+                            $entry[] = $damage;
                         }
                     }
-                }                       
+                }  
+
+                $list[] = $entry;                     
             }
         }
         
