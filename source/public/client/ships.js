@@ -607,6 +607,17 @@ window.shipManager = {
 
     },
 
+    isDisabled: function(ship){
+        for (var i = 0; i < ship.systems.length; i++){
+            if (ship.systems[i].displayName == "C&C"){
+                if (shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabledOneTurn", gamedata.turn-1)){
+                    return true;
+                }
+            }
+        }
+    },
+
+
     isDestroyed: function(ship){
 
     if (ship == null){

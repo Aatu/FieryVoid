@@ -864,12 +864,12 @@ class DBManager {
     }
 
     
-	public function getTacGames($playerid){
-		$games = $this->getTacGame(0, $playerid);
-		if ($games == null)
-			return array();
+    public function getTacGames($playerid){
+        $games = $this->getTacGame(0, $playerid);
+        if ($games == null)
+            return array();
         
-		foreach ($games as $game){
+        foreach ($games as $game){
                     $game->slots = $this->getSlotsInGame($game->id);
                     $game->onConstructed();
                     
@@ -883,11 +883,32 @@ class DBManager {
                         if ($ship->userid == $game->forPlayer)
                             $game->waitingForThisPlayer = true;
                     }
-		}
-		
-		return $games;
-	}
-	
+        }
+        
+        return $games;
+    }
+        
+    public function getFirePhaseGames($playerid){
+
+        $games = [];
+
+        $sql = "SELECT * FROM `B5CGM`.`tac_game` WHERE phase = 4 AND status = 'ACTIVE'";
+    //    debug::log($sql);
+
+        $result = $this->query($sql);
+        
+        if ($result == null || sizeof($result) == 0)
+            return null;
+            
+        foreach ($result as $value) {
+            $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
+            $games[] = $game;
+        }
+
+        return $games;
+    }
+
+    
     public function getTacGamedata($playerid, $gameid){
 		
 		if ($gameid <=0)

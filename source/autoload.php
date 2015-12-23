@@ -8,6 +8,13 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
+                //customs                
+                'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
+
+                // centauri raiders
+                'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
+                'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
+
 
                 // drazi and wotc centauro osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',

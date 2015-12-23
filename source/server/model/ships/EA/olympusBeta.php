@@ -8,7 +8,7 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->faction = "EA";
         $this->phpclass = "OlympusBeta";
         $this->imagePath = "img/ships/olympus.png";
-        $this->shipClass = "Olympus Gunship (Beta Version)";
+        $this->shipClass = "Olympus Beta Corvette (Laser)";
         $this->occurence = "uncommon/rare";
         
         $this->forwardDefense = 15;
@@ -65,16 +65,15 @@ class OlympusBeta extends HeavyCombatVessel{
                 ),
                 1=> array(
                         3 => "Thruster",
-                        5 => "Medium Pulse Cannon",
-                        7 => "Railgun",
+                        5 => "Medium Laser",
+                        7 => "Particle Canon",
                         9 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        8 => "Class-S Missile Rack",
-                        10 => "Railgun",
+                        10 => "Particle Canon",
                         12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",

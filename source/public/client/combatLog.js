@@ -212,7 +212,6 @@ window.combatLog = {
 
 
     logCriticals: function(ship, string){
-        console.log(string);
 
         var html = '<div class="logentry">';
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   

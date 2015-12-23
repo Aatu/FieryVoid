@@ -89,6 +89,29 @@ class Manager{
         
         return $games;
     }
+
+
+    public static function getFirePhaseGames($userid){
+
+
+        try {
+            self::initDBManager();
+            
+            $games = self::$dbManager->getFirePhaseGames($userid);
+
+            if ($games == null){
+                return null;
+            }            
+        }
+        catch(exception $e) {
+            throw $e;
+        }
+        
+
+        return $games;
+
+
+    }
     
     public static function shouldBeInGame($userid){
 		if (!is_numeric($userid))
@@ -110,6 +133,11 @@ class Manager{
         $background = $data["background"];
         $gamespace = $data["gamespace"];
         $slots = array();
+        $pointsA = $data["slots"][0]["points"];
+        $poinstB = $data["slots"][1]["points"];
+
+        debug::log($pointsA);
+        debug::log($poinstB);
         
         foreach ($data["slots"] as $slot){
             $slots[] = new PlayerSlotFromJSON($slot);

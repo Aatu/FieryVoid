@@ -32,9 +32,18 @@
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($games); ?>);
-				ajaxInterface.startPollingGames();
-				gamedata.thisplayer = <?php print($_SESSION["user"]); ?>;
+                ajaxInterface.startPollingGames();
+
+				gamedata.thisplayer = <?php print($_SESSION["user"]); ?>;                
 			});
+
+            function loadFireList(){
+                ajaxInterface.getFirePhaseGames();
+            }
+
+       //     $(document).ready(function(){
+         //       ajaxInterface.getFirePhaseGames();
+           // })
 		</script>
 	</head>
 	<body>
@@ -47,7 +56,7 @@
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			
             <table class="gametable">
-                <tr><td>ACTIVE GAMES</td><td>STARTING GAMES</td></tr>
+                <tr><td class="centered">ACTIVE GAMES</td><td class="centered">STARTING GAMES</td><td class="centered">ACTIVE FIRE IN:</td></tr>
                 <tr>
                     <td><div class="gamecontainer active subpanel">
                         <div class="notfound">No active games</div>
@@ -57,13 +66,16 @@
                         <div class="gamecontainer lobby subpanel">
                         <div class="notfound">No starting games</div>
                         </div>
+                        
                     </td>
                     <td>
-                    <!---    <a class="link" href="creategame.php">TUTORIAL</a>
-                        <a class="link" href="creategame.php">AUTOMATCH</a>
-                    
-                        <a class="link" id="test" onclick="ajaxInterface.testAjax()">test function</a>
-                    -->    <a class="link" href="creategame.php">CREATE GAME</a>
+                        <div id="fireList" class="gamecontainer fire subpanel">
+                        </div>
+                    </td>
+                    <td>
+                        <a class="link" href="creategame.php">CREATE GAME</a>
+                        <input type="button" id="loadFireButton" onclick="loadFireList()" value="LOAD ACTIVE FIRE">
+
                     </td>
                 </tr>
             </table>

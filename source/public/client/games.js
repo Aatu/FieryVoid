@@ -3,6 +3,29 @@ window.gamedata = {
 	waiting: true,
 	games: null,
 	thisplayer: 0,
+
+	createFireDiv: function(data){
+
+		var target = document.getElementById("fireList");
+			target.innerHTML = "";
+
+		for (var i = 0; i < data.length; i++){
+			var id = data[i].id;
+
+			var div = document.createElement("div");
+				div.className = "game slot clickable"
+
+			var link = document.createElement("a");
+				link.setAttribute("href", "http://localhost/FieryVoid/source/public/hex.php?gameid=" + id);
+				link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
+
+				div.appendChild(link);
+
+				target.appendChild(div);
+		//		target.style.display = "inline-block";
+
+		}
+	},
 	
 	parseServerData: function(serverdata){
 	

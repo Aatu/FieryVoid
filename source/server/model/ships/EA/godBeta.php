@@ -32,15 +32,30 @@ class GODBeta extends OSAT{
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 0, 180));
         $this->addPrimarySystem(new InterceptorMkII(2, 4, 2, 0, 360));
         $this->addPrimarySystem(new InterceptorMkII(2, 4, 2, 0, 360));
-
-
         $this->addPrimarySystem(new Reactor(4, 24, 0, 0));
-     //   $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 3, 6));   
-
         $this->addPrimarySystem(new Thruster(4, 20, 0, 0, 2));
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 60));
+		
+		$this->hitChart = array(
+			0=> array(
+				6 => "Structure",
+				8 => "Thruster",
+				10 => "Heavy Particle Cannon",
+				13 => "Class-LH Missile Rack",
+				15 => "Light Pulse Cannon",
+				17 => "Scanner",
+				19 => "Reactor",
+				20 => "Interceptor II",
+			),
+			1=> array(
+				20 => "Primary",
+			),
+			2=> array(
+				20 => "Primary",
+			),
+        );
     }
 }

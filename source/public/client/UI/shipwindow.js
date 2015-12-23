@@ -267,13 +267,13 @@ shipWindowManager = {
 			return "Heavy Plasma";
 		}
 		else if (name == "Class-S Missile Rack"){
-			return "S-Missile Rack";
+			return "S Rack";
 		}
 		else if (name == "Class-L Missile Rack"){
-			return "L-Missile Rack";
+			return "L Rack";
 		}
 		else if (name == "Class-LH Missile Rack"){
-			return "LH-Missile Rack";
+			return "LH Rack";
 		}
 		else if (name == "Interceptor Prototype"){
 			return "Interceptor";
@@ -283,6 +283,9 @@ shipWindowManager = {
 		}
 		else if (name == "Interceptor II"){
 			return "Interceptor";
+		}
+		if (name == "Plasma Accelerator"){
+			return "Plasma Accel";
 		}
 		else return name;
 	},

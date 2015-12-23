@@ -36,5 +36,24 @@ class Hector extends OSAT{
                 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(4, 30));
+		
+		
+		$this->hitChart = array(
+			0=> array(
+				9 => "Structure",
+				11 => "Thruster",
+				14 => "Class-LH Missile Rack",
+				16 => "Light Pulse Cannon",
+				19 => "Scanner",
+				19 => "Reactor",
+				20 => "Interceptor I",
+			),
+			1=> array(
+				20 => "Primary",
+			),
+			2=> array(
+				20 => "Primary",
+			),
+        );
     }
 }

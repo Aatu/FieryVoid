@@ -192,6 +192,9 @@ gamedata = {
 
             for (var ship in myShips){
                 if (!myShips[ship].flight){
+                    if (shipManager.isDisabled(myShips[ship])){
+                        continue;
+                    }
                     if (gamedata.turn == 1){
                         if (myShips[ship].EW.length == 0){
                             hasNoEW.push(myShips[ship]);

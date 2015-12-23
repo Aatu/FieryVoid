@@ -27,10 +27,6 @@ window.ajaxInterface = {
         });
     },
 
-    alert: function(){
-        alert("ding");
-    },
-
     getAdaptiveArmour: function(shipId, getAdaptiveArmourCallback){
         $.ajax({
             type : 'GET',
@@ -489,7 +485,18 @@ window.ajaxInterface = {
             error : ajaxInterface.errorAjax
         });
     },
-    
+
+    getFirePhaseGames: function(){
+        
+        $.ajax({
+            type : 'GET',
+            url : 'firePhaseGames.php',
+            dataType : 'json',
+            data: {},
+            success : gamedata.createFireDiv,
+            error : ajaxInterface.errorAjax
+        });
+    }
 }
 
 

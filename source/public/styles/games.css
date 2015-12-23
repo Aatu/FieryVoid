@@ -5,11 +5,13 @@
 .gametable td
 {
     vertical-align: top;
+    text-align: center;
 }
 
 .gametable .gamecontainer
 {
-    width:300px;
+    width:250px;
+    font-size: 12px;
 }
 
 .waitingForTurn
@@ -19,4 +21,33 @@
 	-moz-box-shadow: 0px 0px 15px #0099ff;
     -webkit-box-shadow: 0px 0px 15px #0099ff;
     box-shadow: 0px 0px 15px #0099ff;
+}
+
+#fireList {
+}
+
+.fireEntry {
+}
+
+.centered {
+}
+
+#loadFireButton {
+    border: none;
+    margin: auto;
+    display: block; 
+    background-color: #222;
+    padding: 5px 0px;
+    width: 160px;
+    text-align: center;
+    margin-bottom: 5px;
+    color: white;
+    text-decoration: none;
+    font-family: arial;
+    font-size: 12px;
+}
+
+#loadFireButton:hover{
+    background-color: #DEEBFF;
+    color: black;
 }
