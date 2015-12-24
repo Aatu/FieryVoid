@@ -16,7 +16,7 @@ window.gamedata = {
 				div.className = "game slot clickable"
 
 			var link = document.createElement("a");
-				link.setAttribute("href", "http://localhost/FieryVoid/source/public/hex.php?gameid=" + id);
+				link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
 				link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 
 				div.appendChild(link);
