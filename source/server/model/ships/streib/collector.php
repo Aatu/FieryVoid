@@ -53,19 +53,6 @@ class Collector extends BaseShip{
         $this->addRightSystem(new CargoBay(9, 9));
         $this->addRightSystem(new DualBurstBeam(5, 8, 5, 300, 180));
         $this->addRightSystem(new EMWaveDisruptor(6, 8, 4, 300, 180));
-
-
-
-
-
-   /*  
-        $this->addPrimarySystem(new ImprovedBlastLaser(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new DualBurstBeam(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new MediumBurstBeam(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new HeavyBurstBeam(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new BurstPulseCannon(2, 4, 1, 0, 360));
-     */   
-		
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(9, 40));
@@ -73,5 +60,52 @@ class Collector extends BaseShip{
         $this->addLeftSystem(new Structure(9, 40));
         $this->addRightSystem(new Structure(9, 40));
         $this->addPrimarySystem(new Structure(9, 40));
+
+
+        $this->hitChart = array(
+            0 => array(
+                12 => "Structure",
+                14 => "Tractor Beam",
+                17 => "Engine",
+                20 => "Reactor",
+            ),
+            1 => array(
+                3 => "Thruster",
+                7 => "Medium Burst Beam",
+                9 => "Burst Pulse Cannon",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+            2 => array(
+                6 => "Thruster",
+                8 => "Improved Blast Laser",
+                10 => "Medium Burst Beam",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+            3 => array(
+                3 => "Thruster",
+                5 => "Improved Blast Laser",
+                7 => "Heavy Burst Beam",
+                9 => "Dual Burst Beam",
+                10 => "EM-Wave Disruptor",
+                11 => "Cargo Bay",
+                13 => "Jump Engine",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+            4 => array(
+                3 => "Thruster",
+                5 => "Dual Burst Beam",
+                7 => "EM-Wave Disruptor",
+                9 => "Scanner",
+                10 => "C&C",
+                11 => "Hangar",
+                12 => "Cargo Bay",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+        );
     }
 }
+?>

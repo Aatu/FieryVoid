@@ -188,8 +188,7 @@
              
         public $freeintercept = true;
         public $loadingtime = 1;
-  
-        
+
         public $rangePenalty = 6;
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
 
@@ -250,11 +249,9 @@
             return $boostLevel;
         }
 
-        public function getInterceptRating($turn){
-            return 3 + 3 * ($this->getBoostLevel($turn));            
+        public function getCharges($turn){
+            return $this->getBoostLevel($turn);
         }
-
-
     }
 
 

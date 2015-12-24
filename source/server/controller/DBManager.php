@@ -890,7 +890,7 @@ class DBManager {
         
     public function getFirePhaseGames($playerid){
 
-        $games = [];
+        $games = array();
 
         $sql = "SELECT * FROM `B5CGM`.`tac_game` WHERE phase = 4 AND status = 'ACTIVE'";
     //    debug::log($sql);

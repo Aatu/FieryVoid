@@ -284,8 +284,23 @@ shipWindowManager = {
 		else if (name == "Interceptor II"){
 			return "Interceptor";
 		}
-		if (name == "Plasma Accelerator"){
-			return "Plasma Accel";
+		if (name == "Improved Blast Laser"){
+			return "Imp. Bl. Laser";
+		}
+		if (name == "EM-Wave Disruptor"){
+			return "EMW Disruptor";
+		}
+		if (name == "Medium Burst Beam"){
+			return "Medium BB";
+		}
+		if (name == "Heavy Burst Beam"){
+			return "Heavy BB";
+		}
+		if (name == "Dual Burst Beam"){
+			return "Dual BB";
+		}
+		if (name == "Burst Pulse Cannon"){
+			return "Burst PC";
 		}
 		else return name;
 	},
