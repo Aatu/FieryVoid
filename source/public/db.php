@@ -23,14 +23,10 @@ $sql = "SELECT phpclass, COUNT(*) count FROM tac_ship GROUP BY phpclass";
 $stmt = $db->query($sql);
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$toSort = array();
+$list = array();
 
 
-for ($i = 0; $i < 40; $i++){
-	$toSort[] = $results[$i];
-}
-
-usort($toSort, function($a, $b){
+usort($results, function($a, $b){
 	if ($a["count"] > $b["count"]){
 		return -1;
 	}
@@ -38,6 +34,11 @@ usort($toSort, function($a, $b){
 });
 
 
-foreach ($toSort as $ship){
-	echo $ship["phpclass"].", times: ".$ship["count"]."<br>";
+for ($i = 0; $i < 40; $i++){
+	$list[] = $results[$i];
+}
+
+
+foreach ($list as $ship){
+	echo $ship["phpclass"].", times seen in combat: ".$ship["count"]."<br>";
 }
