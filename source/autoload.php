@@ -61,7 +61,7 @@ spl_autoload_register(
 
 
                 //Streib
-                'collector' => '/server/model/ships/streib/collector.php',
+ //               'collector' => '/server/model/ships/streib/collector.php',
 
                 //Streib guns
 
