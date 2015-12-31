@@ -169,6 +169,8 @@ class ShipSystem{
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
 
+        $damageMulti = 1;
+
         if ($ship instanceof OSAT){
             if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
                 if ($this->getTotalDamage() > ($this->maxhealth/2)){
@@ -183,7 +185,11 @@ class ShipSystem{
             $crits[] = $crit;
         }
 
-        $roll = Dice::d(20)+$this->getTotalDamage() + $add;
+        if ($this instanceof SubReactor){
+            $damageMulti = 0.5;
+        }
+
+        $roll = Dice::d(20) + floor($this->getTotalDamage()*$damageMulti) + $add;
         $criticalTypes = -1;
 
         foreach ($this->possibleCriticals as $i=>$value){

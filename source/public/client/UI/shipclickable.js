@@ -98,6 +98,24 @@ window.shipClickable = {
             var jinking = shipManager.movement.getJinking(ship) * 5;
             var flightArmour = shipManager.systems.getFlightArmour(ship);
             var misc = shipManager.systems.getMisc(ship);
+
+            if (ship.base){
+            	var direction;
+            	var html;
+
+            	if (ship.movement[1].value == -1){
+        			direction = "port";
+            	}
+            	else if (ship.movement[1].value == 1){
+					direction = "starboard";
+				}
+
+				if (direction){
+	        		var html = "Rotation towards " + direction;
+		            shipClickable.addEntryElement(html);
+		        }
+            }
+
             
             shipClickable.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
             shipClickable.addEntryElement('Evasion: -' +jinking+ ' to hit', ship.flight === true && jinking > 0);

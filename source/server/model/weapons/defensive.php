@@ -249,10 +249,8 @@
             return $boostLevel;
         }
 
-        public function getCharges($turn){
+        public function getBonusCharges($turn){
             return $this->getBoostLevel($turn);
         }
     }
-
-
 ?>

@@ -4,7 +4,7 @@ class Strela extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 510;
+        $this->pointCost = 470;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Strela";
         $this->imagePath = "img/ships/strela.png";
@@ -29,7 +29,6 @@ class Strela extends HeavyCombatVessel{
         $this->addPrimarySystem(new Hangar(5, 7));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
-
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
@@ -41,8 +40,10 @@ class Strela extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 16, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(3, 15, 3, 20));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 0));
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 240));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -52,9 +53,5 @@ class Strela extends HeavyCombatVessel{
         
         
     }
-
 }
-
-
-
 ?>

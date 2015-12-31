@@ -102,15 +102,21 @@ window.damageDrawer = {
 			//return image;
 			image = damageDrawer.drawFlight(ship, image);
 		}else{
+
+            var locs = [1, 2, 3, 4, 5];
+
+            if (ship.base){
+                locs = [1, 2, 31, 32, 42, 41];
+            }
             
-            for (var i = 1; i<5; i++){
-                var stru = shipManager.systems.getStructureSystem(ship, i);
+            for (var i = 0; i<locs.length; i++){
+                var stru = shipManager.systems.getStructureSystem(ship, locs[i]);
                 if (!stru)
                     continue;
                 
-                if (shipManager.systems.isDestroyed(ship, stru) && !images.drawData[i]){
-                    image = damageDrawer.applyDamage(ship, i, image);
-                    images.drawData[i] = true;
+                if (shipManager.systems.isDestroyed(ship, stru) && !images.drawData[locs[i]]){
+                    image = damageDrawer.applyDamage(ship, locs[i], image);
+                    images.drawData[locs[i]] = true;
                 }
             }
 		}
@@ -141,19 +147,22 @@ window.damageDrawer = {
         if (location == 1){
             x = width-100;
             y = Math.floor((height-200)*0.5);
-        }else if (location == 2){
-            x = -100;
-            y = Math.floor((height-200)*0.5);
-        }else if (location == 3){
+        }
+        else if (location == 3 || location == 31 || location == 32){
             x = Math.floor((width-200)*0.5);
             //y = 100 + range;
             y = (-70)+range;
-        }else if (location == 4){
-            x = Math.floor((width-200)*0.5);
-            
-            y = height-130 - range;
         }
-        
+        else if (location == 2){
+            x = -100;
+            y = Math.floor((height-200)*0.5);
+        }
+        else if (location == 4 || location == 41 || location == 42){
+            x = Math.floor((width-200)*0.5);            
+            y = height-130 - range;
+            console.log(x, y);
+        }
+
         
         context.drawImage(damageDrawer.damageimg, x, y, 200, 200);
         var damage = context.getImageData(0, 0, width, height);

@@ -24,8 +24,7 @@ shipManager.systems = {
 		
 	},
 	
-	isDestroyed: function(ship, system){
-        
+	isDestroyed: function(ship, system){          
         if(system.parentId > 0){
             var parentSystem = system;
             
@@ -38,6 +37,7 @@ shipManager.systems = {
         
         return system.destroyed;
     },
+
     
     isEngineDestroyed: function(ship){
 	if (ship.flight || ship.osat)
@@ -60,6 +60,9 @@ shipManager.systems = {
     isReactorDestroyed: function(ship){
 		if (ship.flight)
 			return false;
+        if (ship.base){
+            return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0));
+        }
 			
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
     },
@@ -223,6 +226,19 @@ shipManager.systems = {
             }
             
         
+        }
+        
+        return null;
+    
+    },
+
+    getSystemByNameInLoc: function(ship, name, loc){
+        for (var i in ship.systems){
+            var system = ship.systems[i];
+
+            if (system.location == loc && system.name == name){
+                return system;
+            }        
         }
         
         return null;

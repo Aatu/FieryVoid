@@ -608,51 +608,110 @@ window.shipManager = {
     },
 
     isDisabled: function(ship){
-        for (var i = 0; i < ship.systems.length; i++){
-            if (ship.systems[i].displayName == "C&C"){
-                if (shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabledOneTurn", gamedata.turn-1)){
-                    return true;
+        if (ship.base){
+            var cncs = [];
+
+            for (var system in ship.systems){
+                if (ship.systems[system].displayName == "C&C"){
+                    cncs.push(ship.systems[system]);
+                }
+            }
+
+            for (var system in cncs){
+                if (!shipManager.criticals.hasCriticalOnTurn(cncs[system], "ShipDisabledOneTurn", gamedata.turn-1)){
+                    return false;
                 }
             }
         }
+        else {
+            for (var i = 0; i < ship.systems.length; i++){
+                if (ship.systems[i].displayName == "C&C"){
+                    if (shipManager.criticals.hasCriticalOnTurn(ship.systems[i], "ShipDisabledOneTurn", gamedata.turn-1)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     },
 
 
     isDestroyed: function(ship){
 
-    if (ship == null){
-        return;
-    }
+        if (ship == null){
+            return;
+        }
 
         if (ship.flight){
 			for (var i in ship.systems){
 				var fighter = ship.systems[i];
-				if (!shipManager.systems.isDestroyed(ship, fighter))
+				if (!shipManager.systems.isDestroyed(ship, fighter)){
 					return false;
-
+                }
 			}
 			return true;
+		}
+        else{            
+            if (!ship.base){
+    			var stru = shipManager.systems.getStructureSystem(ship, 0);
+    			if (shipManager.systems.isDestroyed(ship, stru)){
+    				return true;
+                }   
 
+                var react = shipManager.systems.getSystemByName(ship, "reactor");
+                if (shipManager.systems.isDestroyed(ship, react)){
+                    return true;
+                }
+            } else {
+                var stru = shipManager.systems.getStructureSystem(ship, 0);
+                if (shipManager.systems.isDestroyed(ship, stru)){
+                    return true;     
+                }
 
-		}else{
-
-			var stru = shipManager.systems.getStructureSystem(ship, 0);
-			if (shipManager.systems.isDestroyed(ship, stru))
-				return true;
-
-            var react = shipManager.systems.getSystemByName(ship, "reactor");
-            if (shipManager.systems.isDestroyed(ship, react))
-                return true;
+                var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
+                if (shipManager.systems.isDestroyed(ship, mainReactor)){
+                    return true;
+                }           
+            }
         }
 
         return false;
 
     },
 
-    isAdrift: function(ship){
 
-        if (ship.flight || ship.osat)
-			return false;
+
+    getOuterReactorDestroyedThisTurn: function(ship){
+
+        var array = [];
+
+        for (var j = 0; j < ship.systems.length; j++){
+            system = ship.systems[j];
+            if (system.displayName == "Reactor" && system.location != 0){
+                if (system.destroyed){
+                    for (var k = 0; k < system.damage.length; k++){
+                        var dmg = system.damage[k];
+                        if (dmg.destroyed){
+                            if (gamedata.turn == dmg.turn){
+                                array.push(system);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (array.length > 0){
+            return array;
+        }
+        else return null;
+    },
+
+
+    isAdrift: function(ship){
+        if (ship.flight || ship.osat || ship.base)
+            return false;
 
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "ShipDisabledOneTurn"))
             return true;
@@ -661,11 +720,24 @@ window.shipManager = {
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "cnC"))){
             return true;
         }
-
-        if (shipManager.power.isPowerless(ship))
-            return true;
-
         return false;
+    },
+
+    isEngineless: function(ship){
+        var engines = [];
+        for (var sys in ship.systems){
+            if (ship.systems[sys].displayName == "Engine"){
+                engines.push(ship.systems[sys]);
+            }
+        }
+
+        for (var i = 0; i < engines.length; i++){
+            if (engines[i].destroyed == false){
+                return false;
+            }
+        }
+
+        return true;
     },
 
     getTurnDestroyed: function(ship){

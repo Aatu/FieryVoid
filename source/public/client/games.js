@@ -4,27 +4,32 @@ window.gamedata = {
 	games: null,
 	thisplayer: 0,
 
-	createFireDiv: function(data){
-
+	createFireDiv: function(data){		
 		var target = document.getElementById("fireList");
 			target.innerHTML = "";
 
-		for (var i = 0; i < data.length; i++){
-			var id = data[i].id;
+		if (data){
+			for (var i = 0; i < data.length; i++){
+				var id = data[i].id;
 
-			var div = document.createElement("div");
-				div.className = "game slot clickable"
+				var div = document.createElement("div");
+					div.className = "game slot clickable"
 
-			var link = document.createElement("a");
-				link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
-				link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
+				var link = document.createElement("a");
+					link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
+					link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 
-				div.appendChild(link);
+					div.appendChild(link);
 
-				target.appendChild(div);
-		//		target.style.display = "inline-block";
-
+			}
 		}
+		else {
+			var div = document.createElement("div");
+				div.className = "game slot clickable";
+				div.innerHTML = "No Ongoing Fire Phases found";
+		}
+
+		target.appendChild(div);
 	},
 	
 	parseServerData: function(serverdata){

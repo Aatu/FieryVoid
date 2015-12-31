@@ -8,13 +8,28 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
+             //   'kraken' => '/server/model/ships/centauri/kraken.php',
+             //  'orion' => '/server/model/ships/ea/orion.php',
+                'quadparticlebeam' => '/server/model/weapons/particle.php',
+
+                //base                
+                'starbase' => '/server/model/ships/ShipClasses.php',
+                'starbasetwosides' => '/server/model/ships/ShipClasses.php',
+
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
+                'wlcchlonasvestekflight' => '/server/model/ships/customs/wlcChlonasVesTekFlight.php',
+                'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
+
+                //custom guns
+                'customlightmattercannon' => '/server/model/weapons/customs.php',
+                'customlightmattercannonf' => '/server/model/weapons/customs.php',
+
 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
-
+                'dux' => '/server/model/ships/centauri_raiders/dux.php',
 
                 // drazi and wotc centauro osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
@@ -46,7 +61,7 @@ spl_autoload_register(
 
 
                 //Streib
-            //    'collector' => '/server/model/ships/streib/collector.php',
+                'collector' => '/server/model/ships/streib/collector.php',
 
                 //Streib guns
 
@@ -74,7 +89,6 @@ spl_autoload_register(
                 'udran' => '/server/model/ships/yolu/udran.php',
                 'ulana' => '/server/model/ships/yolu/ulana.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
-                'xebec' => '/server/model/ships/raiders/xebec.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
 
 
@@ -130,6 +144,7 @@ spl_autoload_register(
                 'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
 
                 'celerian' => '/server/model/ships/centauri_old/celerian.php',
+                'celerian1850' => '/server/model/ships/centauri_old/celerian1850.php',
                 'soladon' => '/server/model/ships/centauri_old/soladon.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
                 'kasta' => '/server/model/ships/centauri_old/kasta.php',
@@ -196,6 +211,8 @@ spl_autoload_register(
                 'strikecarrier' => '/server/model/ships/raiders/strikeCarrier.php',
                 'uidace' => '/server/model/ships/raiders/uidace.php',
                 'wolf' => '/server/model/ships/raiders/wolf.php',
+                'xebec' => '/server/model/ships/raiders/xebec.php',
+                'duxraider' => '/server/model/ships/raiders/duxRaider.php',
 
 
                 //stock 

@@ -258,6 +258,41 @@ class Reactor extends ShipSystem{
     }
 }
 
+class SubReactor extends ShipSystem{
+
+    public $name = "reactor";
+    public $displayName = "Reactor";
+    public $outputType = "power";
+    
+    public $possibleCriticals = array(
+        11=>"OutputReduced2",
+        15=>"OutputReduced4",
+        19=>"OutputReduced8",
+        27=>array("OutputReduced10", "ForcedOfflineOneTurn"));
+    
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+    }
+
+    public function addCritical($shipid, $phpclass, $gamedata) {
+        if(strcmp($phpclass, "ForcedOfflineOneTurn") == 0){
+            // This is the reactor. If it takes a ForcedOffLineForOneTurn,
+            // propagate this crit to all systems that can be shut down.
+            $ship = $gamedata->getShipById($shipid);
+            foreach($ship->systems as $system){
+                if ($system->location == $this->location){
+                    if($system->powerReq > 0){
+                        $system->addCritical($shipid, $phpclass, $gamedata);
+                    }       
+                }
+            }
+        }
+
+        parent::addCritical($shipid, $phpclass, $gamedata);
+    }
+
+}
+
 class Engine extends ShipSystem{
 
     public $name = "engine";

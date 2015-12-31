@@ -16,26 +16,26 @@ window.ajaxInterface = {
         });
 	},
 
-    testAjax: function(){
-        $.ajax({
-            type : 'GET',
-            url : 'test.php',
-            dataType : 'json',
-            data: {string:"test"},
-            success : ajaxInterface.alert,
-            error : ajaxInterface.errorAjax
-        });
-    },
+    getAdaptiveArmour: function(id){
 
-    getAdaptiveArmour: function(shipId, getAdaptiveArmourCallback){
+        var obj = {
+            gameid: gamedata.gameid,
+            shipid: id,
+            turn: gamedata.turn
+        }
+
         $.ajax({
             type : 'GET',
             url : 'adaptiveArmour.php',
             dataType : 'json',
-            data: {id: shipId},
-            success : getAdaptiveArmourCallback,
+            data: obj,
+            success : ajaxInterface.postAdaptiveArmour,
             error : ajaxInterface.errorAjax
         });
+    },
+
+    postAdaptiveArmour: function(data){
+        console.log(data);
     },
 
     react: function(){
@@ -226,7 +226,7 @@ window.ajaxInterface = {
 
 
                 tidyships.push(newShip);
-                console.log(newShip);
+            //    console.log(newShip);
             }
         }
        

@@ -52,7 +52,7 @@ class Mogortha extends MediumShip{
 				15 => "Engine",
 				16 => "Hangar",
 				19 => "Reactor",
-				20 => "CnC",
+				20 => "C&C",
 			),
 
 			1=> array(

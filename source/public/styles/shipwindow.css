@@ -247,25 +247,38 @@
 }
 
 .shipwindow .shipSection{
-    margin-top:5px;
-    
+    margin-top:5px;    
 }
 
 .shipwindow .shipSection table{
     width:100%;
 }
 
+.shipwindow .base #shipSection_4{
+    position:absolute;
+    width:70px;
+    top:200px;
+    right:62px;
+}
+
+.shipwindow .base #shipSection_3{
+    position:absolute;
+    width:70px;
+    top:200px;
+    left:55px;
+}
+
 .shipwindow #shipSection_4{
     position:absolute;
     width:70px;
-    top:215px;
+    top:225px;
     right:62px;
 }
 
 .shipwindow #shipSection_3{
     position:absolute;
     width:70px;
-    top:215px;
+    top:225px;
     left:55px;
 }
 

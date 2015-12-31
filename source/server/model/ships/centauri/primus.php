@@ -83,23 +83,23 @@ class Primus extends BaseShip{
             ),
             2=> array(
                     7 => "Thruster",
-                    8 => "Jump Engine",
+                    12 => "Jump Engine",
                     18 => "Structure",
-                    19 => "Primary",
+                    20 => "Primary",
             ),
             3=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
-                    19 => "Primary",
+                    20 => "Primary",
             ),
             4=> array(
                     3 => "Thruster",
                     7 => "Battle Laser",
                     11 => "Twin Array",
                     18 => "Structure",
-                    19 => "Primary",
+                    20 => "Primary",
             )
         );
     }

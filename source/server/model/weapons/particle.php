@@ -30,18 +30,16 @@
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.15;
-        public $projectilespeed = 12;
+        public $projectilespeed = 32;
         public $animationWidth = 4;
         public $trailLength = 10;
 
         public $intercept = 2;
-
-
         public $loadingtime = 1;
 
 
         public $rangePenalty = 1;
-        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
+        public $fireControl = array(4, 4, 400); // fighters, <mediums, <capitals
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -52,6 +50,12 @@
         public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 16 - $this->dp;      }
 
+    }
+
+    class QuadParticleBeam extends StdParticleBeam {
+        public $name = "quadParticleBeam";
+        public $displayName = "Quad Particle Beam";
+        public $guns = 4;
     }
 
     class ParticleBlaster extends Particle{

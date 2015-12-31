@@ -541,7 +541,6 @@ window.weaponManager = {
 			mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 
 		if (shooter.osat && shipManager.movement.hasTurned(shooter)){
-			console.log("osat turn -1");
 			mod -= 1;
 		}
 
@@ -871,11 +870,14 @@ window.weaponManager = {
 
 	getShipHittingSide: function(shooter, target){
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
-		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);;
 
-	//    console.log("getShipDefenceValue targetFacing: " + targetFacing + " shooterCompassHeading: " +shooterCompassHeading);
+		if (target.base){
+			return [1, 2, 31, 32, 41, 42];
+		}
 
-		 if (target.draziCap){
+
+		else if (target.draziCap){
  			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
 				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
 					return [1, 3]
@@ -904,7 +906,7 @@ window.weaponManager = {
 			else return [0]
 		}
 
-		if (target.draziHCV){
+		else if (target.draziHCV){
 			if 	(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(180, targetFacing), mathlib.addToDirection(360, targetFacing)) &&
 				(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(180, targetFacing)))){
 				return [3, 4];
@@ -917,7 +919,7 @@ window.weaponManager = {
 			}
 		}
 
-		 if (target.shipSizeClass > 0 && target.shipSizeClass < 3){
+		else if (target.shipSizeClass > 0 && target.shipSizeClass < 3){
 			if  (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(90, targetFacing), mathlib.addToDirection(270, targetFacing)) &&
 				(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(270, targetFacing), mathlib.addToDirection(90, targetFacing)))){
 				return [1, 2];
@@ -928,9 +930,9 @@ window.weaponManager = {
 			if ( mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(90, targetFacing), mathlib.addToDirection(270, targetFacing))){
 				return [2];
 			}
-		 }
+		}
 
-		 if (target.shipSizeClass == 3){
+		else if (target.shipSizeClass == 3){
  			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
 				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
 					return [1, 3]
@@ -956,6 +958,7 @@ window.weaponManager = {
 				return [4];
 			}
 		}
+
 		return 0;
 	},
 

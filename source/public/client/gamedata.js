@@ -159,7 +159,7 @@ gamedata = {
 		var ret = (target.team != shooter.team); 
 		return ret;
 	},
-    
+
     shipStatusChanged: function(ship){
         botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
@@ -175,7 +175,29 @@ gamedata = {
         if(gamedata.status == "FINISHED")
             return;
 
-// CHECK for NO EW
+        // CHECK for Base Rotation
+        if (gamedata.gamephase == -1 && gamedata.turn == 1){
+            bases = [];
+
+            for (var i in gamedata.ships){
+                var ship = gamedata.ships[i];
+                if (ship.userid == gamedata.thisplayer){
+                    if (ship.base){
+                        bases.push(ship);
+                    }
+                }
+            }
+            if (bases){
+                for (var i = 0; i < bases.length; i++){
+                    if (bases[i].movement[1].value == 0){
+                        confirm.error("Please setup the rotation of your starbase.", function(){});
+                        return false;
+                    }
+                }
+            }
+        } 
+
+        // CHECK for NO EW
         if (gamedata.gamephase == 1){
             var myShips = [];
 
@@ -229,9 +251,9 @@ gamedata = {
                 confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
             }
         }
+        
 
-
-// CHECK for NO FIRE
+        // CHECK for NO FIRE
         else if(gamedata.gamephase == 3){
             var myShips = [];
 
@@ -295,19 +317,19 @@ gamedata = {
         
         else if(gamedata.gamephase != 4){
             confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
-//            if (window.helper.autocomm!=true) {
-//	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
-//            } else {
-//            	gamedata.doCommit();
-//            }	
+        //            if (window.helper.autocomm!=true) {
+        //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+        //            } else {
+        //            	gamedata.doCommit();
+        //            }	
         }
         else{
             confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
-//            if (window.helper.autocomm!=true) {
-//	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
-//            } else {
-//	            confirm.askSurrender("Do you wish to SURRENDER?", gamedata.doCommit, gamedata.onSurrenderClicked);
-//            }	
+        //            if (window.helper.autocomm!=true) {
+        //	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+        //            } else {
+        //	            confirm.askSurrender("Do you wish to SURRENDER?", gamedata.doCommit, gamedata.onSurrenderClicked);
+        //            }	
         }
     },
     
@@ -324,6 +346,8 @@ gamedata = {
     
     doCommit: function(){
         UI.shipMovement.hide();
+
+
         if (gamedata.gamephase == 1){
 //        	ajaxInterface.fastpolling=true;
             var shipNames = shipManager.power.getShipsNegativePower();
@@ -359,9 +383,10 @@ gamedata = {
                 ew.convertUnusedToDEW(ship);
             }
             
-            ajaxInterface.submitGamedata();
-            
-        }else if (gamedata.gamephase == 2){
+            ajaxInterface.submitGamedata();        
+        }
+
+        else if (gamedata.gamephase == 2){
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
                 combatLog.logMoves(ship);
@@ -376,10 +401,15 @@ gamedata = {
             ajaxInterface.submitGamedata();
         }else if (gamedata.gamephase == -1){
             ajaxInterface.submitGamedata();
+        }            
+    },
+
+    autoCommitOnMovement: function(ship){
+        if (ship.base){
+            combatLog.logMoves(ship);
+            shipManager.movement.RemoveMovementIndicators();
+            ajaxInterface.submitGamedata();
         }
-        
-    
-            
     },
     
     onCancelClicked: function(e){
@@ -474,7 +504,7 @@ gamedata = {
                         break;
                     }
                 }
-            }            
+            }     
         }
         
         if (gamedata.gamephase == 4){
@@ -507,9 +537,14 @@ gamedata = {
                 
                 if (ship.userid == gamedata.thisplayer){
                     shipManager.movement.doForcedPivot(ship);
+
+                    if (ship.base){
+                        shipManager.movement.doRotate(ship);
+                        gamedata.autoCommitOnMovement(ship);
+                    }
+
                     gamedata.selectShip(ship, false);
                 }
-           
             });
         }
           

@@ -802,30 +802,6 @@ class Manager{
             $movement = Movement::setPreturnMovementStatusForShip($ship, $servergamedata->turn);
             self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
         }
-            
-    }
-
-    private static function checkRegen($gamedata){
-        foreach ($gamedata->ships as $ship){
-            if ($ship->isDisabled()){
-                continue;
-            }
-            else if ($ship->selfRegen === true){
-                foreach ($ship->systems as $system){
-                    if ($system instanceof Structure || $system instanceof Thruster){
-                        if ($system->getRemainingHealth() < $system->maxhealth){
-
-                            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, -2, $system->armour, 0, 0, false, "");
-                            $damageEntry->updated = true;
-                            $system->damage[] = $damageEntry;
-                            Debug::log("regen hit");
-                        }
-                    }
-                    else {
-                    }
-                }
-            }
-        }
     }
     
     private static function generateIniative($gamedata){
@@ -999,7 +975,6 @@ class Manager{
         
         return $ships;
     }
-    
     
 }
 

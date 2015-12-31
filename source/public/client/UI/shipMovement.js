@@ -26,6 +26,10 @@ window.UI = {
                 
                 UI.shipMovement.pivotleftElement =  $("#pivotleft", ui);
                 UI.shipMovement.pivotrightElement = $("#pivotright", ui);
+
+                UI.shipMovement.rotateleftElement =  $("#rotateleft", ui);
+                UI.shipMovement.rotaterightElement = $("#rotateright", ui);
+
                 UI.shipMovement.rollElement = $("#roll", ui);
                 UI.shipMovement.jinkElement = $("#jink", ui);
                 UI.shipMovement.jinkvalueElement = UI.shipMovement.jinkElement.find(".jinkvalue");
@@ -50,6 +54,10 @@ window.UI = {
                 
                 UI.shipMovement.pivotleftElement.on("click", UI.shipMovement.pivotleftCallback);
                 UI.shipMovement.pivotrightElement.on("click", UI.shipMovement.pivotrightCallback);
+
+                UI.shipMovement.rotateleftElement.on("click", UI.shipMovement.rotateleftCallback);
+                UI.shipMovement.rotaterightElement.on("click", UI.shipMovement.rotaterightCallback);
+
                 UI.shipMovement.rollElement.on("click", UI.shipMovement.rollCallback);
                 
                 UI.shipMovement.accElement.on("click", UI.shipMovement.accelCallback);
@@ -146,14 +154,12 @@ window.UI = {
         
         pivotleftCallback: function(e){
             e.stopPropagation();
-			//console.log("pivotCallback1");
             UI.shipMovement.pivotCallback(e, false);
         }, 
         
         pivotCallback: function(e, right){
 			if (UI.shipMovement.checkUITimeout())
                 return false;
-			//console.log("pivotCallback2");
                 
             var ship = gamedata.getActiveShip();
             
@@ -163,6 +169,25 @@ window.UI = {
             shipManager.movement.doPivot(ship, right);
             
         },
+
+        rotateleftCallback: function(e){
+            e.stopPropagation();
+            UI.shipMovement.rotateCallback(e, true);
+        }, 
+        
+        rotaterightCallback: function(e){
+            e.stopPropagation();
+            UI.shipMovement.rotateCallback(e, false);
+        }, 
+
+        rotateCallback: function(e, right){
+            e.stopPropagation();  
+            var ship = gamedata.getActiveShip();
+            if (!ship)
+                ship = gamedata.getSelectedShip();
+            shipManager.movement.pickRotation(ship, right);
+        },
+
         
         sliprightCallback: function(e){
             e.stopPropagation();
@@ -330,7 +355,21 @@ window.UI = {
                 pivotright.hide();
             }
             
-            
+            // Base Rotation
+            if (shipManager.movement.canRotate(ship)){
+                var rotateleft = UI.shipMovement.rotateleftElement;
+                    angle = mathlib.addToDirection(shipHeading, -100);
+                    dis = 60;
+                var icon = "img/rotateleft.png";
+                UI.shipMovement.drawUIElement(rotateleft, pos.x, pos.y, s, dis*1.4, angle, icon, "rotateleftcanvas", shipHeading);
+                
+                var rotateright = UI.shipMovement.rotaterightElement;
+                    dis = 60;
+                    angle = mathlib.addToDirection(shipHeading, 100);
+                var icon = "img/rotateright.png";
+                UI.shipMovement.drawUIElement(rotateright, pos.x, pos.y, s, dis*1.4, angle, icon, "rotaterightcanvas", shipHeading);
+            }
+
             
             dis = 30;
             angle = mathlib.addToDirection(shipHeading, 180);
@@ -403,6 +442,8 @@ window.UI = {
         },
         
         drawUIElement: function(e, x, y, s, dis, angle, path, canvasid, shipHeading){
+
+
         
             var UIpos = mathlib.getPointInDirection( dis, angle, x, y);
             e.css("top", UIpos.y - y - s*0.5+"px").css("left", UIpos.x - x - s*0.5+"px");

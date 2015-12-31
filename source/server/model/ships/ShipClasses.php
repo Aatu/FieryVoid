@@ -690,7 +690,7 @@
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
         debug::log("______________________");
-        debug::log("gethitystem for: ".$this->phpclass." with id: ".$this->id);
+        debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
 
             if (isset($this->hitChart[0])){
                 debug::log("TABLE");
@@ -713,15 +713,13 @@
             
             if ($fire->calledid != -1)
                 $system = $this->getSystemById($fire->calledid);
+                debug::log("called shot vs ".$system->displayName." ,destroyed: ".$system->destroyed);
             
             if ($system != null && !$system->isDestroyed())
                 return $system;
         
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
-
-
-            debug::log("checking if FLASH");
 
             $destroyedThisTurn = false;
 
@@ -744,18 +742,12 @@
             }
 
 
-            if ($destroyedThisTurn){
-                debug::log("one destroyed this turn!");
-            }
-            else {
-                debug::log("nope");
-            }
-
 
             if (!$weapon->flashDamage){
                 debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
+                debug::log("intial roll: ".$roll);
 
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
@@ -1265,9 +1257,6 @@
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
 
-
-            debug::log("checking if FLASH");
-
             $destroyedThisTurn = false;
 
             if ($weapon->flashDamage){
@@ -1301,7 +1290,7 @@
                 debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
-
+                debug::log("intial roll: ".$roll);
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                 }
@@ -1314,7 +1303,7 @@
                     }
                 }
 
-                debug::log("roll: ".$roll." on loc: ".$location."__name: ".$name);
+                debug::log("hit result on loc: ".$location." has name: ".$name);
 
                 if ($name == "Primary"){
                         $name = false;
@@ -1741,4 +1730,158 @@
            return false;
         }
     }
+
+
+
+    class StarBase extends BaseShip{
+        public $base = true;
+    }
+
+
+    class StarBaseTwoSides extends StarBase{
+
+
+        protected function addLeftFrontSystem($system){
+            $this->addSystem($system, 31);
+        }
+        protected function addLeftAftSystem($system){
+            $this->addSystem($system, 32);
+        }
+        protected function addRightFrontSystem($system){
+            $this->addSystem($system, 41);
+        }
+        protected function addRightAftSystem($system){
+            $this->addSystem($system, 42);
+        }
+
+
+        public function isDestroyed($turn = false){        
+            foreach($this->systems as $system){
+                if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
+                    return true;
+                }
+                if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
+                    return true;
+                }                
+            }
+            return false;
+        }
+
+        public function destroySection($reactor, $gamedata){
+            $locToDestroy = $reactor->location;
+            $sysArray = array();
+
+            foreach ($this->systems as $system){
+                if ($system->location == $reactor->location){
+                    if (! $system->destroyed){
+                        $sysArray[] = $system;
+                    }
+                }
+            }
+
+            foreach ($sysArray as $system){
+
+                $remaining = $system->getRemainingHealth();
+                $armour = $system->armour;
+                $toDo = $remaining + $armour;
+
+                $damageEntry = new DamageEntry(-1, $this->id, -1, $gamedata->turn, $system->id, $toDo, $armour, 0, -1, true, "", "plasma");
+                $damageEntry->updated = true;
+
+                $system->damage[] = $damageEntry;
+            }
+        }
+
+        /*
+        public function destroyAllOnLocation($location, $gamedata, $fireOrder){
+            debug::log("destroy");
+            foreach ($this->systems as $system){
+                if ($system->location == $location){
+                    if (! $system->destroyed){
+                        $health = $system->getRemainingHealth();
+                        $destroyed = true;
+
+                        $damageEntry = new DamageEntry(-1, $this->id, -1, $fireOrder->turn, $system->id, $health+$armour, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
+                        $damageEntry->updated = true;
+
+                        $system->damage[] = $damageEntry;
+                    }
+                }
+            }
+        }
+        */
+
+
+        public function doGetDefenceValue($tf, $shooterCompassHeading){                
+            return $this->sideDefense;
+        }
+
+
+
+        
+        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+
+            $eligible = array();
+            $loc = 0;
+            
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
+                $eligible[] = 1;
+            }
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(90,$tf) )){
+                $eligible[] = 41;
+            }
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(90,$tf), Mathlib::addToDirection(150,$tf) )){
+                $eligible[] = 42;
+            }
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
+                $eligible[] = 2;
+            }
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(270,$tf) )){
+                $eligible[] = 32;
+            }
+            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(330,$tf) )){
+                $eligible[] = 31;
+            }
+
+            if (sizeof($eligible) > 1){
+                debug::log("sizeof: ".sizeof($eligible));
+                $roll = mt_rand(0, sizeof($eligible)-1);
+                debug::log("roll: ".$roll);
+                $loc = $eligible[$roll];
+            }
+            else {
+                $loc = $eligible[0];
+            }
+
+            return $loc;
+        }
+        
+        
+        public function getHitSection($pos, $shooter, $turn, $weapon){
+            
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = 0;
+            
+            if (! $weapon->ballistic){
+                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+            }else{
+                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            }
+
+            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+
+
+
+            if ($location != 0){         
+
+                $structure = $this->getStructureSystem($location);
+                if ($structure != null && $structure->isDestroyed($turn-1))
+                    return 0;
+                }
+        
+            return $location;
+            
+        }
+    }
+
 ?>

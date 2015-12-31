@@ -60,13 +60,13 @@ flightWindowManager = {
 	
 	
 	createShipWindow: function(ship){
-                var template;
-                
-                if(!ship.superheavy){
-                    template = $("#shipwindowtemplatecontainer .shipwindow.flight");
-                }else{
-                    template = $("#shipwindowtemplatecontainer .shipwindow.heavyfighter");
-                }
+        var template;
+        
+        if(!ship.superheavy){
+            template = $("#shipwindowtemplatecontainer .shipwindow.flight");
+        }else{
+            template = $("#shipwindowtemplatecontainer .shipwindow.heavyfighter");
+        }
                 
 		var shipwindow = template.clone(true).appendTo("body");
 		

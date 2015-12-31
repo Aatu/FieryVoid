@@ -35,7 +35,7 @@ shipManager.movement = {
             ship.deploymove.y = pos.y;
         }
 
-        if (ship.deploymove && ship.osat){
+        if (ship.deploymove && ship.osat || ship.deploymove && ship.base){
     		ship.deploymove.speed = 0;
         }
         
@@ -55,10 +55,9 @@ shipManager.movement = {
         
         ship.deploymove.facing = newfacing;
         ship.deploymove.heading = newheading;
-    }, 
+    },     
 
-	doDeploymentAccel: function(ship, accel){
-
+    doDeploymentAccel: function(ship, accel){
         var value = 1;
         if (!accel){
             value = -1;
@@ -68,9 +67,9 @@ shipManager.movement = {
         var newSpeed = speed + value;
 
         if (newSpeed >= 3 && newSpeed <= 7){
-			ship.deploymove.speed += value;
-			shipManager.drawShip(ship);
-		}
+            ship.deploymove.speed += value;
+            shipManager.drawShip(ship);
+        }
     },
 
     isMovementReady: function(ship){
@@ -650,6 +649,89 @@ shipManager.movement = {
             shipWindowManager.assignThrust(ship);
         }
     },
+
+    canRotate: function(ship){
+        if (ship.base){
+            if (gamedata.gamephase == -1 && gamedata.turn == 1 && ship.deploymove){
+                return true;
+            }
+        }
+        else return false;
+    },
+
+
+    pickRotation: function (ship, right){
+        if (right){
+            confirm.confirm("Are you sure you want to set the base' rotation towards port ?", function(response){
+                if (response){
+                    shipManager.movement.setRotation(ship, right);
+                }
+            })
+        }
+        else {
+            confirm.confirm("Are you sure you want to set the base' rotation towards starboard ?", function(response){
+                if (response){
+                    shipManager.movement.setRotation(ship, right);
+                }
+            })
+        }
+    },
+
+    setRotation: function(ship, right){
+
+        if (right){
+        ship.movement[1].value = -1;
+        }
+        else {
+        ship.movement[1].value = 1;
+        }
+    },
+
+    doRotate: function(ship){
+
+        if (gamedata.turn > 0){
+
+            var name;
+            var step = ship.movement[1].value;
+
+
+            if (step == -1){
+                name = "rotateLeft";
+            }
+            else if (step == 1){
+                name = "rotateRight";
+            }
+
+            var lm = ship.movement[ship.movement.length-1];
+            var facing = mathlib.addToHexFacing(lm.facing, step);
+            
+            ship.movement[ship.movement.length] = {
+                id:-1,
+                type:name,
+                x:lm.x,
+                y:lm.y,
+                xOffset:lm.xOffset,
+                yOffset:lm.yOffset,
+                facing:facing,
+                heading:facing,
+                speed:lm.speed,
+                animating:false,
+                animated:false,
+                animationtics:0,
+                requiredThrust:Array(null, null, null, null, null),
+                assignedThrust:Array(),
+                commit:true,
+                preturn:false,
+                at_initiative:shipManager.getIniativeOrder(ship),
+                turn:gamedata.turn,
+                forced:true,
+                value:0
+            } 
+        }
+
+        shipManager.drawShip(ship);
+
+    },
     
     isEndingPivot: function(ship, right){
         var isPivoting = shipManager.movement.isPivoting(ship);
@@ -666,9 +748,7 @@ shipManager.movement = {
         return false;
     },
     
-    canPivot: function(ship, right){
-        
-        
+    canPivot: function(ship, right){        
 	
 		if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship))
 			return false;
@@ -986,7 +1066,7 @@ shipManager.movement = {
     },
     
     canChangeSpeed: function(ship, accel){
-        if (ship.osat){
+        if (ship.osat || ship.base){
         	return false;
         }
 

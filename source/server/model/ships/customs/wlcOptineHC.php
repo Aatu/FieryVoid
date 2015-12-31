@@ -71,14 +71,14 @@ class wlcOptineHC extends BaseShip{
 				16 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",
-				20 => "CnC",
+				20 => "C&C",
 			),
 
 			1=> array(
 				4 => "Thruster",
-				6 => "ImperialLaser",
-				7 => "AssaultLaser",
-				9 => "TwinArray",
+				6 => "Imperial Laser",
+				7 => "Assault Laser",
+				9 => "Twin Array",
 				11 => "Hangar",
 				18 => "Structure",
 				20 => "Primary",
@@ -86,25 +86,25 @@ class wlcOptineHC extends BaseShip{
 
 			2=> array(
 				5 => "Thruster",
-				8 => "JumpEngine",
-				10 => "AssaultLaser",
-				12 => "TwinArray",
+				8 => "Jump Engine",
+				10 => "Assault Laser",
+				12 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",
 			),
 
 			3=> array(
 				4 => "Thruster",
-				6 => "ImperialLaser",
-				8 => "TwinArray",
+				6 => "Imperial Laser",
+				8 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",
 			),
 
 			4=> array(
 				4 => "Thruster",
-				6 => "ImperialLaser",
-				8 => "TwinArray",
+				6 => "Imperial Laser",
+				8 => "Twin Array",
 				18 => "Structure",
 				20 => "Primary",
 			),

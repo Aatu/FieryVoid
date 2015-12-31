@@ -2,16 +2,70 @@
     include_once 'global.php';
 
 
-	$shipId = $_GET["id"];
-	debug::log($shipId);
+	$gameid = $_GET["gameid"];
+	$shipid = $_GET["shipid"];
+	$turn = $_GET["turn"];
+
+	try {
+		$link = new PDO("mysql:host=localhost;dbname=B5CGM","root","",
+						array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+	}
+	catch(PDOException $ex){
+	    die(json_encode(array('outcome' => false, 'message' => 'Unable to connect')));
+	}
+
+	if ($link){
+		debug::log("alive connection");
+		$stmt = $link->prepare(
+				            "SELECT 
+				                *
+				            FROM 
+				                tac_adaptivearmour
+				            WHERE 
+				                gameid = :gameid
+				            AND
+				                shipid = :shipid"
+			            );
+
+		$stmt->execute(array(
+			":gameid" =>$gameid,
+			":shipid" => $shipid
+			));
 
 
-	DBManager::setValidAdaptiveSettings($gamedata, $shipId);
+		$row = $stmt->fetch();
 
-	$ret = ["shipId" => $shipId];
-	$retJSON = json_encode($ret, JSON_NUMERIC_CHECK);
+		if ($row){
+			foreach ($row as $result){
+				debug::log($result);
+			}
+		}
+		else {				
+			debug::log("ERROR");
+		}
+	}
+	else 
+		debug::log("no connection");
+
+
+/*
+
+        while($stmt->fetch()){
+            $value["particle"] = array($particlepoints, $particlealloc);
+            $value["laser"] = array($laserpoints, $laseralloc);
+            $value["molecular"] = array($molecularpoints, $molecularalloc);
+            $value["matter"] = array($matterpoints, $matteralloc);
+            $value["plasma"] = array($plasmapoints, $plasmaalloc);
+            $value["electromagnetic"] = array($electromagneticpoints, $electromagneticalloc);
+            $value["antimatter"] = array($antimatterpoints, $antimatteralloc);
+            $value["ion"] = array($ionpoints, $ionalloc);
+            $value["gravitic"] = array($graviticpoints, $graviticalloc);
+            $value["ballistic"] = array($ballisticpoints, $ballisticalloc);
+        }
+
+*/
 
 	
-	print($retJSON);
+//	print(json_encode($ret));
     
 ?>
