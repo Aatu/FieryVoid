@@ -577,7 +577,7 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Pulse";
+            $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Standard";
 
             parent::setSystemDataWindow($turn);
