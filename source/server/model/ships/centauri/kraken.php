@@ -46,7 +46,7 @@ class Kraken extends StarBaseTwoSides{
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));
 
-		$this->addPrimarySystem(new Structure( 7, 60));
+		$this->addPrimarySystem(new Structure( 7, 145));
 
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
@@ -63,7 +63,7 @@ class Kraken extends StarBaseTwoSides{
 				new TwinArray(5, 6, 2, $min, $max),
 				new TwinArray(5, 6, 2, $min, $max),
 				new CargoBay(5, 30),
-				new Reactor(5, 30, 0, 0),
+				new SubReactor(5, 30, 0, 0),
 				new Structure(5, 115)
 			);
 

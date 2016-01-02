@@ -186,6 +186,7 @@ class ShipSystem{
         }
 
         if ($this instanceof SubReactor){
+            debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
 
@@ -288,6 +289,17 @@ class ShipSystem{
         return false;
         
     }
+
+
+    public function wasDestroyedThisTurn($turn){
+        foreach ($this->damage as $damage){
+            if ($damage->turn == $turn && $damage->destroyed){
+                return true;
+            }
+        }  
+        return false;
+    }
+
     
     public function isDamagedOnTurn($turn){
         

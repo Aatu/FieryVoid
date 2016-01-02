@@ -80,10 +80,9 @@ shipManager.power = {
                     shipManager.power.setOnline(ship, system);
                     systemwindow.removeClass("offline");
                     
-                    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
-                    userMessage += "Power up all necessary systems.";
-                    
-                    window.confirm.error(userMessage, function(){});
+                //    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
+                //    userMessage += "Power up all necessary systems.";                    
+                //    window.confirm.error(userMessage, function(){});
                     
                     return;
                 }else{

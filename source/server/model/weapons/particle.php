@@ -39,7 +39,7 @@
 
 
         public $rangePenalty = 1;
-        public $fireControl = array(4, 4, 400); // fighters, <mediums, <capitals
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

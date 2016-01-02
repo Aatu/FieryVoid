@@ -8,7 +8,6 @@
         public $rof = 1;
         public $maxpulses = 6;
         public $priority = 8;
-        public $damageClass = "particle";
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

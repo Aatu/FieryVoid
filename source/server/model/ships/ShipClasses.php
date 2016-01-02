@@ -24,6 +24,7 @@
         public $slot;
         public $unavailable = false;
         public $minesweeperbonus = 0;
+        public $base = false;
         
         public $enabledSpecialAbilities = array();
         
@@ -711,9 +712,10 @@
             $name = false;
             $systems = array();
             
-            if ($fire->calledid != -1)
+            if ($fire->calledid != -1){
                 $system = $this->getSystemById($fire->calledid);
                 debug::log("called shot vs ".$system->displayName." ,destroyed: ".$system->destroyed);
+            }
             
             if ($system != null && !$system->isDestroyed())
                 return $system;
@@ -1755,6 +1757,7 @@
         }
 
 
+
         public function isDestroyed($turn = false){        
             foreach($this->systems as $system){
                 if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
@@ -1771,6 +1774,7 @@
             $locToDestroy = $reactor->location;
             $sysArray = array();
 
+            debug::log("killing section: ".$locToDestroy);
             foreach ($this->systems as $system){
                 if ($system->location == $reactor->location){
                     if (! $system->destroyed){

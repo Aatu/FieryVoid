@@ -185,7 +185,9 @@ window.UI = {
             var ship = gamedata.getActiveShip();
             if (!ship)
                 ship = gamedata.getSelectedShip();
-            shipManager.movement.pickRotation(ship, right);
+            if (ship.base){
+                shipManager.movement.pickRotation(ship, right);
+            }
         },
 
         

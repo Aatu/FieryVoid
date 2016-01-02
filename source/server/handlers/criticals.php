@@ -18,8 +18,8 @@ class Criticals{
 						$crits = $system->testCritical($ship, $gamedata, $crits);
              	   }
                 }
-                if ($ship instanceof StarBase && $system instanceof Reactor){
-                	if ($system->isDestroyed($gamedata->turn)){
+                if ($ship instanceof StarBase && $system instanceof SubReactor){
+                	if ($system->wasDestroyedThisTurn($gamedata->turn)){
 	                	if ($system->location != 0){
 	                		$ship->destroySection($system, $gamedata);
 	                	}		

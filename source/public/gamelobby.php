@@ -390,13 +390,13 @@
                         <div class="notes"></div>
                     </td>                
                     <td class="col2">
-                        <div id="shipSection_1" class="shipSection" style="margin-top: 15px;">
+                        <div id="shipSection_1" class="shipSection" style="margin-top: 15px">
                             <table></table>
                         </div>
-                        <div id="shipSection_0" class="shipSection primary">
+                        <div id="shipSection_0" class="shipSection primary" style="margin-top: 25px">
                             <table></table>
                         </div>
-                        <div id="shipSection_2" class="shipSection" style="margin-top: 25px;">
+                        <div id="shipSection_2" class="shipSection" style="margin-bottom: 20px">
                             <table></table>
                         </div>
                     </td>

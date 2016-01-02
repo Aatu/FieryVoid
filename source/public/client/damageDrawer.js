@@ -6,6 +6,9 @@ window.damageDrawer = {
     damageimg: null,
     damagemaskimg: null, 
     
+    damageimgbase: null,
+    damagemaskimgbase: null, 
+    
     getOrginalImage: function(ship){
         return shipManager.shipImages[ship.id];
     },
@@ -115,8 +118,14 @@ window.damageDrawer = {
                     continue;
                 
                 if (shipManager.systems.isDestroyed(ship, stru) && !images.drawData[locs[i]]){
-                    image = damageDrawer.applyDamage(ship, locs[i], image);
-                    images.drawData[locs[i]] = true;
+                    if (ship.base){
+                        image = damageDrawer.applyDamageBase(ship, locs[i], image);
+                        images.drawData[locs[i]] = true;
+                    }
+                    else {
+                        image = damageDrawer.applyDamage(ship, locs[i], image);
+                        images.drawData[locs[i]] = true;
+                    }
                 }
             }
 		}
@@ -160,7 +169,6 @@ window.damageDrawer = {
         else if (location == 4 || location == 41 || location == 42){
             x = Math.floor((width-200)*0.5);            
             y = height-130 - range;
-            console.log(x, y);
         }
 
         
@@ -221,6 +229,109 @@ window.damageDrawer = {
 
     },
     
+    
+    applyDamageBase: function(ship, location, image){
+
+        var images = shipManager.shipImages[ship.id];
+        var width = ship.canvasSize;
+        var height = ship.canvasSize;
+        var canvas  = $('<canvas id="constcanDam" width="'+width+'" height="'+height+'"></canvas>');
+        var context = canvas.get(0).getContext("2d");
+        var x = 0;
+        var y = 0;
+        var imageData = image.data;
+        var center = {
+            x: width/2,
+            y: height/2
+        }
+        
+        var range = Math.floor((width - 200)*0.66);
+       
+        var pixels = 4 * width * height;
+        
+        if (location == 1){
+            x = width-100;
+            y = height/2 - 75;
+        }
+
+        else if (location == 41){
+            x = width-140;
+            y = height - 150;
+        }
+        else if (location == 42){
+            x = 0;
+            y = height - 150;
+        }
+
+        else if (location == 2){
+            x = -50;
+            y = height/2 - 75;
+        }
+
+        else if (location == 32){
+            x = 0;
+            y = 0;
+        }
+        else if (location == 31){
+            x = width-140;
+            y = 0;
+        }
+
+
+
+        
+        context.drawImage(damageDrawer.damageimgbase, x, y, 150, 150);
+        var damage = context.getImageData(0, 0, width, height);
+        var damageData = damage.data;
+        context.clearRect ( 0 , 0 , width, height );
+        
+        context.drawImage(damageDrawer.damageimgbase, x, y, 150, 150);
+        var mask = context.getImageData(0, 0, width, height);
+        var maskData = mask.data;
+        context.clearRect ( 0 , 0 , width, height );
+        
+        while (pixels) {
+            var r = pixels-4;
+            var g = pixels-3;
+            var b = pixels-2;
+            var a = pixels-1;
+            
+            var a1 = imageData[a];
+            var a2 = damageData[a];
+            var a3 = 255 - maskData[a];
+            
+            if (a3 < 255 ){
+                var na = (a1 < a3) ? a1 : a3;
+                imageData[a] = na;
+                    
+            }
+            
+            
+            
+            if (a1 == 0 || a2 == 0){
+                    pixels -= 4;
+                    continue;
+            }
+            
+            
+            
+                
+            var m = a2 / 255;
+            //alphaComponent = imageData.data[((50*(imageData.width*4)) + (200*4)) + 3];
+            imageData[r] = imageData[r] * (1-m) + damageData[r] * m;
+            imageData[g] = imageData[g] * (1-m) + damageData[g] * m;
+            imageData[b] = imageData[b] * (1-m) + damageData[b] * m;
+            
+            
+            pixels -= 4;
+            
+            
+        }
+        image.data = imageData;
+        
+        return image;
+
+    },
     drawFlight: function(flight, image){
     	var images = shipManager.shipImages[flight.id];
         var width = flight.canvasSize;
@@ -275,6 +386,12 @@ window.damageDrawer = {
     
     window.damageDrawer.damagemaskimg = new Image();
     window.damageDrawer.damagemaskimg.src = "img/damagemask.png";
+
+    window.damageDrawer.damageimgbase = new Image();
+    window.damageDrawer.damageimgbase.src = "img/damage.png";
+    
+    window.damageDrawer.damagemaskimgbase = new Image();
+    window.damageDrawer.damagemaskimgbase.src = "img/damagemask.png";
 
     
 })();

@@ -308,6 +308,7 @@ class Manager{
             self::$dbManager->startTransaction();
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
+
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
@@ -609,8 +610,17 @@ class Manager{
     }
     
     private static function startMovement($gamedata){
-    
         $gamedata->setPhase(2); 
+
+        $ship = $gamedata->getFirstShip();
+
+        if ($ship instanceof StarBase){
+            if ($gamedata->turn > 1){
+                $moves = sizeof($ship->movement);
+                debug::log($ship->movement[$moves-1]->type);
+            }
+        }
+
         $gamedata->setActiveship($gamedata->getFirstShip()->id);
         self::$dbManager->updateGamedata($gamedata);
     

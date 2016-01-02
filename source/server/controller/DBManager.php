@@ -610,7 +610,9 @@ class DBManager {
 
 
 
-    public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages){ 
+    public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages){
+
+        debug::log("___submitDamagesForAdaptiveArmour___");
 
         $obj = array();
         $id;
@@ -636,10 +638,10 @@ class DBManager {
 
             if (isset($obj[$damage->damageclass])){
                 $obj[$damage->damageclass] += 1;
-                debug::log("+ 1");
+                debug::log($obj[$damage->damageclass]." + 1");
             } else {                
                 $obj[$damage->damageclass] = 1;
-               debug::log("init = 1");
+               debug::log("INIT: ".$obj[$damage->damageclass]." = 1");
             }
 
             $id = $damage->fireorderid;
@@ -648,23 +650,28 @@ class DBManager {
 
 
         foreach ($obj as $key => $value){
-            if (is_string($key) && strlen($key) > 2){
-                debug::log($key." => ".$value);
+            if ($key != "pulse"){
+                if (is_string($key) && strlen($key) > 2){
+                    debug::log($key." => ".$value);
 
-                try {
-                    $sql = "
-                    UPDATE `B5CGM`.`tac_adaptivearmour` 
-                    SET `".$key."points` = `".$key."points` + $value 
-                    WHERE gameid = '".$gameid."' 
-                    AND shipid ='".$shipid = $damage->shipid."'";
+                    try {
+                        $sql = "
+                        UPDATE `B5CGM`.`tac_adaptivearmour` 
+                        SET `".$key."points` = `".$key."points` + $value 
+                        WHERE gameid = '".$gameid."' 
+                        AND shipid ='".$shipid = $damage->shipid."'";
 
-                    debug::log($sql);
+                        debug::log($sql);
 
-                $this->update($sql);
+                    $this->update($sql);
+                    }
+                    catch(Exception $e) {
+                        throw $e;
+                    }
                 }
-                catch(Exception $e) {
-                    throw $e;
-                }
+            }
+            else {
+                debug::log("PULSE");
             }
         }
     }

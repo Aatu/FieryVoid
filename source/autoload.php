@@ -8,9 +8,11 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
-             //   'kraken' => '/server/model/ships/centauri/kraken.php',
-             //  'orion' => '/server/model/ships/ea/orion.php',
+           //     'kraken' => '/server/model/ships/centauri/kraken.php',
+           //     'orion' => '/server/model/ships/ea/orion.php',
+           //     'jastat' => '/server/model/ships/narn/jastat.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
+                'bmissilerack' => '/server/model/weapons/missile.php',
 
                 //base                
                 'starbase' => '/server/model/ships/ShipClasses.php',

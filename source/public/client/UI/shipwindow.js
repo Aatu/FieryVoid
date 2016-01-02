@@ -110,7 +110,7 @@ shipWindowManager = {
 		shipWindowManager.populateShipWindow(ship, shipwindow);
 
 
-		if (typeof ship.hitChart != "undefined" && gamedata.gamephase > -2){
+		if (ship.hitChart.length > 0 && gamedata.gamephase > -2 || typeof ship.hitChart != "undefined" && gamedata.gamephase > -2){
 			shipWindowManager.hitChartSetup(ship, shipwindow);
 		}
 
@@ -312,6 +312,9 @@ shipWindowManager = {
 		else if (name == "Class-LH Missile Rack"){
 			return "LH Rack";
 		}
+		else if (name == "Class-B Missile Rack"){
+			return "B Rack";
+		}
 		else if (name == "Interceptor Prototype"){
 			return "Interceptor";
 		}
@@ -349,7 +352,7 @@ shipWindowManager = {
         
         var abilities = Array();
         var notes = Array();
-        
+
 		if (ship.hitChart.length > 0){
             notes.push("&nbsp;has HitChart.");
         }
@@ -444,9 +447,6 @@ shipWindowManager = {
                         notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
                     }
                 }
-            }
-            else{
-                notes.push("&nbsp;&nbsp;&nbsp;no fighters");
             }
            
             if(ship.limited != 0){
