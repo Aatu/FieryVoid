@@ -12,7 +12,7 @@ spl_autoload_register(
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'kraken' => '/server/model/ships/centauri/kraken.php',
-                'orion' => '/server/model/ships/ea/orion.php',
+                'orion' => '/server/model/ships/EA/orion.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
                 'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',

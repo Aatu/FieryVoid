@@ -533,9 +533,6 @@ shipWindowManager = {
 		
 		var index = 0;
 		for (var i in arrangement){
-		//	if (ship.base && location == 1){
-		//		console.log(arrangement[i]);
-		//	}
 			var group = arrangement[i];
 			var row;
 			if (group.length == 1){
