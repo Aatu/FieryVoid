@@ -622,10 +622,10 @@ shipWindowManager = {
 		var grouped = shipManager.systems.groupSystems(systems);
 
 			if (ship.base){
-				grouped = shipWindowManager.combineGroupsForBase(grouped, ship);
+				grouped = shipWindowManager.combineGroupsForBase(grouped);
 			}
 			else {
-				grouped = shipWindowManager.combineGroups(grouped, ship);
+				grouped = shipWindowManager.combineGroups(grouped);
 			}
 
 			grouped = shipWindowManager.addStructure(grouped, structure);
@@ -670,7 +670,7 @@ shipWindowManager = {
 	
 	},
 	
-	combineGroups: function(grouped, ship){
+	combineGroups: function(grouped){
 		var finals = Array();
 	
 		for (var i in grouped){
@@ -682,10 +682,10 @@ shipWindowManager = {
 				var found = false;
 				for (var a in grouped){
 					var other = grouped[a];
-					if (!found && (other.length == 2 || other.length == 1) && !shipWindowManager.isInFinal(finals, other) && group != other){
+					if (!found && other.length == 2 && !shipWindowManager.isInFinal(finals, other) && group != other){
 						if (group.length == 1){
-								finals.push(Array(other[0],group[0],other[1]));
-						}	
+							finals.push(Array(other[0],group[0],other[1]));
+						}
 						else {	
 							finals.push(Array(other[0],group[0], group[1],other[1]));
 						}
@@ -699,13 +699,12 @@ shipWindowManager = {
 				}
 				
 			}
-			else {
+			else{
 				finals.push(group);
 			}
 		}
-
-		return finals;		
-	
+		
+		return finals;
 	},
 
 	combineGroupsForBase: function(grouped){

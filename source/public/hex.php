@@ -319,7 +319,7 @@
                     <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
                         <table></table>
                     </div>
-                    <div id="shipSection_0" class="shipSection primary" style="border-top: 3px dotted; border-top: 3px dotted; margin-top: 35px;">
+                    <div id="shipSection_0" class="shipSection primary" style="border-top: 3px dotted #7e9dc7; border-bottom: 3px dotted #7e9dc7; margin-top: 35px;">
                         <table></table>
                     </div>
                     <div id="shipSection_2" class="shipSection" style="margin-top: 35px;">

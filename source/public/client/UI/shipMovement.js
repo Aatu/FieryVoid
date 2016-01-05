@@ -253,7 +253,6 @@ window.UI = {
                 return;
             }
             
-            
                     
             UI.shipMovement.initMoveUI();
             var shipHeading = shipManager.getShipDoMAngle(ship);
@@ -358,18 +357,22 @@ window.UI = {
             }
             
             // Base Rotation
+            var rotateleft = UI.shipMovement.rotateleftElement;
+            var rotateright = UI.shipMovement.rotaterightElement;
             if (shipManager.movement.canRotate(ship)){
-                var rotateleft = UI.shipMovement.rotateleftElement;
                     angle = mathlib.addToDirection(shipHeading, -100);
                     dis = 60;
                 var icon = "img/rotateleft.png";
                 UI.shipMovement.drawUIElement(rotateleft, pos.x, pos.y, s, dis*1.4, angle, icon, "rotateleftcanvas", shipHeading);
                 
-                var rotateright = UI.shipMovement.rotaterightElement;
                     dis = 60;
                     angle = mathlib.addToDirection(shipHeading, 100);
                 var icon = "img/rotateright.png";
                 UI.shipMovement.drawUIElement(rotateright, pos.x, pos.y, s, dis*1.4, angle, icon, "rotaterightcanvas", shipHeading);
+            }
+            else {
+                rotateleft.hide();
+                rotateright.hide();
             }
 
             
