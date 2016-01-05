@@ -30,7 +30,7 @@
         public $animation = "beam";
         public $animationColor = array(255, 250, 230);
         public $animationExplosionScale = 0.15;
-        public $projectilespeed = 32;
+        public $projectilespeed = 15;
         public $animationWidth = 4;
         public $trailLength = 10;
 

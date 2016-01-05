@@ -34,11 +34,13 @@ class Kraken extends StarBaseTwoSides{
 		);
 
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
-		$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
-		$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
-		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
-		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
+		$this->addPrimarySystem(new CnC(7, 30, 0, 0)); 
+		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
+		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));
@@ -56,8 +58,8 @@ class Kraken extends StarBaseTwoSides{
 
 			$systems = array(
 				new MatterCannon(5, 7, 4, $min, $max),
-				new MatterCannon(5, 7, 4, $min, $max),
 				new BattleLaser(5, 6, 6, $min, $max),
+				new MatterCannon(5, 7, 4, $min, $max),
 				new TwinArray(5, 6, 2, $min, $max),
 				new TwinArray(5, 6, 2, $min, $max),
 				new TwinArray(5, 6, 2, $min, $max),

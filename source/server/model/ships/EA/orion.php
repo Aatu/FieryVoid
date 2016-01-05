@@ -35,7 +35,7 @@ class Orion extends StarBaseTwoSides{
 		);
 
 
-		$this->addPrimarySystem(new Reactor(6, 20, 0, 0));
+		$this->addPrimarySystem(new Reactor(6, 20, 0, -18));
 		$this->addPrimarySystem(new CnC(6, 27, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(6, 16, 5, 7));
 		$this->addPrimarySystem(new Scanner(6, 16, 5, 7));

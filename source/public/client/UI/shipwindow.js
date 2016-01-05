@@ -518,9 +518,14 @@ shipWindowManager = {
 		var col4 = 4;
 		if (location == 0){
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
-		}else if (location < 3){
+		}
+		else if (location < 3){
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
-		}else{
+		}
+		else if (location > 30){
+			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
+		}
+		else{
 			col2 = 1;
 			col4 = 2;
 			arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
@@ -528,26 +533,28 @@ shipWindowManager = {
 		
 		var index = 0;
 		for (var i in arrangement){
+		//	if (ship.base && location == 1){
+		//		console.log(arrangement[i]);
+		//	}
 			var group = arrangement[i];
 			var row;
-			if (group.length == 1){row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');}
-			if (group.length == 2){	
-			
+			if (group.length == 1){
+				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
+			}
+			else if (group.length == 2){
+
 				if (location == 4){
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
-				}else{
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
 				}
-				
-			}
-			
-			if (group.length == 3){	
-			
+				else {
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+				}				
+			}			
+			else if (group.length == 3){				
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
 				+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
-			}
-				
-			if (group.length == 4){	
+			}				
+			else if (group.length == 4){	
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
 				+'<td class="systemcontainer_'+(index+2)+'"></td><td class="systemcontainer_'+(index+3)+'"></td></tr>')
 			}
@@ -593,7 +600,8 @@ shipWindowManager = {
 			var system = systems[i];
 			if (systems.length % 2 == 1 && i == 0){
 				grouped.push(Array(system));
-			}else{
+			}
+			else {
 				list.push(system);
 				if (list.length == 2){
 					grouped.push(list);
@@ -611,17 +619,21 @@ shipWindowManager = {
 			
 	},
 	
+	
 	getFinalArrangementFour: function(ship, systems, structure){
 				
 		var grouped = shipManager.systems.groupSystems(systems);
 
-		grouped = shipWindowManager.combineGroups(grouped);
-		grouped = shipWindowManager.addStructure(grouped, structure);
-		
-		return grouped;
-		
-		
-		
+			if (ship.base){
+				grouped = shipWindowManager.combineGroupsForBase(grouped, ship);
+			}
+			else {
+				grouped = shipWindowManager.combineGroups(grouped, ship);
+			}
+
+			grouped = shipWindowManager.addStructure(grouped, structure);
+			
+			return grouped;
 	},
 	
 	addStructure: function(grouped, structure){
@@ -660,9 +672,8 @@ shipWindowManager = {
 		return grouped;
 	
 	},
-
 	
-	combineGroups: function(grouped){
+	combineGroups: function(grouped, ship){
 		var finals = Array();
 	
 		for (var i in grouped){
@@ -674,10 +685,11 @@ shipWindowManager = {
 				var found = false;
 				for (var a in grouped){
 					var other = grouped[a];
-					if (!found && other.length == 2 && !shipWindowManager.isInFinal(finals, other) && group != other){
+					if (!found && (other.length == 2 || other.length == 1) && !shipWindowManager.isInFinal(finals, other) && group != other){
 						if (group.length == 1){
-							finals.push(Array(other[0],group[0],other[1]));
-						}else{	
+								finals.push(Array(other[0],group[0],other[1]));
+						}	
+						else {	
 							finals.push(Array(other[0],group[0], group[1],other[1]));
 						}
 											
@@ -689,18 +701,83 @@ shipWindowManager = {
 					finals.push(group);
 				}
 				
-			}else{
+			}
+			else {
 				finals.push(group);
 			}
-			
-				
-			
 		}
-		
-		return finals;
-		
+
+		return finals;		
 	
 	},
+
+	combineGroupsForBase: function(grouped){
+	var finals = Array();
+
+		for (var i in grouped){
+			var group = grouped[i];
+			if (shipWindowManager.isInFinal(finals, group))
+				continue;
+				
+			if (group.length == 1 || group.length == 2){
+				var found = false;
+				for (var a in grouped){
+					var other = grouped[a];
+					if (!found && (other.length == 2 || other.length == 1) && !shipWindowManager.isInFinal(finals, other) && group != other && group[0].weapon && other[0].weapon){
+						if (group.length == 1){
+							if (typeof other[1] != "undefined"){
+								finals.push(Array(other[0],group[0],other[1]));
+							}
+							else {
+								finals.push(Array(other[0],group[0]));
+							}
+						}
+						else {	
+							finals.push(Array(other[0],group[0], group[1],other[1]));
+						}
+											
+						found = true;
+						break;
+					}
+				}
+				if (!found){
+					finals.push(group);
+				}
+				
+			}
+			else {
+				finals.push(group);
+			}
+		}
+
+
+		var ulti = []
+		var remains = [];
+
+		for (var i in finals){
+			if (finals[i].length == 1){
+				remains.push(finals[i]);
+			}
+			else {
+				ulti.push(finals[i]);
+			}
+		}
+
+		if (remains.length <= 3){
+			var group = [];
+			for (var i in remains){
+				for (var j in remains[i]){
+					group.push(remains[i][j]);
+				}
+			}
+
+			ulti.push(group);
+			return ulti;
+		}
+
+	return finals;		
+
+},
 	
 	isInFinal: function(finals, group){
 	
@@ -725,22 +802,33 @@ shipWindowManager = {
 
 	
 	setDataForSystem: function(ship, system){
-            var shipwindow = ship.shipStatusWindow;
-            if (shipwindow){
-            	if (ship.adaptiveArmour == true){
-        			shipWindowManager.setAdaptiveArmour(ship);
-        			if (gamedata.gamephase != 1){
-        				var div = document.getElementById("outerArmourDiv" + ship.id);
 
-        				if (div){
-							div.style.display = "none";
-						}
-        			}
+        var shipwindow = ship.shipStatusWindow;
+        if (shipwindow){
+        	if (ship.adaptiveArmour == true){
+    			shipWindowManager.setAdaptiveArmour(ship);
+    			if (gamedata.gamephase != 1){
+    				var div = document.getElementById("outerArmourDiv" + ship.id);
+
+    				if (div){
+						div.style.display = "none";
+					}
+    			}
+        	}
+
+            if (ship.flight){
+                flightWindowManager.setData(ship, system, shipwindow);
+            }
+            else {	                	
+                if (ship.base && system.name == "reactor"){                	
+            		var reactors = shipManager.power.getAllReactors(ship);
+            		for (var i = 0; i < reactors.length; i++){
+            			if (! reactors[i].destroyed){
+		                    shipWindowManager.setSystemData(ship, reactors[i], shipwindow)
+            			}
+            		}
             	}
-
-                if (ship.flight){
-                    flightWindowManager.setData(ship, system, shipwindow);
-                }else{
+            	else {
                     shipWindowManager.setSystemData(ship, system, shipwindow)
                     
                     if(system.dualWeapon && system.weapons){
@@ -753,8 +841,8 @@ shipWindowManager = {
                                 shipWindowManager.setSystemData(ship, subweapon, shipwindow);
                             }
                         }
-                    }else
-                    {
+                    }
+                    else {
                         shipWindowManager.setSystemData(ship, system, shipwindow);
                     }
 
@@ -763,7 +851,8 @@ shipWindowManager = {
                         botPanel.setEW(ship);
                     }
                 }
-            }
+            }		
+        }
 	},
 
 

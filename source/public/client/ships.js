@@ -607,20 +607,35 @@ window.shipManager = {
 
     },
 
+    getPrimaryCnC: function(ship){
+        var cncs = [];
+
+        for (var system in ship.systems){
+            if (ship.systems[system].displayName == "C&C"){
+                cncs.push(ship.systems[system]);
+            }
+        }
+
+        cncs.sort(function(a, b){
+            if (shipManager.systems.getRemainingHealth(a) > shipManager.systems.getRemainingHealth(b) ){
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        });
+
+        var primary = cncs[0];
+
+        return primary;
+    },
+
     isDisabled: function(ship){
         if (ship.base){
-            var cncs = [];
+            var primary = shipManager.getPrimaryCnC(ship);
 
-            for (var system in ship.systems){
-                if (ship.systems[system].displayName == "C&C"){
-                    cncs.push(ship.systems[system]);
-                }
-            }
-
-            for (var system in cncs){
-                if (!shipManager.criticals.hasCriticalOnTurn(cncs[system], "ShipDisabledOneTurn", gamedata.turn-1)){
-                    return false;
-                }
+            if (!shipManager.criticals.hasCriticalOnTurn(primary, "ShipDisabledOneTurn", gamedata.turn-1)){
+                return false;
             }
         }
         else {
@@ -662,7 +677,8 @@ window.shipManager = {
                 if (shipManager.systems.isDestroyed(ship, react)){
                     return true;
                 }
-            } else {
+            }
+            else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
                 if (shipManager.systems.isDestroyed(ship, stru)){
                     return true;     
@@ -680,6 +696,32 @@ window.shipManager = {
     },
 
 
+    getStructuresDestroyedThisTurn: function(ship){
+
+        var array = [];
+
+        for (var j = 0; j < ship.systems.length; j++){
+            system = ship.systems[j];
+            if (system.displayName == "Structure" && system.location != 0){
+                if (system.destroyed){
+                    for (var k = 0; k < system.damage.length; k++){
+                        var dmg = system.damage[k];
+                        if (dmg.destroyed){
+                            if (gamedata.turn == dmg.turn){
+                                array.push(system);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (array.length > 0){
+            return array;
+        }
+        else return null;
+    },
 
     getOuterReactorDestroyedThisTurn: function(ship){
 

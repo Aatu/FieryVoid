@@ -407,7 +407,37 @@ shipManager.systems = {
             }
 		
 	return list;
+    },
+
+
+
+    getTotalDamage: function(system){
+        var total = 0;
+
+        for (var i = 0; i < system.damage.lemgth; i++){
+            var damage = system.damage[i].damage - system.damage[i].armour;
+            if (damage > 0){
+                total+= damage;
+            }
+        }
+
+        return total;
+    },
+
+
+    getRemainingHealth: function(system){
+        var damage = shipManager.systems.getTotalDamage(system);
+        var max = system.maxhealth;
+
+        var rem = max - damage;
+
+        if (rem < 0){
+            rem = 0;
+        }
+   
+        return rem; 
+
     }
-    
+
 
 }

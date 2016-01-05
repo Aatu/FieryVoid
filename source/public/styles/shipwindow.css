@@ -15,7 +15,9 @@
     box-shadow: 5px 5px 10px black;
 }
 
+
 .shipwindow .value{
+    margin-top: 7px;
     margin-left:3px;
     margin-right:3px;
     color:#496791;
@@ -53,8 +55,6 @@
 .shipwindow .topbar .value.name{
     font-style:italic;
 }
-
-
 
 .shipwindow .container{
     position:relative;

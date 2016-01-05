@@ -8,13 +8,18 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
-           //     'kraken' => '/server/model/ships/centauri/kraken.php',
-           //     'orion' => '/server/model/ships/ea/orion.php',
-           //     'jastat' => '/server/model/ships/narn/jastat.php',
+
+                //bases, weapons, power crit
+                'outputreducedoneturn' => '/server/model/cricialClasses.php',
+                'kraken' => '/server/model/ships/centauri/kraken.php',
+                'orion' => '/server/model/ships/ea/orion.php',
+                'jastat' => '/server/model/ships/narn/jastat.php',
+                'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
+                'bmissilerack' => '/server/model/weapons/missile.php',
 
-                //base                
+                //base  classes              
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasetwosides' => '/server/model/ships/ShipClasses.php',
 

@@ -388,10 +388,10 @@ window.damageDrawer = {
     window.damageDrawer.damagemaskimg.src = "img/damagemask.png";
 
     window.damageDrawer.damageimgbase = new Image();
-    window.damageDrawer.damageimgbase.src = "img/damage.png";
+    window.damageDrawer.damageimgbase.src = "img/damagebase.png";
     
     window.damageDrawer.damagemaskimgbase = new Image();
-    window.damageDrawer.damagemaskimgbase.src = "img/damagemask.png";
+    window.damageDrawer.damagemaskimgbase.src = "img/damagemaskbase.png";
 
     
 })();

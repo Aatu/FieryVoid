@@ -27,7 +27,7 @@ class JaStat extends StarBaseTwoSides{
 		$this->hitChart = array(			
 			0=> array(
 				10 => "Structure",
-				12 => "Energy Mine",
+				12 => "IonTorpedo",
 				14 => "Energy Mine",
 				16 => "Scanner",
 				18 => "Reactor",
@@ -35,14 +35,14 @@ class JaStat extends StarBaseTwoSides{
 			)
 		);
 
+		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
+		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
+		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
+		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
-		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
-		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
-		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
-		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
-		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
-		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
+		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
+		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
+		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
@@ -70,7 +70,7 @@ class JaStat extends StarBaseTwoSides{
 				new Hangar(5, 7, 6),
 				new Structure(5, 90)
 			);
-
+			
 			$loc = $this->locations[$i];
 
 			$this->hitChart[$loc] = array(

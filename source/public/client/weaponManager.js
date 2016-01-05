@@ -365,19 +365,21 @@ window.weaponManager = {
 	canCalledshot: function(target, system){
 		var shooter = gamedata.getSelectedShip();
 
-
 		if (!shooter)
 			return false;
 
 		var loc = weaponManager.getShipHittingSide(shooter, target);
 	//	console.log(loc);
 	//	console.log("aiming at: " + loc + " , system is on: " + system.location);
-		if (target.flight)
+		if (target.flight){
 			return false;
+		}
+		else if (target.base){
+			return true;
+		}
 
 
 		if (target.shipSizeClass == 3){
-
 			if (system.location == 0 && system.weapon){
 				return true;
 
@@ -395,11 +397,10 @@ window.weaponManager = {
 				}
 			}
 		}
-
-		if (target.draziHCV){
+		else  if (target.draziHCV){
 			for (var i = 0; i < loc.length; i++) {
 				if (system.location == loc[i]){
-				return true
+					return true
 				}
 			}
 			if (system.location == 0 && system.weapon){
@@ -413,7 +414,7 @@ window.weaponManager = {
 			}
 		}
 
-		if (target.shipSizeClass == 1 || target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0){
+		else if (target.shipSizeClass == 1 || target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0){
 			var thruster = weaponManager.getTargetableThruster(shooter, target);
 			if (system.direction == thruster){
 				return true
@@ -870,14 +871,22 @@ window.weaponManager = {
 
 	getShipHittingSide: function(shooter, target){
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
-		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);;
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
 		if (target.base){
-			return [1, 2, 31, 32, 41, 42];
+ 		/*	if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(60, targetFacing))){
+				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(300, targetFacing), mathlib.addToDirection(360, targetFacing))){
+					return [1, 31]
+				}
+				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(60, targetFacing), mathlib.addToDirection(120, targetFacing))){
+					return [1, 41]
+				}
+				return [1];
+			} */
+			return [1, 41, 42, 2, 31, 32];
 		}
 
-
-		else if (target.draziCap){
+		 else if (target.draziCap){
  			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
 				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
 					return [1, 3]
@@ -966,7 +975,9 @@ window.weaponManager = {
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
-
+		if (target.base){
+			return forwardDefense;
+		}
 
 		//console.log("getShipDefenceValue targetFacing: " + targetFacing + " shooterCompassHeading: " +shooterCompassHeading);
 

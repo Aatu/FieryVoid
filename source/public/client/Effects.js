@@ -238,7 +238,7 @@ window.effects = {
             }
 
             if (ship.base){
-                var sys = shipManager.getOuterReactorDestroyedThisTurn(ship);
+                var sys = shipManager.getStructuresDestroyedThisTurn(ship);
                 if (sys){
                
                     for (var i = 0; i < sys.length; i++){
@@ -348,18 +348,33 @@ window.effects = {
                 }
             }
             if (ship.base){
-                var sys = shipManager.getOuterReactorDestroyedThisTurn(ship);
-                if (sys){
-                    for (var k = 0; k < sys.length; k++){
-                        var system = sys[k];
-                        if (system.destructionAnimated == false){
-                            scrolling.scrollToShip(ship);
-                            effects.displaySubReactorExplosion(ship, system, effects.doDisplayAllWeaponFire);
-                            return;
+                if (! shipManager.isDestroyed(ship)){
+                    /*
+                    var sys = shipManager.getOuterReactorDestroyedThisTurn(ship);
+                    if (sys){
+                        for (var k = 0; k < sys.length; k++){
+                            var system = sys[k];
+                            if (system.destructionAnimated == false){
+                                scrolling.scrollToShip(ship);
+                                effects.displaySubReactorExplosion(ship, system, effects.doDisplayAllWeaponFire);
+                                return;
+                            }
+                        }
+                    }
+                    */
+                    var sys = shipManager.getStructuresDestroyedThisTurn(ship);
+                    if (sys){
+                        for (var k = 0; k < sys.length; k++){
+                            var system = sys[k];
+                            if (system.destructionAnimated == false){
+                                scrolling.scrollToShip(ship);
+                                effects.displayStructureDetroyed(ship, system, effects.doDisplayAllWeaponFire);
+                                return;
+                            }
                         }
                     }
                 }
-            }         
+            }   
             if (shipManager.isDestroyed(ship) && shipManager.getTurnDestroyed(ship) == gamedata.turn){
                 if (ship.destructionAnimated == false){
                     scrolling.scrollToShip(ship);
@@ -448,7 +463,7 @@ window.effects = {
     
 
 
-    displaySubReactorExplosion: function(ship, system, call){
+    displayStructureDetroyed: function(ship, system, call){
 
     //    console.log("loc: " + system.location);
 
@@ -463,7 +478,7 @@ window.effects = {
     //    console.log("rotas: " + rotas);
     //    console.log("shift: " + shift);
     
-        combatLog.logSubReactorExplosion(ship, system);
+    //    combatLog.logSubReactorExplosion(ship, system);
         effects.animationcallback = call;
 
         var pos = shipManager.getShipPositionInWindowCo(ship);

@@ -202,7 +202,7 @@ class LaserPulseArray extends DualWeapon{
 	);
 	
     public $name = "LaserPulseArray";
-	public $displayName = "Laser/Pulse array";
+	public $displayName = "Laser/Pulse Array";
 	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
         

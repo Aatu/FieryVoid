@@ -13,13 +13,22 @@ window.ew = {
             if (system.outputType === "EW"){
                 var output = shipManager.systems.getOutput(ship, system);
             
-                if (output > 0)
+                if (output > 0){
                     ret += output;
+                }
+            }            
+
+            if (ship.base){
+                var primary = shipManager.getPrimaryCnC(ship);
+                if (primary.name == "cnC" && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
+                    ret -= 2;
+                }
             }
-            
-            if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW"))
-                ret -= 2;
-            
+            else {
+                if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW")){
+                    ret -= 2;
+                }
+            }
         }
     
         

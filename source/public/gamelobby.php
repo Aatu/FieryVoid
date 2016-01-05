@@ -302,10 +302,9 @@
         </div>
 
         <div class="system regular">
-            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
             <div class="systemcontainer">
                 <div class="icon">
-                    <span class="efficiency value"></span>
+                    <div class="efficiency value"></div>
                     <div class="iconmask"></div>
                     <div class="UI">
                         <div class="button stopoverload"></div>
@@ -322,12 +321,6 @@
                 <div class="health systembarcontainer">
                     <div class="healthbar bar" style="width:40px;"></div>
                 </div>
-                <!--
-                <div class="systembarcontainer">
-                    <div class="efficiencybar bar" style="width:30px;"></div>
-                    <div class="valuecontainer"><span class="efficiencyvalue value">5/3<span></div>
-                </div>
-                -->
                 <div class="critical systembarcontainer">
                     <div class="valuecontainer"><span class="criticalvalue value">CRITICAL<span></div>
                 </div>
@@ -338,7 +331,6 @@
         <div class="fighter">
             <div class="destroyedtext"><span>DESTROYED</span></div>
             <div class="disengagedtext"><span>DISENGAGED</span></div>
-            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
             <div class="systemcontainer">
                 <div class="icon">
                     <table class="fightersystemcontainer 1"><tr></tr></table>
@@ -354,7 +346,6 @@
         </div>
 
         <div class="heavyfighter">
-            <!--<div class="name"><span class="namevalue">Heavy Laser</span></div>-->
             <div class="systemcontainer">
                 <div class="icon">
                     <table class="fightersystemcontainer 1"><tr></tr></table>
@@ -419,36 +410,36 @@
         </div>
 
 
-        <div class="shipwindow base">
+        <div class="shipwindow base" style="width: 450px;">
             <div class="topbar">
                 <span class="valueheader name">Name:</span><span class="value name">name here</span>
                 <span class="valueheader shipclass">base:</span><span class="value shipclass">ship type class here</span>
                 <div class="close"></div>
             </div>
 
-            <div id="shipSection_3" class="shipSection" style="left: 45px; top: 180px">
-                <table id="31"></table>
-                <table id="32" style="margin-top: 15px; border-top: 3px dotted #7e9dc7;"></table>
+            <div id="shipSection_3" class="shipSection" style="left: 0px; top: 180px">
+                <table id="31" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+                <table id="32"></table>
             </div>
 
             <table class="divider">
                 <tr>
-                    <td class="col1">
-                        <div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
+                    <td class="col1" style="width: 33%">
+                        <div class="icon" style="margin:auto;"><img src="" alt="" border="" width="120" height="120"></div>
                     </td>                
-                    <td class="col2">
+                    <td class="col2" style="width: 33%; border-left: 3px dotted #7e9dc7; border-right: 3px dotted #7e9dc7;">
                         <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
                             <table></table>
                         </div>
-                        <div id="shipSection_0" class="shipSection primary" style="margin-top: 35px;">
+                        <div id="shipSection_0" class="shipSection primary" style="border-top: 3px dotted; border-top: 3px dotted; margin-top: 35px;">
                             <table></table>
                         </div>
                         <div id="shipSection_2" class="shipSection" style="margin-top: 35px;">
                             <table></table>
                         </div>
                     </td>
-                    <td class="col3">
-                        <div class="EW">
+                    <td class="col3" style="width: 33%">
+                        <div class="EW" style="margin: auto;">
                             <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
                             <div class="EWcontainer">
                                 <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
@@ -457,9 +448,9 @@
                                 <div class="notes"></div>
                             </div>
                         </div>
-                        <div id="shipSection_4" class="shipSection" style="right: 50px; top: 180px">
-                            <table id="41"></table>
-                            <table id="42" style="margin-top: 15px; border-top: 3px dotted #7e9dc7;"></table>
+                        <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
+                <table id="41" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+                <table id="42"></table>
                         </div>
                     </td>
                 </tr>

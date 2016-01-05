@@ -174,18 +174,17 @@ class ShipSystem{
         if ($ship instanceof OSAT){
             if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
                 if ($this->getTotalDamage() > ($this->maxhealth/2)){
-          //      if ($this->getTotalDamage() > 1){
                     $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
                     $crits[] = $crit;
                 }
             }
-        }
+        }        
+
         if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }
-
-        if ($this instanceof SubReactor){
+        else if ($this instanceof SubReactor){
             debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
@@ -200,7 +199,7 @@ class ShipSystem{
                 $criticalTypes = $value;
             }
         }            
-        if ($criticalTypes != -1){                
+        if ($criticalTypes != -1){
             if (is_array($criticalTypes)){
                 foreach ($criticalTypes as $phpclass){
                     $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
@@ -211,7 +210,7 @@ class ShipSystem{
                 $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
                 if ($crit)
                     $crits[] = $crit;
-            }                
+            }
         }
         return $crits;         
     }

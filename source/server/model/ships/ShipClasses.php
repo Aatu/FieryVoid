@@ -1737,6 +1737,59 @@
 
     class StarBase extends BaseShip{
         public $base = true;
+
+        
+        public function isDisabled(){
+            if ($this->isPowerless())
+                return true;
+            
+            $cncs = $this->getControlSystems();
+
+
+
+            if (sizeof($cncs) > 0){
+                $intact = sizeof($cncs);
+
+                foreach ($cncs as $cnc){ 
+                    if ($cnc->destroyed){
+                        $intact--;
+                    }
+                }
+                if ($intact == 0){
+                    return true;
+                }
+
+                usort($cncs, function($a, $b){
+                    if ($a->getRemainingHealth() > $b->getRemainingHealth()){
+                        return 1;
+                    }
+                    else return -1;
+                });
+
+                $CnC = $cncs[0];
+            }
+
+            if ($CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn)){
+                debug::log("is effeictlvy PHP Disabled due to ".$CnC->id);
+                return true;
+            }
+            
+            return false;
+        }
+
+
+        public function getControlSystems(){
+            $array = array();
+
+            foreach ($this->systems as $system){
+                if ($system instanceof CnC){
+                    $array[] = $system;
+
+                }
+            }
+
+            return $array;
+        }
     }
 
 
@@ -1757,7 +1810,6 @@
         }
 
 
-
         public function isDestroyed($turn = false){        
             foreach($this->systems as $system){
                 if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
@@ -1768,6 +1820,14 @@
                 }                
             }
             return false;
+        }
+
+        public function getMainReactor(){
+            foreach ($this->systems as $system){
+                if ($system instanceof Reactor && $system->location == 0){
+                    return $system;
+                }
+            }
         }
 
         public function destroySection($reactor, $gamedata){

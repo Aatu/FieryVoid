@@ -50,6 +50,15 @@ class OutputReduced extends Critical{
     }
 }
 
+class OutputReducedOneTurn extends Critical{
+    public $description = "Critical Shutdown effective in Turn ";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+        $this->description = $this->description." ".($turn+1).".";
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+}
+
 class OutputReduced1 extends Critical{
     public $description;
     public $outputMod = -1;
