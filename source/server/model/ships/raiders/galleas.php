@@ -67,22 +67,22 @@ class Galleas extends BaseShip{
         
         $this->hitChart = array(
         		0=> array(
-        				12 => "structure",
-        				15 => "scanner",
+        				12 => "Structure",
+        				15 => "Scanner",
         				17 => "Hangar",
-        				19 => "reactor",
+        				19 => "Reactor",
         				20 => "C&C",
         		),
         		1=> array(
         				5 => "Medium Bolter",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		2=> array(
         				4 => "Twin Array",
         				7 => "Engine",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		3=> array(
         				3 => "Retro Thruster",
@@ -90,8 +90,8 @@ class Galleas extends BaseShip{
         				8 => "Main Thruster",
         				11 => "Twin Array",
         				13 => "Hangar",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		4=> array(
         				3 => "Retro Thruster",
@@ -99,8 +99,8 @@ class Galleas extends BaseShip{
         				8 => "Main Thruster",
         				11 => "Twin Array",
         				13 => "Hangar",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         );
     }

@@ -53,7 +53,7 @@ class Corsair extends MediumShip{
         				5=>"Thruster",
 						7=>"Light Particle Beam",
         				9=>"Light Particle Cannon",
-        				10=>"Medium Plasma",
+        				10=>"Medium Plasma Cannon",
         				17=>"Structure",
         				20=>"Primary",
         		),

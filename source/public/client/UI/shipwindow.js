@@ -229,7 +229,7 @@ shipWindowManager = {
 						var tr = document.createElement("tr");
 
 							var td = document.createElement("td")
-								td.innerHTML = list[j][0]
+								td.innerHTML = list[j][0];
 								td.style.borderBottom = "1px solid #496791";
 							tr.appendChild(td);
 
@@ -252,7 +252,7 @@ shipWindowManager = {
 			button.innerHTML = "Display Hit Chart";
 			button.id = "hitChartButton" + ship.id;
 			button.className = "interceptButton";
-			button.style.marginLeft = "8px";
+			button.style.marginLeft = "18px";
 			$(button).data("id", ship.id);
 			button.addEventListener("click", function(){
 				var div = document.getElementById("hitChartDiv" + $(this).data("id"));

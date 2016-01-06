@@ -74,7 +74,7 @@ class Koratyl extends StarBaseTwoSides{
 				2 => "Heavy Bolter",
 				4 => "Medium Laser",
 				6 => "Class-S Missile Rack",
-				8 => "Scanner Pulsar",
+				8 => "Scatter Pulsar",
 				10 => "Cargo Bay",
 				11 => "Hangar",
 				13 => "Reactor",

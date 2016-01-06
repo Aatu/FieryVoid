@@ -56,7 +56,7 @@ class Galleon extends HeavyCombatVessel{
         $this->hitChart = array (
         		0=> array (
         				6=>"Structure",
-        				11=>"Cargo",
+        				11=>"Cargo Bay",
         				13=>"Scanner",
         				15=>"Engine",
         				17=>"Hangar",
@@ -66,7 +66,7 @@ class Galleon extends HeavyCombatVessel{
         		1=> array (
         				4=>"Thruster",
         				6=>"Standard Particle Beam",
-        				8=>"Medium Plasma",
+        				8=>"Medium Plasma Cannon",
         				10=>"Particle Cannon",
         				13=>"Cargo Bay",
         				18=>"Structure",

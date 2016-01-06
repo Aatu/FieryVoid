@@ -50,9 +50,9 @@ class Pillager extends BaseShip{
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		
   		$this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
-		$this->addLeftSystem(new LightParticleCannon(2, 6, 5, 0, 180));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new LightParticleCannon(2, 6, 5, 0, 180));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
   		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 38));
@@ -63,41 +63,41 @@ class Pillager extends BaseShip{
         
         $this->hitChart = array(
         		0=> array(
-        				9 => "structure",
-        				11 => "scanner",
-        				13 => "jump engine",
-        				16 => "hangar",
-        				18 => "reactor",
+        				9 => "Structure",
+        				11 => "Scanner",
+        				13 => "Jump Engine",
+        				16 => "Hangar",
+        				18 => "Reactor",
         				20 => "C&C",
         		),
         		1=> array(
-        				5 => "thruster",
+        				5 => "Thruster",
         				8 => "Light Particle Cannon",
         				10 => "Gauss Cannon",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		2=> array(
-        				6 => "thruster",
+        				6 => "Thruster",
         				7 => "Gauss Cannon",
         				9 => "Engine",
         				11 => "Cargo Bay",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		3=> array(
-        				6 => "thruster",
+        				6 => "Thruster",
         				8 => "Light Particle Beam",
         				10 => "Light Particle Cannon",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         		4=> array(
-        				6 => "thruster",
+        				6 => "Thruster",
         				8 => "Light Particle Beam",
         				10 => "Light Particle Cannon",
-        				18 => "structure",
-        				20 => "primary",
+        				18 => "Structure",
+        				20 => "Primary",
         		),
         );
     }

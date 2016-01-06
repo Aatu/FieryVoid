@@ -336,6 +336,10 @@
                             <div class="notes"></div>
                         </div>
                     </div>
+                    <div class ="buttons">
+                        <div class="HitChart" style="display: none;">
+                        </div>
+                    </div>
                     <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
             <table id="41" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
             <table id="42"></table>

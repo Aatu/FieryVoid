@@ -52,7 +52,7 @@ class Pinnace extends MediumShip{
         		),
         		1=> array (
         				5=>"Thruster",
-        				9=>"Medium Plasma",
+        				9=>"Medium Plasma Cannon",
         				17=>"Structure",
         				20=>"Primary",
         		),

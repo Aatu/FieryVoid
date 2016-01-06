@@ -56,9 +56,9 @@ class Brigantine extends HeavyCombatVessel{
         $this->hitChart = array (
         		0=> array (
         				6=>"Structure",
-        				8=>"Cargo",
+        				8=>"Cargo Bay",
         				10=>"Thruster",
-        				12=>"Medium Plasma",
+        				12=>"Medium Plasma Cannon",
         				14=>"Scanner",
         				16=>"Engine",
         				17=>"Hangar",

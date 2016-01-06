@@ -56,28 +56,28 @@ class Felucca extends MediumShip{
         
         $this->hitChart = array(
         		0=> array(
-        				7 => "thruster",
+        				7 => "Thruster",
         				9 => "Standard Particle Beam",
-        				12 => "scanner",
-        				15 => "engine",
-        				17 => "hangar",
-        				19 => "reactor",
+        				12 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
         				20 => "C&C",
         		),
         		1=> array(
-        				5 => "thruster",
+        				5 => "Thruster",
         				7 => "Standard Particle Beam",
         				9 => "Cargo Bay A",
         				11 => "Cargo Bay B",
-        				17 => "structure",
-        				20 => "primary",
+        				17 => "Structure",
+        				20 => "Primary",
         		),
         		2=> array(
-        				5 => "thruster",
+        				5 => "Thruster",
         				8 => "Cargo Bay C",
         				11 => "Cargo Bay D",
-        				17 => "structure",
-        				20 => "primary",
+        				17 => "Structure",
+        				20 => "Primary",
         		),
         );
     }
