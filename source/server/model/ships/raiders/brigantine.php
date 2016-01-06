@@ -52,6 +52,36 @@ class Brigantine extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 3, 38));
         $this->addPrimarySystem(new Structure( 4, 42));
         $this->addAftSystem(new Structure( 3, 30));
+
+        $this->hitChart = array (
+        		0=> array (
+        				6=>"Structure",
+        				8=>"Cargo",
+        				10=>"Thruster",
+        				12=>"Medium Plasma",
+        				14=>"Scanner",
+        				16=>"Engine",
+        				17=>"Hangar",
+        				19=>"Reactor",
+        				20=>"C&C",
+        		),
+        		1=> array (
+        				4=>"Thruster",
+        				6=>"Standard Particle Beam",
+        				8=>"Twin Array",
+        				10=>"Medium Pulse Cannon",
+        				18=>"Structure",
+        				20=>"Primary",
+        		),
+        		2=> array(
+        				6=>"Thruster",
+        				8=>"Standard Particle Beam",
+        				10=>"Twin Array",
+        				12=>"Cargo Bay",
+        				18=>"Structure",
+        				20=>"Primary",
+        		),
+        );
     }
 }
 
