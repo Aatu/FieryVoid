@@ -48,7 +48,8 @@ shipManager.power = {
 				}
 			}
             else if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn") || shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns"))
-            {            	
+            {                  	
+                systemwindow.addClass("forcedoffline");
 
                 // Because of the crit, add a power entry to the power array
                 // of this system.
@@ -531,8 +532,6 @@ shipManager.power = {
 
 		var has = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		var need = shipManager.power.countBoostReqPower(ship, system);
-		console.log(has);
-		console.log(need);
 
 		if (has >= need){
 			return true;

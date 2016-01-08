@@ -433,8 +433,7 @@
         }
     }
     
-    class PointPulsar extends Pulse
-    {
+    class PointPulsar extends Particle{
         public $name = "pointPulsar";
         public $displayName = "Point Pulsar";
         public $iconPath = "pointPulsar.png";
@@ -446,8 +445,7 @@
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
         public $rof = 2;
-        public $maxpulses = 3;
-        public $grouping = 0;
+        public $guns = 3;
 
         public $loadingtime = 2;
         public $normalload = 2;
@@ -464,22 +462,11 @@
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        
-        protected function getExtraPulses($needed, $rolled)
-        {
-            return 0;
-        }
+
 
         public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Pulse";
+            $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Standard";
-            
-            parent::setSystemDataWindow($turn);
-
-            $this->data["Pulses"] = '3';
-            unset($this->data["Grouping range"]);
-            unset($this->data["Max pulses"]);
         }
         
         public function getDamage($fireOrder){

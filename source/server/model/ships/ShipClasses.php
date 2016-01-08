@@ -29,8 +29,8 @@
         public $enabledSpecialAbilities = array();
         
         public $canvasSize = 200;
-        
-        public $structures = Array(null, null, null, null, null);
+
+        public $activeHitLocation = 0;
 
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
@@ -528,100 +528,8 @@
         
             return $movement->getFacingAngle();
         }
-        
-        public function getDefenceValuePos($pos){
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-          
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
-        }
-        
-        public function getDefenceValue($shooter){
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-          
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
-            
-        }
-        
-        
-        public function doGetDefenceValue($tf, $shooterCompassHeading){
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-               return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
-                return $this->sideDefense;
-            }  else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
-                return $this->sideDefense;
-            } 
-                
-            return $this->sideDefense;
-        }
-        
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            $location = 0;
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-                $location = 1;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                $location = 2;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
-                $location = 3;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
-                $location = 4;
-            } 
-           
-            //print ($this->name ." shootercompas: $shooterCompassHeading, targetfacing: $tf, location: $location \n");
-            
-                
-            return $location;
-        }
-           
-        
-        
-        public function getHitSection($pos, $shooter, $turn, $weapon){
-            
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = 0;
-            
-            if (! $weapon->ballistic){
-                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-            }else{
-                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-            }
-            
-            
-            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
-            
-            $rolled = Movement::isRolled($this);
-            
-            if ($rolled && $location == 3){
-                $location = 4;
-            }else if ($rolled && $location == 4){
-                $location = 3;
-            }
 
 
-
-            if ($location != 0){
-                if (!isset($this->hitChart[0])){
-                    debug::log("!isset ship->hitchart[0] getHitSection");
-                    if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
-                        $location = 0;
-                    }
-                }
-              
-
-                $structure = $this->getStructureSystem($location);
-                if ($structure != null && $structure->isDestroyed($turn-1))
-                    return 0;
-                }
-        
-            return $location;
-            
-        }
-        
         public function getStructureSystem($location){
             foreach ($this->systems as $system){
                 if ($system instanceof Structure  && $system->location == $location){
@@ -631,10 +539,12 @@
             
             return null;
         }
+
         
         public function getFireControlIndex(){
               return 2;
         }
+
         
         public function isDestroyed($turn = false){
         
@@ -658,7 +568,7 @@
                 return true;
             
             $CnC = $this->getSystemByName("CnC");
-			if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
+            if (!$CnC || $CnC->destroyed || $CnC->hasCritical("ShipDisabledOneTurn", TacGamedata::$currentTurn))
                 return true;
             
             return false;
@@ -688,6 +598,119 @@
         }
 
 
+        
+        public function getDefenceValuePos($pos){
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+          
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
+        }
+        
+        public function getDefenceValue($shooter){
+        debug::log("getDefenceValue");         
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+          
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);            
+        }
+
+
+        public function doGetDefenceValue($tf, $shooterCompassHeading){
+        debug::log("doGetDefenceValue");         
+
+            $locs = $this->getLocations();
+            $valid = array();
+
+            foreach ($locs as $loc){
+                if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($loc["min"], $tf), Mathlib::addToDirection($loc["max"], $tf))){
+                    $valid[] = $loc;
+                }
+            }
+
+            $valid = $this->fillLocations($valid);
+            $pick = $this->pickLocationForHit($valid);
+
+            debug::log("SET SHIP HIT LOC TO: ".$this->activeHitLocation["loc"]);
+            $this->activeHitLocation = $pick;
+            debug::log("RETURNING FOR SHOT :".$this->activeHitLocation["profile"]);
+
+            return $this->activeHitLocation["profile"];
+
+        }
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 300, "profile" => $this->sideDefense);
+
+            return $locs;
+        }
+
+
+        public function fillLocations($locs){            
+        debug::log("fillLocations");   
+
+            foreach ($locs as $key => $loc){
+                $structure = $this->getStructureSystem($loc["loc"]);
+
+                $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+                $locs[$key]["armour"] = $structure->armour;
+            }
+
+            return $locs;
+        }
+
+
+        public function pickLocationForHit($locs){
+           
+        debug::log("pickLocationForHit");   
+            $topValue = -1;
+            $pick = -1;
+
+            foreach ($locs as $loc){
+                $value = $loc["remHealth"];
+                $value += floor($value/10) * $loc["armour"] * 1.5;
+
+                if ($value > $topValue){
+                    $topValue = $value;
+                    $pick = $loc;
+                }
+            }
+
+            return $pick;
+        }
+
+
+
+
+        public function getHitSection($pos, $shooter, $turn, $weapon){
+        debug::log("getHitSection");   
+
+            $location = $this->activeHitLocation["loc"];
+
+            if ($location != 0){
+                if (!isset($this->hitChart[0])){
+                    debug::log("!isset ship->hitchart[0] getHitSection");
+                    if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
+                        $location = 0;
+                    }
+                }
+
+                $structure = $this->getStructureSystem($location);
+                if ($structure != null && $structure->isDestroyed($turn-1))
+                    return 0;
+            }
+        
+            debug::log("RETURNING FOR DAMAGE:".$this->activeHitLocation["loc"]);
+            return $location;
+            
+        }        
+
+
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
         debug::log("______________________");
@@ -702,8 +725,8 @@
                 $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
             }
 
-                return $system;
-            }
+            return $system;
+        }
 
 
 
@@ -714,7 +737,7 @@
             
             if ($fire->calledid != -1){
                 $system = $this->getSystemById($fire->calledid);
-                debug::log("called shot vs ".$system->displayName." ,destroyed: ".$system->destroyed);
+                debug::log("called shot vs ".$system->displayName.", destroyed: ".$system->destroyed);
             }
             
             if ($system != null && !$system->isDestroyed())
@@ -1069,10 +1092,9 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-						
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
+            debug::log("getPiercingLocations");
+
+            $location =  $this->activeHitLocation["loc"];
             
             $locs = array();
             $finallocs = array();
@@ -1153,21 +1175,19 @@
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
-        
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            $location = 0;
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-                $location = 1;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(330,$tf) )){
-                $location = 3;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(180,$tf) )){
-                $location = 4;
-            } 
-           
-            return $location;
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 180, "max" => 330, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 30, "max" => 180, "profile" => $this->sideDefense);
+
+            return $locs;
         }
     }
+
     
     class HeavyCombatVessel extends BaseShip{
     
@@ -1177,21 +1197,19 @@
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
-     
-            
-         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            
-            $location = 0;
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(90,$tf) )){
-                $location = 1;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(90,$tf), Mathlib::addToDirection(270,$tf) )){
-                $location = 2;
-            }
-           
-                
-            return $location;
+
+
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+
+            return $locs;
         }
+
     }
 
     class HeavyCombatVesselLeftRight extends BaseShip{
@@ -1202,19 +1220,20 @@
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
-         
-         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            $location = 0;
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(0,$tf), Mathlib::addToDirection(180,$tf) )){
-                $location = 4;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
-                $location = 3;
-            }
-                
-            return $location;
+
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+
+            return $locs;
         }
     }
+
+
     
     class MediumShip extends BaseShip{
     
@@ -1227,23 +1246,18 @@
         public function getFireControlIndex(){
               return 1;
                
-        }
-        
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            
-            $location = 0;
-            
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(90,$tf) )){
-                $location = 1;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(90,$tf), Mathlib::addToDirection(270,$tf) )){
-                $location = 2;
-            }
-           
-          
-                
-            return $location;
-        }
+        }        
 
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+
+            return $locs;
+        }
 
         public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
             $system = null;
@@ -1583,17 +1597,15 @@
             parent::__construct($id, $userid, $name, $slot);
         }
 
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            
-            $location = 0;
 
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(0,$tf), Mathlib::addToDirection(180,$tf) )){
-                $location = 4;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(180,$tf), Mathlib::addToDirection(0,$tf) )){
-                $location = 3;
-            }
-            
-            return $location;
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+
+            return $locs;
         }
     }
     
@@ -1610,10 +1622,6 @@
                
         }
         
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-            // Light ships only have a primary section
-            return 0;
-        }
         
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = 0){
 
@@ -1876,75 +1884,54 @@
         */
 
 
-        public function doGetDefenceValue($tf, $shooterCompassHeading){                
-            return $this->sideDefense;
-        }
-
-
-
-        
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
-
-            $eligible = array();
-            $loc = 0;
+        public function getPiercingLocations($shooter, $pos, $turn, $weapon){
+            debug::log("getPiercingLocations");
             
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-                $eligible[] = 1;
-            }
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(90,$tf) )){
-                $eligible[] = 41;
-            }
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(90,$tf), Mathlib::addToDirection(150,$tf) )){
-                $eligible[] = 42;
-            }
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                $eligible[] = 2;
-            }
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(270,$tf) )){
-                $eligible[] = 32;
-            }
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(270,$tf), Mathlib::addToDirection(330,$tf) )){
-                $eligible[] = 31;
-            }
-
-            if (sizeof($eligible) > 1){
-                debug::log("sizeof: ".sizeof($eligible));
-                $roll = mt_rand(0, sizeof($eligible)-1);
-                debug::log("roll: ".$roll);
-                $loc = $eligible[$roll];
-            }
-            else {
-                $loc = $eligible[0];
-            }
-
-            return $loc;
-        }
-        
-        
-        public function getHitSection($pos, $shooter, $turn, $weapon){
+            $location =  $this->activeHitLocation["loc"];
             
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = 0;
-            
-            if (! $weapon->ballistic){
-                $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-            }else{
-                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            $locs = array();
+            $finallocs = array();
+
+            if ($location == 1 || $location == 2){
+                $locs[] = 1;
+                $locs[] = 0;
+                $locs[] = 2;
             }
-
-            $location =  $this->doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon);
-
-
-
-            if ($location != 0){         
-
-                $structure = $this->getStructureSystem($location);
-                if ($structure != null && $structure->isDestroyed($turn-1))
-                    return 0;
+            else if ($location == 31 || $location == 42){
+                $locs[] = 31;
+                $locs[] = 0;
+                $locs[] = 42;
+            }
+            else if ($location == 32 || $location == 41){
+                $locs[] = 32;
+                $locs[] = 0;
+                $locs[] = 41;
+            }
+            
+            foreach ($locs as $loc){
+                $structure = $this->getStructureSystem($loc);
+                if ($structure != null && !$structure->isDestroyed()){
+                    $finallocs[] = $loc;
                 }
-        
-            return $location;
+            }
             
+            return $finallocs;
+            
+        }
+
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 41, "min" => 0, "max" => 120, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 42, "min" => 60, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 32, "min" => 180, "max" => 300, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 31, "min" => 240, "max" => 360, "profile" => $this->forwardDefense);
+
+            return $locs;
         }
     }
 

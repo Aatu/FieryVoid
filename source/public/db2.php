@@ -1,7 +1,7 @@
 <?php
 $database = 'B5CGM';
-$user='root';
-$pw='';
+$user='aatu';
+$pw='Kiiski';
 $server = 'localhost';
 
 

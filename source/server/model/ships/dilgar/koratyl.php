@@ -79,7 +79,7 @@ class Koratyl extends StarBaseTwoSides{
 				11 => "Hangar",
 				13 => "Reactor",
 				18 => "Structure",
-				9 => "Primary",
+				20 => "Primary",
 			);
 
 			foreach ($systems as $system){

@@ -453,6 +453,8 @@ class Weapon extends ShipSystem{
     }
 
     public function calculateHit($gamedata, $fireOrder){
+        debug::log("_____________");
+        debug::log("calc Hit");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
@@ -465,7 +467,8 @@ class Weapon extends ShipSystem{
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $defence = $target->getDefenceValuePos($pos);
-        }else{
+        }
+        else {
             $defence = $target->getDefenceValue($shooter);
         }
 
@@ -602,6 +605,10 @@ class Weapon extends ShipSystem{
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
+
+        if ($this instanceof HeavyPulse){
+            debug::log("int: ".$intercept);
+        }
     
     }
 

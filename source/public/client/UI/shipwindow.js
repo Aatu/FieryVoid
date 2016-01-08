@@ -182,7 +182,7 @@ shipWindowManager = {
 				div.id = "hitChartDiv" + ship.id;
 				$(div).addClass("hitChartDisabled");
 
-			var names = ["Primary", "Front", "Aft", "Port", "S-Bord"];
+			var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
 			if (ship.base){
 				names[1] = "Sections";
@@ -252,7 +252,7 @@ shipWindowManager = {
 			button.innerHTML = "Display Hit Chart";
 			button.id = "hitChartButton" + ship.id;
 			button.className = "interceptButton";
-			button.style.marginLeft = "18px";
+			button.style.marginLeft = "12px";
 			$(button).data("id", ship.id);
 			button.addEventListener("click", function(){
 				var div = document.getElementById("hitChartDiv" + $(this).data("id"));
