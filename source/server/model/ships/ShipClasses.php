@@ -654,11 +654,21 @@
         public function fillLocations($locs){            
         debug::log("fillLocations");   
 
+        debug::log(sizeof($locs));
+
             foreach ($locs as $key => $loc){
+        debug::log($locs[$key]["id"]);
+
                 $structure = $this->getStructureSystem($loc["loc"]);
 
-                $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-                $locs[$key]["armour"] = $structure->armour;
+                if ($structure){
+                    $structure->id;
+                    $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+                    $locs[$key]["armour"] = $structure->armour;
+                }
+                else {
+                    debug::log("no structure!");
+                }
             }
 
             return $locs;
