@@ -531,6 +531,7 @@
 
 
         public function getStructureSystem($location){
+            debug::log("getStructureSystem ".$location);
             foreach ($this->systems as $system){
                 if ($system instanceof Structure  && $system->location == $location){
                     return $system;
@@ -657,7 +658,7 @@
         debug::log(sizeof($locs));
 
             foreach ($locs as $key => $loc){
-        debug::log($locs[$key]["id"]);
+        debug::log($locs[$key]["loc"]);
 
                 $structure = $this->getStructureSystem($loc["loc"]);
 

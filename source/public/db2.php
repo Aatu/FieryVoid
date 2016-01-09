@@ -63,7 +63,7 @@ usort($resultsA, function($a, $b){
 
 foreach ($resultsA as $result){
 	if ($result["times"] > 0){
-		echo "Player: ".$result["username"]." with ID: ".$result["id"]." was seen: ".$result["times"]."<br>";
+		echo "Player: ".$result["username"]." with ID: ".$result["id"]." was seen: ".$result["times"]." times.<br>";
 	}
 }
 

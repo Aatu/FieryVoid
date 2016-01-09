@@ -319,7 +319,10 @@ shipManager.systems = {
     
     getStructureSystem: function(ship, location){
         
-        if (!ship.structures[location])
+        if (ship.flight){
+            return null;
+        }
+        else if (!ship.structures[location])
             return null;
 			
         return shipManager.systems.getSystem(ship, ship.structures[location]);
