@@ -683,7 +683,6 @@
             $pick = -1;
 
             foreach ($locs as $loc){
-                debug::log(var_dump($loc));
                 $value = $loc["remHealth"];
                 $value += floor($value/10) * $loc["armour"] * 1.5;
 
