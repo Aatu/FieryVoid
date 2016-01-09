@@ -1215,8 +1215,12 @@
         debug::log("getLocations");         
             $locs = array();
 
-            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 1, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 210, "max" => 270, "profile" => $this->sideDefense);            
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
 
             return $locs;
         }
@@ -1236,9 +1240,13 @@
         public function getLocations(){
         debug::log("getLocations");         
             $locs = array();
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
 
-            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 360, "profile" => $this->forwardDefense);
 
             return $locs;
         }
@@ -1264,8 +1272,10 @@
         debug::log("getLocations");         
             $locs = array();
 
-            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 1, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 1, "min" => 150, "max" => 210, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 1, "min" => 210, "max" => 360, "profile" => $this->forwardDefense);
 
             return $locs;
         }
@@ -1613,8 +1623,12 @@
         debug::log("getLocations");         
             $locs = array();
 
-            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
 
             return $locs;
         }
