@@ -652,8 +652,8 @@
         }
 
 
-        public function fillLocations($locs){            
-        debug::log("fillLocations");   
+        public function fillLocations($locs){
+        debug::log("fillLocations for".$this->phpclass);   
 
         debug::log(sizeof($locs));
 
@@ -678,11 +678,12 @@
 
         public function pickLocationForHit($locs){
            
-        debug::log("pickLocationForHit");   
+        debug::log("pickLocationForHit");
             $topValue = -1;
             $pick = -1;
 
             foreach ($locs as $loc){
+                debug::log(var_dump($loc));
                 $value = $loc["remHealth"];
                 $value += floor($value/10) * $loc["armour"] * 1.5;
 
