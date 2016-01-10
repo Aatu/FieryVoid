@@ -556,9 +556,10 @@ shipWindowManager = {
 				+'<td class="systemcontainer_'+(index+2)+'"></td><td class="systemcontainer_'+(index+3)+'"></td></tr>')
 			}
 			
-			if (location == 2){
+			if (location == 2 || location == 32 || location == 42){
 				row.prependTo(destination);
-			}else{
+			}
+			else{
 				row.appendTo(destination);
 			}
 			

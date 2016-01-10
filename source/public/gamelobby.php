@@ -418,7 +418,7 @@
             </div>
 
             <div id="shipSection_3" class="shipSection" style="left: 0px; top: 180px">
-                <table id="31" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+                <table id="31" style="border-bottom: 8px solid #7e9dc7"></table>
                 <table id="32"></table>
             </div>
 
@@ -449,7 +449,7 @@
                             </div>
                         </div>
                         <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
-                <table id="41" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+                <table id="41" style="border-bottom: 8px solid #7e9dc7"></table>
                 <table id="42"></table>
                         </div>
                     </td>

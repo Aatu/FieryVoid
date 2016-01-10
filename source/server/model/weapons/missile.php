@@ -349,19 +349,46 @@ class LHMissileRack extends MissileLauncher
 }
 
 
-class BMissileRack extends lHMissileRack {
+class BMissileRack extends MissileLauncher {
+
     public $name = "bMissileRack";
     public $displayName = "Class-B Missile Rack";
-    public $range = 60;
+    public $range = 30;
     public $distanceRange = 60;
+    public $loadingtime = 1;
+    public $iconPath = "missile3.png";
+    public $rangeMod = 10;
     
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
+
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+      //      echo "<font color = 'white'>__construct<br></font>";
+
+        if ($base){
+        //    echo "<font color = 'white'>base</font><br>";
+            $this->range = 60;
+            $this->rangeMod = 30;
+        //    echo "<font color = 'white'>".$this->range."</font><br>";
+        }
 
     }
+
+    public function testAmmoExplosion($ship, $gamedata){
+        return false;
+    }
+
+
+    public function getDamage($fireOrder){
+        return 20;
+    }
+
+    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
+    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
 }
+
+
 
 class FighterMissileRack extends MissileLauncher
 {

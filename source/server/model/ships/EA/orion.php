@@ -41,10 +41,10 @@ class Orion extends StarBaseTwoSides{
 		$this->addPrimarySystem(new Scanner(6, 16, 5, 7));
 		$this->addPrimarySystem(new Hangar(6, 6));
 		$this->addPrimarySystem(new CargoBay(6, 48));
-		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
-		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
-		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
-		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360));
+		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360, true));
+		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360, true));
+		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360, true));
+		$this->addPrimarySystem(new BMissileRack(6, 9, 0, 0, 360, true));
 
 		$this->addPrimarySystem(new Structure( 7, 150));
 
@@ -57,7 +57,7 @@ class Orion extends StarBaseTwoSides{
 			$systems = array(
 				new HvyParticleCannon(4, 12, 9, $min, $max),
 				new HeavyPulse(4, 6, 4, $min, $max),
-				new BMissileRack(4, 9, 0, $min, $max),
+				new BMissileRack(4, 9, 0, $min, $max, true),
 				new QuadParticleBeam(4, 8, 4, $min, $max),
 				new InterceptorMKII(4, 4, 2, $min, $max),
 				new InterceptorMKII(4, 4, 2, $min, $max),

@@ -21,10 +21,10 @@ class GODBeta extends OSAT{
         $this->iniativebonus = 60;
 
 
-        $this->addPrimarySystem(new LHMissileRack(3, 9, 0, 270, 90));
-        $this->addPrimarySystem(new LHMissileRack(3, 9, 0, 270, 90));
-        $this->addPrimarySystem(new LHMissileRack(3, 9, 0, 270, 90));
-        $this->addPrimarySystem(new LHMissileRack(3, 9, 0, 270, 90));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
+        $this->addPrimarySystem(new BMissileRack(3, 9, 0, 270, 90));
         $this->addPrimarySystem(new HvyParticleCannon(5, 12, 9, 300, 60));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
         $this->addPrimarySystem(new LightPulse(2, 4, 2, 180, 360));
@@ -44,7 +44,7 @@ class GODBeta extends OSAT{
 				6 => "Structure",
 				8 => "Thruster",
 				10 => "Heavy Particle Cannon",
-				13 => "Class-LH Missile Rack",
+				13 => "Class-B Missile Rack",
 				15 => "Light Pulse Cannon",
 				17 => "Scanner",
 				19 => "Reactor",

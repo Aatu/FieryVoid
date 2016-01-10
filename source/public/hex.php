@@ -306,7 +306,7 @@
         </div>
 
         <div id="shipSection_3" class="shipSection" style="left: 0px; top: 180px">
-            <table id="31" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+            <table id="31" style="border-bottom: 6px solid #7e9dc7"></table>
             <table id="32"></table>
         </div>
 
@@ -315,11 +315,11 @@
                 <td class="col1" style="width: 33%">
                     <div class="icon" style="margin:auto;"><img src="" alt="" border="" width="120" height="120"></div>
                 </td>                
-                <td class="col2" style="width: 33%; border-left: 3px dotted #7e9dc7; border-right: 3px dotted #7e9dc7;">
+                <td class="col2" style="width: 33%; border-left: 6px solid #7e9dc7; border-right: 6px solid #7e9dc7;">
                     <div id="shipSection_1" class="shipSection" style="margin-top: 20px;">
                         <table></table>
                     </div>
-                    <div id="shipSection_0" class="shipSection primary" style="border-top: 3px dotted #7e9dc7; border-bottom: 3px dotted #7e9dc7; margin-top: 35px;">
+                    <div id="shipSection_0" class="shipSection primary" style="border-top: 4px solid #7e9dc7; border-bottom: 4px solid #7e9dc7; margin-top: 35px;">
                         <table></table>
                     </div>
                     <div id="shipSection_2" class="shipSection" style="margin-top: 35px;">
@@ -336,12 +336,8 @@
                             <div class="notes"></div>
                         </div>
                     </div>
-                    <div class ="buttons">
-                        <div class="HitChart" style="display: none;">
-                        </div>
-                    </div>
                     <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
-            <table id="41" style="margin-bottom: 25px; border-bottom: 3px dotted #7e9dc7"></table>
+                <table id="41" style="border-bottom: 6px solid #7e9dc7"></table>
             <table id="42"></table>
                     </div>
                 </td>
