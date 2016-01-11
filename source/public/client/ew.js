@@ -20,14 +20,11 @@ window.ew = {
         }
 
         if (ship.base){
-            var primary = shipManager.getPrimaryCnC(ship);
-            if (primary.name == "cnC" && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
+            if (shipManager.criticals.hasCritical(shipManager.getPrimaryCnC(ship), "RestrictedEW")){
                 ret -= 2;
             }
         }
-        else {
-            var scanner = shipManager.systems.getSystemByName(ship, "cnC");
-            if (shipManager.criticals.hasCritical(scanner, "RestrictedEW")){
+        else if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "cnC"), "RestrictedEW")){
                 ret -= 2;
             }   
         }
