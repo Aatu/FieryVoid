@@ -16,11 +16,7 @@ window.ew = {
                 if (output > 0){
                     ret += output;
                 }
-            }            
-
-            if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW")){
-                ret -= 2;
-            }
+            }  
         }
 
         if (ship.base){
@@ -28,7 +24,13 @@ window.ew = {
             if (primary.name == "cnC" && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
                 ret -= 2;
             }
-        }    
+        }
+        else {
+            var scanner = shipManager.getSystemByName("cnC");
+            if (shipManager.criticals.hasCritical(scanner, "RestrictedEW")){
+                ret -= 2;
+            }   
+        }
         
         return (ret > 0) ? ret : 0;
     },
