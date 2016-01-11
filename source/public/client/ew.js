@@ -25,8 +25,7 @@ window.ew = {
             }
         }
         else if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(ship, "cnC"), "RestrictedEW")){
-                ret -= 2;
-            }   
+            ret -= 2;
         }
         
         return (ret > 0) ? ret : 0;
