@@ -18,19 +18,17 @@ window.ew = {
                 }
             }            
 
-            if (ship.base){
-                var primary = shipManager.getPrimaryCnC(ship);
-                if (primary.name == "cnC" && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
-                    ret -= 2;
-                }
-            }
-            else {
-                if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW")){
-                    ret -= 2;
-                }
+            if (system.name == "cnC" && shipManager.criticals.hasCritical(system, "RestrictedEW")){
+                ret -= 2;
             }
         }
-    
+
+        if (ship.base){
+            var primary = shipManager.getPrimaryCnC(ship);
+            if (primary.name == "cnC" && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
+                ret -= 2;
+            }
+        }    
         
         return (ret > 0) ? ret : 0;
     },
@@ -415,12 +413,24 @@ window.ew = {
         }
 
         if (!selected.osat){
-    		if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "cnC"), "RestrictedEW")){
+            if (ship.base){
+                var primary = shipManager.getPrimaryCnC(ship);
+                if (shipManager.criticals.hasCritical(primary, "RestrictedEW")){
+                    var def = ew.getDefensiveEW(selected);
+                    var all = ew.getScannerOutput(selected);
+                    
+                    if (def-1 < all*0.5){
+                        return false;
+                     }
+                }
+            }
+            else if (shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(selected, "cnC"), "RestrictedEW")){
     			var def = ew.getDefensiveEW(selected);
     			var all = ew.getScannerOutput(selected);
     			
-    			if (def-1 < all*0.5)
+    			if (def-1 < all*0.5){
     				return false;
+                }   
     		}
         }
 

@@ -81,7 +81,7 @@ class Apollo extends BaseShip{
             ),
             1=> array(
                     6 => "Thruster",
-                    8 => "Heavy Laser",
+                    8 => "Class-L Missile Rack",
                     11 => "Interceptor II",
                     18 => "Structure",
                     20 => "Primary",

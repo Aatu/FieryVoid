@@ -278,7 +278,7 @@ class SubReactor extends ShipSystem{
         11=>"OutputReduced2",
         15=>"OutputReduced4",
         19=>"OutputReduced8",
-        19=>"OutputReducedOneTurn"
+        27=>"OutputReducedOneTurn"
     );
     
     function __construct($armour, $maxhealth, $powerReq, $output ){

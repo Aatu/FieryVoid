@@ -336,6 +336,8 @@
                             <div class="notes"></div>
                         </div>
                     </div>
+                    <div class ="buttons">
+                    </div>
                     <div id="shipSection_4" class="shipSection" style="right: 75px; top: 180px">
                 <table id="41" style="border-bottom: 6px solid #7e9dc7"></table>
             <table id="42"></table>
