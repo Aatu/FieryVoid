@@ -26,7 +26,7 @@ window.ew = {
             }
         }
         else {
-            var scanner = shipManager.getSystemByName("cnC");
+            var scanner = shipManager.systems.getSystemByName(ship, "cnC");
             if (shipManager.criticals.hasCritical(scanner, "RestrictedEW")){
                 ret -= 2;
             }   
