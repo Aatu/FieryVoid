@@ -45,5 +45,30 @@ class Malau extends MediumShip{
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(5, 64));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				10 => "Thruster",
+        				12 => "Fusion Cannon",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		1=> array(
+        				4 => "Thruster",
+        				7 => "Molecular Disruptor",
+        				10 => "Fusion Cannon",
+        				17 => "Structure",
+        				20 => "Primary",
+        		),
+        		2=> array(
+        				6 => "Thruster",
+        				8 => "Fusion Cannon",
+        				17 => "Structure",
+        				20 => "Primary",
+        		),
+        );
     }
 }

@@ -28,7 +28,6 @@ class Notai extends BaseShip{
         $this->addPrimarySystem(new Hangar(4, 2));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
-
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 10, 6, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 10, 6, 300, 60));
@@ -38,13 +37,13 @@ class Notai extends BaseShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 300));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 240));
 
-        $this->addLeftSystem(new GraviticThruster(5, 21, 0, 5, 3));
+        $this->addLeftSystem(new GraviticThruster(5, 18, 0, 5, 3));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addLeftSystem(new Hangar(5, 12));
 
-        $this->addRightSystem(new GraviticThruster(5, 21, 0, 5, 4));
+        $this->addRightSystem(new GraviticThruster(5, 18, 0, 5, 4));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 240, 60));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
@@ -57,7 +56,45 @@ class Notai extends BaseShip{
         $this->addLeftSystem(new Structure( 6, 66));
         $this->addRightSystem(new Structure( 6, 66 ));
 
-
+        $this->hitChart = array(
+        		0=> array(
+        				12 => "Structure",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		1=> array(
+        				4 => "Thruster",
+        				7 => "Molecular Disruptor",
+        				9 => "Fusion Cannon",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		2=> array(
+        				6 => "Thruster",
+        				8 => "Fusion Cannon",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		3=> array(
+        				6 => "Thruster",
+        				8 => "Molecular Disruptor",
+        				10 => "Fusion Cannon",
+        				12 => "Hangar",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				6 => "Thruster",
+        				8 => "Molecular Disruptor",
+        				10 => "Fusion Cannon",
+        				12 => "Hangar",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
     }
 
 }

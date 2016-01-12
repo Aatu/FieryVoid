@@ -15,7 +15,7 @@ class Yuan extends BaseShip{
 
         $this->forwardDefense = 18;
         $this->sideDefense = 19;
-
+		$this->limited = 10;
         $this->turncost = 1;
         $this->turndelaycost = 1;
         $this->accelcost = 5;
@@ -76,7 +76,52 @@ class Yuan extends BaseShip{
         $this->addLeftSystem(new Structure( 6, 96));
         $this->addRightSystem(new Structure( 6, 96 ));
 
-
+        $this->hitChart = array(
+        		0=> array(
+        				12 => "Structure",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		1=> array(
+        				3 => "Thruster",
+        				5 => "Fusion Agitator",
+        				6 => "Molecular Flayer",
+        				7 => "Fusion Cannon",
+        				9 => "Destabilizer Beam",
+        				11 => "Molecular Disruptor",
+        				13 => "Jump Engine",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		2=> array(
+        				6 => "Thruster",
+        				8 => "Molecular Disruptor",
+        				11 => "Fusion Cannon",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		3=> array(
+        				4 => "Thruster",
+        				6 => "Molecular Flayer",
+        				8 => "Molecular Disruptor",
+        				10 => "Fusion Agitator",
+        				12 => "Fusion Cannon",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				4 => "Thruster",
+        				6 => "Molecular Flayer",
+        				8 => "Molecular Disruptor",
+        				10 => "Fusion Agitator",
+        				12 => "Fusion Cannon",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
     }
 
 }
