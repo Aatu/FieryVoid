@@ -220,8 +220,16 @@ spl_autoload_register(
                 'wolf' => '/server/model/ships/raiders/wolf.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
-
-
+            		
+            	//civilians
+            	'ore' => '/server/model/ships/civilians/ore.php',
+            	'liner' => '/server/model/ships/civilians/liner.php',
+            	'fastFreighter' => '/server/model/ships/civilians/fastFreighter.php',
+            	'cargoTug' => '/server/model/ships/civilians/cargoTug.php',
+            	'tankerTug' => '/server/model/ships/civilians/tankerTug.php',
+            	'pirateHunter' => '/server/model/ships/civilians/pirateHunter.php',
+            	'qship' => '/server/model/ships/civilians/qship.php',
+            		
                 //stock 
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
