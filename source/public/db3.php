@@ -1,7 +1,7 @@
 <?php
 $database = 'B5CGM';
-$user='aatu';
-$pw='Kiiski';
+$user='root';
+$pw='';
 $server = 'localhost';
 
 
@@ -20,7 +20,11 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 
 
-$sql = "DELETE * FROM tac_game WHERE id = 3040 AND turn = 2";
+//$sql = "DELETE * FROM tac_game WHERE id = 3077";
+//$stmt = $db->query($sql);
+
+//$sql = "DELETE * FROM tac_game WHERE id = 3031";
+$sql = "TRUNCATE TABLE tac_game";
 $stmt = $db->query($sql);
 
 echo "deleted";

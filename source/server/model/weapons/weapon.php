@@ -454,23 +454,14 @@ class Weapon extends ShipSystem{
 
     public function calculateHit($gamedata, $fireOrder){
         debug::log("_____________");
-        debug::log("calc Hit");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
+        debug::log($shooter->phpclass." vs: ".$target->phpclass);
         $pos = $shooter->getCoPos();
         $jammermod = 0;
         $jink = 0;
         $defence = 0;
-
-
-        if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            $defence = $target->getDefenceValuePos($pos);
-        }
-        else {
-            $defence = $target->getDefenceValue($shooter);
-        }
+        $preProfileGoal;
 
         $rp = $this->calculateRangePenalty($pos, $target);
         $rangePenalty = $rp["rp"];
@@ -487,7 +478,7 @@ class Weapon extends ShipSystem{
             {
                 $jink = Movement::getJinking($target, $gamedata->turn);
             }
-            elseif( mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0
+            else if( mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0
                     ||  Movement::getJinking($shooter, $gamedata->turn) > 0){
                 $jink = Movement::getJinking($target, $gamedata->turn);
             }
@@ -596,6 +587,22 @@ class Weapon extends ShipSystem{
             $sdew = 0;
         }
 
+
+
+        $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
+
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $defence = $target->getDefenceValuePos($pos, $preProfileGoal);
+        }
+        else {
+            $defence = $target->getDefenceValue($shooter, $preProfileGoal);
+        }
+
+
+
+
         $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
         $change = round(($goal/20)*100);
@@ -606,10 +613,6 @@ class Weapon extends ShipSystem{
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
 
-        if ($this instanceof HeavyPulse){
-            debug::log("int: ".$intercept);
-        }
-    
     }
 
     public function getIntercept($gamedata, $fireOrder){

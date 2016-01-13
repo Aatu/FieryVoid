@@ -8,7 +8,7 @@ class Orestes extends BaseShip{
 		$this->faction = "EA";
 		$this->phpclass = "Orestes";
 		$this->imagePath = "img/ships/orestes.png";
-		$this->shipClass = "Orestes (Epsilon Model)";
+		$this->shipClass = "Orestes Epsilon (Laser)";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>12);
 

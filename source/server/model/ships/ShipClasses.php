@@ -599,23 +599,24 @@
 
 
         
-        public function getDefenceValuePos($pos){
+        public function getDefenceValuePos($pos, $preGoal){
+            debug::log("getDefenceValuePos");         
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
           
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
         }
         
-        public function getDefenceValue($shooter){
-        debug::log("getDefenceValue");         
+        public function getDefenceValue($shooter, $preGoal){
+            debug::log("getDefenceValue");         
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
           
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading);            
+            return $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);            
         }
 
 
-        public function doGetDefenceValue($tf, $shooterCompassHeading){
+        public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
         debug::log("doGetDefenceValue");         
 
             $locs = $this->getLocations();
@@ -628,11 +629,11 @@
             }
 
             $valid = $this->fillLocations($valid);
-            $pick = $this->pickLocationForHit($valid);
+            $pick = $this->pickLocationForHit($valid, $preGoal);
 
             debug::log("SET SHIP HIT LOC TO: ".$this->activeHitLocation["loc"]);
             $this->activeHitLocation = $pick;
-            debug::log("RETURNING FOR SHOT :".$this->activeHitLocation["profile"]);
+            debug::log("RETURNING FOR SHOT PROFILE VALUE:".$this->activeHitLocation["profile"]);
 
             return $this->activeHitLocation["profile"];
 
@@ -652,22 +653,19 @@
 
 
         public function fillLocations($locs){
-        debug::log("fillLocations for".$this->phpclass);   
-
-        debug::log(sizeof($locs));
+        debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
-        debug::log($locs[$key]["loc"]);
 
                 $structure = $this->getStructureSystem($loc["loc"]);
 
                 if ($structure){
-                    $structure->id;
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
                 }
                 else {
                     debug::log("no structure!");
+                    return null;
                 }
             }
 
@@ -675,21 +673,33 @@
         }
 
 
-        public function pickLocationForHit($locs){
+        public function pickLocationForHit($locs, $preGoal){
            
         debug::log("pickLocationForHit");
             $topValue = -1;
             $pick = -1;
 
             foreach ($locs as $loc){
-                $value = $loc["remHealth"];
-                $value += floor($value/10) * $loc["armour"] * 1.5;
+                $value = $loc["remHealth"]; // remaining Health on Structure
+                $value += floor($value/10) * ($loc["armour"] * 1.5); // add armour*1.5 per 10 remaining Health
 
+                // $value is now approximatly a value of relative toughness of this section
+
+                //since we have the hitchance PRE profile as parameter, apply the profile of this section
+                //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
+                $goal = $preGoal + $loc["profile"];
+
+                // divide toughness by expected hitchance effective defensive worth of a section
+
+                $value = $value / $goal;
+
+                // if the effective defensive worth is higher than the current one, replace it
                 if ($value > $topValue){
                     $topValue = $value;
                     $pick = $loc;
                 }
             }
+            debug::log($this->phpclass." def value on loc: ".$loc["loc"]." is: ".$value);
 
             return $pick;
         }
@@ -704,7 +714,6 @@
 
             if ($location != 0){
                 if (!isset($this->hitChart[0])){
-                    debug::log("!isset ship->hitchart[0] getHitSection");
                     if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
                         $location = 0;
                     }

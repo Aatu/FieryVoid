@@ -1997,10 +1997,11 @@ setSystemData: function(ship, system, shipwindow){
 					$(input).data("shipid", ship.id);
 					
 					input.onclick = function(){
-						console.log("confirm");
 
-						var ret = {};						
-						var types = document.getElementsByClassName("damageTypes");
+						var ret = {};
+						
+						var subDiv = document.getElementById("outerArmourDiv" + $(this).data("shipid"));
+						var types = subDiv.getElementsByClassName("damageTypes");
 						
 						for (var i = 0; i < types.length; i++){
 							var string = types[i].innerHTML.toLowerCase();

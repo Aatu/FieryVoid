@@ -175,7 +175,7 @@
         
         
         
-        public function doGetDefenceValue($tf, $shooterCompassHeading){
+        public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
             if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
                return $this->forwardDefense;
             }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
