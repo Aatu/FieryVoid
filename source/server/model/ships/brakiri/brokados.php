@@ -4,8 +4,8 @@ class Brokados extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 825;
-	$this->faction = "Brakiri";
+		$this->pointCost = 825;
+		$this->faction = "Brakiri";
         $this->phpclass = "Brokados";
         $this->imagePath = "img/ships/brokados.png";
         $this->shipClass = "Brokados Battle Carrier";
@@ -63,5 +63,48 @@ class Brokados extends BaseShip{
         $this->addLeftSystem(new Structure(4, 48));
         $this->addRightSystem(new Structure(4, 48));
         $this->addPrimarySystem(new Structure(5, 40));
+		
+		$this->hitChart = array(
+			0=> array(
+					6 => "Structure",
+					8 => "Shield Generator",
+					10 => "Jump Engine",
+					12 => "Scanner",
+					14 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					3 => "Thruster",
+					6 => "Heavy Laser",
+					8 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					8 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			3=> array(
+					3 => "Thruster",
+					6 => "Gravitic Shield",
+					8 => "Heavy Laser",
+					10 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					3 => "Thruster",
+					6 => "Gravitic Shield",
+					8 => "Heavy Laser",
+					10 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
     }
 }

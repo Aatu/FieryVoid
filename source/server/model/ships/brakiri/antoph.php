@@ -46,6 +46,34 @@ class Antoph extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 48));
         $this->addAftSystem(new Structure( 5, 48));
         $this->addPrimarySystem(new Structure( 5, 33 ));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Gravitic Cannon",					
+					12 => "Thruster",
+					14 => "Scanner",
+					16 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					4 => "Thruster",
+					7 => "Gravitic Pulsar",
+					9 => "Graviton Beam",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					7 => "Thruster",
+					8 => "Gravitic Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
+
     }
 }
 ?>

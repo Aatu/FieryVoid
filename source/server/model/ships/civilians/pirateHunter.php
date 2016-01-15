@@ -7,7 +7,7 @@ class PirateHunter extends MediumShip{
 		$this->pointCost = 450;
 		$this->faction = "Civilians";
         $this->phpclass = "PirateHunter";
-        $this->imagePath = "img/ships/sloop.png"; //Needs to change maybe?
+        $this->imagePath = "img/ships/pirateHunter.png"; //Needs to change maybe?
         $this->shipClass = "Pirate Hunter";
         $this->canvasSize = 100;
         

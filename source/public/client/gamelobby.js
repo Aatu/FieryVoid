@@ -361,6 +361,9 @@ window.gamedata = {
             window.confirm.error("This slot has already bought a fleet!", function(){});
             return false;
         }
+
+        
+        $(".confirm").remove();
         
 //		if (gamedata.canAfford(ship)){
 			window.confirm.showShipBuy(ship, gamedata.doBuyShip);

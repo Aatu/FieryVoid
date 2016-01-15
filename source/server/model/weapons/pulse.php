@@ -432,104 +432,6 @@
             
         }
     }
-    
-    class PointPulsar extends Particle{
-        public $name = "pointPulsar";
-        public $displayName = "Point Pulsar";
-        public $iconPath = "pointPulsar.png";
-        public $animation = "trail";
-        public $trailLength = 13;
-        public $animationWidth = 4;
-        public $projectilespeed = 25;
-        public $animationExplosionScale = 0.17;
-        public $animationColor =  array(175, 225, 175);
-        public $trailColor = array(110, 225, 110);
-        public $rof = 2;
-        public $guns = 3;
-
-        public $loadingtime = 2;
-        public $normalload = 2;
-        public $priority = 5;
-        
-        public $calledShotMod = -4;
-
-        public $intercept = 3;
-
-        public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-
-        public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
-        }
-        
-        public function getDamage($fireOrder){
-            return 10 - $this->dp;
-        }
- 
-        public function setMinDamage()
-        {
-            $this->minDamage = 10 - $this->dp;
-        }
-
-        public function setMaxDamage()
-        {
-            $this->maxDamage = 10 - $this->dp;
-        }
-        
-        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            if ($target->isDestroyed())
-                return;
-
-            $calledsystem = null;
-            
-            if ($fireOrder->calledid != -1){
-                $calledsystem = $target->getSystemById($fireOrder->calledid);
-            }
-
-            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
-
-            if ($system == null)
-                return;
-    
-            if ($fireOrder->calledid == -1){
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-                return;
-            }
-            
-            if($system->location == $calledsystem->location && $system === $calledsystem){
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-            }else{
-                // we haven't yet overkilled into another location:
-                // check if there are more of the same type of systems in the same location
-                // if so, target those first. To strip a ship of systems is the main benefit of
-                // the point pulsar. (Implementation differs from official Bab5Wars rules. But
-                // this implementation needs less clicking and user interaction.)
-                foreach($target->systems as $targetSystem){
-                    if(!$targetSystem->isDestroyed()
-                            && $targetSystem->location == $calledsystem->location
-                            && $targetSystem->name == $calledsystem->name){
-                        $fireOrder->calledid = $targetSystem->id;
-                        $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location);
-                        return;
-                    }
-                }
-
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-            }
-        }
-
-        protected function getPulses($turn)
-        {
-            return 3;
-        }
-    }
 
     class PairedLightBoltCannon extends LinkedWeapon{
 
@@ -573,6 +475,104 @@
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    }
+
+    class PointPulsar extends Pulse
+    {
+        public $name = "pointPulsar";
+        public $displayName = "Point Pulsar";
+        public $iconPath = "pointPulsar.png";
+        public $animation = "trail";
+        public $trailLength = 13;
+        public $animationWidth = 4;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.17;
+        public $animationColor =  array(175, 225, 175);
+        public $trailColor = array(110, 225, 110);
+        public $rof = 2;
+        public $maxpulses = 3;
+        public $grouping = 0;
+        public $loadingtime = 2;
+        public $normalload = 2;
+        public $priority = 5;
+        
+        public $calledShotMod = -4;
+        public $intercept = 3;
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return 0;
+        }
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
+            $this->data["Pulses"] = '3';
+            unset($this->data["Grouping range"]);
+            unset($this->data["Max pulses"]);
+        }
+        
+        public function getDamage($fireOrder){
+            return 10 - $this->dp;
+        }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 10 - $this->dp;
+        }
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 10 - $this->dp;
+        }
+        
+        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+            if ($target->isDestroyed())
+                return;
+            $calledsystem = null;
+            
+            if ($fireOrder->calledid != -1){
+                $calledsystem = $target->getSystemById($fireOrder->calledid);
+            }
+            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+            if ($system == null)
+                return;
+    
+            if ($fireOrder->calledid == -1){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+                return;
+            }
+            
+            if($system->location == $calledsystem->location && $system === $calledsystem){
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }else{
+                // we haven't yet overkilled into another location:
+                // check if there are more of the same type of systems in the same location
+                // if so, target those first. To strip a ship of systems is the main benefit of
+                // the point pulsar. (Implementation differs from official Bab5Wars rules. But
+                // this implementation needs less clicking and user interaction.)
+                foreach($target->systems as $targetSystem){
+                    if(!$targetSystem->isDestroyed()
+                            && $targetSystem->location == $calledsystem->location
+                            && $targetSystem->name == $calledsystem->name){
+                        $fireOrder->calledid = $targetSystem->id;
+                        $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location);
+                        return;
+                    }
+                }
+                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            }
+        }
+        protected function getPulses($turn)
+        {
+            return 3;
+        }
     }
 
 ?>

@@ -63,5 +63,45 @@ class Corumai extends BaseShip{
         $this->addLeftSystem(new Structure(5, 68));
         $this->addRightSystem(new Structure(5, 68));
         $this->addPrimarySystem(new Structure(5, 65));
+		
+		$this->hitChart = array(
+			0=> array(
+					9 => "Structure",
+					11 => "Jump Engine",
+					13 => "Scanner",
+					15 => "Engine",
+					16 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					5 => "Thruster",
+					8 => "Graviton Pulsar",
+					10 => "Graviton Beam",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					7 => "Thruster",
+					9 => "Graviton Beam",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			3=> array(
+					4 => "Thruster",
+					7 => "Graviton Beam",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					7 => "Graviton Beam",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+				
     }
 }

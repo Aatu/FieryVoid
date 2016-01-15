@@ -37,5 +37,18 @@ class Tokrana extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(5, 30));
+		
+		$this->hitChart = array(
+			0=> array(
+					9 => "Structure",
+					11 => "Scanner",
+					13 => "Gravitic Cannon",
+					14 => "Gravitic Bolt",
+					15 => "Gravitic Shield",
+					17 => "Scanner",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+		);
     }
 }

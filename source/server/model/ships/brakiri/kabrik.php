@@ -42,6 +42,31 @@ class Kabrik extends MediumShip{
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 7, 2));
 		
         $this->addPrimarySystem(new Structure( 4, 48));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Thruster",
+					11 => "Scanner",
+					14 => "Engine",
+					15 => "Hangar",
+					18 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					4 => "Thruster",
+					6 => "Gravitic Cannon",
+					10 => "Gravitic Bolt",
+					16 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					8 => "Gravitic Bolt",
+					16 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
     }
 }
 ?>

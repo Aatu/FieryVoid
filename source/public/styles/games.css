@@ -51,3 +51,14 @@
     background-color: #DEEBFF;
     color: black;
 }
+
+#newsHeader {
+    text-align: center;
+    font-size: 20px;
+}
+
+#newsEntry {
+    text-align: center;
+    margin-top: 30px;
+    border: 1px solid #DEEBFF
+}

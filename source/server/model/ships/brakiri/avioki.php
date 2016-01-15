@@ -54,5 +54,41 @@ class Avioki extends BaseShip{
         $this->addLeftSystem(new Structure(6, 48));
         $this->addRightSystem(new Structure(6, 48));
         $this->addPrimarySystem(new Structure(6, 44));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Jump Engine",
+					12 => "Scanner",
+					15 => "Engine",
+					16 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					4 => "Thruster",
+					7 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			3=> array(
+					4 => "Thruster",
+					8 => "Graviton Beam",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					8 => "Graviton Beam",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);		
     }
 }

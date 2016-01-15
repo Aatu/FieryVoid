@@ -28,6 +28,7 @@ class CivilianFreighter extends MediumShip{
 		$cE = new CargoBay(2, 20);
 		$cF = new CargoBay(2, 20);
 		$cG = new CargoBay(2, 20);
+		$cH = new CargoBay(2, 20);
 		
 		$cA->displayName = "Cargo Bay A";
 		$cB->displayName = "Cargo Bay B";

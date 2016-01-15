@@ -30,7 +30,7 @@ class Bashnar extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 16, 2, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
-	$this->addPrimarySystem(new Hangar(2, 8));
+		$this->addPrimarySystem(new Hangar(2, 8));
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));

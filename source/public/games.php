@@ -41,9 +41,32 @@
                 ajaxInterface.getFirePhaseGames();
             }
 
-       //     $(document).ready(function(){
-         //       ajaxInterface.getFirePhaseGames();
-           // })
+            $(document).ready(function(){
+
+                var header = document.getElementById("newsHeader");
+                    header.innerHTML = "Latest News - 14.01.2016";
+                    header
+
+                var news = document.getElementById("newsEntry");
+                    news.innerHTML = "Hey,";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "The latest update includes:"
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- 4 Bases (for EA, Dilgar, Narn, Centauri).";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- A few more civilian vessels.";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Yolu, Brakiri ships supplied with B5Wars-style hit location table.";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Bugfix with Adaptive Armour when using more than 1 White Star.";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "enjoy";
+
+
+
+           });
 		</script>
 	</head>
 	<body>
@@ -52,7 +75,13 @@
 <!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
-		<div class="panel large">
+        <div class="panel news">
+            <div id="newsHeader">
+            </div>
+            <div id="newsEntry">
+            </div>
+        </div>
+        <div class="panel large">
 			<div class="logout"><a href="logout.php">LOGOUT</a></div>
 			
             <table class="gametable">

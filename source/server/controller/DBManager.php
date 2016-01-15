@@ -1452,8 +1452,6 @@ class DBManager {
             while( $stmt->fetch())
             {
                 // This is a dual/duoweapon or a fightersystem
-                debug::log($gamedata->getShipById($shipid)->phpclass);
-                debug::log($gamedata->getShipById($shipid)->getSystemById($systemid)->displayName);
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
             }
             $stmt->close();

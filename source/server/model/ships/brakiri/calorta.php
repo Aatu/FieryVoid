@@ -47,5 +47,31 @@ class Calorta extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(7, 40));
         $this->addLeftSystem(new Structure(6, 48));
         $this->addRightSystem(new Structure(6, 48));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Thruster",
+					11 => "Graviton Pulsar",
+					14 => "Scanner",
+					16 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			3=> array(
+					4 => "Thruster",
+					10 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					10 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
     }
 }

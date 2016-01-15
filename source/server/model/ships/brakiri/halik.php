@@ -48,6 +48,30 @@ class Halik extends MediumShip{
         $this->addAftSystem(new GravitonPulsar(3, 6, 2, 90, 270));
 		
         $this->addPrimarySystem(new Structure( 4, 54));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Thruster",
+					11 => "Scanner",
+					14 => "Engine",
+					15 => "Hangar",
+					18 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					4 => "Thruster",
+					10 => "Gravitic Pulsar",
+					17 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					8 => "Gravitic Pulsar",
+					17 => "Structure",
+					20 => "Primary",
+			),
+		);
+
     }
 }
 ?>

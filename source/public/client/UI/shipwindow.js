@@ -353,8 +353,8 @@ shipWindowManager = {
         var abilities = Array();
         var notes = Array();
 
-		if (ship.hitChart.length > 0){
-            notes.push("&nbsp;has HitChart.");
+		if (ship.hitChart.length > 0 || typeof ship.hitChart[0] != "undefined"){
+            notes.push("&nbsp;has B5W Hit Table.");
         }
 
     	//BUTTONS like Defensive Fire

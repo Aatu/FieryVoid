@@ -25,7 +25,8 @@ class CivilianTanker extends MediumShip{
 		$cB = new CargoBay(2, 20);
 		$cC = new CargoBay(2, 20);
 		$cD = new CargoBay(2, 20);
-		$cE = new CargoBay(2, 20);
+        $cE = new CargoBay(2, 20);
+        $cF = new CargoBay(2, 20);
 		
 		$cA->displayName = "Cargo Bay A";
 		$cB->displayName = "Cargo Bay B";

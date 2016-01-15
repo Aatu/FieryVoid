@@ -46,5 +46,35 @@ class Ikorta extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Structure(7, 40));
         $this->addLeftSystem(new Structure(6, 48));
         $this->addRightSystem(new Structure(6, 48));
+		
+		$this->hitChart = array(
+			0=> array(
+					7 => "Structure",
+					9 => "Shield Generator",
+					11 => "Thruster",
+					12 => "Graviton Pulsar",
+					14 => "Scanner",
+					16 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			3=> array(
+					4 => "Thruster",
+					6 => "Gravitic Shield",
+					8 => "Gravitic Cannon",
+					10 => "Gravitic Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					6 => "Gravitic Shield",
+					10 => "Gravitic Bolt",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
     }
 }

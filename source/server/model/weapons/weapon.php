@@ -461,6 +461,8 @@ class Weapon extends ShipSystem{
         $jammermod = 0;
         $jink = 0;
         $defence = 0;
+
+        $hitLoc;
         $preProfileGoal;
 
         $rp = $this->calculateRangePenalty($pos, $target);
@@ -594,13 +596,13 @@ class Weapon extends ShipSystem{
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            $defence = $target->getDefenceValuePos($pos, $preProfileGoal);
+            $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
         }
         else {
-            $defence = $target->getDefenceValue($shooter, $preProfileGoal);
+            $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
         }
 
-
+        $defence = $hitLoc["profile"];
 
 
         $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);

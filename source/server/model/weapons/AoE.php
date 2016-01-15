@@ -22,12 +22,15 @@
                     
                     
                     $maxdis = mathlib::getDistanceHex($shooterPos, mathlib::hexCoToPixel($target["x"], $target["y"]));
-                    if ($dis>$maxdis)
+
+                    if ($dis>$maxdis){
                         $dis = floor($maxdis);
-                    
+                    }
+
                     for ($i=0;$i<$dis;$i++){
                         $target = mathlib::getHexToDirection($rolled, $target["x"], $target["y"]);
-                    }   
+                    }
+
                     $fireOrder->x = $target["x"];
                     $fireOrder->y = $target["y"];
                     $fireOrder->pubnotes .= "Shot deviates $dis hexes. ";   
@@ -92,18 +95,23 @@
             
             if ($target instanceof FighterFlight){
 				$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
-			}else{
-				
-						
-				$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
-				
+			}
+            else {
+                if ($target instanceof StarBase || $target instanceof OSAT){
+                    $amount = floor($amount/2);
+                }
+
+
+                $hitLoc = $target->getDefenceValuePos($pos, 100);
+
+				$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $hitLoc["loc"]);
+			
 				if ($system == null)
 					return;
 					
 				$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata);
-			}  
-            
-        
+
+			}
         }
         
         public function fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
@@ -151,6 +159,7 @@
         }
 
         public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
             $this->data["Weapon type"] = "Ballistic";
         }
         

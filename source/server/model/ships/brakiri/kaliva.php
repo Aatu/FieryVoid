@@ -4,8 +4,8 @@ class Kaliva extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 775;
-	$this->faction = "Brakiri";
+		$this->pointCost = 775;
+		$this->faction = "Brakiri";
         $this->phpclass = "Kaliva";
         $this->imagePath = "img/ships/avioki.png";
         $this->shipClass = "Kaliva Lance Cruiser";
@@ -29,7 +29,7 @@ class Kaliva extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 13, 8, 8));
         $this->addPrimarySystem(new Engine(6, 16, 0, 15, 4));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 28));
-	$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2));
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
@@ -53,6 +53,44 @@ class Kaliva extends BaseShip{
         $this->addLeftSystem(new Structure(6, 48));
         $this->addRightSystem(new Structure(6, 48));
         $this->addPrimarySystem(new Structure(6, 44));
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Jump Engine",
+					12 => "Scanner",
+					15 => "Engine",
+					16 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					3 => "Thruster",
+					6 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			3=> array(
+					4 => "Thruster",
+					6 => "Graviton Lancer",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					6 => "Graviton Lancer",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
+		
+		
     }
 }
 ?>

@@ -62,5 +62,44 @@ class Torsha extends BaseShip{
         $this->addLeftSystem(new Structure(4, 44));
         $this->addRightSystem(new Structure(4, 44));
         $this->addPrimarySystem(new Structure(4, 36));
+		
+		
+		$this->hitChart = array(
+			0=> array(
+					8 => "Structure",
+					10 => "Shield Generator",
+					12 => "Scanner",
+					14 => "Engine",
+					17 => "Hangar",
+					19 => "Reactor",
+					20 => "C&C",
+			),
+			1=> array(
+					4 => "Thruster",
+					8 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			2=> array(
+					6 => "Thruster",
+					8 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			3=> array(
+					4 => "Thruster",
+					7 => "Graviton Shield",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+			4=> array(
+					4 => "Thruster",
+					7 => "Graviton Shield",
+					9 => "Graviton Pulsar",
+					18 => "Structure",
+					20 => "Primary",
+			),
+		);
     }
 }

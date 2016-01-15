@@ -617,7 +617,7 @@
 
 
         public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
-        debug::log("doGetDefenceValue");         
+            //    debug::log("doGetDefenceValue");         
 
             $locs = $this->getLocations();
             $valid = array();
@@ -631,16 +631,16 @@
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
 
-            debug::log("SET SHIP HIT LOC TO: ".$this->activeHitLocation["loc"]);
+            //  debug::log("SET SHIP HIT LOC TO: ".$pick["loc"]);
             $this->activeHitLocation = $pick;
-            debug::log("RETURNING FOR SHOT PROFILE VALUE:".$this->activeHitLocation["profile"]);
+            //    debug::log("RETURNING FOR SHOT PROFILE VALUE:".$this->activeHitLocation["profile"]);
 
-            return $this->activeHitLocation["profile"];
+            return $this->activeHitLocation;
 
         }
 
         public function getLocations(){
-        debug::log("getLocations");         
+    //    debug::log("getLocations");         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
@@ -653,7 +653,7 @@
 
 
         public function fillLocations($locs){
-        debug::log("fillLocations for".$this->phpclass);  
+        //debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
 
@@ -675,7 +675,7 @@
 
         public function pickLocationForHit($locs, $preGoal){
            
-        debug::log("pickLocationForHit");
+        //debug::log("pickLocationForHit");
             $topValue = -1;
             $pick = -1;
 
@@ -708,7 +708,6 @@
 
 
         public function getHitSection($pos, $shooter, $turn, $weapon){
-        debug::log("getHitSection");   
 
             $location = $this->activeHitLocation["loc"];
 
@@ -724,7 +723,10 @@
                     return 0;
             }
         
-            debug::log("RETURNING FOR DAMAGE:".$this->activeHitLocation["loc"]);
+            if (isset($this->activeHitLocation["loc"])){
+                debug::log("RETURNING FOR DAMAGE: ".$this->activeHitLocation["loc"]);
+            }
+            
             return $location;
             
         }        
@@ -732,8 +734,8 @@
 
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-        debug::log("______________________");
-        debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
+            debug::log("______________________");
+            debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
 
             if (isset($this->hitChart[0])){
                 debug::log("TABLE");
@@ -1777,7 +1779,7 @@
 
 
     class StarBase extends BaseShip{
-        public $base = true;
+        public $base = true;  
 
         
         public function isDisabled(){

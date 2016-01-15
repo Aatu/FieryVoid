@@ -48,11 +48,16 @@ a.link:hover
 	border:1px solid #37465a;
 }
 
+.panel.news {
+	width:400px;
+	margin:0px auto 50px auto;
+}
+
 .panel.large{
 	width:1000px;
 	margin:0px auto 10px auto;
-
 }
+
 
 .panelheader{
 	font-size:20px;

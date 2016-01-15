@@ -4,8 +4,8 @@ class Brathon extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 325;
-	$this->faction = "Brakiri";
+		$this->pointCost = 325;
+		$this->faction = "Brakiri";
         $this->phpclass = "Brathon";
         $this->imagePath = "img/ships/brathon.png";
         $this->shipClass = "Brathon Auxiliary Cruiser";
@@ -27,7 +27,7 @@ class Brathon extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 16, 2, 5));
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
-	$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4));
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
@@ -51,6 +51,7 @@ class Brathon extends BaseShip{
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
         $this->addPrimarySystem(new Structure(4, 64));
+		
     }
 }
 ?>

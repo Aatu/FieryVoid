@@ -346,10 +346,10 @@ window.weaponManager = {
 						value = weapon.firingModes[value];
 
 					if (value == "Piercing"){
-						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
 					}
 					else {
-						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
 					}
 				}
 				else{
@@ -687,8 +687,7 @@ window.weaponManager = {
 				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 			}
 		}
-
-		if (calledid){
+		if (calledid > 0){
 			mod += weapon.calledShotMod;
 		}
 
@@ -704,7 +703,8 @@ window.weaponManager = {
 
 		if (oew < 1){
 			rangePenalty = rangePenalty*2;
-		 }else if (shooter.faction != target.faction){
+		}
+		else if (shooter.faction != target.faction){
 			var jammer = shipManager.systems.getSystemByName(target, "jammer");
 			var stealth = shipManager.systems.getSystemByName(target, "stealth");
 
@@ -731,10 +731,8 @@ window.weaponManager = {
 
 		var change = Math.round((goal/20)*100);
 	//	console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+	//	console.log(change);
 
-	// makes no sense to cap hit % visuals at 100. You wanne calc your estimated pulses, right ?
-	//    if (change > 100)
-	//       change = 100;
 		return change;
 
 
@@ -1064,10 +1062,26 @@ window.weaponManager = {
 			if (weaponManager.isPosOnWeaponArc(selectedShip, ball.position, weapon)){
 				weaponManager.removeFiringOrder(selectedShip, weapon);
 
+				var damageClass = weapon.data["Weapon type"].toLowerCase();
+				var chance = weaponManager.calculataBallisticHitChange(ball, -1);
+
+
 				for (var s=0;s<weapon.guns;s++){
 					weapon.fireOrders.push(
 						{
-							id:null, type:type, shooterid:selectedShip.id, targetid:ball.fireOrderId, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:"null", y:"null", damageclass: weapon.data["Weapon type"].toLowerCase()
+							id:null,
+							type:type,
+							shooterid:selectedShip.id,
+							targetid:ball.fireOrderId,
+							weaponid:weapon.id,
+							calledid:-1,
+							turn:gamedata.turn,
+							firingMode:weapon.firingMode,
+							shots:weapon.defaultShots,
+							x:"null",
+							y:"null",
+							damageclass: weapon.data["Weapon type"].toLowerCase(),
+							chance: chance
 						}
 					);
 				}
@@ -1244,8 +1258,14 @@ window.weaponManager = {
 							calledid = system.id;
 						}
 
+						
 
 						var damageClass = weapon.data["Weapon type"].toLowerCase();
+						var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+
+						if (chance < 1){
+							continue;
+						}
 						
 						var fire = {
 							id:fireid,
@@ -1259,7 +1279,8 @@ window.weaponManager = {
 							shots:weapon.defaultShots,
 							x:"null",
 							y:"null",
-							damageclass: damageClass
+							damageclass: damageClass,
+							chance: chance
 						};
 						weapon.fireOrders.push(fire);
 

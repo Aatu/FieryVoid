@@ -1,12 +1,12 @@
 <?php
-class CivilianFreighter extends MediumShip{
+class QShip extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 350;
 		$this->faction = "Civilians";
-        $this->phpclass = "CivilianFreighter";
+        $this->phpclass = "QShip";
         $this->imagePath = "img/ships/civilianFreighter.png";
         $this->shipClass = "Commercial Freighter";
         $this->canvasSize = 100;

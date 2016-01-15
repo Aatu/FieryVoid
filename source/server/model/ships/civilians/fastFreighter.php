@@ -7,7 +7,7 @@ class FastFreighter extends MediumShip{
 		$this->pointCost = 150;
 		$this->faction = "Civilians";
         $this->phpclass = "FastFreighter";
-        $this->imagePath = "img/ships/civilianFreighter.png";
+        $this->imagePath = "img/ships/fastFreighter.png";
         $this->shipClass = "Civilian Fast Freighter";
         $this->canvasSize = 100;
         
