@@ -44,12 +44,10 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News - 14.01.2016";
+                    header.innerHTML = "Latest News - 15.01.2016";
                     header
 
                 var news = document.getElementById("newsEntry");
-                    news.innerHTML = "Hey,";
-                    news.innerHTML += "<br>";
                     news.innerHTML += "The latest update includes:"
                     news.innerHTML += "<br>";
                     news.innerHTML += "<br>";
@@ -61,11 +59,12 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- Bugfix with Adaptive Armour when using more than 1 White Star.";
                     news.innerHTML += "<br>";
+                    news.innerHTML += "- Another NAMELESSS fix.";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "enjoy";
-
-
-
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "Enjoy and report BUGS (plenty?) on FB.";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "Also hit F5 whenever something weird happens.";
            });
 		</script>
 	</head>
