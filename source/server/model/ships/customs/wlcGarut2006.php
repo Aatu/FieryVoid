@@ -9,7 +9,7 @@ class wlcGarut2006 extends BaseShip{
         
 	$this->pointCost = 800;
         $this->faction = "Custom Ships";
-        $this->phpclass = "wlcGarut";
+        $this->phpclass = "wlcGarut2006";
         $this->shipClass = "Centauri Garut Survey Ship (2006)";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 

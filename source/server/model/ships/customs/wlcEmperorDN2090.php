@@ -9,7 +9,7 @@ class wlcEmperorDN2090 extends BaseShip{
         
 	$this->pointCost = 1100;
         $this->faction = "Custom Ships";
-        $this->phpclass = "wlcEmperor2090DN";
+        $this->phpclass = "wlcEmperorDN2090";
         $this->shipClass = "wlc Centauri Emperor Dreadnought (2090)";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 
