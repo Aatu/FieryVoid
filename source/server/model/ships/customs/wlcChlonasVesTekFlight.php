@@ -4,12 +4,12 @@ class wlcChlonasVesTekFlight extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 420; //70*6
-	$this->faction = "Custom Ships";
+        $this->pointCost = 420; //70*6
+        $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasVesTekFlight";
         $this->shipClass = "Ch'Lonas Ves'Tek Assault Fighters";
-	$this->imagePath = "img/ships/pikitos.png";
-        
+        $this->imagePath = "img/ships/pikitos.png";
+
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
         $this->freethrust = 10;
@@ -34,7 +34,7 @@ class wlcChlonasVesTekFlight extends FighterFlight{
             $fighter->imagePath = "img/ships/pikitos.png";
             $fighter->iconPath = "img/ships/pikitos_large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
-            $fighter->addFrontSystem(new customLightMatterCannonF(345, 15));
+            $fighter->addFrontSystem(new CustomLightMatterCannonF(345, 15));
             $this->addSystem($fighter);
         }
     }

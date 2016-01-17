@@ -18,6 +18,8 @@ window.SystemFactory =
             return new Fighter(systemJson, ship);
         
         var name = systemJson.name.charAt(0).toUpperCase() + systemJson.name.slice(1);
+
+//console.log(name);
         var system = new window[name](systemJson, ship);
         
         if(system.duoWeapon || system.dualWeapon){

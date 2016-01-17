@@ -251,9 +251,13 @@ class SMissileRack extends MissileLauncher{
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
+        if ($base){
+            $this->range = 40;
+            $this->rangeMod = 20;
+        }
     }
     
     public function getDamage($fireOrder)
@@ -364,13 +368,10 @@ class BMissileRack extends MissileLauncher {
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
 
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-      //      echo "<font color = 'white'>__construct<br></font>";
 
         if ($base){
-        //    echo "<font color = 'white'>base</font><br>";
             $this->range = 60;
             $this->rangeMod = 30;
-        //    echo "<font color = 'white'>".$this->range."</font><br>";
         }
 
     }

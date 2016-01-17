@@ -26,12 +26,18 @@ spl_autoload_register(
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
                 'wlcchlonasvestekflight' => '/server/model/ships/customs/wlcChlonasVesTekFlight.php',
-                'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
+                'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
+                'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
+                'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
+                'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
+                'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
-
+                'customheavymattercannon' => '/server/model/weapons/customs.php',
+                'customstrikelaser' => '/server/model/weapons/customs.php',
+                'custompulsarlaser' => '/server/model/weapons/customs.php',
 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
