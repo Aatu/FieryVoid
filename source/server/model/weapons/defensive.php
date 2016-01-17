@@ -175,7 +175,7 @@
 
         public $trailColor = array(30, 170, 255);
         
-        public $name = "sentinelPD";
+        public $name = "sentinelPointDefense";
         public $displayName = "Sentinel Point Defense";
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
