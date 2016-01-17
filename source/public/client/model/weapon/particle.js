@@ -205,12 +205,12 @@ LightBolter.prototype = Object.create(Particle.prototype);
 LightBolter.prototype.constructor = LightBolter;
 
 
-var SentinelPD = function(json, ship)
+var SentinelPointDefense = function(json, ship)
 {
     Particle.call( this, json, ship);
 }
-SentinelPD.prototype = Object.create( Particle.prototype );
-SentinelPD.prototype.constructor = SentinelPD;
+SentinelPointDefense.prototype = Object.create( Particle.prototype );
+SentinelPointDefense.prototype.constructor = SentinelPointDefense;
 
 
 var ParticleProjector = function(json, ship)
