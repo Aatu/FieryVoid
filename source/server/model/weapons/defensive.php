@@ -70,8 +70,7 @@
 
     }
     
-    class InterceptorMkII extends InterceptorMkI
-    {
+    class InterceptorMkII extends InterceptorMkI{
         public $name = "interceptorMkII";
         public $displayName = "Interceptor II";
         
@@ -97,8 +96,7 @@
         }
     }
     
-    class InterceptorPrototype extends InterceptorMkI
-    {
+    class InterceptorPrototype extends InterceptorMkI{
         public $name = "interceptorPrototype";
         public $displayName = "Interceptor Prototype";
         
@@ -165,13 +163,12 @@
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
-        
+        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }        
 
     }
 
 
-    class SentinelPD extends GuardianArray{
+    class SentinelPointDefense extends GuardianArray{
 
         public $trailColor = array(30, 170, 255);
         
