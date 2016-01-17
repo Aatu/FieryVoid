@@ -27,6 +27,7 @@ spl_autoload_register(
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
                 'wlcchlonasvestekflight' => '/server/model/ships/customs/wlcChlonasVesTekFlight.php',
+                'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
                 'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
                 'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
