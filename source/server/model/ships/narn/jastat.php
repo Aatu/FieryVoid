@@ -40,9 +40,9 @@ class JaStat extends StarBaseFiveSections{
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
-		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
-		$this->addPrimarySystem(new IonTorpedo(6, 5, 4, 0, 360));
+		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
+		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
+		$this->addPrimarySystem(new TwinArray(6, 6, 2, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
 		$this->addPrimarySystem(new EnergyMine(6, 5, 4, 0, 360));
