@@ -1,5 +1,5 @@
 <?php
-class Kraken extends StarBaseTwoSides{
+class Kraken extends StarBaseSixSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);

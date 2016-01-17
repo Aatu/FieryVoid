@@ -1778,6 +1778,7 @@
 
 
 
+
     class StarBase extends BaseShip{
         public $base = true;
         public $Enormous = true;
@@ -1834,10 +1835,6 @@
 
             return $array;
         }
-    }
-
-
-    class StarBaseTwoSides extends StarBase{
 
 
         protected function addLeftFrontSystem($system){
@@ -1854,7 +1851,7 @@
         }
 
 
-        public function isDestroyed($turn = false){        
+        public function isDestroyed($turn = false){
             foreach($this->systems as $system){
                 if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
                     return true;
@@ -1899,26 +1896,10 @@
                 $system->damage[] = $damageEntry;
             }
         }
+    }
 
-        /*
-        public function destroyAllOnLocation($location, $gamedata, $fireOrder){
-            debug::log("destroy");
-            foreach ($this->systems as $system){
-                if ($system->location == $location){
-                    if (! $system->destroyed){
-                        $health = $system->getRemainingHealth();
-                        $destroyed = true;
 
-                        $damageEntry = new DamageEntry(-1, $this->id, -1, $fireOrder->turn, $system->id, $health+$armour, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
-                        $damageEntry->updated = true;
-
-                        $system->damage[] = $damageEntry;
-                    }
-                }
-            }
-        }
-        */
-
+    class StarBaseSixSections extends StarBase{
 
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
             debug::log("getPiercingLocations");
@@ -1971,4 +1952,21 @@
         }
     }
 
+
+
+    class StarBaseFiveSections extends StarBase{
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 41, "min" => 330, "max" => 150, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 42, "min" => 30, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 32, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 31, "min" => 150, "max" => 330, "profile" => $this->forwardDefense);
+
+            return $locs;
+        }
+    }
 ?>

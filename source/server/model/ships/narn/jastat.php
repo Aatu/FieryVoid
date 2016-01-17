@@ -1,7 +1,7 @@
 <?php
 
 
-class JaStat extends StarBaseTwoSides{
+class JaStat extends StarBaseFiveSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -23,7 +23,7 @@ class JaStat extends StarBaseTwoSides{
 		$this->imagePath = "img/ships/jastat.png";
 		$this->canvasSize = 280; //Enormous Starbase
 
-		$this->locations = array(41, 42, 2, 32, 31, 1);
+		$this->locations = array(41, 42, 32, 31, 1);
 		$this->hitChart = array(			
 			0=> array(
 				10 => "Structure",
@@ -54,7 +54,7 @@ class JaStat extends StarBaseTwoSides{
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
 			$min = 0 + ($i*60);
-			$max = 120 + ($i*60);
+			$max = 180 + ($i*60);
 
 			$systems = array(
 				new MagGun(5, 9, 8, $min, $max),

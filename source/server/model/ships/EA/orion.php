@@ -1,5 +1,5 @@
 <?php
-class Orion extends StarBaseTwoSides{
+class Orion extends StarBaseSixSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
