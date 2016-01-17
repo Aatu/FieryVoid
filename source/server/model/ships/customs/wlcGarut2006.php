@@ -44,15 +44,15 @@ class wlcGarut2006 extends BaseShip{
 	$this->addFrontSystem(new Hangar(3, 18));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 240, 360));
 	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 0, 120));
-	$this->addFrontSystem(new SentinelPD(2, 4, 2, 240, 60));
-	$this->addFrontSystem(new SentinelPD(2, 4, 2, 300, 120));
+	$this->addFrontSystem(new SentinelPointDefense(2, 4, 2, 240, 60));
+	$this->addFrontSystem(new SentinelPointDefense(2, 4, 2, 300, 120));
 		
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
 	$this->addAftSystem(new JumpEngine(5, 32, 6, 20));
-	$this->addAftSystem(new SentinelPD(2, 4, 2, 90, 180));
+	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 180));
 		
 	$this->addLeftSystem(new Thruster(4, 30, 0, 8, 3));
 	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));

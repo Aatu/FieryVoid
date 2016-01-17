@@ -196,7 +196,7 @@ spl_autoload_register(
 
                 //WotC Centauri systems
                 'taclaser' => '/server/model/weapons/lasers.php',
-                'sentinelpd' => '/server/model/weapons/defensive.php',
+                'sentinelpointdefense' => '/server/model/weapons/defensive.php',
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
                 'plasmagun' => '/server/model/weapons/plasma.php',
                 'particleprojector' => '/server/model/weapons/particle.php',

@@ -34,8 +34,8 @@ class Tatros extends MediumShip{
     $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
     $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
     $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
-    $this->addFrontSystem(new SentinelPD(1, 4, 2, 180, 60));
-    $this->addFrontSystem(new SentinelPD(1, 4, 2, 300, 180));
+    $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 180, 60));
+    $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 300, 180));
 
     $this->addAftSystem(new Thruster(1, 10, 0, 4, 2));
     $this->addAftSystem(new Thruster(1, 10, 0, 4, 2));

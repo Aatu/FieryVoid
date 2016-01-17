@@ -49,8 +49,8 @@ class wlcEmperorDN2090 extends BaseShip{
 	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 0, 120));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
 	$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
-	$this->addFrontSystem(new SentinelPD(2, 4, 2, 240, 60));
-	$this->addFrontSystem(new SentinelPD(2, 4, 2, 300, 120));
+	$this->addFrontSystem(new SentinelPointDefense(2, 4, 2, 240, 60));
+	$this->addFrontSystem(new SentinelPointDefense(2, 4, 2, 300, 120));
 		
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
@@ -61,7 +61,7 @@ class wlcEmperorDN2090 extends BaseShip{
 	$this->addAftSystem(new AssaultLaser(3, 6, 4, 120, 240));
 	$this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
 	$this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
-	$this->addAftSystem(new SentinelPD(2, 4, 2, 90, 180));
+	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 180));
 		
 	$this->addLeftSystem(new Thruster(4, 30, 0, 8, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 360));
