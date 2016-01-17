@@ -130,10 +130,14 @@ class MissileFB extends Ammo
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $jammermod = 0;
+        $jink = 0;
+        $defence = 0;
+
+        $hitLoc;
+        $preProfileGoal;
         
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
         $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-        $defence = $target->getDefenceValuePos($pos);
                        
         $rp = $this->calculateRangePenalty($pos, $target);
         $rangePenalty = $rp["rp"];
@@ -188,6 +192,14 @@ class MissileFB extends Ammo
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
         
         $intercept = $this->getIntercept($gamedata, $fireOrder);
+
+
+
+        $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
+        $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
+
+        $defence = $hitLoc["profile"];
+
 
         // Fighters only ignore all defensive EW, be it DEW, SDEW or BDEW for non-ballistic weapons
         // This is a ballistic weapon, so all defensive EW is taken into account.

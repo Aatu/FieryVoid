@@ -1779,7 +1779,8 @@
 
 
     class StarBase extends BaseShip{
-        public $base = true;  
+        public $base = true;
+        public $Enormous = true;
 
         
         public function isDisabled(){
