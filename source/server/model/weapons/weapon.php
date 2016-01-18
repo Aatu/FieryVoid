@@ -596,18 +596,18 @@ class Weapon extends ShipSystem{
 
         if ($this->ballistic){
             debug::log("ballistic");
-         //   $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
         }
         else {
-        //    debug::log("non ballistic");
+            debug::log("non ballistic");
             if ($target->activeHitLocation["validFor"] != $shooter->id){
-           //     debug::log("hitLoc -1 or for other shooter");
+                debug::log("hitLoc -1 or for other shooter");
                 $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
             }
             else {
-           //     debug::log("hitLoc for this shooter!");
+                debug::log("hitLoc for this shooter!");
                 $hitLoc = $target->activeHitLocation;
             }
         }

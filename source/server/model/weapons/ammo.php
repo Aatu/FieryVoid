@@ -198,8 +198,8 @@ class MissileFB extends Ammo
         $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
         
         if ($target->activeHitLocation["validFor"] != $shooter->id){
-                debug::log("hitLoc -1 or for other shooter");
-                $hitLoc = $target->getDefenceValuePos($shooter, $preProfileGoal);
+            debug::log("hitLoc -1 or for other shooter");
+            $hitLoc = $target->getDefenceValuePos($shooter, $preProfileGoal);
         }
         else {
             debug::log("hitLoc for this shooter!");

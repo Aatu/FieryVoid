@@ -21,7 +21,7 @@ class wlcGarut2006 extends BaseShip{
 	$this->iniativebonus = 0;
 
         $this->imagePath = "img/ships/kendari.png";
-	$this->canvasSize = 350; //Paragon is 280, this is ture Enormous
+	$this->canvasSize = 200; //Paragon is 280, this is ture Enormous
 
 
 

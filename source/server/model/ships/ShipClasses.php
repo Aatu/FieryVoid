@@ -649,7 +649,7 @@
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 3, "min" => 210, "max" => 300, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
 
             return $locs;
         }
@@ -678,7 +678,7 @@
 
         public function pickLocationForHit($locs, $preGoal){           
             //debug::log("pickLocationForHit");
-            
+                        
             $topValue = -1;
             $pick = -1;
 
