@@ -593,14 +593,25 @@ class Weapon extends ShipSystem{
 
         $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
+
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            debug::log("ballistic");
+         //   $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
         }
         else {
-            $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
+        //    debug::log("non ballistic");
+            if ($target->activeHitLocation["validFor"] != $shooter->id){
+           //     debug::log("hitLoc -1 or for other shooter");
+                $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
+            }
+            else {
+           //     debug::log("hitLoc for this shooter!");
+                $hitLoc = $target->activeHitLocation;
+            }
         }
+
 
         $defence = $hitLoc["profile"];
 
@@ -862,7 +873,7 @@ class Weapon extends ShipSystem{
 
     protected function getSystemArmour($system, $gamedata, $fireOrder){
 
-	$shooter = $gamedata->getShipById($fireOrder->shooterid);
+    	$shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 
 		$armor = 0;

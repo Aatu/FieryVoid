@@ -142,7 +142,6 @@ class DBManager {
                 $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
                 VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
 
-                debug::log($sql);
                 $id = $this->insert($sql);
 
             }catch(Exception $e) {
@@ -157,7 +156,6 @@ class DBManager {
                 VALUES ($gameid, $shipid, $flightSize)";
 
                 $id = $this->insert($sql);
-                Debug::log($sql);
 
             }catch(Exception $e) {
                 $this->endTransaction(true);

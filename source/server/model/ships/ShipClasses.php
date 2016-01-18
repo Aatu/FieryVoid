@@ -30,7 +30,7 @@
         
         public $canvasSize = 200;
 
-        public $activeHitLocation = 0;
+        public $activeHitLocation = array("validFor" => -1);
 
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
@@ -600,24 +600,32 @@
 
         
         public function getDefenceValuePos($pos, $preGoal){
-            debug::log("getDefenceValuePos");         
+            //debug::log("getDefenceValuePos");         
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-          
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
+
+            $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
+            $this->activeHitLocation = $result;
+            $this->activeHitLocation["validFor"] = $shooter->id;
+
+            return $result;
         }
         
         public function getDefenceValue($shooter, $preGoal){
-            debug::log("getDefenceValue");         
+            //debug::log("getDefenceValue");         
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
           
-            return $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);            
+            $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
+            $this->activeHitLocation = $result;
+            $this->activeHitLocation["validFor"] = $shooter->id;
+
+            return $result;
         }
 
 
         public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
-            //    debug::log("doGetDefenceValue");         
+            //debug::log("doGetDefenceValue");         
 
             $locs = $this->getLocations();
             $valid = array();
@@ -631,16 +639,11 @@
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
 
-            //  debug::log("SET SHIP HIT LOC TO: ".$pick["loc"]);
-            $this->activeHitLocation = $pick;
-            //    debug::log("RETURNING FOR SHOT PROFILE VALUE:".$this->activeHitLocation["profile"]);
-
-            return $this->activeHitLocation;
-
+            return $pick;
         }
 
         public function getLocations(){
-    //    debug::log("getLocations");         
+            //debug::log("getLocations");         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
@@ -653,7 +656,7 @@
 
 
         public function fillLocations($locs){
-        //debug::log("fillLocations for".$this->phpclass);  
+            //debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
 
@@ -673,9 +676,9 @@
         }
 
 
-        public function pickLocationForHit($locs, $preGoal){
-           
-        //debug::log("pickLocationForHit");
+        public function pickLocationForHit($locs, $preGoal){           
+            //debug::log("pickLocationForHit");
+            
             $topValue = -1;
             $pick = -1;
 

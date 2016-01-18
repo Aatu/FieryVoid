@@ -13,6 +13,7 @@
         public function chooseTarget($gd){
             $best = null;
             foreach ($this->intercepts as $candidate){
+                $armour;
                 $fire = $candidate->fire;
 
                 $target = $gd->getShipById($fire->targetid);
@@ -27,8 +28,7 @@
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
 
 
-                $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
-                $armour;
+    /*            $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
 
         //        debug::log("intercepting fire from: ".$target->phpclass." versus opposing ".$firingweapon->displayName." from ".$shooter->phpclass);
 
@@ -46,7 +46,22 @@
                     $structure = $target->getStructureSystem($hitLocation);
                     $armour = $structure->armour;
                  //   debug::log("non-flight armour: ".$armour);
+                }                      
+    */
+
+                if ($shooter instanceof FighterFlight){
+                    $armour = 2;
                 }
+                else if ($shooter instanceof MediumShip){
+                    $armour = 4;
+                }
+                else if ($shooter instanceof StarBase){
+                    $armour = 6;
+                }
+                else {
+                    $armour = 5;
+                }
+
 
                 if ($firingweapon instanceof Matter){
                     $armour = 0;
@@ -59,8 +74,6 @@
                 if ($armour < 0 || !$armour){
                     $armour = 0;
                 }
-                      
-
                 if ($firingweapon instanceof Raking){
                     $avg = $firingweapon->getAvgDamage();
                     $rakes = $avg / $firingweapon->raking;
@@ -467,7 +480,7 @@ class Firing{
         }
 
 
-
+/*
         usort($fireOrders, 
             function($a, $b) use ($gamedata){
                 if ($a->targetid !== $b->targetid){
@@ -481,6 +494,26 @@ class Firing{
                 }
             }
         );
+*/
+
+
+        // sort all fire by shooter, then target, then priority
+        usort($fireOrders, 
+            function($a, $b) use ($gamedata){
+                if ($a->shooterid != $b->shooterid){
+                    return $a->shooterid - $b->shooterid;
+                }
+                else if ($a->targetid !== $b->targetid){
+                    return $a->targetid - $b->targetid;
+                }
+                else {
+                    return $a->priority - $b->priority;
+                }
+            }
+        );
+
+
+
 
 
 

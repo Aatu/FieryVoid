@@ -171,23 +171,49 @@
             }
         
             return $movement->getFacingAngle();
-        }
+        }     
         
-        
-        
+
         public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
-            if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(330,$tf), Mathlib::addToDirection(30,$tf) )){
-               return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(150,$tf), Mathlib::addToDirection(210,$tf) )){
-                return $this->forwardDefense;
-            }else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(210,$tf), Mathlib::addToDirection(330,$tf) )){
-                return $this->sideDefense;
-            }  else if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection(30,$tf), Mathlib::addToDirection(150,$tf) )){
-                return $this->sideDefense;
-            } 
-                
-            return $this->sideDefense;
+            //    debug::log("doGetDefenceValue");         
+
+            $locs = $this->getLocations();
+            $valid = array();
+
+            foreach ($locs as $loc){
+                if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($loc["min"], $tf), Mathlib::addToDirection($loc["max"], $tf))){
+                    $valid[] = $loc;
+                }
+            }
+
+            $pick = array("profile" => 100);
+
+            foreach ($valid as $loc){
+                if ($loc["profile"] < $pick["profile"]){
+                    $pick = $loc;
+                }
+            }
+
+            //  debug::log("SET SHIP HIT LOC TO: ".$pick["loc"]);
+            $this->activeHitLocation = $pick;
+            //    debug::log("RETURNING FOR SHOT PROFILE VALUE:".$this->activeHitLocation["profile"]);
+
+            return $this->activeHitLocation;
+
         }
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+
+            return $locs;
+        }
+
         
         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
             return 0;

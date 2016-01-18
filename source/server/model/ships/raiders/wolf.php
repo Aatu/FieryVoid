@@ -35,15 +35,15 @@ class Wolf extends MediumShip{
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 240, 60));
 		$this->addFrontSystem(new ParticleCannon(3, 8, 7, 300, 120));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 180, 60));
-		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 180));
+		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 180));
 		$this->addFrontSystem(new CargoBay(3, 10));
 		$this->addFrontSystem(new CargoBay(3, 10));
 		$this->addFrontSystem(new Hangar(3, 2));
 		$this->addFrontSystem(new Hangar(3, 2));
 				
         $this->addAftSystem(new Thruster(2, 12, 0, 8, 2));
-        $this->addAftSystem(new ParticleCannon(3, 8, 7, 120, 270));
         $this->addAftSystem(new ParticleCannon(3, 8, 7, 120, 300));
+        $this->addAftSystem(new ParticleCannon(3, 8, 7, 60, 240));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 240));
         $this->addAftSystem(new CargoBay(3, 20));

@@ -274,7 +274,7 @@ window.effects = {
             }   
         }
             
-        shipFire.sort(function(obj1, obj2){
+     /*   shipFire.sort(function(obj1, obj2){
             if(obj1.targetid !== obj2.targetid){
                  return obj1.targetid-obj2.targetid;
             }
@@ -283,6 +283,21 @@ window.effects = {
             }
             else return obj1.shooterid - obj2.shooterid;
         });
+*/
+
+        shipFire.sort(function(obj1, obj2){
+            if (obj1.shooterid != obj2.shooterid){
+                return obj1.shooterid - obj2.shooterid;
+            }
+            else if(obj1.targetid != obj2.targetid){
+                 return obj1.targetid-obj2.targetid;
+            }
+            else {
+                return obj1.priority - obj2.priority;
+            }
+        });
+
+
 
         for (var x in fighterFire){
             shipFire.push(fighterFire[x]);
