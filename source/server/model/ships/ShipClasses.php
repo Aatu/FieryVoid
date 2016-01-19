@@ -606,7 +606,6 @@
 
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $this->activeHitLocation = $result;
-            $this->activeHitLocation["validFor"] = $shooter->id;
 
             return $result;
         }
@@ -618,7 +617,6 @@
           
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $this->activeHitLocation = $result;
-            $this->activeHitLocation["validFor"] = $shooter->id;
 
             return $result;
         }
