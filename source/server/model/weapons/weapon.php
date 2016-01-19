@@ -602,7 +602,7 @@ class Weapon extends ShipSystem{
         }
         else {
             debug::log("non ballistic");
-            if ($target->activeHitLocation["validFor"] != $shooter->id){
+            if ($target->activeHitLocation["validFor"] != $shooter->id || !isset($target->activeHitLocation["validFor"])){
                 debug::log("hitLoc -1 or for other shooter");
                 $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
                 $target->activeHitLocation["validFor"] = $shooter->id;
