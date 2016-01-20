@@ -480,7 +480,6 @@ class Firing{
         }
 
 
-/*
         usort($fireOrders, 
             function($a, $b) use ($gamedata){
                 if ($a->targetid !== $b->targetid){
@@ -494,10 +493,9 @@ class Firing{
                 }
             }
         );
-*/
 
 
-        // sort all fire by shooter, then target, then priority
+/*
         usort($fireOrders, 
             function($a, $b) use ($gamedata){
                 if ($a->shooterid != $b->shooterid){
@@ -511,9 +509,7 @@ class Firing{
                 }
             }
         );
-
-
-
+*/
 
 
 

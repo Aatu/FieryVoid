@@ -602,14 +602,28 @@ class Weapon extends ShipSystem{
         }
         else {
             debug::log("non ballistic");
-            if ( !isset($target->activeHitLocation["validFor"]) || $target->activeHitLocation["validFor"] != $shooter->id){
-                debug::log("hitLoc -1 or for other shooter");
-                $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
-                $target->activeHitLocation["validFor"] = $shooter->id;
-            }
-            else {
-                debug::log("hitLoc for this shooter!");
-                $hitLoc = $target->activeHitLocation;
+
+            if (sizeof($target->activeHitLocation > 0)){                
+                $found = false;
+                debug::log("more than one setup loc found");
+
+                foreach ($target->activeHitLocation as $setup){
+                    if ($setup["validFor"] == $shooter->id){
+                        debug::log("hitLoc for this shooter!");
+                        $hitLoc = $setup;
+                        $found = true;
+                    }
+                    if ($found){
+                        break;
+                    }
+                }
+
+                if (!$found){
+                    debug::log("no valid hitloc for this shooter found");
+                    $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
+                    $hitLoc["validFor"] = $shooter->id;
+                    $target->activeHitLocation[] = $hitLoc;
+                }
             }
         }
 

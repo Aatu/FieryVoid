@@ -184,7 +184,7 @@ class MissileLauncher extends Weapon{
             $modifiedDamage = $systemHealth + $armour;
         }
         
-        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, $modifiedDamage, $armour, 0, -1, $destroyed, "");
+        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, $modifiedDamage, $armour, 0, -1, $destroyed, "particle");
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->hits[] = $damageEntry;

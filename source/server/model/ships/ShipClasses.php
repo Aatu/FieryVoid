@@ -30,8 +30,7 @@
         
         public $canvasSize = 200;
 
-        public $activeHitLocation = array("validFor" => -1);
-
+        public $activeHitLocation = array();
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;

@@ -66,14 +66,14 @@ class OlympusBeta extends HeavyCombatVessel{
                 1=> array(
                         3 => "Thruster",
                         5 => "Medium Laser",
-                        7 => "Particle Canon",
+                        7 => "Particle Cannon",
                         9 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 2=> array(
                         6 => "Thruster",
-                        10 => "Particle Canon",
+                        10 => "Particle Cannon",
                         12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",

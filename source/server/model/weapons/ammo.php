@@ -197,14 +197,29 @@ class MissileFB extends Ammo
 
         $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
         
-        if ($target->activeHitLocation["validFor"] != $shooter->id){
-            debug::log("hitLoc -1 or for other shooter");
-            $hitLoc = $target->getDefenceValuePos($shooter, $preProfileGoal);
+        if (sizeof($target->activeHitLocation > 0)){                
+            $found = false;
+            debug::log("more than one setup loc found");
+
+            foreach ($target->activeHitLocation as $setup){
+                if ($setup["validFor"] == $shooter->id){
+                    debug::log("hitLoc for this shooter!");
+                    $hitLoc = $setup;
+                    $found = true;
+                }
+                if ($found){
+                    break;
+                }
+            }
+
+            if (!$found){
+                debug::log("no valid hitloc for this shooter found");
+                $hitLoc = $target->getDefenceValuePos($shooter, $preProfileGoal);
+                $hitLoc["validFor"] = $shooter->id;
+                $target->activeHitLocation[] = $hitLoc;
+            }
         }
-        else {
-            debug::log("hitLoc for this shooter!");
-            $hitLoc = $target->activeHitLocation;
-        }
+
 
         $defence = $hitLoc["profile"];
 

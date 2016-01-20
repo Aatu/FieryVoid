@@ -172,15 +172,10 @@ window.combatLog = {
             var sys = ship.systems[i];
             for (var j = 0; j < sys.damage.length; j++){
                 var entry = sys.damage[j];
-                if (entry.fireorderid == -1 && entry.turn == gamedata.turn){
-                    if (entry.destroyed == 1){
+                if (entry.destroyed == 1){
+                    if (entry.fireorderid == -1 && entry.turn == gamedata.turn){
                         destroyed += '<span class="damage">' + shipManager.systems.getDisplayName(sys) + '</span>';
                         destroyed += ', ';
-                        break;
-                    }
-                    else {
-                        damages += shipManager.systems.getDisplayName(sys);
-                        damages += ', ';
                         break;
                     }
                 }
@@ -192,12 +187,12 @@ window.combatLog = {
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
             html +=  ' suffered ' + dmg + ' damage due to exploding ammunition from its ' + system.displayName + '.';
 
-            if (damages.length >15){
-                var length = damages.length;
+   /*         if (damages.length >15){
+               var length = damages.length;
                 damages = damages.substring(0, length-2);
                 html +=  '<li>' + damages + '</li>';
             }
-            if (destroyed.length >15){
+    */        if (destroyed.length >15){
                 var length = destroyed.length;
                 destroyed = destroyed.substring(0, length-2);
                 html +=  '<li>' + destroyed + '</li>';
