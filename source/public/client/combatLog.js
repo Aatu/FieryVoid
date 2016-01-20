@@ -178,6 +178,7 @@ window.combatLog = {
                         destroyed += ', ';
                         break;
                     }
+                    else continue;
                 }
             }
         }
