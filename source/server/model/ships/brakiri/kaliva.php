@@ -78,13 +78,13 @@ class Kaliva extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					6 => "Graviton Lancer",
+					6 => "Graviton Lance",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					6 => "Graviton Lancer",
+					6 => "Graviton Lance",
 					18 => "Structure",
 					20 => "Primary",
 			),

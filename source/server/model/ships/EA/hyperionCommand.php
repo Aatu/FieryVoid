@@ -95,13 +95,13 @@ class HyperionCommand extends BaseShip{
                 ),
                 3=> array(
                         6 => "Thruster",
-                        9 => "Heavy Laser Cannon",
+                        9 => "Heavy Laser",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         6 => "Thruster",
-                        9 => "Heavy Laser Cannon",
+                        9 => "Heavy Laser",
                         18 => "Structure",
                         20 => "Primary",
                 ),
