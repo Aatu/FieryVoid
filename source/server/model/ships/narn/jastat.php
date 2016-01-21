@@ -23,7 +23,7 @@ class JaStat extends StarBaseFiveSections{
 		$this->imagePath = "img/ships/jastat.png";
 		$this->canvasSize = 280; //Enormous Starbase
 
-		$this->locations = array(41, 42, 32, 31, 1);
+		$this->locations = array(1, 41, 42, 32, 31);
 		$this->hitChart = array(			
 			0=> array(
 				10 => "Structure",
@@ -53,8 +53,8 @@ class JaStat extends StarBaseFiveSections{
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 
-			$min = 0 + ($i*60);
-			$max = 180 + ($i*60);
+			$min = 270 + ($i*72);
+			$max = 90 + ($i*72);
 
 			$systems = array(
 				new MagGun(5, 9, 8, $min, $max),

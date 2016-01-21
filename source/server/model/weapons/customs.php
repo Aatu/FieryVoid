@@ -160,7 +160,7 @@ class CustomPulsarLaser extends Pulse{
 
 
 
-class CustomStrikeLaser extends Weapon{
+class CustomStrikeLaser extends TacLaser{
     /*Srike Laser, as used on Ch'Lonas ships*/
         public $name = "customStrikeLaser";
         public $displayName = "Strike Laser";
