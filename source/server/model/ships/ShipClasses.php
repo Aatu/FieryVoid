@@ -615,8 +615,8 @@
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
           
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
+            $result["validFor"] = $shooter->id;
             $this->activeHitLocation = $result;
-            $this->activeHitLocation["validFor"] = $shooter->id;
 
             return $result;
         }
