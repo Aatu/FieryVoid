@@ -588,7 +588,7 @@ class Weapon extends ShipSystem{
             $bdew = 0;
             $sdew = 0;
         }
-
+/*
         debug::log($this->displayName);
         debug::log($dew);
         debug::log($bdew);
@@ -596,13 +596,13 @@ class Weapon extends ShipSystem{
         debug::log($jammermod);
         debug::log($rangePenalty);
         debug::log($intercept);
+        debug::log($jink);
         debug::log($oew);
         debug::log($soew);
-        debug::log($oew);
         debug::log($soew);
         debug::log($firecontrol);
         debug::log($mod);
-
+*/
         $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
 
