@@ -626,6 +626,11 @@
             //debug::log("doGetDefenceValue");         
 
             $locs = $this->getLocations();
+
+            for ($i = 0; $i < sizeof($locs); $i++){
+                $locs[$i]["validFor"] = -1;
+            }
+
             $valid = array();
 
             foreach ($locs as $loc){
@@ -648,6 +653,7 @@
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+
 
             return $locs;
         }
