@@ -627,9 +627,9 @@
 
             $locs = $this->getLocations();
 
-            for ($i = 0; $i < sizeof($locs); $i++){
-                $locs[$i]["validFor"] = -1;
-            }
+        //    for ($i = 0; $i < sizeof($locs); $i++){
+        //        $locs[$i]["validFor"] = -1;
+        //    }
 
             $valid = array();
 
@@ -660,12 +660,11 @@
 
 
         public function fillLocations($locs){
-            //debug::log("fillLocations for".$this->phpclass);  
+            debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
 
                 $structure = $this->getStructureSystem($locs[$key]["loc"]);
-
 
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
@@ -683,7 +682,7 @@
 
         public function pickLocationForHit($locs, $preGoal){           
             debug::log("pickLocationForHit");
-                        
+            debug::log("size: ".sizeof($locs));
             $topValue = -1;
             $pick = -1;
 
@@ -1322,9 +1321,12 @@
 
                 $structure = $this->getStructureSystem(0);
 
+
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+                    debug::log("rem: ".$locs[$key]["remHealrth"]);
                     $locs[$key]["armour"] = $structure->armour;
+                    debug::log("armour: ".$locs[$key]["armour"]);
                 }
                 else {
                     debug::log("no structure!");
@@ -1825,7 +1827,7 @@
 
 
         public function getLocations(){
-        debug::log("getLocations");         
+        debug::log("getLocations for OSAT");         
             $locs = array();
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
