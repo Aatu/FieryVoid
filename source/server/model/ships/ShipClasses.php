@@ -1324,7 +1324,7 @@
 
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-                    debug::log("rem: ".$locs[$key]["remHealrth"]);
+                    debug::log("rem: ".$locs[$key]["remHealth"]);
                     $locs[$key]["armour"] = $structure->armour;
                     debug::log("armour: ".$locs[$key]["armour"]);
                 }
