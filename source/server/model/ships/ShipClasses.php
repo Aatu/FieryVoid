@@ -697,6 +697,8 @@
                 //since we have the hitchance PRE profile as parameter, apply the profile of this section
                 //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
                 $goal = $preGoal + $loc["profile"];
+                debug::log("local preGoal: ".$preGoal);                
+                debug::log("local profile: ".$loc["profile"]);
                 debug::log("local value: ".$value);
 
                 // divide toughness by expected hitchance effective defensive worth of a section
