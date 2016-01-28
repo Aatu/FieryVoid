@@ -664,7 +664,6 @@
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
-                    $locs[$key]["validFor"] = null;
                 }
                 else {
                     debug::log("no structure!");
@@ -703,12 +702,11 @@
                 }
             }
 
-            debug::log($this->phpclass." def value on loc: ".$loc["loc"]." is: ".$topValue);
+            debug::log($this->phpclass." TOP def value on loc: ".$loc["loc"]." is: ".$topValue);
             if ($this instanceof OSAT){
                 debug::log($pick["remHealth"]);
                 debug::log($pick["profile"]);
                 debug::log($pick["armour"]);
-                debug::log($pick["validFor"]);
             }
 
             return $pick;
@@ -1318,7 +1316,6 @@
 
                 $structure = $this->getStructureSystem(0);
 
-
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
@@ -1829,29 +1826,6 @@
             $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
-
-            return $locs;
-        }
-
-
-        public function fillLocations($locs){
-            //debug::log("fillLocations for".$this->phpclass);  
-
-            foreach ($locs as $key => $loc){
-
-                $structure = $this->getStructureSystem(0);
-
-
-                if ($structure){
-                    $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-                    $locs[$key]["armour"] = $structure->armour;
-                    $locs[$key]["validFor"] = null;
-                }
-                else {
-                    debug::log("no structure!");
-                    return null;
-                }
-            }
 
             return $locs;
         }
