@@ -614,14 +614,14 @@ class Weapon extends ShipSystem{
                         $found = true;
                     }
                     if ($found){
+                        debug::log("breaking hitLoc search");
                         break;
                     }
                 }
 
                 if (!$found){
-                    debug::log("no valid hitloc for this shooter found");
+                    debug::log("no valid hitloc for this shooter found, creating");
                     $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
-                    $hitLoc["validFor"] = $shooter->id;
                     $target->activeHitLocation[] = $hitLoc;
                 }
             }

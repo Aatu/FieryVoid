@@ -616,6 +616,7 @@
           
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $this->activeHitLocation = $result;
+            $this->activeHitLocation["validFor"] = $shooter->id;
 
             return $result;
         }
@@ -653,7 +654,6 @@
 
 
         public function fillLocations($locs){
-            debug::log(sizeof($locs));
             //debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
@@ -677,7 +677,7 @@
 
 
         public function pickLocationForHit($locs, $preGoal){           
-            //debug::log("pickLocationForHit");
+            debug::log("pickLocationForHit");
                         
             $topValue = -1;
             $pick = -1;
@@ -702,7 +702,14 @@
                     $pick = $loc;
                 }
             }
-            debug::log($this->phpclass." def value on loc: ".$loc["loc"]." is: ".$value);
+
+            debug::log($this->phpclass." def value on loc: ".$loc["loc"]." is: ".$topValue);
+            if ($this instanceof OSAT){
+                debug::log($pick["remHealth"]);
+                debug::log($pick["profile"]);
+                debug::log($pick["armour"]);
+                debug::log($pick["validFor"]);
+            }
 
             return $pick;
         }
@@ -1305,7 +1312,7 @@
 
 
         public function fillLocations($locs){
-            //debug::log("fillLocations for".$this->phpclass);  
+        // debug::log("fillLocations for".$this->phpclass);
 
             foreach ($locs as $key => $loc){
 
@@ -1315,7 +1322,6 @@
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
-                    $locs[$key]["validFor"] = null;
                 }
                 else {
                     debug::log("no structure!");
