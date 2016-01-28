@@ -688,17 +688,21 @@
 
             foreach ($locs as $loc){
                 $value = $loc["remHealth"]; // remaining Health on Structure
+                debug::log("local value: ".$value);
                 $value += floor($value/10) * ($loc["armour"] * 1.5); // add armour*1.5 per 10 remaining Health
+                debug::log("local value: ".$value);
 
                 // $value is now approximatly a value of relative toughness of this section
 
                 //since we have the hitchance PRE profile as parameter, apply the profile of this section
                 //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
                 $goal = $preGoal + $loc["profile"];
+                debug::log("local value: ".$value);
 
                 // divide toughness by expected hitchance effective defensive worth of a section
 
                 $value = $value / $goal;
+                debug::log("local value: ".$value);
 
                 // if the effective defensive worth is higher than the current one, replace it
                 if ($value > $topValue){
