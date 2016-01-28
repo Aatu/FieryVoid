@@ -103,14 +103,12 @@ class Nova extends BaseShip{
                 3=> array(
                         4 => "Thruster",
                         11 => "Laser/Pulse Array",
-                        12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
                         11 => "Laser/Pulse Array",
-                        12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),

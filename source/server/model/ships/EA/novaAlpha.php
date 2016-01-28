@@ -99,14 +99,12 @@ class NovaAlpha extends BaseShip{
                 3=> array(
                         4 => "Thruster",
                         11 => "Medium Laser",
-                        12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
                         11 => "Medium Laser",
-                        12 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",
                 ),

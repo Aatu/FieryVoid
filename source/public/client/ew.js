@@ -27,11 +27,11 @@ window.ew = {
         }
         else if (! ship.flight){
             var cnc = shipManager.systems.getSystemByName(ship, "cnC");
-            if (cnc && shipManager.criticals.hasCritical(ship, "RestrictedEW")){
+            if (cnc && shipManager.criticals.hasCritical(cnc, "RestrictedEW")){
                 ret -= 2;
             }
         }
-        
+
         return (ret > 0) ? ret : 0;
     },
     

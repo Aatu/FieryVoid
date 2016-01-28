@@ -77,14 +77,14 @@ class Gquonth extends BaseShip{
 				7 => "Heavy Laser",
 				11 => "Ion Torpedo",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			2=> array(
 				7 => "Thruster",
 				9 => "Twin Array",
 				11 => "Light Pulse Cannon",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			3=> array(
 				4 => "Thruster",
@@ -92,7 +92,7 @@ class Gquonth extends BaseShip{
 				8 => "Light Pulse Cannon",
 				10 => "Twin Array",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
@@ -100,7 +100,7 @@ class Gquonth extends BaseShip{
 				8 => "Light Pulse Cannon",
 				10 => "Twin Array",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 		);		
     }

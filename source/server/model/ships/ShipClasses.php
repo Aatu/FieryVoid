@@ -653,15 +653,18 @@
 
 
         public function fillLocations($locs){
+            debug::log(sizeof($locs));
             //debug::log("fillLocations for".$this->phpclass);  
 
             foreach ($locs as $key => $loc){
 
-                $structure = $this->getStructureSystem($loc["loc"]);
+                $structure = $this->getStructureSystem($locs[$key]["loc"]);
+
 
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
+                    $locs[$key]["validFor"] = null;
                 }
                 else {
                     debug::log("no structure!");
@@ -770,8 +773,8 @@
             $destroyedThisTurn = false;
 
             if ($weapon->flashDamage){
-                debug::log("is FLASH");
-                debug::log("check if a system on target location was destroyed this turn");
+            //    debug::log("is FLASH");
+            //    debug::log("check if a system on target location was destroyed this turn");
                 foreach ($this->systems as $system){
                     if ($system->isDestroyed() && $system->location == $location){
                         foreach ($system->damage as $damage){
@@ -790,10 +793,10 @@
 
 
             if (!$weapon->flashDamage){
-                debug::log("begin normal, non flash roll on hitchart routine");
+            //    debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
-                debug::log("intial roll: ".$roll);
+            //    debug::log("intial roll: ".$roll);
 
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
@@ -807,7 +810,7 @@
                     }
                 }
 
-                debug::log("roll: ".$roll." on loc: ".$location."__name: ".$name);
+            //    debug::log("roll: ".$roll." on loc: ".$location."__name: ".$name);
 
                 if ($name == "Primary"){
                         $name = false;
@@ -839,7 +842,7 @@
                 }
             }
             else {                
-                debug::log("FLASH type, gathering all from location");
+            //    debug::log("FLASH type, gathering all from location");
                 foreach ($this->systems as $system){
                     if ($system->location == $location && !$system->isDestroyed() && !$system instanceof Structure){
                         $systems[] = $system;
@@ -850,37 +853,37 @@
 
             // if you have more than 0 systems if you elligable array
             if (sizeof($systems) > 0){
-                debug::log("more than one valid sys");
+            //    debug::log("more than one valid sys");
                 $roll = mt_rand(1, sizeof($systems));
                 $system = $systems[$roll-1];
-                debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
+            //    debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 if (!$system->isDestroyed()){
-                    debug::log("sys is not destroyed, return it!");
+            //        debug::log("sys is not destroyed, return it!");
                     return $system;
                 }
                 else {
-                    debug::log("sys is destroyed, try getUndamagedSameSystem!");
+                //    debug::log("sys is destroyed, try getUndamagedSameSystem!");
                     $newSystem = $this->getUndamagedSameSystem($system, $location);
 
                     if ($newSystem){                        
-                    debug::log("got one, return it");
+                //    debug::log("got one, return it");
                         return $newSystem;
                     }
                     else {
                         if ($weapon->flashDamage){
-                            debug::log("got no same name system and im flash, getHitSystem anew");
+                   //         debug::log("got no same name system and im flash, getHitSystem anew");
                             return $this->getHitSystem($pos, $shooter, $fire, $weapon, $location);
                         }
                         else {
-                            debug::log("not flash, got no same name system, get structure ".$location);
+                     //       debug::log("not flash, got no same name system, get structure ".$location);
                             $system = $this->getStructureSystem($location);
                             // this is no MCV, so check for outer structure being ded
                             if ($system->isDestroyed()){
-                                debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
+                    //            debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
                                 return $this->getStructureSystem(0);
                             }
                             else {
-                                debug::log("its alive, return it");
+                     //           debug::log("its alive, return it");
                                 return $system;
                             }
                         }   
@@ -893,30 +896,30 @@
                 debug::log("size of systems = 0 no valid target systems -- TYPO or section down ??");
 
                 if ($weapon->flashDamage){
-                    debug::log("flash type");
+              //      debug::log("flash type");
 
-                    debug::log("checking for outer structure");
+               //     debug::log("checking for outer structure");
                     $system = $this->getStructureSystem($location);
 
                     if ($system->isDestroyed()){
-                    debug::log("but its destroyed, returning any primary system");
+                //    debug::log("but its destroyed, returning any primary system");
                         return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                     }
                     else {
-                    debug::log("outer structure is alive, returning it");
+                //    debug::log("outer structure is alive, returning it");
                         return $system;
                     }
                 }
                 else if ($destroyedThisTurn){
-                    debug::log("non flash, destroyed something earlier on this target loc, overkill into struct 0");
+                //    debug::log("non flash, destroyed something earlier on this target loc, overkill into struct 0");
                     $structure = $this->getStructureSystem(0);
 
                     if ($structure->isDestroyed()){
-                        debug::log("structure destroyed - return null");
+                 //       debug::log("structure destroyed - return null");
                         return null;
                     }
                     else {
-                        debug::log("structure intact, return it");
+                 //       debug::log("structure intact, return it");
                         return $structure;
                     }
                 }
@@ -1282,13 +1285,48 @@
         debug::log("getLocations");         
             $locs = array();
 
-            $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 0, "min" => 210, "max" => 360, "profile" => $this->forwardDefense);
+//            $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+  //          $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+    //        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->sideDefense);
+      //      $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+
+            $locs[] = array("loc" => 1, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 150, "profile" => $this->sideDefense);
+
+            $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);  
+
+            $locs[] = array("loc" => 2, "min" => 210, "max" => 270, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
+
 
             return $locs;
         }
+
+
+        public function fillLocations($locs){
+            //debug::log("fillLocations for".$this->phpclass);  
+
+            foreach ($locs as $key => $loc){
+
+                $structure = $this->getStructureSystem(0);
+
+
+                if ($structure){
+                    $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+                    $locs[$key]["armour"] = $structure->armour;
+                    $locs[$key]["validFor"] = null;
+                }
+                else {
+                    debug::log("no structure!");
+                    return null;
+                }
+            }
+
+            return $locs;
+        }
+
+
 
         public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
             $system = null;
@@ -1307,8 +1345,8 @@
             $destroyedThisTurn = false;
 
             if ($weapon->flashDamage){
-                debug::log("is FLASH");
-                debug::log("check if a system on target location was destroyed this turn");
+           //     debug::log("is FLASH");
+             //   debug::log("check if a system on target location was destroyed this turn");
                 foreach ($this->systems as $system){
                     if ($system->isDestroyed() && $system->location == $location){
                         foreach ($system->damage as $damage){
@@ -1326,18 +1364,18 @@
 
 
             if ($destroyedThisTurn){
-                debug::log("one destroyed this turn!");
+          //      debug::log("one destroyed this turn!");
             }
             else {
-                debug::log("nope");
+          //      debug::log("nope");
             }
 
 
             if (!$weapon->flashDamage){
-                debug::log("begin normal, non flash roll on hitchart routine");
+             //   debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
                 $roll = mt_rand(1, 20);
-                debug::log("intial roll: ".$roll);
+             //   debug::log("intial roll: ".$roll);
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                 }
@@ -1356,13 +1394,13 @@
                         $name = false;
                         $location = 0;
                         $roll = mt_rand(1, 20);
-                        debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
+                   //     debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
                 else if ($name == "Structure"){
-                    debug::log("MCV front/aft structure roll, checking for prim structure");
+                  //  debug::log("MCV front/aft structure roll, checking for prim structure");
                     $system = $this->getStructureSystem(0);
                     if (!$system->isDestroyed()){
-                        debug::log("return intact primary structure on MCV");
+                  //      debug::log("return intact primary structure on MCV");
                         return $system;
                     }
                     else {
@@ -1393,7 +1431,7 @@
                 }
             }
             else {                
-                debug::log("FLASH type, gathering all from location");
+            //    debug::log("FLASH type, gathering all from location");
                 foreach ($this->systems as $system){
                     if ($system->location == $location && !$system->isDestroyed() && !$system instanceof Structure){
                         $systems[] = $system;
@@ -1404,37 +1442,37 @@
 
             // if you have more than 0 systems if you elligable array
             if (sizeof($systems) > 0){
-                debug::log("more than one valid sys");
+              //  debug::log("more than one valid sys");
                 $roll = mt_rand(1, sizeof($systems));
                 $system = $systems[$roll-1];
-                debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
+             //   debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 if (!$system->isDestroyed()){
-                    debug::log("sys is not destroyed, return it!");
+              //      debug::log("sys is not destroyed, return it!");
                     return $system;
                 }
                 else {
-                    debug::log("sys is destroyed, try getUndamagedSameSystem!");
+             //       debug::log("sys is destroyed, try getUndamagedSameSystem!");
                     $newSystem = $this->getUndamagedSameSystem($system, $location);
 
                     if ($newSystem){                        
-                    debug::log("got one, return it");
+               //     debug::log("got one, return it");
                         return $newSystem;
                     }
                     else {
                         if ($weapon->flashDamage){
-                            debug::log("got no same name system and im flash, getHitSystem anew");
+                  //          debug::log("got no same name system and im flash, getHitSystem anew");
                             return $this->getHitSystem($pos, $shooter, $fire, $weapon, $location);
                         }
                         else {
-                            debug::log("not flash, got no same name system, get structure ".$location);
+                   //         debug::log("not flash, got no same name system, get structure ".$location);
                             $system = $this->getStructureSystem(0);
                             // this is no MCV, so check for outer structure being ded
                             if ($system->isDestroyed()){
-                                debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
+                      //          debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
                                 return $this->getStructureSystem(0);
                             }
                             else {
-                                debug::log("its alive, return it");
+                     //           debug::log("its alive, return it");
                                 return $system;
                             }
                         }   
@@ -1444,7 +1482,7 @@
 
             // if you have no elligibe systems in your array
             else {
-                debug::log("size of systems = 0 no valid target systems -- TYPO or section down ??");
+                debug::log("size of systems = 0 = no valid target systems -- TYPO or SECTION down ??");
 
                 if ($weapon->flashDamage){
             /*        debug::log("flash type");
@@ -1465,15 +1503,15 @@
                     return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                 }
                 else if ($destroyedThisTurn){
-                    debug::log("non flash, destroyed something earlier on this target loc, overkill into struct 0");
+              //      debug::log("non flash, destroyed something earlier on this target loc, overkill into struct 0");
                     $structure = $this->getStructureSystem(0);
 
                     if ($structure->isDestroyed()){
-                        debug::log("structure destroyed - return null");
+             //           debug::log("structure destroyed - return null");
                         return null;
                     }
                     else {
-                        debug::log("structure intact, return it");
+                //        debug::log("structure intact, return it");
                         return $structure;
                     }
                 }
@@ -1633,12 +1671,13 @@
         debug::log("getLocations");         
             $locs = array();
 
-            $locs[] = array("loc" => 0, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 0, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 0, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 0, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
 
             return $locs;
         }
@@ -1773,6 +1812,42 @@
 
         public function isDisabled(){
            return false;
+        }
+
+
+        public function getLocations(){
+        debug::log("getLocations");         
+            $locs = array();
+
+            $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+
+            return $locs;
+        }
+
+
+        public function fillLocations($locs){
+            //debug::log("fillLocations for".$this->phpclass);  
+
+            foreach ($locs as $key => $loc){
+
+                $structure = $this->getStructureSystem(0);
+
+
+                if ($structure){
+                    $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+                    $locs[$key]["armour"] = $structure->armour;
+                    $locs[$key]["validFor"] = null;
+                }
+                else {
+                    debug::log("no structure!");
+                    return null;
+                }
+            }
+
+            return $locs;
         }
     }
 

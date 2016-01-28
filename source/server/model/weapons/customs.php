@@ -160,7 +160,7 @@ class CustomPulsarLaser extends Pulse{
 
 
 
-class CustomStrikeLaser extends TacLaser{
+class CustomStrikeLaser extends Weapon{
     /*Srike Laser, as used on Ch'Lonas ships*/
         public $name = "customStrikeLaser";
         public $displayName = "Strike Laser";
@@ -172,6 +172,18 @@ class CustomStrikeLaser extends TacLaser{
         public $loadingtime = 3;
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+
+
+        public function setSystemDataWindow($turn){
+
+            $this->data["Weapon type"] = "Laser";
+            $this->data["Damage type"] = "Standard";
+
+            parent::setSystemDataWindow($turn);
+        }
+
+        public $priority = 7;
+
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {

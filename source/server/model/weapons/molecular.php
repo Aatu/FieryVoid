@@ -566,15 +566,15 @@
             $count = 0;
 
             foreach(LightMolecularDisrupterHandler::$hits as $hit){
-                Debug::log("Checking array");
+            //    Debug::log("Checking array");
                 if($hit['shooter'] == $shooter->id && $hit['target'] == $target->id){
                     $count++;
-                    Debug::log("Count is ".$count." for shooter id ".$shooter->id);
+             //       Debug::log("Count is ".$count." for shooter id ".$shooter->id);
                 }
             }
 
             if($count===3){
-                Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
+             //   Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
                 return true;
             }
 
