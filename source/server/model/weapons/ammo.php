@@ -202,7 +202,7 @@ class MissileFB extends Ammo
             debug::log("more than one setup loc found");
 
             foreach ($target->activeHitLocation as $setup){
-                if ($setup["validFor"] == $shooter->id){
+                if ($setup["validFor"] == $shooter->id * 10){
                     debug::log("hitLoc for this shooter!");
                     $hitLoc = $setup;
                     $found = true;
@@ -214,8 +214,9 @@ class MissileFB extends Ammo
 
             if (!$found){
                 debug::log("no valid hitloc for this shooter found");
-                $hitLoc = $target->getDefenceValuePos($shooter, $preProfileGoal);
-                $hitLoc["validFor"] = $shooter->id;
+                $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
+                // multiplying the shooter ID to make sure that the hitLoc set up for a ballistic not applied for the regular fire of the fighter
+                $hitLoc["validFor"] = $shooter->id * 10;
                 $target->activeHitLocation[] = $hitLoc;
             }
         }

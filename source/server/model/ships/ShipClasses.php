@@ -599,9 +599,10 @@
 
         
         public function getDefenceValuePos($pos, $preGoal){
-            //debug::log("getDefenceValuePos");         
+            debug::log("getDefenceValuePos");
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            debug::log("throw");
 
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $this->activeHitLocation = $result;
@@ -1333,9 +1334,9 @@
 
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-                    debug::log("rem: ".$locs[$key]["remHealth"]);
+            //        debug::log("rem: ".$locs[$key]["remHealth"]);
                     $locs[$key]["armour"] = $structure->armour;
-                    debug::log("armour: ".$locs[$key]["armour"]);
+              //      debug::log("armour: ".$locs[$key]["armour"]);
                 }
                 else {
                     debug::log("no structure!");
@@ -1536,7 +1537,8 @@
                     }
                 }
                 else {
-                    debug::log("LAST ELSE, cant resolve shit");
+                    debug::log("destroyedThisTurn False, -> getHitsystem 0 !!");
+                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
                 }
             }
         }

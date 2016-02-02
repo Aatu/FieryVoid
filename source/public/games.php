@@ -41,7 +41,7 @@
                 ajaxInterface.getFirePhaseGames();
             }
 
-            $(document).ready(function(){
+       /*     $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
                     header.innerHTML = "Latest News - 15.01.2016";
@@ -66,6 +66,7 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
            });
+*/
 		</script>
 	</head>
 	<body>

@@ -27,7 +27,7 @@ class JaStat extends StarBaseFiveSections{
 		$this->hitChart = array(			
 			0=> array(
 				10 => "Structure",
-				12 => "IonTorpedo",
+				12 => "Twin Array",
 				14 => "Energy Mine",
 				16 => "Scanner",
 				18 => "Reactor",
