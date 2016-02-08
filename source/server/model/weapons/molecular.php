@@ -501,16 +501,12 @@
                     $structTarget = $target->getStructureSystem(0);
                 }
                 else{
-                    $tf = $target->getFacingAngle();
-                    $shooterCompassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
-                    $location =  $target->doGetHitSection($tf, $shooterCompassHeading, TacGamedata::$currentTurn, $this);
-
-                    $rolled = Movement::isRolled($target);
-
-                    if ($rolled && $location == 3){
-                        $location = 4;
-                    }else if ($rolled && $location == 4){
-                        $location = 3;
+                    if (sizeof($target->activeHitLocation > 0)){
+                        foreach ($target->activeHitLocation as $hitLoc){
+                            if ($hitLoc["validFor"] == $shooter->id){
+                                $location = $hitLoc["loc"];
+                            }
+                        }
                     }
 
                     if ($location != 0){
