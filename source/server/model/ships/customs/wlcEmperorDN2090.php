@@ -20,8 +20,7 @@ class wlcEmperorDN2090 extends BaseShip{
         $this->sideDefense = 20;
 	$this->iniativebonus = 0;
 
-        $this->imagePath = "img/ships/kendari.png";
-	$this->canvasSize = 350; //Paragon is 280, this is ture Enormous
+        $this->imagePath = "img/ships/sakar.png";
 
 
 
