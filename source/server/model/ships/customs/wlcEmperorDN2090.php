@@ -61,7 +61,7 @@ class wlcEmperorDN2090 extends BaseShip{
 	$this->addAftSystem(new AssaultLaser(3, 6, 4, 120, 240));
 	$this->addAftSystem(new TwinArray(3, 6, 2, 60, 240));
 	$this->addAftSystem(new TwinArray(3, 6, 2, 120, 300));
-	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 180));
+	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 270));
 		
 	$this->addLeftSystem(new Thruster(4, 30, 0, 8, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 360));
