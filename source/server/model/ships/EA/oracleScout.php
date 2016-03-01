@@ -65,7 +65,7 @@ class OracleScout extends BaseShip{
                         10 => "Structure",
                         11 => "Jump Engine",
                         12 => "Class-S Missile Rack",
-                        14 => "Scanner",
+                        14 => "ELINT Scanner",
                         16 => "Engine",
                         17 => "Hangar",
                         19 => "Reactor",
@@ -74,7 +74,7 @@ class OracleScout extends BaseShip{
                 1=> array(
                         4 => "Thruster",
                         6 => "Standard Particle Beam",
-                        8 => "Scanner",
+                        8 => "ELINT Scanner",
                         11 => "Interceptor I",
                         18 => "Structure",
                         20 => "Primary",

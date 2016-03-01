@@ -62,7 +62,7 @@ class Vakar extends BaseShip{
 			0=> array(
 				8 => "Structure",
 				11 => "Jump Engine",
-				13 => "Scanner",
+				13 => "ELINT Scanner",
 				15 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",

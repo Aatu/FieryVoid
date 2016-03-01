@@ -53,7 +53,7 @@ class Calorta extends HeavyCombatVesselLeftRight{
 					8 => "Structure",
 					10 => "Thruster",
 					11 => "Graviton Pulsar",
-					14 => "Scanner",
+					14 => "ELINT Scanner",
 					16 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
