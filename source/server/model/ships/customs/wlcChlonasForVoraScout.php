@@ -41,7 +41,6 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->addLeftSystem(new Thruster(4, 13, 0, 4, 3));
 
         $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 120));
-        $this->addRightSystem(new CustomPulsarLaser(4, 0,0, 300, 120)); //Power and Structure are defined in weapon
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
