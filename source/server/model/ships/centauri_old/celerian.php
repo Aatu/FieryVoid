@@ -30,7 +30,7 @@ class Celerian extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 360));
-        $this->addFrontSystem(new AssaultLaser(3, 5, 4, 300, 60));
+        $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 60));
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
@@ -39,13 +39,13 @@ class Celerian extends BaseShip{
         $this->addAftSystem(new JumpEngine(5, 25, 3, 20));
         
 	$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
-        $this->addLeftSystem(new AssaultLaser(3, 5, 4, 240, 360));
+        $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));   
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360)); 
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));   
                 		
 	$this->addRightSystem(new Thruster(4, 14, 0, 5, 4));
-        $this->addRightSystem(new AssaultLaser(3, 5, 4, 0, 120));
+        $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));        
