@@ -34,6 +34,14 @@ spl_autoload_register(
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
             	'wlcChlonasForVoraScout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
+            	'wlcChlonasEsKashiDD2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
+            	'wlcChlonasEsKashiDD2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
+            	'wlcChlonasMerTanCRV2161' => '/server/model/ships/customs/wlcChlonasMerTanCRV2161.php',
+            	'wlcChlonasMerTanCRV2230' => '/server/model/ships/customs/wlcChlonasMerTanCRV2230.php',
+            	'wlcChlonasTraVoraCL2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
+            	'wlcChlonasTraVoraCL2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
+            	'wlcChlonasWyLeraA' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
+            	'wlcChlonasWyLeraB' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
