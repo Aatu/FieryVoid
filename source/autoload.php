@@ -33,6 +33,7 @@ spl_autoload_register(
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
+            	'wlcChlonasForVoraScout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',

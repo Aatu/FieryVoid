@@ -50,8 +50,8 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
 		
 		0=> array(
 			9 => "Thruster",
-			11 => "Matter Cannon"
-			12 => "Light Particle Beam"
+			11 => "Matter Cannon",
+			12 => "Light Particle Beam",
 			14 => "Scanner",
 			16 => "Engine",
 			17 => "Hangar",

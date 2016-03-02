@@ -71,6 +71,7 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
 			10 => "Imperial Laser",
 			18 => "Structure",
 			20 => "Primary",
+		),
 		3=> array(
 			4 => "Thruster",
 			7 => "Tactical Laser",

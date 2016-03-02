@@ -51,12 +51,8 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->addRightSystem(new Structure( 4, 42));
         $this->addPrimarySystem(new Structure( 5, 40));
 
-
-
-
 	//d20 hit chart
-	$this->hitChart = array(
-		
+	$this->hitChart = array(		
 		0=> array(
 			8 => "Structure",
 			10 => "Jump Engine",
@@ -73,6 +69,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
 			10 => "Elint Scanner",
 			18 => "Structure",
 			20 => "Primary",
+		),
 		3=> array(
 			4 => "Thruster",
 			6 => "Assault Laser",
