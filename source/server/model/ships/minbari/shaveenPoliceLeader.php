@@ -46,6 +46,33 @@ class ShaveenPoliceLeader extends MediumShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 180));
 
         $this->addPrimarySystem(new Structure( 4, 48));
+		
+		$this->hitChart = array(
+            0=> array(
+					11 => "Thruster",
+                    13 => "Jammer",
+					14 => "Tractor Beam",
+					15 => "Scanner",
+                    16 => "Reactor",
+                    17 => "Hangar",
+                    19 => "Engine",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+					5 => "Molecular Pulsar",
+					7 => "Fusion Cannon",
+					9 => "Shock Cannon",
+                    17 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Fusion Cannon",
+                    17 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

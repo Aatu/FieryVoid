@@ -55,6 +55,36 @@ class Retlata extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 36));
         $this->addAftSystem(new Structure( 5, 36));
         $this->addPrimarySystem(new Structure( 5, 45));
+		
+		$this->hitChart = array(
+            0=> array(
+                    5 => "Structure",
+					6 => "Tractor Beam",
+					7 => "Fusion Cannon",
+					9 => "Cargo Bay",
+					11 => "Thruster",
+                    13 => "Jammer",
+					15 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Fusion Cannon",
+					12 => "Cargo Bay",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

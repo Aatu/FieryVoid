@@ -43,6 +43,32 @@ class Torotha extends MediumShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
 
         $this->addPrimarySystem(new Structure( 6, 60));
+		
+		$this->hitChart = array(
+            0=> array(
+					8 => "Thruster",
+                    10 => "Jammer",
+					13 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    6 => "Thruster",
+					9 => "Molecular Disruptor",
+					11 => "Fusion Cannon",
+					13 => "Electro-Pulse Gun",
+                    17 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    7 => "Thruster",
+                    10 => "Fusion Cannon",
+                    17 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 
 }

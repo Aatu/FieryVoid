@@ -64,6 +64,47 @@ class Tigara extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 70));
         $this->addRightSystem(new Structure( 5, 70));
         $this->addPrimarySystem(new Structure( 6, 60));
+		
+		$this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+					11 => "Engine",
+					13 => "Jammer",
+                    15 => "Scanner",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    3 => "Thruster",
+					5 => "Antimatter Converter",
+					7 => "Molecular Disruptor",
+					9 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Molecular Disruptor",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    3 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Molecular Disruptor",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    3 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Molecular Disruptor",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>
