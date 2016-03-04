@@ -41,32 +41,25 @@
                 ajaxInterface.getFirePhaseGames();
             }
 
-       /*     $(document).ready(function(){
+            $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News - 15.01.2016";
+                    header.innerHTML = "Latest News - 03.05.2016";
                     header
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:"
                     news.innerHTML += "<br>";
+                    news.innerHTML += "- Hit Charts for the Minbari.";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- 4 Bases (for EA, Dilgar, Narn, Centauri).";
+                    news.innerHTML += "- A few more custom vessels to suppoprt Wolfgang's Campaign.";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- A few more civilian vessels.";
+                    news.innerHTML += "- Bugfix regarding hit chart enabled scouts.";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Yolu, Brakiri ships supplied with B5Wars-style hit location table.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Bugfix with Adaptive Armour when using more than 1 White Star.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Another NAMELESSS fix.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "Enjoy and report BUGS (plenty?) on FB.";
+                    news.innerHTML += "Enjoy and report BUGS on FB.";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
            });
-*/
 		</script>
 	</head>
 	<body>
