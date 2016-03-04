@@ -61,7 +61,7 @@ class Halos extends BaseShip{
 			0=> array(
 					8 => "Structure",
 					10 => "Jump Engine",
-					12 => "Scanner",
+					12 => "ELINT Scanner",
 					15 => "Engine",
 					16 => "Hangar",
 					19 => "Reactor",

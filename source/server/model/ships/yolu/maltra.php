@@ -57,7 +57,7 @@ class Maltra extends BaseShip{
         $this->hitChart = array(
         		0=> array(
         				12 => "Structure",
-        				14 => "Scanner",
+        				14 => "ELINT Scanner",
         				16 => "Engine",
         				17 => "Hangar",
         				19 => "Reactor",

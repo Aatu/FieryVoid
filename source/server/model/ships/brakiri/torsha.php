@@ -68,7 +68,7 @@ class Torsha extends BaseShip{
 			0=> array(
 					8 => "Structure",
 					10 => "Shield Generator",
-					12 => "Scanner",
+					12 => "ELINT Scanner",
 					14 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
