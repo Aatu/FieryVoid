@@ -24,9 +24,9 @@ class StormFront extends MediumShip{
         
         $this->occurence = "uncommon";
          
-        $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 3, 6));
+        $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 15, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));

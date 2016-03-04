@@ -7,7 +7,7 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         $this->pointCost = 385;
         $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasNaKashiDDA";
-        $this->imagePath = "img/ships/sunhawk.png";
+        $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Ch'Lonas Na'Kashi Assault Destroyer";
         $this->occurence = "uncommon";
         //$this->fighters = array("medium"=>6);
@@ -23,10 +23,9 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         $this->iniativebonus = 35;
         
          
-
         $this->addPrimarySystem(new Reactor(5, 14, 0, 2));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 13, 5, 3));
+        $this->addPrimarySystem(new Scanner(4, 13, 3, 5));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(3, 10));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 1));
@@ -56,7 +55,6 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         
 	//d20 hit chart
 	$this->hitChart = array(
-		
 		0=> array(
 			5 => "Structure",
 			7 => "Matter Cannon",
@@ -67,7 +65,6 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
 			19 => "Reactor",
 			20 => "CnC",
 		),
-
 		3=> array(
 			4 => "Thruster",
 			7 => "Strike Laser",
@@ -76,7 +73,6 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
 			18 => "Structure",
 			20 => "Primary",
 		),
-
 		4=> array(
 			4 => "Thruster",
 			7 => "Strike Laser",
@@ -85,10 +81,7 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
 			18 => "Structure",
 			20 => "Primary",
 		),
-
-
 	);
-
     }
 }
 ?>

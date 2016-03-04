@@ -7,7 +7,7 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
         $this->pointCost = 450;
         $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasEsKashiDD2245";
-        $this->imagePath = "img/ships/sunhawk.png";
+        $this->imagePath = "img/ships/kraasus.png";
         $this->shipClass = "Ch'Lonas Es'Kashi Destroyer (2245)";
         //$this->fighters = array("medium"=>6);
         
@@ -19,14 +19,13 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-        $this->iniativebonus = 40;
+        $this->iniativebonus = 35;
         
          
-
         $this->addPrimarySystem(new Reactor(5, 14, 0, 0));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 13, 6, 4));
-        $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
+        $this->addPrimarySystem(new Scanner(4, 13, 4, 6));
+        $this->addPrimarySystem(new Engine(5, 11, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 1));
         $this->addPrimarySystem(new Thruster(4, 21, 0, 8, 2));
@@ -35,12 +34,15 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
         $this->addLeftSystem(new AssaultLaser(3, 6, 4, 240, 60));
         $this->addLeftSystem(new MatterCannon(3, 7, 4, 240, 360));
-        $this->addLeftSystem(new TwinArray(2, 6, 2, 240, 60));
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
+        $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
 
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
         $this->addRightSystem(new AssaultLaser(3, 6, 4, 300, 120));
         $this->addRightSystem(new MatterCannon(3, 7, 4, 0, 120));
-        $this->addRightSystem(new TwinArray(2, 6, 2, 300, 120));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
+        $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
+
         
         
         
@@ -64,28 +66,23 @@ class wlcChlonasEsKashiDD2245 extends HeavyCombatVesselLeftRight{
 			19 => "Reactor",
 			20 => "CnC",
 		),
-
 		3=> array(
 			4 => "Thruster",
 			7 => "Assault Laser",
 			10 => "Matter Cannon",
-			12 => "Twin Array",
+			12 => "Light Particle Beam",
 			18 => "Structure",
 			20 => "Primary",
 		),
-
 		4=> array(
 			4 => "Thruster",
 			7 => "Assault Laser",
 			10 => "Matter Cannon",
-			12 => "Twin Array",
+			12 => "Light Particle Beam",
 			18 => "Structure",
 			20 => "Primary",
 		),
-
-
 	);
-
     }
 }
 ?>

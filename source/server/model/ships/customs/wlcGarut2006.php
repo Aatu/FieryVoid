@@ -20,8 +20,8 @@ class wlcGarut2006 extends BaseShip{
         $this->sideDefense = 20;
 	$this->iniativebonus = 0;
 
-        $this->imagePath = "img/ships/kendari.png";
-	$this->canvasSize = 200; //Paragon is 280, this is ture Enormous
+        $this->imagePath = "img/ships/sakar.png";
+	
 
 
 
@@ -52,7 +52,7 @@ class wlcGarut2006 extends BaseShip{
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 16, 0, 3, 2));
 	$this->addAftSystem(new JumpEngine(5, 32, 6, 20));
-	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 180));
+	$this->addAftSystem(new SentinelPointDefense(2, 4, 2, 90, 270));
 		
 	$this->addLeftSystem(new Thruster(4, 30, 0, 8, 3));
 	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
