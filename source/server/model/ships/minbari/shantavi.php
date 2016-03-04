@@ -48,6 +48,34 @@ class Shantavi extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 6, 60));
         $this->addAftSystem(new Structure( 4, 56));
         $this->addPrimarySystem(new Structure( 6, 60));
+		
+		$this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+					9 => "Thruster",
+                    10 => "Jump Engine",
+                    12 => "Jammer",
+					14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    6 => "Neutron Laser",
+                    9 => "Molecular Pulsar",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    9 => "Neutron Laser",
+					12 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

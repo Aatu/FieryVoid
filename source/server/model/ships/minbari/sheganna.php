@@ -34,6 +34,24 @@ class Sheganna extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(4, 35));
+		
+		$this->hitChart = array(
+                0=> array(
+                        9 => "Structure",
+                        12 => "Thruster",
+                        13 => "Neutron Laser",
+                        15 => "Fusion Cannon",
+                        17 => "Scanner",
+                        19 => "Reactor",
+                        20 => "Jammer",
+                ),
+                1=> array(
+                        20 => "Primary",
+                ),
+                2=> array(
+                        20 => "Primary",
+                ),
+        );
         
     }
 }

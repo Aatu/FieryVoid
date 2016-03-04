@@ -75,6 +75,49 @@ class Sharlin extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 96));
         $this->addRightSystem(new Structure( 5, 96));
         $this->addPrimarySystem(new Structure( 6, 80));
+		
+		$this->hitChart = array(
+            0=> array(
+                    6 => "Structure",
+					8 => "Engine",
+                    10 => "Jump Engine",
+					11 => "Tractor Beam",
+					13 => "Jammer",
+                    15 => "Scanner",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    3 => "Thruster",
+                    7 => "Neutron Laser",
+                    11 => "Fusion Cannon",
+					12 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    9 => "Fusion Cannon",
+                    12 => "Neutron Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    3 => "Thruster",
+                    8 => "Fusion Cannon",
+                    11 => "Neutron Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    3 => "Thruster",
+                    8 => "Fusion Cannon",
+                    11 => "Neutron Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

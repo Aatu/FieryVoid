@@ -51,6 +51,33 @@ class Morshin extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 39));
         $this->addAftSystem(new Structure( 4, 36));
         $this->addPrimarySystem(new Structure( 5, 45));
+		
+		$this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+					9 => "Thruster",
+                    11 => "Jammer",
+					13 => "Scanner",
+                    14 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    7 => "Fusion Cannon",
+                    10 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

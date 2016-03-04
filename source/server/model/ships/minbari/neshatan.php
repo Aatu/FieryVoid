@@ -62,6 +62,47 @@ class Neshatan extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 80));
         $this->addRightSystem(new Structure( 5, 80));
         $this->addPrimarySystem(new Structure( 6, 66));
+		
+		$this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+					9 => "Engine",
+                    12 => "Jump Engine",
+					14 => "Jammer",
+                    16 => "Scanner",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    9 => "Neutron Laser",
+                    10 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",                    
+					10 => "Neutron Laser",
+                    12 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    4 => "Thruster",
+					7 => "Neutron Laser",
+                    8 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    4 => "Thruster",
+					7 => "Neutron Laser",
+                    8 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

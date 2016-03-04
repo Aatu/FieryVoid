@@ -65,6 +65,45 @@ class Leshath extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 70));
         $this->addRightSystem(new Structure( 5, 70));
         $this->addPrimarySystem(new Structure( 6, 60));
+		
+		$this->hitChart = array(
+            0=> array(
+                    8 => "Structure",
+					10 => "Engine",
+                    12 => "Jump Engine",
+					14 => "Jammer",
+                    16 => "ELINT Scanner",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    8 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    9 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    4 => "Thruster",
+                    8 => "Fusion Cannon",
+                    10 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    3 => "Thruster",
+                    8 => "Fusion Cannon",
+                    12 => "Neutron Laser",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

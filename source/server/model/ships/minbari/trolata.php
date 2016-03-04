@@ -62,6 +62,46 @@ class Trolata extends BaseShip{
         $this->addLeftSystem(new Structure( 7, 60));
         $this->addRightSystem(new Structure( 7, 60));
         $this->addPrimarySystem(new Structure( 8, 50));
+		
+		$this->hitChart = array(
+            0=> array(
+                    10 => "Structure",
+					12 => "Engine",
+					14 => "Jammer",
+                    16 => "Scanner",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    6 => "Neutron Laser",
+                    8 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    12 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    4 => "Thruster",
+					6 => "Antimatter Converter",
+                    9 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    4 => "Thruster",
+					6 => "Antimatter Converter",
+                    9 => "Fusion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
+		
     }
 }
 ?>

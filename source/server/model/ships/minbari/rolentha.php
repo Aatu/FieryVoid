@@ -54,6 +54,35 @@ class Rolentha extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure( 5, 36));
         $this->addAftSystem(new Structure( 5, 36));
         $this->addPrimarySystem(new Structure( 5, 45));
+		
+		$this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+					9 => "Jammer",
+					11 => "Fusion Cannon",
+					13 => "Thruster",
+					15 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    4 => "Thruster",
+                    6 => "Fusion Cannon",
+					10 => "Neutron Laser",
+					12 => "Electro-Pulse Gun",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    6 => "Thruster",
+                    8 => "Fusion Cannon",
+					10 => "Tractor Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>
