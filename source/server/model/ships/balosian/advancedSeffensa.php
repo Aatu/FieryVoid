@@ -8,7 +8,7 @@ class AdvancedSeffensa extends BaseShip{
         $this->faction = "Balosian";
         $this->phpclass = "AdvancedSeffensa";
         $this->imagePath = "img/ships/seffensa.png";
-        $this->shipClass = "Seffensa Advanced Cruiser";
+        $this->shipClass = "Seffensa Advanced Cruiser (Unofficial)";
         $this->shipSizeClass = 3;
         
         $this->forwardDefense = 15;
@@ -42,7 +42,7 @@ class AdvancedSeffensa extends BaseShip{
         $this->addLeftSystem(new AdvancedAssaultLaser(5, 6, 4, 240, 0));
         $this->addLeftSystem(new ImprovedIonCannon(5, 6, 4, 240, 0));
 
-	$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
+		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
         $this->addRightSystem(new AdvancedAssaultLaser(5, 6, 4, 0, 120));
         $this->addRightSystem(new ImprovedIonCannon(5, 6, 4, 0, 120));
         
@@ -52,6 +52,44 @@ class AdvancedSeffensa extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 66));
         $this->addRightSystem(new Structure( 5, 66));
         $this->addPrimarySystem(new Structure( 6, 54));
+		
+		$this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    3 => "Thruster",
+                    5 => "Adv. Assault Laser",
+					9 => "Advanced Particle Beam"
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    7 => "Thruster",
+					10 => "Advanced Particle Beam"
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    3 => "Thruster",
+					6 => "Adv. Assault Laser"
+					9 => "Imp. Ion Cannon"
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    3 => "Thruster",
+					6 => "Adv. Assault Laser"
+					9 => "Imp. Ion Cannon"
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>
