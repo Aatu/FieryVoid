@@ -26,22 +26,20 @@ spl_autoload_register(
 
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
-                'wlcchlonasvestekflight' => '/server/model/ships/customs/wlcChlonasVesTekFlight.php',
+                'wlcchlonasvestek' => '/server/model/ships/customs/wlcchlonasvestek.php',
                 'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
-                'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
-                'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
-            	'wlcChlonasForVoraScout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
-            	'wlcChlonasEsKashiDD2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
-            	'wlcChlonasEsKashiDD2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
-            	'wlcChlonasMerTanCRV2161' => '/server/model/ships/customs/wlcChlonasMerTanCRV2161.php',
-            	'wlcChlonasMerTanCRV2230' => '/server/model/ships/customs/wlcChlonasMerTanCRV2230.php',
-            	'wlcChlonasTraVoraCL2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
-            	'wlcChlonasTraVoraCL2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
-            	'wlcChlonasWyLeraA' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
-            	'wlcChlonasWyLeraB' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
+           		'wlcchlonasforvorascout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
+          		'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
+            	'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
+            	'wlcchlonasmertancrv2161' => '/server/model/ships/customs/wlcChlonasMerTanCRV2161.php',
+            	'wlcchlonasmertancrv2230' => '/server/model/ships/customs/wlcChlonasMerTanCRV2230.php',
+            	'wlcchlonastravoracl2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
+            	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
+            	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
+            	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
@@ -242,13 +240,13 @@ spl_autoload_register(
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
             		
             	//civilians
-            //	'ore' => '/server/model/ships/civilians/oreBarge.php',
-            //	'liner' => '/server/model/ships/civilians/liner.php',
+            	'ore' => '/server/model/ships/civilians/oreBarge.php',
+            	'liner' => '/server/model/ships/civilians/liner.php',
             	'fastfreighter' => '/server/model/ships/civilians/fastFreighter.php',
-            //	'cargoTug' => '/server/model/ships/civilians/cargoTug.php',
-            //	'tankerTug' => '/server/model/ships/civilians/tankerTug.php',
+            	'cargoTug' => '/server/model/ships/civilians/cargoTug.php',
+            	'tankerTug' => '/server/model/ships/civilians/tankerTug.php',
             	'piratehunter' => '/server/model/ships/civilians/pirateHunter.php',
-            //	'qship' => '/server/model/ships/civilians/qship.php',
+            	'qship' => '/server/model/ships/civilians/qship.php',
             		
                 //stock 
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
