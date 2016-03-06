@@ -62,7 +62,7 @@ class Esharan extends HeavyCombatVessel{
 					9 => "Thruster",
                     10 => "Jump Engine",
                     12 => "Jammer",
-					14 => "Scanner"
+					14 => "Scanner",
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
