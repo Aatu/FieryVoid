@@ -155,6 +155,7 @@ spl_autoload_register(
 
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
+            	'OrieniGatlingRG' => '/server/model/weapons/matter.php',	
                 'gausscannon' => '/server/model/weapons/matter.php',
                 'heavygausscannon' => '/server/model/weapons/matter.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
