@@ -23,7 +23,7 @@ class Obedient extends MediumShip{
         $this->iniativebonus = 60;
         
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 11, 2, 5));
         $this->addPrimarySystem(new Engine(3, 16, 0, 12, 2));
