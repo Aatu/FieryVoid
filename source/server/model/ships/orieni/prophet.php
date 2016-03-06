@@ -57,8 +57,8 @@ class Prophet extends BaseShip{
         $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
         $this->addLeftSystem(new CargoBay(2, 25));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 240, 60));
-        $this->addLeftSystem(new HeavyLaserLance(3, 10, 4, 180, 360));
-        $this->addLeftSystem(new HeavyLaserLance(3, 10, 4, 180, 360));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
@@ -68,8 +68,8 @@ class Prophet extends BaseShip{
         $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
         $this->addRightSystem(new CargoBay(2, 25));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 300, 120));
-        $this->addRightSystem(new HeavyLaserLance(3, 10, 4, 0, 180));
-        $this->addRightSystem(new HeavyLaserLance(3, 10, 4, 0, 180));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
