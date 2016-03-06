@@ -1,6 +1,6 @@
 <?php
 class Devout2007 extends MediumShip{
-    /*Orieni Devout Escort Frigate, variant ISD 2007*/
+    /*Orieni Devout Escort Frigate, variant ISD 2007; source: WoCR*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
