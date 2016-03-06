@@ -82,21 +82,21 @@ class Lahas extends BaseShip{
             ),
             2=> array(
                     6 => "Thruster",
-					9 => "Standard Particle Beam"
+					9 => "Standard Particle Beam",
 					11 => "Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-					7 => "Standard Particle Beam"
+					7 => "Standard Particle Beam",
 					10 => "Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-					7 => "Standard Particle Beam"
+					7 => "Standard Particle Beam",
 					10 => "Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",

@@ -73,23 +73,23 @@ class Thosalsi extends BaseShip{
             ),
             2=> array(
                     7 => "Thruster",
-					9 => "Standard Particle Beam"
+					9 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-					6 => "Standard Particle Beam"
+					6 => "Standard Particle Beam",
 					8 => "Ion Cannon",
-					11 => "Hangar"
+					11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-					6 => "Standard Particle Beam"
+					6 => "Standard Particle Beam",
 					8 => "Ion Cannon",
-					11 => "Hangar"
+					11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             ),

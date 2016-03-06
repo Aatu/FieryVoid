@@ -66,7 +66,7 @@ class Seffensa extends BaseShip{
             1=> array(
                     3 => "Thruster",
                     5 => "Assault Laser",
-					9 => "Standard Particle Beam"
+					9 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -77,15 +77,15 @@ class Seffensa extends BaseShip{
             ),
             3=> array(
                     3 => "Thruster",
-					6 => "Assault Laser"
-					9 => "Ion Cannon"
+					6 => "Assault Laser",
+					9 => "Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     3 => "Thruster",
-					6 => "Assault Laser"
-					9 => "Ion Cannon"
+					6 => "Assault Laser",
+					9 => "Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
