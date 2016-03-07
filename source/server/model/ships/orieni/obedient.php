@@ -45,6 +45,35 @@ class Obedient extends MediumShip{
        
         $this->addPrimarySystem(new Structure(4, 36));
         
+        //d20 hit chart
+	$this->hitChart = array(
+		
+		0=> array(
+			8 => "Thruster",
+			11 => "Scanner",
+			15 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			5 => "Thruster",
+			7 => "Gauss Cannon",
+			8 => "Light Laser",
+			9 => "Rapid Gatling Railgun",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			7 => "Thruster",
+			9 => "Rapid Gatling Railgun",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	);
+        
+        
+        
         }
     }
 ?>
