@@ -123,6 +123,7 @@ spl_autoload_register(
                 'crusader' => '/server/model/ships/orieni/crusader.php',
 
                 'obedient' => '/server/model/ships/orieni/obedient.php',
+                'obedient1780' => '/server/model/ships/orieni/obedient1780.php',
                 'Devout2002' => '/server/model/ships/orieni/devout2002.php',
                 'Devout2007' => '/server/model/ships/orieni/devout2007.php',
 
