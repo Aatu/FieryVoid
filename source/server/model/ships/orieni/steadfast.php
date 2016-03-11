@@ -1,6 +1,6 @@
 <?php
 class Steadfast extends MediumShip{
-    
+    /*Orieni Steadfast Escort Corvette, variant ISD 2007*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -8,7 +8,7 @@ class Steadfast extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Steadfast";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Steadfast Escort Frigate";
+        $this->shipClass = "Steadfast Escort Frigate (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -50,7 +50,36 @@ class Steadfast extends MediumShip{
        
         $this->addPrimarySystem(new Structure(4, 46));
 		
+
+
+	//d20 hit chart
+	$this->hitChart = array(
 		
+		0=> array(
+			8 => "Thruster",
+			11 => "Scanner",
+			15 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+			5 => "Thruster",
+			8 => "Gauss Cannon",
+			11 => "Rapid Gatling Railgun",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			8 => "Light Laser",
+			10 => "Rapid Gatling Railgun",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	);
+
+			
         }
     }
 ?>
