@@ -124,8 +124,8 @@ spl_autoload_register(
 
                 'obedient' => '/server/model/ships/orieni/obedient.php',
                 'obedient1780' => '/server/model/ships/orieni/obedient1780.php',
-                'Devout2002' => '/server/model/ships/orieni/devout2002.php',
-                'Devout2007' => '/server/model/ships/orieni/devout2007.php',
+                'devout2002' => '/server/model/ships/orieni/devout2002.php',
+                'devout2007' => '/server/model/ships/orieni/devout2007.php',
 
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
                 'seeker' => '/server/model/ships/orieni/seeker.php',
@@ -154,7 +154,7 @@ spl_autoload_register(
 
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
-            	'OrieniGatlingRG' => '/server/model/weapons/matter.php',	
+            	'orienigatlingrg' => '/server/model/weapons/matter.php',	
                 'gausscannon' => '/server/model/weapons/matter.php',
                 'heavygausscannon' => '/server/model/weapons/matter.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
