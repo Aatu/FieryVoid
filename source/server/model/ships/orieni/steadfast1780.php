@@ -4,7 +4,7 @@ class Steadfast extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 445;
+		$this->pointCost = 395;
 		$this->faction = "Orieni";
         $this->phpclass = "Steadfast1780";
         $this->imagePath = "img/ships/steadfast.png";
