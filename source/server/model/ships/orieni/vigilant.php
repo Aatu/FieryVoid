@@ -24,7 +24,7 @@ class Vigilant extends BaseShip{
         $this->limited = 10;
 
         
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 5, 6));
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
