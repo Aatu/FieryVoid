@@ -87,7 +87,7 @@ class Vigilant extends BaseShip{
 			17 => "Hangar",
 			18 => "HK-Control Node",
 			19 => "Reactor",
-			20 => "CnC",
+			20 => "C&C",
 		),
 
 		//Forward
