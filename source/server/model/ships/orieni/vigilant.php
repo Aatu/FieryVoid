@@ -33,7 +33,7 @@ class Vigilant extends BaseShip{
         $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
 		$reloadRack = new CargoBay(6, 9);
-		$reloadRack->name = 'Reload Rack';
+		$reloadRack->displayName = 'Reload Rack';
 	$this->addPrimarySystem($reloadRack);
         
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
