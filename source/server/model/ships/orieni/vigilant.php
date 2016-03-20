@@ -44,8 +44,8 @@ class Vigilant extends BaseShip{
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 120));
 
-        $this->addAftSystem(new RapidGatling(2, 4, 1, 60, 300));
-        $this->addAftSystem(new RapidGatling(2, 4, 1, 60, 300));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
