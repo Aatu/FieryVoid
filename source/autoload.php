@@ -150,6 +150,7 @@ spl_autoload_register(
              //   'shininglight' => '/server/model/ships/orieni/shininglight.php',
 
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
+                'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
                 'righteous' => '/server/model/ships/orieni/righteous.php',
 
 
