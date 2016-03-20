@@ -1,6 +1,6 @@
 <?php
 class Prophet extends BaseShip{
-    
+    /*Orieni Prophet Command Ship, variant ISD 2007 (WoCR)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -8,7 +8,7 @@ class Prophet extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Prophet";
         $this->imagePath = "img/ships/prophet.png";
-        $this->shipClass = "Prophet Command Ship";
+        $this->shipClass = "Prophet Command Ship (2007)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>30);
         $this->canvasSize = 280;
@@ -82,6 +82,67 @@ class Prophet extends BaseShip{
         $this->addLeftSystem(new Structure(4, 68));
         $this->addRightSystem(new Structure(4, 68));
         $this->addPrimarySystem(new Structure(5, 60));
+        
+        
+        
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		//PRIMARY
+		0=> array( 
+			7 => "Structure",
+			9 => "Jump Engine",
+			11 => "Scanner",
+			13 => "Engine",
+			16 => "Hangar",
+			18 => "HK-Control Node",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		//Forward
+		1=> array(
+			3 => "Thruster",
+			5 => "Class-S Missile Rack",
+			7 => "Heavy Gauss Cannon",
+			9 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Aft
+		2=> array(
+			5 => "Thruster",
+			6 => "Class-S Missile Rack",
+			8 => "Heavy Gauss Cannon",
+			10 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Port
+		3=> array(
+			3 => "Thruster",
+			5 => "Heavy Laser Lance",
+			7 => "Heavy Gauss Cannon",
+			8 => "Class-S Missile Rack",
+			10 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Starboard
+		4=> array(
+			3 => "Thruster",
+			5 => "Heavy Laser Lance",
+			7 => "Heavy Gauss Cannon",
+			8 => "Class-S Missile Rack",
+			10 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);
+        
         
     }
 
