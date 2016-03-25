@@ -1,6 +1,7 @@
 <?php
 class Kestrel extends MediumShip{
-    
+    /*Kestrel Corvette Leader is Rare variant of Kestrel Corvette*/
+    /*present on Drazi Raider list as Throkan Corvette*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
@@ -20,7 +21,10 @@ class Kestrel extends MediumShip{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 2;
-		$this->iniativebonus = 70;
+	$this->iniativebonus = 70;
+	
+	$this->occurence = "rare";
+	
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 4));
         $this->addPrimarySystem(new CnC(4, 10, 0, 0));
