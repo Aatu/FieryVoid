@@ -141,6 +141,7 @@ spl_autoload_register(
                 'pariah' => '/server/model/ships/orieni/pariah.php',
 
                 'prophet' => '/server/model/ships/orieni/prophet.php',
+                'prophet1780' => '/server/model/ships/orieni/prophet1780.php',                
                 'paragon' => '/server/model/ships/orieni/paragon.php',
 
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
