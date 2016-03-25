@@ -44,7 +44,7 @@ class Prophet extends BaseShip{
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
 
         $this->addAftSystem(new SMissileRack(5, 6, 0, 90, 270));
-        $this->addAftSystem(new HeavyGausscannon(4, 10, 4, 90, 270));
+        $this->addAftSystem(new HeavyGausscannon(2, 10, 4, 90, 270));
         $this->addAftSystem(new RapidGatling(2, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(2, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(2, 4, 1, 60, 300));
@@ -62,7 +62,7 @@ class Prophet extends BaseShip{
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new HeavyGausscannon(4, 10, 4, 180, 360));
+        $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
 
 
         $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
@@ -73,7 +73,7 @@ class Prophet extends BaseShip{
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new HeavyGausscannon(4, 10, 4, 0, 180));
+        $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
 
 
 		//structures
