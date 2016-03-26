@@ -9,6 +9,13 @@ spl_autoload_register(
             $classes = array(
 
 
+            		
+            	//Minbari WLC Custom ships
+            	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
+            	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
+            	'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
+            	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
+            		
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'kraken' => '/server/model/ships/centauri/kraken.php',
