@@ -50,6 +50,31 @@ class Erlassan extends HeavyCombatVessel{
         $this->addFrontSystem(new Structure(4, 48));
         $this->addAftSystem(new Structure(4, 50));
         $this->addPrimarySystem(new Structure(4, 48));
+
+		$this->hitChart = array(
+            0=> array(
+                    7 => "Structure",
+					11 => "Thruster",
+					14 => "Scanner",
+                    16 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    5 => "Thruster",
+                    9 => "Ion Cannon",
+                    11 => "Standard Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    7 => "Thruster",
+                    11 => "Standard Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>

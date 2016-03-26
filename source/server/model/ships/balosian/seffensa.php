@@ -43,7 +43,7 @@ class Seffensa extends BaseShip{
         $this->addLeftSystem(new AssaultLaser(4, 6, 4, 240, 0));
         $this->addLeftSystem(new IonCannon(4, 6, 4, 240, 0));
 
-	$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
+		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 0, 120));
         $this->addRightSystem(new IonCannon(4, 6, 4, 0, 120));
         
@@ -53,6 +53,43 @@ class Seffensa extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 56));
         $this->addRightSystem(new Structure( 4, 56));
         $this->addPrimarySystem(new Structure( 6, 44));
+		
+		$this->hitChart = array(
+            0=> array(
+                    9 => "Structure",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array(
+                    3 => "Thruster",
+                    5 => "Assault Laser",
+					9 => "Standard Particle Beam",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array(
+                    8 => "Thruster",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array(
+                    3 => "Thruster",
+					6 => "Assault Laser",
+					9 => "Ion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array(
+                    3 => "Thruster",
+					6 => "Assault Laser",
+					9 => "Ion Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+        );
     }
 }
 ?>
