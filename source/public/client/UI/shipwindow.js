@@ -83,7 +83,7 @@ shipWindowManager = {
 	createShipWindow: function(ship){
 		var template;
 
-		if (ship.base){
+		if (ship.base && !ship.smallBase){
 			template = $("#shipwindowtemplatecontainer .shipwindow.base");
 		}
 		else {
@@ -157,7 +157,7 @@ shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 0);
 		shipWindowManager.addSystems(ship, shipwindow, 2);
 
-		if (ship.base){
+		if (ship.base && !ship.smallBase){
 			shipWindowManager.addSystems(ship, shipwindow, 31);
 			shipWindowManager.addSystems(ship, shipwindow, 32);
 			shipWindowManager.addSystems(ship, shipwindow, 41);
@@ -184,7 +184,7 @@ shipWindowManager = {
 
 			var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
-			if (ship.base){
+			if (ship.base && !ship.smallBase){
 				names[1] = "Sections";
 				toDo = 2;
 			}
@@ -480,7 +480,7 @@ shipWindowManager = {
 		var table = " table";
 		var dest = "";
 
-		if (ship.base){
+		if (ship.base && !ship.smallBase){
 			type = ".shipwindow.base_";
 
 			if (location > 4){
@@ -622,7 +622,7 @@ shipWindowManager = {
 				
 		var grouped = shipManager.systems.groupSystems(systems);
 
-			if (ship.base){
+			if (ship.base && ship.smallBase){
 				grouped = shipWindowManager.combineGroupsForBase(grouped);
 			}
 			else {
