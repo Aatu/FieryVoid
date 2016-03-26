@@ -25,6 +25,7 @@
         public $unavailable = false;
         public $minesweeperbonus = 0;
         public $base = false;
+        public $smallBase = false;
         
         public $enabledSpecialAbilities = array();
         
