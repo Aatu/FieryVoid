@@ -7,7 +7,7 @@ class Schooner extends MediumShip{
 	$this->pointCost = 200;
 	$this->faction = "Raiders";
         $this->phpclass = "Schooner";
-        $this->imagePath = "img/ships/sloop.png"; //needs to be changed
+        $this->imagePath = "img/ships/civilianTanker.png";
         $this->shipClass = "Schooner";
         $this->canvasSize = 100;
         
