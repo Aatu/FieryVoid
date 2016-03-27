@@ -36,7 +36,7 @@ class CustomLightMatterCannon extends Matter {
 class CustomLightMatterCannonF extends Matter {
     /*fighter version of Light Matter Cannon, as used on Ch'Lonas fighters*/
     /*NOT done as linked weapon!*/
-        public $name = "customLightMatterCannonf";
+        public $name = "customLightMatterCannonF";
         public $displayName = "Light Matter Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
