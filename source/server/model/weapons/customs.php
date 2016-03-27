@@ -36,11 +36,9 @@ class CustomLightMatterCannon extends Matter {
 class CustomLightMatterCannonF extends Matter {
     /*fighter version of Light Matter Cannon, as used on Ch'Lonas fighters*/
     /*NOT done as linked weapon!*/
-
         public $name = "customLightMatterCannonf";
         public $displayName = "Light Matter Cannon";
         public $animation = "trail";
-
         public $animationColor = array(250, 250, 190);
         public $projectilespeed = 18;
         public $animationWidth = 2;
@@ -52,8 +50,6 @@ class CustomLightMatterCannonF extends Matter {
         public $rangePenalty = 1;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
  
-
-
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -68,9 +64,8 @@ class CustomLightMatterCannonF extends Matter {
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 - $this->dp;      }
-
-
     }
+
 
     class CustomHeavyMatterCannon extends Matter
     {
