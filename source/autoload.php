@@ -34,7 +34,7 @@ spl_autoload_register(
 
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
-                'wlcchlonasvestek' => '/server/model/ships/customs/wlcchlonasvestek.php',
+                'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
                 'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
@@ -151,6 +151,7 @@ spl_autoload_register(
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',                
                 'paragon' => '/server/model/ships/orieni/paragon.php',
+                'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
 
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
 
