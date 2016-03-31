@@ -81,7 +81,7 @@ class Vigilant1704 extends BaseShip{
 			10 => "Jump Engine",
 			12 => "Scanner",
 			14 => "Engine",
-			15 => "Reload Rack"
+			15 => "Reload Rack",
 			17 => "Hangar",
 			18 => "HK-Control Node",
 			19 => "Reactor",

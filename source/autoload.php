@@ -39,7 +39,6 @@ spl_autoload_register(
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
                 'wlcgarut2006' => '/server/model/ships/customs/wlcGarut2006.php',
-<<<<<<< HEAD
            		'wlcchlonasforvorascout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
           		'wlcchlonaseskashidd2198' => '/server/model/ships/customs/wlcChlonasEsKashiDD2198.php',
             	'wlcchlonaseskashidd2245' => '/server/model/ships/customs/wlcChlonasEsKashiDD2245.php',
@@ -49,15 +48,6 @@ spl_autoload_register(
             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
             	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
-=======
-             	'wlcchlonasforvorascout' => '/server/model/ships/customs/wlcChlonasForVoraScout.php',
-             	'wlcchlonasmertancrv2161' => '/server/model/ships/customs/wlcChlonasMerTanCRV2161.php',
-             	'wlcchlonasmertancrv2230' => '/server/model/ships/customs/wlcChlonasMerTanCRV2230.php',
-             	'wlcchlonastravoracl2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
-             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
-             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
-             	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
->>>>>>> refs/remotes/origin/master
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',

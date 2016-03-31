@@ -1,5 +1,5 @@
 <?php
-class Steadfast extends MediumShip{
+class Steadfast1780 extends MediumShip{
     /*Orieni Steadfast Escort Corvette, variant ISD 1780 (WoCR)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
