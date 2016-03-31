@@ -228,7 +228,6 @@
 
 
     class RapidGatling extends Matter{
-
         public $name = "rapidGatling";
         public $displayName = "Rapid Gatling Railgun";
         public $animation = "trail";
@@ -251,6 +250,19 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+        public function getDamage($fireOrder){        return Dice::d(6, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+    }
+    
+    class OrieniGatlingRG extends RapidGatling{
+    	/*RapidGatling's predecessor*/ 
+        public $displayName = "Gatling Railgun";
+    	public $guns = 1;
+    	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
         public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }

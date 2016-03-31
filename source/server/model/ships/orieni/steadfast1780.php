@@ -1,14 +1,14 @@
 <?php
-class Steadfast extends MediumShip{
-    /*Orieni Steadfast Escort Corvette, variant ISD 2007*/
+class Steadfast1780 extends MediumShip{
+    /*Orieni Steadfast Escort Corvette, variant ISD 1780 (WoCR)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 445;
+		$this->pointCost = 395;
 		$this->faction = "Orieni";
-        $this->phpclass = "Steadfast";
+        $this->phpclass = "Steadfast1780";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Steadfast Escort Frigate (2007)";
+        $this->shipClass = "Steadfast Escort Frigate (1780)";
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -25,26 +25,26 @@ class Steadfast extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 12, 3, 6));
+        $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 15, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 		
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));
+        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 180, 60));
+        $this->addFrontSystem(new GaussCannon(1, 10, 4, 300, 60));
+        $this->addFrontSystem(new GaussCannon(1, 10, 4, 300, 60));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 300, 180));
 
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
-        $this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
+        $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(1, 8, 0, 4, 2));
+        $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
+        $this->addAftSystem(new LightLaser(0, 4, 3, 180, 360));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 360));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 0, 240));
         $this->addAftSystem(new LightLaser(1, 4, 3, 0, 180));        
         
        
@@ -66,20 +66,20 @@ class Steadfast extends MediumShip{
 		1=> array(
 			5 => "Thruster",
 			8 => "Gauss Cannon",
-			11 => "Rapid Gatling Railgun",
+			11 => "Gatling Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 		2=> array(
 			6 => "Thruster",
 			8 => "Light Laser",
-			10 => "Rapid Gatling Railgun",
+			10 => "Gatling Railgun",
 			17 => "Structure",
 			20 => "Primary",
 		),
 	);
 
-			
+		
         }
     }
 ?>

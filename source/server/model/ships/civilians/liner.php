@@ -5,10 +5,10 @@ class Liner extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 160;
-        $this->faction = "Civilian";
-        $this->phpclass = "Luxury Liner";
+        $this->faction = "Civilians";
+        $this->phpclass = "Liner";
         $this->imagePath = "img/ships/battlewagon.png"; //need to change
-        $this->shipClass = "Liner";
+        $this->shipClass = "Luxury Liner";
         $this->shipSizeClass = 3;
         
         $this->forwardDefense = 19;

@@ -8,7 +8,7 @@ class QShip extends MediumShip{
 		$this->faction = "Civilians";
         $this->phpclass = "QShip";
         $this->imagePath = "img/ships/civilianFreighter.png";
-        $this->shipClass = "Commercial Freighter";
+        $this->shipClass = "Commercial Freighter (Q-Ship)";
         $this->canvasSize = 100;
         
         $this->forwardDefense = 13;
