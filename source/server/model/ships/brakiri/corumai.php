@@ -20,7 +20,7 @@ class Corumai extends BaseShip{
         $this->accelcost = 5;
         $this->rollcost = 3;
         $this->pivotcost = 5;
-        $this->iniativebonus = -2;
+        $this->iniativebonus = -10;
         
         $this->gravitic = true;
 
