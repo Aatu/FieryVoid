@@ -16,6 +16,7 @@ class PhalanI extends FighterFlight{
         $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+                $this->occurence = "uncommon";
         
 		$this->iniativebonus = 80;
         $this->populate();
