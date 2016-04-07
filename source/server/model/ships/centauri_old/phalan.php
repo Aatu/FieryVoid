@@ -7,7 +7,7 @@ class Phalan extends FighterFlight{
 		$this->pointCost = 132;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Phalan";
-        $this->shipClass = "Phalan flight";
+        $this->shipClass = "Phalan Assault Fighter flight";
 		$this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 9;
