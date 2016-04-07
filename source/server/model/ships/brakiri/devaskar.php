@@ -76,7 +76,7 @@ class Devaskar extends BaseShip{
 			),
 			1=> array(
 					4 => "Thruster",
-					8 => "Graviton Bolt",
+					8 => "Gravitic Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
@@ -88,15 +88,15 @@ class Devaskar extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					7 => "Graviton Shield",
-					9 => "Graviton Bolt",
+					7 => "Gravitic Shield",
+					9 => "Gravitic Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					7 => "Graviton Shield",
-					9 => "Graviton Bolt",
+					7 => "Gravitic Shield",
+					9 => "Gravitic Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
