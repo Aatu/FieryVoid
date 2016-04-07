@@ -200,7 +200,11 @@ spl_autoload_register(
                 'taras' => '/server/model/ships/centauri_old/taras.php',
 
                 'glaive' => '/server/model/ships/centauri_old/glaive.php',
+                
                 'phalan' => '/server/model/ships/centauri_old/phalan.php',
+                'phalani' => '/server/model/ships/centauri_old/phalanI.php',
+                'phalanm' => '/server/model/ships/centauri_old/phalanM.php',
+                'phalanmnav' => '/server/model/ships/centauri_old/phalanMNav.php',
 
                 'centaurum' => '/server/model/ships/centauri_old/centaurum.php',
 
