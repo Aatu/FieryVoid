@@ -62,12 +62,16 @@ class Brikorta extends HeavyCombatVesselLeftRight{
 			),
 			3=> array(
 					4 => "Thruster",
+					6 => "Gravitic Shield",
+					8 => "Medium Laser",
 					10 => "Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
+					6 => "Gravitic Shield",
+					8 => "Medium Laser",
 					10 => "Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
