@@ -54,7 +54,7 @@ class RakartaLaser extends MediumShip{
 			1=> array(
 					4 => "Thruster",
 					8 => "Medium Laser",
-					10 => "Gravitic Pulsar",
+					10 => "Graviton Pulsar",
 					17 => "Structure",
 					20 => "Primary",
 			),
