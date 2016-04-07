@@ -53,7 +53,7 @@ class Drikorta extends HeavyCombatVesselLeftRight{
 					7 => "Structure",
 					9 => "Shield Generator",
 					11 => "Thruster",
-					12 => "Graviton Bolt",
+					12 => "Gravitic Bolt",
 					14 => "Scanner",
 					16 => "Engine",
 					17 => "Hangar",
