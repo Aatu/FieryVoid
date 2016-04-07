@@ -60,14 +60,14 @@ class Antoph extends HeavyCombatVessel{
 			),
 			1=> array(
 					4 => "Thruster",
-					7 => "Gravitic Pulsar",
+					7 => "Graviton Pulsar",
 					9 => "Graviton Beam",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					7 => "Thruster",
-					8 => "Gravitic Pulsar",
+					8 => "Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
 			),
