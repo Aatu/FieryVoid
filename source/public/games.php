@@ -44,17 +44,13 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News - 03.05.2016";
+                    header.innerHTML = "Latest News -04.09.2016";
                     header
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:"
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Hit Charts for the Minbari.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- A few more custom vessels to suppoprt Wolfgang's Campaign.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Bugfix regarding hit chart enabled scouts.";
+                    news.innerHTML += "- Fix to Brakiri Hit Charts";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB.";
                     news.innerHTML += "<br>";

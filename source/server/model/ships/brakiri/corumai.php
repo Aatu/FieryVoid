@@ -29,7 +29,7 @@ class Corumai extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 8, 8));
         $this->addPrimarySystem(new Engine(5, 21, 0, 15, 5));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 28));
-	$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4));
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GravitonBeam(5, 8, 8, 300, 60));
