@@ -864,6 +864,8 @@ class Weapon extends ShipSystem{
                     }
                 }
                 else{
+                	$hitLoc = $target->getDefenceValue($shooter, 0);
+                	$target->activeHitLocation[] = $hitLoc;
                     $system = $ship->getHitSystem($target->getCoPos(), $target, $fireOrder, $this);
 
                     if ($system == null){
