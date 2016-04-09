@@ -643,7 +643,7 @@
 
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
-            debug::log("Pick value: ".$pick);
+//            debug::log("Pick value: ".$pick);
             
 
             return $pick;
@@ -734,9 +734,10 @@
 
 
         public function getHitSection($pos, $shooter, $turn, $weapon){
-
-            $location = $this->activeHitLocation["loc"];
-
+        	if (sizeof($this->activeHitLocation == 0)){
+        		$this->activeHitLocation = $this->getDefenceValuePos($pos, 0);
+        	}
+           	$location = $this->activeHitLocation["loc"];
             if ($location != 0){
                 if (!isset($this->hitChart[0])){
                     if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
