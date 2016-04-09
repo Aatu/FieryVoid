@@ -1226,8 +1226,8 @@
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 4, "min" => 180, "max" => 330, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 3, "min" => 30, "max" => 180, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 330, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 180, "profile" => $this->sideDefense);
 
             return $locs;
         }
@@ -1278,7 +1278,7 @@
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 4, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
 
-            $locs[] = array("loc" => 3, "min" => 150, "max" => 180, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 330, "max" => 360, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 180, "max" => 210, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 3, "min" => 210, "max" => 360, "profile" => $this->forwardDefense);
 
