@@ -643,6 +643,8 @@
 
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
+            debug::log("Pick value: ".$pick);
+            
 
             return $pick;
         }
