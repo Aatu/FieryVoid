@@ -1,13 +1,13 @@
 <?php
-class Phalan extends FighterFlight{
+class PhalanMNav extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 132;
+		$this->pointCost = 210; //6*25+Navigators
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "Phalan";
-        $this->shipClass = "Phalan Assault Fighter flight";
+        $this->phpclass = "PhalanMNav";
+        $this->shipClass = "Phalan-M Missile Fighter flight (with navigator)";
 		$this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 9;
@@ -16,28 +16,27 @@ class Phalan extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+
+	$this->hasNavigator = true;
         
 		$this->iniativebonus = 80;
         $this->populate();
     }
-
     public function populate(){
-
         $current = count($this->systems);
         $new = $this->flightSize;
         $toAdd = $new - $current;
-
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(2, 1, 1, 1);
-			$fighter = new Fighter("phalan", $armour, 12, $this->id);
-			$fighter->displayName = "Centauri Phalan Assault Fighter";
+			$fighter = new Fighter("phalani", $armour, 12, $this->id);
+			$fighter->displayName = "Centauri Phalan-M Missile Fighter";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0));
-			$fighter->addFrontSystem(new PlasmaGun(330, 30, 0));
+			$fighter->addFrontSystem(new PairedPlasmaBlaster(330, 30, 0)); 
+			$fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
 			
 			
 			$this->addSystem($fighter);
@@ -46,9 +45,5 @@ class Phalan extends FighterFlight{
 		
 		
     }
-
 }
-
-
-
 ?>

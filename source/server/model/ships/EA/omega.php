@@ -89,7 +89,7 @@ class Omega  extends BaseShip{
                 1=> array(
                         3 => "Thruster",
                         6 => "Heavy Laser",
-                        7 => "Heavy Pulse Cannon",
+                        8 => "Heavy Pulse Cannon",
                         11 => "Interceptor II",
                         18 => "Structure",
                         20 => "Primary",

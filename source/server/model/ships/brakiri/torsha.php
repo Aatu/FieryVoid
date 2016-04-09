@@ -88,14 +88,14 @@ class Torsha extends BaseShip{
 			),
 			3=> array(
 					4 => "Thruster",
-					7 => "Graviton Shield",
+					7 => "Gravitic Shield",
 					9 => "Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			4=> array(
 					4 => "Thruster",
-					7 => "Graviton Shield",
+					7 => "Gravitic Shield",
 					9 => "Graviton Pulsar",
 					18 => "Structure",
 					20 => "Primary",
