@@ -7,7 +7,7 @@ class wlcChlonasVesTek extends FighterFlight{
         $this->pointCost = 420; //70*6
         $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasVesTek";
-        $this->shipClass = "Ch'Lonas Ves'Tek Assault Fighters";
+        $this->shipClass = "Ch'Lonas Ves'Tek Assault flight";
         $this->imagePath = "img/ships/shadras.png";
 
         $this->forwardDefense = 8;
@@ -17,7 +17,7 @@ class wlcChlonasVesTek extends FighterFlight{
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         $this->iniativebonus = 85;
- //       $this->limited = 33;
+        $this->limited = 33;
 
         
         $this->populate();
