@@ -440,7 +440,7 @@
                 }
             }
 
-            if ( ($system instanceof Fighter) && ($system->superheavy != true) && ($affect > 0)){
+            if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter))) && ($affect > 0)){
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
