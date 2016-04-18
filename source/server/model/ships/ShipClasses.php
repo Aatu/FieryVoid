@@ -781,6 +781,8 @@
         public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
             $system = null;
             $name = false;
+            $location_different = false; //target system may be on different location?
+            $location_different_array = array(); //array(location,system) if so indicated
             $systems = array();
             
             if ($fire->calledid != -1){
@@ -815,6 +817,8 @@
             }
 
 
+            $location_different = $location; //no retargeting unless indicated later
+            
 
             if (!$weapon->flashDamage){
             //    debug::log("begin normal, non flash roll on hitchart routine");
@@ -833,7 +837,7 @@
                         }
                     }
                 }
-
+                
             //    debug::log("roll: ".$roll." on loc: ".$location."__name: ".$name);
 
                 if ($name == "Primary"){
@@ -854,11 +858,19 @@
                         }
                     }
                 }
+                
+                //name MAY indicate a system on different section!    
+                $location_different_array = explode (':' , $name);
+                if(sizeof($location_different_array)==2){ //exactly 2 items - first location, then name
+                  $location_different = $location_different_array[0]; //location ID
+                  $name = $location_different_array[1]; //actual system name
+                  //else leave as is
+                }
 
                 debug::log("hitLoc: ".$location.", hitting: ".$name);
 
                 foreach ($this->systems as $system){
-                    if ($system->location == $location){
+                    if ($system->location == $location_different){ //possibly location indicated is different than one actualy hit
                         if ($system->displayName == $name){
                             $systems[] = $system;
                         }
@@ -887,7 +899,7 @@
                 }
                 else {
                 //    debug::log("sys is destroyed, try getUndamagedSameSystem!");
-                    $newSystem = $this->getUndamagedSameSystem($system, $location);
+                    $newSystem = $this->getUndamagedSameSystem($system, $location_different);  //possibly location different to one actually hit!
 
                     if ($newSystem){                        
                 //    debug::log("got one, return it");
