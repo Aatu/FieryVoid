@@ -8,7 +8,8 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
 
-
+                //TECHNICAL UNIT - target drone for various tests
+                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
             		
             	//Minbari WLC Custom ships
             	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
