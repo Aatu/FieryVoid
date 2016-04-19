@@ -414,13 +414,13 @@ window.weaponManager = {
 			}
 		}
 
-		else if (target.shipSizeClass == 1 || target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0){
+		else if (/*target.shipSizeClass == 1 ||*/ target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0){
 			var thruster = weaponManager.getTargetableThruster(shooter, target);
 			if (system.direction == thruster){
 				return true
 			}
 		}
-		if (target.shipSizeClass == 1 || target.shipSizeClass == 2){
+		if (/*target.shipSizeClass == 1 ||*/ target.shipSizeClass == 2){
 			if (system.location == 0 && system.weapon){
 				return true;
 			}
@@ -430,6 +430,21 @@ window.weaponManager = {
 				}
 			}
 		}
+		
+		//treat MCVs as one huge PRIMARY section!
+		if (target.shipSizeClass == 1 ) {
+			if (system.weapon){
+				return true //all weapons are targetable if in arc
+			}
+			if (system.name == "thruster"){ //all thrusters are targetable if in arc
+				var thruster = weaponManager.getTargetableThruster(shooter, target);
+				if (system.direction == thruster){
+					return true
+				}
+			}
+			return false //other systems on MCVs are not targetable at all
+		}
+		
 		return false;
 	},
 
