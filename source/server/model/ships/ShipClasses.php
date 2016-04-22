@@ -735,7 +735,7 @@
 
         public function getHitSection($pos, $shooter, $turn, $weapon){
         	if (sizeof($this->activeHitLocation == 0)){
-        		$this->activeHitLocation = $this->getDefenceValuePos($pos, 0);
+        		$this->activeHitLocation = $this->getDefenceValue($shooter, 0);
         	}
            	$location = $this->activeHitLocation["loc"];
             if ($location != 0){
