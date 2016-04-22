@@ -630,7 +630,10 @@ window.weaponManager = {
 		var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
 		var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 		var sPosHex = shipManager.getShipPosition(shooter);
-		var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
+		//var defence = weaponManager.getShipDefenceValuePos(sPosHex, target);
+		/*Marcin Sawicki: I _think_ getShipDefenceValue should be used instead*/
+		var defence = weaponManager.getShipDefenceValue(shooter, target);
+		
 		//console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 
 		var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
