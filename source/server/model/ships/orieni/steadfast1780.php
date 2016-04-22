@@ -8,7 +8,7 @@ class Steadfast1780 extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Steadfast1780";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Steadfast Escort Frigate (1780)";
+        $this->shipClass = "Steadfast Escort Corvette (1780)";
         $this->agile = true;
         $this->canvasSize = 100;
         
