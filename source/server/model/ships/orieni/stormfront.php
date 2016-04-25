@@ -8,7 +8,7 @@ class StormFront extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "StormFront";
         $this->imagePath = "img/ships/stormFront.png";
-        $this->shipClass = "Storm Front Missile Corvette";
+        $this->shipClass = "Storm Front Missile Corvette (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
         
