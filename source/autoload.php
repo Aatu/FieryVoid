@@ -146,6 +146,8 @@ spl_autoload_register(
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
+                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
+                
 
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
