@@ -1,6 +1,6 @@
 <?php
 class Staunch extends MediumShip{
-    /Orieni Staunch Strike Frigate, V6*/
+    /*Orieni Staunch Strike Frigate, V6*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
