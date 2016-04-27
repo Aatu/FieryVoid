@@ -161,6 +161,7 @@ spl_autoload_register(
                 'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
 
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
+                'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
 
 
 
