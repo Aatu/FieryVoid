@@ -19,17 +19,20 @@ window.gamedata = {
 					link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
 					link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 
-					div.appendChild(link);
-
+				div.appendChild(link);
+				
+				target.appendChild(div);
 			}
 		}
 		else {
 			var div = document.createElement("div");
 				div.className = "game slot clickable";
 				div.innerHTML = "No Ongoing Fire Phases found";
+				
+			target.appendChild(div);
 		}
 
-		target.appendChild(div);
+		//target.appendChild(div); //moved inside if/else clause
 	},
 	
 	parseServerData: function(serverdata){
