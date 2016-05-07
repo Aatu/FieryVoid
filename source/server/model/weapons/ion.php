@@ -43,14 +43,18 @@ class IonCannon extends Raking{
 
     public $name = "ionCannon";
     public $displayName = "Ion Cannon";
-    public $animation = "trail";
+    //public $animation = "trail";
+    public $animation = "laser"; //more fitting for Raking, and faster at long range
     public $animationColor = array(127, 0, 255);
     public $animationExplosionScale = 0.25;
     public $projectilespeed = 10;
-    public $animationWidth = 4;
+    public $animationWidth = 3;//4;
+    public $animationWidth2 = 0.3;
     public $trailLength = 24;
     public $intercept = 1;
     public $priority = 4;
+    
+
 
     public $loadingtime = 2;
     public $shots = 1;

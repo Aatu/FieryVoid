@@ -577,6 +577,7 @@ class ReloadRack extends ShipSystem
     // This needs to be implemented
     public $name = "ReloadRack";
     public $displayName = "Reload Rack";
+    public $iconPath = "missileReload.png";
     
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
