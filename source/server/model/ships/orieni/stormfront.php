@@ -8,7 +8,7 @@ class StormFront extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "StormFront";
         $this->imagePath = "img/ships/stormFront.png";
-        $this->shipClass = "Storm Front Missile Corvette";
+        $this->shipClass = "Storm Front Missile Corvette (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -47,7 +47,31 @@ class StormFront extends MediumShip{
         
        
         $this->addPrimarySystem(new Structure(4, 46));
-		
+
+	
+	//d20 hit chart
+	$this->hitChart = array(
+		0=> array( //PRIMARY
+			8 => "Thruster",
+			11 => "Scanner",
+			15 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array( //Fwd
+			6 => "Thruster",
+			8 => "Class-S Missile Rack",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array( //Aft
+			7 => "Thruster",
+			9 => "Rapid Gatling Railgun",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	); //end of hit chart
 		
         }
     }

@@ -34,7 +34,11 @@ spl_autoload_register(
 
                 //customs                
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
+                
                 'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
+                'wlcchlonassatrevan' => '/server/model/ships/customs/wlcChlonasSaTrevanFlight.php',
+                'wlcchlonaslertar' => '/server/model/ships/customs/wlcChlonasLerTarFlight.php',
+                
                 'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
@@ -140,7 +144,10 @@ spl_autoload_register(
                 'seeker' => '/server/model/ships/orieni/seeker.php',
                 'staunch' => '/server/model/ships/orieni/staunch.php',
                 'virtue' => '/server/model/ships/orieni/virtue.php',
+                'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
+                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
+                
 
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
@@ -154,6 +161,7 @@ spl_autoload_register(
                 'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
 
                 'vengeful' => '/server/model/ships/orieni/vengeful.php',
+                'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
 
 
 

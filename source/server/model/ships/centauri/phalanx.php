@@ -4,8 +4,8 @@ class Phalanx extends OSAT{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 250;
-		$this->faction = "Centauri";
+	$this->pointCost = 250;
+	$this->faction = "Centauri";
         $this->phpclass = "Phalanx";
         $this->imagePath = "img/ships/phalanx.png";
         $this->shipClass = 'Phalanx Satellite';
@@ -28,7 +28,7 @@ class Phalanx extends OSAT{
         $this->addPrimarySystem(new BattleLaser(4, 6, 6, 270, 90)); 
         $this->addPrimarySystem(new BattleLaser(4, 6, 6, 270, 90)); 
         $this->addPrimarySystem(new TwinArray(3, 6, 2, 180, 360));
-        $this->addPrimarySystem(new TwinArray(3, 6, 2, 180, 360));  
+        $this->addPrimarySystem(new TwinArray(3, 6, 2, 0, 180));  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         

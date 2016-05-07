@@ -8,7 +8,7 @@ class Steadfast extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Steadfast";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Steadfast Escort Frigate (2007)";
+        $this->shipClass = "Steadfast Escort Corvette (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -17,9 +17,9 @@ class Steadfast extends MediumShip{
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
-        $this->rollcost = 1;
-        $this->pivotcost = 2;
+        $this->accelcost = 3;
+        $this->rollcost = 2;
+        $this->pivotcost = 3;
 		$this->iniativebonus = 60;
         
          
