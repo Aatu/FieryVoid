@@ -101,7 +101,7 @@
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
 
-            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
+            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                 $crit->updated = true;
                 $crit->inEffect = true;
@@ -158,7 +158,7 @@
 			$crit = null;
 			
             debug::log($system->displayName);
-			if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
+			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
@@ -230,7 +230,7 @@
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
 			
-            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter)){
+            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
@@ -284,7 +284,7 @@
             $crit = null;
 
             if ($system instanceof Fighter){
-                if (!$system instanceof SuperHeavyFighter){
+                if (!$ship instanceof SuperHeavyFighter){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = true;
@@ -346,7 +346,7 @@
             
             debug::log($system->displayName);
             if ($system instanceof Fighter){
-                if (!$system instanceof SuperHeavyFighter){
+                if (!$ship instanceof SuperHeavyFighter){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = true;
@@ -440,7 +440,7 @@
                 }
             }
 
-            if ($system instanceof Fighter && !($system instanceof SuperHeavyFighter) && $affect > 0){
+            if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
                 $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 $crit->inEffect = true;
