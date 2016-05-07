@@ -7,7 +7,7 @@
         public $animationColor = array(75, 250, 90);
 		public $trailColor = array(75, 250, 90);
 		public $projectilespeed = 20;
-        public $animationWidth = 3;s
+        public $animationWidth = 3;
 		public $animationExplosionScale = 0.25;
 		public $trailLength = 400;
         public $priority = 1;
