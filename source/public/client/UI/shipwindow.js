@@ -272,8 +272,7 @@ shipWindowManager = {
 		//first hide retargeting
 		var n = name.indexOf(":");
 		if (n > 0){ //there is retargeting
-		      var name2 = name.substring(n);
-		      return getName(name2);
+		      name = name.substring(n+1);
 		}
 		
 		
