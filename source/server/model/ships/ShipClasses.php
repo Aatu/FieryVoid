@@ -604,6 +604,12 @@
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
             debug::log("throw");
+            
+	    if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
+			$shooterCompassHeading = 360-$shooterCompassHeading;
+		}
+	    }
 
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $this->activeHitLocation = $result;
@@ -615,6 +621,12 @@
             //debug::log("getDefenceValue");         
             $tf = $this->getFacingAngle();
             $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+          
+            if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
+			$shooterCompassHeading = 360-$shooterCompassHeading;
+		}
+	    }
           
             $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
             $result["validFor"] = $shooter->id;
@@ -735,7 +747,7 @@
 
         public function getHitSection($pos, $shooter, $turn, $weapon){
         	if (sizeof($this->activeHitLocation == 0)){
-        		$this->activeHitLocation = $this->getDefenceValuePos($pos, 0);
+        		$this->activeHitLocation = $this->getDefenceValue($shooter, 0);
         	}
            	$location = $this->activeHitLocation["loc"];
             if ($location != 0){
