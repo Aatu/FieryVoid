@@ -269,7 +269,13 @@ shipWindowManager = {
 	},
 
 	getName: function(name){
-
+		//first hide retargeting
+		var n = name.indexOf(":");
+		if (n > 0){ //there is retargeting
+		      name = name.substring(n+1);
+		}
+		
+		
 		if (name == "Heavy Particle Cannon"){
 			return "Heavy Particle";
 		}
