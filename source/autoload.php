@@ -143,6 +143,7 @@ spl_autoload_register(
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
                 'steadfast1780' => '/server/model/ships/orieni/steadfast1780.php',                
                 'seeker' => '/server/model/ships/orieni/seeker.php',
+                'seeker1793' => '/server/model/ships/orieni/seeker1793.php',
                 'staunch' => '/server/model/ships/orieni/staunch.php',
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
