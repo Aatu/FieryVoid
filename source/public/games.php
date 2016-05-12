@@ -44,13 +44,23 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News -04.09.2016";
+                    header.innerHTML = "Latest News 05.11.2016";
                     header
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:"
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Fix to Brakiri Hit Charts";
+                    news.innerHTML += "- Bugfix for zero range firing";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Various SCS updates";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- New Custom ships";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Bugfix for active fire loading";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Bugfix for superheavy fighter dropout";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Ion visual changes";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB.";
                     news.innerHTML += "<br>";
