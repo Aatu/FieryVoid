@@ -386,7 +386,7 @@ window.weaponManager = {
 			}
 			for (var i = 0; i < loc.length; i++) {
 				if (system.location == loc[i]){
-					return true
+					return true;
 				}
 			}
 			if (target.draziCap && system.name == "thruster" && system.location == 2){
@@ -400,16 +400,16 @@ window.weaponManager = {
 		else  if (target.draziHCV){
 			for (var i = 0; i < loc.length; i++) {
 				if (system.location == loc[i]){
-					return true
+					return true;
 				}
 			}
 			if (system.location == 0 && system.weapon){
-				return true
+				return true;
 			}
 			if (system.name == "thruster" && system.location == 0){
 				var thruster = weaponManager.getTargetableThruster(shooter, target);
 				if (system.direction == thruster){
-					return true
+					return true;
 				}
 			}
 		}
@@ -417,7 +417,7 @@ window.weaponManager = {
 		else if (/*target.shipSizeClass == 1 ||*/ target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0){
 			var thruster = weaponManager.getTargetableThruster(shooter, target);
 			if (system.direction == thruster){
-				return true
+				return true;
 			}
 		}
 		if (/*target.shipSizeClass == 1 ||*/ target.shipSizeClass == 2){
@@ -426,7 +426,7 @@ window.weaponManager = {
 			}
 			for (var i = 0; i < loc.length; i++) {
 				if (system.location == loc[i]){
-					return true
+					return true;
 				}
 			}
 		}
@@ -434,15 +434,15 @@ window.weaponManager = {
 		//treat MCVs as one huge PRIMARY section!
 		if (target.shipSizeClass == 1 ) {
 			if (system.weapon){
-				return true //all weapons are targetable if in arc
+				return true; //all weapons are targetable if in arc
 			}
 			if (system.name == "thruster"){ //all thrusters are targetable if in arc
 				var thruster = weaponManager.getTargetableThruster(shooter, target);
 				if (system.direction == thruster){
-					return true
+					return true;
 				}
 			}
-			return false //other systems on MCVs are not targetable at all
+			return false; //other systems on MCVs are not targetable at all
 		}
 		
 		return false;
