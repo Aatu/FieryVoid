@@ -835,7 +835,7 @@
             if (!$weapon->flashDamage){
             //    debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
-                $roll = mt_rand(1, 20);
+                $roll = Dice::d(20);
             //    debug::log("intial roll: ".$roll);
 
                 if (isset($this->hitChart[$location][$roll])){
@@ -855,7 +855,7 @@
                 if ($name == "Primary"){
                         $name = false;
                         $location = 0;
-                        $roll = mt_rand(1, 20);
+                		$roll = Dice::d(20);
                         debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
 
@@ -902,7 +902,7 @@
             // if you have more than 0 systems if you elligable array
             if (sizeof($systems) > 0){
             //    debug::log("more than one valid sys");
-                $roll = mt_rand(1, sizeof($systems));
+                $roll = Dice::d(sizeof($systems));
                 $system = $systems[$roll-1];
             //    debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 if (!$system->isDestroyed()){
@@ -1423,8 +1423,8 @@
             if (!$weapon->flashDamage){
              //   debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
-                $roll = mt_rand(1, 20);
-             //   debug::log("intial roll: ".$roll);
+                $roll = Dice::d(20);
+                //   debug::log("intial roll: ".$roll);
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                 }
@@ -1442,8 +1442,8 @@
                 if ($name == "Primary"){
                         $name = false;
                         $location = 0;
-                        $roll = mt_rand(1, 20);
-                   //     debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
+                		$roll = Dice::d(20);
+                        //     debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
                 else if ($name == "Structure"){
                   //  debug::log("MCV front/aft structure roll, checking for prim structure");
@@ -1492,7 +1492,7 @@
             // if you have more than 0 systems if you elligable array
             if (sizeof($systems) > 0){
               //  debug::log("more than one valid sys");
-                $roll = mt_rand(1, sizeof($systems));
+                $roll = Dice::d(sizeof($systems));
                 $system = $systems[$roll-1];
              //   debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 if (!$system->isDestroyed()){
