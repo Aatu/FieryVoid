@@ -855,7 +855,6 @@
                 if ($name == "Primary"){
                         $name = false;
                         $location = 0;
-                        $location_different = 0;
                 		$roll = Dice::d(20);
                         debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
