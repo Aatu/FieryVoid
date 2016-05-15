@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
     class BaseShip{
 
@@ -4152,4 +4151,3 @@
         }
     }
 ?>
->>>>>>> refs/remotes/origin/master
