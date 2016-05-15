@@ -855,29 +855,31 @@
                 if ($name == "Primary"){
                         $name = false;
                         $location = 0;
+                        $location_different = 0;
                         $roll = mt_rand(1, 20);
                         debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
-                }
 
-                if (isset($this->hitChart[$location][$roll])){
-                        $name = $this->hitChart[$location][$roll];
-                }
-                else {
-                    while (!$name){
-                        $roll++;
-                        if (isset($this->hitChart[$location][$roll])){
-                            $name = $this->hitChart[$location][$roll];
-                        }
-                    }
-                }
-                
-                //name MAY indicate a system on different section!    
-                $location_different_array = explode (':' , $name);
-                if(sizeof($location_different_array)==2){ //exactly 2 items - first location, then name
-                  $location_different = $location_different_array[0]; //location ID
-                  $name = $location_different_array[1]; //actual system name
-                  //else leave as is
-                }
+	                if (isset($this->hitChart[$location][$roll])){
+	                        $name = $this->hitChart[$location][$roll];
+	                }
+	                else {
+	                    while (!$name){
+	                        $roll++;
+	                        if (isset($this->hitChart[$location][$roll])){
+	                            $name = $this->hitChart[$location][$roll];
+	                        }
+	                    }
+	                }
+	            }
+	            else{
+	                //name MAY indicate a system on different section!    
+	                $location_different_array = explode (':' , $name);
+	                if(sizeof($location_different_array)==2){ //exactly 2 items - first location, then name
+	                  $location_different = $location_different_array[0]; //location ID
+	                  $name = $location_different_array[1]; //actual system name
+	                  //else leave as is
+	                }
+	            }
 
                 debug::log("hitLoc: ".$location.", hitting: ".$name);
 
