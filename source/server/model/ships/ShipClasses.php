@@ -855,6 +855,7 @@
                 if ($name == "Primary"){
                         $name = false;
                         $location = 0;
+                        $location_different = 0;
                 		$roll = Dice::d(20);
                         debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
@@ -877,6 +878,7 @@
                   $location_different = $location_different_array[0]; //location ID
                   $name = $location_different_array[1]; //actual system name
                   //else leave as is
+                  debug::log("Rerouted");
                 }
 
                 debug::log("hitLoc: ".$location.", hitting: ".$name);
@@ -1421,10 +1423,10 @@
 
 
             if (!$weapon->flashDamage){
-             //   debug::log("begin normal, non flash roll on hitchart routine");
+                debug::log("begin normal, non flash roll on hitchart routine");
                 $hitChart = $this->hitChart[$location];
                 $roll = Dice::d(20);
-                //   debug::log("intial roll: ".$roll);
+                   debug::log("intial roll: ".$roll);
                 if (isset($this->hitChart[$location][$roll])){
                     $name = $this->hitChart[$location][$roll];
                 }
@@ -1443,7 +1445,7 @@
                         $name = false;
                         $location = 0;
                 		$roll = Dice::d(20);
-                        //     debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
+                             debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
                 }
                 else if ($name == "Structure"){
                   //  debug::log("MCV front/aft structure roll, checking for prim structure");
@@ -1491,20 +1493,20 @@
 
             // if you have more than 0 systems if you elligable array
             if (sizeof($systems) > 0){
-              //  debug::log("more than one valid sys");
+                debug::log("more than one valid sys");
                 $roll = Dice::d(sizeof($systems));
                 $system = $systems[$roll-1];
-             //   debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
+                debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
                 if (!$system->isDestroyed()){
-              //      debug::log("sys is not destroyed, return it!");
+                    debug::log("sys is not destroyed, return it!");
                     return $system;
                 }
                 else {
-             //       debug::log("sys is destroyed, try getUndamagedSameSystem!");
+                    debug::log("sys is destroyed, try getUndamagedSameSystem!");
                     $newSystem = $this->getUndamagedSameSystem($system, $location);
 
                     if ($newSystem){                        
-               //     debug::log("got one, return it");
+                    debug::log("got one, return it");
                         return $newSystem;
                     }
                     else {
@@ -1513,15 +1515,15 @@
                             return $this->getHitSystem($pos, $shooter, $fire, $weapon, $location);
                         }
                         else {
-                   //         debug::log("not flash, got no same name system, get structure ".$location);
+                            debug::log("not flash, got no same name system, get structure ".$location);
                             $system = $this->getStructureSystem(0);
                             // this is no MCV, so check for outer structure being ded
                             if ($system->isDestroyed()){
-                      //          debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
+                                debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
                                 return $this->getStructureSystem(0);
                             }
                             else {
-                     //           debug::log("its alive, return it");
+                                debug::log("its alive, return it");
                                 return $system;
                             }
                         }   
