@@ -31,12 +31,12 @@ class Sharaal extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 28, 4, 11));
         $this->addPrimarySystem(new Engine(5, 22, 0, 10, 4));
         $this->addPrimarySystem(new JumpEngine(5, 25, 4, 12));
-	$this->addPrimarySystem(new Hangar(5, 28));
+		$this->addPrimarySystem(new Hangar(5, 28));
         $this->addPrimarySystem(new Jammer(4, 10, 5));
         $this->addPrimarySystem(new TractorBeam(5, 10, 0, 0));
 
         // weapons arguments: armor, health, power, start arc, end arc
-	$this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
+		$this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new AntimatterConverter(4, 11, 5, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
@@ -62,7 +62,7 @@ class Sharaal extends BaseShip{
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new GraviticThruster(4, 14, 0, 5, 4));
-	$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
