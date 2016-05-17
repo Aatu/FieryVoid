@@ -11,12 +11,7 @@ spl_autoload_register(
                 //TECHNICAL UNIT - target drone for various tests
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
             		
-            	//Minbari WLC Custom ships
-            	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
-            	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
-            	'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
-            	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
-            		
+
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'kraken' => '/server/model/ships/centauri/kraken.php',
@@ -33,7 +28,7 @@ spl_autoload_register(
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
 
-                //customs                
+                //custom ships directory             
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
                 
                 'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
@@ -53,6 +48,12 @@ spl_autoload_register(
             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
             	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
+
+            	//custom Minbari
+            	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
+            	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
+            	'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
+            	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
 
                 //custom Narn
             	'gkon' => '/server/model/ships/narn/zunoff_gkon.php',
