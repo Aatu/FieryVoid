@@ -8,7 +8,7 @@ class Dagkar extends MediumShip{
         $this->faction = "Narn";
         $this->phpclass = "Dagkar";
         $this->imagePath = "img/ships/dagkar.png";
-        $this->shipClass = "Dag'Kar";
+        $this->shipClass = "Dag'Kar Missile Frigate";
         $this->limited = 33;
 
         $this->forwardDefense = 14;
