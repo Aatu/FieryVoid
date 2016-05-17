@@ -28,8 +28,8 @@ class Dagkar extends MediumShip{
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
+        $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
         
 
         
