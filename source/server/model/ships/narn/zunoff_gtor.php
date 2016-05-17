@@ -5,8 +5,8 @@ class GTor extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-    		$this->pointCost = 650;
-    		$this->faction = "Narn";
+    	$this->pointCost = 650;
+    	$this->faction = "Narn";
         $this->phpclass = "GTor";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tor Bolt Cruiser";
