@@ -8,11 +8,12 @@ class Katoc extends HeavyCombatVessel{
         $this->faction = "Narn";
         $this->phpclass = "Katoc";
         $this->imagePath = "img/ships/katoc.png";
-        $this->shipClass = "Ka'Toc";
+        $this->shipClass = "Ka'Toc Battle Destroyer";
         $this->fighters = array("normal"=>6);        
         
         $this->forwardDefense = 12;
         $this->sideDefense = 15;
+        $this->isd = 2240;
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
