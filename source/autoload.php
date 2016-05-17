@@ -56,7 +56,8 @@ spl_autoload_register(
 
                 //custom Narn
             	'gkon' => '/server/model/ships/narn/zunoff_gkon.php',
-            	'gtor' => '/server/model/ships/narn/zunoff_gtor.php',            	
+            	'gtor' => '/server/model/ships/narn/zunoff_gtor.php',
+            	'kator' => '/server/model/ships/narn/zunoff_kator.php',
 
 
 
