@@ -54,6 +54,12 @@ spl_autoload_register(
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
             	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
 
+                //custom Narn
+            	'gkon' => '/server/model/ships/narn/zunoff_gkon.php',
+            	'gtor' => '/server/model/ships/narn/zunoff_gtor.php',            	
+
+
+
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
