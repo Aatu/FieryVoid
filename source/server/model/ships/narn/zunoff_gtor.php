@@ -13,7 +13,7 @@ class GTor extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 
-      	$this->occurence = "common";
+      	$this->occurence = "rare";
       	$this->isd = 2234;
       	$this->unofficial = true;
 		
