@@ -9,8 +9,7 @@ spl_autoload_register(
             $classes = array(
 
                 //TECHNICAL UNIT - target drone for various tests
-                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',
-            		
+                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',      		
 
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
@@ -28,13 +27,11 @@ spl_autoload_register(
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
 
-                //customs                
-                'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',
-                
+                //custom ships directory             
+                'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',               
                 'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
                 'wlcchlonassatrevanflight' => '/server/model/ships/customs/wlcChlonasSaTrevanFlight.php',
-                'wlcchlonaslertarflight' => '/server/model/ships/customs/wlcChlonasLerTarFlight.php',
-                
+                'wlcchlonaslertarflight' => '/server/model/ships/customs/wlcChlonasLerTarFlight.php',              
                 'wlcchlonaslofahraffa' => '/server/model/ships/customs/wlcChlonasLoFahraFFA.php',
                 'wlcchlonasnakashidda' => '/server/model/ships/customs/wlcChlonasNaKashiDDA.php',
                 'wlcemperordn2090' => '/server/model/ships/customs/wlcEmperorDN2090.php',
@@ -49,22 +46,17 @@ spl_autoload_register(
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
             	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
 
-
             	//custom Minbari
             	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
             	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
             	'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
             	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
 
-
                 //custom Narn
                 'dagkur' => '/server/model/ships/narn/zunoff_dagkur.php',
             	'gkon' => '/server/model/ships/narn/zunoff_gkon.php',
             	'gtor' => '/server/model/ships/narn/zunoff_gtor.php',
             	'kator' => '/server/model/ships/narn/zunoff_kator.php',
-
-
-
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
@@ -91,7 +83,6 @@ spl_autoload_register(
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
 
-
                 // early drazi adds
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
@@ -106,7 +97,6 @@ spl_autoload_register(
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
 
-
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
 
@@ -119,10 +109,8 @@ spl_autoload_register(
                 'improvedblastlaser' => '/server/model/weapons/lasers.php',
                 'emwavedisruptor' => '/server/model/weapons/defensive.php',
 
-
                 //new crit
                 'forcedofflineturns' => '/server/model/cricialClasses.php',
-
 
                 // Yolu ships
                 'aluin' => '/server/model/ships/yolu/aluin.php',
@@ -756,7 +744,3 @@ spl_autoload_register(
 );
 
 
-
-
-
-// @codeCoverageIgnoreEnd
