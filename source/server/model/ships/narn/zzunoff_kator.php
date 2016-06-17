@@ -1,19 +1,22 @@
 <?php
-class Katoc extends HeavyCombatVessel{
-    
+class KaTor extends HeavyCombatVessel{
+    /*Narn Ka'Tor Early Battle Destroyer, Showdowns-10 (unofficial)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 575;
+        $this->pointCost = 550;
         $this->faction = "Narn";
-        $this->phpclass = "Katoc";
+        $this->phpclass = "KaTor";
         $this->imagePath = "img/ships/katoc.png";
-        $this->shipClass = "Ka'Toc Battle Destroyer";
+        $this->shipClass = "Ka'Tor Battle Destroyer";
         $this->fighters = array("normal"=>6);        
         
+	$this->occurence = "common";
+	$this->isd = 2234;
+	$this->unofficial = true;
+
         $this->forwardDefense = 12;
         $this->sideDefense = 15;
-        $this->isd = 2240;
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
@@ -23,7 +26,7 @@ class Katoc extends HeavyCombatVessel{
         $this->iniativebonus = 30;
         
          
-        $this->addPrimarySystem(new Reactor(5, 16, 0, 3));
+        $this->addPrimarySystem(new Reactor(5, 16, 0, 6));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 7));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
@@ -33,18 +36,18 @@ class Katoc extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
-        $this->addFrontSystem(new MagGun(5, 9, 8, 300, 60));
-        
-        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 240, 0));
-        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 0, 120));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
+        $this->addFrontSystem(new ScatterPulsar(2, 4, 2, 270, 90));
+        $this->addFrontSystem(new HeavyBolter(5, 10, 6, 300, 60));
+        $this->addFrontSystem(new ImperialLaser(4, 8, 5, 240, 0));
+        $this->addFrontSystem(new ImperialLaser(4, 8, 5, 0, 120));
         
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 90, 270));        
+        $this->addAftSystem(new ScatterPulsar(2, 4, 2, 90, 270));
+        $this->addAftSystem(new ScatterPulsar(2, 4, 2, 90, 270));        
         
+
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 54));
         $this->addAftSystem(new Structure( 4, 54));
@@ -52,7 +55,7 @@ class Katoc extends HeavyCombatVessel{
 		
 	
 		$this->hitChart = array(
-			0=> array(
+			0=> array( //PRIMARY
 				8 => "Structure",
 				11 => "Thruster",
 				13 => "Scanner",
@@ -61,24 +64,21 @@ class Katoc extends HeavyCombatVessel{
 				19 => "Reactor",
 				20 => "C&C",
 			),
-			1=> array(
+			1=> array( //Fwd
 				4 => "Thruster",
-				6 => "Heavy Laser",
-				8 => "Mag Gun",
-				10 => "Light Pulse Cannon",
+				6 => "Imperial Laser",
+				8 => "Heavy Bolter",
+				10 => "Scatter Pulsar",
 				18 => "Structure",
 				20 => "Primary",
 			),
-			2=> array(
+			2=> array( //Aft
 				6 => "Thruster",
-				8 => "Light Pulse Cannon",
+				8 => "Scatter Pulsar",
 				18 => "Structure",
 				20 => "Primary",
 			),
 		);         
     }
 }
-
-
-
 ?>

@@ -1,19 +1,21 @@
 <?php
-class Dagkar extends MediumShip{
+class DagKur extends MediumShip{
     
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-        $this->pointCost = 750;
+        $this->pointCost = 580;
         $this->faction = "Narn";
-        $this->phpclass = "Dagkar";
+        $this->phpclass = "DagKur";
         $this->imagePath = "img/ships/dagkar.png";
-        $this->shipClass = "Dag'Kar Missile Frigate";
-        $this->limited = 33;
-
+        $this->shipClass = "Dag'Kur Bombardment Frigate";
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
         
+        $this->limited = 33;
+	$this->isd = 2218;
+	$this->unofficial = true;
+
         $this->turncost = 0.50;
         $this->turndelaycost = 0.50;
         $this->accelcost = 3;
@@ -21,41 +23,32 @@ class Dagkar extends MediumShip{
         $this->pivotcost = 2;
         
         $this->iniativebonus = 60;
-
         
-        $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 8, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
-        $this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
+        $this->addPrimarySystem(new Scanner(4, 12, 2, 5));
+        $this->addPrimarySystem(new Engine(4, 12, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
         
-
         
         //front
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new EnergyMine(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
-        $this->addFrontSystem(new IonTorpedo(4, 5, 4, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
+        $this->addFrontSystem(new BombRack(4, 6, 0, 300, 60));
         
         //aft
-
         $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
         
-
         //structures
         $this->addPrimarySystem(new Structure(4, 55));
         
@@ -71,8 +64,7 @@ class Dagkar extends MediumShip{
 			),
 			1=> array(
 				4 => "Thruster",
-				8 => "Energy Mine",
-				12 => "Ion torpedo",
+				12 => "Bomb Rack",
 				17 => "Structure",
 				20 => "Primary",
 			),

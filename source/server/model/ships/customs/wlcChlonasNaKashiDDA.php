@@ -63,7 +63,7 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
 			15 => "Engine",
 			17 => "Hangar",
 			19 => "Reactor",
-			20 => "CnC",
+			20 => "C&C",
 		),
 		3=> array(
 			4 => "Thruster",

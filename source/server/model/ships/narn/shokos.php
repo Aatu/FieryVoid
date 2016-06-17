@@ -65,7 +65,7 @@ class Shokos extends MediumShip{
 			),
 			2=> array(
 				6 => "Thruster",
-				10 => "Twin Array",
+				10 => "Light Pulse Cannon",
 				17 => "Structure",
 				20 => "Primary",
 			),
