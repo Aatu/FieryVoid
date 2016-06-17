@@ -992,7 +992,7 @@ window.weaponManager = {
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
 		if (target.base){
-			return forwardDefense;
+			return target.forwardDefense;
 		}
 
 		//console.log("getShipDefenceValue targetFacing: " + targetFacing + " shooterCompassHeading: " +shooterCompassHeading);
