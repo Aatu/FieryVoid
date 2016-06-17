@@ -54,6 +54,39 @@ class WhiteStar extends MediumShip{
         $this->addAftSystem(new GraviticThruster(4, 10, 0, 4, 2));
 
         $this->addPrimarySystem(new Structure( 5, 48));
+        
+        
+        
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		0=> array(
+			8 => "Thruster",
+			10 => "Jammer",
+			12 => "Tractor Beam",
+			14 => "Sensors",
+			16 => "Engine",
+			17 => "Hangar",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		1=> array(
+		    4 => "Thruster",
+			5 => "Improved Neutron Laser",
+			9 => "Molecular Pulsar",
+			11 => "0:EM Shield",
+			17 => "Structure",
+			20 => "Primary",
+		),
+		2=> array(
+			6 => "Thruster",
+			9 => "Jump Engine",
+			11 => "0:EM Shield",
+			17 => "Structure",
+			20 => "Primary",
+		),
+	);
+
     }
 
 }
