@@ -5,8 +5,7 @@ shipManager.power = {
 		for (var i in gamedata.ships){
 			var ship = gamedata.ships[i];
 			
-			//disable to show previous Power to opponent - NOT ENOUGH!
-			//if (ship.userid != gamedata.thisplayer) continue;
+			if (ship.userid != gamedata.thisplayer) continue;
 			
 			for (var a in ship.systems){
 				shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
