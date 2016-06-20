@@ -5,7 +5,7 @@ shipManager.power = {
 		for (var i in gamedata.ships){
 			var ship = gamedata.ships[i];
 			
-			//disable to show previous Power to opponent
+			//disable to show previous Power to opponent - NOT ENOUGH!
 			//if (ship.userid != gamedata.thisplayer) continue;
 			
 			for (var a in ship.systems){
@@ -56,6 +56,10 @@ shipManager.power = {
                 // A bit of code is necessary to make sure this only happens once.
                 var isOnline = true;
 
+		//for Jammer, copy last turn's power - it's important for opponent!
+                if (system.name == "jammer"){
+			copyLastTurnPower(ship, system);
+                }
 
                 for (var i in system.power){
                     var power = system.power[i];
