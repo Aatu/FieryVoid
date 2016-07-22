@@ -2006,7 +2006,7 @@
     class StarBaseSixSections extends StarBase{
 
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            debug::log("getPiercingLocations");
+            //debug::log("getPiercingLocations");
             
             $location =  $this->activeHitLocation["loc"];
             
@@ -2042,7 +2042,7 @@
 
 
         public function getLocations(){
-        debug::log("getLocations");         
+        //debug::log("getLocations");         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
@@ -2060,8 +2060,53 @@
 
     class StarBaseFiveSections extends StarBase{
 
+	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
+            //debug::log("getPiercingLocations");
+            
+            $location =  $this->activeHitLocation["loc"];
+            
+            $locs = array();
+            $finallocs = array();
+            if ($location == 1 ){ 
+                $locs[] = 1;
+                $locs[] = 0;
+                $locs[] = 41; //should be choice, let's go for '3 sections further'
+            }
+            else if ($location == 41){
+                $locs[] = 41;
+                $locs[] = 0;
+                $locs[] = 31;
+            }
+            else if ($location == 42){
+                $locs[] = 42;
+                $locs[] = 0;
+                $locs[] = 1;
+            }
+            else if ($location == 32){
+                $locs[] = 32;
+                $locs[] = 0;
+                $locs[] = 41;
+            }
+            else if ($location == 31){
+                $locs[] = 31;
+                $locs[] = 0;
+                $locs[] = 42;
+            }
+
+            
+            foreach ($locs as $loc){
+                $structure = $this->getStructureSystem($loc);
+                if ($structure != null && !$structure->isDestroyed()){
+                    $finallocs[] = $loc;
+                }
+            }
+            
+            return $finallocs;
+            
+        }
+
         public function getLocations(){
-        debug::log("getLocations");         
+        //debug::log("getLocations");         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
