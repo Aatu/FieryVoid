@@ -426,7 +426,7 @@ shipWindowManager = {
 		}
      if(!ship.fighter){
 
-            abilities.push("&nbsp;TD: " + ship.turncost + " TC: " + ship.turndelaycost);
+            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost);
         }
 
         if(ship.agile){
