@@ -53,10 +53,19 @@ spl_autoload_register(
             	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
 
                 //custom Narn
-                'dagkur' => '/server/model/ships/narn/zunoff_dagkur.php',
-            	'gkon' => '/server/model/ships/narn/zunoff_gkon.php',
-            	'gtor' => '/server/model/ships/narn/zunoff_gtor.php',
-            	'kator' => '/server/model/ships/narn/zunoff_kator.php',
+                'dagkur' => '/server/model/ships/narn/zzunoff_dagkur.php',
+            	'gkon' => '/server/model/ships/narn/zzunoff_gkon.php',
+            	'gtor' => '/server/model/ships/narn/zzunoff_gtor.php',
+            	'kator' => '/server/model/ships/narn/zzunoff_kator.php',
+            	'naston' => '/server/model/ships/narn/zzunoff_naston.php',
+            	'rongor' => '/server/model/ships/narn/zzunoff_rongor.php',
+            	'ronvar' => '/server/model/ships/narn/zzunoff_ronvar.php',
+            	'shokan' => '/server/model/ships/narn/zzunoff_shokan.php',
+            	'shovok' => '/server/model/ships/narn/zzunoff_shovok.php',
+            	'shovor' => '/server/model/ships/narn/zzunoff_shovor.php',
+            	'shovorbolt' => '/server/model/ships/narn/zzunoff_shovorBolt.php',
+            	'tshon' => '/server/model/ships/narn/zzunoff_tshon.php',
+            	'tvoth' => '/server/model/ships/narn/zzunoff_tvoth.php',
 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
