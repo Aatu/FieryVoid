@@ -39,7 +39,8 @@ window.ew = {
         for (var i in gamedata.ships){
             var ship = gamedata.ships[i];
             
-            if(ship.faction == elint.faction && ship.id != elint.id){
+            //if(ship.faction == elint.faction && ship.id != elint.id){
+            if(ship.userid == elint.userid && ship.id != elint.id){
                 for (var i in ship.EW){
                     var entry = ship.EW[i];
                     
@@ -601,7 +602,8 @@ window.ew = {
         for (var i in elints){
             var elint = elints[i];
             
-            if(ship.faction != elint.faction)
+            //if(ship.faction != elint.faction)
+            if(ship.userid == elint.userid)
                 continue;
             
             if ( !ew.checkInELINTDistance(ship, elint, 20))
