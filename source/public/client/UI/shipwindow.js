@@ -188,8 +188,18 @@ shipWindowManager = {
 				names[1] = "Sections";
 				toDo = 2;
 			}
+			
+			//(almost) always try to show all 5 sections, there may be holes
+			if (toDo > 2){ 
+				toDo = 5;
+			}
 
 				for (var i = 0; i < toDo; i++){
+					
+					//skip if appropriate entry does not exist
+					if(ship.hitChart[i] === undefined){
+						continue; //no appropriate entry, skip it
+					}
 
 					var template = $("#hitChartTable");
 					var table = template.clone(true);
