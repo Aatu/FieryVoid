@@ -4,5 +4,5 @@ $database_user='aatu';
 $database_password='Kiiski';
 //$database_user='root';
 //$database_password=''; 
-$secret_phrase='molecular pulsar';
+$secret_phrase='molecular pulsar'; 
 ?>
