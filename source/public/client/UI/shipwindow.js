@@ -242,7 +242,7 @@ shipWindowManager = {
 							tr.appendChild(td);
 
 							var td = document.createElement("td")
-								td.innerHTML = list[j][1] + " %";
+								td.innerHTML = list[j][1] + "%";
 								td.style.borderBottom = "1px solid #496791";
 							tr.appendChild(td);
 						table.appendChild(tr);
