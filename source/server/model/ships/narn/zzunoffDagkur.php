@@ -1,12 +1,12 @@
 <?php
-class DagKur extends MediumShip{
+class zzunoffDagkur extends MediumShip{
     
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
         $this->pointCost = 580;
         $this->faction = "Narn";
-        $this->phpclass = "DagKur";
+        $this->phpclass = "zzunoffDagkur";
         $this->imagePath = "img/ships/dagkar.png";
         $this->shipClass = "Dag'Kur Bombardment Frigate";
         $this->forwardDefense = 14;

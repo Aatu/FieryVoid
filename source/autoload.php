@@ -53,8 +53,8 @@ spl_autoload_register(
             	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
 
                 //custom Narn
-                'dagkur' => '/server/model/ships/narn/zzunoffDagkur.php',
-            	'gkon' => '/server/model/ships/narn/zzunoffGkon.php',
+                'zzunoffdagkur' => '/server/model/ships/narn/zzunoffDagkur.php',
+            	'zzunoffgkon' => '/server/model/ships/narn/zzunoffGkon.php',
             	'gtor' => '/server/model/ships/narn/zzunoffGtor.php',
             	'kator' => '/server/model/ships/narn/zzunoffKator.php',
             	'naston' => '/server/model/ships/narn/zzunoffNaston.php',
