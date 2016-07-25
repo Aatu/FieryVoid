@@ -175,7 +175,7 @@ shipWindowManager = {
 
 		var names = [];
 		var parentDiv = shipwindow.find(".buttons")[0];
-		var toDo = ship.hitChart.length;
+		var toDo = ship.hitChart.length; //not always works correctly!
 			
 			var div = shipwindow.find(".hitChartDiv");
 				div = div[0];
@@ -187,12 +187,10 @@ shipWindowManager = {
 			if (ship.base && !ship.smallBase){
 				names[1] = "Sections";
 				toDo = 2;
+			}else{
+				toDo = 5; //(almost) always try to show all 5 sections, there may be holes	
 			}
-			
-			//(almost) always try to show all 5 sections, there may be holes
-			if (toDo > 2){ 
-				toDo = 5;
-			}
+
 
 				for (var i = 0; i < toDo; i++){
 					
