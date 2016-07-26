@@ -1,5 +1,5 @@
 <?php
-class ShoVok extends MediumShip{
+class zzunoffShovok extends MediumShip{
 	/*Narn Sho'Vok Attack Cutter; source: Showdowns-10*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class ShoVok extends MediumShip{
         
 		$this->pointCost = 345;
 		$this->faction = "Narn";
-        $this->phpclass = "ShoVok";
+        $this->phpclass = "zzunoffShovok";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Vok Attack Cutter";
         $this->agile = true;
