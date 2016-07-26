@@ -1,5 +1,5 @@
 <?php
-class ShoVor extends MediumShip{
+class zzunoffShoVor extends MediumShip{
 	/*Narn Sho'Vor Escort Cutter; source: Showdowns-10*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class ShoVor extends MediumShip{
         
 		$this->pointCost = 365; //LOTS; as it's unofficial, I'm temted to reduce point cost - around 300, I'd say.
 		$this->faction = "Narn";
-        $this->phpclass = "ShoVor";
+        $this->phpclass = "zzunoffShoVor";
         $this->imagePath = "img/ships/shokos.png";
         $this->shipClass = "Sho'Vor Escort Cutter";
         $this->agile = true;

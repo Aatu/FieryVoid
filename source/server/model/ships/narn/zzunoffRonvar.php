@@ -1,12 +1,12 @@
 <?php
-class Ronvar extends HeavyCombatVessel{
+class zzunoffRonvar extends HeavyCombatVessel{
 	/*Narn Ronvar Pulsar Destroyer, Showdowns-10 (unofficial)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 475;
         $this->faction = "Narn";
-        $this->phpclass = "Ronvar";
+        $this->phpclass = "zzunoffRonvar";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Ronvar Pulsar Destroyer";
         

@@ -1,5 +1,5 @@
 <?php
-class NaSton extends BaseShip{
+class zzunoffNaSton extends BaseShip{
     	/*Narn Na'Ston Explorer, Showdowns-10 (unofficial)*/
 	/*it's not a T'Loth variant, but is based on T'Loth hull elements - so I used T'Loth image*/
 
@@ -8,7 +8,7 @@ class NaSton extends BaseShip{
         
 		$this->pointCost = 900;
 		$this->faction = "Narn";
-        $this->phpclass = "NaSton";
+        $this->phpclass = "zzunoffNaSton";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "Na'Ston Explorer";
         //$this->fighters = array("normal"=>12);//12 cargo shuttles by default

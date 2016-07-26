@@ -1,12 +1,12 @@
 <?php
-class KaTor extends HeavyCombatVessel{
+class zzunoffKaTor extends HeavyCombatVessel{
     /*Narn Ka'Tor Early Battle Destroyer, Showdowns-10 (unofficial)*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 550;
         $this->faction = "Narn";
-        $this->phpclass = "KaTor";
+        $this->phpclass = "zzunoffKaTor";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Tor Battle Destroyer";
         $this->fighters = array("normal"=>6);        
