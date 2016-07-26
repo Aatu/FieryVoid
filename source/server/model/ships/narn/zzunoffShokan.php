@@ -1,12 +1,12 @@
 <?php
-class ShoKan extends BaseShip{
+class zzunoffShoKan extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
 		$this->faction = "Narn";
-        $this->phpclass = "ShoKan";
+        $this->phpclass = "zzunoffShoKan";
         $this->imagePath = "img/ships/shokar.png";
         $this->shipClass = "Sho'Kan Scout Cruiser";
         $this->limited = 33;
