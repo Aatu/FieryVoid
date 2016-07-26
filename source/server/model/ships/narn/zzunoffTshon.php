@@ -1,5 +1,5 @@
 <?php
-class TShon extends BaseShip{
+class zzunoffTShon extends BaseShip{
     	/*Narn T'Shon Early Explorer, Showdowns-10 (unofficial)*/
 
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class TShon extends BaseShip{
         
 		$this->pointCost = 600;
 		$this->faction = "Narn";
-        $this->phpclass = "TShon";
+        $this->phpclass = "zzunoffTShon";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Shon Explorer";
         //$this->fighters = array("normal"=>12); //12 Assault Shuttles in standared configuration
