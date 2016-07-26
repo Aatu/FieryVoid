@@ -1,5 +1,5 @@
 <?php
-class GTor extends BaseShip{
+class zzunoffGTor extends BaseShip{
 	/*Narn G'Tor Bolt Cruiser, Showdowns-10 (unofficial)*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class GTor extends BaseShip{
         
     	$this->pointCost = 650;
     	$this->faction = "Narn";
-        $this->phpclass = "GTor";
+        $this->phpclass = "zzunoffGTor";
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tor Bolt Cruiser";
         $this->shipSizeClass = 3;
