@@ -33,14 +33,14 @@ class zzunoffTShon extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
-		$this->addPrimarySystem(new Hangar(5, 16));
+	$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
+	$this->addPrimarySystem(new Hangar(5, 16));
         
 	//fwd
         $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 270, 90));
+        $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
       
 		//aft
 		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
