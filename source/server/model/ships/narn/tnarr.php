@@ -25,7 +25,7 @@ class Tnarr extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 21, 3, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
-		$this->addPrimarySystem(new Hangar(5, 26));
+		$this->addPrimarySystem(new Hangar(5, 14));
         
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 270, 90));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
