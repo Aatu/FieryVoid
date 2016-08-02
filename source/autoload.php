@@ -44,7 +44,8 @@ spl_autoload_register(
             	'wlcchlonastravoracl2169' => '/server/model/ships/customs/wlcChlonasTraVoraCL2169.php',
             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
-            	'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
+                'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
+                'eacgemini' => '/server/model/ships/customs/eacGemini.php',
 
             	//custom Minbari
             	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
