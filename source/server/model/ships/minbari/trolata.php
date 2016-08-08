@@ -38,12 +38,13 @@ class Trolata extends BaseShip{
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
 
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
+        
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new GraviticThruster(6, 30, 0, 9, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+	$this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         $this->addLeftSystem(new AntimatterConverter(5, 7, 5, 240, 0));
