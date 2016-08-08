@@ -32,8 +32,8 @@ class Sakar extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 60, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 60, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new Hangar(4, 12));
         $this->addFrontSystem(new Hangar(4, 12));
         
