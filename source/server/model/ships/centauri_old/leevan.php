@@ -44,7 +44,7 @@ class Leevan extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
-        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 240, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 120, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 0, 240));
         
         
