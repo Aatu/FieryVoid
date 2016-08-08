@@ -1,5 +1,5 @@
 <?php
-class wlcChlonasMerTanCRV2230 extends MediumShipLeftRight{
+class wlcChlonasMerTanCRV2230 extends MediumShip{
     /*Ch'Lonas Mer'Tan corvette, variant ISD 2230*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
