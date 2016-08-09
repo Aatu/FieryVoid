@@ -25,9 +25,7 @@
                 $userid = Manager::authenticatePlayer($user, $passnew);
 		
                 if ($userid != false){
-                  	$_SESSION["user"] = $userid['id'];
-                    $_SESSION["access"] = $userid['access'];
-                    header('Location: games.php');
+ 			$error = "Password change successful!";
                 }
             }else if ($result === null){
                 $error = "An internal server error occurred!";
