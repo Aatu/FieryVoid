@@ -1605,6 +1605,37 @@ class DBManager {
         
         return true;
     }  
+    
+    
+    public function changePassword($username, $passwordold, $passwordnew) //change password for a given account
+    {
+        $username = htmlspecialchars($username);
+        $username = $this->DBEscape($username);
+        
+        $sql = "SELECT * FROM player WHERE username LIKE '$username' and password = password('$passwordold')";
+        if (!$this->found($sql))
+        {
+            return false;
+        }
+			
+        if ($stmt = $this->connection->prepare("
+            UPDATE 
+                player
+            SET 
+            	password = password('$passwordnew')
+            WHERE
+            	username = '$username'
+            ;
+            ")) 
+        {
+            //$stmt->bind_param($passwordnew, $username);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        return true;
+    }  
+    
   
     public function authenticatePlayer($username, $password){
 	
