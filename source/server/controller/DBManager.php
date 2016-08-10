@@ -1,7 +1,7 @@
 <?php 
 mysqli_report(MYSQLI_REPORT_ERROR);
 
-class DBManager {
+class DBManager {re
 
     private $connection = null;
     
@@ -1622,13 +1622,13 @@ class DBManager {
             UPDATE 
                 player
             SET 
-            	password = password('$passwordnew')
+            	password = password(?)
             WHERE
-            	username = '$username'
+            	username = ?
             ;
             ")) 
         {
-            //$stmt->bind_param($passwordnew, $username);
+            $stmt->bind_param($passwordnew, $username);
             $stmt->execute();
             $stmt->close();
         }
