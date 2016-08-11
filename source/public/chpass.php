@@ -27,6 +27,8 @@
 		
                 if ($userid != false){
  			$error = "Password change successful!";
+ 			$user = '';
+ 			$passold = '';
                 }
             }else if ($result === null){
                 $error = "An internal server error occurred!";
