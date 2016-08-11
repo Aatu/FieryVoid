@@ -35,7 +35,7 @@ class zzunoffTShonStealth extends BaseShip{
         $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new EnergyPulsar(2, 6, 3, 270, 90));
+        $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));
       
 		//aft
 		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));

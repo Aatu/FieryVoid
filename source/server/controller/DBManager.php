@@ -1622,7 +1622,7 @@ class DBManager {
         $passwordnew = htmlspecialchars($passwordnew);
         $passwordnew = $this->DBEscape($passwordnew);
         
-        $sql = "SELECT * FROM player WHERE username LIKE '$username' and password = password('$passwordold')";
+        $sql = "SELECT * FROM player WHERE username LIKE '$username' and password LIKE password('$passwordold')";
         if (!$this->found($sql))
         {
             return false;

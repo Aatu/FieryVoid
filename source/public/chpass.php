@@ -1,8 +1,9 @@
 <?php
 	include_once 'global.php';
-	if (isset($_SESSION["user"]) && $_SESSION["user"] != false){
+/*	if (isset($_SESSION["user"]) && $_SESSION["user"] != false){
 		header('Location: games.php');
 	}
+*/	
 	
     $error = "";
 	if (isset($_POST["user"]) && isset($_POST["passold"]) && isset($_POST["passnew"]) && isset($_POST["passnew2"])){
