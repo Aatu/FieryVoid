@@ -209,8 +209,22 @@ class Manager{
             Debug::error($e);
             return null;
         }
+    }
+    
+    public static function changePassword($username, $passwordold, $passwordnew) {
+        try {
+            self::initDBManager();
+            $ret =  self::$dbManager->changePassword($username, $passwordold, $passwordnew);
+                      
+            return $ret;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return null;
+        }
         
     }
+    
     
     public static function authenticatePlayer($username, $password) {
         try {

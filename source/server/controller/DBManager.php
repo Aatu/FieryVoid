@@ -1,7 +1,7 @@
 <?php 
 mysqli_report(MYSQLI_REPORT_ERROR);
 
-class DBManager {
+class DBManager {re
 
     private $connection = null;
     
@@ -1580,6 +1580,10 @@ class DBManager {
         $username = htmlspecialchars($username);
         $username = $this->DBEscape($username);
         
+        //for password - do a similar escape?...
+        $password = htmlspecialchars($password);
+        $password = $this->DBEscape($password);
+        
         $sql = "SELECT * FROM player WHERE username LIKE '$username'";
         if ($this->found($sql))
         {
@@ -1605,6 +1609,43 @@ class DBManager {
         
         return true;
     }  
+    
+    
+    public function changePassword($username, $passwordold, $passwordnew) //change password for a given account
+    {
+        $username = htmlspecialchars($username);
+        $username = $this->DBEscape($username);
+        
+        //for password - do a similar escape?...
+        $passwordold = htmlspecialchars($passwordold);
+        $passwordold = $this->DBEscape($passwordold);
+        $passwordnew = htmlspecialchars($passwordnew);
+        $passwordnew = $this->DBEscape($passwordnew);
+        
+        $sql = "SELECT * FROM player WHERE username LIKE '$username' and password = password('$passwordold')";
+        if (!$this->found($sql))
+        {
+            return false;
+        }
+			
+        if ($stmt = $this->connection->prepare("
+            UPDATE 
+                player
+            SET 
+            	password = password(?)
+            WHERE
+            	username = ?
+            ;
+            ")) 
+        {
+            $stmt->bind_param($passwordnew, $username);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        return true;
+    }  
+    
   
     public function authenticatePlayer($username, $password){
 	
