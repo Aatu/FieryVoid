@@ -125,6 +125,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 7;
         
         public $rangePenalty = 0.33;
         public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals 
@@ -210,6 +211,7 @@
         
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 7;
         
         public $firingModes = array(
             1 => "Standard",
@@ -300,6 +302,7 @@
 
             public $damageType = "raking";
             public $raking = 10;
+            public $priority = 7;
 
             public $firingModes = array(
                 1 => "Standard",
@@ -335,6 +338,7 @@
 
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 7;
 
         public $firingModes = array(
             1 => "Standard",
@@ -402,6 +406,7 @@
 
         public $damageType = "raking";
         public $raking = 10;
+        public $priority = 7;
 
         public $firingModes = array(
             1 => "Standard",
@@ -487,6 +492,7 @@
         public $uninterceptable = true;
 
         public $loadingtime = 3;
+        public $priority = 6;
 
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 3, 5); // fighters, <mediums, <capitals

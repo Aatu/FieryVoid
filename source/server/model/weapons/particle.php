@@ -40,7 +40,7 @@
 
         public $rangePenalty = 1;
         public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
-
+        public $priority = 4;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -134,6 +134,7 @@
 
         public $loadingtime = 1;
         public $guns = 2;
+        public $priority = 4;
 
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
@@ -166,6 +167,7 @@
 
         public $loadingtime = 1;
         public $guns = 2;
+        public $priority = 5;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -197,7 +199,7 @@
 
         public $intercept = 1;
         public $loadingtime = 2;
-        public $priority = 4;
+        public $priority = 8;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals
@@ -234,7 +236,7 @@
 
         public $intercept = 2;
         public $loadingtime = 2;
-        public $priority = 3;
+        public $priority = 8;
 
         public $rangePenalty = 1;
         public $fireControl = array(0, 2, 4); // fighters, <mediums, <capitals
@@ -267,7 +269,7 @@
         public $animationExplosionScale = 0.45;
         public $animationWidth = 5;
         public $damageType = "raking";
-        public $priority = 4;
+        public $priority = 7;
 
         public $loadingtime = 6;
 
@@ -311,7 +313,7 @@
         public $extraoverloadshots = 2;
         public $overloadshots = 2;
         public $loadingtime = 2;
-        public $priority = 3;
+        public $priority = 8;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -353,6 +355,7 @@
         public $loadingtime = 1;
         public $boostable = true;
         public $boostEfficiency = 1;
+        public $priority = 4;
 
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
@@ -510,6 +513,7 @@
 
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+        public $priority = 4;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -617,7 +621,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 8;
         public $trailLength = 14;
-        public $priority = 8;
+        public $priority = 7;
 
         public $loadingtime = 3;
 
@@ -800,7 +804,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 6;
         public $trailLength = 6;
-        public $priority = 9;
+        public $priority = 6;
 
         public $loadingtime = 3;
 
@@ -831,7 +835,7 @@
         public $projectilespeed = 14;
         public $animationWidth = 4;
         public $trailLength = 4;
-        public $priority = 7;
+        public $priority = 6;
 
         public $loadingtime = 2;
 
@@ -894,6 +898,7 @@
 
         public $intercept = 2;
         public $loadingtime = 1;
+        public $priority = 4;
 
         public $rangePenalty = 2;
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
