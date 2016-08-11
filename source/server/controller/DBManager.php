@@ -1,7 +1,7 @@
 <?php 
 mysqli_report(MYSQLI_REPORT_ERROR);
 
-class DBManager {re
+class DBManager {
 
     private $connection = null;
     
