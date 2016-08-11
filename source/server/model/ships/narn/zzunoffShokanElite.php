@@ -1,5 +1,5 @@
 <?php
-class zzunoffShoKan extends BaseShip{
+class zzunoffShoKanElite extends BaseShip{
     /*Showdowns-10 Sho'Kan Scout Cruiser (unofficial)*/
     /*with Elite Crew modifications applied*/
     /*weapons and critical results could not be improved, so I went for slight defense boost instead: Reactor and C&C armor are improved by 1*/
