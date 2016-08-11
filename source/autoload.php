@@ -62,10 +62,12 @@ spl_autoload_register(
             	'zzunoffrongor' => '/server/model/ships/narn/zzunoffRongor.php',
             	'zzunoffronvar' => '/server/model/ships/narn/zzunoffRonvar.php',
             	'zzunoffshokan' => '/server/model/ships/narn/zzunoffShokan.php',
+            	'zzunoffshokanelite' => '/server/model/ships/narn/zzunoffShokanElite.php',
             	'zzunoffshovok' => '/server/model/ships/narn/zzunoffShovok.php',
             	'zzunoffshovor' => '/server/model/ships/narn/zzunoffShovor.php',
             	'zzunoffshovorbolt' => '/server/model/ships/narn/zzunoffShovorBolt.php',
             	'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
+            	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
                 //custom guns
