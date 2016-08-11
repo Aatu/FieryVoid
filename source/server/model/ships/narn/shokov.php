@@ -8,7 +8,7 @@ class Shokov extends MediumShip{
 		$this->faction = "Narn";
         $this->phpclass = "Shokov";
         $this->imagePath = "img/ships/shokos.png";
-        $this->shipClass = "Sho'Kov";
+        $this->shipClass = "Sho'Kov Torpedo Cutter";
         $this->agile = true;
         $this->canvasSize = 100;
         $this->occurence = "rare";
@@ -35,8 +35,9 @@ class Shokov extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 60));
+        $this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 120));
         $this->addFrontSystem(new IonTorpedo(3, 5, 4, 300, 120));
-		$this->addFrontSystem(new IonTorpedo(3, 5, 4, 240, 120));		
+				
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 6, 2));

@@ -37,7 +37,7 @@ class zzunoffNaSton extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
 		$this->addPrimarySystem(new Hangar(5, 14));
-        $this->addFrontSystem(new CargoBay(2, 50));
+        $this->addPrimarySystem(new CargoBay(2, 50));
         
 	//fwd
         $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
@@ -46,29 +46,29 @@ class zzunoffNaSton extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
       
-		//aft
-		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
-		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	//aft
+	$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
+	$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         
-		//left
-		$this->addLeftSystem(new TwinArray(2, 6, 2, 180, 0));
-		$this->addLeftSystem(new MediumPlasma(4, 5, 3, 300, 0));
-		$this->addLeftSystem(new MediumPlasma(4, 5, 3, 300, 0));
+	//left
+	$this->addLeftSystem(new TwinArray(2, 6, 2, 180, 0));
+	$this->addLeftSystem(new MediumPlasma(4, 5, 3, 300, 0));
+	$this->addLeftSystem(new MediumPlasma(4, 5, 3, 300, 0));
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
               
-		//right
-		$this->addRightSystem(new TwinArray(2, 6, 2, 0, 180));
-		$this->addRightSystem(new MediumPlasma(4, 5, 3, 0, 60));
-		$this->addRightSystem(new MediumPlasma(4, 5, 3, 0, 60));
-		$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
+	//right
+	$this->addRightSystem(new TwinArray(2, 6, 2, 0, 180));
+	$this->addRightSystem(new MediumPlasma(4, 5, 3, 0, 60));
+	$this->addRightSystem(new MediumPlasma(4, 5, 3, 0, 60));
+	$this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 
-		//structures
+	//structures
         $this->addFrontSystem(new Structure(4, 52));
         $this->addAftSystem(new Structure(4, 75));
         $this->addLeftSystem(new Structure(4, 75));
