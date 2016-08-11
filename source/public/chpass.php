@@ -29,6 +29,7 @@
  			$error = "Password change successful!";
  			$user = '';
  			$passold = '';
+ 			$_POST["user"] = '';
                 }
             }else if ($result === null){
                 $error = "An internal server error occurred!";
