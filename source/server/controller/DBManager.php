@@ -1638,7 +1638,7 @@ class DBManager {
             ;
             ")) 
         {
-            $stmt->bind_param($passwordnew, $username);
+            $stmt->bind_param('ss', $passwordnew, $username);
             $stmt->execute();
             $stmt->close();
         }
