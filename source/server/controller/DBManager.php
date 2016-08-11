@@ -1580,6 +1580,10 @@ class DBManager {re
         $username = htmlspecialchars($username);
         $username = $this->DBEscape($username);
         
+        //for password - do a similar escape?...
+        $password = htmlspecialchars($password);
+        $password = $this->DBEscape($password);
+        
         $sql = "SELECT * FROM player WHERE username LIKE '$username'";
         if ($this->found($sql))
         {
@@ -1611,6 +1615,12 @@ class DBManager {re
     {
         $username = htmlspecialchars($username);
         $username = $this->DBEscape($username);
+        
+        //for password - do a similar escape?...
+        $passwordold = htmlspecialchars($passwordold);
+        $passwordold = $this->DBEscape($passwordold);
+        $passwordnew = htmlspecialchars($passwordnew);
+        $passwordnew = $this->DBEscape($passwordnew);
         
         $sql = "SELECT * FROM player WHERE username LIKE '$username' and password = password('$passwordold')";
         if (!$this->found($sql))
