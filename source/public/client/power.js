@@ -56,9 +56,10 @@ shipManager.power = {
                 var isOnline = true;
 
 		//for Jammer, copy last turn's power - it's important for opponent!
-                if (system.name == "jammer"){
-			copyLastTurnPower(ship, system);
-                }
+		//induces trouble AND does not work as intended
+                //if (system.name == "jammer"){
+		//	copyLastTurnPower(ship, system);
+                //}
 
                 for (var i in system.power){
                     var power = system.power[i];
