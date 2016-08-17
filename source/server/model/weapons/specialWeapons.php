@@ -1,26 +1,26 @@
 <?php
-	class PlasmaStream extends Raking{
 
-		public $name = "plasmaStream";
+class PlasmaStream extends Raking{
+
+	public $name = "plasmaStream";
         public $displayName = "Plasma Stream";
         public $animation = "beam";
         public $animationColor = array(75, 250, 90);
-		public $trailColor = array(75, 250, 90);
-		public $projectilespeed = 20;
+	public $trailColor = array(75, 250, 90);
+	public $projectilespeed = 20;
         public $animationWidth = 3;
-		public $animationExplosionScale = 0.25;
-		public $trailLength = 400;
+	public $animationExplosionScale = 0.25;
+	public $trailLength = 400;
         public $priority = 1;
 		        
-		public $raking = 5;
+	public $raking = 5;
         public $loadingtime = 2;
-        
-		public $rangeDamagePenalty = 1;	
+	public $rangeDamagePenalty = 1;	
         public $rangePenalty = 1;
         public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
@@ -77,7 +77,7 @@
         public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.15;
         public $trailLength = 30;
-        public $priority = 5;
+        public $priority = 3; //dropout effect on fighters
 
         public $loadingtime = 2;
 
@@ -122,21 +122,21 @@
         public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
     }
 
-	class BurstBeam extends Weapon{
+class BurstBeam extends Weapon{
 
-		public $name = "burstBeam";
+	public $name = "burstBeam";
         public $displayName = "Burst Beam";
         public $animation = "laser";
         public $animationColor = array(158, 240, 255);
-		public $trailColor = array(158, 240, 255);
-		public $projectilespeed = 15;
+	public $trailColor = array(158, 240, 255);
+	public $projectilespeed = 15;
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
         public $animationExplosionScale = 0.10;
-		public $trailLength = 30;
+	public $trailLength = 30;
 		        
-	    public $loadingtime = 1;
-        public $priority = 10;
+	public $loadingtime = 1;
+        public $priority = 9; //as antiship weapon; as antifighter should go first...
         
 			
         public $rangePenalty = 2;
@@ -191,7 +191,7 @@
 	}
 
 
-	class BurstPulseCannon extends Pulse {
+class BurstPulseCannon extends Pulse {
 		public $name = "burstPulseCannon";
         public $displayName = "Burst Pulse Cannon";
 
@@ -208,7 +208,7 @@
         public $maxpulses = 6;
 		        
 	    public $loadingtime = 1;
-        public $priority = 10;
+        public $priority = 9;
         
 			
         public $rangePenalty = 0.5;
@@ -271,7 +271,7 @@
 		public $trailLength = 40;
 
         public $loadingtime = 2;
-        public $priority = 10;
+        public $priority = 9;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 3, 40); // fighters, <=mediums, <=capitals 
@@ -332,7 +332,7 @@
 		public $trailLength = 50;
 
         public $loadingtime = 3;
-        public $priority = 10;
+        public $priority = 9;
 
         public $rangePenalty = 0.33;
         public $fireControl = array(2, 4, 5); // fighters, <=mediums, <=capitals 
