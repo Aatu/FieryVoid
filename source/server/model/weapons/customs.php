@@ -122,7 +122,6 @@ class CustomPulsarLaser extends Pulse{
 
         public $grouping = 25;
         public $maxpulses = 4;
-        public $priority = 7;
         public $loadingtime = 3;
         
         public $rangePenalty = 0.33;
@@ -181,7 +180,6 @@ class CustomStrikeLaser extends Weapon{
             parent::setSystemDataWindow($turn);
         }
 
-        public $priority = 7;
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
