@@ -10,6 +10,7 @@
         public $iconPath = "interceptor.png";
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.15;
+        public $priority = 4;
 
         public $animationWidth = 1;
             
@@ -99,6 +100,7 @@
     class InterceptorPrototype extends InterceptorMkI{
         public $name = "interceptorPrototype";
         public $displayName = "Interceptor Prototype";
+        public $priority = 4;
         
         public $output = 2;
         public $intercept = 2;
@@ -135,6 +137,7 @@
         public $animation = "laser";
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.15;
+        public $priority = 4;
 
         public $animationWidth = 1;
         public $animationWidth2 = 0;
