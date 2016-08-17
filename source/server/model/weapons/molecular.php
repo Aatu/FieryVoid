@@ -29,7 +29,7 @@
         public $trailLength = 16;
 
         public $intercept = 2;
-        public $priority = 7;
+        public $priority = 6;
 
 
         public $loadingtime = 1;
@@ -65,7 +65,7 @@
 
         public $loadingtime = 2;
         public $intercept = 1;
-        public $priority = 8;
+        public $priority = 6;
 
         public $rangePenalty = 0.5;
         public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
@@ -134,7 +134,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 25;
-        public $priority = 4;
+        public $priority = 7;
 
         public $intercept = 0;
         public $loadingtime = 4;
@@ -208,7 +208,7 @@
         public $animationColor = array(100, 100, 255);
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.3;
-        public $priority = 3;
+        public $priority = 3; 
 
         public $animationExplosionScale = 0.35;
 
@@ -333,7 +333,7 @@
         public $loadingtime = 3;
         public $raking = 6;
         public $addedDice;
-        public $priority = 4;
+        public $priority = 8;
 
         public $boostable = true;
         public $boostEfficiency = 4;
@@ -466,6 +466,7 @@
         public $damageType = "raking";
         public $raking = 10;
         public $exclusive = true;
+        public $priority = 7;
         
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
