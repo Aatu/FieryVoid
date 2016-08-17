@@ -1,13 +1,13 @@
 <?php
 
-    class Pulse extends Weapon{
+class Pulse extends Weapon{
         
         public $trailColor = array(190, 75, 20);
         public $animationColor = array(190, 75, 20);
         public $grouping = 20;
         public $rof = 1;
         public $maxpulses = 6;
-        public $priority = 8;
+        public $priority = 5;
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -103,7 +103,7 @@
         */
     }
 
-    class EnergyPulsar extends Pulse{
+class EnergyPulsar extends Pulse{
 
         public $name = "energyPulsar";
         public $displayName = "Energy Pulsar";
@@ -115,7 +115,7 @@
         public $trailLength = 12;
         public $grouping = 25;
         public $maxpulses = 3;
-        public $priority = 5;
+        public $priority = 4;
 
         public $loadingtime = 2;
         
@@ -147,7 +147,7 @@
 
     }
     
-    class ScatterPulsar extends Pulse{
+class ScatterPulsar extends Pulse{
 
         public $name = "scatterPulsar";
         public $displayName = "Scatter Pulsar";
@@ -162,7 +162,7 @@
         
         public $loadingtime = 1;
         public $intercept = 2;
-        public $priority = 2;
+        public $priority = 3;
         
         public $rangePenalty = 2;
         public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
@@ -176,7 +176,7 @@
         public function setMaxDamage(){     $this->maxDamage = 6 - $this->dp;      }
     }
     
-    class QuadPulsar extends Pulse{
+class QuadPulsar extends Pulse{
 
         public $name = "quadPulsar";
         public $displayName = "Quad Pulsar";
@@ -188,6 +188,7 @@
         public $rof = 3;
         public $grouping = 25;
         public $maxpulses = 4;
+        public $priority = 6;
         
         public $loadingtime = 3;
         
@@ -213,6 +214,7 @@
         public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
     }
     
+    
     class LightPulse extends Pulse{
 
         public $name = "lightPulse";
@@ -225,7 +227,7 @@
         public $trailLength = 10;
         
         public $loadingtime = 1;
-        public $priority = 7;
+        public $priority = 3;
         
         public $rangePenalty = 2;
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
@@ -254,7 +256,7 @@
         public $rof = 2;
         
         public $loadingtime = 2;
-        public $priority = 5;
+        public $priority = 4;
         
         public $rangePenalty = 1;
         public $fireControl = array(1, 3, 4); // fighters, <mediums, <capitals 
@@ -283,7 +285,7 @@
         public $projectilespeed = 20;
         public $animationExplosionScale = 0.20;
         public $rof = 2;
-        public $priority = 8;
+        public $priority = 6;
         
         public $loadingtime = 3;
         
@@ -355,7 +357,7 @@
         public $rof = 2;
         public $maxpulses = 7;
         public $grouping = 15;
-        public $priority = 5;
+        public $priority = 4;
 
         public $loadingtime = 1;
     	public $normalload = 2;
@@ -494,7 +496,7 @@
         public $grouping = 0;
         public $loadingtime = 2;
         public $normalload = 2;
-        public $priority = 5;
+        public $priority = 2; //due to sniping bonus
         
         public $calledShotMod = -4;
         public $intercept = 3;
