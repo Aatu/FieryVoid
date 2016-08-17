@@ -499,7 +499,7 @@
         public $priority = 6;
 
         public $loadingtime = 3;
-        public $priority = 6;
+
 
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 3, 5); // fighters, <mediums, <capitals
