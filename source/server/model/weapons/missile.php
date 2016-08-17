@@ -13,7 +13,7 @@ class MissileLauncher extends Weapon{
     public $distanceRange = 0;
     public $firingMode = 1;
     public $rangeMod = 0;
-    public $priority = 8;
+    public $priority = 6;
     public $hits = array();
 
     protected $distanceRangeMod = 0;
@@ -406,6 +406,7 @@ class FighterMissileRack extends MissileLauncher
     public $animationWidth = 2;
     public $trailLength = 60;
     protected $distanceRangeMod = 0;
+    public $priority = 4;
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -533,6 +534,7 @@ class FighterTorpedoLauncher extends FighterMissileRack
     public $firingMode = 1;
     public $maxAmount = 0;
     protected $distanceRangeMod = 0;
+    public $priority = 4;
 
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
     
@@ -599,6 +601,7 @@ class BombRack extends MissileLauncher{
     public $animationWidth = 4;
     public $trailLength = 100;
     protected $distanceRangeMod = 0;
+    public $priority = 6;
 
     public $firingModes = array(
         1 => "B"

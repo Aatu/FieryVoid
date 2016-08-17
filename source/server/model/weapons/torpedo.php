@@ -47,7 +47,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 10;
         public $trailLength = 10;
-        public $priority = 8;
+        public $priority = 6;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -78,7 +78,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 4;
         public $trailLength = 40;
-        public $priority = 7;
+        public $priority = 5;
         
         public $grouping = 20;
         

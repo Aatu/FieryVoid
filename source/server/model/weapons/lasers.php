@@ -151,6 +151,7 @@
         public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
+        public $priority = 8;
         
         public $loadingtime = 3;
         
@@ -182,6 +183,7 @@
         public $animationWidth2 = 0.2;
         
         public $loadingtime = 2;
+        public $priority = 8;
         
         public $damageType = "raking";
         public $raking = 10;
@@ -242,6 +244,7 @@
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
+        public $priority = 8;
         
         public $loadingtime = 2;
         
@@ -368,6 +371,7 @@
         public $animationColor = array(220, 100, 11);
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
+        public $priority = 8;
 
         public $loadingtime = 3;
         public $overloadable = false;
@@ -436,6 +440,7 @@
         public $animationColor = array(220, 60, 120);
         public $animationWidth = 3;
         public $animationWidth2 = 0.2;
+        public $priority = 8;
 
         public $loadingtime = 2;
 
@@ -462,6 +467,7 @@
         public $animationColor = array(220, 60, 120);
         public $animationWidth = 5;
         public $animationWidth2 = 0.5;
+        public $priority = 7;
 
         public $loadingtime = 4;
 
@@ -490,6 +496,7 @@
         public $animationWidth = 5;
         public $animationWidth2 = 0.5;
         public $uninterceptable = true;
+        public $priority = 6;
 
         public $loadingtime = 3;
         public $priority = 6;

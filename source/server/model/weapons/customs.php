@@ -8,6 +8,7 @@ class CustomLightMatterCannon extends Matter {
         public $projectilespeed = 25;
         public $animationWidth = 3;
         public $animationExplosionScale = 0.15;
+        public $priority = 6;
 
         public $loadingtime = 2;
         
@@ -43,6 +44,7 @@ class CustomLightMatterCannonF extends Matter {
         public $projectilespeed = 18;
         public $animationWidth = 2;
         public $animationExplosionScale = 0.10;
+        public $priority = 8;
         
         public $loadingtime = 3;
         public $exclusive = false; //this is not an exclusive weapon!
@@ -77,6 +79,7 @@ class CustomLightMatterCannonF extends Matter {
         public $projectilespeed = 25;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.25;
+        public $priority = 9;
       
 
         public $loadingtime = 3;
@@ -113,6 +116,7 @@ class CustomPulsarLaser extends Pulse{
         public $animationWidth = 3;
         public $animationWidth2 = 0.5;
         public $uninterceptable = true;
+        public $priority = 5;
 
         public $rof = 2;
 
@@ -167,7 +171,7 @@ class CustomStrikeLaser extends Weapon{
         public $loadingtime = 3;
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
-
+        public $priority = 6;
 
         public function setSystemDataWindow($turn){
 

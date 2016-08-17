@@ -59,6 +59,7 @@ class MissileB extends Ammo
     public $range = 20;
     public $hitChanceMod = 3;
     public $ballistic = true;
+    public $priority = 6;
 
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
@@ -104,6 +105,7 @@ class MissileFB extends Ammo
     public $range = 10;
     public $hitChanceMod = 3;
     public $ballistic = true;
+    public $priority = 4;
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
@@ -256,6 +258,7 @@ class MissileFY extends MissileFB
     public $cost = 2;
     public $damage = 6;
     public $range = 8;
+    public $priority = 3;
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);
@@ -277,6 +280,7 @@ class LightBallisticTorpedo extends MissileFB
     public $amount = 0;
     public $range = 25;
     public $hitChanceMod = 0;
+    public $priority = 3;
     
     function __construct($startArc, $endArc, $fireControl){
         parent::__construct($startArc, $endArc, $fireControl);
@@ -298,6 +302,7 @@ class LightIonTorpedo extends MissileFB
     public $amount = 0;
     public $range = 20;
     public $hitChanceMod = 0;
+    public $priority = 4;
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);

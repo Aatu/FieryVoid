@@ -30,7 +30,7 @@
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
         public $maxpulses = 3;
-        public $priority = 5;
+        public $priority = 4;
 		
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
@@ -181,7 +181,7 @@ class GraviticBolt extends Gravitic
         public $maxBoostLevel = 2;
         public $loadingtime = 1;
         public $curDamage = 9;
-        public $priority = 7;
+        public $priority = 4;
 		
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
@@ -315,6 +315,7 @@ class GraviticBolt extends Gravitic
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 4;
         public $animationWidth2 = 0.4;
+        public $priority = 7;
         
         public $loadingtime = 4;
         public $damageType = "raking";
@@ -347,10 +348,11 @@ class GraviticBolt extends Gravitic
         public $animation = "trail";
         public $trailColor = array(99, 255, 00);
         public $animationColor = array(99, 255, 00);
-        public $projectilespeed = 13;
+        public $projectilespeed = 15;
         public $animationWidth = 2;
         public $animationExplosionScale = 0.15;
         public $loadingtime = 1;
+        public $priority = 5;
 
         public $priority = 7;
 
@@ -391,6 +393,8 @@ class GraviticBolt extends Gravitic
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
+        
+        public $priority = 7;
 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
@@ -436,6 +440,8 @@ class GraviticBolt extends Gravitic
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
+        
+        public $priority = 6;
 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
@@ -471,6 +477,7 @@ class GraviticBolt extends Gravitic
         public $damageType = "raking";
         public $raking = 10;
         public $exclusive = true;
+        public $priority = 9;
         
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
@@ -619,6 +626,7 @@ class GraviticBolt extends Gravitic
         public $animationColor = array(99, 255, 00);
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
+        public $priority = 8;
         
         public $damageType = "raking";
         public $raking = 6;
