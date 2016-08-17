@@ -12,6 +12,7 @@ class IonBolt extends Weapon{
     public $projectilespeed = 12;
     public $animationWidth = 3;
     public $trailLength = 20;
+    public $priority = 8;
 
     public $loadingtime = 2;
     public $shots = 1;
