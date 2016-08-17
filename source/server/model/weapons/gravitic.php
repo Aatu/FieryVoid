@@ -354,7 +354,7 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 1;
         public $priority = 5;
 
-        public $priority = 7;
+
 
 		
         public $rangePenalty = 0.33;
