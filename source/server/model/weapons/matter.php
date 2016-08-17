@@ -129,6 +129,7 @@
         public $projectilespeed = 30;
         public $animationWidth = 4;
         public $animationExplosionScale = 0.20;
+        public $priority = 6;
         
         public $loadingtime = 2;
 		
@@ -172,7 +173,7 @@
     }
 
 
-        class GaussCannon extends MatterCannon
+    class GaussCannon extends MatterCannon
     {
         public $name = "gaussCannon";
         public $displayName = "Gauss Cannon";
@@ -241,6 +242,7 @@
         public $intercept = 1;
         public $loadingtime = 1;
         public $ballisticIntercept = true;
+        public $priority = 6;
         
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 0); // fighters, <mediums, <capitals 
