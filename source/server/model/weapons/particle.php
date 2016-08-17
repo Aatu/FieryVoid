@@ -16,7 +16,7 @@
             parent::setSystemDataWindow($turn);
         }
 
-        public $priority = 7;
+        public $priority = 6;
 
 
     }
@@ -40,7 +40,7 @@
 
         public $rangePenalty = 1;
         public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
-        public $priority = 4;
+        public $priority = 5;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -70,6 +70,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 5;
         public $trailLength = 10;
+        public $priority = 6;
 
         public $loadingtime = 2;
 
@@ -101,6 +102,7 @@
         public $animationWidth = 5;
         public $trailLength = 10;
         public $iconPath = "stdParticleBeam.png";
+        public $priority = 5;
 
         public $intercept = 2;
         public $loadingtime = 1;
@@ -167,7 +169,7 @@
 
         public $loadingtime = 1;
         public $guns = 2;
-        public $priority = 5;
+        public $priority = 6;
 
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
@@ -355,7 +357,7 @@
         public $loadingtime = 1;
         public $boostable = true;
         public $boostEfficiency = 1;
-        public $priority = 4;
+        public $priority = 5;
 
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
@@ -499,6 +501,7 @@
         public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
     }
     
+    
     class RepeaterGun extends ParticleRepeater{
 
         public $name = "repeaterGun";
@@ -610,9 +613,9 @@
 
     }
 
+
+
     class SolarCannon extends Particle{
-
-
         public $name = "solarCannon";
         public $displayName = "Solar Cannon";
         public $animation = "beam";
@@ -621,7 +624,7 @@
         public $projectilespeed = 15;
         public $animationWidth = 8;
         public $trailLength = 14;
-        public $priority = 7;
+        public $priority = 6;
 
         public $loadingtime = 3;
 
@@ -721,6 +724,7 @@
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
+        
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
@@ -761,6 +765,7 @@
         public $projectilespeed = 12;
         public $animationWidth = 2;
         public $trailLength = 10;
+        public $priority = 4;
 
         public $intercept = 2;
 
