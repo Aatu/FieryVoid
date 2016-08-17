@@ -2,7 +2,7 @@
 
 	class Plasma extends Weapon{
 
-        public $priority = 8;
+        public $priority = 6;
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -136,20 +136,21 @@
 */		}
 
 	}
-	
-	class MagGun extends Plasma{
 
-		public $name = "magGun";
+	
+class MagGun extends Plasma{
+
+	public $name = "magGun";
         public $displayName = "Mag Gun";
         public $animation = "trail";
         public $animationColor = array(255, 105, 0);
-		public $trailColor = array(255, 140, 60);
-		public $projectilespeed = 15;
+	public $trailColor = array(255, 140, 60);
+	public $projectilespeed = 15;
         public $animationWidth = 6;
-		public $animationExplosionScale = 0.50;
-		public $trailLength = 30;
+	public $animationExplosionScale = 0.50;
+	public $trailLength = 30;
         public $flashDamage = true;
-        public $priority = 1;
+        public $priority = 2;
 		        
         public $loadingtime = 3;
 			
@@ -157,19 +158,19 @@
         public $fireControl = array(null, 2, 6); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
-		public function getDamage($fireOrder){        return Dice::d(10,6)+20;   }
+	public function getDamage($fireOrder){        return Dice::d(10,6)+20;   }
         public function setMinDamage(){     $this->minDamage = 26 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 80 - $this->dp;      }
-
-	}
+}
 	
-	class HeavyPlasma extends Plasma{
-
+	
+	
+class HeavyPlasma extends Plasma{
     	public $name = "heavyPlasma";
         public $displayName = "Heavy Plasma Cannon";
         public $animation = "trail";
@@ -196,10 +197,11 @@
         public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 48 - $this->dp;      }
 
-	}
+}
     
-    class MediumPlasma extends Plasma{
-
+    
+    
+class MediumPlasma extends Plasma{
     	public $name = "mediumPlasma";
         public $displayName = "Medium Plasma Cannon";
         public $animation = "trail";
@@ -226,9 +228,11 @@
         public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
 
-	}
+}
 
-        class LightPlasma extends Plasma{
+
+
+class LightPlasma extends Plasma{
 
     	public $name = "lightPlasma";
         public $displayName = "Light Plasma Cannon";
@@ -256,10 +260,11 @@
         public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
 
-	}
+}
 
 
-    class PlasmaTorch extends Plasma{
+
+class PlasmaTorch extends Plasma{
 
     	public $name = "plasmaTorch";
         public $displayName = "Plasma Torch";
@@ -308,7 +313,7 @@
 
 
 
-    class PairedPlasmaBlaster extends LinkedWeapon{
+class PairedPlasmaBlaster extends LinkedWeapon{
 
         public $name = "pairedPlasmaBlaster";
         public $displayName = "Paired Plasma Blaster";
@@ -371,8 +376,7 @@
     }
 
 
-    class PlasmaGun extends Plasma{
-
+class PlasmaGun extends Plasma{
         public $name = "plasmaGun";
         public $displayName = "Plasma Gun";
         public $animation = "trail";
