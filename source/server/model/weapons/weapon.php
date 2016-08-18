@@ -953,6 +953,7 @@ class Weapon extends ShipSystem{
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
 
 //        var_dump($fireOrder);
+	$damage = floor($damage);//make sure damage is a whole number, without fractions!
 
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();
