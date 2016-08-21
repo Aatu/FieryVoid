@@ -76,7 +76,7 @@ class zzunoffShoKan extends BaseShip{
 				8 => "Medium Plasma Cannon",
 				11 => "Twin Array",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			2=> array(
 				6 => "Thruster",
