@@ -52,6 +52,8 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- Option to change user password (if You feel the urge :) )";
                     news.innerHTML += "<br>";
+                    news.innerHTML += "- FAQ updated (in FB)";                    
+                    news.innerHTML += "<br>";
                     news.innerHTML += "- Various SCS updates (including engine for Raider Skiff)";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB.";
