@@ -61,7 +61,7 @@
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
                     
                  var links = document.getElementById("linksEntry");
-                    links.innerHTML +='<a href="https://lookaside.fbsbx.com/file/FV%20FAQ.txt">FAQ</a>
+                    links.innerHTML +='<a href="https://www.facebook.com/download/preview/102107126910276">FAQ</a>
                     	- differences from B5Wars and known bugs<br>';
                     links.innerHTML +='<a href="http://b5warsvault.wikidot.com/">B5Wars Vault</a>
                     	- B5Wars rules and LOTS of related stuff<br>';
