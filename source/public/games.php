@@ -61,9 +61,8 @@
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
                     
                  var links = document.getElementById("linksEntry");
-                    links.innerHTML +='<a href="https://lookaside.fbsbx.com/file/FV%20FAQ.txt?token=AWzIa4zaJ8Hrmp5TgMdL3LTg1uD5Lf9WHwjJW4_yaib-otIX0kfqRkZn7sbZDislkFaXupX_bYhn7Scd7WlE9IKuai0rvKVjVrlmHBzWykWx_XunPlF2xTFdb0A0jE2MDukRCduRkBkWFwjr6oz6ie0ATPW5zAE1uduwxCfA408Kdw">
-                    	FAQ
-                    	</a> - differences from B5Wars and known bugs<br>';
+                    links.innerHTML +='<a href="https://lookaside.fbsbx.com/file/FV%20FAQ.txt">FAQ</a>
+                    	- differences from B5Wars and known bugs<br>';
                     links.innerHTML +='<a href="http://b5warsvault.wikidot.com/">B5Wars Vault</a>
                     	- B5Wars rules and LOTS of related stuff<br>';
                     links.innerHTML +='<a href="http:/fieryvoid.net/reg.php">Register</a>
