@@ -44,25 +44,31 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 26 July 2016";
+                    header.innerHTML = "Latest News 22nd of August 2016";
                     header
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:"
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Bugfix Piercing fire at bases";
+                    news.innerHTML += "- Option to change user password (if You feel the urge :) )";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Hit chart display fixed (for atypical layouts)";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Blanked DEW display is fixed";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- TD/TC on ship display corrected";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Various SCS updates (including Narn Showdowns-10)";
+                    news.innerHTML += "- Various SCS updates (including engine for Raider Skiff)";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB.";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
+                    
+                 var links = document.getElementById("linksEntry");
+                    links.innerHTML +='<a href="https://lookaside.fbsbx.com/file/FV%20FAQ.txt?token=AWzIa4zaJ8Hrmp5TgMdL3LTg1uD5Lf9WHwjJW4_yaib-otIX0kfqRkZn7sbZDislkFaXupX_bYhn7Scd7WlE9IKuai0rvKVjVrlmHBzWykWx_XunPlF2xTFdb0A0jE2MDukRCduRkBkWFwjr6oz6ie0ATPW5zAE1uduwxCfA408Kdw">
+                    	FAQ
+                    	</a> - differences from B5Wars and known bugs<br>';
+                    links.innerHTML +='<a href="http://b5warsvault.wikidot.com/">B5Wars Vault</a>
+                    	- B5Wars rules and LOTS of related stuff<br>';
+                    links.innerHTML +='<a href="http:/fieryvoid.net/reg.php">Register</a>
+                    	new player account<br>';
+                    links.innerHTML +='<a href="http:/fieryvoid.net/chpass.php">Change password</a>
+                    	of Your account<br>';
+                    	
            });
 		</script>
 	</head>
@@ -76,6 +82,8 @@
             <div id="newsHeader">
             </div>
             <div id="newsEntry">
+            </div>
+            <div id="linksEntry">
             </div>
         </div>
         <div class="panel large">
