@@ -63,9 +63,8 @@
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
                     
                     
-                var links = document.getElementById("linksEntry");
 
-                    links.innerHTML +='<a href="https://www.facebook.com/groups/218482691602941/files/" target="_blank">FV FAQ</a> - differences from B5Wars and known bugs<br>';
+                    news.innerHTML +="<a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs<br>";
                      
                     	
            });
@@ -81,8 +80,6 @@
             <div id="newsHeader">
             </div>
             <div id="newsEntry">
-            </div>
-            <div id="linksEntry">
             </div>
         </div>
         <div class="panel large">
