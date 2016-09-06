@@ -62,9 +62,15 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
                     
-                    
+                    news.innerHTML += "<br><br>----------LINKS----------";
 
-                    news.innerHTML +="<a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs<br>";
+                    news.innerHTML +="<br><a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs";
+
+                    news.innerHTML +="<br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff";
+                    news.innerHTML +="<br><a href=\"http:/fieryvoid.net/reg.php\">Register</a> new player account";
+                    news.innerHTML +="<br><a href=\"http:/fieryvoid.net/chpass.php\">Change password</a> of Your account";
+
+                     
                      
                     	
            });
