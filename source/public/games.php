@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 22nd of August 2016";
+                    header.innerHTML = "Latest News 6th of September 2016";
                     header
 
                 var news = document.getElementById("newsEntry");
