@@ -5,9 +5,12 @@ include_once 'global.php';
 //		$_SESSION['hidehelper'] = false;
 //	}
 
+//moving immediately to games.php may not be always good
+/*
 	if (isset($_SESSION["user"]) && $_SESSION["user"] != false){
 		header('Location: games.php');
 	}
+*/	
 	
     $error = "";
 	if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"]) && isset($_POST["secret"])){
@@ -32,7 +35,7 @@ include_once 'global.php';
                 $userid = Manager::authenticatePlayer($_POST["user"], $_POST["pass"]);
 		
                 if ($userid != false){
-                  	$_SESSION["user"] = $userid['id'];
+                    $_SESSION["user"] = $userid['id'];
                     $_SESSION["access"] = $userid['access'];
                     header('Location: games.php');
 

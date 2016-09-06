@@ -176,7 +176,7 @@ window.shipClickable = {
 		e.fadeTo(500, 0.65);
 		
 		if (gamedata.isMyShip(ship) || gamedata.gamephase > 1){
-			//ew.adHostileOEWindicatiors(ship);
+			ew.adHostileOEWindicatiors(ship);
 			ew.adEWindicators(ship);
 			EWindicators.drawEWindicators();
 		}

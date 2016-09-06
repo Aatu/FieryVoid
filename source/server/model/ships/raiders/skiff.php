@@ -23,6 +23,7 @@ class Skiff extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 4));
+        $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
         $this->addPrimarySystem(new CargoBay(3, 20));
         $this->addPrimarySystem(new CargoBay(3, 20));
         $this->addPrimarySystem(new Hangar(2, 4));
@@ -32,13 +33,13 @@ class Skiff extends MediumShip{
     	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
     	 
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 240, 360));
-		$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 0, 120));
+	$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 240, 360));
+	$this->addFrontSystem(new LightParticleCannon(2, 6, 5, 0, 120));
         
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
-		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
+	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
+	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
+	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
+	$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
 	
