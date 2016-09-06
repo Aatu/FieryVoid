@@ -62,15 +62,6 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "Also hit F5 whenever something weird happens.";
                     
-                 var links = document.getElementById("linksEntry");
-                    links.innerHTML +='<a href="https://www.facebook.com/groups/218482691602941/files/" target="_blank">FV FAQ</a>
-                    	- differences from B5Wars and known bugs<br>';
-                    links.innerHTML +='<a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a>
-                    	- B5Wars rules and LOTS of related stuff<br>';
-                    links.innerHTML +='<a href="http:/fieryvoid.net/reg.php">Register</a>
-                    	new player account<br>';
-                    links.innerHTML +='<a href="http:/fieryvoid.net/chpass.php">Change password</a>
-                    	of Your account<br>';
                     	
            });
 		</script>
@@ -85,8 +76,6 @@
             <div id="newsHeader">
             </div>
             <div id="newsEntry">
-            </div>
-            <div id="linksEntry">
             </div>
         </div>
         <div class="panel large">
