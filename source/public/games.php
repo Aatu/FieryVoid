@@ -52,7 +52,9 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- Option to change user password (if You feel the urge :) )";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- FAQ updated (in FB)";                    
+                    news.innerHTML += "- FAQ updated (in FB)"; 
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- some meddling with EW indicators (we'll see...)";                    
                     news.innerHTML += "<br>";
                     news.innerHTML += "- Various SCS updates (including engine for Raider Skiff)";
                     news.innerHTML += "<br>";
