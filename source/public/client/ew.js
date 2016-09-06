@@ -278,6 +278,7 @@ window.ew = {
 							
 			for (var a in other.EW){
 				var EW = other.EW[a];
+				if (EW.turn != gamedata.turn) continue;
 				if (EW.type == "OEW" && EW.targetid == ship.id){
 					ewEffects.push(ew.makeEWindicator(other, EW));
 				}
