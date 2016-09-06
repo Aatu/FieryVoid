@@ -48,7 +48,7 @@
                     header
 
                 var news = document.getElementById("newsEntry");
-                    news.innerHTML += "The latest update includes:"
+                    news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
                     news.innerHTML += "- Option to change user password (if You feel the urge :) )";
                     news.innerHTML += "<br>";
