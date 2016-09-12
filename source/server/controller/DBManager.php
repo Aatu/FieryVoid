@@ -1238,7 +1238,8 @@ class DBManager {
     }
     
     private function getMovesForShips($gamedata){
-        
+        //all turn-related info is an attempt to minimize loaded data
+
         $stmt = $this->connection->prepare("
             SELECT 
                 id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust, at_initiative
@@ -1246,12 +1247,15 @@ class DBManager {
                 tac_shipmovement
             WHERE
                 gameid = ?
+                and turn >= ?
             ORDER BY
                 id ASC
         ");
 
         if ($stmt){
-            $stmt->bind_param('i', $gamedata->id);
+        	$fetchturn = $gamedata->turn-2; //may cause problems if a ship is sitting still longer - rare but possible
+        	if ($fetchturn < 0) $fetchturn = 0;
+            $stmt->bind_param('i', $gamedata->id, $fetchturn);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             while ($stmt->fetch())
