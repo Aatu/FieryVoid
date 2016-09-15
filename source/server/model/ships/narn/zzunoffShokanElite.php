@@ -6,7 +6,7 @@ class zzunoffShoKanElite extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 550+275;
 	$this->faction = "Narn";
         $this->phpclass = "zzunoffShoKanElite";
         $this->imagePath = "img/ships/shokar.png";
@@ -77,7 +77,7 @@ class zzunoffShoKanElite extends BaseShip{
 				8 => "Medium Plasma Cannon",
 				11 => "Twin Array",
 				18 => "Structure",
-				20 => "primary",
+				20 => "Primary",
 			),
 			2=> array(
 				6 => "Thruster",

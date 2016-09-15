@@ -46,8 +46,8 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 44));
-        $this->addLeftSystem(new Structure( 4, 42));
-        $this->addRightSystem(new Structure( 4, 42));
+        $this->addLeftSystem(new Structure( 4, 48));
+        $this->addRightSystem(new Structure( 4, 48));
         $this->addPrimarySystem(new Structure( 4, 40));
 
 

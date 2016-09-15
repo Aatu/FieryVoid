@@ -41,13 +41,13 @@ class Tokrana extends OSAT{
 		$this->hitChart = array(
 			0=> array(
 					9 => "Structure",
-					11 => "Scanner",
+					11 => "Thruster",
 					13 => "Gravitic Cannon",
 					14 => "Gravitic Bolt",
 					15 => "Gravitic Shield",
 					17 => "Scanner",
 					19 => "Reactor",
-					20 => "C&C",
+					20 => "Shield Generator",
 			),
 		);
     }

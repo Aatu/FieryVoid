@@ -25,14 +25,14 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(2, 1, 1, 1);
-            $fighter = new Fighter("wlcChlonasLerTarFlight", $armour, 7, $this->id);
-            $fighter->displayName = "Ler'Tar Light Fighter";
-	        	$fighter->imagePath = "img/ships/shasi.png";
-		        $fighter->iconPath = "img/ships/shasi_large.png";
-			
-	        	$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
-            $this->addSystem($fighter);
+            	$armour = array(2, 1, 1, 1);
+            	$fighter = new Fighter("wlcChlonasSaTrevanFlight", $armour, 7, $this->id);
+            	$fighter->displayName = "Sa'Trevan Light Fighter";
+		$fighter->imagePath = "img/ships/shasi.png";
+	        $fighter->iconPath = "img/ships/shasi_large.png";
+		
+		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
+            	$this->addSystem($fighter);
         }
     }
 }

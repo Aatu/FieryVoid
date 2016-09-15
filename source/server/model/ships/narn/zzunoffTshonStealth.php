@@ -5,7 +5,7 @@ class zzunoffTShonStealth extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 600;
+		$this->pointCost = 600+120;
 		$this->faction = "Narn";
         $this->phpclass = "zzunoffTShonStealth";
         $this->imagePath = "img/ships/tloth.png";
