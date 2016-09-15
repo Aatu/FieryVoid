@@ -1259,15 +1259,13 @@ class DBManager {
             $prev_shipid = 0;
             while ($stmt->fetch())
             {
-            	
-            	if ($prev_shipid != $shipid) { //orders for new ship!
+            	if ($prev_shipid != $shipid) { //orders for new ship! 
             	   if (isset($move1)) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
             	   if (isset($move2)) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
             	   unset($move1);
             	   unset($move2);
             	   $prev_shipid = $shipid;
             	}
-            	*/
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
