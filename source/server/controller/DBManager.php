@@ -1249,7 +1249,7 @@ class DBManager {
                 gameid = ?
             ORDER BY
                 shipid ASC
-                id ASC
+                , id ASC
         ");
 
         if ($stmt){
