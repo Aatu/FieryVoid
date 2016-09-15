@@ -1257,30 +1257,26 @@ class DBManager {
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             $prev_shipid = 0;
-            $move_1 = false;
-            $move_2 = false;
             while ($stmt->fetch())
             {
-            	/*
-            	if ($prev_shipid != $shipid) { //orders for new ship!
-            	   if ($move1 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
-            	   if ($move2 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
-            	   $move1 = false;
-            	   $move2 = false;
+            	if ($prev_shipid != $shipid) { //orders for new ship! 
+            	   if (isset($move1)) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
+            	   if (isset($move2)) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
+            	   unset($move1);
+            	   unset($move2);
             	   $prev_shipid = $shipid;
             	}
-            	*/
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
-                //$move1 = $move2;
-                //$move2 = $move;
+                if (isset($move2)) $move1 = $move2;
+                $move2 = $move;
 
-                $gamedata->getShipById($shipid)->setMovement( $move );
+                //$gamedata->getShipById($shipid)->setMovement( $move );
             }
             //after loop fill any data not filled yet
-            //if ($move1 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
-    	    //if ($move2 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
+            if (isset($move1))  $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
+    	    if (isset($move2))  $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
             
                 
             $stmt->close();
