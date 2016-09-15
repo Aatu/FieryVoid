@@ -1257,26 +1257,34 @@ class DBManager {
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             $prev_shipid = 0;
+            $prev_turn = -1;
+            $move_orders = array();
             while ($stmt->fetch())
             {
             	if ($prev_shipid != $shipid) { //orders for new ship! 
-            	   if (isset($move1)) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
-            	   if (isset($move2)) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
-            	   unset($move1);
-            	   unset($move2);
+            	   foreach($move_orders as $move) {
+            	   	$gamedata->getShipById($prev_shipid)->setMovement( $move );
+            	   }
+            	   $move_orders = array();
             	   $prev_shipid = $shipid;
+            	   $prev_turn = -1;
+            	}
+            	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
+            		$move_orders = array();
+            		$prev_turn = $turn;
             	}
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
-                if (isset($move2)) $move1 = $move2;
-                $move2 = $move;
+                
+                array_push ( $move_orders , $move);
 
                 //$gamedata->getShipById($shipid)->setMovement( $move );
             }
             //after loop fill any data not filled yet
-            if (isset($move1))  $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
-    	    if (isset($move2))  $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
+            foreach($move_orders as $move) {
+    	   	$gamedata->getShipById($prev_shipid)->setMovement( $move );
+    	    }
             
                 
             $stmt->close();
