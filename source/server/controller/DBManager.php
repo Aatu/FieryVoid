@@ -1238,7 +1238,8 @@ class DBManager {
     }
     
     private function getMovesForShips($gamedata){
-        //try to limit - last 2 moves for every unit...
+        //try to limit - last turn of movement for every unit...
+        //actual movement - unit may stand still in a turn, that's not a move :)
 
         $stmt = $this->connection->prepare("
             SELECT 
