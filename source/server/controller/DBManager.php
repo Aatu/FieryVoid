@@ -1238,7 +1238,7 @@ class DBManager {
     }
     
     private function getMovesForShips($gamedata){
-        //all turn-related info is an attempt to minimize loaded data
+        //try to limit - last 2 moves for every unit...
 
         $stmt = $this->connection->prepare("
             SELECT 
@@ -1247,25 +1247,39 @@ class DBManager {
                 tac_shipmovement
             WHERE
                 gameid = ?
-                and turn >= ?
             ORDER BY
+                shipid ASC
                 id ASC
         ");
 
         if ($stmt){
-        	$fetchturn = $gamedata->turn-2; //may cause problems if a ship is sitting still longer - rare but possible
-        	if ($fetchturn < 0) $fetchturn = 0;
-            $stmt->bind_param('ii', $gamedata->id, $fetchturn);
+            $stmt->bind_param('i', $gamedata->id);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
+            $prev_shipid = 0;
+            $move_1 = null;
+            $move_2 = null;
             while ($stmt->fetch())
             {
+            	if ($prev_shipid != $shipid) { //orders for new ship!
+            	   if ($move1 != null) $gamedata->getShipById($shipid)->setMovement( $move1 );
+            	   if ($move2 != null) $gamedata->getShipById($shipid)->setMovement( $move2 );
+            	   $move1 = null;
+            	   $move2 = null;
+            	   $prev_shipid = $shipid;
+            	}
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
+                $move1 = $move2;
+                $move2 = $move;
 
-                $gamedata->getShipById($shipid)->setMovement( $move );
+                //$gamedata->getShipById($shipid)->setMovement( $move );
             }
+            //after loop fill any data not filled yet
+            if ($move1 != null) $gamedata->getShipById($shipid)->setMovement( $move1 );
+    	    if ($move2 != null) $gamedata->getShipById($shipid)->setMovement( $move2 );
+            
                 
             $stmt->close();
         }
