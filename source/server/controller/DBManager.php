@@ -1257,15 +1257,15 @@ class DBManager {
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             $prev_shipid = 0;
-            $move_1 = null;
-            $move_2 = null;
+            $move_1 = false;
+            $move_2 = false;
             while ($stmt->fetch())
             {
             	if ($prev_shipid != $shipid) { //orders for new ship!
-            	   if ($move1 != null) $gamedata->getShipById($shipid)->setMovement( $move1 );
-            	   if ($move2 != null) $gamedata->getShipById($shipid)->setMovement( $move2 );
-            	   $move1 = null;
-            	   $move2 = null;
+            	   if ($move1 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
+            	   if ($move2 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
+            	   $move1 = false;
+            	   $move2 = false;
             	   $prev_shipid = $shipid;
             	}
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
@@ -1277,8 +1277,8 @@ class DBManager {
                 //$gamedata->getShipById($shipid)->setMovement( $move );
             }
             //after loop fill any data not filled yet
-            if ($move1 != null) $gamedata->getShipById($shipid)->setMovement( $move1 );
-    	    if ($move2 != null) $gamedata->getShipById($shipid)->setMovement( $move2 );
+            if ($move1 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move1 );
+    	    if ($move2 != false) $gamedata->getShipById($prev_shipid)->setMovement( $move2 );
             
                 
             $stmt->close();
