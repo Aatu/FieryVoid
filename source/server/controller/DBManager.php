@@ -1255,7 +1255,7 @@ class DBManager {
         if ($stmt){
         	$fetchturn = $gamedata->turn-2; //may cause problems if a ship is sitting still longer - rare but possible
         	if ($fetchturn < 0) $fetchturn = 0;
-            $stmt->bind_param('i', $gamedata->id, $fetchturn);
+            $stmt->bind_param('ii', $gamedata->id, $fetchturn);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             while ($stmt->fetch())
