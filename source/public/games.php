@@ -44,25 +44,22 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 6th of September 2016";
+                    header.innerHTML = "Latest News 15th of September 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Option to change user password (if You feel the urge :) )";
+                    news.innerHTML += "- An attempt to make large games last longer (very large battles tend to crash after a few turns)";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- FAQ updated (in FB)"; 
+                    news.innerHTML += "- fighters now should correctly show smaller profiles to fire"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- EW indicators: mouseover shows hostile as well as own indicators";                    
+                    news.innerHTML += "- Various SCS updates";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Various SCS updates (including engine for Raider Skiff)";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "Enjoy and report BUGS on FB.";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "Also hit F5 whenever something weird happens.";
+                    news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
+
                     
-                    news.innerHTML += "<br><br>----------LINKS----------";
+                    news.innerHTML += "<br><br>----------<b>LINKS</b>----------";
 
                     news.innerHTML +="<br><a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs";
                     news.innerHTML +="<br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff";
