@@ -6,7 +6,7 @@ class EarlyWartalon extends HeavyCombatVesselLeftRight{
         
     	$this->pointCost = 500;
         $this->faction = "Drazi (WotCR)";
-        $this->phpclass = "Wartalon (early)";
+        $this->phpclass = "EarlyWartalon";
         $this->imagePath = "img/ships/warbird.png";
         $this->shipClass = "Wartalon Escort Carrier (early)";
         $this->occurence = "uncommon";
