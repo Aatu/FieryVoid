@@ -60,8 +60,8 @@ class Galleon extends HeavyCombatVessel{
 
         $this->hitChart = array (
         		0=> array (
-        				7=>"Structure", //6 but then Cargo Bays can't be even
-        				9=>"Cargo Bay A",
+        				5=>"Structure", //6 but then Cargo Bays can't be even
+        				8=>"Cargo Bay A",
                         11=>"Cargo Bay B",
         				13=>"Scanner",
         				15=>"Engine",
