@@ -27,6 +27,7 @@ class Battlewagon extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(4, 26));
         $this->addPrimarySystem(new CargoBay(4, 18));
+        $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   
         $this->addFrontSystem(new Thruster(4, 32, 0, 6, 1));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
@@ -37,7 +38,6 @@ class Battlewagon extends BaseShip{
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 120));
 
-        $this->addAftSystem(new JumpEngine(4, 16, 3, 24));
         $this->addAftSystem(new TwinArray(2, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(2, 6, 2, 60, 240));
         $this->addAftSystem(new Thruster(4, 8, 0, 2, 2));
