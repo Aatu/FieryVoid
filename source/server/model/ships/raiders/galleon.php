@@ -71,7 +71,7 @@ class Galleon extends HeavyCombatVessel{
         		),
         		1=> array (
         				4=>"Thruster",
-        				6=>"Standard Particle Beam",
+        				6=>"0:Standard Particle Beam",
         				8=>"Medium Plasma Cannon",
         				10=>"Particle Cannon",
         				13=>"0:Cargo Bay A",
@@ -80,7 +80,7 @@ class Galleon extends HeavyCombatVessel{
         		),
         		2=> array(
         				4=>"Thruster",
-        				6=>"Standard Particle Beam",
+        				6=>"0:Standard Particle Beam",
         				8=>"Twin Array",
         				11=>"0:Cargo Bay B",
         				18=>"Structure",
