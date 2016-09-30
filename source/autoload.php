@@ -277,6 +277,10 @@ spl_autoload_register(
                 'wolf' => '/server/model/ships/raiders/wolf.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
+                
+                'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
+                'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
+                
             		
             	//civilians
             	'ore' => '/server/model/ships/civilians/oreBarge.php',
