@@ -1240,6 +1240,7 @@ class DBManager {
     private function getMovesForShips($gamedata){
         //try to limit - last turn of movement for every unit...
         //actual movement - unit may stand still in a turn, that's not a move :)
+	    //BUT - first turn is extra important, so save that too!
 
         $stmt = $this->connection->prepare("
             SELECT 
@@ -1262,7 +1263,7 @@ class DBManager {
             $move_orders = array();
             while ($stmt->fetch())
             {
-            	if ($prev_shipid != $shipid) { //orders for new ship! 
+            	if ($prev_shipid != $shipid) { //orders for new ship! save old ship orders... 
             	   foreach($move_orders as $move) {
             	   	$gamedata->getShipById($prev_shipid)->setMovement( $move );
             	   }
@@ -1271,6 +1272,11 @@ class DBManager {
             	   $prev_turn = -1;
             	}
             	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
+			if ($prev_turn <= 1) { //there might be especially important orders on turn 1 or earlier, save them
+			   foreach($move_orders as $move) {
+				$gamedata->getShipById($prev_shipid)->setMovement( $move );
+			   }
+			}
             		$move_orders = array();
             		$prev_turn = $turn;
             	}
