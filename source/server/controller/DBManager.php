@@ -1272,7 +1272,11 @@ class DBManager {
             	   $prev_turn = -1;
             	}
             	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
-			if ($prev_turn <= 1) { //there might be especially important orders on turn 1 or earlier, save them
+			if (
+				($prev_turn <= 1) //there might be especially important orders on turn 1 or earlier, save them
+			    	|| ( ($gamedata->turn <= $prev_turn+2) && !($gamedata->getShipById($prev_shipid) instanceof FighterFlight) ) //need more turns back :( for non-fighters...
+			) 
+			{ 
 			   foreach($move_orders as $move) {
 				$gamedata->getShipById($prev_shipid)->setMovement( $move );
 			   }
