@@ -651,6 +651,7 @@ spl_autoload_register(
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
                 'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sentri' => '/server/model/ships/centauri/sentri.php',
+                'larisias' => '/server/model/ships/centauri/larisiAS.php',
                 'severeburnout' => '/server/model/cricialClasses.php',
                 'shadras' => '/server/model/ships/balosian/shadras.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
