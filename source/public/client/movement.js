@@ -826,11 +826,7 @@ shipManager.movement = {
         var pivotcost = ship.pivotcost;
         var value = 0;
         if (gamedata.gamephase == 3){
-		        if (pivotcost == 1) { 
-				pivotcost *= 2; 
-			} else { //shuttles have more
-				pivotcost = Math.ceil(pivotcost * 1.5);
-			}
+			pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
 			value = "combatpivot";
 		}
         
