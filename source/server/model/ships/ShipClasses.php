@@ -2059,7 +2059,6 @@
 
 
     class StarBaseFiveSections extends StarBase{
-
 	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
             //debug::log("getPiercingLocations");
             
@@ -2117,5 +2116,22 @@
 
             return $locs;
         }
-    }
+    } //end of StarBaseFiveSections
+
+
+
+
+    class StarBaseFourSections extends StarBase{
+        public function getLocations(){
+        //debug::log("getLocations");         
+            $locs = array();
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
+            return $locs;
+        }
+    } //end of StarBaseFourSections
+
+
 ?>

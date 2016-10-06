@@ -277,6 +277,10 @@ spl_autoload_register(
                 'wolf' => '/server/model/ships/raiders/wolf.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
+                
+                'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
+                'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
+                
             		
             	//civilians
             	'ore' => '/server/model/ships/civilians/oreBarge.php',
@@ -647,6 +651,7 @@ spl_autoload_register(
                 'senschuka' => '/server/model/ships/dilgar/senschuka.php',
                 'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sentri' => '/server/model/ships/centauri/sentri.php',
+                'larisias' => '/server/model/ships/centauri/larisiAS.php',
                 'severeburnout' => '/server/model/cricialClasses.php',
                 'shadras' => '/server/model/ships/balosian/shadras.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',
