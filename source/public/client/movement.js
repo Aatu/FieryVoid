@@ -789,7 +789,7 @@ shipManager.movement = {
             if (!weaponManager.canCombatTurn(ship))
                 return false;
             
-            if (ship.pivotcost*2 > shipManager.movement.getRemainingEngineThrust(ship))
+            if (Math.ceil(ship.pivotcost * 1.5) > shipManager.movement.getRemainingEngineThrust(ship))
                 return false;
         
         }else if (gamedata.gamephase != 2)
