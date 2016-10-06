@@ -1,5 +1,5 @@
 <?php
-class TFSFreedomBase extends StarBaseFourSections{
+class tfsfreedombase extends StarBaseFourSections{
 /*TFS Freedom Base: unique construction from Raiders&Privateers*/
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
