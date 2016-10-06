@@ -38,7 +38,7 @@ class larisiAS extends FighterFlight{
 			$fighter->iconPath = "img/ships/sentri_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
+			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 1)); //1 gun d6+2
 			
 			
 			$this->addSystem($fighter);
