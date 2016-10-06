@@ -49,7 +49,7 @@ class SanctuaryBase extends StarBaseSixSections{
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new Hangar(3, 1),
 				new SubReactor(3, 8, 0, 0),
-				new CargoBay(3, 36))
+				new CargoBay(3, 36),
 				new Structure(3, 76)
 			);
 			$loc = $this->locations[$i];
