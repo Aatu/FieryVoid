@@ -17,7 +17,7 @@ class TFSFreedomBase extends StarBaseFourSections{
 
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; 
-		$this->locations = array(1, 4, 2, 3);
+		$this->locations = array(1, 41, 2, 31);
 		$this->hitChart = array(			
 			0=> array(
 				10 => "Structure",
