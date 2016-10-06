@@ -44,23 +44,22 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 15th of September 2016";
+                    header.innerHTML = "Latest News 6th of October 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- An attempt to make large games last longer (very large battles tend to crash after a few turns)";
+                    news.innerHTML += "- Fixes to recently included, movement-related bugs";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- fighters now should correctly show smaller profiles to fire"; 
+                    news.innerHTML += "- Thruster crits should be less nasty now (effective thrust counted... if I'm right ;) )"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Various SCS updates";
+                    news.innerHTML += "- Various SCS updates (including overhaul of a few Raider and Drazi ships, 2 new Raider bases, and the first Assault Shuttle in game (for scenario battles ;) ))";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
 
                     
                     news.innerHTML += "<br><br>----------<b>LINKS</b>----------";
-
                     news.innerHTML +="<br><a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs";
                     news.innerHTML +="<br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff";
                     news.innerHTML +="<br><a href=\"http://fieryvoid.net/reg.php\">Register</a> new player account";
