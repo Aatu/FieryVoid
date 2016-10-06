@@ -2123,48 +2123,6 @@
 
 
 
-    class StarBaseFourSections extends StarBase{
-        public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            //debug::log("getPiercingLocations");
-            
-            $location =  $this->activeHitLocation["loc"];
-            
-            $locs = array();
-            $finallocs = array();
-
-            if ($location == 1 || $location == 2){
-                $locs[] = 1;
-                $locs[] = 0;
-                $locs[] = 2;
-            }
-            else if ($location == 31 || $location == 41){
-                $locs[] = 31;
-                $locs[] = 0;
-                $locs[] = 41;
-            }
-            
-            foreach ($locs as $loc){
-                $structure = $this->getStructureSystem($loc);
-                if ($structure != null && !$structure->isDestroyed()){
-                    $finallocs[] = $loc;
-                }
-            }
-            
-            return $finallocs;
-            
-        }
-	    
-	    
-        public function getLocations(){
-        //debug::log("getLocations");         
-            $locs = array();
-            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 31, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 41, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
-            return $locs;
-        }
-    } //end of StarBaseFourSections
 
 
 ?>
