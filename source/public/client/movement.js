@@ -174,8 +174,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2)
             return false;
         
-		if (!ship.flight)
-			return false;
+		/*if (!ship.flight) return false; */
 	
 		if (accel == 0)
 			return true;
@@ -827,7 +826,7 @@ shipManager.movement = {
         var pivotcost = ship.pivotcost;
         var value = 0;
         if (gamedata.gamephase == 3){
-			pivotcost *= 2;
+			pivotcost = Math.ceil(pivotcost * 1.5); //2 for fighters, 3 for shuttles
 			value = "combatpivot";
 		}
         

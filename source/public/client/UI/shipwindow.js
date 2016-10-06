@@ -1491,7 +1491,9 @@ setSystemData: function(ship, system, shipwindow){
         systemwindow.data("direction", system.direction);
         systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster"+system.direction+".png)");
         
-        var channeled = shipManager.movement.getAmountChanneled(ship, system);
+        //var channeled = shipManager.movement.getAmountChanneled(ship, system);
+	//change: count effective thrust, not engine thrust
+	var channeled = shipManager.movement.getAmountChanneledReal(ship, system, false);
         if (channeled > output){
             field.addClass("darkred");
         }else{
