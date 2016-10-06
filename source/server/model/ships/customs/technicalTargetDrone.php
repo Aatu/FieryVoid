@@ -19,7 +19,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->rollcost = 3;
 		$this->pivotcost = 4;
 		
-		$this->$jinkinglimit = 4; //test how (and if at all) this will work for ships...
+		$this->jinkinglimit = 4; //test how (and if at all) this will work for ships...
 		
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 26, 0, 0));

@@ -26,6 +26,8 @@
         public $minesweeperbonus = 0;
         public $base = false;
         public $smallBase = false;
+	    
+	public $jinkinglimit = 0; //just in case there will be a ship actually able to jink
         
         public $enabledSpecialAbilities = array();
         
