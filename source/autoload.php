@@ -279,7 +279,7 @@ spl_autoload_register(
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
                 
                 'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
-                'tfsfreedombase' => '/server/model/ships/raiders/TFSFreedomBase.php',
+                'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
                 
             		
             	//civilians
