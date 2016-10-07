@@ -26,6 +26,7 @@ spl_autoload_register(
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
+                'smallstarbasefoursections' => '/server/model/ships/ShipClasses.php',
 
                 //custom ships directory             
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',               
