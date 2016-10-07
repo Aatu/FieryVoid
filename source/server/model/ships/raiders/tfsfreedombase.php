@@ -18,7 +18,7 @@ class tfsfreedombase extends StarBaseFourSections{
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; 
 		
-		$this->locations = array(1, 41, 2, 31);
+		$this->locations = array(1, 4, 2, 3);
 		
 		$this->hitChart = array(			
 			0=> array(
@@ -62,16 +62,6 @@ class tfsfreedombase extends StarBaseFourSections{
 				$this->addSystem($system, $loc);
 			}
 		}
-		//I encountered unexpected trouble - perhaps that's because side locations are not filled?...
-		/*
-		$systems = array( new Structure(1, 1) );
-			foreach ($systems as $system){
-				$this->addSystem($system, 32);
-				$this->addSystem($system, 42);
-			}	
-		$this->hitChart[32] = array( 20 => "Primary",	);
-		$this->hitChart[42] = array( 20 => "Primary",	);
-		*/
-		
+
     }
 }
