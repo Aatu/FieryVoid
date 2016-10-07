@@ -2123,6 +2123,9 @@
 
 
     class StarBaseFourSections extends BaseShip{
+        function __construct($id, $userid, $name, $slot){
+            parent::__construct($id, $userid, $name,$slot);
+		///and change relevant standard  data...
 		$this->base = true; //this is a base after all!
 		$this->smallBase = true; //...NOT an enormous one ;)
 	        //values below will most often be true for such base...
@@ -2130,7 +2133,7 @@
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
-	    
+        }
 	    
         public function getLocations(){        
             $locs = array();
