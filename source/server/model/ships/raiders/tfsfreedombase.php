@@ -6,7 +6,7 @@ class tfsfreedombase extends StarBaseFourSections{
 		$this->pointCost = 700;
 		$this->faction = "Raiders";
 		$this->phpclass = "tfsfreedombase";
-		$this->shipClass = "Z NOT WORKING YET! TFS Freedom Base";
+		$this->shipClass = "TFS Freedom Base";
 		$this->fighters = array("medium"=>24); 
 		$this->shipSizeClass = 3; //this is Capital base
 		$this->iniativebonus = -200; //no voluntary movement anyway
