@@ -215,13 +215,13 @@ shipManager.movement = {
 			
 		var commit = false;
 		var requiredThrust = Array();
-        var assignedThrust = Array();
-        if (ship.flight){
+        	var assignedThrust = Array();
+        	if (ship.flight){
 			commit = true;
 			requiredThrust[0] = 1;
 			assignedThrust[0] = 1;
-		}else{
-			requiredThrust[0] = 1;
+		}else{ //this is a ship, not fighter flight!
+			requiredThrust = Array(ship.pivotcost, 0, 0, 0, 0);
 		}
         
     
