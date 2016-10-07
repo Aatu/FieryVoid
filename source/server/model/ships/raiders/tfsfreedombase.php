@@ -14,6 +14,8 @@ class tfsfreedombase extends StarBaseFourSections{
 		$this->turndelaycost = 0;
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
+		
+		        $this->occurence = "unique";
 
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; 
