@@ -2122,14 +2122,18 @@
 
 
 
-    class StarBaseFourSections extends BaseShip{ //just change arcs of sections...
-        public $base = true;
-        public $smallBase = true;
+    class SmallStarBaseFourSections extends BaseShip{ //just change arcs of sections...
+	    function __construct($id, $userid, $name,  $slot){
+		parent::__construct($id, $userid, $name,  $slot);
 	    
-        public $shipSizeClass = 3; 
-        public $iniativebonus = -200; //no voluntary movement anyway
-        public $turncost = 0;
-        public $turndelaycost = 0;
+		$this->base = true;
+		$this->smallBase = true;
+	    
+		$this->shipSizeClass = 3; 
+		$this->iniativebonus = -200; //no voluntary movement anyway
+		$this->turncost = 0;
+		$this->turndelaycost = 0;
+	    }
 	    
         public function getLocations(){        
             $locs = array();
@@ -2141,7 +2145,7 @@
 
             return $locs;
         }
-    } //end ofStarBaseFourSections
+    } //end of SmallStarBaseFourSections
 
 
 ?>
