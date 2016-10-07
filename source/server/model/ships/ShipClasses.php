@@ -2122,7 +2122,27 @@
 
 
 
+    class StarBaseFourSections extends BaseShip{
+		$this->base = true; //this is a base after all!
+		$this->smallBase = true; //...NOT an enormous one ;)
+	        //values below will most often be true for such base...
+		$this->shipSizeClass = 3; 
+		$this->iniativebonus = -200; //no voluntary movement anyway
+		$this->turncost = 0;
+		$this->turndelaycost = 0;
+	    
+	    
+        public function getLocations(){        
+            $locs = array();
 
+            $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 0, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
+
+            return $locs;
+        }
+    } //end ofStarBaseFourSections
 
 
 ?>
