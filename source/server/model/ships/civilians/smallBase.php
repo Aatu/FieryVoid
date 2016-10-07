@@ -1,5 +1,5 @@
 <?php
-class smallBase extends BaseShip{
+class smallBase extends StarBaseFourSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
