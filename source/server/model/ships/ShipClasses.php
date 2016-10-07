@@ -2123,6 +2123,14 @@
 
 
     class StarBaseFourSections extends BaseShip{ //just change arcs of sections...
+        public $base = true;
+        public $smallBase = true;
+	    
+        public $shipSizeClass = 3; 
+        public $iniativebonus = -200; //no voluntary movement anyway
+        public $turncost = 0;
+        public $turndelaycost = 0;
+	    
         public function getLocations(){        
             $locs = array();
 
