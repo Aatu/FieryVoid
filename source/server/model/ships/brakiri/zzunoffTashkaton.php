@@ -63,7 +63,7 @@ class zzunoffTashkaton extends BaseShip{
 
         
         $this->addRightSystem(new GravitonBeam(4, 8, 8, 0, 60));
-        $this->addLeftSystem(new GraviticCannon(3, 6, 5, 0, 120));
+        $this->addRightSystem(new GraviticCannon(3, 6, 5, 0, 120));
         $this->addRightSystem(new GraviticThruster(5, 13, 0, 8, 4));
 
         
