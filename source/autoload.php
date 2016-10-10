@@ -20,9 +20,10 @@ spl_autoload_register(
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
-            	'smallbase' => '/server/model/ships/civilians/smallBase.php',
+            	
 
-                //base  classes              
+                //starbase  classes              
+                'smallbase' => '/server/model/ships/civilians/smallBase.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
