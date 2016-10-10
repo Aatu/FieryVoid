@@ -348,6 +348,7 @@ spl_autoload_register(
                 'calorta' => '/server/model/ships/brakiri/calorta.php',
                 'catapult' => '/server/model/systems/baseSystems.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
+                'cidikar' => '/server/model/ships/brakiri/cidikar.php',
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
