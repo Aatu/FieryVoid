@@ -48,6 +48,9 @@ spl_autoload_register(
                 'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
                 'eacgemini' => '/server/model/ships/customs/eacGemini.php',
 
+                //custom Brakiri
+                'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
+                
             	//custom Minbari
             	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
             	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
