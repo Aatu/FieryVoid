@@ -403,6 +403,7 @@ spl_autoload_register(
                 'ewentry' => '/server/model/BaseClasses.php',
                 'eyehawk' => '/server/model/ships/drazi/eyehawk.php',
                 'falkosi' => '/server/model/ships/brakiri/falkosi.php',
+                'tobrakias' => '/server/model/ships/brakiri/tobrakiAS.php',
                 'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
                 'fighter' => '/server/model/systems/fighter.php',
                 'fighterflight' => '/server/model/ships/FighterFlight.php',
