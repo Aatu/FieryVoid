@@ -20,9 +20,10 @@ spl_autoload_register(
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
-            	'smallbase' => '/server/model/ships/civilians/smallBase.php',
+            	
 
-                //base  classes              
+                //starbase  classes              
+                'smallbase' => '/server/model/ships/civilians/smallBase.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
                 'starbasefivesections' => '/server/model/ships/ShipClasses.php',
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
@@ -49,6 +50,7 @@ spl_autoload_register(
                 'eacgemini' => '/server/model/ships/customs/eacGemini.php',
 
                 //custom Brakiri
+                'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 
             	//custom Minbari
@@ -348,6 +350,7 @@ spl_autoload_register(
                 'calorta' => '/server/model/ships/brakiri/calorta.php',
                 'catapult' => '/server/model/systems/baseSystems.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
+                'cidikar' => '/server/model/ships/brakiri/cidikar.php',
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
                 'civilianfreighter' => '/server/model/ships/civilians/civilianFreighter.php',
@@ -402,6 +405,7 @@ spl_autoload_register(
                 'ewentry' => '/server/model/BaseClasses.php',
                 'eyehawk' => '/server/model/ships/drazi/eyehawk.php',
                 'falkosi' => '/server/model/ships/brakiri/falkosi.php',
+                'tobrakias' => '/server/model/ships/brakiri/tobrakiAS.php',
                 'fangedserpent' => '/server/model/ships/drazi/fangedserpent.php',
                 'fighter' => '/server/model/systems/fighter.php',
                 'fighterflight' => '/server/model/ships/FighterFlight.php',

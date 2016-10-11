@@ -45,8 +45,8 @@ class zzunoffTashkaton extends BaseShip{
         $this->addFrontSystem(new GravitonBeam(4, 8, 8, 300, 60));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 0, 120));
-        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
-        $this->addFrontSystem(new GraviticThruster(5, 15, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
+        $this->addFrontSystem(new GraviticThruster(5, 10, 0, 6, 1));
    
 	$this->addAftSystem(new GraviticShield(0, 6, 0, 3, 180, 240));
         $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 300));
@@ -54,7 +54,7 @@ class zzunoffTashkaton extends BaseShip{
 	$this->addAftSystem(new GravitonPulsar(3, 5, 2, 60, 240));
 	$this->addAftSystem(new GraviticShield(0, 6, 0, 3, 120, 180));
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
-        $this->addAftSystem(new GraviticThruster(5, 10, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(5, 15, 0, 8, 2));
 
 
 	$this->addLeftSystem(new GraviticCannon(3, 6, 5, 240, 0));
@@ -63,7 +63,7 @@ class zzunoffTashkaton extends BaseShip{
 
         
         $this->addRightSystem(new GravitonBeam(4, 8, 8, 0, 60));
-        $this->addLeftSystem(new GraviticCannon(3, 6, 5, 0, 120));
+        $this->addRightSystem(new GraviticCannon(3, 6, 5, 0, 120));
         $this->addRightSystem(new GraviticThruster(5, 13, 0, 8, 4));
 
         
