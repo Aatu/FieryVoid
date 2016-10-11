@@ -1,1 +1,83 @@
+<?php
+/*custom weapons - from StarWars universe (to keep them separate)*/
 
+
+  class SWFighterLaser extends LinkedWeapon{
+    /*StarWars fighter weapon - a Particle weapon!*/
+    public $name = "lightParticleBeam";
+    public $displayName = "Fighter Laser";
+    public $animation = "trail";
+    public $projectilespeed = 12;
+    public $animationColor =  array(225, 175, 195);
+    public $animationWidth = 10;
+    public $trailColor = array(205, 175, 185);
+    public $trailLength = 5;
+    public $priority = 4;
+    public $intercept = 2;
+    public $loadingtime = 1;
+    public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+    private $damagebonus = 0;
+    public $exclusive = false;    
+    
+    function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
+      if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
+      $this->damagebonus = $damagebonus;
+      $this->defaultShots = $nrOfShots;
+      $this->shots = $nrOfShots;
+      $this->intercept = $nrOfShots;
+          
+      parent::__construct(0, 1, 0, $startArc, $endArc);
+    }    
+    
+    public function setSystemDataWindow($turn){
+      $this->data["Weapon type"] = "Particle";
+      $this->data["Damage type"] = "Standard";
+      parent::setSystemDataWindow($turn);
+    }
+    
+    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+
+  } //end of SWFighterLaser
+
+
+
+  class SWFighterLaserAllLinked extends SWFighterLaser{
+    /*StarWars fighter weapon - maximum power shot, all guns linked!*/
+    function __construct($startArc, $endArc, $damagebonus){
+      $this->$animationColor =  array(235, 175, 200);
+      $this->$animationWidth = 12;
+      $this->$trailColor = array(215, 175, 190);
+      $this->$trailLength = 6;  
+      $this->exclusive = true;
+      
+      parent::__construct($startArc, $endArc, $damagebonus, 1, 'All Linked');
+    }
+
+  } //end of SWFighterLaserAllLinked
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?>
