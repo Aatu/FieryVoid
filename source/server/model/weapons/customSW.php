@@ -4,7 +4,7 @@
 
   class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
-    public $name = "lightParticleBeam";
+    public $name = "swFighterLaser";
     public $displayName = "Fighter Laser";
     public $animation = "trail";
     public $projectilespeed = 12;
@@ -45,14 +45,15 @@
   } //end of SWFighterLaser
 
 
-
   class SWFighterLaserAllLinked extends SWFighterLaser{
     /*StarWars fighter weapon - maximum power shot, all guns linked!*/
     function __construct($startArc, $endArc, $damagebonus){
+      $name = "swFighterLaserAllLinked";
       $this->$animationColor =  array(235, 175, 200);
       $this->$animationWidth = 12;
       $this->$trailColor = array(215, 175, 190);
-      $this->$trailLength = 6;  
+      $this->$trailLength = 6;
+      public $fireControl = array(-3, -1, -1); // fully linked shot is less accurate!
       $this->exclusive = true;
       
       parent::__construct($startArc, $endArc, $damagebonus, 1, 'All Linked');
@@ -62,7 +63,70 @@
 
 
 
+  class SWFighterIon extends LinkedWeapon{
+    /*StarWars fighter Ion weapon*/
+    public $name = "swFighterIon";
+    public $displayName = "Fighter Ion Cannon";
+    public $animation = "trail";
+    public $projectilespeed = 10;
+    public $animationColor =  array(175, 225, 195);
+    public $animationWidth = 10;
+    public $trailColor = array(175, 205, 185);
+    public $trailLength = 5;
+    public $priority = 9;
+    public $intercept = 0;
+    public $loadingtime = 1;
+    public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(-3, -2, -1); // fighters, <mediums, <capitals
+    private $damagebonus = 0;
+    public $exclusive = false;    
+    
+    function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
+      if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
+      $this->damagebonus = $damagebonus;
+      $this->defaultShots = $nrOfShots;
+      $this->shots = $nrOfShots;
+          
+      parent::__construct(0, 1, 0, $startArc, $endArc);
+    }    
+    
+    public function setSystemDataWindow($turn){
+      $this->data["Weapon type"] = "SW Ion";
+      $this->data["Damage type"] = "Standard";
+      $this->data["<font color='red'>Remark</font>"] = "Increased chance to hit systems.";      
+      $this->data["<font color='red'>Remark</font>"] = "Generates additional critical roll."; 
+      $this->data["<font color='red'>Remark</font>"] = "Ignores armor."; 
+      parent::setSystemDataWindow($turn);
+    }
+     
+    public function getDamage($fireOrder){        return Dice::d(3)+$this->damagebonus;   }
+    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus - $this->dp;      }
+    
+    protected function getSystemArmour($system, $gamedata, $fireOrder){
+      return 0; //ignore armor!
+    }
 
+  } //end of SWFighterIon
+    
+
+  class SWFighterIonAllLinked extends SWFighterIon{
+    /*StarWars fighter weapon - maximum power shot, all guns linked!*/
+    function __construct($startArc, $endArc, $damagebonus){
+      $name = "swFighterIonAllLinked";      
+      $this->$animationColor =  array(175, 235, 200);
+      $this->$animationWidth = 12;
+      $this->$trailColor = array(175, 215, 190);
+      $this->$trailLength = 6;
+      public $fireControl = array(-5, -3, -2); // fully linked shot is less accurate!
+      $this->exclusive = true;
+      
+      parent::__construct($startArc, $endArc, $damagebonus, 1, 'All Linked');
+    }
+
+  } //end of SWFighterIonAllLinked
 
 
 
