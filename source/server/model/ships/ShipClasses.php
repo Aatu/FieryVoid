@@ -538,8 +538,11 @@
                     return $system;
                 }
             }
-            
-            return null;
+            if($location!=0){ //if there is no appropriate structure for a section, then it must be PRIMARY Structure!
+		   return $this->getStructureSystem(0);
+	    }else{
+            	return null;
+	    }
         }
 
         
@@ -810,8 +813,9 @@
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
 
+		
+/*fragment  not required for anything any longer?
             $destroyedThisTurn = false;
-
             if ($weapon->flashDamage){
             //    debug::log("is FLASH");
             //    debug::log("check if a system on target location was destroyed this turn");
@@ -829,14 +833,14 @@
                     }
                 }
             }
+*/	    
 
 
             $location_different = $location; //no retargeting unless indicated later
             
-
+		$hitChart = $this->hitChart[$location];
             if (!$weapon->flashDamage){
             //    debug::log("begin normal, non flash roll on hitchart routine");
-                $hitChart = $this->hitChart[$location];
                 $roll = Dice::d(20);
             //    debug::log("intial roll: ".$roll);
 
@@ -883,7 +887,7 @@
 	                }
 	            }
 
-                debug::log("hitLoc: ".$location.", hitting: ".$name);
+                //debug::log("hitLoc: ".$location.", hitting: ".$name);
 
                 foreach ($this->systems as $system){
                     if ($system->location == $location_different){ //possibly location indicated is different than one actualy hit
@@ -893,13 +897,35 @@
                     }
                 }
             }
-            else {                
+            else {     //FLASH mode!           
             //    debug::log("FLASH type, gathering all from location");
-                foreach ($this->systems as $system){
-                    if ($system->location == $location && !$system->isDestroyed() && !$system instanceof Structure){
-                        $systems[] = $system;
-                    }
-                }
+		// BUT only systems actually on hit table!	
+		for($roll = 1; $roll <= 20 ; $roll++){ //use hit table to prepare systems list for Flash!
+			if (isset($this->hitChart[$location][$roll])){
+				$name = $this->hitChart[$location][$roll];
+				if($name == 'Primary') $name = ''; //do not overkill
+				//name MAY indicate a system on different section!    
+				$location_different_array = explode (':' , $name);
+				if(sizeof($location_different_array)==2){ //exactly 2 items - first location, then name 
+					$location_different = $location_different_array[0]; //location ID
+					$name = $location_different_array[1]; //actual system name
+				}else{
+					$location_different = $location;
+				}
+				if ($name != '' ){ //something useful found!
+					if($name == 'Structure'){
+						$system = $this->getStructureSystem($location_different);
+						if(!$system->isDestroyed()) $systems[] = $system;
+					}else{
+						foreach ($this->systems as $system){
+							if ($system->location == $location_different && $system->displayName == $name && !$system->isDestroyed() ){
+								$systems[] = $system;
+							}
+						}
+					}			
+				}
+			}
+		}	
             }
 
 
@@ -945,7 +971,7 @@
 
             // if you have no elligibe systems in your array
             else {
-                debug::log("size of systems = 0 no valid target systems -- TYPO or section down ??");
+                //debug::log("size of systems = 0 no valid target systems -- TYPO or section down ??");
 
                 if ($weapon->flashDamage){
               //      debug::log("flash type");
@@ -999,45 +1025,29 @@
             $totalStructure = 0;
 
             foreach ($this->systems as $system){
-                if ($system->location == $location){
-            
-                    // For flash damage, only take into account the systems
+                if ($system->location == $location && $system->name != "structure"){ //structure qwill get separate entry!
+                                // For flash damage, only take into account the systems
                     // that are still alive and are not structure.
-                    if ($weapon->flashDamage && ($system->isDestroyed() || $system->name == "structure" )){
+                    if ($weapon->flashDamage && ($system->isDestroyed() /*|| $system->name == "structure" )*/){
                         continue;
-                    }
-                        
+                    }                        
                     $systems[] = $system;
-                        
-                    if ($system->name == "structure"){
-                       
-                        $multiply = 0.5;
-                        if ($location == 0)
-                            $multiply = 2;
-                            
-                        $totalStructure += round($system->maxhealth * $multiply);
-                    }else{
-                        $totalStructure += $system->maxhealth;
-                    }
-                    
+			$totalStructure += $system->maxhealth;
                 }
             }   
+//add appropriate structure, too!
+	    $system = this->getStructureSystem($location);
+	    if(!$system->isDestroyed() || !$weapon->flashDamage) { //Structure not added only if it's destroyed and mode is Flash
+		$systems[] = $system;
+		$multiply = 0.5;
+		if ($location == 0) $multiply = 2;
+		$totalStructure += round($system->maxhealth * $multiply);
+	    }
             
             if(sizeof($systems) == 0){
                 // all systems were destroyed. If there still is structure,
                 // return that. If not, go to primary.
-           //     debug::log("size of 0");
-            //    debug::log("location: ".$location);
-
                 $structure = $this->getStructureSystem($location);
-
-                if ($structure){
-           //         debug::log("strcuture: ".$structure->displayName);
-                }
-                else {
-            //        debug::log("no structure");
-                }
-
                 if($structure->isDestroyed()){
             //        debug::log("structure true");
                     if ($location == 0)
