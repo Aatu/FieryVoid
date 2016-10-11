@@ -292,7 +292,8 @@ class ArmorReduced extends Critical{
 
 class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be nastier*/
     public $description = "Vulnerable to critical.";
-    function __construct($id, $shipid, $systemid, $phpclass, $turn){
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $strength){
+	    $outputMod = $strength;
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
 }
