@@ -652,17 +652,16 @@ class Weapon extends ShipSystem{
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
-
     }
 
+	
     public function getIntercept($gamedata, $fireOrder){
-
         $count = 0;
         $intercept = 0;
         if ($this->uninterceptable)
             return 0;
 
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+	$shooter = $gamedata->getShipById($fireOrder->shooterid);
         foreach ($gamedata->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach ($fireOrders as $fire){
@@ -699,13 +698,14 @@ class Weapon extends ShipSystem{
         }
 
         return $intercept;
-
     }
 
+	
     public function getInterceptRating($turn){
         return $this->intercept;
     }
 
+	
     public function getNumberOfIntercepts($gamedata, $fireOrder){
         $count = 0;
 
@@ -762,20 +762,18 @@ class Weapon extends ShipSystem{
         $fireOrder->rolled = 1;//Marks that fire order has been handled
     }
 
+	
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
-
 //Debug::Log($this->firingMode);
-
         if ($this->piercing && $this->firingMode == 2 || $this->firingModes[1] == "Piercing"){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
         }else{
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
         }
-
-
     }
 
+	
     protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
 
@@ -793,15 +791,11 @@ class Weapon extends ShipSystem{
             if (!$system)
                 continue;
 
-
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
         }
-
-
-
-
     }
 
+	
     protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
     {
         $okSystem = null;
@@ -886,12 +880,14 @@ class Weapon extends ShipSystem{
         $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
     }
 
+	
     public function isInLaunchRange($shooter, $target, $fireOrder)
     {
         // gameData and fireOrder is needed to check if target has jammers
         return true;
     }
 
+	
     public function isInDistanceRange($shooter, $target, $fireOrder)
     {
         // gameData and fireOrder is needed to check if target has jammers
@@ -950,8 +946,8 @@ class Weapon extends ShipSystem{
         return $damage;
     }
 
+	
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
-
 //        var_dump($fireOrder);
 	$damage = floor($damage);//make sure damage is a whole number, without fractions!
 
@@ -984,15 +980,14 @@ class Weapon extends ShipSystem{
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
         }
 
-
-
-
     }
 
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         return;
     }
-}
+	
+} //end of class Weapon
+
 
     class checkForSelfInterceptFire{
         private static $fired = array();
