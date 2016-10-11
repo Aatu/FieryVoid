@@ -1545,7 +1545,8 @@ shipManager.movement = {
 		
 		
 		var movement = ship.movement[ship.movement.length-1];
-        var already = shipManager.movement.getAmountChanneledReal(ship, system);
+        //var already = shipManager.movement.getAmountChanneledReal(ship, system);
+	var already = shipManager.movement.getAmountChanneled(ship, system); //do check effective thrust, not engine thrust
         var step = 1;
         var wasted = 0;
         var turndelay = shipManager.movement.calculateTurndelay(ship, movement, movement.speed);
@@ -1566,18 +1567,17 @@ shipManager.movement = {
         }
             
     
-        if (shipManager.systems.getOutput(ship, system)*2 < already + step)
+        //if (shipManager.systems.getOutput(ship, system)*2 < already + step)
+	if (shipManager.systems.getOutput(ship, system)*2 < already + 1) //do check effective thrust, not engine thrust
             return false;
 			
 		
         var crits = shipManager.criticals.hasCritical(system, "HalfEfficiency");
         if (crits > 0){
-
             step = step*(crits+1);
         }
         
         if (shipManager.criticals.hasCritical(system, "FirstThrustIgnored") && already == 0){
-
             step++;
         }
         
