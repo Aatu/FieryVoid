@@ -1035,8 +1035,8 @@
 			$totalStructure += $system->maxhealth;
                 }
             }   
-//add appropriate structure, too!
-	    $system = this->getStructureSystem($location);
+		//add appropriate structure, too!
+	    $system = $this->getStructureSystem($location);
 	    if(!$system->isDestroyed() || !$weapon->flashDamage) { //Structure not added only if it's destroyed and mode is Flash
 		$systems[] = $system;
 		$multiply = 0.5;
