@@ -730,6 +730,7 @@
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
 
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";
@@ -781,6 +782,7 @@
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
 
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
