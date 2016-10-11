@@ -168,12 +168,22 @@ class ShipSystem{
     }
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
-
+	//use additional value to critical!
+	$bonusCrit = 0;	
+	foreach($crits as $key=>$value) {
+	  if($value instanceof NastierCrit){
+		$bonusCrit+= $value->$outputMod;
+		  unset($crits[$key]);
+	  }
+	}
+	$crits = array_values($crits); //in case some criticals were deleted!
+		
+	    
         $damageMulti = 1;
 
         if ($ship instanceof OSAT){
             if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0){
-                if ($this->getTotalDamage() > ($this->maxhealth/2)){
+                if ($this->getTotalDamage()+$bonusCrit > ($this->maxhealth/2)){
                     $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
                     $crits[] = $crit;
                 }
@@ -189,7 +199,7 @@ class ShipSystem{
             $damageMulti = 0.5;
         }
 
-        $roll = Dice::d(20) + floor($this->getTotalDamage()*$damageMulti) + $add;
+        $roll = Dice::d(20) + floor(($this->getTotalDamage()+$bonusCrit)*$damageMulti) + $add;
         $criticalTypes = -1;
 
         foreach ($this->possibleCriticals as $i=>$value){
