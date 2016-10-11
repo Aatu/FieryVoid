@@ -50,6 +50,7 @@ spl_autoload_register(
                 'eacgemini' => '/server/model/ships/customs/eacGemini.php',
 
                 //custom Brakiri
+                'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
                 
             	//custom Minbari
