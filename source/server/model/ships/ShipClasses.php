@@ -1028,7 +1028,7 @@
                 if ($system->location == $location && $system->name != "structure"){ //structure qwill get separate entry!
                                 // For flash damage, only take into account the systems
                     // that are still alive and are not structure.
-                    if ($weapon->flashDamage && ($system->isDestroyed() /*|| $system->name == "structure" )*/){
+                    if ($weapon->flashDamage && ($system->isDestroyed() /*|| $system->name == "structure" */)){
                         continue;
                     }                        
                     $systems[] = $system;
