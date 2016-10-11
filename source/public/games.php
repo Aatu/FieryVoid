@@ -44,17 +44,17 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 6th of October 2016";
+                    header.innerHTML = "Latest News 11th of October 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Fixes to recently included, movement-related bugs";
+                    news.innerHTML += "- Flash weapons using hit chart (sort of) and being able to hit Structure";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Thruster crits should be less nasty now (effective thrust counted... if I'm right ;) )"; 
+                    news.innerHTML += "- Thruster crits should be less nasty now (effective thrust counted)"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Various SCS updates (including overhaul of a few Raider and Drazi ships, 2 new Raider bases, and the first Assault Shuttle in game (for scenario battles ;) ))";
+                    news.innerHTML += "- Various SCS updates";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
 
