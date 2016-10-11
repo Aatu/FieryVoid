@@ -16,6 +16,7 @@ class TobrakiAS extends FighterFlight{
         $this->freethrust = 7;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 0;
+	$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         $this->iniativebonus = 9*5;
         
