@@ -400,6 +400,7 @@ class GraviticBolt extends Gravitic
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+		$this->intercept = $shots;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -447,6 +448,7 @@ class GraviticBolt extends Gravitic
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+		$this->intercept = $shots;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
