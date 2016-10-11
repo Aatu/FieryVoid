@@ -7,7 +7,7 @@ class zzunoffTashkaton extends BaseShip{
 	$this->pointCost = 900;
 	$this->faction = "Brakiri";
         $this->phpclass = "zzunoffTashkaton";
-        $this->imagePath = "img/ships/corumai.png"; //to be replaced with Tashkat image once available
+        $this->imagePath = "img/ships/shakara.png"; //to be replaced with Tashkat image once available
         $this->shipClass = "Tashkaton Advanced Cruiser";
         $this->shipSizeClass = 3;
 
