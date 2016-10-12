@@ -54,6 +54,8 @@ class Weapon extends ShipSystem{
     public $shots = 1;
     public $defaultShots = 1;
     public $canChangeShots = false;
+	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	
 
     public $grouping = 0;
     public $guns = 1;
@@ -588,21 +590,7 @@ class Weapon extends ShipSystem{
             $bdew = 0;
             $sdew = 0;
         }
-/*
-        debug::log($this->displayName);
-        debug::log($dew);
-        debug::log($bdew);
-        debug::log($sdew);
-        debug::log($jammermod);
-        debug::log($rangePenalty);
-        debug::log($intercept);
-        debug::log($jink);
-        debug::log($oew);
-        debug::log($soew);
-        debug::log($soew);
-        debug::log($firecontrol);
-        debug::log($mod);
-*/
+
         $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
 
@@ -610,7 +598,7 @@ class Weapon extends ShipSystem{
             debug::log("ballistic");
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            $hitLoc = $target->getDefenceValuePos($pos, $preProfileGoal);
+            $hitLoc = $target->doGetHitSectionPos($pos, $preProfileGoal);
         }
         else {
           //  debug::log("non ballistic");
@@ -633,7 +621,7 @@ class Weapon extends ShipSystem{
 
                 if (!$found){
                 //    debug::log("no valid hitloc for this shooter found, creating");
-                    $hitLoc = $target->getDefenceValue($shooter, $preProfileGoal);
+                    $hitLoc = $target->doGetHitSection($shooter, $preProfileGoal);
                     $target->activeHitLocation[] = $hitLoc;
                 }
             }
