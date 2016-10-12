@@ -203,30 +203,32 @@
         }
 
         public function getLocations(){
-        debug::log("getLocations");         
             $locs = array();
+		$exampleFtr = $this->systems[0]; //whether still alive or not
+		$health = $exampleFtr->maxhealth;
 
-            $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-            $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
-            $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+            $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[0]);
+            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
+            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
+            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
 
             return $locs;
         }
+	    
+       public function fillLocations($locs){
+            return $locs;
+        }
 
-        
+
+/*
         public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
             return 0;
         }
-           
-        
         
         public function getHitSection($pos, $shooter, $turn, $weapon){
-            
-            
             return 0;
-            
         }
+*/	
         
         public function getStructureSystem($location){
              return null;
