@@ -740,11 +740,11 @@
 
         public function getHitSection($pos, $shooter, $turn, $weapon){ //returns value - location!
 		$foundLocation = 0;
-		if(isset($this->activeHitLocations[$shooter->id])){
+		if(isset($this->activeHitLocations[$shooter->id]) && !$weapon->ballistic){
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
         	}else{
 			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
-			$this->activeHitLocations[$shooter->id] = $loc; 
+			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not sa ve for ballistic weapons!
 			$foundLocation = $loc["loc"];
 		}
 		
@@ -755,7 +755,16 @@
 		return $foundLocation;
         }        
 
-
+        public function getHitSectionProfile($pos, $shooter, $turn, $weapon){ //returns value - profile!
+		$foundProfile = 0;
+		if(isset($this->activeHitLocations[$shooter->id]) && !$weapon->ballistic){
+			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
+        	}else{
+			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
+			$foundProfile = $loc["profile"];
+		}
+		return $foundProfile;
+        }   
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
             if (isset($this->hitChart[0])){
