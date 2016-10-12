@@ -454,11 +454,13 @@ class Weapon extends ShipSystem{
         return Array("rp"=>$rangePenalty, "notes"=>$notes);
     }
 
+	
+	
     public function calculateHit($gamedata, $fireOrder){
-        debug::log("_____________");
+        //debug::log("_____________");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        debug::log($shooter->phpclass." vs: ".$target->phpclass);
+        //debug::log($shooter->phpclass." vs: ".$target->phpclass);
         $pos = $shooter->getCoPos();
         $jammermod = 0;
         $jink = 0;
@@ -570,10 +572,9 @@ class Weapon extends ShipSystem{
         }
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
-
-			$CnC = $shooter->getSystemByName("CnC");
-			$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
-		}
+		$CnC = $shooter->getSystemByName("CnC");
+		$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
+	}
         $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
 
         $intercept = $this->getIntercept($gamedata, $fireOrder);
@@ -585,46 +586,21 @@ class Weapon extends ShipSystem{
             $sdew = 0;
         }
 
-        $preProfileGoal = ($dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
+        $preProfileGoal = (-$dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
-
+	    
         if ($this->ballistic){
-            //debug::log("ballistic");
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            $hitLoc = $target->doGetHitSectionPos($pos, $preProfileGoal);
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		$hitLoc = $target->getHitSectionPos($pos, $preProfileGoal);
+		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
         }
         else {
-
-            if (sizeof($target->activeHitLocation > 0)){                
-                $found = false;
-             //   debug::log("more than one setup loc found");
-
-                foreach ($target->activeHitLocation as $setup){
-                    if ($setup["validFor"] == $shooter->id){
-                  //      debug::log("hitLoc for this shooter!");
-                        $hitLoc = $setup;
-                        $found = true;
-                    }
-                    if ($found){
-                  //      debug::log("breaking hitLoc search");
-                        break;
-                    }
-                }
-
-                if (!$found){
-                //    debug::log("no valid hitloc for this shooter found, creating");
-                    $hitLoc = $target->doGetHitSection($shooter, $preProfileGoal);
-                    $target->activeHitLocation[] = $hitLoc;
-                }
-            }
-        }
-
-
-        $defence = $hitLoc["profile"];
-
-
-        $goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
+		$hitLoc = $target-> getHitSection($shooter, $preProfileGoal);
+		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
+	}
+        //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
+	$goal = $defence + $preProfileGoal;
 
         $change = round(($goal/20)*100);
 
@@ -703,8 +679,9 @@ class Weapon extends ShipSystem{
         return $count;
     }
 
+	
+	
     public function fire($gamedata, $fireOrder){
-
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $this->firingMode = $fireOrder->firingMode;
@@ -781,35 +758,27 @@ class Weapon extends ShipSystem{
     {
         $okSystem = null;
 
-        if ($this->piercing && $this->firingMode == 2)
-        {
+        if ($this->piercing && $this->firingMode == 2){
             return null;
         }
 
-	if ($target instanceof FighterFlight)
-        {
+	if ($target instanceof FighterFlight){
             return null;
         }
 
-        if ($this->flashDamage)
-        {
-            // If overkill comes from flash damage, first go through all
-            // other systems before overkilling into structure.
-            $okSystem = $target->getHitSystem($pos, $shooter, $fireOrder, $this);
+        if ($this->flashDamage){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
+            $okSystem = $target->getHitSystem($pos, $shooter, $fireOrder, $this); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
-        if ( $okSystem == null )
-        {
+        if ( $okSystem == null || $okSystem->isDestroyed()){
             $okSystem = $target->getStructureSystem($system->location);
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed())
-        {
+        if ($okSystem == null || $okSystem->isDestroyed())        {
             $okSystem = $target->getStructureSystem(0);
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed())
-        {
+        if ($okSystem == null || $okSystem->isDestroyed())        {
             return null;
         }
 
@@ -818,7 +787,6 @@ class Weapon extends ShipSystem{
 
 
     public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-
         if($this->flashDamage){
             $flashDamageAmount = $damage/4;
 
@@ -828,20 +796,19 @@ class Weapon extends ShipSystem{
                     // make certain the target doesn't get the damage twice
                     continue;
                 }
+		    
+		if ($ship->isDestroyed()) continue; //no point allocating
 
                 if ($ship instanceof FighterFlight){
-
                     foreach ($ship->systems as $fighter){
                         if ($fighter == null || $fighter->isDestroyed()){
                             continue;
 			}
                         $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
                     }
-                }
-                else{
+                }else{
                     $system = $ship->getHitSystem($target->getCoPos(), $target, $fireOrder, $this);
-
-                    if ($system == null){
+                    if ($system == null ){
                         continue;
                     }
 
@@ -850,13 +817,11 @@ class Weapon extends ShipSystem{
             }
         }
 
-        if ($target->isDestroyed())
-            return;
+        if ($target->isDestroyed()) return;
 
 	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
 
-        if ($system == null)
-            return;
+        if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 
         $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
     }
@@ -880,7 +845,7 @@ class Weapon extends ShipSystem{
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 
-		$armor = 0;
+	$armor = 0;
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
