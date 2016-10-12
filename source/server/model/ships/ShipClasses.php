@@ -778,18 +778,12 @@
 
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-            //debug::log("______________________");
-            //debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
-
             if (isset($this->hitChart[0])){
-               // debug::log("TABLE");
                 $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
             }
             else {
-               // debug::log("DICE");
                 $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
             }
-
             return $system;
         }
 
@@ -838,7 +832,7 @@
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
 		$name = '';
-		while (!$name){
+		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
 			}else{
@@ -869,168 +863,102 @@
 
 
         public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
+		/*same as by table, but prepare table out of available systems...*/
+		$system = null;
+		$name = false;
+		$location_different = false; //target system may be on different location?
+		$location_different_array = array(); //array(location,system) if so indicated
+		$systems = array();
 
-            $system = null;
-            
-            if ($fire->calledid != -1)
-                $system = $this->getSystemById($fire->calledid);
-            
-            if ($system != null && !$system->isDestroyed())
-                return $system;
-        
-            if ($location === null)
-                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
-            
-            $systems = array();
-            $totalStructure = 0;
+		if ($fire->calledid != -1){
+			$system = $this->getSystemById($fire->calledid);
+		}
 
-            foreach ($this->systems as $system){
-                if ($system->location == $location && $system->name != "structure"){ //structure qwill get separate entry!
-                                // For flash damage, only take into account the systems
-                    // that are still alive and are not structure.
-                    if ($weapon->flashDamage && ($system->isDestroyed() /*|| $system->name == "structure" */)){
-                        continue;
-                    }                        
-                    $systems[] = $system;
-			$totalStructure += $system->maxhealth;
-                }
-            }   
-		//add appropriate structure, too!
-	    $system = $this->getStructureSystem($location);
-	    if(!$system->isDestroyed() || !$weapon->flashDamage) { //Structure not added only if it's destroyed and mode is Flash
-		$systems[] = $system;
-		$multiply = 0.5;
-		if ($location == 0) $multiply = 2;
-		$totalStructure += round($system->maxhealth * $multiply);
-	    }
-            
-            if(sizeof($systems) == 0){
-                // all systems were destroyed. If there still is structure,
-                // return that. If not, go to primary.
-                $structure = $this->getStructureSystem($location);
-                if($structure->isDestroyed()){
-            //        debug::log("structure true");
-                    if ($location == 0)
-                                return null;
-                    // Go to primary
-                    // Go to primary systems for flash damage
-                    if ($weapon->flashDamage){
-                        return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                    }
-                    else{
-                        if($structure->isDestroyed($fire->turn -1)){
-                            $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                        }
-                        else{
-                            $structure = $this->getStructureSystem(0);
-                        
-                            if($structure->isDestroyed()){
-                                return null;
-                            }
-                            else{
-                                return $structure;
-                            }
-                        }
-                    }
-                }
-                else{
-                    // there is still structure left.
-                    return $structure;
-                }
-            }
-            
-            $roll = Dice::d($totalStructure);
-            $goneTrough = 0;
+		if ($system != null && !$system->isDestroyed()) return $system;
 
-            foreach ($systems as $system){
-                $health = 0;
-                    
-                if ($system->name == "structure"){
-                    $multiply = 0.5;
-                    if ($location == 0)
-                        $multiply = 2;
-                        
-                    $health = round($system->maxhealth * $multiply);
-                }else{
-                    $health = $system->maxhealth;
-                }
-                
-                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
-                    //print("hitting: " . $system->displayName . " location: " . $system->location ."\n\n");
-                    if ($system->isDestroyed()){
-                        $newSystem = $this->getUndamagedSameSystem($system, $location);
-                        
-                        if($newSystem != null){
-                            return $newSystem;
-                        }
-                        
-                        if ($system instanceof Structure){
-                            if ($system->location == 0){
-                                return null;}
-                                
-                            // Go to primary systems for flash damage
-                            // Go to primary structure for other weapons.
-                            if ($weapon->flashDamage){
-                                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                            }
-                            else{
-                                if($system->isDestroyed($fire->turn -1)){
-                                    $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                                }
-                                else{
-                                    $structure = $this->getStructureSystem(0);
+		if ($location === null) 	$location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
 
-                                    if($structure->isDestroyed()){
-                                        return null;
-                                    }
-                                    else{
-                                        return $structure;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        $structure = $this->getStructureSystem($location);
-                        if ($structure == null || $structure->isDestroyed()){
-                            if ($structure != null && $structure->location == 0){
-                                return null;
-                            }
-                                
-                            // Go to primary systems for flash damage
-                            // Go to primary structure for other weapons.
-                            if ($weapon->flashDamage){
-                                return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                            }
-                            else{
-                                if($structure != null && $structure->isDestroyed($fire->turn -1)){
-                                    $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                                }
-                                else{
-                                    $structure = $this->getStructureSystem(0);
-
-                                    if($structure != null && $structure->isDestroyed()){
-                                        return null;
-                                    }
-                                    else{
-                                        return $structure;
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            return $structure;
-                        }
-                            
-                        
-                    }
-                    return $system;
-                }
-                
-                $goneTrough += $health;
-            }
-            
-            return null;
-        }
+          
+		$hitChart = array(); //$hitChart will contain system names, as usual!
+		//use only non-destroyed systems on section hit
+		$rngTotal = 0; //range of current system
+		$rngCurr = 0; //total range of live systems
+		
+		foreach ($this->systems as $system){ //ok, do use actual systems...
+			if (($system->location == $location) && ($system !instanceof Structure)){ 
+				//Flash - undestroyed only
+				if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+					//Structure and C&C will get special treatment...
+					$multiplier = 1;
+					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
+					$rngCurr =  ceil($system->maxhealth * $multiplier);
+					$rngCurr+=1; //small systems usually have relatively high chance of being hit
+					$rngTotal = $rngTotal+$rngCurr;
+					$hitChart[$rngTotal] = $system->displayName;
+				}
+			}
+		}
+		//add Structure
+		$system =  $this->getStructureSystem($location);
+		if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+			if($location == 0){
+				$multiplier = 2; //PRIMARY has relatively low Structure, increase chance
+			}else{
+				$multiplier = 0; //non-PRIMARY have relatively high structure, reduce chance
+			}
+			$rngCurr =  ceil($system->maxhealth * $multiplier);
+			$rngCurr+=1; //small systems usually have relatively high chance of being hit
+			$rngTotal = $rngTotal+$rngCurr;
+			$hitChart[$rngTotal] = $system->displayName;
+		} 
+		//is there anything to be hit? if not, just overkill to PRIMARY Structure...
+		if($rngTotal==0){
+			$struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
+			return $struct;
+		}
+			
+		//for non-Flash, add PRIMARY to hit table...
+		if(!$weapon->flashDamage){
+			$multiplier = 0.1; //10% chance for PRIMARY penetration
+			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
+			$rngCurr =  ceil($rngTotal * $multiplier);
+			$rngTotal = $rngTotal+$rngCurr;
+			$hitChart[$rngTotal] = 'Primary';
+		}	
+			
+		//now choose system from chart...
+		$roll = Dice::d($rngTotal);
+		$name = '';
+		while ($name == ''){
+			if (isset($hitChart[$roll])){
+				$name = $hitChart[$roll];
+			}else{
+				$roll++;
+				if($roll>$rngTotal)//out of range already!
+				{
+					return $this->getStructureSystem(0);
+				}
+			}
+		}
+		
+		if($name == 'Primary'){ //redirect to PRIMARY!
+			return $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, 0);
+		}
+		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
+		if(sizeof($systems)==0){ //if empty, overkill to Structure
+			$struct = $this->getStructureSystem($location);
+			if($struct->isDestroyed()) $struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
+			return $struct;
+		}
+		
+		//now choose one of equal eligible systems (they're already known to be undestroyed)
+                $roll = Dice::d(sizeof($systems));
+                $system = $systems[$roll-1];
+		return $system;
+		
+	} //end of function GetHitSystemByDice
+		
+		
 
         
         public function getPiercingDamagePerLoc($damage){
