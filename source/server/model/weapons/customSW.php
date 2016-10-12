@@ -81,7 +81,8 @@
     public $rangePenalty = 2;
     public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
     private $damagebonus = 0;
-    public $exclusive = false;    
+    public $exclusive = false;   
+    public $systemKiller = true;
     
     function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
       if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
