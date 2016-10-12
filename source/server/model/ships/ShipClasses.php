@@ -1199,7 +1199,6 @@
         
         public function getFireControlIndex(){
               return 1;
-               
         }        
 
 
@@ -1207,10 +1206,6 @@
         debug::log("getLocations");         
             $locs = array();
 
-//            $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-  //          $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-    //        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->sideDefense);
-      //      $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
 
             $locs[] = array("loc" => 1, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
@@ -1227,362 +1222,28 @@
 
 
         public function fillLocations($locs){
-        // debug::log("fillLocations for".$this->phpclass);
 
             foreach ($locs as $key => $loc){
-
                 $structure = $this->getStructureSystem(0);
-
 
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-            //        debug::log("rem: ".$locs[$key]["remHealth"]);
                     $locs[$key]["armour"] = $structure->armour;
-              //      debug::log("armour: ".$locs[$key]["armour"]);
                 }
                 else {
-                    debug::log("no structure!");
+                    //debug::log("no structure!");
                     return null;
                 }
             }
 
             return $locs;
         }
+    } //end of class MediumShip	    
 
 
 
-        public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
-            $system = null;
-            $name = false;
-            $systems = array();
-            
-            if ($fire->calledid != -1)
-                $system = $this->getSystemById($fire->calledid);
-            
-            if ($system != null && !$system->isDestroyed())
-                return $system;
-        
-            if ($location === null)
-                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
-
-            $destroyedThisTurn = false;
-
-            if ($weapon->flashDamage){
-           //     debug::log("is FLASH");
-             //   debug::log("check if a system on target location was destroyed this turn");
-                foreach ($this->systems as $system){
-                    if ($system->isDestroyed() && $system->location == $location){
-                        foreach ($system->damage as $damage){
-                            if ($damage->turn == $fire->turn){
-                                $destroyedThisTurn = true;
-                                break;
-                            }
-                        }
-                    }
-                    if ($destroyedThisTurn){
-                        break;
-                    }
-                }
-            }
 
 
-            if ($destroyedThisTurn){
-          //      debug::log("one destroyed this turn!");
-            }
-            else {
-          //      debug::log("nope");
-            }
-
-
-            if (!$weapon->flashDamage){
-             //   debug::log("begin normal, non flash roll on hitchart routine");
-                $hitChart = $this->hitChart[$location];
-                $roll = Dice::d(20);
-             //   debug::log("intial roll: ".$roll);
-                if (isset($this->hitChart[$location][$roll])){
-                    $name = $this->hitChart[$location][$roll];
-                }
-                else {
-                    while (!$name){
-                        $roll++;
-                        if (isset($hitChart[$roll])){
-                            $name = $hitChart[$roll];
-                        }
-                    }
-                }
-
-                debug::log("hit result on loc: ".$location." has name: ".$name);
-
-                if ($name == "Primary"){
-                        $name = false;
-                        $location = 0;
-                        $roll = Dice::d(20);
-                   //     debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
-                }
-                else if ($name == "Structure"){
-                  //  debug::log("MCV front/aft structure roll, checking for prim structure");
-                    $system = $this->getStructureSystem(0);
-                    if (!$system->isDestroyed()){
-                  //      debug::log("return intact primary structure on MCV");
-                        return $system;
-                    }
-                    else {
-                        return null;
-                    }
-                }
-
-                if (isset($this->hitChart[$location][$roll])){
-                        $name = $this->hitChart[$location][$roll];
-                }
-                else {
-                    while (!$name){
-                        $roll++;
-                        if (isset($this->hitChart[$location][$roll])){
-                            $name = $this->hitChart[$location][$roll];
-                        }
-                    }
-                }
-
-                debug::log("hitLoc: ".$location.", hitting: ".$name);
-
-                foreach ($this->systems as $system){
-                    if ($system->location == $location){
-                        if ($system->displayName == $name){
-                            $systems[] = $system;
-                        }
-                    }
-                }
-            }
-            else {                
-            //    debug::log("FLASH type, gathering all from location");
-                foreach ($this->systems as $system){
-                    if ($system->location == $location && !$system->isDestroyed() && !$system instanceof Structure){
-                        $systems[] = $system;
-                    }
-                }
-            }
-
-
-            // if you have more than 0 systems if you elligable array
-            if (sizeof($systems) > 0){
-              //  debug::log("more than one valid sys");
-                $roll = Dice::d(sizeof($systems));
-                $system = $systems[$roll-1];
-             //   debug::log("target systems: ".sizeof($systems).", rolled: ".$roll.", hitting: ".$system->displayName);
-                if (!$system->isDestroyed()){
-              //      debug::log("sys is not destroyed, return it!");
-                    return $system;
-                }
-                else {
-             //       debug::log("sys is destroyed, try getUndamagedSameSystem!");
-                    $newSystem = $this->getUndamagedSameSystem($system, $location);
-
-                    if ($newSystem){                        
-               //     debug::log("got one, return it");
-                        return $newSystem;
-                    }
-                    else {
-                        if ($weapon->flashDamage){
-                  //          debug::log("got no same name system and im flash, getHitSystem anew");
-                            return $this->getHitSystem($pos, $shooter, $fire, $weapon, $location);
-                        }
-                        else {
-                   //         debug::log("not flash, got no same name system, get structure ".$location);
-                            $system = $this->getStructureSystem(0);
-                            // this is no MCV, so check for outer structure being ded
-                            if ($system->isDestroyed()){
-                      //          debug::log("target outer struct sys is destroyed, getting overkill to structure 0");
-                                return $this->getStructureSystem(0);
-                            }
-                            else {
-                     //           debug::log("its alive, return it");
-                                return $system;
-                            }
-                        }   
-                    }
-                }
-            }
-
-            // if you have no elligibe systems in your array
-            else {
-                debug::log("size of systems = 0 = no valid target systems -- TYPO or SECTION down ??");
-
-                if ($weapon->flashDamage){
-            /*        debug::log("flash type");
-                    debug::log("checking for outer structure");
-                    $system = $this->getStructureSystem(0);
-
-                    if ($system->isDestroyed()){
-                    debug::log("but its destroyed, returning any primary system");
-                        return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                    }
-                    else {
-                    debug::log("outer structure is alive, returning it");
-                        return $system;
-                    }
-            */
-
-                debug::log("flash type vs mcv, no systems, return PRIMARY hitsystem !!!");
-                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                }
-                else if ($destroyedThisTurn){
-              //      debug::log("non flash, destroyed something earlier on this target loc, overkill into struct 0");
-                    $structure = $this->getStructureSystem(0);
-
-                    if ($structure->isDestroyed()){
-             //           debug::log("structure destroyed - return null");
-                        return null;
-                    }
-                    else {
-                //        debug::log("structure intact, return it");
-                        return $structure;
-                    }
-                }
-                else {
-                    debug::log("destroyedThisTurn False, -> getHitsystem 0 !!");
-                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                }
-            }
-        }
-
-
-
-        public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location = null){
-
-            // Turn counter needed to keep track of when a section was destroyed.
-            $destroyedThisTurn = false;
-            
-            $system = null;
-            if ($fire->calledid != -1){
-                $system = $this->getSystemById($fire->calledid);
-            }
-            
-            if ($system != null && !$system->isDestroyed())
-                return $system;
-        
-            if ($location === null)
-                $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
-            
-            $systems = array();
-            $totalStructure = 0;
-
-            foreach ($this->systems as $system){
-                // For flash damage, only take into account the systems
-                // that are still alive and are not structure.
-                // The turn in which a system is destroyed is checked for each system
-                // this is done to keep track of when the last system was destroyed on
-                // this section, so we can decide whether to throw on the primary
-                // hit section, or if we need to go to primary structure for overkill
-                foreach ($system->damage as $damage){
-                    if ($damage->turn === $fire->turn && $damage->destroyed){
-                        // A system has had damage this turn. This means not all
-                        // of them were destroyed at the start of this turn.
-                        $destroyedThisTurn = true;
-                    }
-                }
-                
-                if ($weapon->flashDamage && ($system->isDestroyed() || $system instanceof Structure )){
-                    continue;
-                }
-                    
-                if ($system->location == $location || $system instanceof Structure){
-                     $systems[] = $system;
-                        
-                    if ($system instanceof Structure){
-                        $multiply = 0.5;
-                            
-                        $totalStructure += round($system->maxhealth * $multiply);
-                    }else{
-                        $totalStructure += $system->maxhealth;
-                    }
-                    
-                }
-            }   
-
-            
-            if(sizeof($systems) == 0){
-                // All normal systems have already been destroyed on this section
-                // If we already are doing primary:
-                // If structure is gone, return null
-                // else return structure
-                if ($location == 0){
-                    $structure = $this->getStructureSystem(0);
-                    
-                    if($structure->isDestroyed()){
-                        return null;
-                    }
-                    else{
-                        return $structure;
-                    }
-                }
-
-                // all systems were destroyed. Go to primary.
-                // Go to primary systems for flash damage
-                // Go to primary structure for other weapons.
-                if ($weapon->flashDamage){
-                    return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                }
-                else{
-                    if($destroyedThisTurn){
-                        $structure = $this->getStructureSystem(0);
-
-                        if($structure->isDestroyed()){
-                            return null;
-                        }
-                        else{
-                            return $structure;
-                        }    
-                    }
-                    else{
-                        return $this->getHitSystem($pos, $shooter, $fire, $weapon, 0);
-                    }
-                }
-            }
-            
-            $roll = Dice::d($totalStructure);
-            $goneTrough = 0;
-            
-            foreach ($systems as $system){
-                $health = 0;
-            
-                if ($system->name == "structure"){
-                    $multiply = 0.5;
-                        
-                    $health = round($system->maxhealth * $multiply);
-                }else{
-                    $health = $system->maxhealth;
-                }
-                
-                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
-                    if ($system->isDestroyed())                        
-                    {
-                        $newSystem = $this->getUndamagedSameSystem($system, $location);
-                        
-                        if($newSystem != null){
-                            return $newSystem;
-                        }
- 
-                        if ($system instanceof Structure){
-                            return null;}
-                                
-                        $structure = $this->getStructureSystem(0);
-                        if ($structure == null || $structure->isDestroyed()){
-                            return null;
-                          
-                        }else{
-                            return $structure;
-                        }
-                    }
-
-                    return $system;
-                }
-                
-                $goneTrough += $health;
-            }
-
-            return null;
-        }
-    }
     
     class MediumShipLeftRight extends MediumShip{
 
@@ -1607,7 +1268,9 @@
         }
     }
     
-    class LightShip extends BaseShip{
+
+
+    class LightShip extends BaseShip{ //is this used anywhere?...
     
         public $shipSizeClass = 0;
         
@@ -1620,115 +1283,9 @@
                
         }
         
-        
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = 0){
+    } //end of class LightShip
 
-            // Turn counter needed to keep track of when a section was destroyed.
-            $destroyedThisTurn = false;
-            
-            $system = null;
-            if ($fire->calledid != -1){
-                $system = $this->getSystemById($fire->calledid);
-            }
-            
-            if ($system != null && !$system->isDestroyed())
-                return $system;
-        
-            $systems = array();
-            $totalStructure = 0;
 
-            foreach ($this->systems as $system){
-                // For flash damage, only take into account the systems
-                // that are still alive and are not structure.
-                // The turn in which a system is destroyed is checked for each system
-                // this is done to keep track of when the last system was destroyed on
-                // this section, so we can decide whether to throw on the primary
-                // hit section, or if we need to go to primary structure for overkill
-                foreach ($system->damage as $damage){
-                    if ($damage->turn === $fire->turn && $damage->destroyed){
-                        // A system has had damage this turn. This means not all
-                        // of them were destroyed at the start of this turn.
-                        $destroyedThisTurn = true;
-                    }
-                }
-                
-                if ($weapon->flashDamage && ($system->isDestroyed() || $system instanceof Structure )){
-                    continue;
-                }
-                    
-                if ($system->location == $location || $system instanceof Structure){
-                     $systems[] = $system;
-                        
-                    if ($system instanceof Structure){
-                        $multiply = 0.5;
-                            
-                        $totalStructure += round($system->maxhealth * $multiply);
-                    }else{
-                        $totalStructure += $system->maxhealth;
-                    }
-                    
-                }
-            }   
-
-            
-            if(sizeof($systems) == 0){
-                // All normal systems have already been destroyed
-                // If structure is gone, return null
-                // else return structure
-                $structure = $this->getStructureSystem(0);
-
-                if($structure->isDestroyed()){
-                    return null;
-                }
-                else{
-                    return $structure;
-                }
-            }
-            
-            $roll = Dice::d($totalStructure);
-            $goneTrough = 0;
-            
-            foreach ($systems as $system){
-                $health = 0;
-            
-                if ($system->name == "structure"){
-                    $multiply = 0.5;
-                        
-                    $health = round($system->maxhealth * $multiply);
-                }else{
-                    $health = $system->maxhealth;
-                }
-                
-                if ($roll > $goneTrough && $roll <= ($goneTrough + $health)){
-                    if ($system->isDestroyed())                        
-                    {
-                        $newSystem = $this->getUndamagedSameSystem($system, $location);
-                        
-                        if($newSystem != null){
-                            return $newSystem;
-                        }
- 
-                        if ($system instanceof Structure){
-                            return null;}
-                                
-                        $structure = $this->getStructureSystem(0);
-                        if ($structure == null || $structure->isDestroyed()){
-                            return null;
-                          
-                        }else{
-                            return $structure;
-                        }
-                    }
-
-                    return $system;
-                }
-                
-                $goneTrough += $health;
-            }
-
-            return null;
-        }
-    }
 
     class OSAT extends MediumShip{
         public $osat = true;        
