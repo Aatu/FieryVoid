@@ -548,13 +548,7 @@ class Weapon extends ShipSystem{
             $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
         }
 
-   /*     if ($target instanceof FighterFlight){
-            $dis = mathlib::getDistanceHex($shooter->getCoPos(),  $target->getCoPos());
-            if ($dis > 10){
-                $oew = 0;
-            }
-        }
-*/
+
         if ($oew < 1){
             $rangePenalty = $rangePenalty*2;
         }
@@ -595,13 +589,12 @@ class Weapon extends ShipSystem{
 
 
         if ($this->ballistic){
-            debug::log("ballistic");
+            //debug::log("ballistic");
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $hitLoc = $target->doGetHitSectionPos($pos, $preProfileGoal);
         }
         else {
-          //  debug::log("non ballistic");
 
             if (sizeof($target->activeHitLocation > 0)){                
                 $found = false;
