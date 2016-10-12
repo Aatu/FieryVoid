@@ -317,6 +317,27 @@
             
             return null;
         }
+	    
+	    
+	public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
+		/*name may indicate different location?...*/
+		$location_different_array = explode (':' , $name);
+		if(sizeof($location_different_array)==2){ //indicated different section: exactly 2 items - first location, then name
+			return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
+		}else{
+			$returnTab = array();
+			foreach ($this->systems as $system){
+				if ( ($system->displayName == $name) && ($system->$location == $location) ){
+				    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
+					    $returnTab[] = $system;
+				    }
+				}
+			}            
+			return $returnTab;
+		}
+		return array(); //should never reach here
+	} //end of function getSystemsByNameLoc
+	    
 
         
         public function getHitChanceMod($shooter, $pos, $turn){
@@ -666,16 +687,12 @@
             return $pick;
         }
 
-        public function getLocations(){
-            //debug::log("getLocations");         
+        public function getLocations(){      
             $locs = array();
-
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
             $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
-
-
             return $locs;
         }
 
@@ -702,47 +719,30 @@
 
 
         public function pickLocationForHit($locs, $preGoal){           
-        //    debug::log("pickLocationForHit");
-         //   debug::log("size: ".sizeof($locs));
             $topValue = -1;
             $pick = -1;
 
             foreach ($locs as $loc){
                 $value = $loc["remHealth"]; // remaining Health on Structure
-            //    debug::log("local value: ".$value);
                 $value += floor($value/10) * ($loc["armour"] * 1.5); // add armour*1.5 per 10 remaining Health
-            //  debug::log("local value: ".$value);
 
                 // $value is now approximatly a value of relative toughness of this section
 
                 //since we have the hitchance PRE profile as parameter, apply the profile of this section
                 //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
-
                 $goal = $preGoal + $loc["profile"];
-             //   debug::log("local preGoal: ".$preGoal);                
-            //   debug::log("local profile: ".$loc["profile"]);
-            //   debug::log("local value: ".$value);
 
                 // divide toughness by expected hitchance effective defensive worth of a section
                 if ($goal >= 1){
                     $value = $value / $goal;
                 }
-              //  debug::log("local value: ".$value);
 
                 // if the effective defensive worth is higher than the current one, replace it
-
                 if ($value > $topValue){
                     $topValue = $value;
                     $pick = $loc;
                 }
             }
-
-         //   debug::log($this->phpclass." TOP def value on loc: ".$loc["loc"]." is: ".$topValue);
-          //  if ($this instanceof OSAT){
-            //    debug::log($pick["remHealth"]);
-              //  debug::log($pick["profile"]);
-              //  debug::log($pick["armour"]);
-          //  }
 
             return $pick;
         }
@@ -768,7 +768,7 @@
             }
         
             if (isset($this->activeHitLocation["loc"])){
-                debug::log("RETURNING FOR DAMAGE: ".$this->activeHitLocation["loc"]);
+                //debug::log("RETURNING FOR DAMAGE: ".$this->activeHitLocation["loc"]);
             }
             
             return $location;
@@ -778,15 +778,15 @@
 
 
         public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-            debug::log("______________________");
-            debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
+            //debug::log("______________________");
+            //debug::log("getHitSystem for: ".$this->phpclass." with id: ".$this->id);
 
             if (isset($this->hitChart[0])){
-                debug::log("TABLE");
+               // debug::log("TABLE");
                 $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
             }
             else {
-                debug::log("DICE");
+               // debug::log("DICE");
                 $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
             }
 
@@ -804,7 +804,7 @@
             
             if ($fire->calledid != -1){
                 $system = $this->getSystemById($fire->calledid);
-                debug::log("called shot vs ".$system->displayName.", destroyed: ".$system->destroyed);
+                //debug::log("called shot vs ".$system->displayName.", destroyed: ".$system->destroyed);
             }
             
             if ($system != null && !$system->isDestroyed())
@@ -812,28 +812,6 @@
         
             if ($location === null)
                 $location = $this->getHitSection($pos, $shooter, $fire->turn, $weapon);
-
-		
-/*fragment  not required for anything any longer?
-            $destroyedThisTurn = false;
-            if ($weapon->flashDamage){
-            //    debug::log("is FLASH");
-            //    debug::log("check if a system on target location was destroyed this turn");
-                foreach ($this->systems as $system){
-                    if ($system->isDestroyed() && $system->location == $location){
-                        foreach ($system->damage as $damage){
-                            if ($damage->turn == $fire->turn){
-                                $destroyedThisTurn = true;
-                                break;
-                            }
-                        }
-                    }
-                    if ($destroyedThisTurn){
-                        break;
-                    }
-                }
-            }
-*/	    
 
 
             $location_different = $location; //no retargeting unless indicated later
@@ -858,12 +836,11 @@
                 
             //    debug::log("roll: ".$roll." on loc: ".$location."__name: ".$name);
 
-                if ($name == "Primary"){
+                if ($name == "Primary"){ //redirect to PRIMARY
                         $name = false;
                         $location = 0;
                         $location_different = 0;
                         $roll = Dice::d(20);
-                        debug::log("redirecting to PRIMARY ___ NEW roll: ".$roll." on loc: ".$location);
 
 	                if (isset($this->hitChart[$location][$roll])){
 	                        $name = $this->hitChart[$location][$roll];
