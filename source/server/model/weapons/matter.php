@@ -1,7 +1,8 @@
 <?php
 
     class Matter extends Weapon
-    {
+    {	    
+        public $noOverkill = true;//Matter weapons do not overkill
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -26,10 +27,12 @@
             }
         }
 
+	/*no need due to noOverkill trait
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
         {
             return null;
         }
+	*/
 
         public function setSystemDataWindow($turn)
         {
@@ -41,6 +44,7 @@
 
         public $priority = 9;
     }
+
 
     class MatterCannon extends Matter
     {
@@ -67,6 +71,7 @@
         public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
     }
     
+
     class HeavyRailGun extends Matter
     {
         public $name = "heavyRailGun";
@@ -93,6 +98,7 @@
         public function setMaxDamage(){     $this->maxDamage = 57 - $this->dp;      }    
     }
     
+
     class RailGun extends Matter
     {
         public $name = "railGun";
@@ -119,6 +125,7 @@
         public function setMaxDamage(){     $this->maxDamage = 33 - $this->dp;      }    
     }
     
+
     class LightRailGun extends Matter
     {
         public $name = "lightRailGun";
@@ -257,6 +264,7 @@
         public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
     }
     
+
     class OrieniGatlingRG extends RapidGatling{
     	/*RapidGatling's predecessor*/ 
         public $displayName = "Gatling Railgun";
@@ -272,7 +280,6 @@
 
 
     class PairedGatlingGun extends LinkedWeapon{
-
         // take a look
         public $name = "pairedGatlingGun";
         public $displayName = "Paired Gatling Guns";
@@ -285,6 +292,7 @@
         public $shots = 2;
         public $defaultShots = 2;
         public $ammunition = 6;
+	    
         
         public $loadingtime = 1;
 
@@ -294,19 +302,19 @@
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
+	    
+	public noOverkill = true;
 
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         
+	    
         public function setSystemDataWindow($turn){
-
-
             $this->data["Weapon type"] = "Matter";
             $this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
-
 
             $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
         }
@@ -329,10 +337,12 @@
             }
         }
 
+	/*no need due to noOverkill trait
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
         {
             return null;
         }
+	*/
 
 
         public function getDamage($fireOrder){
