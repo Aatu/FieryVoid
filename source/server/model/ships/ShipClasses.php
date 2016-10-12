@@ -758,6 +758,10 @@
 		$foundLocation = 0;
 		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
 		$foundLocation = $loc["loc"];
+		if($foundLocation > 0){ //return it only if not destroyed as of previous turn
+			$structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure 
+			if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
+		}		
 		return $foundLocation;
         }   	    
 
