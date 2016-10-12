@@ -15,22 +15,17 @@ class CustomLightMatterCannon extends Matter {
         public $rangePenalty = 1;
         public $fireControl = array(-1, 3, 2); // fighters, <mediums, <capitals 
 
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-        if ( $maxhealth == 0 ){
-            $maxhealth = 5;
-        }
-        if ( $powerReq == 0 ){
-            $powerReq = 2;
-        }
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 2;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
-    } //customLightMatterCannon
+} //customLightMatterCannon
 
 
 
@@ -66,11 +61,10 @@ class CustomLightMatterCannonF extends Matter {
         public function getDamage($fireOrder){        return Dice::d(10, 1)+4;   }
         public function setMinDamage(){   return  $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){   return  $this->maxDamage = 14 - $this->dp;      }
-    }
+}//CustomLightMatterCannonF
 
 
-    class CustomHeavyMatterCannon extends Matter
-    {
+class CustomHeavyMatterCannon extends Matter{
     /*Heavy Matter Cannon, as used on Ch'Lonas ships*/
         public $name = "customHeavyMatterCannon";
         public $displayName = "Heavy Matter Cannon";
@@ -102,7 +96,7 @@ class CustomLightMatterCannonF extends Matter {
         public function getDamage($fireOrder){        return Dice::d(10, 3)+5;   }
         public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
-    } //customLightMatterCannon
+} //CustomHeavyMatterCannon
 
 
 
@@ -154,7 +148,7 @@ class CustomPulsarLaser extends Pulse{
         public function getDamage($fireOrder){        return 12;   }
         public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
-    }
+} //customPulsarLaser
 
 
 
@@ -173,10 +167,8 @@ class CustomStrikeLaser extends Weapon{
         public $priority = 6;
 
         public function setSystemDataWindow($turn){
-
             $this->data["Weapon type"] = "Laser";
             $this->data["Damage type"] = "Standard";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -197,6 +189,6 @@ class CustomStrikeLaser extends Weapon{
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8; }
         public function setMinDamage(){ $this->minDamage = 10 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 28 - $this->dp; }
-    }
+}//CustomStrikeLaser
 
 ?>
