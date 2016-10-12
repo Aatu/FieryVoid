@@ -738,12 +738,12 @@
 
 
 
-        public function getHitSection($pos, $shooter, $turn, $weapon){ //returns value - location!
+        public function getHitSection($pos, $shooter, $turn, $weapon, $preGoal = 0){ //returns value - location!
 		$foundLocation = 0;
 		if(isset($this->activeHitLocations[$shooter->id]) && !$weapon->ballistic){
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
         	}else{
-			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
+			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
 			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
 			$foundLocation = $loc["loc"];
 		}
@@ -755,12 +755,13 @@
 		return $foundLocation;
         }        
 
-        public function getHitSectionProfile($pos, $shooter, $turn, $weapon){ //returns value - profile!
+        public function getHitSectionProfile($pos, $shooter, $turn, $weapon, $preGoal = 0){ //returns value - profile!
 		$foundProfile = 0;
 		if(isset($this->activeHitLocations[$shooter->id]) && !$weapon->ballistic){
 			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
         	}else{
-			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
+			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
+			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
 			$foundProfile = $loc["profile"];
 		}
 		return $foundProfile;
