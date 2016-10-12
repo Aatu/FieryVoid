@@ -33,7 +33,7 @@
         
         public $canvasSize = 200;
 
-        public $activeHitLocation = array();
+        public $activeHitLocations = array(); //$shooterID->targetSection
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
@@ -601,11 +601,8 @@
         }
         
         public function isPowerless(){
-        
             $output = 0;
-            
             foreach($this->systems as $system){
-            
                 if ($system->isDestroyed())
                     continue;
             
@@ -617,59 +614,15 @@
             
             }
             
-            if ($output >= 0)
-                return false;
-        
+            if ($output >= 0)  return false;        
             return true;
         }
 
 
-        
-        public function getDefenceValuePos($pos, $preGoal){
-            debug::log("getDefenceValuePos");
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-            debug::log("throw");
-            
-	    if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
-		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
-			$shooterCompassHeading = 360-$shooterCompassHeading;
-		}
-	    }
+             
 
-            $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
-            $this->activeHitLocation = $result;
-
-            return $result;
-        }
-        
-        public function getDefenceValue($shooter, $preGoal){
-            //debug::log("getDefenceValue");         
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-          
-            if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
-		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
-			$shooterCompassHeading = 360-$shooterCompassHeading;
-		}
-	    }
-          
-            $result = $this->doGetDefenceValue($tf,  $shooterCompassHeading, $preGoal);
-            $result["validFor"] = $shooter->id;
-            $this->activeHitLocation = $result;
-
-            return $result;
-        }
-
-
-        public function doGetDefenceValue($tf, $shooterCompassHeading, $preGoal){
-            //debug::log("doGetDefenceValue");         
-
+        public function doGetHitSectionBearing($tf, $shooterCompassHeading, $preGoal){ //return array with all data!  
             $locs = $this->getLocations();
-
-        //    for ($i = 0; $i < sizeof($locs); $i++){
-        //        $locs[$i]["validFor"] = -1;
-        //    }
 
             $valid = array();
 
@@ -681,11 +634,40 @@
 
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
-//            debug::log("Pick value: ".$pick);
-            
-
             return $pick;
         }
+	    
+	    
+        public function doGetHitSectionPos($pos, $preGoal){ //return array with all data!  
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+            
+	    if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
+			$shooterCompassHeading = 360-$shooterCompassHeading;
+		}
+	    }
+
+            $result = $this->doGetHitSectionBearing($tf,  $shooterCompassHeading, $preGoal);
+            return $result;
+        }
+	    
+	    
+	    
+        public function doGetHitSection($shooter, $preGoal){   //return array with all data!  
+            $tf = $this->getFacingAngle();
+            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
+          
+            if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
+			$shooterCompassHeading = 360-$shooterCompassHeading;
+		}
+	    }
+          
+            $result = $this->doGetHitSectionBearing($tf,  $shooterCompassHeading, $preGoal);
+            return $result;
+        }
+	    
 
         public function getLocations(){      
             $locs = array();
@@ -698,43 +680,49 @@
 
 
         public function fillLocations($locs){
-            debug::log("fillLocations for".$this->phpclass);  
-
             foreach ($locs as $key => $loc){
-
                 $structure = $this->getStructureSystem($locs[$key]["loc"]);
-
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
                     $locs[$key]["armour"] = $structure->armour;
                 }
                 else {
-                    debug::log("no structure!");
-                    return null;
+                    return null; //should never happen!
                 }
             }
-
             return $locs;
         }
 
 
-        public function pickLocationForHit($locs, $preGoal){           
+        public function pickLocationForHit($locs, $preGoal){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
             $topValue = -1;
-            $pick = -1;
+            $pick = array();
 
-            foreach ($locs as $loc){
+            foreach ($locs as $loc){	
                 $value = $loc["remHealth"]; // remaining Health on Structure
                 $value += floor($value/10) * ($loc["armour"] * 1.5); // add armour*1.5 per 10 remaining Health
-
+		    if($value==0) $value = 0.1; //so there's still something to choose from and profile has meaning...
                 // $value is now approximatly a value of relative toughness of this section
 
                 //since we have the hitchance PRE profile as parameter, apply the profile of this section
                 //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
+		/*
                 $goal = $preGoal + $loc["profile"];
+		if($goal<0)$goal=0;//always miss
+		if($goal>20)$goal=20;//always hit
+		*/
+		/*above would be correct only if each shot was assigned separately... 
+		 	but as the first shot defines section choice for all further shots too, use just the profile itself
+		*/
+		$goal = $loc["profile"];
+		if($goal<1) $goal=1; //don't accept profile <1...
 
                 // divide toughness by expected hitchance effective defensive worth of a section
-                if ($goal >= 1){
-                    $value = $value / $goal;
+		if($goal==0){//miss, so that MUST be the correct choice! - do not look further
+			$pick = $loc;
+			return $pick;
+		}else{
+                    $value = $value / $goal; 
                 }
 
                 // if the effective defensive worth is higher than the current one, replace it
@@ -750,29 +738,21 @@
 
 
 
-        public function getHitSection($pos, $shooter, $turn, $weapon){
-        	if (sizeof($this->activeHitLocation == 0)){
-        		$this->activeHitLocation = $this->getDefenceValue($shooter, 0);
-        	}
-           	$location = $this->activeHitLocation["loc"];
-            if ($location != 0){
-                if (!isset($this->hitChart[0])){
-                    if ((($this instanceof MediumShip && Dice::d(20)>17 ) || Dice::d(10)>9) && !$weapon->flashDamage){
-                        $location = 0;
-                    }
-                }
-
-                $structure = $this->getStructureSystem($location);
-                if ($structure != null && $structure->isDestroyed($turn-1))
-                    return 0;
-            }
-        
-            /*if (isset($this->activeHitLocation["loc"])){
-                debug::log("RETURNING FOR DAMAGE: ".$this->activeHitLocation["loc"]);
-            }*/
-            
-            return $location;
-            
+        public function getHitSection($pos, $shooter, $turn, $weapon){ //returns value - location!
+		$foundLocation = 0;
+		if(isset($this->activeHitLocations[$shooter->id])){
+			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
+        	}else{
+			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
+			$this->activeHitLocations[$shooter->id] = $loc; 
+			$foundLocation = $loc["loc"];
+		}
+		
+		if($foundLocation > 0){ //return it only if not destroyed as of previous turn
+			$structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure 
+			if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
+		}
+		return $foundLocation;
         }        
 
 
@@ -832,9 +812,15 @@
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
 		$name = '';
+		$isSystemKiller = $weapon->systemKiller;
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
+				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
+					$isSystemKiller = false; //don't do that again
+					$name = ''; //reset
+					$roll = Dice::d($rngTotal); //new location roll
+				}				
 			}else{
 				$roll++;
 				if($roll>$rngTotal)//out of range already!
@@ -929,9 +915,15 @@
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
 		$name = '';
+		$isSystemKiller = $weapon->systemKiller;
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
+				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
+					$isSystemKiller = false; //don't do that again
+					$name = '';
+					$roll = Dice::d($rngTotal); //new location roll
+				}
 			}else{
 				$roll++;
 				if($roll>$rngTotal)//out of range already!
@@ -1074,8 +1066,7 @@
 
 
 
-        public function getLocations(){
-        debug::log("getLocations");         
+        public function getLocations(){         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
@@ -1100,8 +1091,7 @@
         }
 
 
-        public function getLocations(){
-        debug::log("getLocations");         
+        public function getLocations(){       
             $locs = array();
             $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
@@ -1130,8 +1120,7 @@
         }        
 
 
-        public function getLocations(){
-        debug::log("getLocations");         
+        public function getLocations(){     
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
@@ -1149,23 +1138,7 @@
         }
 
 
-        public function fillLocations($locs){
-
-            foreach ($locs as $key => $loc){
-                $structure = $this->getStructureSystem(0);
-
-                if ($structure){
-                    $locs[$key]["remHealth"] = $structure->getRemainingHealth();
-                    $locs[$key]["armour"] = $structure->armour;
-                }
-                else {
-                    //debug::log("no structure!");
-                    return null;
-                }
-            }
-
-            return $locs;
-        }
+        
     } //end of class MediumShip	    
 
 
@@ -1180,8 +1153,7 @@
         }
 
 
-        public function getLocations(){
-        debug::log("getLocations");         
+        public function getLocations(){       
             $locs = array();
 
             $locs[] = array("loc" => 4, "min" => 0, "max" => 30, "profile" => $this->forwardDefense);
@@ -1224,8 +1196,7 @@
         }
 
 
-        public function getLocations(){
-        debug::log("getLocations for OSAT");         
+        public function getLocations(){      
             $locs = array();
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
