@@ -55,6 +55,7 @@ class Weapon extends ShipSystem{
     public $defaultShots = 1;
     public $canChangeShots = false;
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	
 
     public $grouping = 0;
@@ -765,6 +766,10 @@ class Weapon extends ShipSystem{
 	if ($target instanceof FighterFlight){
             return null;
         }
+	    
+	if($this->noOverkill){  //weapon trait: no overkill
+		return null;	
+	}
 
         if ($this->flashDamage){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
             $okSystem = $target->getHitSystem($pos, $shooter, $fireOrder, $this); //for Flash it won't return destroyed system other than PRIMARY Structure
@@ -894,22 +899,16 @@ class Weapon extends ShipSystem{
 
 	
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
-//        var_dump($fireOrder);
 	$damage = floor($damage);//make sure damage is a whole number, without fractions!
 
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
         $systemHealth = $system->getRemainingHealth();
         $modifiedDamage = $damage;
 
-
-
-        //print("damage: $damage armour: $armour\n");
-
         $destroyed = false;
         if ($damage-$armour >= $systemHealth){
             $destroyed = true;
             $modifiedDamage = $systemHealth + $armour;
-            //print("destroying! rem: ".$system->getRemainingHealth()."\n");
         }
 
 
@@ -917,9 +916,7 @@ class Weapon extends ShipSystem{
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-        //print("damage: $damage armour: $armour destroyed: $destroyed \n");
-        if ($damage-$armour > $systemHealth){
-            //print("overkilling!\n\n");
+        if ($damage-$armour > $systemHealth){//overkilling!
              $damage = $damage-$modifiedDamage;
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata);
              if ($overkillSystem != null)
