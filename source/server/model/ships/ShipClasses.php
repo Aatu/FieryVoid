@@ -744,7 +744,7 @@
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
         	}else{
 			$loc = $this->doGetHitSection($shooter, 0); //finds array with relevant data!
-			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not sa ve for ballistic weapons!
+			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
 			$foundLocation = $loc["loc"];
 		}
 		
