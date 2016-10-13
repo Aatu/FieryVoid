@@ -408,15 +408,12 @@
         }
 
         
-        public function getLastTurnMovement($turn){
-		/*this function returns movement from a particular turn... shouldn't it return last movement EARLIER THAN current turn?*/
-		$movement =  array("x"=>0, "y"=>0);
+        public function getLastTurnMovement($turn){ //returns last actual move, as of current turn
+		$movement =  null;
 		foreach ($this->movement as $move){ //should be sorted from oldest to newest...
-			if($move->type == "start"){
-				$movement = $move;
-			}elseif($move->turn < $turn){
-				$movement = $move;
-			}
+			if($move->type != "move") continue;
+			if($move->turn > $turn) continue;
+			$movement = $move;  
 		}
 		return $movement;
 		
