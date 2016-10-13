@@ -542,7 +542,7 @@ class QuadPulsar extends Pulse{
             if ($fireOrder->calledid != -1){
                 $calledsystem = $target->getSystemById($fireOrder->calledid);
             }
-            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+            $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
             if ($system == null)
                 return;
     
