@@ -397,7 +397,7 @@ class Firing{
         $shooterCompassHeading = null;
 
         if ($firingweapon->ballistic){
-            $movement = $shooter->getLastTurnMovement($fire->turn);
+            $movement = $shooter->getLastTurnMovement($fire->turn-1);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $shooterCompassHeading = mathlib::getCompassHeadingOfPos($ship, $pos);
         }else{

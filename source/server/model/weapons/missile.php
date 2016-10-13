@@ -42,7 +42,7 @@ class MissileLauncher extends Weapon{
     }
     
     public function isInDistanceRange($shooter, $target, $fireOrder){
-        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
         $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
     
         if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->distanceRange)
@@ -472,7 +472,7 @@ class FighterMissileRack extends MissileLauncher
     
     public function isInDistanceRange($shooter, $target, $fireOrder)
     {
-        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
         $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
     
         if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->getDistanceRange())
