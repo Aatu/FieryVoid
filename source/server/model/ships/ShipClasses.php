@@ -1023,9 +1023,10 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            debug::log("getPiercingLocations");
+            //debug::log("getPiercingLocations");
 
-            $location =  $this->activeHitLocation["loc"];
+            //$location =  $this->activeHitLocation["loc"];
+		$location = $this->getHitSection($shooter, $turn);
             
             $locs = array();
             $finallocs = array();
