@@ -35,7 +35,7 @@
                 if ($target->isDestroyed())
                     return;
             
-                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+                $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
                 
                 if ($system == null)
                     return;

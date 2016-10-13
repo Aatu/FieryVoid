@@ -715,7 +715,7 @@ class Weapon extends ShipSystem{
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
                 $fireOrder->shotshit++;
-                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);		
             }
         }
 
@@ -746,7 +746,7 @@ class Weapon extends ShipSystem{
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
 
         foreach ($locs as $loc){
-            $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $loc);
+            $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $loc);
 
             if (!$system)
                 continue;
@@ -810,22 +810,24 @@ class Weapon extends ShipSystem{
                         if ($fighter == null || $fighter->isDestroyed()){
                             continue;
 			}
-                        $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+                        //$this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+			$this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, null, $gamedata); //do not pass $pos?
                     }
                 }else{
-                    $system = $ship->getHitSystem($target->getCoPos(), $target, $fireOrder, $this);
+                    $system = $ship->getHitSystem(null, $target, $fireOrder, $this);
                     if ($system == null ){
                         continue;
                     }
 
-                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+                    //$this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+			$this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata); //do not pass $pos?
                 }
             }
         }
 
         if ($target->isDestroyed()) return;
 
-	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 

@@ -822,19 +822,20 @@
         }   	    
 
 	    
-        public function getHitSystem($shooter, $fireOrder, $weapon, $location = null){
+        public function getHitSystem($pos, $shooter, $fireOrder, $weapon, $location = null){
             if (isset($this->hitChart[0])){
-                $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);
+                $system = $this->getHitSystemByTable($pos, $shooter, $fireOrder, $weapon, $location);
             }
             else {
-                $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);
+                $system = $this->getHitSystemByDice($pos, $shooter, $fireOrder, $weapon, $location);
             }
             return $system;
         }
 
 
 
-        public function getHitSystemByTable($shooter, $fire, $weapon, $location){
+        public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){ 
+		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		$system = null;
 		$name = false;
 		$location_different = false; //target system may be on different location?
@@ -848,7 +849,9 @@
 		if ($system != null && !$system->isDestroyed()) return $system;
 
 		if ($location === null) {
-			if($weapon->ballistic){
+			if($pos!=null){
+				$location = $this->getHitSectionPos($pos, $fire->turn);
+			}elseif($weapon->ballistic){
 				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
 			}else{
@@ -919,7 +922,8 @@
         } //end of function getHitSystemByTable
 
 
-        public function getHitSystemByDice($shooter, $fire, $weapon, $location){
+        public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
+		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
 		$name = false;
@@ -934,7 +938,9 @@
 		if ($system != null && !$system->isDestroyed()) return $system;
 
 		if ($location === null) {
-			if($weapon->ballistic){
+			if($pos!=null){
+				$location = $this->getHitSectionPos($pos, $fire->turn);
+			}elseif($weapon->ballistic){
 				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
 			}else{
