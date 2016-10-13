@@ -783,7 +783,7 @@
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
         	}else{
 			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
-			$this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
+			$this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
 			$foundLocation = $loc["loc"];
 		}
 		
@@ -811,7 +811,7 @@
 			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
         	}else{
 			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
-			$this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
+			$this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
 			$foundProfile = $loc["profile"];
 		}
 		return $foundProfile;
