@@ -863,6 +863,9 @@
 				$location = $this->getHitSectionPos($pos, $fire->turn);
 				$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
 				debug::log("$toBeLogged"); 
+				$mv = $shooter->getLastTurnMovement($fireOrder->turn-1);
+				$toBeLogged = $this->name + ' MJS BALLISTIC by movement; location: ' $location + '; coord: ' + $mv->x + ' ' + $mv->y;
+				debug::log("$toBeLogged"); 
 			}else{
 				$location = $this->getHitSection($shooter, $fire->turn);
 				$toBeLogged = $this->name + ' MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
