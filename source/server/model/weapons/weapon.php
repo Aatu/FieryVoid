@@ -715,7 +715,7 @@ class Weapon extends ShipSystem{
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
                 $fireOrder->shotshit++;
-                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);		
             }
         }
 
@@ -810,7 +810,8 @@ class Weapon extends ShipSystem{
                         if ($fighter == null || $fighter->isDestroyed()){
                             continue;
 			}
-                        $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+                        //$this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+			$this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, null, $gamedata); //do not pass $pos?
                     }
                 }else{
                     $system = $ship->getHitSystem($pos, $target, $fireOrder, $this);
@@ -818,7 +819,8 @@ class Weapon extends ShipSystem{
                         continue;
                     }
 
-                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+                    //$this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, $pos, $gamedata);
+			$this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata); //do not pass $pos?
                 }
             }
         }
