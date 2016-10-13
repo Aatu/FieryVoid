@@ -176,7 +176,9 @@
 
         public function getLocations(){
             $locs = array();
-		$exampleFtr = $this->systems[0]; //whether still alive or not
+		foreach ($this->systems as $fighter){
+			$exampleFtr = $fighter; //whether still alive or not; any fighter in flight will do, as they're all the same!
+		}
 		$health = $exampleFtr->maxhealth;
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[0]);
