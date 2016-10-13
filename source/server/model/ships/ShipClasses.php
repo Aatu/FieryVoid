@@ -858,7 +858,7 @@
 					if($name != 'Primary'){ //no PRIMARY penetrating hits for Flash!
 						$systemsArray = $this->getSystemsByNameLoc($name, $location, false);//undestroyed ystems of this name
 						if(sizeof($systemsArray)>0){ //there actually are such systems!
-							$rngTotal+ = $rngCurr;
+							$rngTotal+= $rngCurr;
 							$hitChart[$rngTotal] = $name;						
 						}
 					}
