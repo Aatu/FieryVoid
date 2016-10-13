@@ -690,8 +690,9 @@ class Weapon extends ShipSystem{
 
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            //$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            //$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
         }
 
         $this->calculateHit($gamedata, $fireOrder);
@@ -751,7 +752,7 @@ class Weapon extends ShipSystem{
             if (!$system)
                 continue;
 
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata);
         }
     }
 
@@ -831,7 +832,8 @@ class Weapon extends ShipSystem{
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 
-        $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+        //$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+	    $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $null, $gamedata);
     }
 
 	
