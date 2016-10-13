@@ -1018,7 +1018,7 @@
 		}
 		
 		if($name == 'Primary'){ //redirect to PRIMARY!
-			return $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, 0);
+			return $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
 		if(sizeof($systems)==0){ //if empty, overkill to Structure
