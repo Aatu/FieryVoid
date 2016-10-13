@@ -182,10 +182,8 @@ class ForcedOfflineForTurns extends Critical{
 }
 
 class FirstThrustIgnored extends Critical{
-
     public $description = "First point of channeled thrust is ignored.";
     public $outputMod = -1;
-
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
@@ -202,18 +200,14 @@ class HalfEfficiency extends Critical{
 }
 
 class OSATThrusterCrit extends Critical{
-
     public $description = "Can only turn once per turn.";
-
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
 }
 
 class AmmoExplosion extends Critical{
-
     public $description = "Stored ammunition did explode.";
-
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
@@ -221,6 +215,7 @@ class AmmoExplosion extends Critical{
 
 class SensorsDisrupted extends Critical{
     public $description = "Sensors disrupted. Cannot change sensor settings. [TODO]";
+    public $oneturn = true;	
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
     }
@@ -292,5 +287,14 @@ class ArmorReduced extends Critical{
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
+    }
+}
+
+class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be nastier*/
+    public $description = "Vulnerable to critical.";
+    public $oneturn = true;	
+    function __construct($id, $shipid, $systemid, $turn, $strength){
+	    $outputMod = $strength;
+            parent::__construct($id, $shipid, $systemid, 'NastierCrit', $turn);
     }
 }

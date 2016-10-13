@@ -29,6 +29,9 @@ spl_autoload_register(
                 'starbasesixsections' => '/server/model/ships/ShipClasses.php',
                 'smallstarbasefoursections' => '/server/model/ships/ShipClasses.php',
 
+                //additional criticals
+                'nastiercrit' => '/server/model/cricialClasses.php',
+                
                 //custom ships directory             
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',               
                 'wlcchlonasvestek' => '/server/model/ships/customs/wlcChlonasVesTek.php',
@@ -82,6 +85,12 @@ spl_autoload_register(
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
+                
+                //custom guns StarWars
+                'swfighterlaser' => '/server/model/weapons/customSW.php',
+                'swfighterlaseralllinked' => '/server/model/weapons/customSW.php',
+                'swfighterion' => '/server/model/weapons/customSW.php',
+                'swfighterionalllinked' => '/server/model/weapons/customSW.php',
 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',

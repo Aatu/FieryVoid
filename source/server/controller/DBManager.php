@@ -1274,7 +1274,7 @@ class DBManager {
             	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
 			if (
 				($prev_turn <= 1) //there might be especially important orders on turn 1 or earlier, save them
-			    	|| ( ($gamedata->turn <= $prev_turn+2) && !($gamedata->getShipById($prev_shipid) instanceof FighterFlight) ) //need more turns back :( for non-fighters...
+			    	|| ( ($gamedata->turn <= $prev_turn+2)) //need more turns back :( for turn delay and ballistics
 			) 
 			{ 
 			   foreach($move_orders as $move) {
