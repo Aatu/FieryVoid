@@ -822,19 +822,19 @@
         }   	    
 
 	    
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+        public function getHitSystem($shooter, $fireOrder, $weapon, $location = null){
             if (isset($this->hitChart[0])){
-                $system = $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, $location);
+                $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);
             }
             else {
-                $system = $this->getHitSystemByDice($pos, $shooter, $fire, $weapon, $location);
+                $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);
             }
             return $system;
         }
 
 
 
-        public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){
+        public function getHitSystemByTable($shooter, $fire, $weapon, $location){
 		$system = null;
 		$name = false;
 		$location_different = false; //target system may be on different location?
@@ -849,9 +849,10 @@
 
 		if ($location === null) {
 			if($weapon->ballistic){
-				$location = $this->getHitSection($shooter, $fire->turn);
-			}else{
+				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
+			}else{
+				$location = $this->getHitSection($shooter, $fire->turn);
 			}
 		}
           
@@ -918,7 +919,7 @@
         } //end of function getHitSystemByTable
 
 
-        public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
+        public function getHitSystemByDice($shooter, $fire, $weapon, $location){
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
 		$name = false;
@@ -934,9 +935,10 @@
 
 		if ($location === null) {
 			if($weapon->ballistic){
-				$location = $this->getHitSection($shooter, $fire->turn);
-			}else{
+				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
+			}else{
+				$location = $this->getHitSection($shooter, $fire->turn);
 			}
 		}
 
