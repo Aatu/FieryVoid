@@ -906,18 +906,18 @@ class Weapon extends ShipSystem{
         $modifiedDamage = $damage;
 
         $destroyed = false;
-        if ($damage-$armour >= $systemHealth){
+        if ($damage-$armour >= $systemHealth){ //target will be destroyed
             $destroyed = true;
             $modifiedDamage = $systemHealth + $armour;
         }
-
 
         $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
         $damageEntry->updated = true;
         $system->damage[] = $damageEntry;
         $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-        if ($damage-$armour > $systemHealth){//overkilling!
-             $damage = $damage-$modifiedDamage;
+	
+	$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
+        if ($damage > 0){//overkilling!
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata);
              if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
