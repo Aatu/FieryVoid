@@ -814,7 +814,7 @@ class Weapon extends ShipSystem{
 			$this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, null, $gamedata); //do not pass $pos?
                     }
                 }else{
-                    $system = $ship->getHitSystem($pos, $target, $fireOrder, $this);
+                    $system = $ship->getHitSystem(null, $target, $fireOrder, $this);
                     if ($system == null ){
                         continue;
                     }
@@ -827,7 +827,7 @@ class Weapon extends ShipSystem{
 
         if ($target->isDestroyed()) return;
 
-	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 
