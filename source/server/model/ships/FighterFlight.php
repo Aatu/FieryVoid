@@ -221,7 +221,7 @@
         }
         
         
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+        public function getHitSystem($shooter, $fire, $weapon, $location = null){
         
                  //print("getHitSystem, location: $location ");
             $systems = array();
