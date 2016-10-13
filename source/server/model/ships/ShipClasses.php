@@ -845,7 +845,6 @@
 
 
         public function getHitSystemByTable($shooter, $fire, $weapon, $location){ 
-		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		$system = null;
 		$name = false;
 		$location_different = false; //target system may be on different location?
@@ -862,11 +861,11 @@
 			if($weapon->ballistic){
 				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
-				$toBeLogged = 'MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
+				$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
 				debug::log("$toBeLogged"); 
 			}else{
 				$location = $this->getHitSection($shooter, $fire->turn);
-				$toBeLogged = 'MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
+				$toBeLogged = $this->name + ' MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
 				debug::log("$toBeLogged"); 
 			}
 		}
@@ -935,7 +934,6 @@
 
 
         public function getHitSystemByDice( $shooter, $fire, $weapon, $location){
-		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
 		$name = false;
