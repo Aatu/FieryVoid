@@ -936,7 +936,7 @@
 		$rngCurr = 0; //total range of live systems
 		
 		foreach ($this->systems as $system){ //ok, do use actual systems...
-			if (($system->location == $location) && ($system !instanceof Structure)){ 
+			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
 				if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
 					//Structure and C&C will get special treatment...
