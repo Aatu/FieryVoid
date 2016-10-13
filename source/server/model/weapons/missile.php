@@ -115,7 +115,7 @@ class MissileLauncher extends Weapon{
         }
     }
 
-
+/*why is this redefined? shouldn't be necessary any longer
     public function getHitSystem($ship){
 
         $systems = array();
@@ -159,6 +159,7 @@ class MissileLauncher extends Weapon{
             }
         }
     }
+*/    
 
 
     public function ammoExplosionDamage($ship, $system, $damage, $gamedata){
