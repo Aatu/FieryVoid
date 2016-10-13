@@ -409,7 +409,19 @@
 
         
         public function getLastTurnMovement($turn){
-        
+		/*this function returns movement from a particular turn... shouldn't it return last movement EARLIER THAN current turn?*/
+		$movement =  array("x"=>0, "y"=>0);
+		foreach ($this->movement as $move){ //should be sorted from oldest to newest...
+			if($move->type == "start"){
+				$movement = $move;
+			}elseif($move->turn < $turn){
+				$movement = $move;
+			}
+		}
+		return $movement;
+		
+		
+		/*original code
             $movement = null;
             if (!is_array($this->movement)){
                 return array("x"=>0, "y"=>0);
@@ -426,10 +438,11 @@
                 }
                 $movement = $move;
             }
-        
             return $movement;
-        
+	    */    
         }
+	    
+	    
         
         public function getCoPos(){
         
