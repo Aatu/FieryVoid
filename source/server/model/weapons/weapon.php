@@ -833,7 +833,7 @@ class Weapon extends ShipSystem{
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 
         //$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-	    $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $null, $gamedata);
+	    $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata);
     }
 
 	
