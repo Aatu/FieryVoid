@@ -764,7 +764,7 @@
 
 
 
-        public function getHitSection($shooter, $preGoal = 0){ //returns value - location! DO NOT USE FOR BALLISTICS!
+        public function getHitSection($shooter, $turn, $preGoal = 0){ //returns value - location! DO NOT USE FOR BALLISTICS!
 		$foundLocation = 0;
 		if(isset($this->activeHitLocations[$shooter->id])){
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
@@ -780,7 +780,7 @@
 		}
 		return $foundLocation;
         }
-        public function getHitSectionPos($pos, $preGoal = 0){ //returns value - profile! THIS IS FOR BALLISTICS!
+        public function getHitSectionPos($pos, $turn, $preGoal = 0){ //returns value - profile! THIS IS FOR BALLISTICS!
 		$foundLocation = 0;
 		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
 		$foundLocation = $loc["loc"];
