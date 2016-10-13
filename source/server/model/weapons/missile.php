@@ -103,7 +103,7 @@ class MissileLauncher extends Weapon{
             $system = $this;
 
             if ($this->isDestroyed()){
-                $system = $this->getHitSystem($ship);
+                $system = $this->getHitSystemShip($ship);
             }
 
             if ($left < $rake){
@@ -115,8 +115,8 @@ class MissileLauncher extends Weapon{
         }
     }
 
-/*why is this redefined? shouldn't be necessary any longer
-    public function getHitSystem($ship){
+
+    public function getHitSystemShip($ship){
 
         $systems = array();
         $total = 0;
@@ -159,7 +159,6 @@ class MissileLauncher extends Weapon{
             }
         }
     }
-*/    
 
 
     public function ammoExplosionDamage($ship, $system, $damage, $gamedata){
