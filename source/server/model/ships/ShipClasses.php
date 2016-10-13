@@ -327,7 +327,7 @@
 		}else{
 			$returnTab = array();
 			foreach ($this->systems as $system){
-				if ( ($system->displayName == $name) && ($system->$location == $location) ){
+				if ( ($system->displayName == $name) && ($system->location == $location) ){
 				    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
 					    $returnTab[] = $system;
 				    }
