@@ -746,7 +746,7 @@ class Weapon extends ShipSystem{
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
 
         foreach ($locs as $loc){
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $loc);
+            $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $loc);
 
             if (!$system)
                 continue;
@@ -773,7 +773,7 @@ class Weapon extends ShipSystem{
 	}
 
         if ($this->flashDamage){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
-            $okSystem = $target->getHitSystem($shooter, $fireOrder, $this); //for Flash it won't return destroyed system other than PRIMARY Structure
+            $okSystem = $target->getHitSystem($pos, $shooter, $fireOrder, $this); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
         if ( $okSystem == null || $okSystem->isDestroyed()){
@@ -813,7 +813,7 @@ class Weapon extends ShipSystem{
                         $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $pos, $gamedata);
                     }
                 }else{
-                    $system = $ship->getHitSystem($target, $fireOrder, $this);
+                    $system = $ship->getHitSystem($pos, $target, $fireOrder, $this);
                     if ($system == null ){
                         continue;
                     }
@@ -825,7 +825,7 @@ class Weapon extends ShipSystem{
 
         if ($target->isDestroyed()) return;
 
-	$system = $target->getHitSystem($shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
 
