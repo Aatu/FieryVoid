@@ -41,7 +41,7 @@ class LinkedWeapon extends Weapon{
             $location = $target->getHitSection($shooter, $fireOrder->turn, $this);
         }
         
-	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem($shooter, $fireOrder, $this, $location);
         
         for ($i=0;$i<$fireOrder->shots;$i++)
         {   
