@@ -822,19 +822,29 @@
         }   	    
 
 	    
-        public function getHitSystem($pos, $shooter, $fireOrder, $weapon, $location = null){
+	    public function getHitSystemPos($pos,$shooter, $fireOrder, $weapon, $location = null){
+		    /*find target section before finding location*/
+		    if($location==null){
+			    $location = $this->getHitSectionPos($pos, $fireOrder->turn);
+		    }
+		    $this->getHitSystem($shooter, $fireOrder, $weapon, $location);
+	    }
+	    
+	    
+        public function getHitSystem($shooter, $fireOrder, $weapon, $location = null){
+		/*if something has to choose system by firing position, use getHitSystemPos instead*/
             if (isset($this->hitChart[0])){
-                $system = $this->getHitSystemByTable($pos, $shooter, $fireOrder, $weapon, $location);
+                $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);
             }
             else {
-                $system = $this->getHitSystemByDice($pos, $shooter, $fireOrder, $weapon, $location);
+                $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);
             }
             return $system;
         }
 
 
 
-        public function getHitSystemByTable($pos, $shooter, $fire, $weapon, $location){ 
+        public function getHitSystemByTable($shooter, $fire, $weapon, $location){ 
 		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		$system = null;
 		$name = false;
@@ -848,14 +858,16 @@
 
 		if ($system != null && !$system->isDestroyed()) return $system;
 
-		if ($location === null) {
-			if($pos!=null){
-				$location = $this->getHitSectionPos($pos, $fire->turn);
-			}elseif($weapon->ballistic){
+		if ($location === null) { 
+			if($weapon->ballistic){
 				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
+				$toBeLogged = 'MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
+				debug::log("$toBeLogged"); 
 			}else{
 				$location = $this->getHitSection($shooter, $fire->turn);
+				$toBeLogged = 'MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
+				debug::log("$toBeLogged"); 
 			}
 		}
           
@@ -905,7 +917,7 @@
 		}
 		
 		if($name == 'Primary'){ //redirect to PRIMARY!
-			return $this->getHitSystemByTable($pos, $shooter, $fire, $weapon, 0);
+			return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
 		if(sizeof($systems)==0){ //if empty, overkill to Structure
@@ -922,7 +934,7 @@
         } //end of function getHitSystemByTable
 
 
-        public function getHitSystemByDice($pos, $shooter, $fire, $weapon, $location){
+        public function getHitSystemByDice( $shooter, $fire, $weapon, $location){
 		/*IMPORTANT: use $pos as null unless damage comes from direction unrelated to firing order itself (such as AoE weapon)*/
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
@@ -938,9 +950,7 @@
 		if ($system != null && !$system->isDestroyed()) return $system;
 
 		if ($location === null) {
-			if($pos!=null){
-				$location = $this->getHitSectionPos($pos, $fire->turn);
-			}elseif($weapon->ballistic){
+			if($weapon->ballistic){
 				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 				$location = $this->getHitSectionPos($pos, $fire->turn);
 			}else{
@@ -1125,7 +1135,7 @@
         }
 
         public function getLocations(){
-        debug::log("getLocations");         
+        //debug::log("getLocations");         
             $locs = array();
 
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
