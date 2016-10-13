@@ -794,11 +794,11 @@
 	    
         public function getHitSectionProfile($shooter, $preGoal = 0){ //returns value - profile! DO NOT USE FOR BALLISTICS!
 		$foundProfile = 0;
-		if(isset($this->activeHitLocations[$shooter->id]) && !$weapon->ballistic){
+		if(isset($this->activeHitLocations[$shooter->id]) ){
 			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
         	}else{
 			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
-			if(!$weapon->ballistic) $this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
+			$this->activeHitLocations[$shooter->id] = $loc; //do not save for ballistic weapons!
 			$foundProfile = $loc["profile"];
 		}
 		return $foundProfile;
