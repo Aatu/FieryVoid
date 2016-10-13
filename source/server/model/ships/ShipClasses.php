@@ -698,8 +698,8 @@
 		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
 		foreach ($locs as $loc){
 			//compare current best pick with current loop iteration, change if new pick is better
-			$toughnessPick = $pick["remHealth"]+($pick["remHealth"]*$pick["armour"]*0.15));//toughness: remaining structure toughened by armor
-			$toughnessLoc = $loc["remHealth"]+($loc["remHealth"]*$loc["armour"]*0.15));//every point of armor increases toughness by 15%
+			$toughnessPick = $pick["remHealth"]+($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
+			$toughnessLoc = $loc["remHealth"]+($loc["remHealth"]*$loc["armour"]*0.15);//every point of armor increases toughness by 15%
 			
 			//now, depending on which profile is larger - modify toughness of smaller profile
 			//every point of size difference increases perceived toughness by 12 points
@@ -713,10 +713,9 @@
 				$toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
 			}
 										   
-			//if toughness is equal, profile wins; 	else, better toughness wins
-			if($toughnessLoc>$toughnessPick){
+			if($toughnessLoc>$toughnessPick){ //if new toughness is better, it wins (already takes profile into account)
 				$pick = $loc;
-			}elseif($loc["profile"]<$pick["profile"]){
+			}elseif($loc["profile"]<$pick["profile"]){ //if toughness is equal, better profile wins
 				$pick = $loc;
 			}//else old choice stays
 		}
