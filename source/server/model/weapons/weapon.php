@@ -591,13 +591,13 @@ class Weapon extends ShipSystem{
 
 	    
         if ($this->ballistic){
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
 		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
 		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
         }
         else {
-		$hitLoc = $target-> getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
+		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
 	}
         //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
@@ -689,7 +689,7 @@ class Weapon extends ShipSystem{
 
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
 
@@ -852,7 +852,7 @@ class Weapon extends ShipSystem{
 
 	$armor = 0;
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
             $armor = $system->getArmourPos($gamedata, $pos);
         }else{
