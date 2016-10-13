@@ -303,7 +303,7 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 	    
-	public noOverkill = true;
+	public $noOverkill = true;
 
 
         function __construct($startArc, $endArc){
