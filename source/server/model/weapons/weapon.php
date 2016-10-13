@@ -591,8 +591,9 @@ class Weapon extends ShipSystem{
 
 	    
         if ($this->ballistic){
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		//$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+		//$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
 		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
         }
