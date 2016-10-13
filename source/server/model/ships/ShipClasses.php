@@ -695,6 +695,35 @@
 
 
         public function pickLocationForHit($locs, $preGoal){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
+		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
+		foreach ($locs as $loc){
+			//compare current best pick with current loop iteration, change if new pick is better
+			$toughnessPick = $pick["remHealth"]+($pick["remHealth"]*$pick["armour"]*0.15));//toughness: remaining structure toughened by armor
+			$toughnessLoc = $loc["remHealth"]+($loc["remHealth"]*$loc["armour"]*0.15));//every point of armor increases toughness by 15%
+			
+			//now, depending on which profile is larger - modify toughness of smaller profile
+			//every point of size difference increases perceived toughness by 12 points
+			//that's a lot if remaining structure is low, but not all that much if it's high
+			$profileImpact = 12; 
+			if($pick["profile"]<$loc["profile"]){ //old profile smaller
+				$profileDiff = $loc["profile"] - $pick["profile"];
+				$toughnessPick = $toughnessPick + ($profileDiff*$profileImpact);
+			}elseif($pick["profile"]>$loc["profile"]){ //old profile larger
+				$profileDiff = $pick["profile"] - $loc["profile"];
+				$toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
+			}
+										   
+			//if toughness is equal, profile wins; 	else, better toughness wins
+			if($toughnessLoc>$toughnessPick){
+				$pick = $loc;
+			}elseif($loc["profile"]<$pick["profile"]){
+				$pick = $loc;
+			}//else old choice stays
+		}
+		
+		
+		
+/* previous algorithm - in case Tom wants to use it again		
             $topValue = -1;
             $pick = array();
 
@@ -706,14 +735,11 @@
 
                 //since we have the hitchance PRE profile as parameter, apply the profile of this section
                 //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
-		/*
-                $goal = $preGoal + $loc["profile"];
-		if($goal<0)$goal=0;//always miss
-		if($goal>20)$goal=20;//always hit
-		*/
-		/*above would be correct only if each shot was assigned separately... 
-		 	but as the first shot defines section choice for all further shots too, use just the profile itself
-		*/
+                // $goal = $preGoal + $loc["profile"];
+		//if($goal<0)$goal=0;//always miss
+		//if($goal>20)$goal=20;//always hit
+		//above would be correct only if each shot was assigned separately... 
+		// 	but as the first shot defines section choice for all further shots too, use just the profile itself
 		$goal = $loc["profile"];
 		if($goal<1) $goal=1; //don't accept profile <1...
 
@@ -731,6 +757,7 @@
                     $pick = $loc;
                 }
             }
+*/	    
 
             return $pick;
         }
