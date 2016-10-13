@@ -774,7 +774,26 @@
 
 
 
-
+	public function getHitSectionChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - location! chooses method based on weapon and fire order!
+		
+		
+		
+		if($weapon->ballistic){
+				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
+				$location = $this->getHitSectionPos($pos, $fire->turn);
+				$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
+				debug::log("$toBeLogged"); 
+				$mv = $shooter->getLastTurnMovement($fireOrder->turn-1);
+				$toBeLogged = $this->name + ' MJS BALLISTIC by movement; location: ' $location + '; coord: ' + $mv->x + ' ' + $mv->y;
+				debug::log("$toBeLogged"); 
+			}else{
+				$location = $this->getHitSection($shooter, $fire->turn);
+				$toBeLogged = $this->name + ' MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
+				debug::log("$toBeLogged"); 
+			}
+		
+		
+        }
         public function getHitSection($shooter, $turn, $preGoal = 0){ //returns value - location! DO NOT USE FOR BALLISTICS!
 		$foundLocation = 0;
 		if(isset($this->activeHitLocations[$shooter->id])){
