@@ -172,15 +172,8 @@
                 return;
             }
 
-            $structTarget = null;
-
-            if ( $target instanceof MediumShip ){
-                $structTarget = $target->getStructureSystem(0);
-            }
-            else{
-                $locTarget = $target->getHitSection($pos, $shooter, $fireOrder->turn, $this);
-                $structTarget = $target->getStructureSystem($locTarget);
-            }
+            $locTarget = $target->getHitSection($shooter, $fireOrder->turn, 0);
+            $structTarget = $target->getStructureSystem($location);//this takes care of details like MCV, too
 
             $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
             $crit->updated = true;
@@ -276,36 +269,30 @@
 
 
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
 
-            $structTarget = null;
+            $locTarget = $target->getHitSection($shooter, $fireOrder->turn, 0);
+            //$structTarget = $target->getStructureSystem($locTarget);//this takes care of details like MCV, too
+            
+
             $targets = null;
 
             if ($target instanceof MediumShip){
-
                 foreach ($target->systems as $system){
-
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
-
                     if($system->armour > 0) {
                         $system->criticals[] = $crit;
                     }
                 }
             }
             else{
-                $locTarget = $target->getHitSection($pos, $shooter, $fireOrder->turn, $this);
-
                 foreach ($target->systems as $system){
-
                     if ($system->location === $locTarget){
-
                         $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
                         $crit->inEffect = false;
-
                         if ( $system->armour > 0) {
                             $system->criticals[] = $crit;
                         }
@@ -414,14 +401,8 @@
         }
 
         public function getDamage($fireOrder){
-
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-
             $dmg = Dice::d(10, (5 + $add))+$this->damagebonus;
-
-//            debug::log("addedDice: ".$add);
-  //          debug::log("damage rolled: ".$dmg);
-
             return $dmg;
         }
 
@@ -485,8 +466,6 @@
         }
 
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-       //     Debug::log("in damage");
-
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
 
             if(LightMolecularDisrupterHandler::doArmorReduction($target, $shooter)){
@@ -495,30 +474,9 @@
                 {
                     return;
                 }
-
-                $structTarget = null;
-
-                if ( $target instanceof MediumShip ){
-                    $structTarget = $target->getStructureSystem(0);
-                }
-                else{
-                    if (sizeof($target->activeHitLocation > 0)){
-                        foreach ($target->activeHitLocation as $hitLoc){
-                            if ($hitLoc["validFor"] == $shooter->id){
-                                $location = $hitLoc["loc"];
-                            }
-                        }
-                    }
-
-                    if ($location != 0){
-                        $structure = $target->getStructureSystem($location);
-                        if ($structure != null && $structure->isDestroyed(TacGamedata::$currentTurn-1))
-                            $location = 0;
-                    }
-
-                    $structTarget = $target->getStructureSystem($location);
-
-                }
+                
+                $location = $target->getHitSection($shooter, $fireOrder->turn, 0);
+                $structTarget = $target->getStructureSystem($location);//this takes care of details like MCV, too
 
                 $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
                 $crit->updated = true;
@@ -533,16 +491,17 @@
         public function getDamage($fireOrder){        return Dice::d(2, 10)+15;   }
         public function setMinDamage(){   return  $this->minDamage = 17 - $this->dp;      }
         public function setMaxDamage(){   return  $this->maxDamage = 35 - $this->dp;      }
-        }
+    }
+
+
 
     class LightMolecularDisrupterHandler{
-
         private static $hits = array();
 
         public static function doArmorReduction($target, $shooter){
             $currentTurn = TacGamedata::$currentTurn;
 
-            Debug::log("doArmorReduction");
+            //Debug::log("doArmorReduction");
 
             // Always clean-up first.
             foreach (LightMolecularDisrupterHandler::$hits as $hit){
@@ -554,10 +513,10 @@
                 }
             }
 
-            Debug::log("4");
+            //Debug::log("4");
             // add new hit to the array
             LightMolecularDisrupterHandler::$hits[] = array('turn'=>$currentTurn, 'shooter'=>$shooter->id ,'target'=>$target->id);
-            Debug::log("5");
+            //Debug::log("5");
 
             // Check if this was number 3 for a certain target. If so, decrease armor of the structure
             $count = 0;

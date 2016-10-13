@@ -127,6 +127,7 @@ class MissileFB extends Ammo
         return false;
     }
     
+/*    not necessary any more, but I'm keeping it just in case
     public function calculateHit($gamedata, $fireOrder){
         
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -239,9 +240,9 @@ class MissileFB extends Ammo
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
     }
+*/    
 
-    public function getWeaponHitChanceMod($turn)
-    {
+    public function getWeaponHitChanceMod($turn){
         return $this->hitChanceMod;
     }
 

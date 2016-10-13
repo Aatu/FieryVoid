@@ -1023,9 +1023,7 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            debug::log("getPiercingLocations");
-
-            $location =  $this->activeHitLocation["loc"];
+		$location = $this->getHitSection($shooter, $turn);
             
             $locs = array();
             $finallocs = array();
@@ -1399,9 +1397,7 @@
     class StarBaseSixSections extends StarBase{
 
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            //debug::log("getPiercingLocations");
-            
-            $location =  $this->activeHitLocation["loc"];
+		$location = $this->getHitSection($shooter, $turn);
             
             $locs = array();
             $finallocs = array();
@@ -1453,9 +1449,7 @@
 
     class StarBaseFiveSections extends StarBase{
 	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-            //debug::log("getPiercingLocations");
-            
-            $location =  $this->activeHitLocation["loc"];
+		$location = $this->getHitSection($shooter, $turn);
             
             $locs = array();
             $finallocs = array();
