@@ -593,7 +593,7 @@ class Weapon extends ShipSystem{
         if ($this->ballistic){
 		//$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
 		//$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
+		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
 		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
         }
