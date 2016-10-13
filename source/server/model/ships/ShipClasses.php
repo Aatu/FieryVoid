@@ -838,9 +838,9 @@
 
 		if ($location === null) {
 			if($weapon->ballistic){
-				$location = $this->getHitSection($shooter);
+				$location = $this->getHitSection($shooter, $fire->turn);
 			}else{
-				$location = $this->getHitSectionPos($pos);
+				$location = $this->getHitSectionPos($pos, $fire->turn);
 			}
 		}
           
@@ -923,9 +923,9 @@
 
 		if ($location === null) {
 			if($weapon->ballistic){
-				$location = $this->getHitSection($shooter);
+				$location = $this->getHitSection($shooter, $fire->turn);
 			}else{
-				$location = $this->getHitSectionPos($pos);
+				$location = $this->getHitSectionPos($pos, $fire->turn);
 			}
 		}
 
