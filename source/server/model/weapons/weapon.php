@@ -752,7 +752,7 @@ class Weapon extends ShipSystem{
             if (!$system)
                 continue;
 
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
         }
     }
 
