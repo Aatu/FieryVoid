@@ -443,15 +443,18 @@ class Firing{
     
     public static function fireWeapons($gamedata){
 
-if($gamedata->currentGameID== 3578) {//       debug:
-	var_dump($gamedata);
-	exit;
-}	
+
 	
         $fireOrders  = array();
 
         
         foreach ($gamedata->ships as $ship){
+
+if(TacGamedata::currentGameID== 3578) {//       debug:
+	var_dump($ship);
+	exit;
+}			
+		
             if ($ship instanceof FighterFlight){
                 continue;
             }
