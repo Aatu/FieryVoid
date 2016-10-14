@@ -1260,6 +1260,7 @@ class DBManager {
             $stmt->execute();
             $prev_shipid = 0;
             $prev_turn = -1;
+	    $prev_type = '';		
             $move_orders = array();
             while ($stmt->fetch())
             {
@@ -1270,11 +1271,13 @@ class DBManager {
             	   $move_orders = array();
             	   $prev_shipid = $shipid;
             	   $prev_turn = -1;
+		   $prev_type = $type;
             	}
             	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
 			if (
-				($prev_turn <= 1) //there might be especially important orders on turn 1 or earlier, save them
-			    	|| ( ($gamedata->turn <= $prev_turn+2)) //need more turns back :( for turn delay and ballistics
+				($turn == $gamedata->turn) //current move is for current turn, so previous one is the last move before that, whatever it is...
+				|| ($prev_type != 'move') //special data, do include
+				|| ( ($gamedata->turn <= $prev_turn+2) && (!$ship instanceof FighterFlight))//for ships need even more turns back, due to possible high turn delay!
 			) 
 			{ 
 			   foreach($move_orders as $move) {
@@ -1283,6 +1286,7 @@ class DBManager {
 			}
             		$move_orders = array();
             		$prev_turn = $turn;
+			$prev_type = $type;
             	}
                 $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
