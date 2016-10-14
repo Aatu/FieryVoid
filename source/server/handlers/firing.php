@@ -442,29 +442,22 @@ class Firing{
 
     
     public static function fireWeapons($gamedata){
-//if(TacGamedata::currentGameID== 3578) {//       debug:
-	var_dump( $gamedata);
-	exit;
-//}	
 	
         $fireOrders  = array();
-
         
         foreach ($gamedata->ships as $ship){
-if(TacGamedata::$currentGameID== 3578) {//       debug:
-	var_dump( $ship);
-	exit;
-}	
+
             if ($ship instanceof FighterFlight){
                 continue;
             }
 
             foreach($ship->getAllFireOrders() as $fire){
 
-if(TacGamedata::$currentGameID== 3578) {//       debug:
+ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
+	echo "getAllFireOrders";
 	var_dump($fire);
 	exit;
-}		    
+}   	    
 		    
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
                     continue;
