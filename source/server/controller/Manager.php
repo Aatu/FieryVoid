@@ -714,16 +714,16 @@ if($gameid!=3578)//       MJSdebug
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
- if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "getTacGamedata";
-	var_dump( $gamedata);
-	exit;
-}   	
+
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
      //   Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-        
+ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
+	echo "automateIntercept";
+	var_dump( $gamedata);
+	exit;
+}   	
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
