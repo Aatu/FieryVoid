@@ -886,7 +886,7 @@
 		if ($system != null && !$system->isDestroyed()) return $system;
 
 		if ($location == null) { 
-			$location = getHitSectionChoice($shooter, $fire, $weapon);
+			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
           
 		$hitChart = $this->hitChart[$location];
@@ -967,7 +967,7 @@
 		if ($system != null && !$system->isDestroyed()) return $system;
 
 		if ($location == null) { 
-			$location = getHitSectionChoice($shooter, $fire, $weapon);
+			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
 
           
