@@ -24,8 +24,8 @@ class PlasmaStream extends Raking{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
@@ -94,7 +94,7 @@ class PlasmaStream extends Raking{
         }
 
         // Shock Cannons ignore armor.
-        protected function getSystemArmour($system, $gamedata, $fireOrderr, $pos=null){
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
             return 0;
 	}
 
