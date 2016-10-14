@@ -705,6 +705,10 @@ class Manager{
     
     private static function startEndPhase($gamedata){
         //print("start end");
+if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump( $gamedata);
+	exit;
+}   	    
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
 if(TacGamedata::$currentGameID== 3578) {//       debug:
