@@ -449,7 +449,10 @@ class Firing{
 
         
         foreach ($gamedata->ships as $ship){
-		
+if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump( $ship);
+	exit;
+}	
             if ($ship instanceof FighterFlight){
                 continue;
             }
