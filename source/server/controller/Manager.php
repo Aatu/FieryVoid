@@ -560,6 +560,10 @@ class Manager{
     }
     
     public static function advanceGameState($playerid, $gameid){
+//if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump( $playerid);
+	exit;
+//}   	
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
