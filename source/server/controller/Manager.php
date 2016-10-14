@@ -564,7 +564,7 @@ class Manager{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
 		
-if($gameid!=3578)//       debug:
+if($gameid!=3578)//       MJSdebug
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
                 //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
@@ -576,14 +576,9 @@ if($gameid!=3578)//       debug:
             //Debug("GAME: $gameid Starting to advance gamedata. playerid: $playerid");
             
             self::$dbManager->startTransaction();
-//if(TacGamedata::$currentGameID== 3578) {//       debug:
-echo "plr:";
-		var_dump( $playerid);
-	var_dump( $gameid);
-	exit;
-//} 
+		
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
-//if(TacGamedata::$currentGameID== 3578) {//       debug:
+//if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	var_dump( $gamedata);
 	exit;
 //}   			
