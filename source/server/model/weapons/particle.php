@@ -636,14 +636,14 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata){
+        protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata, $location = null){
             // The damage of a solar cannon does not overkill.
             return null;
         }
 
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
 
-            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location);
 
             // Lower armor on the system that was hit.
             $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
