@@ -594,6 +594,9 @@ class Manager{
             }
             
             if (TacGamedata::$currentPhase > 0){
+		    if(TacGamedata::$currentGameID == 3578){ //DEBUG
+			    print('before advancing systems data!');
+		    }
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship);
