@@ -442,13 +442,8 @@ class Firing{
 
     
     public static function fireWeapons($gamedata){
-
-echo('debug!!! sorry...<br>');{//       debug
-echo(TacGamedata::$currentGameID);
-var_dump( $gamedata);
-exit;    
 if(TacGamedata::currentGameID== 3578) {//       debug:
-	var_dump( $ship);
+	var_dump( $gamedata);
 	exit;
 }	
 	
