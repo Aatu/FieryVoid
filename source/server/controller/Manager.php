@@ -348,6 +348,7 @@ class Manager{
                     throw new Exception("phase and active ship does not match");
                 }
             }else if ($gdS->phase == 3){
+		    if($userid = 61) throw new Exception("before handling firing orders");
                 $ret = self::handleFiringOrders($ships, $gdS);
             }else if ($gdS->phase == 4){
                 $ret = self::handleFinalOrders($ships, $gdS);
