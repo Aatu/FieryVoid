@@ -828,7 +828,7 @@ class Weapon extends ShipSystem{
 
         if ($target->isDestroyed()) return;
 	    
- 	$tmpLocation = $ship->getHitSection($shooter, $fireOrder->turn);
+ 	$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 	$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
