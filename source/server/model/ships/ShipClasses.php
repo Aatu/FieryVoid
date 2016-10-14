@@ -846,7 +846,8 @@
 		    if($location==null){
 			    $location = $this->getHitSectionPos($pos, $fireOrder->turn);
 		    }
-		    $this->getHitSystem($shooter, $fireOrder, $weapon, $location);
+		    $foundSystem = $this->getHitSystem($shooter, $fireOrder, $weapon, $location);
+		    return $foundSystem;
 	    }
 	    
 	    
