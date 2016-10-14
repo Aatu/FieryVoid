@@ -408,7 +408,8 @@
         }
 
         
-        public function getLastTurnMovement($turn){ //returns last actual move, as of indicated turn
+        public function getLastTurnMovement($turn){ 
+	/*new SUSPECT code - returns last actual move, as of indicated turn*/
 		$movement =  null;
 		foreach ($this->movement as $move){ //should be sorted from oldest to newest...
 			if($move->type == "start") continue; //not a real move
@@ -418,7 +419,7 @@
 		return $movement;
 		
 		
-		/*original code
+		/*original code - returns first move of indicated turn*/
             $movement = null;
             if (!is_array($this->movement)){
                 return array("x"=>0, "y"=>0);
@@ -436,7 +437,7 @@
                 $movement = $move;
             }
             return $movement;
-	    */    
+ 
         }
 	    
 	    
