@@ -349,9 +349,9 @@ class Manager{
                 }
             }else if ($gdS->phase == 3){
                 $ret = self::handleFiringOrders($ships, $gdS);
-		    
-		    if($userid = 61) throw new Exception("AFTER handling firing orders");
             }else if ($gdS->phase == 4){
+		    
+		    if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS, $slotid);
