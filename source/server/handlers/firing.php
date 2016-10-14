@@ -447,6 +447,10 @@ echo('debug!!! sorry...<br>');{//       debug
 echo(TacGamedata::$currentGameID);
 var_dump( $gamedata);
 exit;    
+if(TacGamedata::currentGameID== 3578) {//       debug:
+	var_dump( $ship);
+	exit;
+}	
 	
         $fireOrders  = array();
 
