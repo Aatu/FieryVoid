@@ -560,6 +560,10 @@ class Manager{
     }
     
     public static function advanceGameState($playerid, $gameid){
+echo('debug!!! sorry...<br>');{//       debug
+echo(TacGamedata::$currentGameID);
+var_dump( $gamedata);
+exit;    
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
