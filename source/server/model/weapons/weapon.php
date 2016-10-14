@@ -589,7 +589,7 @@ class Weapon extends ShipSystem{
 
 	    
         if ($this->ballistic){
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
 		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
@@ -687,7 +687,7 @@ class Weapon extends ShipSystem{
 
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
 	}
 
@@ -828,9 +828,7 @@ class Weapon extends ShipSystem{
 
         if ($target->isDestroyed()) return;
 	    
-$shipss->getHitSection($shooter, $fireOrder->turn, $tmpLocation);
  	$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
-$ship->getHitSection($shooter, $fireOrder->turn, $tmpLocation);
 	$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
@@ -862,7 +860,7 @@ $ship->getHitSection($shooter, $fireOrder->turn, $tmpLocation);
 		$armor = $system->getArmourPos($gamedata, $pos);
 	}
         elseif($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 	    $armor = $system->getArmourPos($gamedata, $posLaunch);
         }else{
