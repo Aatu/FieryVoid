@@ -59,8 +59,8 @@ class PlasmaStream extends Raking{
 		
 		
 		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
-        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+		public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
+		public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
 
 	}
 
@@ -94,7 +94,7 @@ class PlasmaStream extends Raking{
         }
 
         // Shock Cannons ignore armor.
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
+        protected function getSystemArmour($system, $gamedata, $fireOrderr, $pos=null){
             return 0;
 	}
 
@@ -121,6 +121,8 @@ class PlasmaStream extends Raking{
         public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
     }
+
+
 
 class BurstBeam extends Weapon{
 
@@ -179,20 +181,20 @@ class BurstBeam extends Weapon{
 		
 		
 		public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
+		public function setMinDamage(){     $this->minDamage = 0;      }
+		public function setMaxDamage(){     $this->maxDamage = 0;      }
 
 	}
 
 	class DualBurstBeam extends BurstBeam{
-        public $name = "dualBurstBeam";
-        public $displayName = "Dual Burst Beam";
+		public $name = "dualBurstBeam";
+		public $displayName = "Dual Burst Beam";
 		public $guns = 2;
 	}
 
 
 class BurstPulseCannon extends Pulse {
-		public $name = "burstPulseCannon";
+	public $name = "burstPulseCannon";
         public $displayName = "Burst Pulse Cannon";
 
         public $animationColor = array(158, 240, 255);
@@ -215,7 +217,7 @@ class BurstPulseCannon extends Pulse {
         public $fireControl = array(2, 3, 4); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
        
@@ -253,8 +255,8 @@ class BurstPulseCannon extends Pulse {
 		
 		
 		public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0;      }
-        public function setMaxDamage(){     $this->maxDamage = 0;      }
+		public function setMinDamage(){     $this->minDamage = 0;      }
+		public function setMaxDamage(){     $this->maxDamage = 0;      }
 	}
 
 
