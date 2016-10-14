@@ -443,7 +443,11 @@ class Firing{
     
     public static function fireWeapons($gamedata){
 
-
+if($gamedata->currentGameID== 3578) {//       debug:
+	var_dump($gamedata);
+	exit;
+}	
+	
         $fireOrders  = array();
 
         
