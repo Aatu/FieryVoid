@@ -563,6 +563,12 @@ class Manager{
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
+		
+//if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump( $playerid);
+	var_dump( $gameid);
+	exit;
+//} 		
             
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
@@ -578,6 +584,7 @@ class Manager{
 //if(TacGamedata::$currentGameID== 3578) {//       debug:
 	var_dump( $playerid);
 	var_dump( $gameid);
+	exit;
 //} 
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
 //if(TacGamedata::$currentGameID== 3578) {//       debug:
