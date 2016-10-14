@@ -860,7 +860,7 @@ class Weapon extends ShipSystem{
 		$armor = $system->getArmourPos($gamedata, $pos);
 	}
         elseif($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 	    $armor = $system->getArmourPos($gamedata, $posLaunch);
         }else{
