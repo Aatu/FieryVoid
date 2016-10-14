@@ -351,7 +351,7 @@ class Manager{
                 $ret = self::handleFiringOrders($ships, $gdS);
             }else if ($gdS->phase == 4){
 		    
-		    if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
+		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS, $slotid);
@@ -594,6 +594,9 @@ class Manager{
             }
             
             if (TacGamedata::$currentPhase > 0){
+		    if(TacGamedata::$currentGameID == 3578){ //DEBUG
+			    print('before advancing systems data!');
+		    }
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship);
