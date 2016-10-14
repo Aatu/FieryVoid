@@ -53,6 +53,8 @@
             $fireOrder->updated = true; 
         }
         
+	    
+	    
         public function fire($gamedata, $fireOrder){
         
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -85,11 +87,8 @@
         }
         
         public function AOEdamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
-        
-            
-            if ($target->isDestroyed())
-                return;
-            
+                    
+            if ($target->isDestroyed()) return;            
             
             $amount -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
             
@@ -101,34 +100,26 @@
                     $amount = floor($amount/2);
                 }
 
-
-                $hitLoc = $target->getDefenceValuePos($pos, 100);
-
-				$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $hitLoc["loc"]);
+                $hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, 100);
+		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $hitLoc);
 			
-				if ($system == null)
-					return;
-					
-				$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata);
+		if ($system == null) return;
 
-			}
+		$this->doDamage($target, $shooter, $system, $amount, $fireOrder, $pos, $gamedata, $hitLoc);
+	    }
         }
         
         public function fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
-			
-			foreach ($target->systems as $fighter){
-				
-				if ($fighter == null || $fighter->isDestroyed()){
-					continue;
-				}
-				
-				$this->doDamage($target, $shooter, $fighter, $amount, $fireOrder, $pos, $gamedata);
-				
+		foreach ($target->systems as $fighter){
+			if ($fighter == null || $fighter->isDestroyed()){
+				continue;
 			}
-			
-		}
 
+			$this->doDamage($target, $shooter, $fighter, $amount, $fireOrder, $pos, $gamedata);
+		}
+	}
     }
+
     
     class EnergyMine extends AoE{
     

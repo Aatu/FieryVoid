@@ -9,7 +9,7 @@
         private $damages = array();
         public $priority = 8;
         
-        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){
             
             $rake = $this->raking;
             
@@ -22,8 +22,9 @@
             
             if ($target instanceof FighterFlight)
             {
-                $system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
-                $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this);
+                //$this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
+                $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, null, $gamedata);
                 return;
             }
             
@@ -32,19 +33,21 @@
                 if ($totalDamage <= 0)
                     break;
             
-                if ($target->isDestroyed())
-                    return;
-            
-                $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
+                if ($target->isDestroyed()) return;
+                
+                $trgtLoc = $target->getHitSectionChoice($shooter, $fireOrder, $this);
+                $system = $target->getHitSystem($shooter, $fireOrder, $this, $trgtLoc);
                 
                 if ($system == null)
                     return;
                     
                 if ($totalDamage - $this->raking >= 0){
-                    $this->doDamage($target, $shooter, $system, $rake, $fireOrder, $pos, $gamedata);
+                    //$this->doDamage($target, $shooter, $system, $rake, $fireOrder, $pos, $gamedata);
+                    $this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, $trgtLoc);
                     $totalDamage -= $this->raking;
                 }else if ($totalDamage > 0){
-                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
+                    //$this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
+                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, null, $gamedata, $trgtLoc);
                     break;
                 }else{
                     break;
@@ -53,9 +56,9 @@
             }
         }
         
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata){
-     
-            $armour = $this->getSystemArmour($system, $gamedata, $fireOrder);
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
+            $damage = floor($damage);//make sure damage is a whole number, without fractions!
+            $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
             
             foreach ($this->damages as $previous){
                 if ($previous->systemid == $system->id)
@@ -80,13 +83,11 @@
             $system->damage[] = $damageEntry;
             $this->damages[] = $damageEntry;
             $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-            if ($damage-$armour > $systemHealth){
-            
-                $damage = $damage-$modifiedDamage;
-                 
-                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata);
+            if ($damage-$armour > $systemHealth){            
+                $damage = $damage-$modifiedDamage;                 
+                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata, $location);
                 if ($overkillSystem != null)
-                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata);
+                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $location);
             }
         }
     }

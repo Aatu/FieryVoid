@@ -163,17 +163,17 @@
             parent::setSystemDataWindow($turn);
         }
 
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage){
 
-            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
+            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage);
 
             if ( $target instanceof FighterFlight || $target instanceof SuperHeavyFighter)
             {
                 return;
             }
 
-            $locTarget = $target->getHitSection($shooter, $fireOrder->turn, 0);
-            $structTarget = $target->getStructureSystem($location);//this takes care of details like MCV, too
+            $locTarget = $target->getHitSection($shooter, $fireOrder->turn);
+            $structTarget = $target->getStructureSystem($locTarget);//this takes care of details like MCV, too
 
             $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
             $crit->updated = true;
@@ -268,11 +268,10 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
 
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage){
+            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage);
 
-            $locTarget = $target->getHitSection($shooter, $fireOrder->turn, 0);
-            //$structTarget = $target->getStructureSystem($locTarget);//this takes care of details like MCV, too
+            $locTarget = $target->getHitSection($shooter, $fireOrder->turn);
             
 
             $targets = null;
@@ -465,8 +464,8 @@
             parent::setSystemDataWindow($turn);
         }
 
-        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null);
+        public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage){
+            parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage);
 
             if(LightMolecularDisrupterHandler::doArmorReduction($target, $shooter)){
 
@@ -475,7 +474,7 @@
                     return;
                 }
                 
-                $location = $target->getHitSection($shooter, $fireOrder->turn, 0);
+                $location = $target->getHitSection($shooter, $fireOrder->turn);
                 $structTarget = $target->getStructureSystem($location);//this takes care of details like MCV, too
 
                 $crit = new ArmorReduced(-1, $target->id, $structTarget->id, "ArmorReduced", $gamedata->turn);
