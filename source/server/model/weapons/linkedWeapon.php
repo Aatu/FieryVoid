@@ -37,7 +37,7 @@ class LinkedWeapon extends Weapon{
         if ($target->isDestroyed())
             return;
        
-	$trgtLoc = getHitSectionChoice($shooter, $fireOrder, $this);
+	$trgtLoc = $target->getHitSectionChoice($shooter, $fireOrder, $this);
 	$system = $target->getHitSystem($shooter, $fireOrder, $this, $trgtLoc);
         
         for ($i=0;$i<$fireOrder->shots;$i++)
