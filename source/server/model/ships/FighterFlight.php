@@ -221,25 +221,20 @@
         }
         
         
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
-        
-                 //print("getHitSystem, location: $location ");
+        public function getHitSystem($shooter, $fire, $weapon, $location = null){
             $systems = array();
-          
             foreach ($this->systems as $system){
                 if (!$system->isDestroyed()){
 					$systems[] = $system;
-                }
-                            
-            } 
-			
-			if (sizeof($systems) == 0)
-				return null;
-					
-			return $systems[(Dice::d(sizeof($systems)) -1)];
-			
-        
+                }                            
+            } 		
+		
+		if (sizeof($systems) == 0) return null;
+
+		return $systems[(Dice::d(sizeof($systems)) -1)];
         }
+	    
+	    
         
         public function getAllFireOrders()
         {
