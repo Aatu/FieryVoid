@@ -449,11 +449,6 @@ class Firing{
 
         
         foreach ($gamedata->ships as $ship){
-
-if(TacGamedata::currentGameID== 3578) {//       debug:
-	var_dump($ship);
-	exit;
-}			
 		
             if ($ship instanceof FighterFlight){
                 continue;
@@ -461,6 +456,11 @@ if(TacGamedata::currentGameID== 3578) {//       debug:
 
             foreach($ship->getAllFireOrders() as $fire){
 
+if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump($fire);
+	exit;
+}		    
+		    
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
                     continue;
                 }
