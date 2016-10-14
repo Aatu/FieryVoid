@@ -442,10 +442,10 @@ class Firing{
 
     
     public static function fireWeapons($gamedata){
-if(TacGamedata::currentGameID== 3578) {//       debug:
+//if(TacGamedata::currentGameID== 3578) {//       debug:
 	var_dump( $gamedata);
 	exit;
-}	
+//}	
 	
         $fireOrders  = array();
 
