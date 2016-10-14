@@ -707,6 +707,10 @@ class Manager{
         //print("start end");
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
+if(TacGamedata::$currentGameID== 3578) {//       debug:
+	var_dump( $gamedata);
+	exit;
+}     	    
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
