@@ -8,7 +8,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
             $target = $gamedata->getShipById($fireOrder->targetid);
             if (!$target instanceof WhiteStar){
                 return 0;

@@ -8,17 +8,16 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-		protected function getSystemArmour($system, $gamedata, $fireOrder){
-			$armour = parent::getSystemArmour($system, $gamedata, $fireOrder);
-
-            if (is_numeric($armour)){
-                $toIgnore = ceil($armour /2);
-                $new = $armour - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
+	protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+		$armour = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
+		    if (is_numeric($armour)){
+			$toIgnore = ceil($armour /2);
+			$new = $armour - $toIgnore;
+			return $new;
+		    }
+		    else {
+			return 0;
+		    }
         }
 
 
@@ -345,8 +344,8 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         }
 
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
@@ -412,8 +411,8 @@ class PlasmaGun extends Plasma{
         }
 
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder);
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);

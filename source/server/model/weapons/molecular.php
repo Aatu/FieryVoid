@@ -384,7 +384,7 @@
             return $boostLevel;
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder){
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
 
             $armor = $system->armour;
             $newArmor = $armor - 1;

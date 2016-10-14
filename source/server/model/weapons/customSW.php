@@ -98,26 +98,13 @@
       $this->data["Damage type"] = "Standard";
       $this->data["<font color='red'>Remark</font>"] = "Increased chance to hit systems.";      
       $this->data["<font color='red'>Remark</font>"] = "Increased chance of critical."; 
-      $this->data["<font color='red'>Remark</font>"] = "Ignores half of armor."; 
       parent::setSystemDataWindow($turn);
     }
      
     public function getDamage($fireOrder){        return Dice::d(3)+$this->damagebonus;   }
     public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
     public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus - $this->dp;      }
-    
-    protected function getSystemArmour($system, $gamedata, $fireOrder){
-			$armour = parent::getSystemArmour($system, $gamedata, $fireOrder);
-        if (is_numeric($armour)){
-          $toIgnore = ceil($armour /2);
-          $new = $armour - $toIgnore;
-          return $new;
-        }
-        else {
-          return 0;
-        }
-    }
-    
+        
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
       if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
       if($system instanceof Structure) return; //structure does not suffer critical hits anyway
