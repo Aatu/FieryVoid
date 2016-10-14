@@ -777,7 +777,7 @@
 	public function getHitSectionChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - location! chooses method based on weapon and fire order!
 		$foundLocation = 0;
 		if($weapon->ballistic){
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 			$foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
 			//$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
@@ -818,7 +818,7 @@
 	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - profile! chooses method based on weapon and fire order!
 		$foundProfile = 0;
 		if($weapon->ballistic){
-			$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 			$foundProfile = $this->getHitSectionProfilePos($posLaunch, $fireOrder->turn);
 		}else{
