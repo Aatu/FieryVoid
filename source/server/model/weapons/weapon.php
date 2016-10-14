@@ -526,7 +526,6 @@ class Weapon extends ShipSystem{
         if (!($shooter instanceof FighterFlight)){
 
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
-        //        debug::log("apllying malus for roll");
                 $mod -=3;
             }
 
@@ -539,7 +538,6 @@ class Weapon extends ShipSystem{
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
-       //     debug::log("applying turn malus");
             $mod -= 1;
         }
 
@@ -591,9 +589,8 @@ class Weapon extends ShipSystem{
 
 	    
         if ($this->ballistic){
-		//$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
-		//$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
 		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
         }
@@ -690,10 +687,9 @@ class Weapon extends ShipSystem{
 
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
-            //$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
-            //$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
-        }
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+	}
 
         $this->calculateHit($gamedata, $fireOrder);
         $intercept = $this->getIntercept($gamedata, $fireOrder);
@@ -864,10 +860,9 @@ class Weapon extends ShipSystem{
 		$armor = $system->getArmourPos($gamedata, $pos);
 	}
         elseif($this->ballistic){
-            //$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
-            //$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
-	    $posLaunch = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
-            $armor = $system->getArmourPos($gamedata, $posLaunch);
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+            $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
+	    $armor = $system->getArmourPos($gamedata, $posLaunch);
         }else{
             $armor = $system->getArmour($target, $shooter, $fireOrder->damageclass);
         }
