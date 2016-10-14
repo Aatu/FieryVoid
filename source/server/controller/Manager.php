@@ -724,12 +724,14 @@ if($gameid!=3578)//       MJSdebug
         Firing::fireWeapons($servergamedata);
         $endtime = time();
     //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
- if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
+/*absolutely bad way of debugging
+if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	echo "fireWeapons";
 	var_dump( $gamedata);
 	exit;
 }   
-        
+*/
+	    
         Criticals::setCriticals($servergamedata);
 		//var_dump($servergamedata->getNewFireOrders());
 		//throw new Exception();
