@@ -73,7 +73,7 @@ class TacGamedata{
             foreach($fireOrders as $fire){
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
-                    $movement = $ship->getLastTurnMovement($fire->turn-1);
+                    $movement = $ship->getLastTurnMovement($fire->turn);
                     $target = $fire->targetid;
                     if ($fire->x != "null" && $fire->y != "null")
                         $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
