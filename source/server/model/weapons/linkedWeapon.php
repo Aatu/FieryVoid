@@ -37,8 +37,8 @@ class LinkedWeapon extends Weapon{
         if ($target->isDestroyed())
             return;
        
-        
-	$system = $target->getHitSystem($shooter, $fireOrder, $this);
+	$trgtLoc = getHitSectionChoice($shooter, $fireOrder, $this);
+	$system = $target->getHitSystem($shooter, $fireOrder, $this, $trgtLoc);
         
         for ($i=0;$i<$fireOrder->shots;$i++)
         {   
@@ -65,7 +65,7 @@ class LinkedWeapon extends Weapon{
             }
             
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
+            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $trgtLoc);
         }
     }
 }
