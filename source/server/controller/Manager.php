@@ -707,24 +707,18 @@ if($gameid!=3578)//       MJSdebug
     
     private static function startEndPhase($gamedata){
         //print("start end");
-if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "xxxx";
-	var_dump( $gamedata);
-	exit;
-}   	    
+    
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
-//if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	var_dump( $gamedata);
-	exit;
-//}
+
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-if(TacGamedata::$currentGameID== 3578) {//       debug:
+ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
+	echo "getTacGamedata";
 	var_dump( $gamedata);
 	exit;
-}     
+}   	
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
