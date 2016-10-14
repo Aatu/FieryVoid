@@ -452,13 +452,7 @@ class Firing{
             }
 
             foreach($ship->getAllFireOrders() as $fire){
-
- if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "getAllFireOrders";
-	var_dump($fire);
-	exit;
-}   	    
-		    
+	    
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
                     continue;
                 }
@@ -525,6 +519,11 @@ class Firing{
                 $p = $wpn->priority;
                 // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
+if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
+	echo "foreach (fireOrders as fire)";
+	var_dump($fire);
+	exit;
+}   	
         }
 
 
