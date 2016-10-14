@@ -360,7 +360,7 @@
     	}
         
         public function getDamageMod($shooter, $pos, $turn){
-			$affectingSystems = array();
+	    $affectingSystems = array();
             foreach($this->systems as $system){
                 
                 if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
@@ -775,25 +775,18 @@
 
 
 	public function getHitSectionChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - location! chooses method based on weapon and fire order!
-		
-		
-		
+		$foundLocation = 0;
 		if($weapon->ballistic){
-				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
-				$location = $this->getHitSectionPos($pos, $fire->turn);
-				$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
-				debug::log("$toBeLogged"); 
-				$mv = $shooter->getLastTurnMovement($fireOrder->turn-1);
-				$toBeLogged = $this->name + ' MJS BALLISTIC by movement; location: ' $location + '; coord: ' + $mv->x + ' ' + $mv->y;
-				debug::log("$toBeLogged"); 
-			}else{
-				$location = $this->getHitSection($shooter, $fire->turn);
-				$toBeLogged = $this->name + ' MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
-				debug::log("$toBeLogged"); 
-			}
-		
-		
-        }
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
+			$foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
+			//$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
+			//debug::log("$toBeLogged"); 
+		}else{
+			$foundLocation = $this->getHitSection($shooter, $fireOrder->turn);
+		}
+		return $foundLocation;
+        }   
         public function getHitSection($shooter, $turn, $preGoal = 0){ //returns value - location! DO NOT USE FOR BALLISTICS!
 		$foundLocation = 0;
 		if(isset($this->activeHitLocations[$shooter->id])){
@@ -822,6 +815,17 @@
         }   	    
 
 	    
+	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - profile! chooses method based on weapon and fire order!
+		$foundProfile = 0;
+		if($weapon->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn-1);
+			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
+			$foundProfile = $this->getHitSectionProfilePos($posLaunch, $fireOrder->turn);
+		}else{
+			$foundProfile = $this->getHitSectionProfile($shooter, $fireOrder->turn);
+		}
+		return $foundProfile;
+        }
         public function getHitSectionProfile($shooter, $preGoal = 0){ //returns value - profile! DO NOT USE FOR BALLISTICS!
 		$foundProfile = 0;
 		if(isset($this->activeHitLocations[$shooter->id]) ){
@@ -841,8 +845,9 @@
         }   	    
 
 	    
-	    public function getHitSystemPos($pos,$shooter, $fireOrder, $weapon, $location = null){
-		    /*find target section before finding location*/
+	    
+	    public function getHitSystemPos($pos, $shooter, $fireOrder, $weapon, $location = null){
+		    /*find target section (based on indicated position) before finding location*/
 		    if($location==null){
 			    $location = $this->getHitSectionPos($pos, $fireOrder->turn);
 		    }
@@ -877,20 +882,8 @@
 
 		if ($system != null && !$system->isDestroyed()) return $system;
 
-		if ($location === null) { 
-			if($weapon->ballistic){
-				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
-				$location = $this->getHitSectionPos($pos, $fire->turn);
-				$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
-				debug::log("$toBeLogged"); 
-				$mv = $shooter->getLastTurnMovement($fireOrder->turn-1);
-				$toBeLogged = $this->name + ' MJS BALLISTIC by movement; location: ' $location + '; coord: ' + $mv->x + ' ' + $mv->y;
-				debug::log("$toBeLogged"); 
-			}else{
-				$location = $this->getHitSection($shooter, $fire->turn);
-				$toBeLogged = $this->name + ' MJS DIRECT wpn: ' + $weapon->displayName + '; location: ' $location;
-				debug::log("$toBeLogged"); 
-			}
+		if ($location == null) { 
+			$location = getHitSectionChoice($shooter, $fire, $weapon);
 		}
           
 		$hitChart = $this->hitChart[$location];
@@ -970,13 +963,8 @@
 
 		if ($system != null && !$system->isDestroyed()) return $system;
 
-		if ($location === null) {
-			if($weapon->ballistic){
-				$pos = mathlib::hexCoToPixel($fire->x, $fire->y); //use coordinates saved at the moment of firing, instead trying to retract moves...
-				$location = $this->getHitSectionPos($pos, $fire->turn);
-			}else{
-				$location = $this->getHitSection($shooter, $fire->turn);
-			}
+		if ($location == null) { 
+			$location = getHitSectionChoice($shooter, $fire, $weapon);
 		}
 
           
