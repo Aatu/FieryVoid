@@ -564,7 +564,7 @@ class Manager{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
                 return;
 		
-if($gameid!=3578)
+if($gameid!=3578)//       debug:
             if (!self::$dbManager->getGameSubmitLock($gameid))
             {
                 //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
