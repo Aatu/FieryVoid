@@ -519,11 +519,13 @@ class Firing{
                 $p = $wpn->priority;
                 // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
+/*absolutely bad way of debugging		
 if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	echo "foreach (fireOrders as fire)";
 	var_dump($fire);
 	exit;
 }   	
+*/
         }
 
 
