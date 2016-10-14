@@ -1277,7 +1277,7 @@ class DBManager {
 			if (
 				($turn == $gamedata->turn) //current move is for current turn, so previous one is the last move before that, whatever it is...
 				|| ($prev_type != 'move') //special data, do include
-				|| ( ($gamedata->turn <= $prev_turn+2) && (!$ship instanceof FighterFlight))//for ships need even more turns back, due to possible high turn delay!
+				|| ( ($gamedata->turn <= $prev_turn+2) && (!($gamedata->getShipByID($prev_shipid) instanceof FighterFlight)))//for ships need even more turns back, due to possible high turn delay!
 			) 
 			{ 
 			   foreach($move_orders as $move) {
