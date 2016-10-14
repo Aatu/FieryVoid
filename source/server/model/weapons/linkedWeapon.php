@@ -32,16 +32,13 @@ class LinkedWeapon extends Weapon{
         $fireOrder->rolled = 1;//Marks that fire order has been handled
     }
     
-    public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null)
+    public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage)
     {
         if ($target->isDestroyed())
             return;
        
-        if ($location === null){
-            $location = $target->getHitSection($shooter, $fireOrder->turn, $this);
-        }
         
-	$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $location);
+	$system = $target->getHitSystem($shooter, $fireOrder, $this);
         
         for ($i=0;$i<$fireOrder->shots;$i++)
         {   
@@ -56,7 +53,7 @@ class LinkedWeapon extends Weapon{
                 // you killed the system with one of your shots. Overkill into structure
                 // if there is no structure in this location, go to primary structure
                 // If primary structure is destroyed, just return.
-                $system = $target->getStructureSystem($location);
+                $system = $target->getStructureSystem($system->location);
                 
                 if(($system == null && $location != 0) || ($system != null && $system->isDestroyed())){
                     $system = $target->getStructureSystem(0);
