@@ -636,7 +636,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata, $location = null){
+        protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location = null){
             // The damage of a solar cannon does not overkill.
             return null;
         }
