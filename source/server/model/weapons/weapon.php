@@ -630,11 +630,11 @@ $extraNote='';
         if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($launchPos, $preProfileGoal);
-$extraNote=' POS ';		
+$extraNote=' POS ' . $fireOrder->turn;			
         }else{
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
-$extraNote=' DIRECT ';		
+$extraNote=' DIRECT ' .	$gamedata->turn;
 	}
         //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 	$goal = $defence + $preProfileGoal;
