@@ -482,17 +482,20 @@ class Weapon extends ShipSystem{
         $target = $gamedata->getShipById($fireOrder->targetid);
         //debug::log($shooter->phpclass." vs: ".$target->phpclass);
         $pos = $shooter->getCoPos();
-        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-        $launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
-	    
         $jammermod = 0;
         $jink = 0;
         $defence = 0;
 
         $hitLoc;
         $preProfileGoal;
-
-        $rp = $this->calculateRangePenalty($pos, $target);
+	    
+        if($this->ballistic){
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        	$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+        }else{
+		$launchPos = $pos;
+	}
+        $rp = $this->calculateRangePenalty($launchPos, $target);
         $rangePenalty = $rp["rp"];
 
         $dew = $target->getDEW($gamedata->turn);
