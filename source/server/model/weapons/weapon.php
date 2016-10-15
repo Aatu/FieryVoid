@@ -842,6 +842,7 @@ $notes = $notes.$extraNote;
 	
 
     public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){
+	    /*$pos is never actually used, but _may_ be still useful for redefinitions...*/
         if($this->flashDamage){ //damage units other than base target
             $flashDamageAmount = $damage/4;
 		$explosionPos = $target->getCoPos();
@@ -877,7 +878,13 @@ $notes = $notes.$extraNote;
 
         if ($target->isDestroyed()) return;
 	    
- 	$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+	}else{
+ 		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+	}
 	$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
 
         if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
