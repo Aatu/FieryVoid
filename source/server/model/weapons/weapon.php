@@ -457,6 +457,25 @@ class Weapon extends ShipSystem{
 
 	
 	
+    
+     protected function isFtrFiringNonBallisticWeapons($shooter, $fireOrder){
+        // first get the fighter that is armed with this weapon
+        // We have to go looking for it because the shooter is a flight,
+        // not an individual fighter.
+        $fighterSys = $shooter->getFighterBySystem($fireOrder->weaponid);
+
+        // now recheck all the fighter's weapons
+        foreach($fighterSys->systems as $weapon){
+            if(!$weapon->ballistic && $weapon->firedOnTurn(TacGamedata::$currentTurn)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+	
+	
+	
     public function calculateHit($gamedata, $fireOrder){
         //debug::log("_____________");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -469,8 +488,14 @@ class Weapon extends ShipSystem{
 
         $hitLoc;
         $preProfileGoal;
-
-        $rp = $this->calculateRangePenalty($pos, $target);
+	    
+        if($this->ballistic){
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        	$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+        }else{
+		$launchPos = $pos;
+	}
+        $rp = $this->calculateRangePenalty($launchPos, $target);
         $rangePenalty = $rp["rp"];
 
         $dew = $target->getDEW($gamedata->turn);
@@ -480,8 +505,8 @@ class Weapon extends ShipSystem{
 
         $bdew = EW::getBlanketDEW($gamedata, $target);
 
-        if ($target instanceof FighterFlight){
-            if (!($shooter instanceof FighterFlight))
+        if($target instanceof FighterFlight){
+            if ( (!($shooter instanceof FighterFlight)) || $this->ballistic)
             {
                 $jink = Movement::getJinking($target, $gamedata->turn);
             }
@@ -510,30 +535,20 @@ class Weapon extends ShipSystem{
         }
 
 
-        if ($shooter instanceof FighterFlight){
-            $oew = $shooter->offensivebonus;
-            $mod -= Movement::getJinking($shooter, $gamedata->turn);
-
-            if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
-               $mod -= 1;
-            }
-        }
-
         if ($this->piercing && $this->firingMode == 2 && $this->firingModes[1] == "Standard"){
             $mod -= 4;
         }
 
         if (!($shooter instanceof FighterFlight)){
-
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
                 $mod -=3;
             }
-
             if (Movement::hasPivoted($shooter, $gamedata->turn) && !$this->ballistic){
                 $mod -=3;
             }
         }
-        if ($fireOrder->calledid != -1){
+
+	if ($fireOrder->calledid != -1){
             $mod += $this->getCalledShotMod();
         }
 
@@ -578,25 +593,51 @@ class Weapon extends ShipSystem{
 
         $intercept = $this->getIntercept($gamedata, $fireOrder);
 
-        // Fighters ignore all defensive EW, be it DEW, SDEW or BDEW
-        if ($shooter instanceof FighterFlight && !$this->ballistic){
-            $dew = 0;
-            $bdew = 0;
-            $sdew = 0;
+	    
+	    
+        // Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
+	//and use OB instead of OEW
+        if($shooter instanceof FighterFlight) {
+		$jink += Movement::getJinking($shooter, $gamedata->turn);
+		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
+			$mod -= 1;
+		}
+		if(!$this->ballistic){
+			$dew = 0;
+			$bdew = 0;
+			$sdew = 0;
+			$oew = $shooter->offensivebonus;
+		}else{ //ballistics use of OB is more complicated
+			$oew = 0;
+			if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
+				if($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
+					$oew = $shooter->offensivebonus;
+				}else{ // Check if weapon is in current weapon arc
+					$shooterCompassHeading = mathlib::getCompassHeadingOfShip($shooter, $target);
+					$tf = $shooter->getFacingAngle();
+					if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
+						// Target is in current launcher arc. Flight benefits from offensive bonus.
+						// Now check if the fighter is not firing any non-ballistic weapons
+						if(!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder))$oew = $shooter->offensivebonus;
+					}
+				}
+        		}
+		}
         }
+	    
+	    
 
         $preProfileGoal = (-$dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
-	    
-        if ($this->ballistic){
-		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, $preProfileGoal);
-		$defence = $target->getHitSectionProfilePos($pos, $preProfileGoal);
-        }
-        else {
+$extraNote='';
+        if($this->ballistic){
+		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
+		$defence = $target->getHitSectionProfilePos($launchPos, $preProfileGoal);
+$extraNote=' POS ' . $fireOrder->turn;			
+        }else{
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
+$extraNote=' DIRECT ' .	$gamedata->turn;
 	}
         //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 	$goal = $defence + $preProfileGoal;
@@ -604,7 +645,7 @@ class Weapon extends ShipSystem{
         $change = round(($goal/20)*100);
 
         $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, jink: $jink";
-
+$notes = $notes.$extraNote;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;

@@ -110,7 +110,10 @@ class MissileFB extends Ammo
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct(0, 0, 0, $startArc, $endArc, $fireControl);
     }
+
     
+    
+/*    not necessary any more, but I'm keeping it just in case
     protected function isFiringNonBallisticWeapons($shooter, $fireOrder){
         // first get the fighter that is armed with this weapon
         // We have to go looking for it because the shooter is a flight,
@@ -126,6 +129,7 @@ class MissileFB extends Ammo
 
         return false;
     }
+*/    
     
 /*    not necessary any more, but I'm keeping it just in case
     public function calculateHit($gamedata, $fireOrder){
