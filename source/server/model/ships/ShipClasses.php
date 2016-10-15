@@ -414,7 +414,7 @@
 		$movement =  null;
 		foreach ($this->movement as $move){ //should be sorted from oldest to newest...
 			if($move->type == "start") continue; //not a real move
-			if( ($move->turn > $turn) && ($move->type!='deploy')) continue; //future move; but always include deployment!
+			if( ($move->turn > $trgtTurn) && ($move->type!='deploy')) continue; //future move; but always include deployment!
 			$movement = $move;  
 		}
 		return $movement;
