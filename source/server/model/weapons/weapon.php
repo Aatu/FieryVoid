@@ -564,41 +564,12 @@ class Weapon extends ShipSystem{
             $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
         }
 
-
-        if ($oew < 1){
-            $rangePenalty = $rangePenalty*2;
-        }
-        else
-        {
-            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
-            if ($jammerValue > 0 && $shooter->faction != $target->faction)
-            {
-                $jammermod = $rangePenalty*$jammerValue;
-                if ($target instanceof FighterFlight){
-                    if ( $dew > $jammermod){
-                        $jammermod = 0;
-                    }
-                    else{
-                        $dew = 0;
-                    }
-                }
-            }
-        }
-
-        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
-		$CnC = $shooter->getSystemByName("CnC");
-		$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
-	}
-        $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
-
-        $intercept = $this->getIntercept($gamedata, $fireOrder);
-
 	    
+
 	    
         // Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
 	//and use OB instead of OEW
         if($shooter instanceof FighterFlight) {
-		$jink += Movement::getJinking($shooter, $gamedata->turn);
 		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
 			$mod -= 1;
 		}
@@ -623,7 +594,44 @@ class Weapon extends ShipSystem{
 				}
         		}
 		}
+        }   
+	    
+	    
+
+        if ($oew < 1){
+            $rangePenalty = $rangePenalty*2;
         }
+        else
+        {
+            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
+            if ($jammerValue > 0 && $shooter->faction != $target->faction)
+            {
+                $jammermod = $rangePenalty*$jammerValue;
+                if ($target instanceof FighterFlight){
+                    //if ( $dew > $jammermod){
+		    if ( $jink > $jammermod){
+                        $jammermod = 0;
+                    }
+                    else{
+                        //$dew = 0;
+			 $jink = 0;
+                    }
+                }
+            }
+        }
+	    
+	    
+	if($shooter instanceof FighterFlight)  $jink += Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always  
+
+        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
+		$CnC = $shooter->getSystemByName("CnC");
+		$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
+	}
+        $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
+
+        $intercept = $this->getIntercept($gamedata, $fireOrder);
+
+	    
 	    
 	    
 
@@ -633,11 +641,11 @@ $extraNote='';
         if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($launchPos, $preProfileGoal);
-$extraNote=' POS ' . $fireOrder->turn;			
+$extraNote=' POS ' ;			
         }else{
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
-$extraNote=' DIRECT ' .	$gamedata->turn;
+$extraNote=' DIRECT ' ;
 	}
         //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 	$goal = $defence + $preProfileGoal;
