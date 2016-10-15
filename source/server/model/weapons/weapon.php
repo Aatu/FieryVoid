@@ -593,6 +593,7 @@ class Weapon extends ShipSystem{
 	    
 	    
         // Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
+	//and use OB instead of OEW
         if($shooter instanceof FighterFlight) {
 		$jink += Movement::getJinking($shooter, $gamedata->turn);
 		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
@@ -626,7 +627,7 @@ class Weapon extends ShipSystem{
         $preProfileGoal = (-$dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
 	    
-        if ($this->ballistic){
+        if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($launchPos, $preProfileGoal);
         }
