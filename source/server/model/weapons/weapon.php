@@ -789,7 +789,7 @@ class Weapon extends ShipSystem{
         $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
 
         foreach ($locs as $loc){
-            $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $loc);
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $loc);
 
             if (!$system)
                 continue;
