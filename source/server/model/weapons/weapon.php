@@ -56,6 +56,7 @@ class Weapon extends ShipSystem{
     public $canChangeShots = false;
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	public $noInterceptDegradation = false; //for future interception overhaul
 	
 
     public $grouping = 0;
