@@ -162,13 +162,35 @@
         public $projectilespeed = 10;
         public $animationWidth = 6;
         public $animationExplosionScale = 0.90;
-        public $targetImmobile = true;
+	public $noInterceptDegradation = true;
+        //public $targetImmobile = true;
         
         public $loadingtime = 4;
 		
         public $rangePenalty = 0.17;
         public $fireControl = array(null, null, 2); // fighters, <mediums, <capitals 
 
+	    public function setSystemDataWindow($turn){
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units.";      
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon always hits Structure.";   
+	      parent::setSystemDataWindow($turn);
+	    }	    
+
+	    
+	    
+    public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){ //always hit Structure...
+        if ($target->isDestroyed()) return;
+	$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+	
+	$system = $target->getStructureSystem($tmpLocation);
+	if ($system == null || $system->isDestroyed()) $system = $target->getStructureSystem(0);//facing Structure nonexistent, go to PRIMARY
+        if ($system == null || $system->isDestroyed()) return; 
+        $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+    }
+	    
+	    
+	    
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
