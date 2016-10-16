@@ -859,7 +859,7 @@
 			//use only non-destroyed systems on section hit
 			$rngTotal = 0; //range of current system
 			$rngCurr = 0; //total range of live systems
-			for($i = 1;$i<=20;$i++){
+			for($roll = 1;$roll<=20;$roll++){
 				$rngCurr++;
 				if (isset($this->hitChart[$location][$roll])){
                    			$name = $this->hitChart[$location][$roll];
@@ -959,7 +959,7 @@
 			if($location == 0){
 				$multiplier = 2; //PRIMARY has relatively low Structure, increase chance
 			}else{
-				$multiplier = 0; //non-PRIMARY have relatively high structure, reduce chance
+				$multiplier = 0.5; //non-PRIMARY have relatively high structure, reduce chance
 			}
 			$rngCurr =  ceil($system->maxhealth * $multiplier);
 			$rngCurr+=1; //small systems usually have relatively high chance of being hit
