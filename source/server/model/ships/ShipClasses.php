@@ -711,65 +711,29 @@
 		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
 		foreach ($locs as $loc){
 			//compare current best pick with current loop iteration, change if new pick is better
-			$toughnessPick = $pick["remHealth"]+($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
-			$toughnessLoc = $loc["remHealth"]+($loc["remHealth"]*$loc["armour"]*0.15);//every point of armor increases toughness by 15%
+			$toughnessPick = $pick["remHealth"]+round($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
+			$toughnessLoc = $loc["remHealth"]+round($loc["remHealth"]*$loc["armour"]*0.15);//every point of armor increases toughness by 15%
 			
 			//now, depending on which profile is larger - modify toughness of smaller profile
 			//every point of size difference increases perceived toughness by 12 points
 			//that's a lot if remaining structure is low, but not all that much if it's high
-			$profileImpact = 12; 
+			$profileImpact = 17; //equiv. to almost 10 Str boxes at armor 5, or 11 at 4
 			if($pick["profile"]<$loc["profile"]){ //old profile smaller
 				$profileDiff = $loc["profile"] - $pick["profile"];
-				$toughnessPick = $toughnessPick + ($profileDiff*$profileImpact);
+				if($toughnessPick>0)// profile shouldn't cause destroyed section to be chosen
+				  $toughnessPick = $toughnessPick + ($profileDiff*$profileImpact);
 			}elseif($pick["profile"]>$loc["profile"]){ //old profile larger
 				$profileDiff = $pick["profile"] - $loc["profile"];
-				$toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
+				if($toughnessLoc>0)// profile shouldn't cause destroyed section to be chosen
+				  $toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
 			}
 										   
 			if($toughnessLoc>$toughnessPick){ //if new toughness is better, it wins (already takes profile into account)
 				$pick = $loc;
-			}elseif($loc["profile"]<$pick["profile"]){ //if toughness is equal, better profile wins
+			}elseif(($toughnessLoc==$toughnessPick) && ($loc["profile"]<$pick["profile"])){ //if toughness is equal, better profile wins
 				$pick = $loc;
 			}//else old choice stays
 		}
-		
-		
-		
-/* previous algorithm - in case Tom wants to use it again		
-            $topValue = -1;
-            $pick = array();
-
-            foreach ($locs as $loc){	
-                $value = $loc["remHealth"]; // remaining Health on Structure
-                $value += floor($value/10) * ($loc["armour"] * 1.5); // add armour*1.5 per 10 remaining Health
-		    if($value==0) $value = 0.1; //so there's still something to choose from and profile has meaning...
-                // $value is now approximatly a value of relative toughness of this section
-
-                //since we have the hitchance PRE profile as parameter, apply the profile of this section
-                //to get the END HIT CHANCE. High hit chance diminishes worth of toughness
-                // $goal = $preGoal + $loc["profile"];
-		//if($goal<0)$goal=0;//always miss
-		//if($goal>20)$goal=20;//always hit
-		//above would be correct only if each shot was assigned separately... 
-		// 	but as the first shot defines section choice for all further shots too, use just the profile itself
-		$goal = $loc["profile"];
-		if($goal<1) $goal=1; //don't accept profile <1...
-
-                // divide toughness by expected hitchance effective defensive worth of a section
-		if($goal==0){//miss, so that MUST be the correct choice! - do not look further
-			$pick = $loc;
-			return $pick;
-		}else{
-                    $value = $value / $goal; 
-                }
-
-                // if the effective defensive worth is higher than the current one, replace it
-                if ($value > $topValue){
-                    $topValue = $value;
-                    $pick = $loc;
-                }
-            }
-*/	    
 
             return $pick;
         }

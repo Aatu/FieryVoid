@@ -8,20 +8,22 @@
         
         public function calculateHit($gamedata, $fireOrder){
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $shooterPos = $shooter->getCoPos();
+            $shooterPos = $shooter->getCoPos(); 
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!
             $target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
             $hit = false;
             
             $fireOrder->needed = 0;
             $rolled = Dice::d(4);
-            if ($rolled == 1){
+            if ($rolled == 1){ //no exact hit...
                 $rolled = Dice::d(10);
                 if ($rolled<7){
                     $hit = true;
                     $dis = Dice::d(6);
                     
                     
-                    $maxdis = mathlib::getDistanceHex($shooterPos, mathlib::hexCoToPixel($target["x"], $target["y"]));
+                    $maxdis = mathlib::getDistanceHex($posLaunch, mathlib::hexCoToPixel($target["x"], $target["y"]));
 
                     if ($dis>$maxdis){
                         $dis = floor($maxdis);
@@ -56,9 +58,10 @@
 	    
 	    
         public function fire($gamedata, $fireOrder){
-        
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
             $shooterpos = $shooter->getCoPos();
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!		
             $target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
             
             $this->calculateHit($gamedata, $fireOrder);
@@ -68,7 +71,7 @@
                     
                     
                 foreach($ships1 as $ship){
-                    $this->AOEdamage($ship, $shooter, $fireOrder, $shooterpos, 30, $gamedata);
+                    $this->AOEdamage($ship, $shooter, $fireOrder, $posLaunch, 30, $gamedata);
                     $fireOrder->notes .= $ship->name ." in same hex. "; 
                 }
                 
@@ -87,21 +90,18 @@
         }
         
         public function AOEdamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata){
-                    
-            if ($target->isDestroyed()) return;            
-            
+            if ($target->isDestroyed()) return;                    
             $amount -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
             
             if ($target instanceof FighterFlight){
-				$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
-			}
-            else {
+			$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
+	    } else {
                 if ($target instanceof StarBase || $target instanceof OSAT){
                     $amount = floor($amount/2);
                 }
 
-                $hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn, 100);
-		$system = $target->getHitSystem($pos, $shooter, $fireOrder, $this, $hitLoc);
+                $hitLoc = $target->getHitSectionPos($pos, $fireOrder->turn);
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, $hitLoc);
 			
 		if ($system == null) return;
 

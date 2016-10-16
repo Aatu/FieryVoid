@@ -637,15 +637,13 @@ class Weapon extends ShipSystem{
 
         $preProfileGoal = (-$dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 
-$extraNote='';
+
         if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfilePos($launchPos, $preProfileGoal);
-$extraNote=' POS ' ;			
         }else{
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
-$extraNote=' DIRECT ' ;
 	}
         //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
 	$goal = $defence + $preProfileGoal;
@@ -653,7 +651,6 @@ $extraNote=' DIRECT ' ;
         $change = round(($goal/20)*100);
 
         $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, jink: $jink";
-$notes = $notes.$extraNote;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
@@ -963,7 +960,7 @@ $notes = $notes.$extraNote;
 	
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
 	    /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
-	    /*otherwise best leave null*/
+	    /*otherwise best leave null BUT fill $location!*/
     
 	$damage = floor($damage);//make sure damage is a whole number, without fractions!
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
