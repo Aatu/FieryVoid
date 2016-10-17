@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 13th of October 2016";
+                    header.innerHTML = "Latest News 17th of October 2016";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -54,7 +54,7 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- so if You perceive trouble in this area, please write on FB - I'll try to deploy corrections ASAP"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Various SCS updates (incl. custom version of Brakiri Tashkat and Shakara - with Grav Cannons in place of Shifters)";
+                    news.innerHTML += "- You always wanted to blast bases with Mass Driver, yes? Well, now You can try!";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
 
