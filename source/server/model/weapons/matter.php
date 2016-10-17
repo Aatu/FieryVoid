@@ -198,9 +198,9 @@
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		
-		if(!$target->Enormous){	$canHit=false; $pubnotes. = ' Target is not Enormous. '; }
-		if($target->getSpeed()>0){ $canHit=false; $pubnotes. = ' Target speed >0. '; }
-		if($shooter->getSpeed()>0){ $canHit=false; $pubnotes. = ' Shooter speed >0. '; }
+		if(!$target->Enormous){	$canHit=false; $pubnotes.= ' Target is not Enormous. '; }
+		if($target->getSpeed()>0){ $canHit=false; $pubnotes.= ' Target speed >0. '; }
+		if($shooter->getSpeed()>0){ $canHit=false; $pubnotes.= ' Shooter speed >0. '; }
 			
 		if($canHit){
 			parent::calculateHit($gamedata, $fireOrder);
