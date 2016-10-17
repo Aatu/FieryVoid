@@ -16,6 +16,7 @@ class wlcEmperorDN2090 extends BaseShip{
         $this->fighters = array("heavy"=>24); 
 
         $this->shipSizeClass = 3; //Enormousis not implemented
+        $this->Enormous = true;		
         $this->forwardDefense = 19;
         $this->sideDefense = 20;
 	$this->iniativebonus = 0;
