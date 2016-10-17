@@ -22,7 +22,7 @@ class wlcGarut2006 extends BaseShip{
 
         $this->imagePath = "img/ships/sakar.png";
 	
-
+        $this->Enormous = true;
 
 
         $this->turncost = 2;
