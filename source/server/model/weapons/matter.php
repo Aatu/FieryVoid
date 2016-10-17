@@ -174,8 +174,8 @@
 
 	    public function setSystemDataWindow($turn){
 	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units. "     
-	       "Weapon misses automatically if launching unit speed is > 0. "  
-	      ."Weapon always hits Structure. ";   
+	       ."Weapon misses automatically if launching unit speed is > 0. "  
+	       ."Weapon always hits Structure. ";   
 	      parent::setSystemDataWindow($turn);
 	    }	    
 
