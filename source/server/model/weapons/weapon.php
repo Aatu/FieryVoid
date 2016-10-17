@@ -42,6 +42,7 @@ class Weapon extends ShipSystem{
     public $extraoverloadshots = 0;
 
     public $uninterceptable = false;
+    public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
     public $intercept = 0;
     public $freeintercept = false;
 
@@ -50,7 +51,7 @@ class Weapon extends ShipSystem{
     public $hidetarget = false;
     public $targetImmobile = false;
 	
-    public $noInterceptDegradation = true; //to be incorporated into interception routines
+    
 
 
     public $shots = 1;
@@ -58,7 +59,6 @@ class Weapon extends ShipSystem{
     public $canChangeShots = false;
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
-	public $noInterceptDegradation = false; //for future interception overhaul
 	
 
     public $grouping = 0;
