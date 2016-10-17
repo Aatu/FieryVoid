@@ -153,6 +153,8 @@
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }    
     }
     
+
+
     class MassDriver extends Matter
     {
         public $name = "massDriver";
@@ -162,13 +164,57 @@
         public $projectilespeed = 10;
         public $animationWidth = 6;
         public $animationExplosionScale = 0.90;
-        public $targetImmobile = true;
+	public $noInterceptDegradation = true;
+        //public $targetImmobile = true;
         
         public $loadingtime = 4;
 		
         public $rangePenalty = 0.17;
         public $fireControl = array(null, null, 2); // fighters, <mediums, <capitals 
 
+	    public function setSystemDataWindow($turn){
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units.";      
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically if launching unit speed is > 0.";  
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon always hits Structure.";   
+	      parent::setSystemDataWindow($turn);
+	    }	    
+
+	    
+	    
+	public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){ //always hit Structure...
+		if ($target->isDestroyed()) return;
+		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+
+		$system = $target->getStructureSystem($tmpLocation);
+		if ($system == null || $system->isDestroyed()) $system = $target->getStructureSystem(0);//facing Structure nonexistent, go to PRIMARY
+		if ($system == null || $system->isDestroyed()) return; 
+		$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+	}
+	    
+	public function calculateHit($gamedata, $fireOrder){ //auto-miss if restrictions not met
+		$canHit = true;
+		$pubnotes = '';
+		
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		
+		if(!$target->Enormous){	$canHit=false; $pubnotes. = ' Target is not Enormous. '; }
+		if($target->getSpeed()>0){ $canHit=false; $pubnotes. = ' Target speed >0. '; }
+		if($shooter->getSpeed()>0){ $canHit=false; $pubnotes. = ' Shooter speed >0. '; }
+			
+		if($canHit){
+			parent::calculateHit($gamedata, $fireOrder);
+		}else{ //accurate targeting with this weapon not possible!
+			$fireOrder->needed = 0;
+        		$fireOrder->notes = 'ACCURATE FIRING CRITERIA NOT MET';
+			$fireOrder->pubnotes .= $pubnotes;   
+        		$fireOrder->updated = true;
+		}
+	}
+	    
+	    
+	    
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -177,7 +223,7 @@
         public function getDamage($fireOrder){        return Dice::d(10, 8)+ 60;   }
         public function setMinDamage(){     $this->minDamage = 68 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 140 - $this->dp;      }
-    }
+    } //end of Mass Driver
 
 
     class GaussCannon extends MatterCannon

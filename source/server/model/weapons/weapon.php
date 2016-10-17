@@ -49,6 +49,8 @@ class Weapon extends ShipSystem{
     public $hextarget = false;
     public $hidetarget = false;
     public $targetImmobile = false;
+	
+    public $noInterceptDegradation = true; //to be incorporated into interception routines
 
 
     public $shots = 1;
@@ -56,6 +58,7 @@ class Weapon extends ShipSystem{
     public $canChangeShots = false;
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	public $noInterceptDegradation = false; //for future interception overhaul
 	
 
     public $grouping = 0;
@@ -671,7 +674,7 @@ class Weapon extends ShipSystem{
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
 
                     $deg = $count;
-                    if ($this->ballistic)
+                    if ($this->ballistic || $this->noInterceptDegradation)
                         $deg = 0;
 
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);

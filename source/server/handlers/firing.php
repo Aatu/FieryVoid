@@ -28,26 +28,6 @@
                 $firingweapon = $shooter->getSystemById($fire->weaponid);
 
 
-    /*            $hitLocation = $target->getHitSection($shooter->getCoPos(), $shooter, $fire->turn, $firingweapon);
-
-        //        debug::log("intercepting fire from: ".$target->phpclass." versus opposing ".$firingweapon->displayName." from ".$shooter->phpclass);
-
-                if ($target->shipSizeClass == -1){
-                    $armour = $target->systems[1]->armour[$hitLocation];
-                //    debug::log("flight armour: ".$armour);
-
-                }
-                else if ($target->shipSizeClass == 1){
-                    $structure = $target->getStructureSystem(0);
-                    $armour = $structure->armour;
-                //    debug::log("MCV armour: ".$armour);
-                }
-                else {
-                    $structure = $target->getStructureSystem($hitLocation);
-                    $armour = $structure->armour;
-                 //   debug::log("non-flight armour: ".$armour);
-                }                      
-    */
 
                 if ($shooter instanceof FighterFlight){
                     $armour = 2;
@@ -90,17 +70,18 @@
 
 
                 //disable interception of low-threat weapons with medium reload weapons
-                if ($damage < 14){
+                if ($damage < 10){
                     if ($this->weapon->loadingtime > 1){
                         continue;
                     }
                 }
 
             //    debug::log($firingweapon->displayName.", total estimated dmg: ".$damage.", considering armour of:".$armour." and shots: ".(ceil($fire->shots / 2)));
-                $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire);
+                $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire); //to calculate degradation
+		if($firingweapon->noInterceptDegradation) $numInter = 0;//target shot can be intercepted without degradation!
                 
                 $perc = 0;
-     //               debug::log($this->weapon->displayName." running intercept.");
+		
                 for ($i = 0; $i<$this->weapon->guns;$i++){
                     $perc += (($this->weapon->getInterceptRating($gd->turn)*5) - (($numInter+$i)*5));
                 }
@@ -127,7 +108,6 @@
                 for ($i = 0; $i<$this->weapon->guns;$i++){
                     $interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
                     $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
-//                    var_dump($interceptFire);
 
                     $interceptFire->addToDB = true;
                     $interceptor->fireOrders[] = $interceptFire;
