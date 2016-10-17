@@ -173,9 +173,9 @@
         public $fireControl = array(null, null, 2); // fighters, <mediums, <capitals 
 
 	    public function setSystemDataWindow($turn){
-	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units.";      
-	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically if launching unit speed is > 0.";  
-	      $this->data["<font color='red'>Remark</font>"] = "Weapon always hits Structure.";   
+	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units. "     
+	       "Weapon misses automatically if launching unit speed is > 0. "  
+	      ."Weapon always hits Structure. ";   
 	      parent::setSystemDataWindow($turn);
 	    }	    
 
