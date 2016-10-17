@@ -49,6 +49,8 @@ class Weapon extends ShipSystem{
     public $hextarget = false;
     public $hidetarget = false;
     public $targetImmobile = false;
+	
+    public $noInterceptDegradation = true; //to be incorporated into interception routines
 
 
     public $shots = 1;
