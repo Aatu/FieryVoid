@@ -674,7 +674,7 @@ class Weapon extends ShipSystem{
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
 
                     $deg = $count;
-                    if ($this->ballistic)
+                    if ($this->ballistic || $this->noInterceptDegradation)
                         $deg = 0;
 
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
