@@ -397,10 +397,10 @@
                 $tf = $this->getFacingAngle();
 
                 //get the heading of position, not ship (in case ballistic)
-                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+		    $relativeBearing = $this->getBearingOnPos($pos);
 
                 //if not on arc, continue!
-                if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($system->startArc,$tf), Mathlib::addToDirection($system->endArc,$tf) )){
+                if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){
                     return false;
                 }
             }
@@ -633,52 +633,57 @@
         }
 
 
+	public function getBearingOnPos($pos){ //returns relative angle from this unit to indicated coordinates
+		$tf = $this->getFacingAngle(); //ship facing
+		$compassHeading = mathlib::getCompassHeadingOfPos($this, $pos); //absolute bearing
+		$relativeBearing =  Mathlib::addToDirection($compassHeading, -$tf);//relative bearing
+		if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+			if( $relativeBearing <> 0 ) { //mirror of 0 is 0
+				$relativeBearing = 360-$relativeBearing;
+			}
+		}		
+		return $relativeBearing;
+	}
+	    
+	public function getBearingOnUnit($unit){ //returns relative angle from this unit to indicated unit
+		$tf = $this->getFacingAngle(); //ship facing
+		$compassHeading = mathlib::getCompassHeadingOfShip($this, $unit); //absolute bearing
+		$relativeBearing =  Mathlib::addToDirection($compassHeading, -$tf);//relative bearing
+		if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
+			if( $relativeBearing <> 0 ) { //mirror of 0 is 0
+				$relativeBearing = 360-$relativeBearing;
+			}
+		}		
+		return $relativeBearing;
+	}
+	    
              
 
-        public function doGetHitSectionBearing($tf, $shooterCompassHeading, $preGoal){ //return array with all data!  
+        public function doGetHitSectionBearing($relativeBearing, $preGoal){ //pick section hit from given bearing; return array with all data!  
             $locs = $this->getLocations();
-
             $valid = array();
-
             foreach ($locs as $loc){
-                if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($loc["min"], $tf), Mathlib::addToDirection($loc["max"], $tf))){
+                if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
                     $valid[] = $loc;
                 }
             }
-
             $valid = $this->fillLocations($valid);
             $pick = $this->pickLocationForHit($valid, $preGoal);
             return $pick;
         }
 	    
 	    
-        public function doGetHitSectionPos($pos, $preGoal){ //return array with all data!  
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
-            
-	    if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
-		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
-			$shooterCompassHeading = 360-$shooterCompassHeading;
-		}
-	    }
-
-            $result = $this->doGetHitSectionBearing($tf,  $shooterCompassHeading, $preGoal);
+        public function doGetHitSectionPos($pos, $preGoal){ //pick section hit from given coordinates; return array with all data!  
+            $relativeBearing =  $this->doGetHitSectionPos($pos);
+            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
             return $result;
         }
 	    
 	    
 	    
-        public function doGetHitSection($shooter, $preGoal){   //return array with all data!  
-            $tf = $this->getFacingAngle();
-            $shooterCompassHeading = mathlib::getCompassHeadingOfShip($this, $shooter);
-          
-            if( Movement::isRolled($this) ){ //if ship is rolled, mirror relative bearing
-		if( $shooterCompassHeading <> 0 ) { //mirror of 0 is 0
-			$shooterCompassHeading = 360-$shooterCompassHeading;
-		}
-	    }
-          
-            $result = $this->doGetHitSectionBearing($tf,  $shooterCompassHeading, $preGoal);
+        public function doGetHitSection($shooter, $preGoal){   //pick section hit from given unit; return array with all data!  
+            $relativeBearing =  $this->doGetHitSectionUnit($ship);
+            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
             return $result;
         }
 	    
@@ -770,7 +775,7 @@
 		}
 		return $foundLocation;
         }
-        public function getHitSectionPos($pos, $turn, $preGoal = 0){ //returns value - profile! THIS IS FOR BALLISTICS!
+        public function getHitSectionPos($pos, $turn, $preGoal = 0){ //returns value - location! THIS IS FOR BALLISTICS!
 		$foundLocation = 0;
 		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
 		$foundLocation = $loc["loc"];

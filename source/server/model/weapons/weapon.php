@@ -486,8 +486,11 @@ class Weapon extends ShipSystem{
         //debug::log($shooter->phpclass." vs: ".$target->phpclass);
         $pos = $shooter->getCoPos();
         $jammermod = 0;
-        $jink = 0;
+        $jinkSelf = 0;
+	$jinkTarget = 0;
         $defence = 0;
+        $mod = 0;
+        $oew = 0;
 
         $hitLoc;
         $preProfileGoal;
@@ -501,31 +504,28 @@ class Weapon extends ShipSystem{
         $rp = $this->calculateRangePenalty($launchPos, $target);
         $rangePenalty = $rp["rp"];
 
-        $dew = $target->getDEW($gamedata->turn);
-        if ($shooter instanceof FighterFlight){
-            $dew = 0;
-        }
+        
+	if($shooter instanceof FighterFlight)  $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always  
 
-        $bdew = EW::getBlanketDEW($gamedata, $target);
 
         if($target instanceof FighterFlight){
-            if ( (!($shooter instanceof FighterFlight)) || $this->ballistic)
+            if ( (!($shooter instanceof FighterFlight)) || $this->ballistic) //non-fighters and ballistics always affected by jinking
             {
-                $jink = Movement::getJinking($target, $gamedata->turn);
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
             }
-            else if( mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0
-                    ||  Movement::getJinking($shooter, $gamedata->turn) > 0){
-                $jink = Movement::getJinking($target, $gamedata->turn);
+            elseif( $jinkSelf > 0 || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 ){ //fighter direct fire unaffected at range 0
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
             }
         }
 
-        $mod = 0;
 
+	$dew = $target->getDEW($gamedata->turn);
+        $bdew = EW::getBlanketDEW($gamedata, $target);
         $sdew = EW::getSupportedDEW($gamedata, $target);
         $soew = EW::getSupportedOEW($gamedata, $shooter, $target);
         $dist = EW::getDistruptionEW($gamedata, $shooter);
 
-        $oew = 0;
+
 
         if ($this->useOEW)
         {
@@ -586,10 +586,9 @@ class Weapon extends ShipSystem{
 			if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
 				if($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
 					$oew = $shooter->offensivebonus;
-				}else{ // Check if weapon is in current weapon arc
-					$shooterCompassHeading = mathlib::getCompassHeadingOfShip($shooter, $target);
-					$tf = $shooter->getFacingAngle();
-					if (mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($this->startArc, $tf), Mathlib::addToDirection($this->endArc, $tf))){
+				}else{ // Check if target is in current weapon arc
+					$relativeBearing = $target->getBearingOnUnit($shooter);					
+					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))){
 						// Target is in current launcher arc. Flight benefits from offensive bonus.
 						// Now check if the fighter is not firing any non-ballistic weapons
 						if(!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder))$oew = $shooter->offensivebonus;
@@ -603,28 +602,13 @@ class Weapon extends ShipSystem{
 
         if ($oew < 1){
             $rangePenalty = $rangePenalty*2;
-        }
-        else
-        {
+        } elseif($shooter->faction != $target->faction) {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
-            if ($jammerValue > 0 && $shooter->faction != $target->faction)
-            {
-                $jammermod = $rangePenalty*$jammerValue;
-                if ($target instanceof FighterFlight){
-                    //if ( $dew > $jammermod){
-		    if ( $jink > $jammermod){
-                        $jammermod = 0;
-                    }
-                    else{
-                        //$dew = 0;
-			 $jink = 0;
-                    }
-                }
-            }
+	    $jammermod = $rangePenalty*$jammerValue;
         }
 	    
 	    
-	if($shooter instanceof FighterFlight)  $jink += Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always  
+	
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
 		$CnC = $shooter->getSystemByName("CnC");
@@ -636,10 +620,9 @@ class Weapon extends ShipSystem{
 
 	    
 	    
-	    
-
-        $preProfileGoal = (-$dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
-
+	$hitPpenalties = $dew + $bdew + $sdew + $rangePenalty + $intercept + $jinkSelf + max($jammermod, $jinkTarget);
+	$hitBbonuses = $oew + $soew + $firecontrol + $mod;
+        $preProfileGoal = $hitBonuses-$hitPenalties;
 
         if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn, $preProfileGoal);
@@ -648,12 +631,11 @@ class Weapon extends ShipSystem{
 		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn, $preProfileGoal);
 		$defence = $target->getHitSectionProfile($shooter, $preProfileGoal);
 	}
-        //$goal = ($defence - $dew - $bdew - $sdew - $jammermod - $rangePenalty - $intercept - $jink + $oew + $soew + $firecontrol + $mod);
-	$goal = $defence + $preProfileGoal;
+        $goal = $defence + $preProfileGoal;
 
         $change = round(($goal/20)*100);
 
-        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, jink: $jink";
+        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, jink: $jinkSelf $jinkTarget";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
@@ -683,8 +665,6 @@ class Weapon extends ShipSystem{
                         debug::log($interceptWeapon->displayName);
                         continue;
                     }
-              //      debug::log($ship->shipClass);
-              //      debug::log($interceptWeapon->displayName);
                     $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
 
                     if ($i<0
