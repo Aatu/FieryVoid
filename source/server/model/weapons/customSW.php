@@ -6,6 +6,7 @@
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "swFighterLaser";
     public $displayName = "Fighter Laser";
+	public $iconPath = "starwars/swFighter2.png";
     public $animation = "trail";
     public $projectilespeed = 12;
     public $animationColor =  array(225, 175, 195);
@@ -89,6 +90,7 @@
     /*StarWars fighter Ion weapon*/
     public $name = "swFighterIon";
     public $displayName = "Fighter Ion Cannon";
+	public $iconPath = "starwars/fighterIon.png";	  
     public $animation = "trail";
     public $projectilespeed = 10;
     public $animationColor =  array(175, 225, 195);
