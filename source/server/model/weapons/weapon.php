@@ -606,8 +606,6 @@ class Weapon extends ShipSystem{
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
 	    $jammermod = $rangePenalty*$jammerValue;
         }
-	    
-	    
 	
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
@@ -712,7 +710,9 @@ class Weapon extends ShipSystem{
     public function fire($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        $this->firingMode = $fireOrder->firingMode;
+	
+        //$this->firingMode = $fireOrder->firingMode;
+	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 
         $pos = $shooter->getCoPos();
         if ($this->ballistic){
@@ -975,8 +975,11 @@ class Weapon extends ShipSystem{
     }
 
 	
-	/*allow changing of basic parameters for different firing modes...*/
-	public function changeFiringMode($newMode){ //only particular weapons will do this! 
+	/*allow changing of basic parameters for different firing modes...
+		called in method fire()
+	*/
+	public function changeFiringMode($newMode){ //only particular weapons will actually reimplement this! 
+		$this->firingMode = $newMode;
 		return;
 	}
 	
