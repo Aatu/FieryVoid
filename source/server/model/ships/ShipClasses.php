@@ -397,10 +397,10 @@
                 $tf = $this->getFacingAngle();
 
                 //get the heading of position, not ship (in case ballistic)
-                $shooterCompassHeading = mathlib::getCompassHeadingOfPos($this, $pos);
+		    $relativeBearing = $this->getBearingOnPos($pos);
 
                 //if not on arc, continue!
-                if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($system->startArc,$tf), Mathlib::addToDirection($system->endArc,$tf) )){
+                if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){
                     return false;
                 }
             }
