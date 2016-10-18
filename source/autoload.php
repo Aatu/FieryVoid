@@ -97,8 +97,6 @@ spl_autoload_register(
 
                 //Deneth
                 'ward' => '/server/model/ships/deneth/wardOSAT.php',
-                'tstship' => '/server/model/ships/deneth/tstship.php',
-                'tstship2' => '/server/model/ships/deneth/tstship2.php',
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
