@@ -8,7 +8,7 @@ class wardsat extends OSAT{
 	$this->faction = "Deneth";
         $this->phpclass = "wardsat";
         $this->imagePath = "img/ships/phalanx.png";
-        $this->shipClass = 'Ward Satellite - copy TBD later';
+        $this->shipClass = 'Ward Satellite';
         
         //$this->limited = 10;
         //$this->occurence = "rare";

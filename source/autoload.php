@@ -96,8 +96,8 @@ spl_autoload_register(
                 'swfighterionalllinked' => '/server/model/weapons/customSW.php',
 
                 //Deneth
-                'ward' => '/server/model/ships/deneth/wardOSAT.php',
-                'wardsat' => '/server/model/ships/deneth/wardSat.php', //to be deleted later!!!!
+                //'ward' => '/server/model/ships/deneth/wardOSAT.php',
+                'wardsat' => '/server/model/ships/deneth/wardSat.php', 
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
