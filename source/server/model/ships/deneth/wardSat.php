@@ -1,14 +1,14 @@
 <?php
-class Ward extends OSAT{
+class wardsat extends OSAT{
     /*Deneth Ward OSAT, Raiders-2*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 210;
 	$this->faction = "Deneth";
-        $this->phpclass = "Ward";
+        $this->phpclass = "wardsat";
         $this->imagePath = "img/ships/phalanx.png";
-        $this->shipClass = 'Ward Satellite';
+        $this->shipClass = 'Ward Satellite - copy TBD later';
         
         //$this->limited = 10;
         //$this->occurence = "rare";
