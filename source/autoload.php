@@ -80,7 +80,7 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
                 //Star Wars (sort of) - Centauri Galactic Empire
-                'zzftrywing' => '/server/model/ships/narn/zzftrYWing.php',
+                'swftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
