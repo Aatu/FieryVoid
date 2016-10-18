@@ -8,7 +8,7 @@ class swftrywing extends FighterFlight{
 	$this->faction = "(custom) Centauri Galactic Empire";
         $this->phpclass = "swftrywing";
         $this->shipClass = "Y-Wing Demonstrator flight";
-	$this->imagePath = "img/ships/sentri.png";
+	$this->imagePath = "img/starwars/yWing.png";
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
