@@ -357,7 +357,7 @@ class Firing{
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
         $firingweapon = $shooter->getSystemById($fire->weaponid);
-        
+    
         if ($firingweapon->uninterceptable){
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
@@ -372,22 +372,17 @@ class Firing{
             //Debug::log("Fire is friendly\n");
             return false;
         }
-         
-        $pos = $shooter->getCoPos();   
-        $shooterCompassHeading = null;
+	    
+	    if($firingweapon->ballistic){
+		$movement = $shooter->getLastTurnMovement($fire->turn);
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);		    
+		$relativeBearing = $ship->getBearingOnPos($pos);    
+	    }else{
+		$relativeBearing = $ship->getBearingOnUnit($shooter);
+	    }
 
-        if ($firingweapon->ballistic){
-            $movement = $shooter->getLastTurnMovement($fire->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            $shooterCompassHeading = mathlib::getCompassHeadingOfPos($ship, $pos);
-        }else{
-			$shooterCompassHeading = mathlib::getCompassHeadingOfShip($ship, $shooter);
-		}
-        
-        $tf = $ship->getFacingAngle();
-        
       
-        if (!mathlib::isInArc($shooterCompassHeading, Mathlib::addToDirection($weapon->startArc,$tf), Mathlib::addToDirection($weapon->endArc,$tf) )){
+        if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
@@ -499,13 +494,6 @@ class Firing{
                 $p = $wpn->priority;
                 // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
-/*absolutely bad way of debugging		
-if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "foreach (fireOrders as fire)";
-	var_dump($fire);
-	exit;
-}   	
-*/
         }
 
 
