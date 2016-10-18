@@ -4,11 +4,11 @@ class swftrywing extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		    $this->pointCost = 60*6;
-		    $this->faction = "(custom) Centauri Galactic Empire";
+	$this->pointCost = 60*6;
+	$this->faction = "(custom) Centauri Galactic Empire";
         $this->phpclass = "swftrywing";
         $this->shipClass = "Y-Wing Demonstrator flight";
-		    $this->imagePath = "img/ships/sentri.png";
+	$this->imagePath = "img/ships/sentri.png";
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
@@ -16,11 +16,16 @@ class swftrywing extends FighterFlight{
         $this->offensivebonus = 6;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+	    
+	$this->hasNavigator = true;
         
-		    $this->iniativebonus = 16 *5;
+	$this->iniativebonus = 17 *5; //incl. navigator bonus
         $this->populate();
     }
     
+	
+	
+	
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
@@ -36,9 +41,9 @@ class swftrywing extends FighterFlight{
           $fighter->addFrontSystem(new SWFighterIon(0, 360, 1, 2));
           //to be added: torpedo launchers, shields
 			
-			    $this->addSystem($fighter);
+	  $this->addSystem($fighter);
 			
-		    }
+	}
     }
 }
 ?>
