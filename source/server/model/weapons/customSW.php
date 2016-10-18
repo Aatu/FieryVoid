@@ -47,7 +47,7 @@
         $this->damagebonus = $this->defaultDmgBonus;
       }else{ //fire all guns as one shot
         $this->shots = 1;
-        $this->damagebonus = $this->defaultDmgBonus*$this->defaultShots;
+        $this->damagebonus = $this->defaultDmgBonus + 2*($this->defaultShots-1);
       }
       
 		  return;
@@ -149,7 +149,7 @@
         $this->damagebonus = $this->defaultDmgBonus;
       }else{ //fire all guns as one shot
         $this->shots = 1;
-        $this->damagebonus = $this->defaultDmgBonus*$this->defaultShots;
+        $this->damagebonus = $this->defaultDmgBonus +2*($this->defaultShots-1);
       }
       
 		  return;
