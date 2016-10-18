@@ -43,7 +43,7 @@ class Ward extends OSAT{
 					9 => "Structure",
 					11 => "Thruster",
 					14 => "Assault Laser",
-          16 => "Twin Array",
+          				16 => "Twin Array",
 					18 => "Scanner",
 					20 => "Reactor",
 			)
