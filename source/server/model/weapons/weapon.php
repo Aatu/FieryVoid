@@ -588,7 +588,7 @@ class Weapon extends ShipSystem{
 					$oew = $shooter->offensivebonus;
 				}else{ // Check if target is in current weapon arc
 					$relativeBearing = $target->getBearingOnUnit($shooter);					
-					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))){
+					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)){
 						// Target is in current launcher arc. Flight benefits from offensive bonus.
 						// Now check if the fighter is not firing any non-ballistic weapons
 						if(!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder))$oew = $shooter->offensivebonus;
