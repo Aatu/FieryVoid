@@ -80,10 +80,9 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
                 //Star Wars (sort of) - Centauri Galactic Empire
-                'swftrywing' => '/server/model/ships/starwars_centauri/zzftr_YWing.php',
-                //'swftrywing' => '/server/model/ships/starwars_centauri/yWing_flight.php',
-                'wardsatcg' => '/server/model/ships/starwars_centauri/wardsatcg.php', 
-                'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
+                //'swftrywing' => '/server/model/ships/starwars_centauri/zzftr_YWing.php',
+                //'wardsatcg' => '/server/model/ships/starwars_centauri/wardsatcg.php', 
+               // 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 
                 //custom guns
