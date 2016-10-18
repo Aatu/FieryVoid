@@ -973,6 +973,14 @@ class Weapon extends ShipSystem{
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         return;
     }
+
+	
+	/*allow changing of basic parameters for different firing modes...*/
+	public function changeFiringMode($newMode){ //only particular weapons will do this! 
+		return;
+	}
+	
+	
 	
 } //end of class Weapon
 
@@ -999,3 +1007,6 @@ class Weapon extends ShipSystem{
         return false;
         }
     }
+
+
+ 
