@@ -79,6 +79,9 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
+                //Star Wars (sort of) - Centauri Galactic Empire
+                'zzftrywing' => '/server/model/ships/narn/zzftrYWing.php',
+                
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
@@ -92,6 +95,9 @@ spl_autoload_register(
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swfighterionalllinked' => '/server/model/weapons/customSW.php',
 
+                //Deneth
+                'ward' => '/server/model/ships/deneth/wardOSAT.php',
+                
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
