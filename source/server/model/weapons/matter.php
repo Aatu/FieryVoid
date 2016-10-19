@@ -365,7 +365,7 @@
             $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrderr, $pos=null){
+        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
             $target = $gamedata->getShipById($fireOrder->targetid);
             if (!$target instanceof WhiteStar){
                 return 0;
