@@ -22,22 +22,24 @@ class SWFighterLaser extends LinkedWeapon{
     public $fireControlModes = array(1=>array(0,0,0), 2=>array(-2,-1,-1));
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
  
-    private $defaultDmgBonus = 0;
-    private $damagebonus = 0;
+    public $defaultDmgBonus = 0;
+    public $damagebonus = 0;
     public $exclusive = false;    
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
+		/*
 		if ($nameMod != '') $displayName.= ' ('.$nameMod.')';
 		$this->damagebonus = $damagebonus;
 		$this->defaultDmgBonus = $damagebonus;
 		$this->defaultShots = $nrOfShots;
 		$this->shots = $nrOfShots;
 		$this->intercept = $nrOfShots;
+		*/
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
 	
-    
+    /*
 	public function changeFiringMode($newMode){ //set number of shots, FC and damage bonus according to mode
 		if(!($newMode>0)) return; ///this is not correct!
 		parent::changeFiringMode($newMode);
@@ -52,17 +54,16 @@ class SWFighterLaser extends LinkedWeapon{
 		}
 		return;
 	}
+*/
 
-	
+/*	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		/*
 		$this->data["Weapon type"] = "Particle";
 		$this->data["Damage type"] = "Standard";
 		$this->data["<font color='red'>Remark</font>"] = "Capable of linked fire."; 
-		*/
 	}
-	
+*/	
     
 	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
 	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
