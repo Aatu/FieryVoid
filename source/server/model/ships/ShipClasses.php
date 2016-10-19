@@ -673,7 +673,7 @@
         }
 	    
 	    
-        public function doGetHitSectionPos($pos, $preGoal){ //pick section hit from given coordinates; return array with all data!  
+        public function doGetHitSectionPos($pos, $preGoal=0){ //pick section hit from given coordinates; return array with all data!  
             $relativeBearing =  $this->doGetHitSectionPos($pos);
             $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
             return $result;
