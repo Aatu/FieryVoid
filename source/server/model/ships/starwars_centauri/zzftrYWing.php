@@ -8,18 +8,8 @@ class zzftrywing extends FighterFlight{
         $this->faction = "Centauri Galactic Empire";
         $this->phpclass = "zzftrywing";
         $this->shipClass = "Y-Wing Tech Demo flight";
-        $this->imagePath = "img/ships/auroraStarfury.png";
+        $this->imagePath = "img/starwars/yWing.png";
         
-        /*
-        $this->forwardDefense = 8;
-        $this->sideDefense = 6;
-        $this->freethrust = 12;
-        $this->offensivebonus = 5;
-        $this->jinkinglimit = 6;
-        $this->turncost = 0.33;
-        
-    	$this->iniativebonus = 80;
-        */
         
         $this->forwardDefense = 7;
         $this->sideDefense = 10;
@@ -33,6 +23,8 @@ class zzftrywing extends FighterFlight{
         
         $this->populate();
     }
+    
+    
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
@@ -51,5 +43,7 @@ class zzftrywing extends FighterFlight{
             $this->addSystem($fighter);
        }
     }
+    
+    
 }
 ?>
