@@ -659,7 +659,7 @@
 	    
              
 
-        public function doGetHitSectionBearing($relativeBearing, $preGoal){ //pick section hit from given bearing; return array with all data!  
+        public function doGetHitSectionBearing($relativeBearing, $preGoal=0){ //pick section hit from given bearing; return array with all data!  
             $locs = $this->getLocations();
             $valid = array();
             foreach ($locs as $loc){
@@ -681,7 +681,7 @@
 	    
 	    
 	    
-        public function doGetHitSection($shooter, $preGoal){   //pick section hit from given unit; return array with all data!  
+        public function doGetHitSection($shooter, $preGoal=0){   //pick section hit from given unit; return array with all data!  
             $relativeBearing =  $this->doGetHitSectionUnit($ship);
             $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
             return $result;
@@ -713,7 +713,7 @@
         }
 
 
-        public function pickLocationForHit($locs, $preGoal){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
+        public function pickLocationForHit($locs, $preGoal=0){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
 		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
 		foreach ($locs as $loc){
 			//compare current best pick with current loop iteration, change if new pick is better
