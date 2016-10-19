@@ -29,7 +29,7 @@
     function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
       if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
       $this->damagebonus = $damagebonus;
-      $this->defaultDmgBonus = $damageBonus;
+      $this->defaultDmgBonus = $damagebonus;
       $this->defaultShots = $nrOfShots;
       $this->shots = $nrOfShots;
       $this->intercept = $nrOfShots;
@@ -125,7 +125,7 @@
     function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
       if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
       $this->damagebonus = $damagebonus;
-      $this->defaultDmgBonus = $damageBonus;
+      $this->defaultDmgBonus = $damagebonus;
       $this->defaultShots = $nrOfShots;
       $this->shots = $nrOfShots;
       $this->intercept = 0;
