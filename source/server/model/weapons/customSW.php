@@ -20,7 +20,7 @@
     public $defaultShots = 2;
     public $rangePenalty = 2;
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
-    public $fireControlModes = array(1=>(0,0,0), 2=>(-2,-1,-1));
+    public $fireControlModes = array(1=>array(0,0,0), 2=>array(-2,-1,-1));
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
  
     private $defaultDmgBonus = 0;
@@ -105,7 +105,7 @@
     public $defaultDmgBonus = 0;
     public $rangePenalty = 2;
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
-    public $fireControlModes = array(1=>(-3, -1, -1), 2=>(-5,-2,-2));    
+    public $fireControlModes = array(1=>>array(-3, -1, -1), 2=>>array(-5,-2,-2));    
     public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
     private $damagebonus = 0;
     public $exclusive = false;   
