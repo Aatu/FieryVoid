@@ -80,7 +80,6 @@ spl_autoload_register(
 
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
-                //'wardsatcg' => '/server/model/ships/starwars_centauri/wardsatcg.php', 
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 
@@ -93,9 +92,7 @@ spl_autoload_register(
                 
                 //custom guns StarWars
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
-                'swfighterlaseralllinked' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
-                'swfighterionalllinked' => '/server/model/weapons/customSW.php',
 
                 //Deneth
                 'wardsat' => '/server/model/ships/deneth/wardSat.php', 
