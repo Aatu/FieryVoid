@@ -102,15 +102,17 @@
     public $loadingtime = 1;
     public $shots = 2;
     public $defaultShots = 2;
-    public $defaultDmgBonus = 0;
     public $rangePenalty = 2;
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
     public $fireControlModes = array(1=>array(-3, -1, -1), 2=>array(-5,-2,-2));    
     public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
     private $damagebonus = 0;
+	    
+    private $defaultDmgBonus = 0;
+    private $damagebonus = 0;
     public $exclusive = false;   
+	  
     public $systemKiller = true;
-    
 
     
     public function setSystemDataWindow($turn){
