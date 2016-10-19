@@ -30,7 +30,8 @@
       if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
       $this->damagebonus = $damagebonus;
       $this->defaultDmgBonus = $damageBonus;
-      $this->defaultShots = $nrOfShots      $this->shots = $nrOfShots;
+      $this->defaultShots = $nrOfShots;
+      $this->shots = $nrOfShots;
       $this->intercept = $nrOfShots;
           
       parent::__construct(0, 1, 0, $startArc, $endArc);
