@@ -105,7 +105,6 @@
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
     public $fireControlModes = array(1=>array(-3, -1, -1), 2=>array(-5,-2,-2));    
     public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
-    private $damagebonus = 0;
 	    
     private $defaultDmgBonus = 0;
     private $damagebonus = 0;
@@ -129,7 +128,7 @@
       $this->defaultDmgBonus = $damageBonus;
       $this->defaultShots = $nrOfShots;
       $this->shots = $nrOfShots;
-      $this->intercept = $nrOfShots;
+      $this->intercept = 0;
           
       parent::__construct(0, 1, 0, $startArc, $endArc);
     }    
