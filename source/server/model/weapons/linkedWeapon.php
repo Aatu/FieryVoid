@@ -10,7 +10,9 @@ class LinkedWeapon extends Weapon{
     {
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        $this->firingMode = $fireOrder->firingMode;
+        //$this->firingMode = $fireOrder->firingMode;
+	    $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+
 
         $pos = $shooter->getCoPos();
 
