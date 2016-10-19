@@ -111,15 +111,7 @@
     public $exclusive = false;   
     public $systemKiller = true;
     
-    function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
-      if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
-      $this->damagebonus = $damagebonus;
-      $this->defaultDmgBonus = $damagebonus;
-      $this->defaultShots = $nrOfShots;
-      $this->shots = $nrOfShots;      
-          
-      parent::__construct(0, 1, 0, $startArc, $endArc);
-    }    
+
     
     public function setSystemDataWindow($turn){
       parent::setSystemDataWindow($turn);
