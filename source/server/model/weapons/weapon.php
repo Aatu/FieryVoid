@@ -618,8 +618,8 @@ class Weapon extends ShipSystem{
 
 	    
 	    
-	$hitPpenalties = $dew + $bdew + $sdew + $rangePenalty + $intercept + $jinkSelf + max($jammermod, $jinkTarget);
-	$hitBbonuses = $oew + $soew + $firecontrol + $mod;
+	$hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $intercept + $jinkSelf + max($jammermod, $jinkTarget);
+	$hitBonuses = $oew + $soew + $firecontrol + $mod;
         $preProfileGoal = $hitBonuses-$hitPenalties;
 
         if($this->ballistic){

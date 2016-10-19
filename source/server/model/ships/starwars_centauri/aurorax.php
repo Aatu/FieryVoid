@@ -1,13 +1,13 @@
 <?php
-class aurorax extends FighterFlight{
+class ywingtest extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 342;
         $this->faction = "Centauri Galactic Empire";
-        $this->phpclass = "aurorax";
-        $this->shipClass = "Starfury: Aurora Heavy flight";
+        $this->phpclass = "ywingtest";
+        $this->shipClass = "Y-Wing Tech Demo flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
         
         $this->forwardDefense = 8;
@@ -26,8 +26,8 @@ class aurorax extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("aurorax", $armour, 13, $this->id);
-            $fighter->displayName = "Starfury Heavy Fighter";
+            $fighter = new Fighter("ywingtest", $armour, 13, $this->id);
+            $fighter->displayName = "Y-Wing Technology Demonstrator";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
             $frontGun = new PairedParticleGun(330, 30, 4);

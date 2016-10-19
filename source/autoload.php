@@ -82,7 +82,7 @@ spl_autoload_register(
                 //Star Wars (sort of) - Centauri Galactic Empire
                 //'swftrywing' => '/server/model/ships/starwars_centauri/zzftr_YWing.php',
                 //'wardsatcg' => '/server/model/ships/starwars_centauri/wardsatcg.php', 
-               // 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
+                'ywingtest' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 
                 //custom guns
