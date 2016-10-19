@@ -105,7 +105,7 @@
     public $defaultDmgBonus = 0;
     public $rangePenalty = 2;
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
-    public $fireControlModes = array(1=>>array(-3, -1, -1), 2=>>array(-5,-2,-2));    
+    public $fireControlModes = array(1=>array(-3, -1, -1), 2=>array(-5,-2,-2));    
     public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
     private $damagebonus = 0;
     public $exclusive = false;   
