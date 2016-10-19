@@ -19,7 +19,6 @@ spl_autoload_register(
                 'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
-                'bmissilerack' => '/server/model/weapons/missile.php',
             	
 
                 //starbase  classes              
@@ -80,7 +79,7 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
                 //Star Wars (sort of) - Centauri Galactic Empire
-                //'swftrywing' => '/server/model/ships/starwars_centauri/zzftr_YWing.php',
+                'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 //'wardsatcg' => '/server/model/ships/starwars_centauri/wardsatcg.php', 
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
