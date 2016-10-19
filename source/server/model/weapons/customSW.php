@@ -1,11 +1,11 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
-  class SWFighterLaser extends LinkedWeapon{
+class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "swFighterLaser";
     public $displayName = "Fighter Laser";
-    public $iconPath = "starwars/swFighter2.png";
+   // public $iconPath = "starwars/swFighter2.png";
     public $animation = "trail";
     public $projectilespeed = 12;
     public $animationColor =  array(225, 175, 195);
@@ -26,67 +26,56 @@
     private $damagebonus = 0;
     public $exclusive = false;    
     
-    function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
-      if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
-      $this->damagebonus = $damagebonus;
-      $this->defaultDmgBonus = $damagebonus;
-      $this->defaultShots = $nrOfShots;
-      $this->shots = $nrOfShots;
-      $this->intercept = $nrOfShots;
-          
-      parent::__construct(0, 1, 0, $startArc, $endArc);
-    }    
+	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
+		if ($nameMod != '') $displayName.= ' ('.$nameMod.')';
+		$this->damagebonus = $damagebonus;
+		$this->defaultDmgBonus = $damagebonus;
+		$this->defaultShots = $nrOfShots;
+		$this->shots = $nrOfShots;
+		$this->intercept = $nrOfShots;
+
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}    
+	
     
-    public function changeFiringMode($newMode){ //set number of shots, FC and damage bonus according to mode
-      if(!($newMode>0)) return; ///this is not correct!
-      parent::changeFiringMode($newMode);
-      //changes: linked shot will be single shot at reduced FC and doubled damage bonus
-      $this->fireControl = $this->$fireControlModes[$newMode];
-		  if($newMode == 1){ //standard
-        $this->shots = $this->defaultShots;
-        $this->damagebonus = $this->defaultDmgBonus;
-      }else{ //fire all guns as one shot
-        $this->shots = 1;
-        $this->damagebonus = $this->defaultDmgBonus + 2*($this->defaultShots-1);
-      }
-      
-		  return;
-	  }
+	public function changeFiringMode($newMode){ //set number of shots, FC and damage bonus according to mode
+		if(!($newMode>0)) return; ///this is not correct!
+		parent::changeFiringMode($newMode);
+		//changes: linked shot will be single shot at reduced FC and better damage bonus
+		$this->fireControl = $this->$fireControlModes[$newMode];
+		if($newMode == 1){ //standard
+			$this->shots = $this->defaultShots;
+			$this->damagebonus = $this->defaultDmgBonus;
+		}else{ //fire all guns as one shot
+			$this->shots = 1;
+			$this->damagebonus = $this->defaultDmgBonus + 2*($this->defaultShots-1);
+		}
+		return;
+	}
+
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		/*
+		$this->data["Weapon type"] = "Particle";
+		$this->data["Damage type"] = "Standard";
+		$this->data["<font color='red'>Remark</font>"] = "Capable of linked fire."; 
+		*/
+	}
+	
     
-    public function setSystemDataWindow($turn){
-      parent::setSystemDataWindow($turn);
-      $this->data["Weapon type"] = "Particle";
-      $this->data["Damage type"] = "Standard";
-      $this->data["<font color='red'>Remark</font>"] = "Capable of linked fire."; 
-    }
-    
-    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
 
-  } //end of SWFighterLaser
+} //end of SWFighterLaser
 
 
-/*
-  class SWFighterLaserAllLinked extends SWFighterLaser{
-    function __construct($startArc, $endArc, $damagebonus){
-      $name = "swFighterLaserAllLinked";
-      $this->$animationColor =  array(235, 175, 200);
-      $this->$animationWidth = 12;
-      $this->$trailColor = array(215, 175, 190);
-      $this->$trailLength = 6;
-      public $fireControl = array(-2, -1, -1); // fully linked shot is less accurate!
-      $this->exclusive = true;
-      
-      parent::__construct($startArc, $endArc, $damagebonus, 1, 'All Linked');
-    }
-
-  } //end of SWFighterLaserAllLinked
-*/
 
 
   class SWFighterIon extends LinkedWeapon{
     /*StarWars fighter Ion weapon*/
+/*let's skip content for now, concentrate on debugging Laser......
     public $name = "swFighterIon";
     public $displayName = "Fighter Ion Cannon";
 	public $iconPath = "starwars/fighterIon.png";	  
@@ -162,7 +151,7 @@
       $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $damage); //for ship system and fighter alike
       $system->criticals[] =  $crit;
     }
-
+*/
   } //end of SWFighterIon
     
 
