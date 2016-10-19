@@ -5,7 +5,8 @@ class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "swFighterLaser";
     public $displayName = "Fighter Laser";
-   // public $iconPath = "starwars/swFighter2.png";
+/*	
+    public $iconPath = "starwars/swFighter2.png";
     public $animation = "trail";
     public $projectilespeed = 12;
     public $animationColor =  array(225, 175, 195);
@@ -24,7 +25,8 @@ class SWFighterLaser extends LinkedWeapon{
  
     public $defaultDmgBonus = 0;
     public $damagebonus = 0;
-    public $exclusive = false;    
+    public $exclusive = false;   
+*/    
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
 		/*
