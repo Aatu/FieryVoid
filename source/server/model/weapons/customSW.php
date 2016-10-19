@@ -1,7 +1,6 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
-
   class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "swFighterLaser";
@@ -31,8 +30,7 @@
       if ($nameMod != '') $displayName+= ' ('+$nameMod+')';
       $this->damagebonus = $damagebonus;
       $this->defaultDmgBonus = $damageBonus;
-      $this->defaultShots = $nrOfShots;
-      $this->shots = $nrOfShots;
+      $this->defaultShots = $nrOfShots      $this->shots = $nrOfShots;
       $this->intercept = $nrOfShots;
           
       parent::__construct(0, 1, 0, $startArc, $endArc);
