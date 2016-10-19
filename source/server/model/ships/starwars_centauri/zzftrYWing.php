@@ -21,7 +21,7 @@ class zzftrywing extends FighterFlight{
     	$this->iniativebonus = 80;
         */
         
-        $this->forwardDefense = 8;
+        $this->forwardDefense = 7;
         $this->sideDefense = 10;
         $this->freethrust = 8;
         $this->offensivebonus = 6;
