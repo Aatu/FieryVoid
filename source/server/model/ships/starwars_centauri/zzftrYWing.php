@@ -36,7 +36,7 @@ class zzftrywing extends FighterFlight{
             $fighter->imagePath = "img/starwars/yWing.png";
             $fighter->iconPath = "img/starwars/yWing_large.png";
             
-            $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
+            $frontGun = new swfighterlaser(330, 30, 2, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
             //all-around Ion Cannons
