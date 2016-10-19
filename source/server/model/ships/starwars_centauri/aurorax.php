@@ -1,12 +1,12 @@
 <?php
-class ywingtest extends FighterFlight{
+class aurorax extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 342;
         $this->faction = "Centauri Galactic Empire";
-        $this->phpclass = "ywingtest";
+        $this->phpclass = "aurorax";
         $this->shipClass = "Y-Wing Tech Demo flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
         
@@ -26,7 +26,7 @@ class ywingtest extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
-            $fighter = new Fighter("ywingtest", $armour, 13, $this->id);
+            $fighter = new Fighter("aurorax", $armour, 13, $this->id);
             $fighter->displayName = "Y-Wing Technology Demonstrator";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";

@@ -682,7 +682,7 @@
 	    
 	    
         public function doGetHitSection($shooter, $preGoal=0){   //pick section hit from given unit; return array with all data!  
-            $relativeBearing =  $this->getBearingOnUnit($ship);
+            $relativeBearing =  $this->getBearingOnUnit($shooter);
             $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
             return $result;
         }
