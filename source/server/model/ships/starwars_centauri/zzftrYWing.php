@@ -33,8 +33,8 @@ class zzftrywing extends FighterFlight{
             $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
             $fighter->displayName = "Y-Wing Technology Demonstrator";
-            $fighter->imagePath = "img/ships/auroraStarfury.png";
-            $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
+            $fighter->imagePath = "img/starwars/yWing.png";
+            $fighter->iconPath = "img/starwars/yWing_large.png";
             
             $frontGun = new PairedParticleGun(330, 30, 4);
             $fighter->addFrontSystem($frontGun);
