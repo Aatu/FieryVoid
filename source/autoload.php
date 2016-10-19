@@ -82,6 +82,10 @@ spl_autoload_register(
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
+                //custom guns StarWars
+                'swfighterlaser' => '/server/model/weapons/customSW.php',
+                'swfighterlaser2' => '/server/model/weapons/customSW.php',
+                //'swfighterion' => '/server/model/weapons/customSW.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
@@ -90,9 +94,7 @@ spl_autoload_register(
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
                 
-                //custom guns StarWars
-                'swfighterlaser' => '/server/model/weapons/customSW.php',
-                'swfighterion' => '/server/model/weapons/customSW.php',
+
 
                 //Deneth
                 'wardsat' => '/server/model/ships/deneth/wardSat.php', 
