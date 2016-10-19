@@ -135,13 +135,12 @@
 		
 	public function getArmourPos($gamedata, $pos){ 
 		$target = $gamedata->getShipById($this->flightid); 
-		$loc = $target->doGetHitSectionPos($pos, 0); //finds array with relevant data!
+		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
 		return $loc["armour"];
 	}
         
         public function getArmour($target, $shooter, $dmgType){ //for fighter no need to note where fire went, as all calculations are done on raw flight data
-		$target = $gamedata->getShipById($this->flightid); 
-		$loc = $target->doGetHitSection($shooter, 0); //finds array with relevant data!
+		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
 		return $loc["armour"];
         }
 		
