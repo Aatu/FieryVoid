@@ -1922,7 +1922,7 @@ class DBManager {
             ON
                 p.gameid = g.id
             WHERE
-                DATE_ADD(p.lastactivity, INTERVAL 1 MONTH) < NOW()
+                DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
             OR
                 (DATE_ADD(p.lastactivity, INTERVAL 1 DAY) < NOW() 
                 AND
