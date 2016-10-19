@@ -22,11 +22,11 @@ class SWFighterLaser extends LinkedWeapon{
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
     public $fireControlModes = array(1=>array(0,0,0), 2=>array(-2,-1,-1));
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
- 
+ */ 
     public $defaultDmgBonus = 0;
     public $damagebonus = 0;
     public $exclusive = false;   
-*/    
+   
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
 		/*
