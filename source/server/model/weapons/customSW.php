@@ -3,7 +3,7 @@
 
 class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
-    public $name = "swFighterLaser";
+    public $name = "swfighterlaser";
     public $displayName = "Fighter Laser";
 /*	
     public $iconPath = "starwars/swFighter2.png";
