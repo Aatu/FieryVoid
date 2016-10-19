@@ -1,9 +1,9 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
-class SWFighterLaser extends LinkedWeapon{
+class swfighterlaser2 extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
-    public $name = "swfighterlaser";
+    public $name = "swfighterlaser2";
     public $displayName = "Fighter Laser";
 /*	
     public $iconPath = "starwars/swFighter2.png";
@@ -166,7 +166,45 @@ class SWFighterLaser extends LinkedWeapon{
 
 
 
-
+    class swfighterlaser extends LinkedWeapon{
+        public $trailColor = array(30, 170, 255);
+        public $name = "swfighterlaser";
+        public $displayName = "Paired Particle guns";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $intercept;
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        private $damagebonus = 0;
+        function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
+            $this->damagebonus = $damagebonus;
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+            if($nrOfShots === 1){
+                $this->iconPath = "particleGun.png";
+            }
+            if($nrOfShots === 3){
+                $this->iconPath = "pairedParticleGun3.png";
+            }
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        public function setSystemDataWindow($turn){
+            $this->data["Weapon type"] = "Particle";
+            $this->data["Damage type"] = "Standard";
+            parent::setSystemDataWindow($turn);
+        }
+        public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    }
 
 
 
