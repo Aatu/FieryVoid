@@ -1,5 +1,7 @@
 var SWFighterLaser = function(json, ship){
     Particle.call( this, json, ship);
 }
-swfighterlaser.prototype = Object.create( Particle.prototype );
-swfighterlaser.prototype.constructor = swfighterlaser;
+SWFighterLaser.prototype = Object.create( Particle.prototype );
+SWFighterLaser.prototype.constructor = SWFighterLaser;
+
+
