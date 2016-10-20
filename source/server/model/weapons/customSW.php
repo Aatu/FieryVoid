@@ -1,11 +1,10 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
-class swfighterlaser2 extends LinkedWeapon{
+class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
-    public $name = "swfighterlaser2";
+    public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
-/*	
     public $iconPath = "starwars/swFighter2.png";
     public $animation = "trail";
     public $projectilespeed = 12;
@@ -22,26 +21,24 @@ class swfighterlaser2 extends LinkedWeapon{
     public $firingModes = array( 1 => "Standard", 2=>"Linked");  
     public $fireControlModes = array(1=>array(0,0,0), 2=>array(-2,-1,-1));
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
- */ 
+ 
     public $defaultDmgBonus = 0;
     public $damagebonus = 0;
     public $exclusive = false;   
    
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
-		/*
 		if ($nameMod != '') $displayName.= ' ('.$nameMod.')';
 		$this->damagebonus = $damagebonus;
 		$this->defaultDmgBonus = $damagebonus;
 		$this->defaultShots = $nrOfShots;
 		$this->shots = $nrOfShots;
 		$this->intercept = $nrOfShots;
-		*/
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
 	
-    /*
+
 	public function changeFiringMode($newMode){ //set number of shots, FC and damage bonus according to mode
 		if(!($newMode>0)) return; ///this is not correct!
 		parent::changeFiringMode($newMode);
@@ -56,16 +53,16 @@ class swfighterlaser2 extends LinkedWeapon{
 		}
 		return;
 	}
-*/
 
-/*	
+
+
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Weapon type"] = "Particle";
 		$this->data["Damage type"] = "Standard";
 		$this->data["<font color='red'>Remark</font>"] = "Capable of linked fire."; 
 	}
-*/	
+
     
 	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
 	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
@@ -166,9 +163,9 @@ class swfighterlaser2 extends LinkedWeapon{
 
 
 
-    class SWFighterLaser extends LinkedWeapon{
+    class SWFighterLaserT extends LinkedWeapon{
         public $trailColor = array(30, 170, 255);
-        public $name = "SWFighterLaser";
+        public $name = "SWFighterLaserT";
         public $displayName = "Paired Particle guns";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
