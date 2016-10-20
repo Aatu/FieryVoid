@@ -166,9 +166,9 @@ class swfighterlaser2 extends LinkedWeapon{
 
 
 
-    class swfighterlaser extends LinkedWeapon{
+    class SWFighterLaser extends LinkedWeapon{
         public $trailColor = array(30, 170, 255);
-        public $name = "swfighterlaser";
+        public $name = "SWFighterLaser";
         public $displayName = "Paired Particle guns";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
