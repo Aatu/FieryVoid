@@ -43,7 +43,7 @@ class SWFighterLaser extends LinkedWeapon{
 		if(!($newMode>0)) return; ///this is not correct!
 		parent::changeFiringMode($newMode);
 		//changes: linked shot will be single shot at reduced FC and better damage bonus
-		$this->fireControl = $this->$fireControlModes[$newMode];
+		$this->fireControl = $this->fireControlModes[$newMode];
 		if($newMode == 1){ //standard
 			$this->shots = $this->defaultShots;
 			$this->damagebonus = $this->defaultDmgBonus;
@@ -126,7 +126,7 @@ class SWFighterLaser extends LinkedWeapon{
 	      if(!($newMode>0)) return; ///this is not correct!
 	      parent::changeFiringMode($newMode);
 	      //changes: linked shot will be single shot at reduced FC and doubled damage bonus
-	      $this->fireControl = $this->$fireControlModes[$newMode];
+	      $this->fireControl = $this->fireControlModes[$newMode];
 			  if($newMode == 1){ //standard
 		$this->shots = $this->defaultShots;
 		$this->damagebonus = $this->defaultDmgBonus;
