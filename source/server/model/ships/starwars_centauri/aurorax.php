@@ -27,6 +27,8 @@ class aurorax extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
 		$this->addPrimarySystem(new Hangar(5, 26));
+$frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
+$this->addPrimarySystem($frontGun);	    
         
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));        
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
