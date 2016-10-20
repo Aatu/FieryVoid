@@ -5,7 +5,7 @@
 		header('Location: index.php');
 	}
     
-    if (isset($_GET["leave"]) && isset($_GET["gameid"])){
+    	if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
 		header('Location: games.php');
 	}
