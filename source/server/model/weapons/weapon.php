@@ -57,8 +57,7 @@ class Weapon extends ShipSystem{
     public $shots = 1;
     public $defaultShots = 1;
     public $canChangeShots = false;
-	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
-	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+
 	
 
     public $grouping = 0;
@@ -71,10 +70,16 @@ class Weapon extends ShipSystem{
     public $parentId = -1;
 
     public $firingMode = 1;
-    public $firingModes = array( 1 => "Standard");
-
-    public $flashDamage = false;
-    public $damageType = "standard";
+    public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
+    
+    public $damageType = "standard"; //actual damage type
+	 public $damageMode = 'Standard'; //actual mode of dealing damage
+	//damage type-related variables
+	public $flashDamage = false;
+	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	
+	
     public $minDamage, $maxDamage;
 
     public $exclusive = false;
