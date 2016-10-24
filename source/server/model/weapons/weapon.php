@@ -988,20 +988,22 @@ class Weapon extends ShipSystem{
 	$damage = floor($damage);//make sure damage is a whole number, without fractions!
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
         $systemHealth = $system->getRemainingHealth();
-        $modifiedDamage = $damage;
-		
-        $destroyed = false;
-        if ($damage-$armour >= $systemHealth){ //target will be destroyed
-            $destroyed = true;
-            $modifiedDamage = $systemHealth + $armour;
-        }
+	if($systemHealth>0){ //else system was already destroyed, proceed to overkill
+		$modifiedDamage = $damage;
+		$destroyed = false;
+		if ($damage-$armour >= $systemHealth){ //target will be destroyed
+		    $destroyed = true;
+		    $modifiedDamage = $systemHealth + $armour;
+		}
 
-        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
-        $damageEntry->updated = true;
-        $system->damage[] = $damageEntry;
-        $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-	
-	$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
+		$damageEntry->updated = true;
+		$system->damage[] = $damageEntry;
+		$this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
+
+		$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
+	}
+	    
         if ($damage > 0){//overkilling!
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location);
              if ($overkillSystem != null)
