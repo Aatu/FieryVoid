@@ -8,30 +8,30 @@ class LiberatorPlasma extends MediumShip{
         
 	$this->pointCost = 195;
         $this->faction = "Deneth";
-    $this->phpclass = "LiberatorPlasma";
-    $this->shipClass = "Liberator Plasma Gunboat";
+	$this->phpclass = "LiberatorPlasma";
+	$this->shipClass = "Liberator Plasma Gunboat";
 
-    $this->imagePath = "img/ships/jenas.png";
-    $this->canvasSize = 100;
+	$this->imagePath = "img/ships/jenas.png";
+	$this->canvasSize = 100;
 
-    $this->agile = true;
+	$this->agile = true;
 
 
-    $this->forwardDefense = 10;
-    $this->sideDefense = 11;
-        
+	$this->forwardDefense = 10;
+	$this->sideDefense = 11;
+
 	//$this->limited = 33;
-	      //$this->occurence = "rare";
-	      $this->isd = 2226;
-	      //$this->unofficial = true;
+	//$this->occurence = "rare";
+	$this->isd = 2226;
+	//$this->unofficial = true;
 
-    $this->turncost = 0.25;
-    $this->turndelaycost = 0.25;
-    $this->accelcost = 1;
-    $this->rollcost = 1;
-    $this->pivotcost = 1;
-    $this->iniativebonus = 14 *5;
-        
+	$this->turncost = 0.25;
+	$this->turndelaycost = 0.25;
+	$this->accelcost = 1;
+	$this->rollcost = 1;
+	$this->pivotcost = 1;
+	$this->iniativebonus = 14 *5;
+
 
 	$this->addFrontSystem(new Thruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new Thruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -39,17 +39,17 @@ class LiberatorPlasma extends MediumShip{
 	$this->addAftSystem(new Thruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
 
 
-    $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
-    $this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-    $this->addPrimarySystem(new Scanner(4, 12, 3, 4));
-    $this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
-	
-    $this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));
-    $this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
-    $this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 180));
+	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
+	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
+	$this->addPrimarySystem(new Scanner(4, 12, 3, 4));
+	$this->addPrimarySystem(new Engine(4, 13, 0, 6, 1));
+
+	$this->addPrimarySystem(new TwinArray(2, 6, 2, 180, 0));
+	$this->addPrimarySystem(new MediumPlasma(3, 5, 3, 300, 60));
+	$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 180));
 
 
-    $this->addPrimarySystem(new Structure( 5, 31));
+	$this->addPrimarySystem(new Structure( 5, 31));
 
 
 
