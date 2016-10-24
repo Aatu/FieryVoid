@@ -374,7 +374,7 @@ class Firing{
 	    
 	    if($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); .//launch hex	    
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
 		$relativeBearing = $ship->getBearingOnPos($pos);    
 	    }else{
 		    $pos = $shooter->getCoPos(); //current hex of firing unit
