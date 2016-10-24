@@ -75,7 +75,7 @@ class SWFighterLaser extends LinkedWeapon{
 class SWFighterIon extends LinkedWeapon{
     /*StarWars fighter Ion weapon*/
 
-    public $name = "swFighterIon";
+    public $name = "SWFighterIon";
     public $displayName = "Fighter Ion Cannon";
 	public $iconPath = "starwars/fighterIon.png";	  
 	  
