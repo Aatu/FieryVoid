@@ -129,7 +129,7 @@ class Weapon extends ShipSystem{
 	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}elseif(isset($this->data["Weapon type"])){$this->weaponClass = $this->data["Weapon type"];}
 
 	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
-	    for($i = 1; $i <= $firingModes; $i++){
+	    for($i = 1; $i <= count($this->firingModes); $i++){
 		$this->changeFiringMode($i);
 		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
 		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
