@@ -16,9 +16,9 @@ class Deliverer extends BaseShip{
         $this->sideDefense = 16;
         
         //$this->limited = 10;
-	      //$this->occurence = "rare";
-	      $this->isd = 2226;
-	      //$this->unofficial = true;        
+	//$this->occurence = "rare";
+	$this->isd = 2226;
+	//$this->unofficial = true;        
         
         $this->turncost = 1;
         $this->turndelaycost = 1;
