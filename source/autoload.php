@@ -84,7 +84,7 @@ spl_autoload_register(
                 
                 //custom guns StarWars
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
-                //'swfighterion' => '/server/model/weapons/customSW.php',
+                'swfighterion' => '/server/model/weapons/customSW.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
