@@ -282,8 +282,6 @@ flightWindowManager = {
 		
 		if (shipManager.systems.isDestroyed(flight, fighter)){
 			systemwindow.addClass("destroyed");
-			
-			
 		}
 		
 		if (system.weapon){
@@ -292,9 +290,16 @@ flightWindowManager = {
 			if (weaponManager.isSelectedWeapon(system)){systemwindow.addClass("selected");}else{systemwindow.removeClass("selected");}
 			if (firing  && !(systemwindow.hasClass("loading"))){systemwindow.addClass("firing");}else{firing= false;systemwindow.removeClass("firing");}
 			if (system.ballistic){	systemwindow.addClass("ballistic");	}else{	systemwindow.removeClass("ballistic");	}
+
+			//why fighter weapons can't change modes?...
+			if(Object.keys(system.firingModes).length > 1){
+				systemwindow.addClass("modes");
+                		var modebutton =  $(".mode", systemwindow);
+                		modebutton.html("<span>"+system.firingModes[system.firingMode].substring(0, 1)+"</span>");
+			}
 			
 			if (!firing){
-                var load = weaponManager.getWeaponCurrentLoading(system);
+                		var load = weaponManager.getWeaponCurrentLoading(system);
 				
 				var loadingtime = system.loadingtime;
 				if (system.normalload > 0)
