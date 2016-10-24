@@ -746,7 +746,7 @@
 
 
 
-	public function getHitSectionChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - location! chooses method based on weapon and fire order!
+	public function getHitSectionChoice($shooter, $fireOrder, $weapon, $returnDestroyed = false){ //returns value - location! chooses method based on weapon and fire order!
 		$foundLocation = 0;
 		if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
@@ -755,31 +755,31 @@
 			//$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
 			//debug::log("$toBeLogged"); 
 		}else{
-			$foundLocation = $this->getHitSection($shooter, $fireOrder->turn);
+			$foundLocation = $this->getHitSection($shooter, $fireOrder->turn, $returnDestroyed);
 		}
 		return $foundLocation;
         }   
-        public function getHitSection($shooter, $turn, $preGoal = 0){ //returns value - location! DO NOT USE FOR BALLISTICS!
+        public function getHitSection($shooter, $turn, $returnDestroyed = false){ //returns value - location! DO NOT USE FOR BALLISTICS!
 		$foundLocation = 0;
 		if(isset($this->activeHitLocations[$shooter->id])){
 			$foundLocation = $this->activeHitLocations[$shooter->id]["loc"];	
         	}else{
-			$loc = $this->doGetHitSection($shooter, $preGoal); //finds array with relevant data!
+			$loc = $this->doGetHitSection($shooter); //finds array with relevant data!
 			$this->activeHitLocations[$shooter->id] = $loc; //save location for further hits from same unit
 			$foundLocation = $loc["loc"];
 		}
 		
-		if($foundLocation > 0){ //return it only if not destroyed as of previous turn
+		if($foundLocation > 0 && $returnDestroyed == false){ //return it only if not destroyed as of previous turn
 			$structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure 
 			if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
 		}
 		return $foundLocation;
         }
-        public function getHitSectionPos($pos, $turn, $preGoal = 0){ //returns value - location! THIS IS FOR BALLISTICS!
+        public function getHitSectionPos($pos, $turn, $returnDestroyed = false){ //returns value - location! THIS IS FOR BALLISTICS!
 		$foundLocation = 0;
-		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
+		$loc = $this->doGetHitSectionPos($pos); //finds array with relevant data!
 		$foundLocation = $loc["loc"];
-		if($foundLocation > 0){ //return it only if not destroyed as of previous turn
+		if($foundLocation > 0 && $returnDestroyed == false){ //return it only if not destroyed as of previous turn
 			$structure = $this->getStructureSystem($foundLocation); //this always returns appropriate structure 
 			if($structure->isDestroyed($turn-1)) $foundLocaton = 0;
 		}		
@@ -1033,7 +1033,7 @@
         }
         
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-		$location = $this->getHitSection($shooter, $turn);
+		$location = $this->getHitSection($shooter, $turn, true); //return location even if destroyed
             
             $locs = array();
             $finallocs = array();
@@ -1050,7 +1050,7 @@
             
             foreach ($locs as $loc){
                 $structure = $this->getStructureSystem($loc);
-                if ($structure != null && !$structure->isDestroyed()){
+                if ($structure != null && !$structure->isDestroyed($turn-1)){
                     $finallocs[] = $loc;
                 }
             }
