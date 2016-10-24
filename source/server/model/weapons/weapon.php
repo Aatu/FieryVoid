@@ -3,35 +3,55 @@
 
 class Weapon extends ShipSystem{
 
+	/*all (or almost all) variables will come in array form too - so they can change with mode changes*/
+	/*array should be either empty (attribute does not change) or filled for all firing modes*/
     public $weapon = true;
 
     public $name = null;
     public $displayName ="";
     public $priority = 1;
+	public $priorityArray = array();
 
     public $animation = "none";
+	public Array = array();
     public $animationImg = null;
+	public Array = array();
     public $animationImgSprite = 0;
+	public Array = array();
     public $animationColor = null;
+	public Array = array();
     public $animationColor2 = array(255, 255, 255);
+	public Array = array();
     public $animationWidth = 3;
+	public Array = array();
     public $animationExplosionScale = 0.25;
+	public Array = array();
     public $animationExplosionType = "normal";
-    public $duoWeapon = false;
-    public $dualWeapon = false;
+	public Array = array();
     public $explosionColor = array(250, 230, 80);
+	public Array = array();
     public $trailLength = 40;
+	public Array = array();
     public $trailColor = array(248, 216, 65);
+	public Array = array();
+    public $projectilespeed = 17;
+	public Array = array();
 
     public $rangePenalty = 0;
+	public Array = array();
     public $rangeDamagePenalty = 0;
+	public Array = array();
     public $dp = 0; //damage penalty per dice
     public $range = 0;
+	public Array = array();
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
-    public $piercing = false;
+	public Array = array();
+
 
     public $loadingtime = 1;
+	public Array = array();
     public $turnsloaded;
+	public Array = array();
 
     public $overloadable = false;
 
@@ -42,6 +62,7 @@ class Weapon extends ShipSystem{
     public $extraoverloadshots = 0;
 
     public $uninterceptable = false;
+	$alwaysoverloading
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
     public $intercept = 0;
     public $freeintercept = false;
@@ -49,38 +70,49 @@ class Weapon extends ShipSystem{
     public $ballistic = false;
     public $hextarget = false;
     public $hidetarget = false;
-    public $targetImmobile = false;
-	
+    public $duoWeapon = false;
+    public $dualWeapon = false;
+    public $canChangeShots = false;
     
 
 
     public $shots = 1;
+	public Array = array();
     public $defaultShots = 1;
-    public $canChangeShots = false;
+	public Array = array();
 
-	
+    public $rof = 2; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
+	//public Array = array();
 
     public $grouping = 0;
+	public Array = array();
     public $guns = 1;
-    public $projectilespeed = 17;
+	public Array = array();
 
-    public $rof = 2;
+
+
 
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
 
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
-    
-    public $damageType = "standard"; //actual damage type
-	 public $damageMode = 'Standard'; //actual mode of dealing damage
+    public $damageType = ""; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+	public Array = array();
+    public $weaponClass = ""; //weapon class - overrides $this->data["Weapon type"] if set!
+	public Array = array();
+
 	//damage type-related variables
-	public $flashDamage = false;
+	    public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
+	public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
+	
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	
 	
     public $minDamage, $maxDamage;
+	public Array = array();
+	public Array = array();
 
     public $exclusive = false;
 
@@ -97,7 +129,11 @@ class Weapon extends ShipSystem{
 
         $this->setMinDamage();
         $this->setMaxDamage();
+	    
+	if($this->damageType != '') {$this->data["Damage type"] = $this->damageType;}else{$this->damageType= $this->data["Damage type"];}
+	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}else{$this->weaponClass = $this->data["Weapon type"];}
 
+	    //min and max damage - for all modes...
     }
 
     public function getRange($fireOrder)
