@@ -96,8 +96,12 @@ spl_autoload_register(
 
 
                 //Deneth
-                'wardsat' => '/server/model/ships/deneth/wardSat.php', 
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
+                'liberatorcannon' =>  '/server/model/ships/deneth/liberatorCannon.php', 
+                'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
+                'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
+                'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
+                'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
