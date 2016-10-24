@@ -85,7 +85,7 @@ Weapon.prototype.changeFiringMode = function()
         if(!mathlib.arrayIsEmpty(this.maxDamageArray)){
 		this.minDamage = this.minDamageArray[firingMode];
 		this.maxDamage = this.maxDamageArray[firingMode];
-		this.data["Damage"] = this->minDamage + "-" + this->maxDamage;
+		this.data["Damage"] = this.minDamage + "-" + this.maxDamage;
 	}
 		
 	
