@@ -95,9 +95,9 @@ class Weapon extends ShipSystem{
 
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
-    public $damageType = ""; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = ""; //(lowcase) actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
 	public $damageTypeArray = array();
-    public $weaponClass = ""; //weapon class - overrides $this->data["Weapon type"] if set!
+    public $weaponClass = ""; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $weaponClassArray = array();
 
 	//damage type-related variables
