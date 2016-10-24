@@ -333,7 +333,6 @@ class Firing{
     }
     
     public static function isLegalIntercept($gd, $ship, $weapon, $fire){
-        
         //Debug::log("\n\nIS LEGAL INTERCEPT: ". $ship->name . ' weapon: ' . $weapon->name . '(' .$weapon->id . ")\n");
         
         if ($fire->type=="intercept"){
@@ -375,9 +374,10 @@ class Firing{
 	    
 	    if($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y);		    
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); .//launch hex	    
 		$relativeBearing = $ship->getBearingOnPos($pos);    
 	    }else{
+		    $pos = $shooter->getCoPos(); //current hex of firing unit
 		$relativeBearing = $ship->getBearingOnUnit($shooter);
 	    }
 
@@ -397,6 +397,18 @@ class Firing{
                 return false;
             }
             //Debug::log("Target is this another ship\n");
+		
+		/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
+		//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
+		$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
+		$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
+		$targetBearing = $ship->getBearingOnUnit($target);
+		if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
+			//Debug::log("VALID INTERCEPT\n");
+			return true;
+		}
+			
+		/*old approach: target is within 3 hexes of defensive weapon, range to targed is less than range to shooter
             $distanceShipTarget = mathlib::getDistanceHex($target->getCoPos(), $ship->getCoPos());
             $distancePosShip = mathlib::getDistance($pos, $ship->getCoPos());
             $distancePosTarget = (mathlib::getDistance($target->getCoPos(), $pos));
@@ -407,6 +419,7 @@ class Firing{
                 //Debug::log("VALID INTERCEPT\n");
                 return true;
             }
+	    */
             
         }
          //Debug::log("INVALID INTERCEPT\n");   
