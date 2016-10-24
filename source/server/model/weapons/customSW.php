@@ -35,8 +35,8 @@ class SWFighterLaser extends LinkedWeapon{
 		$this->damagebonus = $damagebonus;
 		$this->damagebonusTab[1] = $damagebonus;
 		$this->damagebonusTab[2] = $damagebonus; //first gun provides basic damage bonus in linked mode
-		if($nrOfShots>1)$this->damagebonusTab[2]+ = 2; //+2 for second linked weapon
-		if($nrOfShots>2)$this->damagebonusTab[2]+ = ($nrOfShots - 2); //+1 for each additional linked weapon
+		if($nrOfShots>1)$this->damagebonusTab[2] += 2; //+2 for second linked weapon
+		if($nrOfShots>2)$this->damagebonusTab[2] += ($nrOfShots - 2); //+1 for each additional linked weapon
 		
 		$this->defaultShots = $nrOfShots;
 		$this->shots = $nrOfShots;
