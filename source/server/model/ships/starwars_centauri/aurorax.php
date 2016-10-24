@@ -5,7 +5,7 @@ class aurorax extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 500;
-		$this->faction = "Centauri Galactic Empire";
+		$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "aurorax";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Loth";
