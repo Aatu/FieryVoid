@@ -125,8 +125,8 @@ class Weapon extends ShipSystem{
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
 	    
-	if($this->damageType != '') {$this->data["Damage type"] = $this->damageType;}else{$this->damageType= $this->data["Damage type"];}
-	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}else{$this->weaponClass = $this->data["Weapon type"];}
+	if($this->damageType != '') {$this->data["Damage type"] = $this->damageType;}elseif(isset($this->data["Damage type"])){$this->damageType = $this->data["Damage type"];}
+	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}elseif(isset($this->data["Weapon type"])){$this->weaponClass = $this->data["Weapon type"];}
 
 	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
 	    for($i = 1; $i <= $firingModes; $i++){
