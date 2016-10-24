@@ -81,10 +81,10 @@ Weapon.prototype.changeFiringMode = function()
     }
 	
 	//set data for that firing mode...
-	if(!mathlib.arrayIsEmpty(this.rangePenaltyArray)) this.rangePenalty = this.rangePenaltyArray[firingMode];
+	if(!mathlib.arrayIsEmpty(this.rangePenaltyArray)) this.rangePenalty = this.rangePenaltyArray[this.firingMode];
         if(!mathlib.arrayIsEmpty(this.maxDamageArray)){
-		this.minDamage = this.minDamageArray[firingMode];
-		this.maxDamage = this.maxDamageArray[firingMode];
+		this.minDamage = this.minDamageArray[this.firingMode];
+		this.maxDamage = this.maxDamageArray[this.firingMode];
 		this.data["Damage"] = this.minDamage + "-" + this.maxDamage;
 	}
 		

@@ -25,6 +25,8 @@ class SWFighterLaser extends LinkedWeapon{
     public $damageType = "standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Particle"; //weapon class - overrides $this->data["Weapon type"] if set!
 
+	private $damagebonus = 0;
+	private $damagebonusArray = array();
 	
 
     public $exclusive = false;   
@@ -33,17 +35,27 @@ class SWFighterLaser extends LinkedWeapon{
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots, $nameMod = ''){
 		if ($nameMod != '') $displayName.= ' ('.$nameMod.')';
 		$this->damagebonus = $damagebonus;
-		$this->damagebonusTab[1] = $damagebonus;
-		$this->damagebonusTab[2] = $damagebonus; //first gun provides basic damage bonus in linked mode
-		if($nrOfShots>1)$this->damagebonusTab[2] += 2; //+2 for second linked weapon
-		if($nrOfShots>2)$this->damagebonusTab[2] += ($nrOfShots - 2); //+1 for each additional linked weapon
+		$this->damagebonusArray[1] = $damagebonus;
+		$this->damagebonusArray[2] = $damagebonus; //first gun provides basic damage bonus in linked mode
+		if($nrOfShots>1)$this->damagebonusArray[2] += 2; //+2 for second linked weapon
+		if($nrOfShots>2)$this->damagebonusArray[2] += ($nrOfShots - 2); //+1 for each additional linked weapon
+		
+		$this->shots = $nrOfShots;
+		$this->shotsArray = array(1=>$nrOfShots, 2=>1);
 		
 		$this->defaultShots = $nrOfShots;
-		$this->shots = $nrOfShots;
 		$this->intercept = $nrOfShots;
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
+	
+	
+	public function changeFiringMode($newMode){ //change parameters with mode change - those not changed by standard
+		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
+		parent::changeFiringMode($newMode);
+		$i = $newMode;
+		if(isset($damagebonusArray[$i])) $this->damagebonus = $damagebonusArray[$i];
+	}
 	
 
 	public function setSystemDataWindow($turn){
