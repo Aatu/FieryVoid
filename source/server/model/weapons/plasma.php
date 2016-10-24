@@ -23,10 +23,9 @@
 
     	
 		public function setSystemDataWindow($turn){
-
 			$this->data["Weapon type"] = "Plasma";
-            $this->data["Damage type"] = "Standard";
-            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (.5 to 1 per hex)";
+            		$this->data["Damage type"] = "Standard";
+            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
 			
 			parent::setSystemDataWindow($turn);
 		}

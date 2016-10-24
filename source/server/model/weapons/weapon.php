@@ -3,35 +3,55 @@
 
 class Weapon extends ShipSystem{
 
+	/*all (or almost all) variables will come in array form too - so they can change with mode changes*/
+	/*array should be either empty (attribute does not change) or filled for all firing modes*/
     public $weapon = true;
 
     public $name = null;
     public $displayName ="";
     public $priority = 1;
+	public $priorityArray = array();
 
     public $animation = "none";
+	public $animationArray = array();
     public $animationImg = null;
+	public $animationImgArray = array();
     public $animationImgSprite = 0;
+	public $animationImgSpriteArray = array();
     public $animationColor = null;
+	public $animationColorArray = array();
     public $animationColor2 = array(255, 255, 255);
+	public  $animationColor2Array = array();
     public $animationWidth = 3;
+	public $animationWidthArray = array();
     public $animationExplosionScale = 0.25;
+	public $animationExplosionScaleArray = array();
     public $animationExplosionType = "normal";
-    public $duoWeapon = false;
-    public $dualWeapon = false;
+	public $animationExplosionTypeArray = array();
     public $explosionColor = array(250, 230, 80);
+	public  $explosionColorArray = array();
     public $trailLength = 40;
+	public $trailLengthArray = array();
     public $trailColor = array(248, 216, 65);
+	public $trailColorArray = array();
+    public $projectilespeed = 17;
+	public $projectilespeedArray = array();
 
     public $rangePenalty = 0;
+	public $rangePenaltyArray = array();
     public $rangeDamagePenalty = 0;
+	public $rangeDamagePenaltyArray = array();
     public $dp = 0; //damage penalty per dice
     public $range = 0;
+	public $rangeArray = array();
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
-    public $piercing = false;
+	public $fireControlArray = array();
+
 
     public $loadingtime = 1;
+	public $loadingtimeArray = array();
     public $turnsloaded;
+	public $turnsloadedArray = array();
 
     public $overloadable = false;
 
@@ -42,42 +62,57 @@ class Weapon extends ShipSystem{
     public $extraoverloadshots = 0;
 
     public $uninterceptable = false;
+	public $uninterceptableArray = array();
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
     public $intercept = 0;
     public $freeintercept = false;
-
     public $ballistic = false;
     public $hextarget = false;
     public $hidetarget = false;
-    public $targetImmobile = false;
-	
-    
+    public $duoWeapon = false;
+    public $dualWeapon = false;
+    public $canChangeShots = false;
 
 
     public $shots = 1;
+	public  $shotsArray = array();
     public $defaultShots = 1;
-    public $canChangeShots = false;
-	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
-	public $noOverkill = false; //this will let simplify entire Matter line enormously!
-	
+	public  $defaultShotsArray = array();
+
+    public $rof = 2; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
+	//public Array = array();
 
     public $grouping = 0;
+	public $groupingArray = array();
     public $guns = 1;
-    public $projectilespeed = 17;
+	public $gunsArray = array();
 
-    public $rof = 2;
+
+
 
     // Used to indicate a parent in case of dualWeapons
     public $parentId = -1;
 
     public $firingMode = 1;
-    public $firingModes = array( 1 => "Standard");
+    public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
+    public $damageType = ""; //(lowcase) actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+	public $damageTypeArray = array();
+    public $weaponClass = ""; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $weaponClassArray = array();
 
-    public $flashDamage = false;
-    public $damageType = "standard";
+	//damage type-related variables
+	    public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
+	public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
+	
+	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	
+	
     public $minDamage, $maxDamage;
+	public $minDamageArray = array();
+	public $maxDamageArray = array();
 
-    public $exclusive = false;
+    public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
     public $calledShotMod = -8;
@@ -89,10 +124,17 @@ class Weapon extends ShipSystem{
 
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
+	    
+	if($this->damageType != '') {$this->data["Damage type"] = $this->damageType;}else{$this->damageType= $this->data["Damage type"];}
+	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}else{$this->weaponClass = $this->data["Weapon type"];}
 
-        $this->setMinDamage();
-        $this->setMaxDamage();
-
+	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
+	    for($i = 1; $i <= $firingModes; $i++){
+		$this->changeFiringMode($i);
+		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
+		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
+	    }
+	    $this->changeFiringMode(1); //reset mode to basic
     }
 
     public function getRange($fireOrder)
@@ -170,13 +212,8 @@ class Weapon extends ShipSystem{
     }
 
     public function firedOnTurn($turn){
-
-        if ($this instanceof DualWeapon && isset($this->turnsFired[$turn]))
-            return true;
-
-
+        if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
         foreach ($this->fireOrders as $fire){
-
             if ($fire->type != "selfIntercept" && $fire->weaponid == $this->id && $fire->turn == $turn){
                 return true;
             }
@@ -254,6 +291,7 @@ class Weapon extends ShipSystem{
             SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
 
+	
     public function setSystemData($data, $subsystem)
     {
         $array = json_decode($data, true);
@@ -339,6 +377,7 @@ class Weapon extends ShipSystem{
         return 0;
     }
 
+	
     public function calculateLoading()
     {
         $normalload = $this->getNormalLoad();
@@ -389,6 +428,7 @@ class Weapon extends ShipSystem{
         return new WeaponLoading($this->getTurnsloaded(), $this->overloadshots, $this->getLoadedAmmo(), $this->overloadturns, $this->getLoadingTime(), $this->firingMode);
     }
 
+	
     private function calculatePhase4Loading()
     {
         if ($this->ballistic)
@@ -948,20 +988,22 @@ class Weapon extends ShipSystem{
 	$damage = floor($damage);//make sure damage is a whole number, without fractions!
         $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
         $systemHealth = $system->getRemainingHealth();
-        $modifiedDamage = $damage;
-		
-        $destroyed = false;
-        if ($damage-$armour >= $systemHealth){ //target will be destroyed
-            $destroyed = true;
-            $modifiedDamage = $systemHealth + $armour;
-        }
+	if($systemHealth>0){ //else system was already destroyed, proceed to overkill
+		$modifiedDamage = $damage;
+		$destroyed = false;
+		if ($damage-$armour >= $systemHealth){ //target will be destroyed
+		    $destroyed = true;
+		    $modifiedDamage = $systemHealth + $armour;
+		}
 
-        $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
-        $damageEntry->updated = true;
-        $system->damage[] = $damageEntry;
-        $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-	
-	$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
+		$damageEntry->updated = true;
+		$system->damage[] = $damageEntry;
+		$this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
+
+		$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
+	}
+	    
         if ($damage > 0){//overkilling!
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location);
              if ($overkillSystem != null)
@@ -978,9 +1020,42 @@ class Weapon extends ShipSystem{
 	/*allow changing of basic parameters for different firing modes...
 		called in method fire()
 	*/
-	public function changeFiringMode($newMode){ //only particular weapons will actually reimplement this! 
+	public function changeFiringMode($newMode){ //change parameters with mode change
+		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
 		$this->firingMode = $newMode;
-		return;
+		if(isset($priorityArray[$i])) $this->priority = $priorityArray[$i];
+		
+		if(isset($animationArray[$i])) $this->animation = $animarionArray[$i];
+		if(isset($animationImgArray[$i])) $this->animationImg = $animationImgArray[$i];
+		if(isset($animationImgSpriteArray[$i])) $this->animationImgSprite = $animationImgSpriteArray[$i];
+		if(isset($animationColorArray[$i])) $this->animationColor = $animationColorArray[$i];
+		if(isset($animationColor2Array[$i])) $this->animationColor2 = $animationColor2Array[$i];
+		if(isset($animationWidthArray[$i])) $this->animationWidth = $animationWidthArray[$i];
+		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
+		if(isset($animationExplosionTypeArray[$i])) $this->animationExplosionType = $animationExplosionTypeArray[$i];
+		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
+		if(isset($explosionColorArray[$i])) $this->explosionColor = $explosionColorArray[$i];
+		if(isset($trailLengthArray[$i])) $this->trailLength = $trailLengthArray[$i];
+		if(isset($trailColorArray[$i])) $this->trailColor = $trailColorArray[$i];
+		if(isset($projectilespeedArray[$i])) $this->projectilespeed = $projectilespeedArray[$i];
+		
+		if(isset($rangePenaltyArray[$i])) $this->rangePenalty = $rangePenaltyArray[$i];
+		if(isset($rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $rangeDamagePenaltyArray[$i];
+		if(isset($rangeArray[$i])) $this->range = $rangeArray[$i];
+		if(isset($fireControlArray[$i])) $this->fireControl = $fireControlArray[$i];
+		if(isset($loadingtimeArray[$i])) $this->loadingtime = $loadingtimeArray[$i];
+		if(isset($turnsloadedArray[$i])) $this->turnsloaded = $turnsloadedArray[$i];
+		if(isset($uninterceptableArray[$i])) $this->uninterceptable = $uninterceptableArray[$i];
+		if(isset($shotsArray[$i])) $this->shots = $shotsArray[$i];
+		if(isset($defaultShotsArray[$i])) $this->defaultShots = $defaultShotsArray[$i];
+		if(isset($groupingArray[$i])) $this->grouping = $groupingArray[$i];
+		if(isset($gunsArray[$i])) $this->guns = $gunsArray[$i];
+		
+		if(isset($damageTypeArray[$i])) $this->damageType = $damageTypeArray[$i];
+		if(isset($weaponClassArray[$i])) $this->weaponClass = $weaponClassArray[$i];
+		if(isset($minDamageArray[$i])) $this->minDamage = $minDamageArray[$i];
+		if(isset($maxDamageArray[$i])) $this->maxDamage = $maxDamageArray[$i];
+		
 	}
 	
 	
