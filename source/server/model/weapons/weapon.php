@@ -1019,7 +1019,7 @@ class Weapon extends ShipSystem{
 		called in method fire()
 	*/
 	public function changeFiringMode($newMode){ //change parameters with mode change
-		//to display in GUI, js function also needs to be redefined
+		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
 		$this->firingMode = $newMode;
 		if(isset($priorityArray[$i])) $this->priority = $priorityArray[$i];
 		
