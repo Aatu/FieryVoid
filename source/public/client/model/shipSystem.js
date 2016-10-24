@@ -69,6 +69,7 @@ Weapon.prototype.getAmmo = function(fireOrder)
 {
     return null;
 }
+
 Weapon.prototype.changeFiringMode = function()
 {
     var mode = this.firingMode+1;
@@ -78,7 +79,19 @@ Weapon.prototype.changeFiringMode = function()
     }else{
         this.firingMode = 1;
     }
-}
+	
+	//set data for that firing mode...
+	if(!mathlib.arrayIsEmpty(this.rangePenaltyArray)) this.rangePenalty = this.rangePenaltyArray[firingMode];
+        if(!mathlib.arrayIsEmpty(this.maxDamageArray)){
+		this.minDamage = this.minDamageArray[firingMode];
+		this.maxDamage = this.maxDamageArray[firingMode];
+		this.data["Damage"] = this->minDamage + "-" + this->maxDamage;
+	}
+		
+	
+	
+} //end of Weapon.prototype.changeFiringMode
+
 
 Weapon.prototype.getTurnsloaded = function()
 {
