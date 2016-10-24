@@ -114,7 +114,7 @@ class Weapon extends ShipSystem{
 	public Array = array();
 	public Array = array();
 
-    public $exclusive = false;
+    public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
     public $calledShotMod = -8;
