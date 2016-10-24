@@ -1,5 +1,5 @@
 <?php
-class LiberatorPlasma extends MediumShip{
+class LiberatorEscort extends MediumShip{
 	/*Deneth Liberator LCV, from Raiders-2*/
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
@@ -7,8 +7,8 @@ class LiberatorPlasma extends MediumShip{
         
 	$this->pointCost = 205;
         $this->faction = "Deneth";
-	$this->phpclass = "LiberatorPlasma";
-	$this->shipClass = "Liberator Plasma Gunboat";
+	$this->phpclass = "LiberatorEscort";
+	$this->shipClass = "Liberator Escort Gunboat";
 	$this->imagePath = "img/ships/jenas.png";
 	$this->canvasSize = 100;
 	$this->agile = true;
