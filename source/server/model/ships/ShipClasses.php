@@ -1050,7 +1050,7 @@
             
             foreach ($locs as $loc){
                 $structure = $this->getStructureSystem($loc);
-                if ($structure != null && !$structure->isDestroyed($turn-1)){
+                if ($structure != null && !$structure->isDestroyed()){
                     $finallocs[] = $loc;
                 }
             }
@@ -1407,7 +1407,7 @@
     class StarBaseSixSections extends StarBase{
 
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-		$location = $this->getHitSection($shooter, $turn);
+		$location = $this->getHitSection($shooter, $turn, true);
             
             $locs = array();
             $finallocs = array();
@@ -1459,7 +1459,7 @@
 
     class StarBaseFiveSections extends StarBase{
 	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-		$location = $this->getHitSection($shooter, $turn);
+		$location = $this->getHitSection($shooter, $turn, true);
             
             $locs = array();
             $finallocs = array();
