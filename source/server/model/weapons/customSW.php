@@ -21,7 +21,7 @@ class SWFighterLaser extends LinkedWeapon{
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
  
-    public $damageType = "standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Particle"; //weapon class - overrides $this->data["Weapon type"] if set!
 
 	private $damagebonus = 0;
@@ -52,7 +52,7 @@ class SWFighterLaser extends LinkedWeapon{
 		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
 		parent::changeFiringMode($newMode);
 		$i = $newMode;
-		if(isset($damagebonusArray[$i])) $this->damagebonus = $damagebonusArray[$i];
+		if(isset($this->damagebonusArray[$i])) $this->damagebonus = $this->damagebonusArray[$i];
 	}
 */	
 
