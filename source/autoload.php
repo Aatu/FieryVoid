@@ -82,9 +82,11 @@ spl_autoload_register(
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
-                //custom guns StarWars
+                //custom weapons StarWars
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
+                'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
+                'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
