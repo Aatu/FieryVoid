@@ -12,8 +12,8 @@ class SWFighterLaser extends LinkedWeapon{
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
     public $trailLength = 20;
-    public $animationColor =  array(225, 175, 195);
-    public $trailColor = array(205, 175, 185);
+    public $animationColor =  array(245, 75, 95);
+    public $trailColor = array(245, 75, 95);
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -87,8 +87,8 @@ class SWFighterIon extends LinkedWeapon{
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
     public $trailLength = 20;
-    public $animationColor =  array( 175, 195, 225);
-    public $trailColor = array( 175, 185, 205);
+    public $animationColor =  array( 100, 100, 245);
+    public $trailColor = array( 100, 100, 245);
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -122,13 +122,6 @@ class SWFighterIon extends LinkedWeapon{
 
     
 	  
-	  
-    
-    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
-
-	
 	protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){ //ignore half of armor
 		$armour = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
@@ -139,6 +132,14 @@ class SWFighterIon extends LinkedWeapon{
 			return 0;
 		    }
         }
+	
+	
+	  
+    
+    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+
 	
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
