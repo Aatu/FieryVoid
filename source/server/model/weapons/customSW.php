@@ -5,7 +5,7 @@ class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
-    public $iconPath = "starwars/swFighter2.png";
+    public $iconPath = "starwars/swFighter4.png";
 	
     public $animation = "trail";
     public $projectilespeed = 13;
@@ -44,6 +44,9 @@ class SWFighterLaser extends LinkedWeapon{
 		$this->defaultShots = $nrOfShots;
 		$this->intercept = $nrOfShots;
 
+		//appropriate icon (number of barrels)...
+		if($nrOfShots<5) $this->iconPath = "starwars/swFighter"+$nrOfShots+".png";
+		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
 	
@@ -77,7 +80,7 @@ class SWFighterIon extends LinkedWeapon{
 
     public $name = "SWFighterIon";
     public $displayName = "Fighter Ion Cannon";
-	public $iconPath = "starwars/fighterIon.png";	  
+	public $iconPath = "starwars/swFighterIon1.png";	  
 	  
     public $animation = "trail";
     public $projectilespeed = 13;
@@ -112,6 +115,7 @@ class SWFighterIon extends LinkedWeapon{
 		$this->shots = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
 		$this->intercept = 0;
+		
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
@@ -137,17 +141,86 @@ class SWFighterIon extends LinkedWeapon{
 
 
 
-class SWFtrProtonTorpedo extends MissileFB
+class SWFtrProtonTorpedoLauncher extends FighterMissileRack
 {
 	/*proton torpedo launcher for fighters*/
     public $name = "SWFtrProtonTorpedo";
-    public $missileClass = "LIT";
+    public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
+    public $iconPath = "lightIonTorpedo";
     public $cost = 11;
     public $surCharge = 0;
+	
     public $damage = 12;
     public $amount = 0;
     public $range = 15;
+	
+    public $hitChanceMod = 0;
+    public $priority = 4;
+    public $firingModes = array( 1 => "Torpedo" );
+	
+    
+    public $name = "FighterTorpedoLauncher";
+    public $displayName = "Fighter Torpedo Launcher";
+    public $loadingtime = 1;
+    public $iconPath = "fighterTorpedo.png";
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    protected $distanceRangeMod = 0;
+    public $priority = 4;
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    
+    public $firingModes = array(
+        1 => "LBT"
+    );
+    
+    function __construct($maxAmount, $startArc, $endArc){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        
+        $LBTorp = new LightBallisticTorpedo($startArc, $endArc, $this->fireControl);
+        
+        $this->missileArray = array(
+            1 => $LBTorp
+        );
+        
+        $this->maxAmount = $maxAmount;
+    }
+    
+    public function setSystemDataWindow($turn)
+    {
+        parent::setSystemDataWindow($turn);
+        $this->data["Weapon type"] = "Ballistic";
+        $this->data["Damage type"] = "Standard";
+        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
+        if($this->missileArray[$this->firingMode]->minDamage != $this->missileArray[$this->firingMode]->maxDamage){
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage."-".$this->missileArray[$this->firingMode]->maxDamage;
+        }else{
+            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage;
+        }
+        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+    }
+    
+    public function getDistanceRange(){
+        return $this->missileArray[$this->firingMode]->range;
+    }
+	
+	
+} //end of SWFtrProtonTorpedoLauncher
+
+
+
+
+class LightIonTorpedo extends MissileFB
+{
+    public $name = "lightIonTorpedo";
+    public $missileClass = "LIT";
+    public $displayName = "Light Ion Torpedo";
+    public $cost = 8;
+    public $surCharge = 0;
+    public $damage = 10;
+    public $amount = 0;
+    public $range = 20;
     public $hitChanceMod = 0;
     public $priority = 4;
     
@@ -157,13 +230,8 @@ class SWFtrProtonTorpedo extends MissileFB
 	
     public function getDamage($fireOrder){        return $this->damage;   }
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
-    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }        
-} //end of SWFtrProtonTorpedo
-
-
-
-
-
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
+}
 
 
 
