@@ -38,20 +38,7 @@ class Ammo extends Weapon
         return $this->range;
     }
     
-    
-        public function isInDistanceRange($shooter, $target, $fireOrder)
-        {
-            $allowedRange = max($this->range, $this->distanceRange);
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->range)
-            {
-                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
-                return false;
-            }
-            return true;
-        }
-    
+        
     
     public function setAmount($newAmount){
         $this->amount = $newAmount;
