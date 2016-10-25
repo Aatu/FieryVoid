@@ -137,6 +137,29 @@ class SWFighterIon extends LinkedWeapon{
 
 
 
+class SWFtrProtonTorpedo extends MissileFB
+{
+	/*proton torpedo launcher for fighters*/
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "LIT";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 11;
+    public $surCharge = 0;
+    public $damage = 12;
+    public $amount = 0;
+    public $range = 15;
+    public $hitChanceMod = 0;
+    public $priority = 4;
+    
+    function __construct($startArc, $endArc, $fireControl = null){
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+	
+    public function getDamage($fireOrder){        return $this->damage;   }
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }        
+} //end of SWFtrProtonTorpedo
+
 
 
 
