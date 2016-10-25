@@ -106,6 +106,7 @@ class SWFighterIon extends LinkedWeapon{
       parent::setSystemDataWindow($turn);
       $this->data["<font color='red'>Remark</font>"] = "Increased chance to hit systems.";      
       $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical."; 
+      $this->data["<font color='red'>Remark</font>"] .= "<br>Ignore half of armor."; 
     }
      
 	
@@ -115,7 +116,6 @@ class SWFighterIon extends LinkedWeapon{
 		$this->shots = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
 		$this->intercept = 0;
-		
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
@@ -127,7 +127,20 @@ class SWFighterIon extends LinkedWeapon{
     public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
     public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
     public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
-        
+
+	
+	protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){ //ignore half of armor
+		$armour = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
+		    if (is_numeric($armour)){
+			$new = floor($armour /2);
+			return $new;
+		    }
+		    else {
+			return 0;
+		    }
+        }
+	
+	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
       if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
       if($system instanceof Structure) return; //structure does not suffer critical hits anyway
@@ -141,27 +154,17 @@ class SWFighterIon extends LinkedWeapon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends FighterMissileRack
+class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo
 {
 	/*proton torpedo launcher for fighters*/
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $iconPath = "lightIonTorpedo";
-    public $cost = 11;
-    public $surCharge = 0;
+    public $iconPath = "lightIonTorpedo.png";
 	
-    public $damage = 12;
-    public $amount = 0;
-    public $range = 15;
-	
-    public $hitChanceMod = 0;
-    public $priority = 4;
     public $firingModes = array( 1 => "Torpedo" );
-	
-    
-    public $name = "FighterTorpedoLauncher";
-    public $displayName = "Fighter Torpedo Launcher";
+
+
     public $loadingtime = 1;
     public $iconPath = "fighterTorpedo.png";
     public $rangeMod = 0;
@@ -169,21 +172,16 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack
     public $maxAmount = 0;
     protected $distanceRangeMod = 0;
     public $priority = 4;
-    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+    public $fireControl = array(0, -1, -4); // fighters, <mediums, <capitals 
     
     public $firingModes = array(
-        1 => "LBT"
+        1 => "Torpedo"
     );
     
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
-        
-        $LBTorp = new LightBallisticTorpedo($startArc, $endArc, $this->fireControl);
-        
-        $this->missileArray = array(
-            1 => $LBTorp
-        );
-        
+        $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $this->fireControl);
+        $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
     }
     
@@ -211,16 +209,16 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack
 
 
 
-class LightIonTorpedo extends MissileFB
+class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedoLauncher
 {
-    public $name = "lightIonTorpedo";
-    public $missileClass = "LIT";
-    public $displayName = "Light Ion Torpedo";
-    public $cost = 8;
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "FtrTorpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 10;
     public $surCharge = 0;
-    public $damage = 10;
+    public $damage = 12;
     public $amount = 0;
-    public $range = 20;
+    public $range = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
     
@@ -231,7 +229,7 @@ class LightIonTorpedo extends MissileFB
     public function getDamage($fireOrder){        return $this->damage;   }
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
-}
+}//end of SWFtrProtonTorpedo
 
 
 
