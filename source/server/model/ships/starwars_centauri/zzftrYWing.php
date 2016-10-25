@@ -44,10 +44,8 @@ class zzftrywing extends FighterFlight{
             
             //Proton Torpedo Launchers
             $torpedoLauncher = new SWFtrProtonTorpedo(4, 330, 30);
-            $torpedoLauncher->firingModes = array( 1 => "Torpedo" );
             $fighter->addFrontSystem($torpedoLauncher);
             $torpedoLauncher = new SWFtrProtonTorpedo(4, 330, 30);
-            $torpedoLauncher->firingModes = array( 1 => "Torpedo" );
             $fighter->addFrontSystem($torpedoLauncher);
             
             
