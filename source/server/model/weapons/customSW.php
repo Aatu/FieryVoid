@@ -162,7 +162,7 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $displayName = "Fighter Proton Torpedo";
     public $iconPath = "lightIonTorpedo.png";
 	
-    public $firingModes = array( 1 => "Torpedo" );
+    public $firingModes = array( 1 => "FtrTorpedo" );
 
 
     public $loadingtime = 1;
@@ -172,11 +172,8 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $maxAmount = 0;
     protected $distanceRangeMod = 0;
     public $priority = 4;
-    public $fireControl = array(0, -1, -4); // fighters, <mediums, <capitals 
+    public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
     
-    public $firingModes = array(
-        1 => "Torpedo"
-    );
     
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
