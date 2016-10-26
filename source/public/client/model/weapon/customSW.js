@@ -22,3 +22,9 @@ SWFtrProtonTorpedo.prototype = Object.create( Ammo.prototype );
 SWFtrProtonTorpedo.prototype.constructor = SWFtrProtonTorpedo;
 
 
+var SWFtrProtonTorpedoLauncher = function(json, ship)
+{
+    FighterMissileRack.call( this, json, ship);
+}
+SWFtrProtonTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
+SWFtrProtonTorpedoLauncher.prototype.constructor = SWFtrProtonTorpedoLauncher;
