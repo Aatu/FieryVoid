@@ -66,8 +66,6 @@ class Weapon extends ShipSystem{
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
     public $intercept = 0;
     public $freeintercept = false;
-    public $ballistic = false;
-    public $hextarget = false;
     public $hidetarget = false;
     public $duoWeapon = false;
     public $dualWeapon = false;
@@ -101,12 +99,13 @@ class Weapon extends ShipSystem{
 	public $weaponClassArray = array();
 
 	//damage type-related variables
-	    public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
-	public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
+	    //public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
+	//public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
 	
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
-	
+	public $ballistic = false; //this is a ballictic weapon, not direct fire
+        public $hextarget = false; //this weapon is targeted on hex, not unit
 	
     public $minDamage, $maxDamage;
 	public $minDamageArray = array();
@@ -790,16 +789,16 @@ class Weapon extends ShipSystem{
 
 	
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
-	//Debug::Log($this->firingMode);
+	    /*
         if ($this->piercing && $this->firingMode == 2 || $this->firingModes[1] == "Piercing"){
             $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-        }else{
+        }else{*/
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
-        }
+        /*}*/
     }
 
-	
+/* no longer needed, keeping code just in case
     protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
 
@@ -820,17 +819,11 @@ class Weapon extends ShipSystem{
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $loc);
         }
     }
-
+*/
 	
     protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location=null)  {
 	    /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
-	    
-	    
         $okSystem = null;
-
-        if ($this->piercing && $this->firingMode == 2){
-            return null;
-        }
 
 	if ($target instanceof FighterFlight){
             return null;
@@ -840,19 +833,19 @@ class Weapon extends ShipSystem{
 		return null;	
 	}
 
-        if ($this->flashDamage){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
+        if ($this->damageType=='Flash'){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
             $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
-        if ( $okSystem == null || $okSystem->isDestroyed()){
+        if ( $okSystem == null || $okSystem->isDestroyed()){ //overkill to Structure system is mounted on
             $okSystem = $target->getStructureSystem($system->location);
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed())        {
+        if ($okSystem == null || $okSystem->isDestroyed())        { //overkill to PRIMARY Structure
             $okSystem = $target->getStructureSystem(0);
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed())        {
+        if ($okSystem == null || $okSystem->isDestroyed())        { //nowhere to overkill to
             return null;
         }
 
@@ -860,23 +853,12 @@ class Weapon extends ShipSystem{
     }
 
 	
-
-    public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){
-	    /*$pos is never actually used, but _may_ be still useful for redefinitions...*/
-        if($this->flashDamage){ //damage units other than base target
-            $flashDamageAmount = $damage/4;
-		$explosionPos = $target->getCoPos();
-		
-
-            $ships1 = $gamedata->getShipsInDistance($target->getCoPos());
+	/*collateral damage from a Flash explosion (if any), called from function damage*/
+    public function doCollateralDamage($target, $shooter, $fireOrder, $explosionPos, $gamedata, $flashDamageAmount){
+            $ships1 = $gamedata->getShipsInDistance($explosionPos);
             foreach($ships1 as $ship){
-                if($ship === $target){
-                    // make certain the target doesn't get the damage twice
-                    continue;
-                }
-		    
+                if($ship === $target) continue;// make certain the target doesn't get the damage twice
 		if ($ship->isDestroyed()) continue; //no point allocating
-
                 if ($ship instanceof FighterFlight){
                     foreach ($ship->systems as $fighter){
                         if ($fighter == null || $fighter->isDestroyed()){
@@ -887,15 +869,21 @@ class Weapon extends ShipSystem{
                 }else{
 		    $tmpLocation = $ship->getHitSectionPos($explosionPos, $fireOrder->turn);
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
-                    if ($system == null ){
-                        continue;
-                    }
-
                     $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, $tmpLocation);
-                }
-            }
+                }   
+	    }
+    }
+
+    public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
+	    /*find details of shot, proceed to doDamage*/
+	    
+        if($this->damageType=='Flash'){ //damage units other than base target
+            $flashDamageAmount = floor($damage/4); //other units on target hex receive 25% of damage dealt to target
+	    $explosionPos = $target->getCoPos();
+	    $this->doCollateralDamage($target, $shooter, $fireOrder, $explosionPos, $gamedata, $flashDamageAmount);
         }
 
+	    
         if ($target->isDestroyed()) return;
 	    
         if ($this->ballistic){
@@ -905,11 +893,35 @@ class Weapon extends ShipSystem{
 	}else{
  		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 	}
-	$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
 
-        if ($system == null || $system->isDestroyed()) return; //there won't be destroyed system here other than PRIMARY Structure
-
-        $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+	if(($target->shipSizeClass>1) && ($this->damageType=='Piercing')){ //Piercing damage will be split into 3 parts vs units larger thgan MCVs
+		$facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
+		//find out opposite section...
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+		$oppositeBearing = Mathlib::addToDirection($relativeBearing, 180);
+		$outLocation = $target->doGetHitSectionBearing($oppositeBearing); //technically true, even if may lead to strange effects... (in some cases, one location may be chosen twice); in this case, assume narrow point was hit
+		$outLocation = $outLocation["loc"];//whole array was returned
+		//find how big damage is done - split to 3 equal parts; if can't be equal, bigger portions will go to PRIMARY and facing parts
+		if($outLocation == $facingLocation){ //shot enters and exits through the same section - narrow point - split into 2 parts only!
+			$damageOut = 0;
+			$damagePRIMARY = ceil($damage/2);
+			$damageEntry = floor($damage/2);
+		}else{ //standard split to 3 parts
+			$damageOut = floor($damage/3);
+			$damagePRIMARY = ceil($damage/3);
+			$damageEntry = $damage - $damageOut -$damagePRIMARY;
+		}
+		//first part: facing structure
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, $facingLocation);
+		//second part: PRIMARY Structure
+		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, 0);
+		//last part: opposite Structure
+		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, $outLocation);
+	}else{ //standard mode of dealing damage
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+	}
     }
 
 	
@@ -926,37 +938,49 @@ class Weapon extends ShipSystem{
         return true;
     }
 
-    protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-
+    protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){ //standard part of armor
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
-	if($pos!==null){ //attack comes from position not directly related to fire order
-		$armor = $system->getArmourPos($gamedata, $pos);
-	}
-        elseif($this->ballistic){
+	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
-	    $armor = $system->getArmourPos($gamedata, $posLaunch);
-        }else{
-            $armor = $system->getArmour($target, $shooter, $fireOrder->damageclass);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
-
+	$armor = $system->getArmourStandard($target, $shooter, $this->weaponClass, $pos);
 
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
         $armor -= $mod;
+	    
+        if ($armor<0) $armor = 0;
+
+        return $armor;
+    }//endof function getSystemArmourStandard
+	
+	
+    protected function getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos=null){ //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
+    	$shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
+
+	$armor = 0;
+	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+        }
+	$armor = $system->getArmourInvulnerable($target, $shooter, $this->weaponClass, $pos);
+
         if ($armor<0)
             $armor = 0;
 
         return $armor;
-    }
+    }//endof function getSystemArmourInvulnerable
+	
+	
 
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata){
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
             $dis = round(mathlib::getDistanceHex($pos, $targetPos));
-
             //print ("damage: $damage dis: $dis damagepen: " . $this->rangeDamagePenalty);
             $damage -= ($dis * $this->rangeDamagePenalty);
             //print ("damage: $damage \n\n");
@@ -965,30 +989,33 @@ class Weapon extends ShipSystem{
         }
 
         $damage -= $this->dp;
-        if ($damage < 0)
-            return 0;
+	    
+	//for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
+	if(($this->damageType=='Piercing')&&($target->shipSizeClass<2)) $damage = ceil($damage*0.9);
+	    
+        if ($damage < 0) $damage = 0;
 
         return $damage;
-    }
+    } //endof function getDamageMod
+	
 
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
         $damage = $this->getDamage($fireOrder);
-          //debug::log($damage);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
 
         return $damage;
     }
+	
 
 	
     protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
 	    /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
 	    /*otherwise best leave null BUT fill $location!*/
-    
-	$damage = floor($damage);//make sure damage is a whole number, without fractions!
-        $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
-        $systemHealth = $system->getRemainingHealth();
-	if($systemHealth>0){ //else system was already destroyed, proceed to overkill
+	if(!$system->isDestroyed()){ //else system was already destroyed, proceed to overkill
+		$systemHealth = $system->getRemainingHealth();
+		$damage = floor($damage);//make sure damage is a whole number, without fractions!
+		$armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
 		$modifiedDamage = $damage;
 		$destroyed = false;
 		if ($damage-$armour >= $systemHealth){ //target will be destroyed
