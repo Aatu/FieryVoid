@@ -853,7 +853,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null && !$system->isDestroyed()) return $system;
+		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
 		if ($location == null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
@@ -861,7 +861,7 @@
           
 		$hitChart = $this->hitChart[$location];
 		$rngTotal = 20; //standard hit chart has 20 possible locations
-		if ($weapon->flashDamage){ //Flash - change hit chart! 
+		if($weapon->damageType == 'Flash'){ //Flash - change hit chart! - only undestroyed systems
 			$hitChart = array();
 			//use only non-destroyed systems on section hit
 			$rngTotal = 0; //range of current system
@@ -882,6 +882,28 @@
 			}
 			if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! penetrate to PRIMARY...
 		}
+		if($weapon->damageType == 'Piercing'){ //Piercing - change hit chart! - no PRIMARY hits!
+			$hitChart = array();
+			//use only non-destroyed systems on section hit
+			$rngTotal = 0; //range of current system
+			$rngCurr = 0; //total range of live systems
+			for($roll = 1;$roll<=20;$roll++){
+				$rngCurr++;
+				if (isset($this->hitChart[$location][$roll])){
+                   			$name = $this->hitChart[$location][$roll];
+					if($name != 'Primary'){ //no PRIMARY penetrating hits for Piercing!
+						$systemsArray = $this->getSystemsByNameLoc($name, $location, true);//accept destroyed systems too
+						if(sizeof($systemsArray)>0){ //there actually are such systems!
+							$rngTotal+= $rngCurr;
+							$hitChart[$rngTotal] = $name;						
+						}
+					}
+					$rngCurr = 0;
+				}
+			}
+			if($rngTotal ==0) return $this->getStructureSystem($location);//there is nothing here! return facing Structure anyway, overkill methods will handle it
+		}
+		
 			
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
@@ -908,13 +930,12 @@
 			return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, overkill to Structure
+		if(sizeof($systems)==0){ //if empty, damage is done to Structure
 			$struct = $this->getStructureSystem($location);
-			if($struct->isDestroyed()) $struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 		
-		//now choose one of equal eligible systems (they're already known to be undestroyed)
+		//now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
                 $roll = Dice::d(sizeof($systems));
                 $system = $systems[$roll-1];
 		return $system;
@@ -934,7 +955,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null && !$system->isDestroyed()) return $system;
+		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
 		if ($location == null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
