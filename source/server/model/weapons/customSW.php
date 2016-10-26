@@ -167,7 +167,6 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
 
 
     public $loadingtime = 1;
-    public $iconPath = "fighterTorpedo.png";
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
