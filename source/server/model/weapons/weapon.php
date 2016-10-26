@@ -93,7 +93,7 @@ class Weapon extends ShipSystem{
 
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
-    public $damageType = ""; //(first letter upcase) actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = ""; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $damageTypeArray = array();
     public $weaponClass = ""; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $weaponClassArray = array();
@@ -773,40 +773,60 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
 
         for ($i=0;$i<$fireOrder->shots;$i++){
-            // Check if weapon is in distance range.
-            if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
-            {
-                // Target is not in distance range. Move to next shot.
-                continue;
-            }
-
-            $needed = $fireOrder->needed - ($this->grouping*$i);
-            $rolled = Dice::d(100);
-            if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
-                //$fireOrder->pubnotes .= "Shot intercepted. ";
-                $fireOrder->intercepted += 1;
-            }
+		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
+            		$needed = $fireOrder->needed - ($this->grouping*$i);
+		}
+            
+		//for linked shot: further shots will do the same as first!
+		if($this->isLinked && $i > 0){
+			$rolled = 50; //irrelevant really, just 0<roll<100
+			if($fireOrder->linkedHit==null){ //first linked shot did not hit, so neither will further ones
+				$needed = 0;
+				if($fireOrder->intercepted > 0) $fireOrder->intercepted++; //if first linked shot was intercepted, so will be next ones
+			}else{//first linked shot did hit, and so will further ones
+				$needed = 100;
+			}
+		}else{ //standard - find hit and interception
+			$rolled = Dice::d(100);
+			    if ($rolled > $needed && $rolled <= $needed+($intercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
+				    if($this->damageType == 'Pulse'){
+					$fireOrder->intercepted += $this->maxpulses;
+				    }else{
+					$fireOrder->intercepted += 1;
+				    }
+			    }
+		}
 
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
             if ($rolled <= $needed){
-                $fireOrder->shotshit++;
-                $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);		
+		$hitsRemaining=1;
+		    
+		if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
+	            $hitsRemaining = $this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
+		    $hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+		}
+		    
+		while($hitsRemaining>0){
+			$hitsRemaining--;
+                	$fireOrder->shotshit++;
+                	$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
+		}
             }
         }
 
         $fireOrder->rolled = 1;//Marks that fire order has been handled
-    }
+    } //endof function fire
 
 	
+	
+	
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
-	    /*
-        if ($this->piercing && $this->firingMode == 2 || $this->firingModes[1] == "Piercing"){
-            $this->piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-        }else{*/
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
             $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
-        /*}*/
     }
+	
+	
+	
 
 /* no longer needed, keeping code just in case
     protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
