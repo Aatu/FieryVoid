@@ -659,7 +659,7 @@
 	    
              
 
-        public function doGetHitSectionBearing($relativeBearing, $preGoal=0){ //pick section hit from given bearing; return array with all data!  
+        public function doGetHitSectionBearing($relativeBearing){ //pick section hit from given bearing; return array with all data!  
             $locs = $this->getLocations();
             $valid = array();
             foreach ($locs as $loc){
@@ -668,22 +668,22 @@
                 }
             }
             $valid = $this->fillLocations($valid);
-            $pick = $this->pickLocationForHit($valid, $preGoal);
+            $pick = $this->pickLocationForHit($valid);
             return $pick;
         }
 	    
 	    
-        public function doGetHitSectionPos($pos, $preGoal=0){ //pick section hit from given coordinates; return array with all data!  
+        public function doGetHitSectionPos($pos){ //pick section hit from given coordinates; return array with all data!  
             $relativeBearing =  $this->getBearingOnPos($pos);
-            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
+            $result = $this->doGetHitSectionBearing($relativeBearing);
             return $result;
         }
 	    
 	    
 	    
-        public function doGetHitSection($shooter, $preGoal=0){   //pick section hit from given unit; return array with all data!  
+        public function doGetHitSection($shooter){   //pick section hit from given unit; return array with all data!  
             $relativeBearing =  $this->getBearingOnUnit($shooter);
-            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
+            $result = $this->doGetHitSectionBearing($relativeBearing);
             return $result;
         }
 	    
@@ -713,7 +713,7 @@
         }
 
 
-        public function pickLocationForHit($locs, $preGoal=0){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
+        public function pickLocationForHit($locs){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
 		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
 		foreach ($locs as $loc){
 			//compare current best pick with current loop iteration, change if new pick is better
@@ -787,7 +787,7 @@
         }   	    
 
 	    
-	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - profile! chooses method based on weapon and fire order!
+	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon){ //returns value - profile! chooses method based on weapon and fire order!
 		$foundProfile = 0;
 		if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
@@ -798,7 +798,7 @@
 		}
 		return $foundProfile;
         }
-        public function getHitSectionProfile($shooter, $preGoal = 0){ //returns value - profile! DO NOT USE FOR BALLISTICS!
+        public function getHitSectionProfile($shooter){ //returns value - profile! DO NOT USE FOR BALLISTICS!
 		$foundProfile = 0;
 		if(isset($this->activeHitLocations[$shooter->id]) ){
 			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
@@ -809,9 +809,9 @@
 		}
 		return $foundProfile;
         }   
-        public function getHitSectionProfilePos($pos, $preGoal = 0){ //returns value - profile! THIS IS FOR BALLISTICS!
+        public function getHitSectionProfilePos($pos){ //returns value - profile! THIS IS FOR BALLISTICS!
 		$foundProfile = 0;
-		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
+		$loc = $this->doGetHitSectionPos($pos); //finds array with relevant data!
 		$foundProfile = $loc["profile"];
 		return $foundProfile;
         }   	    
