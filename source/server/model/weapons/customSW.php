@@ -45,7 +45,7 @@ class SWFighterLaser extends LinkedWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter"+$nrOfShots+".png";
+		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
@@ -96,7 +96,7 @@ class SWFighterIon extends LinkedWeapon{
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
  
-    public $damageType = "standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "SW Ion"; //weapon class - overrides $this->data["Weapon type"] if set!
 	  
     public $systemKiller = true;
@@ -136,9 +136,9 @@ class SWFighterIon extends LinkedWeapon{
 	
 	  
     
-    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+    public function getDamage($fireOrder){        return Dice::d(4)+$this->damagebonus;   }
     public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 4+$this->damagebonus - $this->dp;      }
 
 	
 	
@@ -155,7 +155,7 @@ class SWFighterIon extends LinkedWeapon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo
+class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo; 2 shots per turn!
 {
 	//proton torpedo launcher for fighters
     public $name = "SWFtrProtonTorpedo";
@@ -218,6 +218,7 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $range = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
+	public $shots = 2; //will fire 2 torpedoes per shot... to compensate for the fact that fighter can't have more than 3 weapons! (display issues)
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);
