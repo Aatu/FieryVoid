@@ -113,11 +113,16 @@ window.combatLog = {
                 var damagehtml = "";
                 for (var a in damages[i].damages){
                     var d = damages[i].damages[a];
-                    if (d.damage-d.armour<=0)
-                        continue;
+		    var damageDone = d.damage-d.armour;
+	            var damageStopped = d.armour;
+		    if(damageDone < 0){
+			    damageStopped = d.damage;
+			    damageDone = 0;
+		    }
+			/*if (d.damage-d.armour<=0) continue;*/
                         
-                    totaldam += d.damage-d.armour;
-                    armour += d.armour;
+                    totaldam += damageDone;//d.damage-d.armour;
+                    armour += damageStopped;//d.armour;
                     var system = shipManager.systems.getSystem(gamedata.getShip(d.shipid), d.systemid); 
                     
                     if (!d.destroyed){
