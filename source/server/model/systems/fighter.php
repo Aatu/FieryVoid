@@ -146,6 +146,11 @@
 		return $loc["armour"];
         }
   */  
+        public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
+		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
+		return $armour;
+        }
+		
 		
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
 	//$pos is to be included if launch position is different than firing unit position
