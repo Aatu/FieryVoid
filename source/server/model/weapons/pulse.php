@@ -37,7 +37,10 @@ class Pulse extends Weapon{
             return Dice::d($this->useDie);
         }
 	
-        
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
 
         public function fire($gamedata, $fireOrder){
 
@@ -76,10 +79,7 @@ class Pulse extends Weapon{
             $fireOrder->rolled = 1;//Marks that fire order has been handled
         }
     
-        protected function getExtraPulses($needed, $rolled)
-        {
-            return floor(($needed - $rolled) / ($this->grouping));
-        }
+
         
         /*
         public function damage($target, $shooter, $fireOrder){
