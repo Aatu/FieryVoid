@@ -1034,7 +1034,6 @@ class Weapon extends ShipSystem{
 		if(isset($animationWidthArray[$i])) $this->animationWidth = $animationWidthArray[$i];
 		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
 		if(isset($animationExplosionTypeArray[$i])) $this->animationExplosionType = $animationExplosionTypeArray[$i];
-		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
 		if(isset($explosionColorArray[$i])) $this->explosionColor = $explosionColorArray[$i];
 		if(isset($trailLengthArray[$i])) $this->trailLength = $trailLengthArray[$i];
 		if(isset($trailColorArray[$i])) $this->trailColor = $trailColorArray[$i];
