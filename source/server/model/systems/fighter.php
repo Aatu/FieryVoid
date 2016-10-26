@@ -139,12 +139,13 @@
 		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
 		return $loc["armour"];
 	}
-  */      
+    
         public function getArmour($target, $shooter, $dmgType){ //for fighter no need to note where fire went, as all calculations are done on raw flight data
 		//would work for direct fire only; retaining just in case
 		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
 		return $loc["armour"];
         }
+  */  
 		
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
 	//$pos is to be included if launch position is different than firing unit position
