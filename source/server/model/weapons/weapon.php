@@ -938,6 +938,14 @@ class Weapon extends ShipSystem{
 		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
 		//last part: opposite Structure
 		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
+	}elseif($this->damageType=='Raking'){ //Raking hit...
+		//split into rakes; armor will not need to be penetrated twice!
+		while($damage>0){
+			$rake=min($damage, $this->raking);
+			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+        		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, false, $tmpLocation);
+			$damage = $damage - $rake;
+		}
 	}else{ //standard mode of dealing damage
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
         	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
@@ -1038,12 +1046,25 @@ class Weapon extends ShipSystem{
 		$damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
 		$systemHealth = $system->getRemainingHealth();
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
-		$armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
+		$armour = $this->getSystemArmourStandard($system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
+		$armour += $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos); //this can't be ignored
 		$modifiedDamage = $damage;
 		$destroyed = false;
+		
+		//armor may be ignored for some reason...
+		$armourIgnored = 0;
+		if(isset($fireOrder->armorIgnored[$system->id])){
+			$armorIgnored = $armour - $fireOrder->armorIgnored[$system->id];
+			$armour = $armour - $armourIgnored;
+		}
+		$armour = min($armour,0);
+		
 		if ($damage-$armour >= $systemHealth){ //target will be destroyed
 		    $destroyed = true;
 		    $modifiedDamage = $systemHealth + $armour;
+		}elseif($this->damageType == 'Raking' ){ //note that armour was already pierced for this shot...
+			$armorIgnored = $armourIgnored+$modifiedDamage;
+			$fireOrder->armorIgnored[$system->id] = $armorIgnored;
 		}
 
 		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
