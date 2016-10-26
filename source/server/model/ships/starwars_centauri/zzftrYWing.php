@@ -42,16 +42,24 @@ class zzftrywing extends FighterFlight{
             $roundGun = new SWFighterIon(330, 30, 1, 2); //all-around Ion Cannons
             $fighter->addFrontSystem($roundGun);
             
-            //Proton Torpedo Launchers
-            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
+            //2 forward Proton Torpedo Launchers, 4 shots each
+            $torpedoLauncher = new FighterTorpedoLauncher(4, 330, 30);
+            $torpedoLauncher->firingModes = array( 1 => "FtrTorpedo" );
+            $torpedoLauncher->iconPath = "lightIonTorpedo";
+            $torpedoLauncher->missileArray = array(1 => new SWFtrProtonTorpedo(330, 30));
             $fighter->addFrontSystem($torpedoLauncher);
-            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
+
+            $torpedoLauncher = new FighterTorpedoLauncher(4, 330, 30);
+            $torpedoLauncher->firingModes = array( 1 => "FtrTorpedo" );
+            $torpedoLauncher->iconPath = "lightIonTorpedo";
+            $torpedoLauncher->missileArray = array(1 => new SWFtrProtonTorpedo(330, 30));
             $fighter->addFrontSystem($torpedoLauncher);
             
             
             
             
-            //Ray Shield
+            //Ray Shield, 3 points
+            
             
             
             $this->addSystem($fighter);
