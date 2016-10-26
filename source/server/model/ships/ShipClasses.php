@@ -842,6 +842,7 @@
 
 
         public function getHitSystemByTable($shooter, $fire, $weapon, $location){ 
+		/*DOES NOT take care of overkill!!! returns section structure if no system can be hit, whether that section is still alive or not*/
 		$system = null;
 		$name = false;
 		$location_different = false; //target system may be on different location?
