@@ -99,13 +99,13 @@ class Weapon extends ShipSystem{
 	public $weaponClassArray = array();
 
 	//damage type-related variables
-	    //public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
-	//public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
-	
+	public $isLinked = false; //for linked weapons - they will all hit the exact same system!
 	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
         public $hextarget = false; //this weapon is targeted on hex, not unit
+	//public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
+	//public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
 	
     public $minDamage, $maxDamage;
 	public $minDamageArray = array();
@@ -948,7 +948,14 @@ class Weapon extends ShipSystem{
 			$damage = $damage - $rake;
 		}
 	}else{ //standard mode of dealing damage
-		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		if($fireOrder->linkedHit!=null){
+			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		}else{
+			$system=$fireOrder->linkedHit;
+		}
+		if($this->isLinked){ //further linked weapons will hit the exact same system!
+			$fireOrder->linkedHit = $system;
+		}
         	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
 	}
     }//endof function damage
