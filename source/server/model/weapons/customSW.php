@@ -155,7 +155,7 @@ class SWFighterIon extends LinkedWeapon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo
+class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo; 2 shots per turn!
 {
 	//proton torpedo launcher for fighters
     public $name = "SWFtrProtonTorpedo";
@@ -218,6 +218,7 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $range = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
+	public $shots = 2; //will fire 2 torpedoes per shot... to compensate for the fact that fighter can't have more than 3 weapons! (display issues)
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);
