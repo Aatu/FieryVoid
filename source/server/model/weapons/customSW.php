@@ -45,7 +45,7 @@ class SWFighterLaser extends LinkedWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter"+$nrOfShots+".png";
+		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
