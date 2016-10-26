@@ -9,20 +9,23 @@ class Pulse extends Weapon{
         public $maxpulses = 6;
         public $priority = 5;
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
-
+    	public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	private $useDie = 5; //die used for base number of hits
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-
+		/* 
             $this->data["Weapon type"] = "Particle";
             $this->data["Damage type"] = "Standard";
             $this->data["Firing Mode"] = "Pulse";
             $this->data["Grouping range"] = $this->grouping + "%";
             $this->data["Max pulses"] = $this->maxpulses;
             $this->data["Pulses"] = 'D 5';
+	    */
+		 $this->data["Special"] = 'Pulse mode: D'.$this->useDie.' +1/'. $this->grouping."%, max. ".$this->maxpulses;
 
             $this->defaultShots = $this->maxpulses;
             
@@ -31,8 +34,9 @@ class Pulse extends Weapon{
         
         protected function getPulses($turn)
         {
-            return Dice::d(5);
+            return Dice::d($this->useDie);
         }
+	
         
 
         public function fire($gamedata, $fireOrder){
