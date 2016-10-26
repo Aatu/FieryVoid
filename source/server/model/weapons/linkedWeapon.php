@@ -1,11 +1,12 @@
 <?php
 class LinkedWeapon extends Weapon{
+	public $isLinked = true; //indicates that this is linked weapon, no need for overrides
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
 
-    
+/* no longer needed, kept just in case
     public function fire($gamedata, $fireOrder)
     {
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -70,4 +71,5 @@ class LinkedWeapon extends Weapon{
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $trgtLoc);
         }
     }
+    */
 }
