@@ -940,6 +940,7 @@ class Weapon extends ShipSystem{
 		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
 	}elseif($this->damageType=='Raking'){ //Raking hit...
 		//split into rakes; armor will not need to be penetrated twice!
+		$fireOrder->armorIgnored = array();//reset info about pierced armor
 		while($damage>0){
 			$rake=min($damage, $this->raking);
 			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
