@@ -880,6 +880,12 @@ window.effects = {
         var details = effects.getShotDetails(fire, weapon);
 
         var hitSystem = fire.hitSystem;
+        
+        var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+        while(modeIteration > 1){
+            weapon.changeFiringMode();
+            modeIteration--;
+        }
 
         var animation = {
             tics:0,

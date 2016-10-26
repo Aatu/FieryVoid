@@ -1029,12 +1029,6 @@ body.phase1 .shipwindow  .system.boosted .minus{
     height:11px;
 }
 
-.fightersystem .mode{
-    border:1px solid #496791;
-    text-align:center;
-    padding-top:1px;
-    height:11px;
-}
 
 
 body.phase1 .shipwindow  .system.modes.ballistic .mode,

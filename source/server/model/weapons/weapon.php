@@ -95,7 +95,7 @@ class Weapon extends ShipSystem{
 
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
-    public $damageType = ""; //(lowcase) actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = ""; //(first letter upcase) actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
 	public $damageTypeArray = array();
     public $weaponClass = ""; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $weaponClassArray = array();
@@ -1034,7 +1034,6 @@ class Weapon extends ShipSystem{
 		if(isset($animationWidthArray[$i])) $this->animationWidth = $animationWidthArray[$i];
 		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
 		if(isset($animationExplosionTypeArray[$i])) $this->animationExplosionType = $animationExplosionTypeArray[$i];
-		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
 		if(isset($explosionColorArray[$i])) $this->explosionColor = $explosionColorArray[$i];
 		if(isset($trailLengthArray[$i])) $this->trailLength = $trailLengthArray[$i];
 		if(isset($trailColorArray[$i])) $this->trailColor = $trailColorArray[$i];

@@ -38,6 +38,8 @@ class Ammo extends Weapon
         return $this->range;
     }
     
+        
+    
     public function setAmount($newAmount){
         $this->amount = $newAmount;
     }
@@ -57,6 +59,7 @@ class MissileB extends Ammo
     public $damage = 20;
     public $amount = 0;
     public $range = 20;
+    public $distanceRange = 60;
     public $hitChanceMod = 3;
     public $ballistic = true;
     public $priority = 6;
@@ -103,6 +106,7 @@ class MissileFB extends Ammo
     public $damage = 10;
     public $amount = 0;
     public $range = 10;
+    public $distanceRange = 30;
     public $hitChanceMod = 3;
     public $ballistic = true;
     public $priority = 4;
@@ -263,6 +267,7 @@ class MissileFY extends MissileFB
     public $cost = 2;
     public $damage = 6;
     public $range = 8;
+    public $distanceRange = 16;
     public $priority = 3;
     
     function __construct($startArc, $endArc, $fireControl = null){
