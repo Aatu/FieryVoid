@@ -34,7 +34,7 @@ class zzftrywing extends FighterFlight{
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
             $fighter->displayName = "Y-Wing Technology Demonstrator";
             $fighter->imagePath = "img/starwars/yWing.png";
-            $fighter->iconPath = "img/starwars/yWingWide_large.png"; //need room for 4th weapon!
+            $fighter->iconPath = "img/starwars/yWing_large.png"; 
             
             $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
