@@ -1027,11 +1027,13 @@
 		
 		
 
-        
+        /* no longer needed, keeping code just in case
         public function getPiercingDamagePerLoc($damage){
             return ceil($damage/3);
         }
+	*/
         
+	    /* no longer needed, keeping code just in case
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true); //return location even if destroyed
             
@@ -1058,6 +1060,7 @@
             return $finallocs;
             
         }
+	*/
         
         
         public static function hasBetterIniative($a, $b){
@@ -1406,6 +1409,7 @@
 
     class StarBaseSixSections extends StarBase{
 
+	    /* no longer needed, keeping code just in case
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true);
             
@@ -1438,6 +1442,7 @@
             return $finallocs;
             
         }
+	*/
 
 
         public function getLocations(){
@@ -1458,6 +1463,7 @@
 
 
     class StarBaseFiveSections extends StarBase{
+	    /* no longer needed, keeping code just in case
 	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true);
             
@@ -1500,6 +1506,7 @@
             return $finallocs;
             
         }
+	*/
 
         public function getLocations(){
         //debug::log("getLocations");         
