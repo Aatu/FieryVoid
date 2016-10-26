@@ -821,19 +821,22 @@ class Weapon extends ShipSystem{
     }
 */
 	
-    protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location=null)  {
+	
+	
+    protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location=null)  {
 	    /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
+	    /*$damageWasDealt=true indicates this is actual overkill, instead of just passing through previously destroyed system that nevertheless was chosen as target*/
         $okSystem = null;
 
 	if ($target instanceof FighterFlight){
             return null;
         }
 	    
-	if($this->noOverkill){  //weapon trait: no overkill
+	if($this->noOverkill && $damageWasDealt){  //weapon trait: no overkill (if this is true overkill only!)
 		return null;	
 	}
 
-        if ($this->damageType=='Flash'){// If overkill comes from flash damage, pick a new target in default way instead of overkill!
+        if ($this->damageType=='Flash'){// If overkill comes from flash damage, pick a new target in default way instead of typicaloverkill!
             $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
@@ -841,16 +844,23 @@ class Weapon extends ShipSystem{
             $okSystem = $target->getStructureSystem($system->location);
         }
 
-        if ($okSystem == null || $okSystem->isDestroyed())        { //overkill to PRIMARY Structure
-            $okSystem = $target->getStructureSystem(0);
-        }
+	    
+	if ($okSystem == null || $okSystem->isDestroyed())        { //overkill to PRIMARY Structure
+		if($this->damageType=='Piercing'){ //Piercing does not overkill to PRIMARY
+			return null;
+		}else{
+	    		$okSystem = $target->getStructureSystem(0);
+		}
+	}
+
 
         if ($okSystem == null || $okSystem->isDestroyed())        { //nowhere to overkill to
             return null;
         }
 
         return $okSystem;
-    }
+    }//endof function getOverkillSystem
+	
 
 	
 	/*collateral damage from a Flash explosion (if any), called from function damage*/
@@ -864,12 +874,12 @@ class Weapon extends ShipSystem{
                         if ($fighter == null || $fighter->isDestroyed()){
                             continue;
 			}
-                        $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $explosionPos, $gamedata);
+                        $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $explosionPos, $gamedata, false);
                     }
                 }else{
 		    $tmpLocation = $ship->getHitSectionPos($explosionPos, $fireOrder->turn);
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
-                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, $tmpLocation);
+                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, $tmpLocation, false);
                 }   
 	    }
     }
@@ -913,16 +923,16 @@ class Weapon extends ShipSystem{
 		}
 		//first part: facing structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
-        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, $facingLocation);
+        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, false, $facingLocation);
 		//second part: PRIMARY Structure
-		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, 0);
+		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
 		//last part: opposite Structure
-		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, $outLocation);
+		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
 	}else{ //standard mode of dealing damage
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
-        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
 	}
-    }
+    }//endof function damage
 
 	
     public function isInLaunchRange($shooter, $target, $fireOrder)
@@ -1009,10 +1019,13 @@ class Weapon extends ShipSystem{
 	
 
 	
-    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
+    protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
 	    /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
 	    /*otherwise best leave null BUT fill $location!*/
+	    /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
+	    
 	if(!$system->isDestroyed()){ //else system was already destroyed, proceed to overkill
+		$damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
 		$systemHealth = $system->getRemainingHealth();
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
 		$armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
@@ -1032,9 +1045,9 @@ class Weapon extends ShipSystem{
 	}
 	    
         if ($damage > 0){//overkilling!
-             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location);
+             $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
              if ($overkillSystem != null)
-                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $location);
+                $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
         }
 
     }
