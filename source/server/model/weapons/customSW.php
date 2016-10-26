@@ -196,6 +196,18 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
         $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
     }
     
+        public function isInDistanceRange($shooter, $target, $fireOrder)
+        {
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->getDistanceRange())
+            {
+                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
+                return false;
+            }
+            return true;
+        }
+	
     public function getDistanceRange(){
         return $this->missileArray[$this->firingMode]->range;
     }
