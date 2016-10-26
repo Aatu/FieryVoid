@@ -8,6 +8,7 @@ class Pulse extends Weapon{
         public $rof = 1;
         public $maxpulses = 6;
         public $priority = 5;
+	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
