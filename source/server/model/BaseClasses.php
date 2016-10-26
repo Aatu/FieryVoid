@@ -229,6 +229,7 @@ class FireOrder{
     public $pubnotes = "";
     public $updated = false;
     public $addToDB = false;
+    public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
     
     function __construct(
         $id,
