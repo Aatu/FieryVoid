@@ -96,7 +96,7 @@ class SWFighterIon extends LinkedWeapon{
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
  
-    public $damageType = "standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "SW Ion"; //weapon class - overrides $this->data["Weapon type"] if set!
 	  
     public $systemKiller = true;
@@ -136,9 +136,9 @@ class SWFighterIon extends LinkedWeapon{
 	
 	  
     
-    public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+    public function getDamage($fireOrder){        return Dice::d(4)+$this->damagebonus;   }
     public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+    public function setMaxDamage(){     $this->maxDamage = 4+$this->damagebonus - $this->dp;      }
 
 	
 	
