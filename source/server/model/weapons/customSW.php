@@ -154,7 +154,7 @@ class SWFighterIon extends LinkedWeapon{
     
 
 
-/* FighterTorpedoLauncher will be used instead
+
 class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo
 {
 	//proton torpedo launcher for fighters
@@ -203,11 +203,11 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
 	
 	
 } //end of SWFtrProtonTorpedoLauncher
-*/
 
 
 
-class SWFtrProtonTorpedo extends MissileFB //this is AMMO; use FighterTorpedoLauncher with appropriate name/icon/ammo changes for weapon
+
+class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedoLauncher
 {
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "FtrTorpedo";
