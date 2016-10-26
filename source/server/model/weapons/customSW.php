@@ -205,6 +205,7 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
                 $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
                 return false;
             }
+		$fireOrder->pubnotes .= " TORPEDO RANGE CHECK: Target in range!";
             return true;
         }
 	
