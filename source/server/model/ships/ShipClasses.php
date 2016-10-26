@@ -912,16 +912,16 @@
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
-				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
+				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure hits
 					$isSystemKiller = false; //don't do that again
 					$name = ''; //reset
 					$roll = Dice::d($rngTotal); //new location roll
 				}				
 			}else{
 				$roll++;
-				if($roll>$rngTotal)//out of range already!
+				if($roll>$rngTotal)//out of range already! return facing Structure... Should not happen.
 				{
-					return $this->getStructureSystem(0);
+					return $this->getStructureSystem($location);
 				}
 			}
 		}
@@ -970,7 +970,7 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
@@ -983,7 +983,7 @@
 		}
 		//add Structure
 		$system =  $this->getStructureSystem($location);
-		if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+		if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
 			if($location == 0){
 				$multiplier = 2; //PRIMARY has relatively low Structure, increase chance
 			}else{
@@ -994,14 +994,14 @@
 			$rngTotal = $rngTotal+$rngCurr;
 			$hitChart[$rngTotal] = $system->displayName;
 		} 
-		//is there anything to be hit? if not, just overkill to PRIMARY Structure...
+		//is there anything to be hit? if not, just return facing Structure...
 		if($rngTotal==0){
-			$struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
+			$struct = $this->getStructureSystem($location); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 			
-		//for non-Flash, add PRIMARY to hit table...
-		if(!$weapon->flashDamage){
+		//for non-Flash/Piercing, add PRIMARY to hit table...
+		if( ($weapon->damageType != 'Flash') && ($weapon->damageType != 'Piercing') ){
 			$multiplier = 0.1; //10% chance for PRIMARY penetration
 			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
 			$rngCurr =  ceil($rngTotal * $multiplier);
@@ -1034,9 +1034,8 @@
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, overkill to Structure
+		if(sizeof($systems)==0){ //if empty, just return Structure
 			$struct = $this->getStructureSystem($location);
-			if($struct->isDestroyed()) $struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 		
