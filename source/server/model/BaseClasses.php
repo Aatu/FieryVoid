@@ -230,6 +230,7 @@ class FireOrder{
     public $updated = false;
     public $addToDB = false;
     public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
+    public $linkedHit = null; //convenient place to store info about system hit by linked weapons
     
     function __construct(
         $id,
