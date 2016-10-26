@@ -4,10 +4,13 @@
     
         public $ballistic = true;
 
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+        
+        
         public function isInDistanceRange($shooter, $target, $fireOrder)
         {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -21,15 +24,16 @@
 
             return true;
         }
-
+       
+        
         public function setSystemDataWindow($turn){
-        $this->data["Weapon type"] = "Ballistic";
+            $this->data["Weapon type"] = "Ballistic";
+            parent::setSystemDataWindow($turn);
+        }
 
-        parent::setSystemDataWindow($turn);
-    }
+    } //endof class Torpedo
 
 
-    }
     
     class IonTorpedo extends Torpedo{
     
@@ -57,7 +61,9 @@
         public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
     
-    }
+    }//endof class IonTorpedo
+
+
     
     class BallisticTorpedo extends Torpedo{
     
@@ -140,7 +146,7 @@
         public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
     
-    }
+    } //endof class BallisticTorpedo
 
 
 
