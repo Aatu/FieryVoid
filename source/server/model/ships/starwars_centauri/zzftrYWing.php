@@ -43,7 +43,6 @@ class zzftrywing extends FighterFlight{
             $fighter->addFrontSystem($roundGun);
             
             //2 forward Proton Torpedo Launchers, 4 shots each
-            //due to display issues, can't have more than 3 weapon systems... will increase $shots of launcher instead
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
