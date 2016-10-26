@@ -122,6 +122,9 @@ class ShipSystem{
         }
     }
     
+	
+	
+/*
     public function getArmour($target, $shooter, $dmgClass){
         $armour = $this->armour;
         $activeAA = 0;
@@ -143,6 +146,27 @@ class ShipSystem{
     public function getArmourPos($gamedata, $pos){
         return $this->armour;
     }
+    */
+	
+        public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
+		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
+		return $armour;
+        }
+		
+		
+    public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
+	return $this->armour;
+    }
+	
+    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
+	$activeAA = 0;
+	if (isset($target->adaptiveArmour)){
+            if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
+        } 
+	return $activeAA;
+    }
+	
+	
     
     public function setSystemDataWindow($turn){
         $counts = array();
