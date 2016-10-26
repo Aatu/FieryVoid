@@ -34,7 +34,7 @@ class zzftrywing extends FighterFlight{
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
             $fighter->displayName = "Y-Wing Technology Demonstrator";
             $fighter->imagePath = "img/starwars/yWing.png";
-            $fighter->iconPath = "img/starwars/yWing_large.png";
+            $fighter->iconPath = "img/starwars/yWingWide_large.png"; //need room for 4th weapon!
             
             $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
@@ -43,13 +43,10 @@ class zzftrywing extends FighterFlight{
             $fighter->addFrontSystem($roundGun);
             
             //2 forward Proton Torpedo Launchers, 4 shots each
-            //due to display issues, can't have more than 3 weapon systems... will increase $shots of launcher instead
-            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(8, 330, 30);
-            $fighter->addFrontSystem($torpedoLauncher);
-            /*
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
-            */
+            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
+            $fighter->addFrontSystem($torpedoLauncher);
             
             
             

@@ -205,6 +205,7 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
                 $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
                 return false;
             }
+		$fireOrder->pubnotes .= " TORPEDO RANGE CHECK: Target in range!";
             return true;
         }
 	
@@ -230,7 +231,6 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $range = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
-	public $shots = 2; //will fire 2 torpedoes per shot... to compensate for the fact that fighter can't have more than 3 weapons! (display issues)
     
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);
