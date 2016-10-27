@@ -830,6 +830,7 @@ class Weapon extends ShipSystem{
 				$needed = 100;
 			}
 		}else{ //standard - find hit and interception
+			$fireOrder->linkedHit=null;
 			$rolled = Dice::d(100);
 			    if ($rolled > $needed && $rolled <= $needed+($intercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
 				    if($this->damageType == 'Pulse'){
