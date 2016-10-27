@@ -644,6 +644,7 @@ class Weapon extends ShipSystem{
 
 	if ($fireOrder->calledid != -1){
             $mod += $this->getCalledShotMod();
+		if($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
         }
 
         if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
