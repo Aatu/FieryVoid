@@ -19,8 +19,8 @@ class PlasmaStream extends Raking{
         public $rangePenalty = 1;
         public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
 	
-    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -51,8 +51,8 @@ class PlasmaStream extends Raking{
 		
 		
 		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
-		public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-		public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+		public function setMinDamage(){     $this->minDamage = 7 ;/*- $this->dp;*/      }
+		public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
 }//endof class PlasmaStream
 
 
@@ -76,12 +76,15 @@ class ShockCannon extends Weapon{
         public $rangePenalty = 1;
         public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals
 
+		public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Electromagnetic";
+            //$this->data["Weapon type"] = "Electromagnetic";
             parent::setSystemDataWindow($turn);
         }
 
@@ -110,8 +113,8 @@ class ShockCannon extends Weapon{
 	}
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 /*- $this->dp*/;      }
 }//endof class ShockCannon
 
 
@@ -136,13 +139,15 @@ class BurstBeam extends Weapon{
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
 
+		    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
        
 		public function setSystemDataWindow($turn){
-			$this->data["Weapon type"] = "Electromagnetic";
+			//$this->data["Weapon type"] = "Electromagnetic";
 	
 			parent::setSystemDataWindow($turn);
 		}
@@ -269,6 +274,9 @@ class BurstPulseCannon extends Pulse {
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 3, 40); // fighters, <=mediums, <=capitals 
 
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -387,6 +395,7 @@ class BurstPulseCannon extends Pulse {
         }
     }
 
+
     class ElectroPulseGun extends Weapon{
 
         public $name = "electroPulseGun";
@@ -405,13 +414,15 @@ class BurstPulseCannon extends Pulse {
         public $rangePenalty = 3;
         public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
 
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Electromagnetic";
+            //$this->data["Weapon type"] = "Electromagnetic";
 
             parent::setSystemDataWindow($turn);
         }
