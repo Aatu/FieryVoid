@@ -378,13 +378,12 @@
         public $boostable = true;
         public $boostEfficiency = 1;
         public $priority = 5;
-        public $grouping = 
 
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
         
         private $hitChanceMod = 0;
-
+        private $previousHit = true;
         
        
         
@@ -440,27 +439,30 @@
 //            
 //            parent::getIntercept($gamedata, $fireOrder);
 //        }
-
-        /* old version - full redefine
-        public function fire($gamedata, $fireOrder){
+        
+        
+        public function fire($gamedata, $fireOrder){ //new, minimalistic redefinition, relying on  getShotHitChanceMod()
+            $this->hitChanceMod = 0;
+            $this->setTimes();
+            $fireOrder->shots = $this->getMaxShots($gamedata->turn);
+            parent::fire($gamedata, $fireOrder);
+        }
+        
+        /*old version - full redefine of fire()
+        public function fire($gamedata, $fireOrder){ 
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $target = $gamedata->getShipById($fireOrder->targetid);
+            $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+            
             $this->setTimes();
             $fireOrder->shots = $this->getMaxShots($gamedata->turn);
 
-            $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            $this->firingMode = $fireOrder->firingMode;
             $pos = $shooter->getCoPos();
 
             for ($i=0;$i<$fireOrder->shots;$i++){
                 $this->setHitChanceMod($i+1);
                 $this->calculateHit($gamedata, $fireOrder);
                 $intercept = $this->getIntercept($gamedata, $fireOrder);
-                // Check if weapon is in distance range.
-                if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
-                {
-                    // Target is not in distance range. Move to next shot.
-                    continue;
-                }
 
                 $needed = $fireOrder->needed - ($this->grouping*$i);
                 $rolled = Dice::d(100);
@@ -484,6 +486,7 @@
         */
         
         
+        /*
         protected function setHitChanceMod($shotNumber){
             switch($shotNumber){
                 case 1:
@@ -497,6 +500,31 @@
                     break;
             }
         }
+        */
+        
+        
+        
+        
+        /*if previous shot missed, next one misses automatically*/
+        /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
+        public function getShotHitChanceMod($shotInSequence){ 
+            $prevExpectedChance = $this->getPrevShotHitChanceMod($shotInSequence-1);
+            if($prevExpectedChance ne $this->hitChanceMod){ //something missed in between
+                $this->hitChanceMod = 10000; //clear miss!!!
+            }else{
+                $this->hitChanceMod = $this->getPrevShotHitChanceMod($shotInSequence);
+            }
+            return $this->hitChanceMod;
+        }
+        
+        public function getPrevShotHitChanceMod($shotInSequence){ //just finds hit chance for a given shot - what it should be
+            if($shotInSequence <=0) return 0;
+            if($shotInSequence ==1) return 5;
+            $mod= 5+10*($shotInSequence-2);
+            return $mod;
+        }
+    
+        
         
         protected function getWeaponHitChanceMod($turn){
             return $this->hitChanceMod;
