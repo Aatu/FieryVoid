@@ -522,7 +522,7 @@ class QuadPulsar extends Pulse{
 
 
 
-    class PointPulsar extends Weapon //this is NOT a Pulse weapon
+    class PointPulsar extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
     {
         public $name = "pointPulsar";
         public $displayName = "Point Pulsar";
@@ -535,15 +535,18 @@ class QuadPulsar extends Pulse{
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
         //public $rof = 2;
-	    public $guns = 4;
+	    public $guns = 3; //always 3, completely separate (not Pulse!) shots
         public $maxpulses = 3;
         public $grouping = 0;
         public $loadingtime = 2;
         public $normalload = 2;
+	    
         public $priority = 2; //due to sniping bonus
         
         public $calledShotMod = -4; //instead of usual -8
-        public $intercept = 3;
+	    
+        public $intercept = 2; //should be 3, but then intercept should be like a Pulse weapon - just once... call this a compromise!
+	    
         public $rangePenalty = 0.5;
         public $fireControl = array(-4, 3, 5); // fighters, <mediums, <capitals
 	    
