@@ -96,7 +96,7 @@
             if ($target instanceof FighterFlight){
 			$this->fighterDamage($target, $shooter, $fireOrder, $pos, $amount, $gamedata);
 	    } else {
-                if ($target instanceof StarBase || $target instanceof OSAT){
+                if (/*$target instanceof StarBase*/$target->base || $target instanceof OSAT){
                     $amount = floor($amount/2);
                 }
 
