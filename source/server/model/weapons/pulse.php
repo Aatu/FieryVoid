@@ -41,6 +41,13 @@ class Pulse extends Weapon{
         {
             return floor(($needed - $rolled) / ($this->grouping));
         }
+	
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
 
         public function fire($gamedata, $fireOrder){
 
