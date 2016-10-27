@@ -797,6 +797,12 @@ class Weapon extends ShipSystem{
         return $count;
     }
 
+	/*some weapons have different hit chance for further shots*/
+	/*default - use grouping*/
+    public function getShotHitChanceMod($shotInSequence){
+	    $mod = $this->grouping * $shotInSequence;
+	    return $mod;
+    }
 	
 	
     public function fire($gamedata, $fireOrder){
@@ -817,7 +823,7 @@ class Weapon extends ShipSystem{
 
         for ($i=0;$i<$fireOrder->shots;$i++){
 		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
-            		$needed = $fireOrder->needed - ($this->grouping*$i);
+            		$needed = $fireOrder->needed - getShotHitChanceMod($i);
 		}
             
 		//for linked shot: further shots will do the same as first!
