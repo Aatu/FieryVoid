@@ -3,13 +3,16 @@
 	class Plasma extends Weapon{
 
         public $priority = 6;
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
-	protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-		$armour = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
+		
+	protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+		$armour = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos);
 		    if (is_numeric($armour)){
 			$toIgnore = ceil($armour /2);
 			$new = $armour - $toIgnore;
@@ -19,15 +22,13 @@
 			return 0;
 		    }
         }
-
-
     	
 		public function setSystemDataWindow($turn){
-			$this->data["Weapon type"] = "Plasma";
-            		$this->data["Damage type"] = "Standard";
-            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			
+			//$this->data["Weapon type"] = "Plasma";
+            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
+            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
 		}
 		
 		public function setSystemData($data, $subsystem){
@@ -37,6 +38,8 @@
 		}
 		
 	}
+
+
 
     class PlasmaAccelerator extends Plasma{
 
@@ -66,7 +69,7 @@
 
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
-                case 0:
+                case 0: 
                 case 1:
                     return Dice::d(10)+4;
                 case 2:
@@ -81,59 +84,39 @@
             switch($this->turnsloaded){
                 case 0:
                 case 1:
-                    $this->minDamage = 5 - $this->dp;
+                    $this->minDamage = 5 /* - $this->dp*/;
                     $this->animationExplosionScale = 0.15;
                     break;
                 case 2:
                     $this->animationExplosionScale = 0.25;
-                    $this->minDamage = 10 - $this->dp;  
+                    $this->minDamage = 10 /*- $this->dp*/;  
                     break;
                 case 3:
                 default:
                     $this->animationExplosionScale = 0.35;
-                    $this->minDamage = 16 - $this->dp;  
+                    $this->minDamage = 16 /*- $this->dp*/;  
                     break;
             }
-
-/*            if ($this->turnsloaded == 1){
-				$this->minDamage = 5 - $this->dp;
-				$this->animationExplosionScale = 0.15;
-			}else if ($this->turnsloaded == 2){
-				$this->animationExplosionScale = 0.25;
-				$this->minDamage = 10 - $this->dp;  
-			}else if ($this->turnsloaded == 3){
-				$this->animationExplosionScale = 0.35;
-				$this->minDamage = 20 - $this->dp;  
-			}else{
-				$this->minDamage = 5 - $this->dp;   
-			}*/
-		}
+	}
                 
         public function setMaxDamage(){
             switch($this->turnsloaded){
                 case 0:
                 case 1:
-                    $this->maxDamage = 14 - $this->dp;
+                    $this->maxDamage = 14 /*- $this->dp*/;
                     break;
                 case 2:
-                    $this->maxDamage = 28 - $this->dp;  
+                    $this->maxDamage = 28 /*- $this->dp*/;  
                     break;
                 case 3:
                 default:
-                    $this->maxDamage = 52 - $this->dp;  
+                    $this->maxDamage = 52 /*- $this->dp*/;  
                     break;
             }
-/*			if ($this->turnsloaded == 1)
-				$this->maxDamage = 14 - $this->dp ;  
-			else if ($this->turnsloaded == 2)
-				$this->maxDamage = 28 - $this->dp; 
-			else if ($this->turnsloaded == 3)
-				$this->maxDamage = 47 - $this->dp; 		    
-			else
-				$this->maxDamage = 47 - $this->dp;
-*/		}
-
 	}
+
+}//endof class PlasmaAccelerator
+
 
 	
 class MagGun extends Plasma{
@@ -160,10 +143,17 @@ class MagGun extends Plasma{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
+		public function setSystemDataWindow($turn){
+			//$this->data["Weapon type"] = "Plasma";
+            		//$this->data["Damage type"] = "Standard";
+			parent::setSystemDataWindow($turn);
+			$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
+		}
+	
 		
 	public function getDamage($fireOrder){        return Dice::d(10,6)+20;   }
-        public function setMinDamage(){     $this->minDamage = 26 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 80 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 26 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 80 /*- $this->dp*/;      }
 }
 	
 	
@@ -192,8 +182,8 @@ class HeavyPlasma extends Plasma{
 		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,4)+8;   }
-        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 48 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 12 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 48 /*- $this->dp*/;      }
 
 }
     
@@ -223,8 +213,8 @@ class MediumPlasma extends Plasma{
 		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
-        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 7 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
 
 }
 
@@ -255,8 +245,8 @@ class LightPlasma extends Plasma{
 		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 /*- $this->dp*/;      }
 
 }
 
@@ -290,9 +280,18 @@ class PlasmaTorch extends Plasma{
         public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
         public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
 
+		public function setSystemDataWindow($turn){
+			//$this->data["Weapon type"] = "Plasma";
+            		//$this->data["Damage type"] = "Standard";
+			parent::setSystemDataWindow($turn);
+			$this->data["<font color='red'>Remark</font>"] .= "<br>If fired, Plasma Torch may overheat.";
+		}
+	
         public function fire($gamedata, $fireOrder){
             // If fired, a Plasma Torch might overheat and go in shutdown for 2 turns.
             // Make a crit roll taking into account any damage already sustained.
+            parent::fire($gamedata, $fireOrder);
+		
             $roll = Dice::d(20) + $this->getTotalDamage();
             
             if($roll >= 16){
@@ -304,15 +303,13 @@ class PlasmaTorch extends Plasma{
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
             }
-            
-            parent::fire($gamedata, $fireOrder);
+		
         }
     }
 
 
 
 class PairedPlasmaBlaster extends LinkedWeapon{
-
         public $name = "pairedPlasmaBlaster";
         public $displayName = "Paired Plasma Blaster";
         public $animation = "trail";
@@ -333,7 +330,8 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 1;
 
-
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
@@ -343,8 +341,8 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         }
 
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
+        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
@@ -358,18 +356,20 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         
     
         public function setSystemDataWindow($turn){
-
+/*
             $this->data["Weapon type"] = "Plasma";
             $this->data["Damage type"] = "Standard";
             $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
-            
+  */          
             parent::setSystemDataWindow($turn);
+            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
         }
 
 
         public function getDamage($fireOrder){        return Dice::d(3)+2;   }
-        public function setMinDamage(){     $this->minDamage = 3 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 5 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
 
     }
 
@@ -400,33 +400,10 @@ class PlasmaGun extends Plasma{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }   
 
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Plasma";
-            $this->data["Damage type"] = "Standard";
-            
-            parent::setSystemDataWindow($turn);
-            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
-        }
-
-
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
-
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
-        }
-        
         
         public function getDamage($fireOrder){        return Dice::d(3)+6;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 9 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 
     }
 
