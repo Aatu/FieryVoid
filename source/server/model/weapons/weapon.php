@@ -41,8 +41,9 @@ class Weapon extends ShipSystem{
 	public $rangePenaltyArray = array();
     public $rangeDamagePenalty = 0;
 	public $rangeDamagePenaltyArray = array();
-    public $dp = 0; //damage penalty - number of crits !
-	public $rp = 0; //range penalty - number of crits !
+    private $dp = 0; //damage penalty - fraction of shot that gets wasted!
+	private $dpArray = array(); //array of damage penalties for all modes! - filled automatically
+	private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
 	public $rangeArray = array();
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
@@ -172,9 +173,12 @@ class Weapon extends ShipSystem{
 	    $dp = $this->dp;
 	//min/max damage arrays are created automatically, so they will always be present
 	if($dp>0){
-		foreach($this->minDamageArray as $dmgMode=>$dmgValue){
-			$this->minDamageArray[$dmgMode] = round($this->minDamage[$dmgMode]*(1-0.1*$this->dp));
-			$this->maxDamageArray[$dmgMode] = round($this->maxDamage[$dmgMode]*(1-0.1*$this->dp));
+		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a percentage, however! - low rolls should be affected lefss than high ones, after all
+		foreach($this->firingModes as $dmgMode){
+			$mod = max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) ) );
+			$this->dpArray[$dmgMode] = $mod/(($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2);//convert to fraction -  of average result ;)
+			$this->minDamageArray[$dmgMode] = $this->minDamage[$dmgMode]-$this->minDamage[$dmgMode]*$this->dpArray[$dmgMode];
+			$this->maxDamageArray[$dmgMode] = $this->maxDamage[$dmgMode]-$this->maxDamage[$dmgMode]$this->dpArray[$dmgMode];
 		}
 	}
 		
@@ -185,7 +189,7 @@ class Weapon extends ShipSystem{
 		}else{
 			$this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
 		}
-		foreach($this->rangePenaltyArray As $dmgMode=>$penalty){
+		foreach($this->rangePenaltyArray As $dmgMode=>$penaltyV){
 			if($this->rangePenaltyArray[$dmgMode]>=1){
 				$this->rangePenaltyArray[$dmgMode] += 1;
 			}else{
@@ -1072,7 +1076,8 @@ class Weapon extends ShipSystem{
 
 	/*returns modified damage, NOT damage modifier*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata){
-        $damage = $damage * (1-0.1*$this->dp); //$dp now holds number of damage criticals
+        $damage = $damage - $damage*$this->dp; //$dp is fraction of shot that gets wasted!
+	    
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
             $dis = mathlib::getDistanceHex($pos, $targetPos);
@@ -1157,39 +1162,40 @@ class Weapon extends ShipSystem{
 		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
 		$this->firingMode = $newMode;
 		$i = $newMode;
-		if(isset($priorityArray[$i])) $this->priority = $priorityArray[$i];
+		if(isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
 		
-		if(isset($animationArray[$i])) $this->animation = $animarionArray[$i];
-		if(isset($animationImgArray[$i])) $this->animationImg = $animationImgArray[$i];
-		if(isset($animationImgSpriteArray[$i])) $this->animationImgSprite = $animationImgSpriteArray[$i];
-		if(isset($animationColorArray[$i])) $this->animationColor = $animationColorArray[$i];
-		if(isset($animationColor2Array[$i])) $this->animationColor2 = $animationColor2Array[$i];
-		if(isset($animationWidthArray[$i])) $this->animationWidth = $animationWidthArray[$i];
-		if(isset($animationExplosionScaleArray[$i])) $this->animationExplosionScale = $animationExplosionScaleArray[$i];
-		if(isset($animationExplosionTypeArray[$i])) $this->animationExplosionType = $animationExplosionTypeArray[$i];
-		if(isset($explosionColorArray[$i])) $this->explosionColor = $explosionColorArray[$i];
-		if(isset($trailLengthArray[$i])) $this->trailLength = $trailLengthArray[$i];
-		if(isset($trailColorArray[$i])) $this->trailColor = $trailColorArray[$i];
-		if(isset($projectilespeedArray[$i])) $this->projectilespeed = $projectilespeedArray[$i];
+		if(isset($this->animationArray[$i])) $this->animation = $this->animarionArray[$i];
+		if(isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
+		if(isset($this->animationImgSpriteArray[$i])) $this->animationImgSprite = $this->animationImgSpriteArray[$i];
+		if(isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
+		if(isset($this->animationColor2Array[$i])) $this->animationColor2 = $this->animationColor2Array[$i];
+		if(isset($this->animationWidthArray[$i])) $this->animationWidth = $this->animationWidthArray[$i];
+		if(isset($this->animationExplosionScaleArray[$i])) $this->animationExplosionScale = $this->animationExplosionScaleArray[$i];
+		if(isset($this->animationExplosionTypeArray[$i])) $this->animationExplosionType = $this->animationExplosionTypeArray[$i];
+		if(isset($this->explosionColorArray[$i])) $this->explosionColor = $this->explosionColorArray[$i];
+		if(isset($this->trailLengthArray[$i])) $this->trailLength = $this->trailLengthArray[$i];
+		if(isset($this->trailColorArray[$i])) $this->trailColor = $this->trailColorArray[$i];
+		if(isset($this->projectilespeedArray[$i])) $this->projectilespeed = $this->projectilespeedArray[$i];
 		
-		if(isset($rangePenaltyArray[$i])) $this->rangePenalty = $rangePenaltyArray[$i];
-		if(isset($rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $rangeDamagePenaltyArray[$i];
-		if(isset($rangeArray[$i])) $this->range = $rangeArray[$i];
-		if(isset($fireControlArray[$i])) $this->fireControl = $fireControlArray[$i];
-		if(isset($loadingtimeArray[$i])) $this->loadingtime = $loadingtimeArray[$i];
-		if(isset($turnsloadedArray[$i])) $this->turnsloaded = $turnsloadedArray[$i];
-		if(isset($uninterceptableArray[$i])) $this->uninterceptable = $uninterceptableArray[$i];
-		if(isset($shotsArray[$i])) $this->shots = $shotsArray[$i];
-		if(isset($defaultShotsArray[$i])) $this->defaultShots = $defaultShotsArray[$i];
-		if(isset($groupingArray[$i])) $this->grouping = $groupingArray[$i];
-		if(isset($gunsArray[$i])) $this->guns = $gunsArray[$i];
+		if(isset($this->rangePenaltyArray[$i])) $this->rangePenalty = $this->rangePenaltyArray[$i];
+		if(isset($this->rangeDamagePenaltyArray[$i])) $this->rangeDamagePenalty = $this->rangeDamagePenaltyArray[$i];
+		if(isset($this->rangeArray[$i])) $this->range = $this->rangeArray[$i];
+		if(isset($this->fireControlArray[$i])) $this->fireControl = $this->fireControlArray[$i];
+		if(isset($this->loadingtimeArray[$i])) $this->loadingtime = $this->loadingtimeArray[$i];
+		if(isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];
+		if(isset($this->uninterceptableArray[$i])) $this->uninterceptable = $this->uninterceptableArray[$i];
+		if(isset($this->shotsArray[$i])) $this->shots = $this->shotsArray[$i];
+		if(isset($this->defaultShotsArray[$i])) $this->defaultShots = $this->defaultShotsArray[$i];
+		if(isset($this->groupingArray[$i])) $this->grouping = $this->groupingArray[$i];
+		if(isset($this->gunsArray[$i])) $this->guns = $this->gunsArray[$i];
 		
-		if(isset($damageTypeArray[$i])) $this->damageType = $damageTypeArray[$i];
-		if(isset($weaponClassArray[$i])) $this->weaponClass = $weaponClassArray[$i];
-		if(isset($minDamageArray[$i])) $this->minDamage = $minDamageArray[$i];
-		if(isset($maxDamageArray[$i])) $this->maxDamage = $maxDamageArray[$i];
+		if(isset($this->damageTypeArray[$i])) $this->damageType = $this->damageTypeArray[$i];
+		if(isset($this->weaponClassArray[$i])) $this->weaponClass = $this->weaponClassArray[$i];
+		if(isset($this->minDamageArray[$i])) $this->minDamage = $this->minDamageArray[$i];
+		if(isset($this->maxDamageArray[$i])) $this->maxDamage = $this->maxDamageArray[$i];
+		if(isset($this->dpArray[$i])) $this->dp = $this->dpArray[$i];
 		
-	}
+	}//endof function changeFiringMode
 	
 	
 	
