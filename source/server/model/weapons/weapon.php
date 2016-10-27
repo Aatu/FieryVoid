@@ -844,8 +844,9 @@ class Weapon extends ShipSystem{
 		$hitsRemaining=1;
 		    
 		if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
-	            $hitsRemaining = $this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
-		    $hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+	            $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+		    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
+		    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
 		}
 		    
 		while($hitsRemaining>0){
