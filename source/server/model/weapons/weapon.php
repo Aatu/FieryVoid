@@ -41,7 +41,8 @@ class Weapon extends ShipSystem{
 	public $rangePenaltyArray = array();
     public $rangeDamagePenalty = 0;
 	public $rangeDamagePenaltyArray = array();
-    public $dp = 0; //damage penalty per dice
+    public $dp = 0; //damage penalty - number of crits !
+	public $rp = 0; //range penalty - number of crits !
     public $range = 0;
 	public $rangeArray = array();
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
@@ -93,9 +94,9 @@ class Weapon extends ShipSystem{
 
     public $firingMode = 1;
     public $firingModes = array( 1 => "Standard"); //just a convenient name for firing mode
-    public $damageType = ""; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $damageTypeArray = array();
-    public $weaponClass = ""; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    public $weaponClass = ""; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 	public $weaponClassArray = array();
 
 	//damage type-related variables
@@ -124,9 +125,6 @@ class Weapon extends ShipSystem{
         $this->startArc = (int)$startArc;
         $this->endArc = (int)$endArc;
 	    
-	if($this->damageType != '') {$this->data["Damage type"] = $this->damageType;}elseif(isset($this->data["Damage type"])){$this->damageType = $this->data["Damage type"];}
-	if($this->weaponClass != '') {$this->data["Weapon type"] = $this->weaponClass;}elseif(isset($this->data["Weapon type"])){$this->weaponClass = $this->data["Weapon type"];}
-
 	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
 	    for($i = 1; $i <= count($this->firingModes); $i++){
 		$this->changeFiringMode($i);
@@ -162,8 +160,45 @@ class Weapon extends ShipSystem{
 
 
     public function effectCriticals(){
+	    $this->dp=0;
+	    $this->rp=0;
         parent::effectCriticals();
+	        
         foreach ($this->criticals as $crit){
+		if ($crit instanceof ReducedRange) $this->rp++;
+		if ($crit instanceof ReducedDamage) $this->dp++;
+	}
+	    $rp = $this->rp;
+	    $dp = $this->dp;
+	//min/max damage arrays are created automatically, so they will always be present
+	if($dp>0){
+		foreach($this->minDamageArray as $dmgMode=>$dmgValue){
+			$this->minDamageArray[$dmgMode] = round($this->minDamage[$dmgMode]*(1-0.1*$this->dp));
+			$this->maxDamageArray[$dmgMode] = round($this->maxDamage[$dmgMode]*(1-0.1*$this->dp));
+		}
+	}
+		
+	//range doesn't have to be an array, but may be
+	while($rp>0){
+		if($this->rangePenalty>=1){
+			$this->rangePenalty += 1;
+		}else{
+			$this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
+		}
+		foreach($this->rangePenaltyArray As $dmgMode=>$penalty){
+			if($this->rangePenaltyArray[$dmgMode]>=1){
+				$this->rangePenaltyArray[$dmgMode] += 1;
+			}else{
+				$this->rangePenaltyArray[$dmgMode] = 1/(round(1/$this->rangePenaltyArray[$dmgMode])-1);
+			}
+		}
+		$rp--;
+	}
+	    
+	//make sure data from table is transferred to current variables
+	$this->changeFiringMode($this->firingMode);
+		
+		/*original code
             if ($crit instanceof ReducedRange){
 
                 if ($this->rangePenalty != 0){
@@ -182,16 +217,15 @@ class Weapon extends ShipSystem{
             }
 
             if ($crit instanceof ReducedDamage){
-                $min = $this->minDamage * 0.25;
-                $max = $this->maxDamage * 0.25;
+                $min = $this->minDamage * 0.2;
+                $max = $this->maxDamage * 0.2;
                 $avg = round(($min+$max)/2);
                 $this->dp = $avg;
             }
         }
-
-
         $this->setMinDamage();
         $this->setMaxDamage();
+*/	
 
     }
 
@@ -267,6 +301,9 @@ class Weapon extends ShipSystem{
         if ($this->intercept > 0){
             $this->data["Intercept"] = "-".$this->intercept*5;
         }
+
+	if($this->damageType != '') $this->data["Damage type"] = $this->damageType;
+	if($this->weaponClass != '') $this->data["Weapon type"] = $this->weaponClass;
 
 
         $misc = array();
@@ -1033,24 +1070,21 @@ class Weapon extends ShipSystem{
 	
 	
 
+	/*returns modified damage, NOT damage modifier*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata){
+        $damage = $damage * (1-0.1*$this->dp); //$dp now holds number of damage criticals
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
-            $dis = round(mathlib::getDistanceHex($pos, $targetPos));
-            //print ("damage: $damage dis: $dis damagepen: " . $this->rangeDamagePenalty);
+            $dis = mathlib::getDistanceHex($pos, $targetPos);
             $damage -= ($dis * $this->rangeDamagePenalty);
-            //print ("damage: $damage \n\n");
-            if ($damage < 0)
-                return 0;
         }
-
-        $damage -= $this->dp;
 	    
 	//for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
-	if(($this->damageType=='Piercing')&&($target->shipSizeClass<2)) $damage = ceil($damage*0.9);
+	if(($this->damageType=='Piercing')&&($target->shipSizeClass<2)) $damage = $damage*0.9;
 	    
         if ($damage < 0) $damage = 0;
-
+	    
+	$damage = floor($damage);
         return $damage;
     } //endof function getDamageMod
 	
