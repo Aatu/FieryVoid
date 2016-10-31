@@ -729,7 +729,7 @@ class Weapon extends ShipSystem{
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
-    }
+    } //endof calculateHit
 
 	
     public function getIntercept($gamedata, $fireOrder){
@@ -995,12 +995,12 @@ class Weapon extends ShipSystem{
 		//find how big damage is done - split to 3 equal parts; if can't be equal, bigger portions will go to PRIMARY and facing parts
 		if($outLocation == $facingLocation){ //shot enters and exits through the same section - narrow point - split into 2 parts only!
 			$damageOut = 0;
-			$damagePRIMARY = ceil($damage/2);
-			$damageEntry = floor($damage/2);
-		}else{ //standard split to 3 parts
-			$damageOut = floor($damage/3);
-			$damagePRIMARY = ceil($damage/3);
-			$damageEntry = $damage - $damageOut -$damagePRIMARY;
+			$damagePRIMARY = floor($damage/2);
+			$damageEntry = ceil($damage/2);
+		}else{ //standard split to 3 parts; defender allocates, so protecting Primary
+			$damageEntry = ceil($damage/3);
+			$damagePRIMARY = floor($damage/3);
+			$damageOut = $damage - $damageOut -$damagePRIMARY;
 		}
 		//first part: facing structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
