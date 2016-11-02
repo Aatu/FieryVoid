@@ -28,10 +28,10 @@ class LiberatorEscort extends MediumShip{
 	$this->pivotcost = 1;
 	$this->iniativebonus = 14 *5;
   
-	$this->addFrontSystem(new Thruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
-	$this->addAftSystem(new Thruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
-	$this->addAftSystem(new Thruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
-	$this->addAftSystem(new Thruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
+	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
+	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
   
 	$this->addPrimarySystem(new Reactor(4, 9, 0, 0));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
