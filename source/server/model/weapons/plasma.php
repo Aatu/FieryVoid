@@ -147,7 +147,7 @@ class MagGun extends Plasma{
 			//$this->data["Weapon type"] = "Plasma";
             		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-			$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
+			//$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
 		}
 	
 		
