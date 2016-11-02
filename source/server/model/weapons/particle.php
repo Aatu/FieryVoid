@@ -524,19 +524,21 @@
             return $mod;
         }
     
-        
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-            //if target is fighter flight, ensure that the same fighter is hit every time!
-            if($target instanceof FighterFlight
-            
-            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-        }
-        
+                
         
         protected function getWeaponHitChanceMod($turn){
             return $this->hitChanceMod;
         }
 
+        
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
+            //if target is fighter flight, ensure that the same fighter is hit every time!
+            if($target instanceof FighterFlight){
+                $fireOrder->linkedHit = $system;
+            }            
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }
+        
         
         protected function getBoostLevel($turn){
             $boostLevel = 0;
