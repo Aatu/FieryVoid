@@ -622,6 +622,10 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
@@ -673,16 +677,15 @@
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals
 
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        public $noOverkill = true; // The damage of a solar cannon does not overkill.
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location = null){
-            // The damage of a solar cannon does not overkill.
-            return null;
-        }
-
+        
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
 
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location);
