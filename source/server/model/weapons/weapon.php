@@ -962,7 +962,7 @@ class Weapon extends ShipSystem{
                 }else{
 		    $tmpLocation = $ship->getHitSectionPos($explosionPos, $fireOrder->turn);
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
-                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, $tmpLocation, false);
+                    $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
                 }   
 	    }
     }
