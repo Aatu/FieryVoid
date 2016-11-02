@@ -170,7 +170,7 @@
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-            if(!$this->alreadyReduced){ //assume that for Piercing mode, facing structue will be first
+            if(!$this->alreadyReduced){ 
                 $struct = $target->getStructureSystem($location);
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //in case of Piercing shot, do this only for first part of shot that actually connects
@@ -275,6 +275,7 @@
         
         public $rangePenalty = 0.33;
         public $fireControl = array(null, 0, 4); // fighters, <mediums, <capitals
+        private $alreadyFlayed
 
         public function setSystemDataWindow($turn){
 
@@ -480,7 +481,6 @@
         
         
     class LightMolecularDisruptor extends Raking{
-        
         public $name = "molecularDisruptor";
         public $displayName = "Light Molecular Distruptor";
         public $animation = "trail";
@@ -499,28 +499,25 @@
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
 
+        public $damageType = "Raking"; 
+        public $weaponClass = "Molecular"; 
+        private $alreadyReduced = false;
+        
         function __construct($startArc, $endArc, $damagebonus){
-            
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Molecular";
-            $this->data["Damage type"] = "Raking";
-            
+        public function setSystemDataWindow($turn){      
             parent::setSystemDataWindow($turn);
+            $this->data["Special"] = 'Reduces armor on facing Structure if at least 3 fighters hit';
         }
 
+        /* no longer needed, moved to doDamage instead
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage){
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage);
 
-            if(LightMolecularDisrupterHandler::doArmorReduction($target, $shooter)){
-
-                if ( $target instanceof FighterFlight || $target instanceof SuperHeavyFighter)
-                {
-                    return;
-                }
+            if(LightMolecularDisrupterHandler::doArmorReduction($target, $shooter)){ //static counting!
+                if ( $target instanceof FighterFlight ) return;
                 
                 $location = $target->getHitSection($shooter, $fireOrder->turn);
                 $structTarget = $target->getStructureSystem($location);//this takes care of details like MCV, too
@@ -534,6 +531,7 @@
                 }
             }
         }
+        */
 
         public function getDamage($fireOrder){        return Dice::d(2, 10)+15;   }
         public function setMinDamage(){   return  $this->minDamage = 17 - $this->dp;      }
