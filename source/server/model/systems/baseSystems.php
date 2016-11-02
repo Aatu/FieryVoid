@@ -412,7 +412,29 @@ class Thruster extends ShipSystem{
         $this->direction = (int)$direction;
     
     }
-}
+} //endof Thruster
+
+
+
+class InvulnerableThruster extends Thruster{
+	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
+	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
+	
+    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
+	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
+    }
+	
+    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
+	$activeAA = 99;
+	return $activeAA;
+    }
+    
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //this thruster won't suffer criticals ;)
+	    return $crits;
+    }
+} //endof InvulnerableThruster
+
+
 
 class GraviticThruster extends Thruster{
     
