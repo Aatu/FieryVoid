@@ -525,6 +525,13 @@
         }
     
         
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
+            //if target is fighter flight, ensure that the same fighter is hit every time!
+            if($target instanceof FighterFlight
+            
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }
+        
         
         protected function getWeaponHitChanceMod($turn){
             return $this->hitChanceMod;
