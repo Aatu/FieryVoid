@@ -598,6 +598,7 @@ window.weaponManager = {
 
 	},
 
+	
 	calculateBaseHitChange: function(target, base, shooter, weapon){
 
   		var jink = 0;
@@ -638,6 +639,7 @@ window.weaponManager = {
 		return base - dew - jink - bdew - sdew;
 	},
 
+	
 	calculateHitChange: function(shooter, target, weapon, calledid){
 
 		var sPos = shipManager.getShipPositionInWindowCo(shooter);
@@ -680,9 +682,11 @@ window.weaponManager = {
 		}
 		else
 		{
+			/* no longer needed, Piercing mode stats will be included in FC itself
 			if (weapon.piercing && weapon.firingMode == 2 && weapon.firingModes[1] !== "Piercing"){
 				mod -= 4;
 			}
+			*/
 
 //			if (shipManager.movement.hasRolled(shooter)){
 			if (shipManager.movement.isRolling(shooter)){
@@ -707,6 +711,7 @@ window.weaponManager = {
 		}
 		if (calledid > 0){
 			mod += weapon.calledShotMod;
+			if(target.base) mod += weapon.calledShotMod;//double penalty vs bases!
 		}
 
 		var ammo = weapon.getAmmo(null);
