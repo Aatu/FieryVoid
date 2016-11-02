@@ -413,6 +413,7 @@ class BurstPulseCannon extends Pulse {
         public $loadingtime = 2;
         public $rangePenalty = 3;
         public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
+	    public $calledShotMod = 0; //can call shot at no penalty! (eg. pick off undamaged fighter)
 
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
