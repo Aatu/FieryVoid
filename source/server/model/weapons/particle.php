@@ -571,7 +571,6 @@
 
     
     class RepeaterGun extends ParticleRepeater{
-
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
         public $animation = "trail";
@@ -590,40 +589,15 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-        }
+        //appropriate redefinitions mostly done in ParticleRepeater class!
         
         public function getDamage($fireOrder){ return Dice::d(10)+3;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 13 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     }
+
+
+
 
     class PairedParticleGun extends LinkedWeapon{
 
@@ -669,15 +643,15 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
     }
 
