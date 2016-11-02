@@ -827,6 +827,9 @@ class Weapon extends ShipSystem{
 		}
             
 		//for linked shot: further shots will do the same as first!
+		if($i==0){ //clear variables that may be relevant for further shots in line
+			$fireOrder->linkedHit=null;
+		}
 		if($this->isLinked && $i > 0){
 			$rolled = 50; //irrelevant really, just 0<roll<100
 			if($fireOrder->linkedHit==null){ //first linked shot did not hit, so neither will further ones
@@ -836,7 +839,6 @@ class Weapon extends ShipSystem{
 				$needed = 100;
 			}
 		}else{ //standard - find hit and interception
-			$fireOrder->linkedHit=null;
 			$rolled = Dice::d(100);
 			    if ($rolled > $needed && $rolled <= $needed+($intercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
 				    if($this->damageType == 'Pulse'){
