@@ -1021,7 +1021,7 @@ class Weapon extends ShipSystem{
 			$damage = $damage - $rake;
 		}
 	}else{ //standard mode of dealing damage
-		if($fireOrder->linkedHit!=null){
+		if($fireOrder->linkedHit==null){
 			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
 		}else{
 			$system=$fireOrder->linkedHit;
