@@ -688,25 +688,29 @@
         
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
             /*repeat damage on structure (ignoring armor); 
-              system hit will have its armor reduced by 2*/
+              system hit will have its armor reduced by 2
+              for non-fighter targets
+              */
 
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
-            $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-            $struct = $system->getStructure();
-            //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
-            $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
-            //reduce damage of system hit
-            $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-            $crit->updated = true;
-            $crit->inEffect = false;
-            if ( $system != null ){
-                $system->criticals[] = $crit;
-                $system->criticals[] = $crit;
+            if(!$target instanceof FighterFlight){
+                $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
+                $struct = $system->getStructure();
+                //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
+                $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
+                //reduce armor of system hit
+                $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                $crit->updated = true;
+                $crit->inEffect = false;
+                if ( $system != null ){
+                    $system->criticals[] = $crit;
+                    $system->criticals[] = $crit;
+                }
+                //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
+                //increase damage by armor of structure - to simulate armor-ignoring effect
+                $damage = $damage + $this->getSystemArmourStandard($struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($struct, $gamedata, $fireOrder);
+                parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
             }
-            //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
-            //increase damage by armor of structure - to simulate armor-ignoring effect
-            $damage = $damage + $this->getSystemArmourStandard($struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($struct, $gamedata, $fireOrder);
-            parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
         } //endof function doDamage
         
         
@@ -966,8 +970,8 @@
         }
 
         public function getDamage($fireOrder){        return 12;   }
-        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
     
     class LightParticleBeamShip extends StdParticleBeam{
@@ -995,9 +999,10 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
+
 
 
     class ParticleProjector extends Particle{
@@ -1024,13 +1029,9 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-        }
-
         public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
 
 
