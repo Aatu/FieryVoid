@@ -39,7 +39,7 @@ class TarzaNav extends FighterFlight{
             
             $torpedoLauncher = new FighterTorpedoLauncher(4, 330, 30);
             $torpedoLauncher->firingModes = array( 1 => "LIT" );
-            $torpedoLauncher->iconPath = "lightIonTorpedo";
+            $torpedoLauncher->iconPath = "lightIonTorpedo.png";
             $torpedoLauncher->missileArray = array(1 => new LightIonTorpedo(330, 30));
             
             $fighter->addFrontSystem($torpedoLauncher);
