@@ -607,7 +607,7 @@ class FighterMissileRack extends MissileLauncher
         $this->range = $ammo->range;
         $this->distanceRange = $ammo->distanceRange;
         $this->priority = $ammo->priority;
-        $this->fireControl = $ammo->fireControl;
+        //$this->fireControl = $ammo->fireControl; //FC should be left that of launcher, after all
         $this->displayName = $ammo->displayName; //so missile name goes into log instead of launcher name
     }
     
