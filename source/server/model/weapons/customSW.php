@@ -67,8 +67,8 @@ class SWFighterLaser extends LinkedWeapon{
 
     
 	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
 } //end of SWFighterLaser
 
@@ -90,9 +90,9 @@ class SWFighterIon extends LinkedWeapon{
     public $animationColor =  array( 100, 100, 245);
     public $trailColor = array( 100, 100, 245);
 	
-    public $priority = 4;
+    public $priority = 10; //Ions fire last, to take advantage of induced criticals
     public $loadingtime = 1;
-    public $rangePenalty = 2;
+    public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
  
@@ -108,8 +108,7 @@ class SWFighterIon extends LinkedWeapon{
       $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical."; 
       $this->data["<font color='red'>Remark</font>"] .= "<br>Ignore half of armor."; 
     }
-     
-	
+     	
 	
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
@@ -119,7 +118,6 @@ class SWFighterIon extends LinkedWeapon{
 
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
-
     
 	  
 	protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){ //ignore half of armor
@@ -132,14 +130,11 @@ class SWFighterIon extends LinkedWeapon{
 			return 0;
 		    }
         }
-	
-	
-	  
+			  
     
-    public function getDamage($fireOrder){        return Dice::d(4)+$this->damagebonus;   }
-    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 4+$this->damagebonus - $this->dp;      }
-
+    public function getDamage($fireOrder){        return Dice::d(3)+$this->damagebonus;   }
+    public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+    public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus ;      }
 	
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
@@ -168,7 +163,6 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $rangeMod = 0;
     public $firingMode = 1;
     public $maxAmount = 0;
-    protected $distanceRangeMod = 0;
     public $priority = 4;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
     
@@ -179,12 +173,6 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
         $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
     }
-    
-	
-    public function getDistanceRange(){
-        return $this->missileArray[$this->firingMode]->range;
-    }
-	
 	
 } //end of SWFtrProtonTorpedoLauncher
 
