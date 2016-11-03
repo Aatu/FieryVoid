@@ -1063,7 +1063,7 @@ class Weapon extends ShipSystem{
         $mod = $system->hasCritical("ArmorReduced", $gamedata->turn-1);
         $armor -= $mod;
 	    
-        if ($armor<0) $armor = 0;
+	$armor = max(0, $armor); //at least 0
 
         return $armor;
     }//endof function getSystemArmourStandard
@@ -1080,8 +1080,7 @@ class Weapon extends ShipSystem{
         }
 	$armor = $system->getArmourInvulnerable($target, $shooter, $this->weaponClass, $pos);
 
-        if ($armor<0)
-            $armor = 0;
+        $armor = max(0, $armor); //at least 0
 
         return $armor;
     }//endof function getSystemArmourInvulnerable
@@ -1101,8 +1100,7 @@ class Weapon extends ShipSystem{
 	//for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
 	if(($this->damageType=='Piercing')&&($target->shipSizeClass<2)) $damage = $damage*0.9;
 	    
-        if ($damage < 0) $damage = 0;
-	    
+        $damage = max(0, $damage); //at least 0	    
 	$damage = floor($damage);
         return $damage;
     } //endof function getDamageMod
