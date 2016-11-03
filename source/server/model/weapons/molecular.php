@@ -137,7 +137,6 @@
 
         public $intercept = 0;
         public $loadingtime = 4;
-        private $alreadyReduced = false;
 
         public $firingModes = array(
             1 => "Raking",
@@ -153,8 +152,9 @@
         public $damageType = "Raking"; 
         public $damageTypeArray = array(1=>'Raking', 2=>'Piercing');
         public $weaponClass = "Molecular"; 
+                
         
-        public $noOverkillArray = array(1=>false, 2=>true); //Piercing mode does not overkill!
+        private $alreadyReduced = false;
         
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -234,7 +234,6 @@
         public $firingModes = array(
             1 => "Piercing"
         );
-        public $noOverkill = true;
 
         public $rangePenalty = 0.33;
         public $fireControl = array(-5, 1, 6); // fighters, <mediums, <capitals
@@ -275,7 +274,7 @@
         
         public $rangePenalty = 0.33;
         public $fireControl = array(null, 0, 4); // fighters, <mediums, <capitals
-        private $alreadyFlayed
+        private $alreadyFlayed = false; //to avoid doing this multiple times
 
         public function setSystemDataWindow($turn){
 
@@ -294,9 +293,11 @@
         public function setMaxDamage(){     $this->maxDamage = 0;      }
 
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
-            //$location is guaranteed to be filled in this case!      
+            //$location is guaranteed to be filled in this case!     
+            if($this->alreadyFlayed) return;
+            $this->alreadyFlayed = true; //avoid doing that multiple times
             foreach ($target->systems as $system){
-                if ($target->shipSizeClass<=1 || $system->location === $locTarget){ //MCVs and smaller ships are one huge section technically
+                if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
@@ -374,8 +375,8 @@
         public $damageType = "Raking"; 
         public $weaponClass = "Molecular"; 
 
-        public function setSystemDataWindow($turn){
 
+        public function setSystemDataWindow($turn){
             $boost = $this->getExtraDicebyBoostlevel($turn);
 
             //$this->data["Weapon type"] = "Molecular";
@@ -387,9 +388,7 @@
 
 
         private function getExtraDicebyBoostlevel($turn){
-
             $add = 0;
-            
             switch($this->getBoostLevel($turn)){
                 case 1:
                     $add = 1;
@@ -411,9 +410,7 @@
 
 
          private function getBoostLevel($turn){
-
             $boostLevel = 0;
-
             foreach ($this->power as $i){
                 if ($i->turn != $turn){
                    continue;
@@ -425,10 +422,11 @@
             return $boostLevel;
         }
 
+        
         protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
         {
-            $armour = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null);
-            $armour = $armour -1;
+            $armour = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos);
+            $armour = $armour - 1;
             $armour = max(0,$armour);
             return $armour;
         }
@@ -448,7 +446,7 @@
 
         public function getDamage($fireOrder){
             $add = $this->getExtraDicebyBoostlevel($fireOrder->turn);
-            $dmg = Dice::d(10, (5 + $add))+10;
+            $dmg = Dice::d(10, (5 + $add)) +10;
             return $dmg;
         }
 
@@ -512,6 +510,22 @@
             $this->data["Special"] = 'Reduces armor on facing Structure if at least 3 fighters hit';
         }
 
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+            if(!$this->alreadyReduced){ 
+                $this->alreadyReduced = true; 
+                if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
+                    $struct = $target->getStructureSystem($location);
+                    if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+                        $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                        $crit->updated = true;
+                        $crit->inEffect = false;
+                        $struct->criticals[] = $crit;
+                    }
+                }
+            }
+        }
+        
         /* no longer needed, moved to doDamage instead
         public function damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage){
             parent::damage( $target, $shooter, $fireOrder, $pos, $gamedata, $damage);
@@ -534,8 +548,8 @@
         */
 
         public function getDamage($fireOrder){        return Dice::d(2, 10)+15;   }
-        public function setMinDamage(){   return  $this->minDamage = 17 - $this->dp;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 35 - $this->dp;      }
+        public function setMinDamage(){   return  $this->minDamage = 17 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 35 ;      }
     }
 
 
@@ -543,39 +557,34 @@
     class LightMolecularDisrupterHandler{
         private static $hits = array();
 
-        public static function doArmorReduction($target, $shooter){
+        
+        /* checks if armor reduction should occur (returns true if so)
+            increases internal counters needed to do so
+        */
+        public static function checkArmorReduction($target, $shooter){ 
             $currentTurn = TacGamedata::$currentTurn;
 
             //Debug::log("doArmorReduction");
 
             // Always clean-up first.
             foreach (LightMolecularDisrupterHandler::$hits as $hit){
-                Debug::log("1");
-                if($hit['turn'] != $currentTurn){
-                    Debug::log("2");
-                    unset($hit);
-                    Debug::log("3");
-                }
+                if($hit['turn'] != $currentTurn) unset($hit);
             }
 
-            //Debug::log("4");
             // add new hit to the array
             LightMolecularDisrupterHandler::$hits[] = array('turn'=>$currentTurn, 'shooter'=>$shooter->id ,'target'=>$target->id);
-            //Debug::log("5");
 
             // Check if this was number 3 for a certain target. If so, decrease armor of the structure
             $count = 0;
 
             foreach(LightMolecularDisrupterHandler::$hits as $hit){
-            //    Debug::log("Checking array");
+                //    Debug::log("Checking array");
                 if($hit['shooter'] == $shooter->id && $hit['target'] == $target->id){
-                    $count++;
-             //       Debug::log("Count is ".$count." for shooter id ".$shooter->id);
+                    $count++; //       Debug::log("Count is ".$count." for shooter id ".$shooter->id);
                 }
             }
 
-            if($count===3){
-             //   Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
+            if($count===3){ //   Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
                 return true;
             }
 
