@@ -2,12 +2,13 @@
 
 class Ammo extends Weapon
 {
+    public $ballistic = true;
     public $amount = 0;
     public $cost = 0;
     public $surCharge = 0;
     public $damage = 0; // is Warhead value
     public $range = 0;
-    public $ballistic = true;
+    public $distanceRange = 0;
     public $hitChanceMod = 0;
     public $priority = 10;
     
@@ -33,11 +34,12 @@ class Ammo extends Weapon
         $this->range = $this->range + $rangeMod;
     }
     
+    /*no longer needed?
     public function getRange($fireOrder)
     {
         return $this->range;
     }
-    
+    */
         
     
     public function setAmount($newAmount){
@@ -77,6 +79,7 @@ class MissileB extends Ammo
         parent::setSystemDataWindow($turn);
     }
     
+    /* no longer needed?
     public function getWeaponHitChanceMod($turn)
     {
         return $this->hitChanceMod;
@@ -86,6 +89,7 @@ class MissileB extends Ammo
     {
         return $this->range;
     }
+    */
 
     public function getDamage($fireOrder)
     {
