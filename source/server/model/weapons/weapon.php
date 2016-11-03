@@ -102,8 +102,10 @@ class Weapon extends ShipSystem{
 
 	//damage type-related variables
 	public $isLinked = false; //for linked weapons - they will all hit the exact same system!
-	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
-	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	private $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	private $systemKillerArray = array();
+	private $noOverkill = false; //this will let simplify entire Matter line enormously!
+	private $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	//public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
@@ -1207,6 +1209,9 @@ class Weapon extends ShipSystem{
 		if(isset($this->maxDamageArray[$i])) $this->maxDamage = $this->maxDamageArray[$i];
 		if(isset($this->dpArray[$i])) $this->dp = $this->dpArray[$i];
 		
+		f(isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
+		f(isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
+		
 	}//endof function changeFiringMode
 	
 	
@@ -1214,28 +1219,28 @@ class Weapon extends ShipSystem{
 } //end of class Weapon
 
 
-    class checkForSelfInterceptFire{
-        private static $fired = array();
+class checkForSelfInterceptFire{
+	private static $fired = array();
+	
+	public static function setFired($id, $turn){
+	    if ($turn != TacGamedata::$currentTurn){
+		$fired = array();
+	    }
+	    checkForSelfInterceptFire::$fired[] = $id;
+	}
 
-        public static function setFired($id, $turn){
-
-            if ($turn != TacGamedata::$currentTurn){
-                $fired = array();
-            }
-            checkForSelfInterceptFire::$fired[] = $id;
-        }
-        public static function checkFired($id, $turn){  
-            if ($turn != TacGamedata::$currentTurn){
-                $fired = array();
-            }
-            foreach (checkForSelfInterceptFire::$fired as $weapon){
-                if ($weapon == $id){
-                    return true;
-                }
-            }
-        return false;
-        }
-    }
+	public static function checkFired($id, $turn){  
+	    if ($turn != TacGamedata::$currentTurn){
+		$fired = array();
+	    }
+	    foreach (checkForSelfInterceptFire::$fired as $weapon){
+		if ($weapon == $id){
+		    return true;
+		}
+	    }
+	    return false;
+	}
+} //endof class checkForSelfInterceptFire
 
 
  
