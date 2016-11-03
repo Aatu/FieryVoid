@@ -396,6 +396,28 @@ class BMissileRack extends MissileLauncher {
 }
 
 
+class BombRack extends MissileLauncher
+{
+    public $name = "BombRack";
+    public $displayName = "Bomb Rack";
+    public $range = 20;
+    public $distanceRange = 60;
+    public $loadingtime = 2;
+    public $iconPath = "bombRack.png";
+    
+    private $rackExplosionDamage = 30; //Bomb Rack carries fewer missiles than standard missile launcher...
+
+    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+    
+    public function getDamage($fireOrder)
+    {
+        return 20;
+    }
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
+}
+
+
 
 class FighterMissileRack extends MissileLauncher
 {
@@ -422,13 +444,10 @@ class FighterMissileRack extends MissileLauncher
     
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct(0, 0, 0, $startArc, $endArc);
-
         $MissileFB = new MissileFB($startArc, $endArc, $this->fireControl);
-        
         $this->missileArray = array(
             1 => $MissileFB
         );
-        
         $this->maxAmount = $maxAmount;
     }
     
@@ -528,9 +547,8 @@ class FighterMissileRack extends MissileLauncher
     }
 */    
     
-    public function fire($gamedata, $fireOrder){ //just decrease ammo...
+    public function fire($gamedata, $fireOrder){ //just decrease ammo and move to standard
         $ammo = $this->missileArray[$fireOrder->firingMode];
-        
         if($ammo->amount > 0){
             $ammo->amount--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
@@ -567,7 +585,7 @@ class FighterMissileRack extends MissileLauncher
     
     
     /*here: copy missile data to launcher itself!*/
-	public function changeFiringMode($newMode){ //change parameters with mode change
+    public function changeFiringMode($newMode){ //change parameters with mode change
         parent::changeFiringMode($newMode);
         $ammo = $this->missileArray[$newMode];
         $this->setMinDamage();
@@ -702,26 +720,7 @@ class ReloadRack extends MissileLauncher//ShipSystem
 
 
 
-class BombRack extends MissileLauncher
-{
-    public $name = "BombRack";
-    public $displayName = "Bomb Rack";
-    public $range = 20;
-    public $distanceRange = 60;
-    public $loadingtime = 2;
-    public $iconPath = "bombRack.png";
-    
-    private $rackExplosionDamage = 30; //Bomb Rack carries fewer missiles than standard missile launcher...
 
-    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
-    
-    public function getDamage($fireOrder)
-    {
-        return 20;
-    }
-    public function setMinDamage(){     $this->minDamage = 20 ;}
-    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
-}
 
 
 ?>
