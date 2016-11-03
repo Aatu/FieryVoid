@@ -1,14 +1,17 @@
 <?php
 
     class Raking extends Weapon{
+        public $raking = 10; //rake size
+        public $priority = 8;
+        public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-        public $raking = 10;
-        private $damages = array();
-        public $priority = 8;
         
+        /*no longer needed, Raking mode recognized natively
         public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){
             
             $rake = $this->raking;
@@ -89,30 +92,18 @@
                 if ($overkillSystem != null)
                     $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $location);
             }
-        }
-    }
-    
-    class Laser extends Raking{
-    
-        public $uninterceptable = true;
-    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+        }*/
         
-        public function setSystemDataWindow($turn){
+        
+    } //endof class Raking
+    
 
-            $this->data["Weapon type"] = "Laser";
-            $this->data["Damage type"] = "Raking";
-            
-            parent::setSystemDataWindow($turn);
-        }
-    
-        
+    class Laser extends Raking{
+        public $uninterceptable = true;
     }
+
 
     class HeavyLaser extends Laser{
-        
         public $name = "heavyLaser";
         public $displayName = "Heavy Laser";
         public $animation = "laser";
@@ -123,8 +114,7 @@
         public $loadingtime = 4;
         public $overloadable = true;
         public $extraoverloadshots = 2;
-        
-        public $damageType = "raking";
+
         public $raking = 10;
         public $priority = 7;
         
@@ -136,11 +126,12 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+20;   }
-        public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 60 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 24 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 60 ;      }
         
         
     }
+
 
     
     class MediumLaser extends Laser{
@@ -156,7 +147,6 @@
         
         public $loadingtime = 3;
         
-        public $damageType = "raking";
         public $raking = 10;
         
         public $rangePenalty = 0.5;
@@ -167,8 +157,8 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+12;   }
-        public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 42 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 15 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 42 ;      }
         
         
         
@@ -186,7 +176,6 @@
         public $loadingtime = 2;
         public $priority = 8;
         
-        public $damageType = "raking";
         public $raking = 10;
 
         public $rangePenalty = 1;
@@ -197,12 +186,12 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 2)+7;   }
-        public function setMinDamage(){     $this->minDamage = 9 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 27 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 27 ;      }
     }
     
+
     class BattleLaser extends Laser{
-        
         public $name = "battleLaser";
         public $displayName = "Battle Laser";
         public $animation = "laser";
@@ -211,31 +200,37 @@
         public $animationWidth2 = 0.2;
         
         public $loadingtime = 3;
-        
-        public $damageType = "raking";
+
         public $raking = 10;
         public $priority = 7;
         
         public $firingModes = array(
-            1 => "Standard",
+            1 => "Raking",
             2 => "Piercing"
-            );
-        public $piercing = true;
+        );
         
+        public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+        public $damageType = $this->damageTypeArray[1]; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        
+        
+        
+                
         public $rangePenalty = 0.25;
-        public $fireControl = array(-3, 3, 4); // fighters, <mediums, <capitals 
+        public $fireControlArray = array( 1=>array(-3, 3, 4), 2=>array(null,-1,0) ); //Raking and Piercing mode
+        public $fireControl = $this->fireControlArray[1]; // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 4)+12;   }
-        public function setMinDamage(){     $this->minDamage = 16 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 52 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 16 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 52 ;      }
         
-        
-        
-    }
+    } //endof class BattleLaser
+
+
     
     class AssaultLaser extends Laser{
         
