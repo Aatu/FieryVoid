@@ -450,11 +450,11 @@ class FighterMissileRack extends MissileLauncher
         $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
     }
 
-    
+    /* no longer needed
     public function calculateHit($gamedata, $fireOrder){
         $ammo = $this->missileArray[$fireOrder->firingMode];
         $ammo->calculateHit($gamedata, $fireOrder); //essentially ammo is the weapon, not launcher! OB is calculated separately, so launcher FC is irrelevant
-    }
+    }*/
     
     public function setId($id){
         parent::setId($id);
@@ -484,6 +484,7 @@ class FighterMissileRack extends MissileLauncher
         return $this->missileArray[$this->firingMode]->distanceRange;
     }
     
+    /* no longer needed
     public function isInDistanceRange($shooter, $target, $fireOrder) //will this be used anywhere?... Ammo will be checked for distance range, not this
     {
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -497,6 +498,7 @@ class FighterMissileRack extends MissileLauncher
         
         return true;
     }
+    */
     
     public function addAmmo($missileClass, $amount){
         foreach($this->missileArray as $missile){
@@ -526,6 +528,21 @@ class FighterMissileRack extends MissileLauncher
     }
 */    
     
+    public function fire($gamedata, $fireOrder){ //just decrease ammo...
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        
+        if($ammo->amount > 0){
+            $ammo->amount--;
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
+        }
+        else{
+            $fireOrder->notes = "No ammo available of the selected type.";
+            $fireOrder->updated = true;
+            return;
+        }
+        parent::fire($gamedata, $fireOrder);
+    }
+    
     public function getDamage($fireOrder){
         $ammo = $this->missileArray[$fireOrder->firingMode];
         return $ammo->getDamage();
@@ -540,6 +557,25 @@ class FighterMissileRack extends MissileLauncher
         $ammo = $this->missileArray[$this->firingMode];
         $ammo->setMaxDamage();
         $this->maxDamage =  $ammo->maxDamage;
+    }
+    
+    public function getWeaponHitChanceMod($turn)
+    {
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        return $ammo->hitChanceMod;
+    }
+    
+    
+    /*here: copy missile data to launcher itself!*/
+	public function changeFiringMode($newMode){ //change parameters with mode change
+        parent::changeFiringMode($newMode);
+        $ammo = $this->missileArray[$newMode];
+        $this->setMinDamage();
+        $this->setMaxDamage();
+        $this->range = $ammo->range;
+        $this->distanceRange = $ammo->distanceRange;
+        $this->priority = $ammo->priority;
+        $this->fireControl = $ammo->fireControl;
     }
     
 } //endof FighterMissileRack
