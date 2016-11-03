@@ -1013,7 +1013,7 @@ class Weapon extends ShipSystem{
 		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
 		//last part: opposite Structure
 		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
-	}elseif($this->damageType=='Raking'){ //Raking hit...
+	}elseif( ($this->damageType=='Raking') && (!($target instanceof FighterFlight)) ){ //Raking hit... but not at fighters - that's effectively Standard shot!
 		//split into rakes; armor will not need to be penetrated twice!
 		$fireOrder->armorIgnored = array();//reset info about pierced armor
 		while($damage>0){
