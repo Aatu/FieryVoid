@@ -43,7 +43,7 @@ class MissileLauncher extends Weapon{
             1 => $MissileB
         );
     }
-
+    
     public function setSystemDataWindow($turn){
         //$this->data["Weapon type"] = "Ballistic";
         //$this->data["Damage type"] = "Standard";
@@ -64,6 +64,15 @@ class MissileLauncher extends Weapon{
         }
         return true;
     }
+    
+    
+    
+    public function getWeaponHitChanceMod($turn)
+    {
+        $ammo = $this->missileArray[$fireOrder->firingMode];
+        return $ammo->hitChanceMod;
+    }
+    
     
     public function setAmmo($firingMode, $amount){
         if(count($this->missileArray) > 0){
@@ -382,9 +391,11 @@ class BMissileRack extends MissileLauncher {
 
     }
 
+    /*
     public function testAmmoExplosion($ship, $gamedata){
         return false;
     }
+    */
 
 
     public function getDamage($fireOrder){
@@ -493,7 +504,7 @@ class FighterMissileRack extends MissileLauncher
     }
     */
     
-    
+    /*MissileLauncher covers this - isInDistanceRange()
     public function getLaunchRange(){
         return $this->missileArray[$this->firingMode]->range;
     }
@@ -502,6 +513,7 @@ class FighterMissileRack extends MissileLauncher
         //return $this->missileArray[$this->firingMode]->range * 3 + $this->distanceRangeMod;
         return $this->missileArray[$this->firingMode]->distanceRange;
     }
+    */
     
     /* no longer needed
     public function isInDistanceRange($shooter, $target, $fireOrder) //will this be used anywhere?... Ammo will be checked for distance range, not this
@@ -577,11 +589,13 @@ class FighterMissileRack extends MissileLauncher
         $this->maxDamage =  $ammo->maxDamage;
     }
     
+    /* MissileLauncher covers this
     public function getWeaponHitChanceMod($turn)
     {
         $ammo = $this->missileArray[$fireOrder->firingMode];
         return $ammo->hitChanceMod;
     }
+    */
     
     
     /*here: copy missile data to launcher itself!*/
