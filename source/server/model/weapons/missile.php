@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 class MissileLauncher extends Weapon{
     public $useOEW = false;
@@ -16,7 +16,13 @@ class MissileLauncher extends Weapon{
     public $priority = 6;
     public $hits = array();
 
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ballistic"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!    
+    
     protected $distanceRangeMod = 0;
+    
+    private $rackExplosionDamage = 70; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion
     
     public $firingModes = array(
         1 => "B"
@@ -24,8 +30,14 @@ class MissileLauncher extends Weapon{
     
     public $missileArray = array();
     
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base=false){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+
+        if ($base){ //mounted on base - double the launch range
+            $this->rangeMod = $this->rangeMod + $this->range; 
+            $this->range = $this->range *2;            
+        }
+        
         $MissileB = new MissileB($startArc, $endArc, $this->fireControl);
         $this->missileArray = array(
             1 => $MissileB
@@ -33,8 +45,8 @@ class MissileLauncher extends Weapon{
     }
 
     public function setSystemDataWindow($turn){
-        $this->data["Weapon type"] = "Ballistic";
-        $this->data["Damage type"] = "Standard";
+        //$this->data["Weapon type"] = "Ballistic";
+        //$this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = "Basic missile";
         $this->data["Missile Hit Mod"] = $this->missileArray[1]->hitChanceMod*5;
 
@@ -63,59 +75,48 @@ class MissileLauncher extends Weapon{
         return $this->missileArray[$fireOrder->firingMode];
     }
 
-    public function testAmmoExplosion($ship, $gamedata){
-        $toDO;
-
-        foreach ($this->damage as $entry){
-            if ($entry->fireorderid == -1){
-                debug::log("chain hit");
-                return;
-            }
-        }
-
+    
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
+        $explodes = false;
 
         $roll = Dice::d(20);
-        if ($roll >= 19){
-            if ($this instanceof BombRack){
-                $toDO = 35;
-            } else if ($this instanceof ReloadRack){
-                $toDO = 120;
-            }
-            else $toDO = 70;
-
-            debug::log("ammo exp for: ".$toDO." on".$this->displayName." id: ".$this->id);
-
-            $this->ammoExplosion($ship, $gamedata, $toDO);            
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
             $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
+        }else{
+            parent::testCritical($ship, $gamedata, $crits, $add);
+        }
+    } //endof function testCritical
+
+
+    public function ammoExplosion($ship, $gamedata, $damage){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            /*
+            $dmgToSelf = $this->getRemainingHealth();
+            $dmgToSelf += $this->getSystemArmourStandard($system, $gamedata, $fireOrder, null); 
+            $dmgToSelf += $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder, null); 
+            */
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->getLocation());
+        }
+        
+        //then apply damage potential as a hit...
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->getLocation()); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
 
-
-    public function ammoExplosion($ship, $gamedata, $toDO){
-        $rake = 10;
-        $left = $toDO;
-
-        while ($left > 0){
-            if ($ship->isDestroyed()){
-                break;
-            }
-
-            $system = $this;
-
-            if ($this->isDestroyed()){
-                $system = $this->getHitSystemShip($ship);
-            }
-
-            if ($left < $rake){
-                $rake = $left;
-            }
-
-            $this->ammoExplosionDamage($ship, $system, $rake, $gamedata);
-            $left -= $rake;
-        }
-    }
-
-
+/*no longer needed
     public function getHitSystemShip($ship){
 
         $systems = array();
@@ -229,15 +230,15 @@ class MissileLauncher extends Weapon{
      //       debug::log("remaining: ".($okSystem->getRemainingHealth()));
         }
     }
-
+*/
     
     public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
-
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
     }
-}       
+    
+} //endof class MissileLauncher      
 
 
 
@@ -251,6 +252,7 @@ class SMissileRack extends MissileLauncher{
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
+/*no longer needed    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
@@ -259,6 +261,7 @@ class SMissileRack extends MissileLauncher{
             $this->rangeMod = 20;
         }
     }
+*/    
     
     public function getDamage($fireOrder)
     {
@@ -266,9 +269,11 @@ class SMissileRack extends MissileLauncher{
 //        return $ammo->getDamage();
         return 20;
     }
-    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
-    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
 }
+
+
 
 class SoMissileRack extends MissileLauncher
 {
@@ -280,11 +285,6 @@ class SoMissileRack extends MissileLauncher
     public $iconPath = "missile1.png";
 
     public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
-
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-    }
     
     public function getDamage($fireOrder)
     {
@@ -292,8 +292,8 @@ class SoMissileRack extends MissileLauncher
 //        return $ammo->getDamage();
         return 20;
     }
-    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
-    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
 }
 
 class LMissileRack extends MissileLauncher
@@ -309,10 +309,11 @@ class LMissileRack extends MissileLauncher
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
 
+    /*
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 
-    }
+    }*/
     
     public function getDamage($fireOrder)
     {
@@ -320,9 +321,10 @@ class LMissileRack extends MissileLauncher
 //        return $ammo->getDamage();
         return 20;
     }
-    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
-    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;}     
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
 }
+
 
 class LHMissileRack extends MissileLauncher
 {
@@ -334,6 +336,7 @@ class LHMissileRack extends MissileLauncher
     public $iconPath = "missile2.png";
     public $rangeMod = 10;
     protected $distanceRangeMod = 10;
+    private $rackExplosionDamage = 0; //this rack directs explosion damage outwards - is itself destroyed, but does not damage ship beyond that
     
     public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals 
     
@@ -348,8 +351,8 @@ class LHMissileRack extends MissileLauncher
 //        return $ammo->getDamage();
         return 20;
     }
-    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
-    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;} 
 }
 
 
@@ -362,6 +365,9 @@ class BMissileRack extends MissileLauncher {
     public $loadingtime = 1;
     public $iconPath = "missile3.png";
     public $rangeMod = 10;
+    
+    private $rackExplosionDamage = 0; //this rack directs explosion damage outwards - is itself destroyed, but does not damage ship beyond that
+    
     
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
     
@@ -385,8 +391,8 @@ class BMissileRack extends MissileLauncher {
         return 20;
     }
 
-    public function setMinDamage(){     $this->minDamage = 20 - $this->dp;}
-    public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;} 
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;} 
 }
 
 
@@ -430,13 +436,14 @@ class FighterMissileRack extends MissileLauncher
     {
         parent::setSystemDataWindow($turn);
 
-        $this->data["Weapon type"] = "Ballistic";
-        $this->data["Damage type"] = "Standard";
+        //$this->data["Weapon type"] = "Ballistic";
+        //$this->data["Damage type"] = "Standard";
         $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
         $this->data["Damage"] = $this->missileArray[$this->firingMode]->damage;
         $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
     }
 
+    
     public function calculateHit($gamedata, $fireOrder){
         $ammo = $this->missileArray[$fireOrder->firingMode];
         $ammo->calculateHit($gamedata, $fireOrder);
@@ -574,18 +581,70 @@ class FighterTorpedoLauncher extends FighterMissileRack
     }
 }
 
-class ReloadRack extends ShipSystem
+
+/*implements weapon because it can do damage like one*/
+class ReloadRack extends MissileLauncher//ShipSystem
 {
-    // This needs to be implemented
     public $name = "ReloadRack";
     public $displayName = "Reload Rack";
     public $iconPath = "missileReload.png";
     
+   
+    //it can explode, too...
+    public $weapon = false; //well, it can't be actually fired
+    public $damageType = 'Flash'; //needed to simulate that it's a weapon
+    public $weaponClass = 'Ballistic';
+    private $rackExplosionDamage = 150; //how much damage will this weapon do in case of catastrophic explosion
+    private $rackExplosionThreshold = 19; //how high roll is needed for rack explosion
+    
     function __construct($armour, $maxhealth){
-        parent::__construct($armour, $maxhealth, 0, 0);
-
+        //parent::__construct($armour, $maxhealth, 0, 0); //that's for extending ShipSystem
+        parent::__construct($armour, $maxhealth, 0, 0, 0);//that's for extending MissileLauncher
     }
-}
+    
+/*not needed if implementing MissileLauncher takes care of it!    
+    public function testCritical($ship, $gamedata, $crits, $add = 0){ //add testing for ammo explosion!
+        $explodes = false;
+
+        $roll = Dice::d(20);
+        if ($roll >= $this->rackExplosionThreshold) $explodes = true;
+        
+        if($explodes){
+            $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
+            $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
+        }else{
+            parent::testCritical($ship, $gamedata, $crits, $add);
+        }
+    } //endof function testCritical
+
+
+    public function ammoExplosion($ship, $gamedata, $damage){
+        //first, destroy self if not yet done...
+        if (!$this->isDestroyed()){
+            $this->noOverkill = true;
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'standard', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->getLocation());
+        }
+        
+        //then apply damage potential as a hit...
+        if($damage>0){
+            $this->noOverkill = false;
+            $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
+            $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
+                    $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->getLocation()); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+        }
+    }
+    
+    public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+    }
+*/    
+} //endof class ReloadRack
 
 class BombRack extends MissileLauncher{
 
