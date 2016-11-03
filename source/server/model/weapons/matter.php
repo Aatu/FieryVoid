@@ -3,28 +3,16 @@
     class Matter extends Weapon
     {	    
         public $noOverkill = true;//Matter weapons do not overkill
+    	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            if (!$target instanceof WhiteStar){
-                return 0;
-            }
-            else {
-                $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $armour = 0;
-                $activeAA = 0;
-            //    debug::log("hit by: ".$dmgClass);
-                if (isset($target->armourSettings[$fireOrder->damageclass][1])){
-                    $activeAA = $target->armourSettings[$fireOrder->damageclass][1];
-                    //      debug::log("hit by: ".$dmgClass.", applying mod: ".$activeAA);
-                    $armour = $activeAA;
-                }
-                return $armour;
-            }
+        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
         }
 
 	/*no need due to noOverkill trait
@@ -36,14 +24,16 @@
 
         public function setSystemDataWindow($turn)
         {
-            $this->data["Weapon type"] = "Matter";
-            $this->data["Damage type"] = "Standard";
-
+            //$this->data["Weapon type"] = "Matter";
+            //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
+	    $this->data["Special"] = "Ignores armor.";
         }
 
         public $priority = 9;
-    }
+    } //endof class Matter
+
+
 
 
     class MatterCannon extends Matter
