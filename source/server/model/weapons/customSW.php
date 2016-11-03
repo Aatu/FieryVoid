@@ -162,9 +162,7 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
     public $iconPath = "lightIonTorpedo.png";
-	
     public $firingModes = array( 1 => "FtrTorpedo" );
-
 
     public $loadingtime = 1;
     public $rangeMod = 0;
@@ -182,32 +180,6 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
         $this->maxAmount = $maxAmount;
     }
     
-    public function setSystemDataWindow($turn)
-    {
-        parent::setSystemDataWindow($turn);
-        $this->data["Weapon type"] = "Ballistic";
-        $this->data["Damage type"] = "Standard";
-        $this->data["Ammo"] = $this->missileArray[$this->firingMode]->displayName;
-        if($this->missileArray[$this->firingMode]->minDamage != $this->missileArray[$this->firingMode]->maxDamage){
-            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage."-".$this->missileArray[$this->firingMode]->maxDamage;
-        }else{
-            $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage;
-        }
-        $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
-    }
-    
-        public function isInDistanceRange($shooter, $target, $fireOrder)
-        {
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
-            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->getDistanceRange())
-            {
-                $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
-                return false;
-            }
-		$fireOrder->pubnotes .= " TORPEDO RANGE CHECK: Target in range!";
-            return true;
-        }
 	
     public function getDistanceRange(){
         return $this->missileArray[$this->firingMode]->range;
@@ -225,10 +197,10 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $missileClass = "FtrTorpedo";
     public $displayName = "Fighter Proton Torpedo";
     public $cost = 10;
-    public $surCharge = 0;
     public $damage = 12;
     public $amount = 0;
     public $range = 15;
+    public $distanceRange = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
     
