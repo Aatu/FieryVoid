@@ -57,8 +57,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+2;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
     }
     
 
@@ -84,8 +84,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 5)+7;   }
-        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 57 - $this->dp;      }    
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 57 ;      }    
     }
     
 
@@ -111,8 +111,8 @@
         }
         
         public function getDamage($fireOrder){  return Dice::d(10, 3)+3;   }
-        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 33 - $this->dp;      }    
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }    
     }
     
 
@@ -139,8 +139,8 @@
         }
         
     	public function getDamage($fireOrder){        return Dice::d(10, 1)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }    
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }    
     }
     
 
@@ -211,8 +211,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 8)+ 60;   }
-        public function setMinDamage(){     $this->minDamage = 68 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 140 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 68 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 140 ;      }
     } //end of Mass Driver
 
 
@@ -238,8 +238,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 1)+10;   }
-        public function setMinDamage(){     $this->minDamage = 11 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 11 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
     }
 
 
@@ -265,8 +265,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
-        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 40 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 13;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
 
         }
 
@@ -296,8 +296,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
     
 
@@ -310,13 +310,12 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         public function getDamage($fireOrder){        return Dice::d(6, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
 
 
     class PairedGatlingGun extends LinkedWeapon{
-        // take a look
         public $name = "pairedGatlingGun";
         public $displayName = "Paired Gatling Guns";
         public $animation = "trail";
@@ -340,7 +339,10 @@
         private $damagebonus = 0;
 	    
 	public $noOverkill = true;
-
+	    
+	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
+	 
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -348,37 +350,17 @@
         
 	    
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Matter";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Matter";
+            //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
-
+            $this->data["Special"] = "Ignores armor.";
             $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
         }
 
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            if (!$target instanceof WhiteStar){
-                return 0;
-            }
-            else {
-                $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $armour = 0;
-                $activeAA = 0;
-                if (isset($target->armourSettings[$fireOrder->damageclass][1])){
-                    $activeAA = $target->armourSettings[$fireOrder->damageclass][1];
-                 //   debug::log("hit by: ".$fireOrder->damageclass.", applying mod: ".$activeAA);
-                    $armour = $activeAA;
-                }
-                return $armour;
-            }
-        }
 
-	/*no need due to noOverkill trait
-        protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
-        {
-            return null;
+        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
         }
-	*/
 
 
         public function getDamage($fireOrder){
@@ -391,10 +373,9 @@
         }
 
 
-       public function fire($gamedata, $fireOrder){
-        debug::log("fire function");
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+        	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
-
             $this->ammunition--;
             Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $this->ammunition);
         }
