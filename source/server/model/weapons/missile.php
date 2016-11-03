@@ -533,11 +533,13 @@ class FighterMissileRack extends MissileLauncher
     
     public function setMinDamage(){
         $ammo = $this->missileArray[$this->firingMode];
-        return $ammo->getDamage();
+        $ammo->setMinDamage();
+        $this->minDamage =  $ammo->minDamage;
     }
     public function setMaxDamage(){
         $ammo = $this->missileArray[$this->firingMode];
-        return $ammo->getDamage();
+        $ammo->setMaxDamage();
+        $this->maxDamage =  $ammo->maxDamage;
     }
     
 } //endof FighterMissileRack
