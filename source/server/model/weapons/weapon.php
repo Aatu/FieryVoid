@@ -910,12 +910,13 @@ class Weapon extends ShipSystem{
 	    /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
 	    /*$damageWasDealt=true indicates this is actual overkill, instead of just passing through previously destroyed system that nevertheless was chosen as target*/
         $okSystem = null;
+	$noOverkill = ( $this->noOverkill || ($this->damageType=='Piercing') );//either explicitly stated or Piercing mode shot
 
 	if ($target instanceof FighterFlight){
             return null;
         }
 	    
-	if($this->noOverkill && $damageWasDealt){  //weapon trait: no overkill (if this is true overkill only!)
+	if($noOverkill && $damageWasDealt){  //weapon trait: no overkill (if this is true overkill only!)
 		return null;	
 	}
 
