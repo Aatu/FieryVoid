@@ -214,12 +214,14 @@ class ShipSystem{
             }
         }        
 
+/* moved to potentially exploding systems themselves  
         if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }
-        else if ($this instanceof SubReactor){
-            debug::log("subreactor, multi damage 0.5");
+*/	
+        if($this instanceof SubReactor){
+            //debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
 
