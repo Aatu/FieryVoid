@@ -628,10 +628,11 @@ class Weapon extends ShipSystem{
             }
         }
 
-
+/*Piercing mode already taken care of in FC
         if ($this->piercing && $this->firingMode == 2 && $this->firingModes[1] == "Standard"){
             $mod -= 4;
         }
+*/	
 
         if (!($shooter instanceof FighterFlight)){
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
