@@ -5,12 +5,12 @@ class Ammo extends Weapon
     public $ballistic = true;
     public $amount = 0;
     public $cost = 0;
-    public $surCharge = 0;
+    //public $surCharge = 0;
     public $damage = 0; // is Warhead value
     public $range = 0;
     public $distanceRange = 0;
     public $hitChanceMod = 0;
-    public $priority = 10;
+    public $priority = 4;
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $fireControl = null){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -57,7 +57,7 @@ class MissileB extends Ammo
     public $missileClass = "B";
     public $displayName = "Basic Missile";
     public $cost = 0;
-    public $surCharge = 0;
+    //public $surCharge = 0;
     public $damage = 20;
     public $amount = 0;
     public $range = 20;
