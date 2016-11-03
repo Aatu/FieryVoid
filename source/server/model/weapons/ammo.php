@@ -63,7 +63,7 @@ class MissileB extends Ammo
     public $range = 20;
     public $distanceRange = 60;
     public $hitChanceMod = 3;
-    public $ballistic = true;
+    //public $ballistic = true;
     public $priority = 6;
 
     function __construct($startArc, $endArc, $fireControl = null){
@@ -100,19 +100,21 @@ class MissileB extends Ammo
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }    
 }
 
+
+
 class MissileFB extends Ammo
 {
     public $name = "missileFB";
     public $missileClass = "FB";
     public $displayName = "Basic Fighter Missile";
     public $cost = 8;
-    public $surCharge = 0;
+    //public $surCharge = 0;
     public $damage = 10;
-    public $amount = 0;
+    //public $amount = 0;
     public $range = 10;
     public $distanceRange = 30;
     public $hitChanceMod = 3;
-    public $ballistic = true;
+    //public $ballistic = true;
     public $priority = 4;
     
     function __construct($startArc, $endArc, $fireControl = null){
@@ -252,12 +254,12 @@ class MissileFB extends Ammo
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
     }
-*/    
+   
 
     public function getWeaponHitChanceMod($turn){
         return $this->hitChanceMod;
     }
-
+*/ 
     public function getDamage($fireOrder){        return 10;   }
     public function setMinDamage(){     $this->minDamage = 10;      }
     public function setMaxDamage(){     $this->maxDamage = 10;      }        
@@ -283,16 +285,19 @@ class MissileFY extends MissileFB
     public function setMaxDamage(){     $this->maxDamage = 8;      }        
 }
 
+
+
 class LightBallisticTorpedo extends MissileFB
 {
     public $name = "lightBallisticTorpedo";
     public $missileClass = "LBT";
     public $displayName = "Light Ballistic Torpedo";
     public $cost = 8;
-    public $surCharge = 0;
+    //public $surCharge = 0;
     public $damage = 10;
     public $amount = 0;
     public $range = 25;
+    public $distanceRange = 25;
     public $hitChanceMod = 0;
     public $priority = 3;
     
@@ -305,16 +310,18 @@ class LightBallisticTorpedo extends MissileFB
     public function setMaxDamage(){     $this->maxDamage = 12;      }        
 }
 
+
 class LightIonTorpedo extends MissileFB
 {
     public $name = "lightIonTorpedo";
     public $missileClass = "LIT";
     public $displayName = "Light Ion Torpedo";
     public $cost = 8;
-    public $surCharge = 0;
+    //public $surCharge = 0;
     public $damage = 10;
     public $amount = 0;
     public $range = 20;
+    public $distanceRange = 20;
     public $hitChanceMod = 0;
     public $priority = 4;
     
