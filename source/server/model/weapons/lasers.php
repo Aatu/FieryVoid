@@ -210,7 +210,7 @@
         );
         
         public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
-        public $damageType = $this->damageTypeArray[1]; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        //public $damageType = $this->damageTypeArray[1]; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
         public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
         
         
@@ -218,7 +218,7 @@
                 
         public $rangePenalty = 0.25;
         public $fireControlArray = array( 1=>array(-3, 3, 4), 2=>array(null,-1,0) ); //Raking and Piercing mode
-        public $fireControl = $this->fireControlArray[1]; // fighters, <mediums, <capitals 
+        //public $fireControl = $this->fireControlArray[1]; // fighters, <mediums, <capitals 
     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -233,7 +233,6 @@
 
     
     class AssaultLaser extends Laser{
-        
         public $name = "assaultLaser";
         public $displayName = "Assault Laser";
         public $animation = "laser";
@@ -243,10 +242,7 @@
         public $priority = 8;
         
         public $loadingtime = 2;
-        
-        public $damageType = "raking";
-        public $raking = 10;
-        
+                
         public $rangePenalty = 0.33;
         public $fireControl = array(-4, 3, 3); // fighters, <mediums, <capitals 
     
@@ -255,10 +251,11 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+4;   }
-        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 34 ;      }
     }
     
+
     class AdvancedAssaultLaser extends Laser{
         
         public $name = "advancedAssaultLaser";
@@ -270,9 +267,6 @@
         
         public $loadingtime = 2;
         
-        public $damageType = "raking";
-        public $raking = 10;
-        
         public $rangePenalty = 0.33;
         public $fireControl = array(-3, 4, 4); // fighters, <mediums, <capitals 
     
@@ -281,13 +275,12 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
-        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 40 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
     }
     
     // Jasper
     class NeutronLaser extends Laser{
-
             public $name = "neutronLaser";
             public $displayName = "Neutron Laser";
             public $animation = "laser";
@@ -295,34 +288,36 @@
             public $animationWidth = 4;
             public $animationWidth2 = 0.4;
 
-            public $extraoverloadshots = 2;
             public $loadingtime = 3;
             public $overloadable = true;
 
-            public $damageType = "raking";
-            public $raking = 10;
             public $priority = 7;
 
             public $firingModes = array(
-                1 => "Standard",
+                1 => "Raking",
                 2 => "Piercing"
-                );
-            public $piercing = true;
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(1, 4, 4), 2=>array(null,0,0) ); //Raking and Piercing mode
+        
+            public $extraoverloadshots = 2;        
+            public $extraoverloadshotsArray = array(1=>2, 2=>0); //extra shots from overload are relevant only for Raking mode!
 
             public $rangePenalty = 0.25;
-            public $fireControl = array(1, 4, 4); // fighters, <mediums, <capitals
 
             function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
                 parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
             }
 
             public function getDamage($fireOrder){ return Dice::d(10, 4)+15; }
-            public function setMinDamage(){ $this->minDamage = 19 - $this->dp; }
-            public function setMaxDamage(){ $this->maxDamage = 55 - $this->dp; }
-        }
+            public function setMinDamage(){ $this->minDamage = 19 ; }
+            public function setMaxDamage(){ $this->maxDamage = 55 ; }
+    }
+
+
 
     class ImprovedNeutronLaser extends Laser{
-
         public $name = "improvedNeutronLaser";
         public $displayName = "Improved Neutron Laser";
         public $iconPath = "neutronLaser.png";
@@ -331,30 +326,30 @@
         public $animationWidth = 5;
         public $animationWidth2 = 0.5;
 
-        public $extraoverloadshots = 3;
         public $loadingtime = 3;
         public $overloadable = true;
-
-        public $damageType = "raking";
-        public $raking = 10;
         public $priority = 7;
 
-        public $firingModes = array(
-            1 => "Standard",
-            2 => "Piercing"
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
             );
-        public $piercing = true;
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(1, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+        
+            //public $extraoverloadshots = 3;        
+            public $extraoverloadshotsArray = array(1=>3, 2=>0); //extra shots from overload are relevant only for Raking mode!
 
         public $rangePenalty = 0.25;
-        public $fireControl = array(1, 4, 5); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 4)+18; }
-        public function setMinDamage(){ $this->minDamage = 22 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 58-  $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 22 ; }
+        public function setMaxDamage(){ $this->maxDamage = 58; }
     }
 
 
@@ -372,26 +367,26 @@
         public $loadingtime = 3;
         public $overloadable = false;
 
-        public $damageType = "raking";
         public $raking = 10;
 
-        public $firingModes = array(
-            1 => "Standard",
-            2 => "Piercing"
-        );
-
-        public $piercing = true;
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(-5, 3, 3), 2=>array(null,-1,-1) ); //Raking and Piercing mode
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+        //public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 3)+6; }
-        public function setMinDamage(){ $this->minDamage = 9 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 36 - $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 9 ; }
+        public function setMaxDamage(){ $this->maxDamage = 36 ; }
         }
 
 
@@ -404,19 +399,18 @@
 
         public $loadingtime = 4;
 
-        public $damageType = "raking";
-        public $raking = 10;
         public $priority = 7;
 
-        public $firingModes = array(
-            1 => "Standard",
-            2 => "Piercing"
-        );
-
-        public $piercing = true;
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(-5, 3, 3), 2=>array(null,-1,-1) ); //Raking and Piercing mode
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+        //public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -440,7 +434,6 @@
 
         public $loadingtime = 2;
 
-        public $damageType = "raking";
         public $raking = 10;
 
         public $rangePenalty = 0.5;
@@ -451,9 +444,11 @@
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8; }
-        public function setMinDamage(){ $this->minDamage = 10 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 28 - $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 10 ; }
+        public function setMaxDamage(){ $this->maxDamage = 28 ; }
     }
+
+
 
     class ImperialLaser extends Laser{
 
@@ -467,7 +462,6 @@
 
         public $loadingtime = 4;
 
-        public $damageType = "raking";
         public $raking = 10;
 
         public $rangePenalty = 0.33;
@@ -483,8 +477,8 @@
     }
 
 
-    class ImprovedBlastLaser extends Weapon{
 
+    class ImprovedBlastLaser extends Weapon{
         public $name = "improvedBlastLaser";
         public $displayName = "Improved Blast Laser";
         public $animation = "laser";
@@ -500,13 +494,17 @@
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 3, 5); // fighters, <mediums, <capitals
 
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Raking";
+        
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 3)+14; }
-        public function setMinDamage(){ $this->minDamage = 17 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 44 - $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 17 ; }
+        public function setMaxDamage(){ $this->maxDamage = 44 ; }
 
     }
 
