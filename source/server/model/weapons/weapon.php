@@ -62,6 +62,7 @@ class Weapon extends ShipSystem{
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
+	public $extraoverloadshotsArray = array();	
 
     public $uninterceptable = false;
 	public $uninterceptableArray = array();
@@ -1198,6 +1199,7 @@ class Weapon extends ShipSystem{
 		if(isset($this->fireControlArray[$i])) $this->fireControl = $this->fireControlArray[$i];
 		if(isset($this->loadingtimeArray[$i])) $this->loadingtime = $this->loadingtimeArray[$i];
 		if(isset($this->turnsloadedArray[$i])) $this->turnsloaded = $this->turnsloadedArray[$i];
+		if(isset($this->extraoverloadshotsArray[$i])) $this->extraoverloadshots = $this->extraoverloadshotsArray[$i];
 		if(isset($this->uninterceptableArray[$i])) $this->uninterceptable = $this->uninterceptableArray[$i];
 		if(isset($this->shotsArray[$i])) $this->shots = $this->shotsArray[$i];
 		if(isset($this->defaultShotsArray[$i])) $this->defaultShots = $this->defaultShotsArray[$i];
