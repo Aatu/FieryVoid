@@ -177,31 +177,25 @@ class HLPA extends Weapon{
 /*Heavy Laser-Pulse Array - let's try to create it using new mode change mechanism...*/	
         public $name = "hlpa";
         public $displayName = "Heavy Laser-Pulse Array";
+	    public $iconPath = "hlpa.png";
 	
 	//visual display - will it be enough to ensure correct animations?...
-	
-	//laser
-	public $animation = "laser";
-        public $animationColor = array(255, 11, 11);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.2;
-	
-	//pulse
-	public $trailColor = array(190, 75, 20);
-        public $animationColor = array(190, 75, 20);
- 	public $animation = "trail";
-        public $trailLength = 20;
-        public $animationWidth = 5;
-        public $projectilespeed = 20;
-        public $animationExplosionScale = 0.20;
+	public $animationArray = array(1=>'laser', 2=>'trail');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(190, 75, 20));
+        public $animationWidthArray = array(1=>4, 2=>5);
+        public $animationWidth2 = 0.2; //not used for Trail animation?...
+	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
+        public $trailLength = 20;//not used for Laser animation?...
+        public $projectilespeed = 20;//not used for Laser animation?...
+        public $animationExplosionScale = 0.20;//not used for Laser animation?...
 	
 	
 	//actual weapons data
         public $groupingArray = array(1=>0, 2=>20);
-        public $maxpulses = 6;
-	public $raking = 10;
+        public $maxpulses = 6; //only useful for Pulse mode
+	public $raking = 10; //only useful for Raking mode
         public $priorityArray = array(1=>7, 2=>5);
-	public $uninterceptableyArray = array(1=>true, 2=>false);
+	public $uninterceptableArray = array(1=>true, 2=>false);
 	
         public $loadingtimeArray = array(1=>4, 2=>3);
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
@@ -224,7 +218,7 @@ class HLPA extends Weapon{
         }
 	
         public function setSystemDataWindow($turn){
-		$this->data["Special"] = 'Can fire as either Heavy Laser or Heavy Pulse Cannon.";
+		$this->data["Special"] = 'Can fire as either Heavy Laser or Heavy Pulse Cannon. ';
 		parent::setSystemDataWindow($turn);
         }
 
