@@ -26,6 +26,8 @@
         public $tohitPenalty = 0;
         public $damagePenalty = 0;
 
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
     
         public function getDefensiveType()
         {
@@ -53,8 +55,8 @@
         }
         
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
             $this->data["DEFENSIVE BONUS:"] = "-15 to hit on arc";
             parent::setSystemDataWindow($turn);
         }
@@ -65,8 +67,8 @@
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
         
 
     }
@@ -97,6 +99,7 @@
         }
     }
     
+
     class InterceptorPrototype extends InterceptorMkI{
         public $name = "interceptorPrototype";
         public $displayName = "Interceptor Prototype";
@@ -124,12 +127,13 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+3;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 13 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     }
 
-    class GuardianArray extends Weapon{
 
+
+    class GuardianArray extends Weapon{
         public $trailColor = array(30, 170, 255);
         
         public $name = "guardianArray";
@@ -151,24 +155,22 @@
         public $rangePenalty = 3;
         public $fireControl = array(8, null, null); // fighters, <mediums, <capitals 
 
-
+        public $damageType = "Standard";
+        public $weaponClass = "Particle";
+        
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
 
-        public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
-            parent::setSystemDataWindow($turn);
-        }
-
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }        
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }        
 
     }
+
 
 
     class SentinelPointDefense extends GuardianArray{
@@ -204,6 +206,8 @@
 
     }
 
+
+
     class EMWaveDisruptor extends Weapon{
 
         public $trailColor = array(30, 170, 255);
@@ -224,11 +228,14 @@
         public $rangePenalty = 2;
         public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 
 
-
+    public $damageType = "Standard"; 
+    public $weaponClass = "Electromagnetic";
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-            $this->data["Weapon type"] = "Electromagnetic";
-            $this->data["Damage type"] = "Intercept / Dropout";
+            //$this->data["Weapon type"] = "Electromagnetic";
+            //$this->data["Damage type"] = "Intercept / Dropout";
+            $this->data["Special"] = "Intercept / Dropout";
         }
         
         public function getDamage($fireOrder){        return 0;   }
@@ -253,4 +260,6 @@
             return $this->getBoostLevel($turn);
         }
     }
+
+
 ?>
