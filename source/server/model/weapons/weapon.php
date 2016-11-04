@@ -853,6 +853,7 @@ class Weapon extends ShipSystem{
 		}
 
             $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+	    $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
             if ($rolled <= $needed){
 		$hitsRemaining=1;
 		    
@@ -870,7 +871,7 @@ class Weapon extends ShipSystem{
             }
         }
 
-        $fireOrder->rolled = 1;//Marks that fire order has been handled
+        $fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
     } //endof function fire
 
 	
