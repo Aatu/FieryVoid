@@ -46,7 +46,8 @@ class SWRayShield extends Shield implements DefensiveSystem{
         return $output;
     }
 	   
-}
+} //endof class SWRayShield
+
 
 
 class SWFighterLaser extends LinkedWeapon{
@@ -214,6 +215,8 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $priority = 4;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
     
+	public $damageType = 'Standard'; 
+    	public $weaponClass = "Ballistic"; 
     
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
@@ -239,7 +242,9 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $distanceRange = 15;
     public $hitChanceMod = 0;
     public $priority = 4;
-    
+	public $damageType = 'Standard'; 
+    	public $weaponClass = "Ballistic"; 
+	
     function __construct($startArc, $endArc, $fireControl = null){
         parent::__construct($startArc, $endArc, $fireControl);
     }
