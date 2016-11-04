@@ -8,7 +8,7 @@ class aurorax extends BaseShip{
 		$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "aurorax";
         $this->imagePath = "img/ships/tloth.png";
-        $this->shipClass = "T'Loth";
+        $this->shipClass = "technology tester";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);        
 		
@@ -28,7 +28,10 @@ class aurorax extends BaseShip{
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
 		$this->addPrimarySystem(new Hangar(5, 26));
 $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
-$this->addPrimarySystem($frontGun);	    
+$this->addPrimarySystem($frontGun);	
+	                //Ray Shield, 3 points
+            $this->addPrimarySystem(new SWRayShield(4, 12, 0, 2, 0, 360));
+	    $this->addPrimarySystem(new SWRayShield(4, 12, 0, 3, 300, 60));
         
         $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));        
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
