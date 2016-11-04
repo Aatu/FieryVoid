@@ -125,6 +125,8 @@ Weapon.prototype.changeFiringMode = function()
 	if(!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
 	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
+	if(!mathlib.arrayIsEmpty(this.extraoverloadshotsArray)) this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
+	
 	if(!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.shotsArray)) this.shots = this.shotsArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.$damageTypeArray)){
@@ -138,6 +140,7 @@ Weapon.prototype.changeFiringMode = function()
 	if(!mathlib.arrayIsEmpty(this.defaultShotsArray)) this.defaultShots = this.defaultShotsArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.groupingArray)) this.grouping = this.groupingArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.gunsArray)) this.guns = this.gunsArray[this.firingMode];
+
 	
 	//firing animation related...
 	if(!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
