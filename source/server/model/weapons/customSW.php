@@ -1,6 +1,54 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
+/*
+	StarWars Ray Shield: does not affect profile
+	protects vs all weapoon classes except Matter, Ballistic and SW Ion
+	doubly effective vs Raking weapons (to simulate longer burst)
+*/
+class SWRayShield extends Shield implements DefensiveSystem{
+    public $name = "swrayshield";
+    public $displayName = "Ray Shield";
+    public $iconPath = "shield.png";
+	
+ 	public $possibleCriticals = array( //different than usual B5Wars shield
+            16=>"OutputReduced1",
+            23=>array("OutputReduced1", "OutputReduced1")
+	);
+	
+    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+    }
+	
+	
+	
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+		$this->tohitPenalty = 0;
+		$this->damagePenalty = $this->getOutput();
+    }
+	
+   public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){ //no defensive hit chance change
+            return 0;
+    }
+	
+    
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under SW shield
+        return false;
+    }
+	
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+        if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
+        $output = $this->output;
+        $output -= $this->outputMod;
+	$output=max(0,$output);
+        return $output;
+    }
+	   
+}
+
+
 class SWFighterLaser extends LinkedWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
