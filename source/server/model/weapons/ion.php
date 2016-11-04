@@ -1,7 +1,7 @@
 <?php
 
-class IonBolt extends Weapon{
 
+class IonBolt extends Weapon{
     public $trailColor = array(30, 170, 255);
 
     public $name = "ionBolt";
@@ -20,26 +20,24 @@ class IonBolt extends Weapon{
     public $rangePenalty = 1;
     public $fireControl = array(-4, 0, 0); // fighters, <mediums, <capitals 
     public $exclusive = true;
+    
+    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
     function __construct($startArc, $endArc){
         parent::__construct(0, 1, 0, $startArc, $endArc);
 
     }
-    public function setSystemDataWindow($turn){
+    
 
-        $this->data["Weapon type"] = "Ion";
-        $this->data["Damage type"] = "Standard";
-
-        parent::setSystemDataWindow($turn);
-    }
     public function getDamage($fireOrder){        return Dice::d(6, 3);  }
-    public function setMinDamage(){     $this->minDamage = 3 - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+    public function setMinDamage(){     $this->minDamage = 3 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 18 ;      }
 
 }
 
-class IonCannon extends Raking{
 
+class IonCannon extends Raking{
     public $trailColor = array(30, 170, 255);
 
     public $name = "ionCannon";
@@ -55,21 +53,14 @@ class IonCannon extends Raking{
     public $intercept = 1;
     public $priority = 8;
     
-
-
     public $loadingtime = 2;
     public $shots = 1;
 
     public $rangePenalty = 0.25;
     public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals 
-
-    public function setSystemDataWindow($turn){
-
-        $this->data["Weapon type"] = "Ion";
-        $this->data["Damage type"] = "Raking";
-
-        parent::setSystemDataWindow($turn);
-    }
+    
+    public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -78,12 +69,13 @@ class IonCannon extends Raking{
     }
 
     public function getDamage($fireOrder){        return Dice::d(10, 2)+10;  }
-    public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
+    public function setMinDamage(){     $this->minDamage = 12 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 30 ;      }
 }
 
-class ImprovedIonCannon extends Raking{
 
+
+class ImprovedIonCannon extends Raking{
     public $trailColor = array(30, 170, 255);
 
     public $name = "improvedIonCannon";
@@ -103,22 +95,20 @@ class ImprovedIonCannon extends Raking{
     public $rangePenalty = 0.25;
     public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals 
 
+    public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+    
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
     
-    public function setSystemDataWindow($turn){
-
-        $this->data["Weapon type"] = "Ion";
-        $this->data["Damage type"] = "Raking";
-
-        parent::setSystemDataWindow($turn);
-    }
     
     public function getDamage($fireOrder){        return Dice::d(10, 2)+15;  }
-    public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
-    public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
+    public function setMinDamage(){     $this->minDamage = 17 ;      }
+    public function setMaxDamage(){     $this->maxDamage = 35 ;      }
 }
 
 
+?>
