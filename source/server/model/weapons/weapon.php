@@ -80,9 +80,9 @@ class Weapon extends ShipSystem{
     public $defaultShots = 1;
 	public  $defaultShotsArray = array();
 
-    public $rof = 2; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
-	//public Array = array();
+    public $rof = 1; //??? I do not see any use of this variable, besides one point in .js checking if it's 0...
 
+	
     public $grouping = 0;
 	public $groupingArray = array();
     public $guns = 1;
