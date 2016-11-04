@@ -1,4 +1,6 @@
 <?php
+
+
 class CustomLightMatterCannon extends Matter {
     /*Light Matter Cannon, as used on Ch'Lonas ships*/
         public $name = "customLightMatterCannon";
@@ -155,13 +157,13 @@ class CustomStrikeLaser extends Weapon{
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
-        //maxhealth and power reqirement are fixed; left option to override with hand-written values
-        if ( $maxhealth == 0 ){
-            $maxhealth = 5;
-        }
-        if ( $powerReq == 0 ){
-            $powerReq = 4;
-        }
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 5;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -169,5 +171,113 @@ class CustomStrikeLaser extends Weapon{
         public function setMinDamage(){ $this->minDamage = 10 ; }
         public function setMaxDamage(){ $this->maxDamage = 28 ; }
 }//CustomStrikeLaser
+
+
+class HLPA extends Weapon{ 
+/*Heavy Laser-Pulse Array - let's try to create it using new mode change mechanism...*/	
+        public $name = "hlpa";
+        public $displayName = "Heavy Laser-Pulse Array";
+	
+	//visual display - will it be enough to ensure correct animations?...
+	
+	//laser
+	public $animation = "laser";
+        public $animationColor = array(255, 11, 11);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.2;
+	
+	//pulse
+	public $trailColor = array(190, 75, 20);
+        public $animationColor = array(190, 75, 20);
+ 	public $animation = "trail";
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 20;
+        public $animationExplosionScale = 0.20;
+	
+	
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>20);
+        public $maxpulses = 6;
+	public $raking = 10;
+        public $priorityArray = array(1=>7, 2=>5);
+	public $uninterceptableyArray = array(1=>true, 2=>false);
+	
+        public $loadingtimeArray = array(1=>4, 2=>3);
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
+        public $fireControlArray = array( 1=>array(-4, 2, 3), 2=>array(-1,3,4) ); // fighters, <mediums, <capitals 
+	
+	public $firingModes = array(1=>'Laser', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Laser', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 10;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either Heavy Laser or Heavy Pulse Cannon.";
+		parent::setSystemDataWindow($turn);
+        }
+
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 4)+20; //Heavy Laser
+				break;
+			case 2:
+				return 15; //Heavy Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				return 24; //Heavy Laser
+				break;
+			case 2:
+				return 15; //Heavy Pulse
+				break;	
+		}
+	}
+        public function setMaxDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				return 60; //Heavy Laser
+				break;
+			case 2:
+				return 15; //Heavy Pulse
+				break;	
+		}
+	}
+	
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(5);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+	
+} //endof class HLPA
 
 ?>
