@@ -349,6 +349,7 @@ class GraviticBolt extends Gravitic
     }
 
 
+
     class GraviticCannon extends Gravitic
     {
         public $name = "graviticCannon";
@@ -362,7 +363,8 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 1;
         public $priority = 5;
 
-
+	public $damageType = 'Standard'; 
+    	public $weaponClass = "Gravitic"; 
 
 		
         public $rangePenalty = 0.33;
@@ -375,9 +377,11 @@ class GraviticBolt extends Gravitic
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+6;;   }
-        public function setMinDamage(){  $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){  $this->maxDamage = 16 - $this->dp;      }
+        public function setMinDamage(){  $this->minDamage = 7 ;      }
+        public function setMaxDamage(){  $this->maxDamage = 16 ;      }
     }
+
+
 
     class LightGraviticBolt extends LinkedWeapon{
 
@@ -404,6 +408,8 @@ class GraviticBolt extends Gravitic
         
         public $priority = 7;
 
+	public $damageType = 'Standard'; 
+    	public $weaponClass = "Gravitic"; 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
@@ -413,19 +419,14 @@ class GraviticBolt extends Gravitic
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Gravitic";
-            $this->data["Damage type"] = "Standard";
-
-            parent::setSystemDataWindow($turn);
-        }
 
         public function getDamage($fireOrder){        return 7;   }
-        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 7 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
 
     }
+
+
 
     class UltraLightGraviticBolt extends LinkedWeapon{
 
@@ -452,6 +453,8 @@ class GraviticBolt extends Gravitic
         
         public $priority = 6;
 
+	public $damageType = 'Standard'; 
+    	public $weaponClass = "Gravitic"; 
 
         function __construct($startArc, $endArc, $damagebonus, $shots = 2){
             $this->shots = $shots;
@@ -461,19 +464,13 @@ class GraviticBolt extends Gravitic
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Gravitic";
-            $this->data["Damage type"] = "Standard";
-
-            parent::setSystemDataWindow($turn);
-        }
 
         public function getDamage($fireOrder){        return 5;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 5 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 5 ;      }
 
     }
+
 
     class LightGravitonBeam extends Weapon{
         public $name = "lightGravitonBeam";
@@ -484,7 +481,6 @@ class GraviticBolt extends Gravitic
         public $animationWidth2 = 0;
         
         public $loadingtime = 3;
-        public $damageType = "raking";
         public $raking = 10;
         public $exclusive = true;
         public $priority = 9;
@@ -492,26 +488,23 @@ class GraviticBolt extends Gravitic
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
  
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
+	    
+	    
         function __construct($startArc, $endArc, $damagebonus){
-            
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
         
-        public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Gravitic";
-            $this->data["Damage type"] = "Standard";
-            
-            parent::setSystemDataWindow($turn);
-        }
         
         public function getDamage($fireOrder){        return Dice::d(6, 5);   }
-        public function setMinDamage(){   return  $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 30 - $this->dp;      }
+        public function setMinDamage(){   return  $this->minDamage = 5 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 30 ;      }
     }
     
-    class GraviticLance extends DualWeapon{
 
+
+class GraviticLance extends DualWeapon{
     public $priority = 7;
 
 	public $firingModes = array( 
@@ -522,39 +515,26 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 4;
         public $name = "GraviticLance";
 	public $displayName = "Gravitic Lance";
+	
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
         	
 	public function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
-        
             $lance = new GravLance($armour, $maxhealth, 8, $startArc, $endArc);
             $lance->dualWeapon = true;
             $lance->parentSystem = $this;
             $beams = new DuoGravitonBeam($armour, $maxhealth, 8, $startArc, $endArc);
             $beams->dualWeapon = true;
             $beams->parentSystem = $this;
-        
             $weapons = array(
                 1 => $lance,
                 2 => $beams
             );
-		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
-        
-/*        public function setLoading( $loading )
-        {
-            Debug::log("Enter gravlance setLoading");
-            if (!$loading){
-                Debug::log("Exit gravlance setLoading: nothing");
-                return;
-            }
-
-            foreach ($this->weapons as $i=>$weapon){
-
-                $weapon->setLoading($loading);
-            }
-        }*/
     }
     
+
     // Don't use the GravLance. It's only here for the GraviticLance class!!
     class GravLance extends Raking{
         public $name = "graviticLance";
@@ -566,6 +546,8 @@ class GraviticBolt extends Gravitic
 
         public $firingModes = array( 1 => "Sustained");
 
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
         
         public $loadingtime = 4;
         // Set overloading and overloadturns to have GravLance ready for
@@ -584,11 +566,7 @@ class GraviticBolt extends Gravitic
         }
 
         public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Gravitic";
-            $this->data["Damage type"] = "Raking";
             $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
-            
             parent::setSystemDataWindow($turn);
         }
         
@@ -597,15 +575,19 @@ class GraviticBolt extends Gravitic
         }
         
         public function getDamage($fireOrder){        return Dice::d(10, 6)+24;   }
-        public function setMinDamage(){   return  $this->minDamage = 30 - $this->dp;      }
-        public function setMaxDamage(){   return  $this->maxDamage = 84 - $this->dp;      }
+        public function setMinDamage(){   return  $this->minDamage = 30 ;      }
+        public function setMaxDamage(){   return  $this->maxDamage = 84 ;      }
     }
     
+
     class DuoGravitonBeam extends DuoWeapon{
     
         public $name = "duoGravitonBeam";
 	public $displayName = "Graviton Beams";
         
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
+	    
         // Just for testing!
         public $loadingtime = 4;
 	
@@ -624,9 +606,8 @@ class GraviticBolt extends Gravitic
  
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $weapons);
         }
-        
-        
     }
+
 
     class GraviticCutter extends Raking
     {
@@ -638,7 +619,6 @@ class GraviticBolt extends Gravitic
         public $animationWidth2 = 0.2;
         public $priority = 8;
         
-        public $damageType = "raking";
         public $raking = 6;
 
         public $boostable = true;
@@ -649,6 +629,9 @@ class GraviticBolt extends Gravitic
         public $rangePenalty = 0.5;
         public $fireControl = array(-4, 2, 4); // fighters, <mediums, <capitals 
         
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Gravitic"; 
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -657,7 +640,6 @@ class GraviticBolt extends Gravitic
         public function setSystemDataWindow($turn){
             // Keep this consistent with the gravitic.js implementation.
             // Yeah, I know: dirty.
-            $this->data["Weapon type"] = "Raking";
             $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
             $this->setTimes();
 //            $this->normalload = $this->loadingtime;
@@ -744,19 +726,19 @@ class GraviticBolt extends Gravitic
         
         public function setMinDamage(){
             if($this->getBoostLevel(TacGameData::$currentTurn)==0){
-                $this->minDamage = 10 - (2*$this->dp);
+                $this->minDamage = 10 ;
             }
             else{
-                $this->minDamage = 13 - (2*$this->dp);
+                $this->minDamage = 13 ;
             }
         }
         
         public function setMaxDamage(){
             if($this->getBoostLevel(TacGameData::$currentTurn)==0){
-                $this->maxDamage = 28 - (2*$this->dp);
+                $this->maxDamage = 28 ;
             }
             else{
-                $this->maxDamage = 40 - (2*$this->dp);
+                $this->maxDamage = 40 ;
             }
         }
     }
