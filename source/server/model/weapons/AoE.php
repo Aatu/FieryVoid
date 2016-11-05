@@ -1,6 +1,6 @@
 <?php
 
-    class AoE extends Weapon{ //directly tailored for EMine, really
+    class AoE extends Weapon{ //directly tailored for EMine, really - not a generic base class
 	    public $damageType = "Flash"; 
 	    public $weaponClass = "Ballistic";
 	    
@@ -16,6 +16,7 @@
 	public function fire($gamedata, $fireOrder){ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
 		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
            	$shooter = $gamedata->getShipById($fireOrder->shooterid);
+	
 
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!	
@@ -49,13 +50,12 @@
 			$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
 			foreach($ships2 as $target){
 				if(isset($ships1[ $target->id])){ //ship on target hex!
-					$damage = $this->maxDamage;
 					$sourceHex = $posLaunch;
+					$damage = $this->maxDamage;
 				}else{ //ship at range 1!
-					$damage = $this->minDamage;
 					$sourceHex = $target;
+					$damage = $this->minDamage;
 				}
-				
 				$this->AOEdamage( $target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 			}
 		}
@@ -67,6 +67,8 @@
 
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata){
             if ($target->isDestroyed()) continue; //no point allocating
+		$damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
+		$damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn);
 		if ($target instanceof FighterFlight){
 		    foreach ($target->systems as $fighter){
 			if ($fighter == null || $fighter->isDestroyed()){
@@ -235,7 +237,7 @@
             $this->data["Weapon type"] = "Ballistic";
         }
         
-	    /*getDamage in itself depends on actually hit ship - this function is meaningless, really!*/
+	    /*getDamage in itself depends on actually hit ship - this function is meaningless here, really!*/
         public function getDamage($fireOrder){        return 10;   } 
 	    /*these are important, though!*/
         public function setMinDamage(){     $this->minDamage = 10;      }
