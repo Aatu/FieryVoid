@@ -1,6 +1,39 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
+/*static class to handle accumulating Ion damage*/
+class SWIonHandlerHandler{
+	private static $accumulatedIonDmg = array();
+	
+	public static function addDamage($targetUnit, $target
+
+
+	public static function checkArmorReduction($target, $shooter){ 
+	    $currentTurn = TacGamedata::$currentTurn;
+	    //Debug::log("doArmorReduction");
+	    // Always clean-up first.
+	    foreach (LightMolecularDisrupterHandler::$hits as $hit){
+		if($hit['turn'] != $currentTurn) unset($hit);
+	    }
+	    // add new hit to the array
+	    LightMolecularDisrupterHandler::$hits[] = array('turn'=>$currentTurn, 'shooter'=>$shooter->id ,'target'=>$target->id);
+	    // Check if this was number 3 for a certain target. If so, decrease armor of the structure
+	    $count = 0;
+	    foreach(LightMolecularDisrupterHandler::$hits as $hit){
+		//    Debug::log("Checking array");
+		if($hit['shooter'] == $shooter->id && $hit['target'] == $target->id){
+		    $count++; //       Debug::log("Count is ".$count." for shooter id ".$shooter->id);
+		}
+	    }
+	    if($count===3){ //   Debug::log("Count is 3 for shooter id ".$shooter->id." and target id ".$target->id);
+		return true;
+	    }
+	    return false;
+	}
+}
+
+
+
 /*
 	StarWars Ray Shield: does not affect profile
 	protects vs all weapoon classes except Matter, Ballistic and SW Ion
