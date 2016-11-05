@@ -5,7 +5,9 @@
 class SWIonHandlerHandler{
 	private static $accumulatedIonDmg = array();
 	
-	public static function addDamage($targetUnit, $target
+	public static function addDamage($targetUnit, $targetSystem, $dmgInflicted){
+		
+	}
 
 
 	public static function checkArmorReduction($target, $shooter){ 
