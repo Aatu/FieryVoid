@@ -134,6 +134,7 @@
         public $animationWidth = 10;
         public $trailLength = 25;
         public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
         public $intercept = 0;
         public $loadingtime = 4;
@@ -173,7 +174,7 @@
             if(!$this->alreadyReduced){ 
                 $struct = $target->getStructureSystem($location);
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
-                    $this->alreadyReduced = true; //in case of Piercing shot, do this only for first part of shot that actually connects
+                    $this->alreadyReduced = true; //do this only for first part of shot that actually connects
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = false;
@@ -224,7 +225,7 @@
         public $animationColor = array(100, 100, 255);
         public $animationWidth = 4.5;
         public $animationWidth2 = 0.3;
-        public $priority = 3; 
+        public $priority = 2; 
 
         public $animationExplosionScale = 0.35;
 
