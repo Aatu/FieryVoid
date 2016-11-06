@@ -100,14 +100,9 @@ interface SpecialAbility{
 }
 
 interface DefensiveSystem{
-
     public function getDefensiveType();
-     
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn);
-    
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn);
-    
-    
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon);
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon);
 }
 
 class Shield extends ShipSystem implements DefensiveSystem{
@@ -144,10 +139,9 @@ class Shield extends ShipSystem implements DefensiveSystem{
     }
     
     private function checkIsFighterUnderShield($target, $shooter){
+	if(!($shooter instanceof FighterFlight) return false; //only fighters may fly under shield!
         $dis = mathlib::getDistanceOfShipInHex($target, $shooter);
-            
-        if ( $dis == 0 && ($shooter instanceof FighterFlight)){
-            // If shooter are fighers and range is 0, they are under the shield
+        if ( $dis == 0 ){ //If shooter are fighers and range is 0, they are under the shield
             return true;
         }
         return false;
@@ -158,7 +152,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         return "Shield";
     }
     
-    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
             return 0;
         
@@ -170,7 +164,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
         return $output;
     }
     
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn())
             return 0;
         
