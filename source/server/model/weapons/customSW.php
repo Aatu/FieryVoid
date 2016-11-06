@@ -46,6 +46,7 @@ class SWIonHandler{
 /*base class for StarWars Ion weapons*/
 class SWIon extends Weapon{	
 	/*compared to SW Lasers: a bit better range, but poor FC and damage (and possible RoF as well)*/
+    public $name = "swion";
     public $priority = 10; //Ions usually fire last, to take advantage of induced criticals
  
     public $damageType = "Standard"; //most if not all SWIon weapons will be Standard mode
@@ -93,8 +94,6 @@ class SWRayShield extends Shield implements DefensiveSystem{
         // shieldfactor is handled as output.
         parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
     }
-	
-	
 	
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
