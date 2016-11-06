@@ -85,6 +85,7 @@ spl_autoload_register(
                 //custom weapons StarWars
                 'swrayshield' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
+                'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
