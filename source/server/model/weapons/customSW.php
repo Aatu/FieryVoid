@@ -4,9 +4,43 @@
 /*static class to handle accumulating Ion damage*/
 class SWIonHandlerHandler{
 	private static $accumulatedIonDmg = array();
+	private static $power = 1.4; //effect magnitude from hit damage ^power
+	private static $free = 10; //this much damage doesn't cause anything
+	private static $threshold = 10; //this much damage (after $free) causes power shortage
+	private static $turn = 0;
+	
+	
 	
 	public static function addDamage($targetUnit, $targetSystem, $dmgInflicted){
-		
+		if($dmgInflicted<1) return;//no point if no damage was actually done
+		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
+		if ($targetUnit->isDestroyed()) return; //no point in doing anything
+		if(($targetSystem->displayName == 'Structure') || ($targetSystem instanceof Reactor) ){ //full damage counts
+			$baseDmg = $dmgInflicted;
+		}else{ //half damage counts 
+			$baseDmg = ceil($dmgInflicted/2);
+		}
+		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
+		$effect = pow($baseDmg,$power);
+		$targetID = $targetUnit->id;
+		$currentTurn = TacGamedata::$currentTurn;
+		if(SWIonHandlerHandler::$turn != $currentTurn){
+			SWIonHandlerHandler::$accumulatedIonDmg = array();//clear everything, it's not current data
+			SWIonHandlerHandler::$turn = $currentTurn;
+		}
+		if(!isset(SWIonHandlerHandler::$accumulatedIonDmg[$targetID]))SWIonHandlerHandler::$accumulatedIonDmg[$targetID]=0;
+		SWIonHandlerHandler::$accumulatedIonDmg[$targetID]+=$effect;
+		$threshold = SWIonHandlerHandler::$free+SWIonHandlerHandler::$threshold;
+		while(SWIonHandlerHandler::$accumulatedIonDmg[$targetID]>$threshold){
+			SWIonHandlerHandler::$accumulatedIonDmg[$targetID] -= SWIonHandlerHandler::$threshold;
+			//cause power shortage...
+			$reactor = $targetUnit->getSystemByName("Reactor");
+			if($reactor instanceof Reactor){ //just making sure!
+				$crit = new OutputReduced1(-1, $targetID, $reactor->id, "OutputReduced1", $currentTurn);
+				$crit->updated = true;
+				$reactor->criticals[] =  $crit;
+			}
+		}
 	}
 
 
@@ -181,16 +215,15 @@ class SWFighterIon extends LinkedWeapon{
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
  
     public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "SW Ion"; //weapon class - overrides $this->data["Weapon type"] if set!
+    public $weaponClass = "SWIon"; //weapon class - overrides $this->data["Weapon type"] if set!
 	  
     public $systemKiller = true;
 
     
     public function setSystemDataWindow($turn){
       parent::setSystemDataWindow($turn);
-      $this->data["<font color='red'>Remark</font>"] = "Increased chance to hit systems.";      
-      $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical."; 
-      $this->data["<font color='red'>Remark</font>"] .= "<br>Ignore half of armor."; 
+      $this->data["<font color='red'>Remark</font>"] = "Damage may cause power shortages.";      
+      $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical on systems damaged."; 
     }
      	
 	
@@ -222,10 +255,12 @@ class SWFighterIon extends LinkedWeapon{
 	
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+      $dmg = $damage - $armour;
+      if($dmg<=0) return; //no damage was actually done
       if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
       if($system instanceof Structure) return; //structure does not suffer critical hits anyway
-            
-      $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $damage); //for ship system and fighter alike
+
+      $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $dmg); //for ship system and fighter alike
       $system->criticals[] =  $crit;
     }
 
