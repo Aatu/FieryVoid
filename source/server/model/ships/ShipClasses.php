@@ -341,63 +341,50 @@
 	    
 
         
-        public function getHitChanceMod($shooter, $pos, $turn){
+        public function getHitChanceMod($shooter, $pos, $turn, $weapon){
             $affectingSystems = array();
-            
             foreach($this->systems as $system){
-                
-                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
-                    continue;
-                
-                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn);
-                
-                if ( !isset($affectingSystems[$system->getDefensiveType()])
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+                if ( !isset($affectingSystems[$system->getDefensiveType()]) //no system of this kind is taken into account yet, or it is but it's weaker
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
                     $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
-                
             }
             return (-array_sum($affectingSystems));
     	}
         
-        public function getDamageMod($shooter, $pos, $turn){
+        public function getDamageMod($shooter, $pos, $turn, $weapon){
 	    $affectingSystems = array();
             foreach($this->systems as $system){
-                
-                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
-                    continue;
-                
-                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn);
-                
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
                 if ( !isset($affectingSystems[$system->getDefensiveType()])
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
                     $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
-                
             }
             return array_sum($affectingSystems);
-		}
+	}
         
-        private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn){
-            if (!($system instanceof DefensiveSystem))
-                return false;
+        private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon){
+            if (!($system instanceof DefensiveSystem)) return false; //this isn't a defensive system at all
                 
             //If the system was destroyed last turn continue 
             //(If it has been destroyed during this turn, it is still usable)
-            if ($system->isDestroyed($turn-1))
-               return false;
+            if ($system->isDestroyed($turn-1)) return false;
 
             //If the system is offline either because of a critical or power management, continue
-            if ($system->isOfflineOnTurn($turn))
-                return false;
+            if ($system->isOfflineOnTurn($turn)) return false;
 
             //if the system has arcs, check that the position is on arc
             if(is_int($system->startArc) && is_int($system->endArc)){
-
-                $tf = $this->getFacingAngle();
-
-                //get the heading of position, not ship (in case ballistic)
+                //get bearing on incoming fire...
+		if($weapon->ballistic){
 		    $relativeBearing = $this->getBearingOnPos($pos);
+		}else{ //direct fire weapon - check from shooter...
+		    $relativeBearing = $this->getBearingOnUnit($shooter);
+		}
 
                 //if not on arc, continue!
                 if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){
