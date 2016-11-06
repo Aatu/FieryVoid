@@ -203,6 +203,7 @@
 
         public $raking = 10;
         public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
         
         public $firingModes = array(
             1 => "Raking",
@@ -292,6 +293,7 @@
             public $overloadable = true;
 
             public $priority = 7;
+            public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
             public $firingModes = array(
                 1 => "Raking",
@@ -329,6 +331,7 @@
         public $loadingtime = 3;
         public $overloadable = true;
         public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
             public $firingModes = array(
                 1 => "Raking",
@@ -363,6 +366,7 @@
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
         public $priority = 8;
+        public $priorityArray = array(1=>8, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
         public $loadingtime = 3;
         public $overloadable = false;
@@ -400,6 +404,7 @@
         public $loadingtime = 4;
 
         public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
 
             public $firingModes = array(
                 1 => "Raking",
@@ -420,6 +425,7 @@
         public function setMinDamage(){ $this->minDamage = 14 - $this->dp; }
         public function setMaxDamage(){ $this->maxDamage = 50 - $this->dp; }
     }
+
 
 
     class TacLaser extends Laser{
