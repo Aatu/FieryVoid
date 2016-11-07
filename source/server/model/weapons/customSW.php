@@ -110,11 +110,15 @@ class SWRayShield extends Shield implements DefensiveSystem{
         return false;
     }
 	
-    public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
         $output = $this->output;
+	//Ballistic, Matter, SWIon - passes through!
+	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' ) $output = 0;
         $output -= $this->outputMod;
-	$output=max(0,$output);
+	//Raking - double effect!
+	if($weapon->damageType == 'Raking') $output = 2*$output;
+	$output=max(0,$output); //no less than 0!
         return $output;
     }
 	   
