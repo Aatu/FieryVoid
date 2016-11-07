@@ -41,8 +41,8 @@ class Vulture extends BaseShipNoAft{
         $this->addLeftSystem(new CargoBay(2, 10));
         $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
 
-        $this->addRightSystem(new LightParticleCannon(2, 6, 5, 300, 120));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 300, 120));
+        $this->addRightSystem(new LightParticleCannon(2, 6, 5, 300, 120));
         $this->addRightSystem(new CargoBay(2, 10));
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
 
