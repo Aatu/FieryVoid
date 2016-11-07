@@ -613,6 +613,7 @@ spl_autoload_register(
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
+                'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
