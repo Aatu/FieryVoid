@@ -457,9 +457,12 @@ shipWindowManager = {
                     if(i == "normal"){
                         notes.push("&nbsp;&nbsp;&nbsp;"+amount+" fighters");
                     }
-                    else{
+                    elseif((i=="superheavy") || (i=="heavy") || (i=="medium") || (i=="light") || (i=="ultralight")){ //fighters with description
                         notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
-                    }
+                    }else{ //something other than fighters
+			notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i );
+		    }
+			
                 }
             }
            
