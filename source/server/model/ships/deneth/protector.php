@@ -6,11 +6,13 @@ class Protector extends HeavyCombatVessel{
         
         $this->pointCost = 520;
         $this->faction = "Deneth";
-        $this->phpclass = "Protector";
+        $this->phpclass = "protector";
         $this->imagePath = "img/ships/brigantine.png"; //need to change
-        $this->shipClass = "Protector Heavy DD";
+        $this->shipClass = "Protector Heavy Destroyer";
         $this->occurence = "common";
         $this->fighters = array("normal"=>6);
+	    
+	$this->isd = 2242;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
@@ -32,16 +34,16 @@ class Protector extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-	$this->addFrontSystem(new MediumPulse(3, 6, 3, 270, 60));
-	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 240, 0));
-	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 0, 120));
 	$this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
-	$this->addFrontSystem(new TwinArray(2, 6, 2, 270, 120));		
+	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 240, 0));
+	$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
+	$this->addFrontSystem(new AssaultLaser(3, 6, 4, 0, 120));
+	$this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));		
         
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
-        $this->addAftSystem(new TwinArray(2, 6, 2, 180, 270));
+        $this->addAftSystem(new TwinArray(2, 6, 2, 180, 300));
         $this->addAftSystem(new TwinArray(2, 6, 2, 60, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
