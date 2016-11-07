@@ -13,6 +13,7 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->limited = 33;
         $this->occurence = "rare";
         $this->variantOf = 'Peregrine Jump Ship';
+	$this->isd = 2065;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
