@@ -95,7 +95,7 @@ spl_autoload_register(
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
-                
+                'hlpa' => '/server/model/weapons/customs.php',
 
 
                 //Deneth
@@ -104,6 +104,8 @@ spl_autoload_register(
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
+                
+                'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 
                 // centauri raiders
