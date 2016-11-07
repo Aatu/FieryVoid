@@ -1,15 +1,17 @@
 <?php
-class SentryFrigate extends MediumShip{
+class sentryFF extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 420;
-		$this->faction = "Deneth";
-        $this->phpclass = "SentryFrigate";
+	$this->pointCost = 420;
+	$this->faction = "Deneth";
+        $this->phpclass = "sentryFF";
         $this->imagePath = "img/ships/pinnace.png";
         $this->shipClass = "Sentry Frigate";
         $this->canvasSize = 100;
+	    
+	$this->isd = 2224;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
