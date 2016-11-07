@@ -4,12 +4,14 @@ class ProviderFreighter extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 110;
-		$this->faction = "Deneth";
-        $this->phpclass = "ProviderFreighter";
+	$this->pointCost = 110;
+	$this->faction = "Civilians";
+        $this->phpclass = "providerfreighter";
         $this->imagePath = "img/ships/civilianFreighter.png";
         $this->shipClass = "Provider Freighter";
         $this->canvasSize = 100;
+	    
+	$this->isd = 2210;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 15;
@@ -19,7 +21,7 @@ class ProviderFreighter extends MediumShip{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-		$this->iniativebonus = -20;
+	$this->iniativebonus = -20;
 		
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
