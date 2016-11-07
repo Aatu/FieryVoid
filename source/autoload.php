@@ -104,11 +104,16 @@ spl_autoload_register(
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
+                'protector' =>  '/server/model/ships/deneth/protector.php', 
+                'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
+                'watcher' =>  '/server/model/ships/deneth/watcher.php', 
                 
                 'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
                 
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
+                
+                'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
