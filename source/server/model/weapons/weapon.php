@@ -1097,6 +1097,7 @@ class Weapon extends ShipSystem{
 	
 
 	/*returns modified damage, NOT damage modifier*/
+	/*this is different function that getDamageMod of unit!*/
     protected function getDamageMod($damage, $shooter, $target, $pos, $gamedata){
         $damage = $damage - $damage*$this->dp; //$dp is fraction of shot that gets wasted!
 	    
@@ -1118,7 +1119,7 @@ class Weapon extends ShipSystem{
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
         $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn);
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $weapon);
 
         return $damage;
     }
