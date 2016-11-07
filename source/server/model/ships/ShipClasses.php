@@ -10,7 +10,7 @@
         public $hitChart = array();
 
         public $occurence = "common";
-	public $variantOf = ''; //variant of what? - display name! (info for user, not system)
+	public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
         public $limited = 0;
         public $agile = false;
         public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
