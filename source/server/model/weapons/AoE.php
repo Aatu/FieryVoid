@@ -83,6 +83,12 @@
 		}   
         }
 
+	/*only half damage vs Enormous units...*/
+	public function getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata){
+		$modifiedDmg = parent::getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
+		if($target->Enormous) $modifiedDmg = floor($modifiedDmg/2);
+		return $modifiedDmg;
+	}
 
 /*old redefinitions - new ones are in their place now!	    
         public function calculateHit($gamedata, $fireOrder){
