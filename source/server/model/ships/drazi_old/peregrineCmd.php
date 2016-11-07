@@ -44,9 +44,9 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->addLeftSystem(new ParticleCannon(3, 8, 7, 240, 60));
         $this->addLeftSystem(new Thruster(4, 16, 0, 5, 3));
         
-        $this->addRightSystem(new ParticleCannon(3, 8, 7, 300, 120));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
 	$this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
+        $this->addRightSystem(new ParticleCannon(3, 8, 7, 300, 120));
         $this->addRightSystem(new Thruster(4, 16, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -56,38 +56,38 @@ class PeregrineCmd extends BaseShipNoAft{
         $this->addFrontSystem(new Structure(4, 44));
     
     
-      $this->hitChart = array(
-        		0=> array(
-        				8=> "Structure",
-        				10=> "Thruster",
-        				12=> "Scanner",
-					14=> "Jump Engine",
-        				16=> "Engine",
-        				18=> "Hangar",
-        				19=> "Reactor",
-        				20=> "C&C",
-        		),
-        		1=> array(
-        				5=> "Thruster",
-        				8=> "Solar Cannon",
-        				9=> "Standard Particle Beam",
-        				18=> "Structure",
-        				20=> "Primary",
-        		),
-        		3=> array(
-        				5=> "Thruster",
-        				7=> "Standard Particle Beam",
-        				9=> "Particle Cannon",
-        				18=> "Structure",
-        				20=> "Primary",
-        		),
-        		4=> array(
-        				5=> "Thruster",
-        				7=> "Standard Particle Beam",
-        				9=> "Particle Cannon",
-        				18=> "Structure",
-        				20=> "Primary",
-        		),
+      	$this->hitChart = array(
+		0=> array(
+				8=> "Structure",
+				10=> "Thruster",
+				12=> "Scanner",
+				14=> "Jump Engine",
+				16=> "Engine",
+				18=> "Hangar",
+				19=> "Reactor",
+				20=> "C&C",
+		),
+		1=> array(
+				5=> "Thruster",
+				8=> "Solar Cannon",
+				9=> "Standard Particle Beam",
+				18=> "Structure",
+				20=> "Primary",
+		),
+		3=> array(
+				5=> "Thruster",
+				7=> "Standard Particle Beam",
+				9=> "Particle Cannon",
+				18=> "Structure",
+				20=> "Primary",
+		),
+		4=> array(
+				5=> "Thruster",
+				7=> "Standard Particle Beam",
+				9=> "Particle Cannon",
+				18=> "Structure",
+				20=> "Primary",
+		),
         );
     }
 }
