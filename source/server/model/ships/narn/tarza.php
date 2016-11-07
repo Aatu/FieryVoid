@@ -20,7 +20,8 @@ class Tarza extends FighterFlight{
 	$this->iniativebonus = 90;
         
         $this->occurence = 'rare';
-	$this->variantOf = "Gorith";
+	$this->variantOf = "Gorith Medium Fighters";
+	    
         $this->populate();
     }
 
