@@ -12,6 +12,7 @@ class TethysPolice extends MediumShip{
 		$this->canvasSize = 100;
 		$this->occurence = "uncommon";
 	        $this->variantOf = 'Tethys Police Cutter (Kappa)';
+	        $this->isd = 2243;
 
 		$this->forwardDefense = 13;
 		$this->sideDefense = 13;
