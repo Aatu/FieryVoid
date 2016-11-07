@@ -241,7 +241,7 @@ window.gamedata = {
 			//show separately: every ship size (skipping bases), fighters, bases
 			
 			//let's start from top: capital ships
-			var sizeClassHeaders = ['Fighters','Medium ships','Heavy Ships', 'Capital ships', 'Bases'];
+			var sizeClassHeaders = ['Fighters','Medium Ships','Heavy Ships', 'Capital Ships', 'Bases'];
 			for(var desiredSize=4; desiredSize>=0;desiredSize--){
 				//display header
 				h = $('<div class="shipsizehdr" data-faction="'+ faction +'"><span class="shiptype">'+sizeClassHeaders[desiredSize]+'</span></div>');
