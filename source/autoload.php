@@ -105,6 +105,8 @@ spl_autoload_register(
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
                 
+                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
+                
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 
