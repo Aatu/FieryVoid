@@ -24,7 +24,7 @@ class Kestrel extends MediumShip{
 	$this->iniativebonus = 70;
 	
 	$this->occurence = "rare";
-	$this->variantOf = "Kestrel (same as Drazi Raider Throkan)";
+	$this->variantOf = "Kestrel Corvette";
 	
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 4));
