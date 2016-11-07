@@ -9,13 +9,13 @@ class OmegaBeta  extends BaseShip{
         $this->faction = "EA";
         $this->phpclass = "OmegaBeta";
         $this->imagePath = "img/ships/omega.png";
-        $this->shipClass = "Omega Destroyer (Beta)";
+        $this->shipClass = "Omega Pulse Destroyer (Beta)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
 	    
 	$this->isd = 2259;
-	$this->variantOf = 'Omega Pulse Destroyer (Beta)';
+	$this->variantOf = 'Omega Destroyer (Alfa)';
 	$this->occurence = 'common';
         
         $this->forwardDefense = 16;
