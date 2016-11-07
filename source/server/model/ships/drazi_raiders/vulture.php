@@ -12,6 +12,8 @@ class Vulture extends BaseShipNoAft{
         $this->fighters = array("light" => 12);
         $this->limited = 33;
         
+        $this->isd = 2065;
+        
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
@@ -51,6 +53,46 @@ class Vulture extends BaseShipNoAft{
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
         $this->addFrontSystem(new Structure(4, 40));
+        
+
+        
+        $this->hitChart = array(
+        		0=> array(
+        				8=> "Structure",
+                        9=> "Jump Engine",
+        				11=> "Thruster",
+        				13=> "Scanner",
+					    15=> "Engine",
+        				17=> "Hangar",
+        				19=> "Reactor",
+        				20=> "C&C",
+        		),
+        		1=> array(
+        				4=> "Thruster",
+        				7=> "Particle Cannon",
+        				8=> "Repeater Gun",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        		3=> array(
+        				4=> "Thruster",
+        				5=> "Standard Particle Beam",
+        				7=> "Light Particle Cannon",
+                        9=> "Cargo",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        		4=> array(
+        				4=> "Thruster",
+        				5=> "Standard Particle Beam",
+        				7=> "Light Particle Cannon",
+                        9=> "Cargo",
+        				18=> "Structure",
+        				20=> "Primary",
+        		),
+        );        
+        
+        
     }
 }
 ?>
