@@ -13,6 +13,10 @@ class OmegaBeta  extends BaseShip{
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
+	    
+	$this->isd = 2259;
+	$this->variantOf = 'Omega Pulse Destroyer (Beta)';
+	$this->occurence = 'common';
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
