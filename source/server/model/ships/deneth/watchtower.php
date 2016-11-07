@@ -7,15 +7,17 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->faction = "Deneth";
 		$this->phpclass = "Watchtower";
 		$this->shipClass = "Watchtower Base";
-		$this->fighters = array("normal"=>30); 
+		$this->fighters = array("normal"=>30, "LCVs"=>4); 
 		$this->shipSizeClass = 3; //this is Capital base
+		$this->base = true;
+		$this->smallbase = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 		$this->forwardDefense = 16;
-		$this->sideDefense = 16;
+		$this->sideDefense = 16;		
 		
-		        $this->occurence = "unique";
+		
 		$this->imagePath = "img/ships/orion.png";
 		$this->canvasSize = 280; 
 		
@@ -39,8 +41,8 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Structure( 5, 60));
 		
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 270 + ($i*90);
-			$max = 90 + ($i*90);
+			$min = 300 + ($i*90);
+			$max = 60 + ($i*90);
 			$systems = array(
 				new TwinArray(4, 6, 2, $min, $max),
 				new TwinArray(4, 6, 2, $min, $max),
@@ -67,4 +69,18 @@ class Watchtower extends SmallStarBaseFourSections{
 			}
 		}
     }
+	
+	
+        //Watchtower has atypical arcs, for a base!
+	public function getLocations(){        
+            $locs = array();
+            $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->forwardDefense);
+            return $locs;
+        }
+	
 }
+
+?>
