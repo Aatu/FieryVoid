@@ -43,8 +43,9 @@ class PeregrineOld extends BaseShipNoAft{
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
         $this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 0));
         $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
-        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
+	    
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
+        $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
 	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
