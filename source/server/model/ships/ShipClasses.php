@@ -10,6 +10,7 @@
         public $hitChart = array();
 
         public $occurence = "common";
+	public $variantOf = ''; //variant of what? - display name! (info for user, not system)
         public $limited = 0;
         public $agile = false;
         public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
