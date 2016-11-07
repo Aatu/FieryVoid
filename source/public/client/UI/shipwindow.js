@@ -474,7 +474,7 @@ shipWindowManager = {
             }
 		
 	    if(ship.unofficial == true){
-		    notes.push("&nbsp;CUSTOM UNIT");
+		    notes.push("&nbsp;<b><i>CUSTOM UNIT</i></b>");
 	    }
         }
         
