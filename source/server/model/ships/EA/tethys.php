@@ -10,6 +10,8 @@ class Tethys extends MediumShip{
         $this->imagePath = "img/ships/tethys.png";
         $this->shipClass = "Tethys Police Cutter (Kappa)";
         $this->canvasSize = 100;
+	    
+	    $this->isd = 2246;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
