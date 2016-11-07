@@ -10,6 +10,8 @@ class zzftrywing extends FighterFlight{
         $this->shipClass = "Y-Wing Tech Demo flight";
         $this->imagePath = "img/starwars/yWing.png";
         
+        //$this->isd = 2214;
+        $this->unofficial = true;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 10;
