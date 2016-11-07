@@ -9,6 +9,8 @@ class ThunderboltStarfuryNav extends FighterFlight{
     $this->phpclass = "ThunderboltStarfuryNav";
     $this->shipClass = "Starfury: Thunderbolt Heavy flight (with navigator)";
     $this->imagePath = "img/ships/thunderboltStarfury.png";
+	    
+    $this->variantOf = 'Starfury: Thunderbolt Heavy flight';
 
     $this->forwardDefense = 8;
     $this->sideDefense = 7;
