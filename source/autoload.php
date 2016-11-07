@@ -139,6 +139,7 @@ spl_autoload_register(
                 'swift' => '/server/model/ships/drazi_old/swift.php',
                 'peregrine' => '/server/model/ships/drazi_old/peregrine.php',
                 'peregrineold' => '/server/model/ships/drazi_old/peregrineOld.php',
+                'peregrinecmd' => '/server/model/ships/drazi_old/peregrineCmd.php',
                 
 
                 //Streib
