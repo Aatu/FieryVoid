@@ -12,7 +12,7 @@ window.gamedata = {
 	status: "LOBBY",
     selectedSlot:null,
     allShips: null,
-
+	
 	canAfford: function(ship){
 
         var slotid = gamedata.selectedSlot;
@@ -202,40 +202,55 @@ window.gamedata = {
 	/*prepares fleet list for purchases for display*/
 	parseShips: function(jsonShips){
 		for (var faction in jsonShips){
+			var targetNode = document.getElementById(ship.faction);
+			var h;
+			var ship;
+			var shipV;
+			var shipDisplayName;
 			var shipList = jsonShips[faction];
 			this.orderShipListOnName(shipList);
 			gamedata.setShipsFromFaction(faction, shipList);
 			
-			//show separately: bases: every ship size, fighters
+			//show separately: every ship size (skipping bases), fighters, bases
 			
 			//let's start from top: capital ships
-			var sizeClassHeaders = ['Medium ships:','Heavy Ships:', 'Capital ships:'];
-			
-			for (var index = 0; index < jsonShips[faction].length; index++){
-				var ship = shipList[index];
-				if(ship.base == true) continue; //check if it's not a base
-				if(ship.shipSizeClass!=3) continue;//check if it's capital
-				if(ship.variantOf!='') continue;//check if it's not a variant
-				//ok, display...
-				var shipDisplayName = prepareClassName(ship);
-				var targetNode = document.getElementById(ship.faction);
-				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+			var sizeClassHeaders = ['Fighters','Medium ships','Heavy Ships', 'Capital ships', 'Bases'];
+			for(var desiredSize=4; desiredSize>=0;desiredSize--){
+				//display header
+				h = $('<div class="shipsizehdr" data-faction="'+ faction +'"><span class="shiptype">'+sizeClassHeaders[desiredSize]+'</span></div>');
                     		h.appendTo(targetNode);
-				//search for variants...
+				for (var index = 0; index < jsonShips[faction].length; index++){
+					ship = shipList[index];
+					if(desiredSize==4){ 
+						//bases, size does not matter
+						if(ship.base != true) continue; //check if it's a base
+				        }else if(desiredSize>0){ //ships (check actual size)
+						if(ship.shipSizeClass!=desiredSize) continue;//check if it's of correct size
+						if(ship.base == true) continue; //check if it's not a base
+					}else{ //fighters! check max size - they should be -1, but 0 isn't used...
+						if(ship.shipSizeClass>0) continue;//check if it's of correct size
+						if(ship.base == true) continue; //check if it's not a base - although I can't imagine fighter sized base!
+					}
+					if(ship.variantOf!='') continue;//check if it's not a variant
+					//ok, display...
+					shipDisplayName = prepareClassName(ship);
+					h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+					h.appendTo(targetNode);
+					//search for variants...
+					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
+						shipV = shipList[index];
+						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
+						shipDisplayName = prepareClassName(shipV);
+						h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+shipV.id+'" data-faction="'+ faction +'" data-shipclass="'+shipV.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+						h.appendTo(targetNode);
+					}
+				}
 			}
 			
-
-			for (var index = 0; index < jsonShips[faction].length; index++){
-				var ship = shipList[index];
-                var targetNode = document.getElementById(ship.faction);
-
-                var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-                    h.appendTo(targetNode);
-            }
-	
 			$(".addship").bind("click", this.buyShip);
 		}
 	}, //endof parseShips
+	
 
     expandFaction: function(event)
     {
