@@ -683,7 +683,7 @@ class Weapon extends ShipSystem{
 				if($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
 					$oew = $shooter->offensivebonus;
 				}else{ // Check if target is in current weapon arc
-					$relativeBearing = $target->getBearingOnUnit($shooter);					
+					$relativeBearing = $target->getBearingOnUnit($shooter);			
 					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)){
 						// Target is in current launcher arc. Flight benefits from offensive bonus.
 						// Now check if the fighter is not firing any non-ballistic weapons
@@ -735,6 +735,7 @@ class Weapon extends ShipSystem{
         $fireOrder->updated = true;
     } //endof calculateHit
 
+	
 	
     public function getIntercept($gamedata, $fireOrder){
         $count = 0;
@@ -953,33 +954,37 @@ class Weapon extends ShipSystem{
 
 	
 	/*collateral damage from a Flash explosion (if any), called from function damage*/
-    public function doCollateralDamage($target, $shooter, $fireOrder, $explosionPos, $gamedata, $flashDamageAmount){
+    public function doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount){
+	    $explosionPos = $target->getCoPos();
             $ships1 = $gamedata->getShipsInDistance($explosionPos);
             foreach($ships1 as $ship){
                 if($ship === $target) continue;// make certain the target doesn't get the damage twice
 		if ($ship->isDestroyed()) continue; //no point allocating
+		$relativeBearing = $ship->getBearingOnUnit($target);//actual direction the damage comes from is from unit directly hit!	
                 if ($ship instanceof FighterFlight){
                     foreach ($ship->systems as $fighter){
                         if ($fighter == null || $fighter->isDestroyed()){
                             continue;
 			}
+			//this will not be entirely correct (may allocate to inappropriate armor) - but to allocate to appropriate armor, function accepting bearing (or section hit as array) would be needed
                         $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $explosionPos, $gamedata, false);
                     }
                 }else{
-		    $tmpLocation = $ship->getHitSectionPos($explosionPos, $fireOrder->turn);
+		    $loc = doGetHitSectionBearing($relativeBearing); //full array
+		    $tmpLocation = $loc["loc"];
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
                     $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
                 }   
 	    }
-    }
+    }//endof function doCollateralDamage
+	
 
     public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
 	    /*find details of shot, proceed to doDamage*/
 	    
         if($this->damageType=='Flash'){ //damage units other than base target
             $flashDamageAmount = floor($damage/4); //other units on target hex receive 25% of damage dealt to target
-	    $explosionPos = $target->getCoPos();
-	    $this->doCollateralDamage($target, $shooter, $fireOrder, $explosionPos, $gamedata, $flashDamageAmount);
+	    $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
         }
 
 	    
