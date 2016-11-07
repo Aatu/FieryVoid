@@ -282,8 +282,7 @@ shipWindowManager = {
 		if (n > 0){ //there is retargeting
 		      name = name.substring(n+1);
 		}
-		
-		
+				
 		if (name == "Heavy Particle Cannon"){
 			return "Heavy Particle";
 		}
@@ -469,6 +468,14 @@ shipWindowManager = {
             if(ship.limited != 0){
                 notes.push("&nbsp;Limited: " + ship.limited + "%");
             }
+		
+            if(ship.variantOf != ''){
+                notes.push("&nbsp;" + ship.occurence + ' variant of ' + ship.variantOf);
+            }
+		
+	    if(ship.unofficial == true){
+		    notes.push("&nbsp;CUSTOM UNIT");
+	    }
         }
         
         /* Set everything into the notes decently. */
