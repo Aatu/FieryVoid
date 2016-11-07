@@ -193,8 +193,35 @@ window.gamedata = {
 	
 	/*prepares ship class name for display - will contain lots of information besides class name itself!*/
 	prepareClassName: function(ship){
-		var displayName = '';
+		//name: actualname (limited variant custom)
+		//italics if actual variant!
+		var displayName = ship.shipClass;
+		var addOn = '';
 		
+		switch(ship.occurence) {
+		    case 'unique':
+			addOn = 'Q';
+			break;
+		    case 'rare':
+			addOn = 'R';
+			break;
+		    case 'uncommon':
+			addOn = 'U';
+			break;
+		    default: //assume common
+			addOn = 'C';
+		}		
+		if((ship.limited>0) && (ship.limited < 100)){ //else no such info necessary
+			addOn = addOn +' '+ ship.limited + '%';
+		}		
+		if(ship.unofficial == true){
+			addOn = addOn +' '+'CUSTOM';
+		}
+		
+		displayName=displayName+' ('+addOn+')';
+		if(ship.variantOf !=''){
+			displayName = '<i>'+displayName+'</i>';
+		}
 		
 		return displayName;
 	}, //endof prepareClassName
