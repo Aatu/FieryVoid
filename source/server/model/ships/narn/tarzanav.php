@@ -21,6 +21,7 @@ class TarzaNav extends FighterFlight{
         $this->hasNavigator = true;
         
         $this->occurence = 'rare';
+	$this->variantOf = "Gorith";
         $this->populate();
     }
 
