@@ -15,7 +15,9 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
 		$this->forwardDefense = 16;
-		$this->sideDefense = 16;		
+		$this->sideDefense = 16;	
+		
+		$this->isd = 2231;
 		
 		
 		$this->imagePath = "img/ships/orion.png";
