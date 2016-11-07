@@ -42,8 +42,9 @@ class Peregrine extends BaseShipNoAft{
         $this->addLeftSystem(new StdParticleBeam(3, 4, 1, 180, 0));
         $this->addLeftSystem(new RepeaterGun(2, 6, 4, 240, 60));
         $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
-        $this->addRightSystem(new RepeaterGun(2, 6, 4, 300, 120));
+	    
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
+        $this->addRightSystem(new RepeaterGun(2, 6, 4, 300, 120));
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -57,7 +58,7 @@ class Peregrine extends BaseShipNoAft{
         				8=> "Structure",
         				10=> "Thruster",
         				12=> "Scanner",
-					      14=> "Jump Engine",
+					14=> "Jump Engine",
         				16=> "Engine",
         				18=> "Hangar",
         				19=> "Reactor",
