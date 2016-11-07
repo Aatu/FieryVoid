@@ -250,13 +250,15 @@ window.gamedata = {
 					ship = shipList[index];
 					if(desiredSize==4){ 
 						//bases, size does not matter
-						if(ship.base != true) continue; //check if it's a base
+						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
 				        }else if(desiredSize>0){ //ships (check actual size)
 						if(ship.shipSizeClass!=desiredSize) continue;//check if it's of correct size
 						if(ship.base == true) continue; //check if it's not a base
+						if(ship.osat == true) continue; //check if it's not an OSAT 
 					}else{ //fighters! check max size - they should be -1, but 0 isn't used...
 						if(ship.shipSizeClass>0) continue;//check if it's of correct size
-						if(ship.base == true) continue; //check if it's not a base - although I can't imagine fighter sized base!
+						if(ship.base == true) continue; //check if it's not a base 
+						if(ship.osat == true) continue; //check if it's not an OSAT 
 					}
 					if(ship.variantOf!='') continue;//check if it's not a variant
 					//ok, display...
