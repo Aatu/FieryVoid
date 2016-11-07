@@ -24,6 +24,7 @@ class PeregrineOld extends BaseShipNoAft{
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 10;
+	    
         $this->addPrimarySystem(new Reactor(5, 18, 0, 2));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
@@ -32,6 +33,7 @@ class PeregrineOld extends BaseShipNoAft{
         $this->addPrimarySystem(new JumpEngine(4, 12, 3, 38));
         $this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
 	$this->addPrimarySystem(new Thruster(4, 12, 0, 4, 2));
+	    
 	$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 120));
@@ -44,13 +46,15 @@ class PeregrineOld extends BaseShipNoAft{
         $this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
         $this->addRightSystem(new StdParticleBeam(3, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
+	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(5, 44));
         $this->addLeftSystem(new Structure(4, 40));
         $this->addRightSystem(new Structure(4, 40));
         $this->addFrontSystem(new Structure(4, 40));
     
-$this->hitChart = array(
+	    
+	$this->hitChart = array(
         		0=> array(
         				8=> "Structure",
         				10=> "Thruster",
