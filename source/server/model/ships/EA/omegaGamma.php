@@ -1,10 +1,10 @@
 <?php
-class OmegaBeta  extends BaseShip{
+class OmegaGamma  extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 950;
+        $this->pointCost = 1100;
         $this->faction = "EA";
         $this->phpclass = "OmegaBeta";
         $this->imagePath = "img/ships/omega.png";
