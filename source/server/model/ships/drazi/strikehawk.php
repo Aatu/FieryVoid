@@ -9,7 +9,7 @@ class Strikehawk extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Strikehawk";
         $this->imagePath = "img/ships/sunhawk.png";
         $this->shipClass = "Strikehawk Battle Carrier";
-        $this->fighters = array("Sky Serpent" => 1);
+        $this->fighters = array("superheavy" => 1);
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
