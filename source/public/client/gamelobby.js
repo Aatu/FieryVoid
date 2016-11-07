@@ -169,6 +169,8 @@ window.gamedata = {
     	gamedata.allShips = factionList;
     },
     
+	/*old, simple version*/
+	/*
 	parseShips: function(jsonShips){
 		
 		for (var faction in jsonShips){
@@ -176,14 +178,7 @@ window.gamedata = {
 			
 			this.orderShipListOnName(shipList);
 			gamedata.setShipsFromFaction(faction, shipList);
-			
-//			
-//	        for (var i in shipList)
-//	        {
-//	            var ship = shipList[i];
-//	            gamedata.ships[faction] = new Ship(ship);
-//	        }
-	
+
 			for (var index = 0; index < jsonShips[faction].length; index++){
 				var ship = shipList[index];
                 var targetNode = document.getElementById(ship.faction);
@@ -194,7 +189,53 @@ window.gamedata = {
 	
 			$(".addship").bind("click", this.buyShip);
 		}
-	},
+	},*/
+	
+	/*prepares ship class name for display - will contain lots of information besides class name itself!*/
+	prepareClassName: function(ship){
+		var displayName = '';
+		
+		
+		return displayName;
+	}, //endof prepareClassName
+	
+	/*prepares fleet list for purchases for display*/
+	parseShips: function(jsonShips){
+		for (var faction in jsonShips){
+			var shipList = jsonShips[faction];
+			this.orderShipListOnName(shipList);
+			gamedata.setShipsFromFaction(faction, shipList);
+			
+			//show separately: bases: every ship size, fighters
+			
+			//let's start from top: capital ships
+			var sizeClassHeaders = ['Medium ships:','Heavy Ships:', 'Capital ships:'];
+			
+			for (var index = 0; index < jsonShips[faction].length; index++){
+				var ship = shipList[index];
+				if(ship.base == true) continue; //check if it's not a base
+				if(ship.shipSizeClass!=3) continue;//check if it's capital
+				if(ship.variantOf!='') continue;//check if it's not a variant
+				//ok, display...
+				var shipDisplayName = prepareClassName(ship);
+				var targetNode = document.getElementById(ship.faction);
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+                    		h.appendTo(targetNode);
+				//search for variants...
+			}
+			
+
+			for (var index = 0; index < jsonShips[faction].length; index++){
+				var ship = shipList[index];
+                var targetNode = document.getElementById(ship.faction);
+
+                var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+                    h.appendTo(targetNode);
+            }
+	
+			$(".addship").bind("click", this.buyShip);
+		}
+	}, //endof parseShips
 
     expandFaction: function(event)
     {
