@@ -1144,7 +1144,7 @@ class Weapon extends ShipSystem{
 		//armor may be ignored for some reason...
 		$armourIgnored = 0;
 		if(isset($fireOrder->armorIgnored[$system->id])){
-			$armorIgnored = $armour - $fireOrder->armorIgnored[$system->id];
+			$armorIgnored =  $fireOrder->armorIgnored[$system->id];
 			$armour = $armour - $armourIgnored;
 		}
 		$armour = min($armour,0);
