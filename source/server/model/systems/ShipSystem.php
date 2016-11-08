@@ -122,6 +122,7 @@ class ShipSystem{
         }
     }
     
+	/*old version, kept just in case
     public function getArmour($target, $shooter, $dmgClass){ //total armour
         $armour = $this->armour;
         $activeAA = 0;
@@ -134,7 +135,12 @@ class ShipSystem{
             }
         }
         return $armour;
-    }
+    }*/
+	public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
+		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
+		return $armour;
+        }
+
 	
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
 	//$pos is to be included if launch position is different than firing unit position
@@ -200,11 +206,13 @@ class ShipSystem{
             }
         }        
 
+	    /*moved to potentially exploding systems themselves
         if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }
-        else if ($this instanceof SubReactor){
+        else */
+		if ($this instanceof SubReactor){
             debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
