@@ -103,10 +103,10 @@ class Weapon extends ShipSystem{
 
 	//damage type-related variables
 	public $isLinked = false; //for linked weapons - they will all hit the exact same system!
-	private $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
-	private $systemKillerArray = array();
-	private $noOverkill = false; //this will let simplify entire Matter line enormously!
-	private $noOverkillArray = array();
+	protected $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	protected $systemKillerArray = array();
+	protected $noOverkill = false; //this will let simplify entire Matter line enormously!
+	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	//public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
