@@ -12,7 +12,7 @@ class OrestesGamma extends BaseShip{
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>12);
 	    
-	        $this>variantOf = "Orestes System Monitor (Epsilon)";
+	        $this->variantOf = "Orestes System Monitor (Epsilon)";
 	        $this->isd = 2219;
 
 		$this->forwardDefense = 16;

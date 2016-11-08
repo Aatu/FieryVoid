@@ -101,7 +101,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 		$this->damagePenalty = $this->getOutput();
     }
 	
-   public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){ //no defensive hit chance change
+   public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
             return 0;
     }
 	

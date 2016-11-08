@@ -36,7 +36,7 @@ class OchlavitaD extends HeavyCombatVessel{
 	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 240, 360));	
 	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));
         $bombrack1 = new BombRack(2, 6, 0, 300, 60);
-        $bombrack1->addAmmo("B", 8);
+        //$bombrack1->addAmmo("B", 8);
 	$this->addFrontSystem($bombrack1);
 	$this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));	
 	$this->addFrontSystem(new QuadPulsar(3, 10, 4, 0, 120));	
