@@ -601,14 +601,16 @@ class FighterMissileRack extends MissileLauncher
     /*here: copy missile data to launcher itself!*/
     public function changeFiringMode($newMode){ //change parameters with mode change
         parent::changeFiringMode($newMode);
-        $ammo = $this->missileArray[$newMode];
-        $this->setMinDamage();
-        $this->setMaxDamage();
-        $this->range = $ammo->range;
-        $this->distanceRange = $ammo->distanceRange;
-        $this->priority = $ammo->priority;
-        //$this->fireControl = $ammo->fireControl; //FC should be left that of launcher, after all
-        $this->displayName = $ammo->displayName; //so missile name goes into log instead of launcher name
+        if(isset($this->missileArray[$newMode])){  //it might not be set in the beginning!
+            $ammo = $this->missileArray[$newMode];
+            $this->setMinDamage();
+            $this->setMaxDamage();
+            $this->range = $ammo->range;
+            $this->distanceRange = $ammo->distanceRange;
+            $this->priority = $ammo->priority;
+            //$this->fireControl = $ammo->fireControl; //FC should be left that of launcher, after all
+            $this->displayName = $ammo->displayName; //so missile name goes into log instead of launcher name
+        }
     }
     
 } //endof FighterMissileRack
