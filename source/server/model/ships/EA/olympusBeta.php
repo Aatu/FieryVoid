@@ -8,8 +8,11 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->faction = "EA";
         $this->phpclass = "OlympusBeta";
         $this->imagePath = "img/ships/olympus.png";
-        $this->shipClass = "Olympus Beta Corvette (Laser)";
-        $this->occurence = "uncommon/rare";
+        $this->shipClass = "Olympus Gunship (Beta)";
+        $this->occurence = "rare";
+        $this->variantOf = "Olympus Corvette (Delta)";
+	    $this->isd = 2229;
+        $this->notes = 'Uncommon during Dilgar War.';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
