@@ -1014,7 +1014,7 @@ class Weapon extends ShipSystem{
 		}else{ //standard split to 3 parts; defender allocates, so protecting Primary
 			$damageEntry = ceil($damage/3);
 			$damagePRIMARY = floor($damage/3);
-			$damageOut = $damage - $damageOut -$damagePRIMARY;
+			$damageOut = $damage - $damageEntry -$damagePRIMARY;
 		}
 		//first part: facing structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
