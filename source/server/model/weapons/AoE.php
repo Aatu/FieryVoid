@@ -59,9 +59,8 @@
 				$this->AOEdamage( $target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 			}
 		}
-            }
 	    
-            $fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 	} //endof function fire
 	    
 
