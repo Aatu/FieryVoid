@@ -15,6 +15,7 @@ class HyperionRail extends BaseShip{
 	
         $this->occurence = "rare";
 	$this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+	$this->isd = 2246;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
