@@ -44,17 +44,19 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 17th of October 2016";
+                    header.innerHTML = "Latest News 8th of November 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Large technical update: damage allocation procedures severely changed";
+                    news.innerHTML += "- Large technical update: firing procedures severely changed";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- so if You perceive trouble in this area, please write on FB - I'll try to deploy corrections ASAP"; 
+                    news.innerHTML += "- (yes, again You'll see mainly bugs... sorry!!! but it'll get better)"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- You always wanted to blast bases with Mass Driver, yes? Well, now You can try!";
+                    news.innerHTML += "- New playable race: Deneth! (courtesy of Wolfgang Lackner-Warton)";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- New fleet selection screen organisation. Not all fleets take full advantage of it yet - EA does ;) .";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
 
@@ -64,8 +66,6 @@
                     news.innerHTML +="<br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff";
                     news.innerHTML +="<br><a href=\"http://fieryvoid.net/reg.php\">Register</a> new player account";
                     news.innerHTML +="<br><a href=\"http://fieryvoid.net/chpass.php\">Change password</a> of Your account";
-
-                     
                      
                     	
            });
