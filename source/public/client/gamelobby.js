@@ -277,14 +277,14 @@ window.gamedata = {
 					}
 					if(ship.variantOf!='') continue;//check if it's not a variant, we're looking only for base designs here...
 					//ok, display...
-					shipDisplayName = prepareClassName(ship);
+					shipDisplayName = this.prepareClassName(ship);
 					h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 					h.appendTo(targetNode);
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
 						shipV = shipList[indexV];
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
-						shipDisplayName = prepareClassName(shipV);
+						shipDisplayName = this.prepareClassName(shipV);
 						h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+shipV.id+'" data-faction="'+ faction +'" data-shipclass="'+shipV.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
 						h.appendTo(targetNode);
 					} //end of variant
