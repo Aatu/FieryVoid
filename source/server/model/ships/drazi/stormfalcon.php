@@ -10,7 +10,7 @@ class Stormfalcon extends BaseShipNoAft{
         $this->phpclass = "Stormfalcon";
         $this->imagePath = "img/ships/stormfalcon.png";
         $this->shipClass = "Stormfalcon Heavy Cruiser";
-        $this->fighters = array("light" => 12, "serpents" => 1);
+        $this->fighters = array("light" => 12, "superheavy" => 1);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

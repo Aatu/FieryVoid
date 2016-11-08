@@ -2,26 +2,24 @@
 
 
     class Particle extends Weapon{
-
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
-
             parent::setSystemDataWindow($turn);
         }
 
         public $priority = 6;
 
-
     }
 
-    class StdParticleBeam extends Particle{
+
+
+    class StdParticleBeam extends Particle{ 
 
         public $trailColor = array(30, 170, 255);
 
@@ -47,8 +45,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+6;   }
-        public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 16 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 16 ;      }
 
     }
 
@@ -84,11 +82,13 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+12;   }
-        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 22 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
 
     }
     
+
+
     class AdvParticleBeam extends Particle{
 
         public $trailColor = array(30, 170, 255);
@@ -114,13 +114,14 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+8;   }
-        public function setMinDamage(){     $this->minDamage = 9 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 9 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
 
     }
 
-    class TwinArray extends Particle{
 
+
+    class TwinArray extends Particle{
         public $trailColor = array(30, 170, 255);
 
         public $name = "twinArray";
@@ -147,8 +148,8 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 
     }
 
@@ -180,10 +181,12 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10, 2)+6;   }
-        public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 26 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 26 ;      }
 
     }
+
+
 
     class ParticleCannon extends Raking{
 
@@ -197,7 +200,6 @@
         public $projectilespeed = 15;
         public $animationWidth = 8;
         public $trailLength = 24;
-        public $damageType = "raking";
 
         public $intercept = 1;
         public $loadingtime = 2;
@@ -206,21 +208,27 @@
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 4, 5); // fighters, <mediums, <capitals
 
+        public $damageType = "Raking"; 
+        public $weaponClass = "Particle";
+        
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Raking";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Raking";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+15;   }
-        public function setMinDamage(){     $this->minDamage = 17 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 35 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 17 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 35 ;      }
     }
+
+
 
     class LightParticleCannon extends Raking{
 
@@ -234,7 +242,6 @@
         public $projectilespeed = 13;
         public $animationWidth = 5;
         public $trailLength = 24;
-        public $damageType = "raking";
 
         public $intercept = 2;
         public $loadingtime = 2;
@@ -243,22 +250,27 @@
         public $rangePenalty = 1;
         public $fireControl = array(0, 2, 4); // fighters, <mediums, <capitals
 
+        public $damageType = "Raking"; 
+        public $weaponClass = "Particle";
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Raking";
+           // $this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Raking";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 2)+8;   }
-        public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 28 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
     }
     
+
+
     class HvyParticleCannon extends Raking{
 
         public $trailColor = array(252, 252, 252);
@@ -270,7 +282,6 @@
         public $animationColor2 = array(255, 255, 255);
         public $animationExplosionScale = 0.45;
         public $animationWidth = 5;
-        public $damageType = "raking";
         public $priority = 7;
 
         public $loadingtime = 6;
@@ -278,21 +289,26 @@
         public $rangePenalty = 0.33;
         public $fireControl = array(0, 4, 6); // fighters, <mediums, <capitals
 
+        public $damageType = "Raking"; 
+        public $weaponClass = "Particle";
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Raking";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Raking";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 6)+60;   }
-        public function setMinDamage(){     $this->minDamage = 66 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 120 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 66 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 120 ;      }
     }
+
+
 
     class ParticleCutter extends Raking{
 
@@ -306,8 +322,10 @@
         public $projectilespeed = 30;
         public $animationWidth = 5;
         public $trailLength = 1500;
-        public $damageType = "raking";
         public $firingModes = array( 1 => "Sustained");
+        
+        public $damageType = "Raking"; 
+        public $weaponClass = "Particle";
         
         // Set to make the weapon start already overloaded.
         public $alwaysoverloading = true;
@@ -325,9 +343,9 @@
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Raking";
-            $this->data["REMARK"] = "This weapon is always in<br>sustained mode.";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Raking";
+            $this->data["REMARK"] = "This weapon is always in sustained mode.";
 
             parent::setSystemDataWindow($turn);
         }
@@ -337,9 +355,11 @@
         }
         
         public function getDamage($fireOrder){ return Dice::d(10, 2)+12;   }
-        public function setMinDamage(){     $this->minDamage = 14 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 32 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 14 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 32 ;      }
     }
+
+
 
     class ParticleRepeater extends Particle{
 
@@ -363,7 +383,10 @@
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
         
         private $hitChanceMod = 0;
-
+        private $previousHit = true;
+        
+       
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -372,14 +395,15 @@
         public function setSystemDataWindow($turn){
             // Keep this consistent with the gravitic.js implementation.
             // Yeah, I know: dirty.
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
             $this->normalload = $this->loadingtime;
         
             $this->setTimes();
             
             parent::setSystemDataWindow($turn);
         }
+        
         
         public function getLoadingTime(){
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
@@ -415,26 +439,30 @@
 //            
 //            parent::getIntercept($gamedata, $fireOrder);
 //        }
-
-        public function fire($gamedata, $fireOrder){
+        
+        
+        public function fire($gamedata, $fireOrder){ //new, minimalistic redefinition, relying on  getShotHitChanceMod()
+            $this->hitChanceMod = 0;
+            $this->setTimes();
+            $fireOrder->shots = $this->getMaxShots($gamedata->turn);
+            parent::fire($gamedata, $fireOrder);
+        }
+        
+        /*old version - full redefine of fire()
+        public function fire($gamedata, $fireOrder){ 
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $target = $gamedata->getShipById($fireOrder->targetid);
+            $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
+            
             $this->setTimes();
             $fireOrder->shots = $this->getMaxShots($gamedata->turn);
 
-            $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            $this->firingMode = $fireOrder->firingMode;
             $pos = $shooter->getCoPos();
 
             for ($i=0;$i<$fireOrder->shots;$i++){
                 $this->setHitChanceMod($i+1);
                 $this->calculateHit($gamedata, $fireOrder);
                 $intercept = $this->getIntercept($gamedata, $fireOrder);
-                // Check if weapon is in distance range.
-                if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
-                {
-                    // Target is not in distance range. Move to next shot.
-                    continue;
-                }
 
                 $needed = $fireOrder->needed - ($this->grouping*$i);
                 $rolled = Dice::d(100);
@@ -455,7 +483,10 @@
 
             $fireOrder->rolled = 1;//Marks that fire order has been handled
         }
+        */
         
+        
+        /*
         protected function setHitChanceMod($shotNumber){
             switch($shotNumber){
                 case 1:
@@ -469,11 +500,46 @@
                     break;
             }
         }
+        */
+        
+        
+        
+        
+        /*if previous shot missed, next one misses automatically*/
+        /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
+        public function getShotHitChanceMod($shotInSequence){ 
+            $prevExpectedChance = $this->getPrevShotHitChanceMod($shotInSequence-1);
+            if($prevExpectedChance ne $this->hitChanceMod){ //something missed in between
+                $this->hitChanceMod = 10000; //clear miss!!!
+            }else{
+                $this->hitChanceMod = $this->getPrevShotHitChanceMod($shotInSequence);
+            }
+            return $this->hitChanceMod;
+        }
+        
+        public function getPrevShotHitChanceMod($shotInSequence){ //just finds hit chance for a given shot - what it should be
+            if($shotInSequence <=0) return 0;
+            if($shotInSequence ==1) return 5;
+            $mod= 5+10*($shotInSequence-2);
+            return $mod;
+        }
+    
+                
         
         protected function getWeaponHitChanceMod($turn){
             return $this->hitChanceMod;
         }
 
+        
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
+            //if target is fighter flight, ensure that the same fighter is hit every time!
+            if($target instanceof FighterFlight){
+                $fireOrder->linkedHit = $system;
+            }            
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+        }
+        
+        
         protected function getBoostLevel($turn){
             $boostLevel = 0;
             foreach ($this->power as $i){
@@ -497,13 +563,14 @@
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 2);   }
-        public function setMinDamage(){     $this->minDamage = 2 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 20 - $this->dp;      }
-    }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+    } //endof class ParticleRepeater
     
+
+
     
     class RepeaterGun extends ParticleRepeater{
-
         public $name = "repeaterGun";
         public $displayName = "Repeater Gun";
         public $animation = "trail";
@@ -522,40 +589,15 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-        }
+        //appropriate redefinitions mostly done in ParticleRepeater class!
         
         public function getDamage($fireOrder){ return Dice::d(10)+3;   }
-        public function setMinDamage(){     $this->minDamage = 4 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 13 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
     }
+
+
+
 
     class PairedParticleGun extends LinkedWeapon{
 
@@ -580,6 +622,10 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
@@ -601,15 +647,15 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
     }
 
@@ -631,16 +677,44 @@
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals
 
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        public $noOverkill = true; // The damage of a solar cannon does not overkill.
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $location = null){
-            // The damage of a solar cannon does not overkill.
-            return null;
-        }
+        
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            /*repeat damage on structure (ignoring armor); 
+              system hit will have its armor reduced by 2
+              for non-fighter targets
+              */
 
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+            if(!$target instanceof FighterFlight){
+                $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
+                $struct = $system->getStructure();
+                //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
+                $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
+                //reduce armor of system hit
+                $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
+                $crit->updated = true;
+                $crit->inEffect = false;
+                if ( $system != null ){
+                    $system->criticals[] = $crit;
+                    $system->criticals[] = $crit;
+                }
+                //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
+                //increase damage by armor of structure - to simulate armor-ignoring effect
+                $damage = $damage + $this->getSystemArmourStandard($struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($struct, $gamedata, $fireOrder);
+                parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
+            }
+        } //endof function doDamage
+        
+        
+        /*old version, kept just in case
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
 
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location);
@@ -695,12 +769,15 @@
             $damageEntry->updated = true;
             $structTarget->damage[] = $damageEntry;
         }
+        */
         
         public function getDamage($fireOrder){        return Dice::d(5)+12;   }
-        public function setMinDamage(){     $this->minDamage = 13 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 17 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 17 ;      }
 
     }
+
+
 
     class LightParticleBlaster extends LinkedWeapon{
 
@@ -725,6 +802,9 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
         
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        
 
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
@@ -742,17 +822,19 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(3)+$this->damagebonus;   }
-        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 3+$this->damagebonus ;      }
 
     }
+
+
 
     class LightParticleBeam extends LinkedWeapon{
 
@@ -778,6 +860,9 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle"; 
+        
         function __construct($startArc, $endArc, $damagebonus, $nrOfShots = 2){
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
@@ -789,20 +874,21 @@
 
         public function setSystemDataWindow($turn){
 
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
 
             parent::setSystemDataWindow($turn);
         }
 
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
-        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
     }
 
-    class HeavyBolter extends Particle{
 
+
+    class HeavyBolter extends Particle{
         public $name = "heavyBolter";
         public $displayName = "Heavy Bolter";
         public $animation = "trail";
@@ -825,15 +911,13 @@
         }
 
         public function getDamage($fireOrder){        return 24;   }
-        public function setMinDamage(){     $this->minDamage = 24 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 24 - $this->dp;      }
-
-
-
+        public function setMinDamage(){     $this->minDamage = 24 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 24 ;      }
     }
     
-    class MediumBolter extends Particle{
 
+
+    class MediumBolter extends Particle{
         public $name = "mediumBolter";
         public $displayName = "Medium Bolter";
         public $animation = "trail";
@@ -857,8 +941,8 @@
         }
 
         public function getDamage($fireOrder){        return 18;   }
-        public function setMinDamage(){     $this->minDamage = 18 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 18 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 18 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
     }
     
     class LightBolter extends Particle{
@@ -886,8 +970,8 @@
         }
 
         public function getDamage($fireOrder){        return 12;   }
-        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 12 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
     
     class LightParticleBeamShip extends StdParticleBeam{
@@ -915,9 +999,10 @@
         }
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
+
 
 
     class ParticleProjector extends Particle{
@@ -944,13 +1029,9 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-        }
-
         public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
 
 

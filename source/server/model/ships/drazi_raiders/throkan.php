@@ -39,6 +39,30 @@ class Throkan extends MediumShip{
         $this->addAftSystem(new Thruster(4, 13, 0, 6, 2));
 
         $this->addPrimarySystem(new Structure( 4, 48));
+        
+        $this->hitChart = array(
+        		0=> array(
+        				8=> "Thruster",
+        				11=> "Scanner",
+        				14=> "Engine",
+        				16=> "Hangar",
+        				19=> "Reactor",
+        				20=> "C&C",
+        		),
+        		1=> array(
+        				5=> "Thruster",
+        				8=> "Particle Cannon",
+        				10=> "Standard Particle Beam",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        		2=> array(
+        				9=> "Thruster",
+        				17=> "Structure",
+        				20=> "Primary",
+        		),
+        );
+        
     }
 
 }

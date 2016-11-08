@@ -8,9 +8,12 @@ class HyperionAlpha extends BaseShip{
         $this->faction = "EA";
         $this->phpclass = "HyperionAlpha";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Alpha (Heavy Cruiser)";
+        $this->shipClass = "Hyperion Heavy Cruiser (Alpha)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
+        
+        $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+        $this->isd = 2216;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

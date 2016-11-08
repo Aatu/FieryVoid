@@ -11,6 +11,7 @@ class Gstor extends BaseShip{
         $this->shipClass = "G'Stor";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
+	$this->variantOf = "G'Quan";
         $this->fighters = array("normal"=>12);        
 		
         $this->forwardDefense = 15;

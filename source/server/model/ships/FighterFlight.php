@@ -76,58 +76,103 @@
                     return $system;
                 }
                 foreach ($system->systems as $fs){
-					if ($fs->id == $id){
-						return $fs;
-					}
-				}
+			if ($fs->id == $id){
+				return $fs;
+			}
+		}
             }
             
             return null;
         }
+	    
+	    
+	    /*redefinition - as defensive systems will be on actual fighters*/
+	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
+	public function getDamageMod($shooter, $pos, $turn, $weapon){
+	    $affectingSystems = array();
+	    $fighter = $this->systems[1];
+            foreach($fighter->systems as $system){
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
+                if ( !isset($affectingSystems[$system->getDefensiveType()])
+                    || $affectingSystems[$system->getDefensiveType()] < $mod){
+                    $affectingSystems[$system->getDefensiveType()] = $mod;
+                }
+            }
+            return array_sum($affectingSystems);
+	}
+	    
+	    /*redefinition - as defensive systems will be on actual fighters*/
+	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
+        public function getHitChanceMod($shooter, $pos, $turn, $weapon){
+            $affectingSystems = array();
+            $fighter = $this->systems[1];
+            foreach($fighter->systems as $system){
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+                if ( !isset($affectingSystems[$system->getDefensiveType()]) //no system of this kind is taken into account yet, or it is but it's weaker
+                    || $affectingSystems[$system->getDefensiveType()] < $mod){
+                    $affectingSystems[$system->getDefensiveType()] = $mod;
+                }
+            }
+            return (-array_sum($affectingSystems));
+    	}
+	    
+	    /*redefinition; for fighter, don't check whether system is destroyed - it doesn't matter as long as entire flight isn't!*/
+	    /*also, fighter systems don't get disabled :)*/
+	private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon){
+            if (!($system instanceof DefensiveSystem)) return false; //this isn't a defensive system at all
+                
+            //if the system has arcs, check that the position is on arc
+            if(is_int($system->startArc) && is_int($system->endArc)){
+                //get bearing on incoming fire...
+		if($weapon->ballistic){
+		    $relativeBearing = $this->getBearingOnPos($pos);
+		}else{ //direct fire weapon - check from shooter...
+		    $relativeBearing = $this->getBearingOnUnit($shooter);
+		}
+                //if not on arc, continue!
+                if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){
+                    return false;
+                }
+            }
+            
+            return true;
+        }//endof function checkIsValidAffectingSystem
         
         
         public function getSystemByName($name){
-			foreach ($this->systems as $fighter){
-                
-                foreach ($fighter->systems as $fs){
-					if ($fs->name == $name){
-						return $fs;
-					}
-				}
-            }
+		foreach ($this->systems as $fighter){
+			foreach ($fighter->systems as $fs){
+				if ($fs->name == $name) return $fs;
+            		}
 		}
+	}
         
         public function getFighterBySystem($id){
-			foreach ($this->systems as $fighter){
-                
-                foreach ($fighter->systems as $fs){
-					if ($fs->id == $id){
-						return $fighter;
-					}
-				}
-            }
-		}
+		foreach ($this->systems as $fighter){
+                	foreach ($fighter->systems as $fs){
+				if ($fs->id == $id) return $fighter;
+			}
+            	}
+	}
         
         protected function addSystem($fighter, $loc = null){
-            
             $fighter->id = $this->autoid;
             $fighter->location = sizeof($this->systems);
             
             $this->autoid++;
             $fighterSys = array();
             foreach ($fighter->systems as $system){
-				
-				$system->id  = $this->autoid;
-				$this->autoid++;
-				$fighterSys[$system->id] = $system;
-			}
+			$system->id  = $this->autoid;
+			$this->autoid++;
+			$fighterSys[$system->id] = $system;
+		}
             $fighter->systems = $fighterSys;
-            
             $this->systems[$fighter->id] = $fighter;
-            
-        
-        }
+        } //endof function addSystem
 		
+	    
         public function getPreviousCoPos(){
             $pos = $this->getCoPos();
             

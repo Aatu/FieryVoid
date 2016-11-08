@@ -5,7 +5,6 @@
 spl_autoload_register(
     function($class) {
         static $classes = null;
-        if ($classes === null) {
             $classes = array(
 
                 //TECHNICAL UNIT - target drone for various tests
@@ -83,7 +82,9 @@ spl_autoload_register(
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 //custom weapons StarWars
+                'swrayshield' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
+                'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
@@ -94,7 +95,7 @@ spl_autoload_register(
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
-                
+                'hlpa' => '/server/model/weapons/customs.php',
 
 
                 //Deneth
@@ -103,14 +104,23 @@ spl_autoload_register(
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
+                'protector' =>  '/server/model/ships/deneth/protector.php', 
+                'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
+                'watcher' =>  '/server/model/ships/deneth/watcher.php', 
+                
+                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
+                
+                'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
+                
+                'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
                 'dux' => '/server/model/ships/centauri_raiders/dux.php',
 
-                // drazi and wotc centauro osat
+                // wotcr drazi and centauri osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
                 'dudromab' => '/server/model/ships/drazi/dudromaB.php',
 
@@ -136,6 +146,10 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
+                'peregrine' => '/server/model/ships/drazi_old/peregrine.php',
+                'peregrineold' => '/server/model/ships/drazi_old/peregrineOld.php',
+                'peregrinecmd' => '/server/model/ships/drazi_old/peregrineCmd.php',
+                
 
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
@@ -189,7 +203,6 @@ spl_autoload_register(
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
                 'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
-                
 
                 'templar' => '/server/model/ships/orieni/templar.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
@@ -226,7 +239,7 @@ spl_autoload_register(
 
 
 
-                //WotC Centauri
+                //WotCR Centauri
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
                 'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
@@ -273,7 +286,7 @@ spl_autoload_register(
 
 
 
-                //WotC Centauri systems
+                //WotCR Centauri systems
                 'taclaser' => '/server/model/weapons/lasers.php',
                 'sentinelpointdefense' => '/server/model/weapons/defensive.php',
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
@@ -281,7 +294,6 @@ spl_autoload_register(
                 'particleprojector' => '/server/model/weapons/particle.php',
 
                 //various
-
                 'hkflight' => '/server/model/ships/HK.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
 
@@ -522,6 +534,7 @@ spl_autoload_register(
                 'katoc' => '/server/model/ships/narn/Katoc.php',
                 'katanpulsedestroyer' => '/server/model/ships/narn/KatanPulseDestroyer.php',
                 'kestrel' => '/server/model/ships/drazi/kestrel.php',
+                'kestrelcommon' => '/server/model/ships/drazi/kestrelcommon.php',
                 'kraasus' => '/server/model/ships/balosian/kraasus.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
@@ -609,6 +622,7 @@ spl_autoload_register(
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
+                'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',

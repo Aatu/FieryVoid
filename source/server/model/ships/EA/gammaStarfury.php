@@ -8,8 +8,10 @@ class GammaStarfury extends FighterFlight{
         $this->pointCost = 366;
         $this->faction = "EA";
         $this->phpclass = "GammaStarfury";
-        $this->shipClass = "Starfury: Gamma Heavy flight";
+        $this->shipClass = "Starfury: Aurora Gamma Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
+	$this->variantOf = "Starfury: Aurora Heavy flight";	    
+	$this->isd = 2259;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
@@ -31,7 +33,7 @@ class GammaStarfury extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){        
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("gammaStarfury", $armour, 13, $this->id);
-            $fighter->displayName = "Gamma Starfury Heavy Fighter";
+            $fighter->displayName = "Aurora Gamma Heavy Fighter";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
 

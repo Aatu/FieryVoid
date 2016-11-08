@@ -8,9 +8,12 @@ class HyperionPatrol extends BaseShip{
 		$this->faction = "EA";
         $this->phpclass = "HyperionPatrol";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Eta (Patrol Cruiser)";
+        $this->shipClass = "Hyperion Patrol Cruiser (Eta)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
+	    
+	$this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+        $this->isd = 2246;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -25,31 +28,31 @@ class HyperionPatrol extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 3, 6));
         $this->addPrimarySystem(new Engine(6, 18, 0, 7, 3));
-		$this->addPrimarySystem(new Hangar(5, 8));
+	$this->addPrimarySystem(new Hangar(5, 8));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));        
+	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
+	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));        
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
+	$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 120));
-		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
+	$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));
 
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
+	$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
         $this->addAftSystem(new JumpEngine(4, 16, 3, 24));
-		$this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
+	$this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
-		$this->addAftSystem(new MediumPulse(3, 6, 3, 60, 300));
+	$this->addAftSystem(new MediumPulse(3, 6, 3, 60, 300));
         $this->addAftSystem(new MediumPulse(3, 6, 3, 60, 300));
         
-		$this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
-		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 300, 0));
-	    $this->addLeftSystem(new MediumPulse(3, 6, 3, 180, 0));
+	$this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
+	$this->addLeftSystem(new HeavyLaser(4, 8, 6, 300, 0));
+	$this->addLeftSystem(new MediumPulse(3, 6, 3, 180, 0));
 
 		$this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
 		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 60));

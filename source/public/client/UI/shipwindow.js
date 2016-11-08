@@ -144,12 +144,12 @@ shipWindowManager = {
         if(gamedata.turn != 0){
             shipwindow.find(".topbar .value.name").html("");
             shipwindow.find(".topbar .valueheader.name").html(ship.name);
-            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
+            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass;// + " (" + ship.occurence + ")");
         }
         else{
             shipwindow.find(".topbar .value.name").html("");
             shipwindow.find(".topbar .valueheader.name").html("");
-            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass + " (" + ship.occurence + ")");
+            shipwindow.find(".topbar .value.shipclass").html(ship.shipClass;// + " (" + ship.occurence + ")");
         }
 
 		
@@ -282,8 +282,7 @@ shipWindowManager = {
 		if (n > 0){ //there is retargeting
 		      name = name.substring(n+1);
 		}
-		
-		
+				
 		if (name == "Heavy Particle Cannon"){
 			return "Heavy Particle";
 		}
@@ -367,9 +366,10 @@ shipWindowManager = {
         var abilities = Array();
         var notes = Array();
 
-		if (ship.hitChart.length > 0 || typeof ship.hitChart[0] != "undefined"){
+	/*unnecessary*//*
+	if (ship.hitChart.length > 0 || typeof ship.hitChart[0] != "undefined"){
             notes.push("&nbsp;has B5W Hit Table.");
-        }
+        }*/
 
     	//BUTTONS like Defensive Fire
 		var belowIcon = shipWindow.find(".notes");
@@ -396,10 +396,7 @@ shipWindowManager = {
 		}
 
 
-
 		// adaptive Armour
-
-
 		var input = document.createElement("input");
 			input.type = "button";
 			input.value = "Adaptive Armour";
@@ -432,8 +429,8 @@ shipWindowManager = {
 				input.className += " interceptEnabled";
 			}
 		}
-     if(!ship.fighter){
-
+	    
+        if(!ship.fighter){
             abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost);
         }
 
@@ -453,19 +450,35 @@ shipWindowManager = {
             if(ship.fighters.length != 0){
                 for (var i in ship.fighters){
                     var amount = ship.fighters[i];
-                    
-                    if(i == "normal"){
+                    if(i == "normal"){ //skip description of kind of fighters
                         notes.push("&nbsp;&nbsp;&nbsp;"+amount+" fighters");
-                    }
-                    else{
+                    }else if((i=="superheavy") || (i=="heavy") || (i=="medium") || (i=="light") || (i=="ultralight")){ //fighters with description
                         notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i +" fighters");
-                    }
+                    }else{ //something other than fighters
+			notes.push("&nbsp;&nbsp;&nbsp;"+amount+" "+ i );
+		    }
                 }
             }
            
-            if(ship.limited != 0){
-                notes.push("&nbsp;Limited: " + ship.limited + "%");
+            if(ship.notes != ''){
+                notes.push("&nbsp;" + ship.notes);
             }
+		
+            if(ship.limited != 0){
+                notes.push("&nbsp;limited: " + ship.limited + "%");
+            }
+		
+            if(ship.variantOf != ''){
+                notes.push("&nbsp;" + ship.occurence + ' variant of ' + ship.variantOf);
+            }
+		
+            if(ship.isd != ''){
+                notes.push("&nbsp;in service: " + ship.isd);
+            }
+		
+	    if(ship.unofficial == true){
+		    notes.push("&nbsp;<b><i>CUSTOM UNIT</i></b>");
+	    }
         }
         
         /* Set everything into the notes decently. */

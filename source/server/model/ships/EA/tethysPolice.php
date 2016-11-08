@@ -8,9 +8,11 @@ class TethysPolice extends MediumShip{
 		$this->faction = "EA";
 		$this->phpclass = "TethysPolice";
 		$this->imagePath = "img/ships/tethys.png";
-		$this->shipClass = "Tethys Police Leader";
+		$this->shipClass = "Tethys Police Leader (Iota)";
 		$this->canvasSize = 100;
 		$this->occurence = "uncommon";
+	        $this->variantOf = 'Tethys Police Cutter (Kappa)';
+	        $this->isd = 2243;
 
 		$this->forwardDefense = 13;
 		$this->sideDefense = 13;

@@ -11,6 +11,7 @@ class Gquonth extends BaseShip{
         $this->shipClass = "G'Quonth";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
+	$this->variantOf = "G'Quan";
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

@@ -10,6 +10,8 @@ class zzftrywing extends FighterFlight{
         $this->shipClass = "Y-Wing Tech Demo flight";
         $this->imagePath = "img/starwars/yWing.png";
         
+        //$this->isd = 2214;
+        $this->unofficial = true;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 10;
@@ -34,13 +36,17 @@ class zzftrywing extends FighterFlight{
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
             $fighter->displayName = "Y-Wing Technology Demonstrator";
             $fighter->imagePath = "img/starwars/yWing.png";
-            $fighter->iconPath = "img/starwars/yWingWide_large.png"; //need room for 4th weapon!
+            $fighter->iconPath = "img/starwars/yWing_large.png"; 
             
             $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
             $roundGun = new SWFighterIon(330, 30, 1, 2); //all-around Ion Cannons
+            $roundGun->exclusive = true; //either this or lasers, not both!
             $fighter->addFrontSystem($roundGun);
+            
+            //Ray Shield, 3 points
+            $fighter->addFrontSystem(new SWRayShield(0, 1, 0, 3, 0, 360));
             
             //2 forward Proton Torpedo Launchers, 4 shots each
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
@@ -48,9 +54,7 @@ class zzftrywing extends FighterFlight{
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
             
-            
-            
-            //Ray Shield, 3 points
+
             
             
             

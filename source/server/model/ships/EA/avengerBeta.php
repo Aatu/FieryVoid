@@ -11,7 +11,10 @@ class AvengerBeta extends BaseShip{
         $this->shipClass = "Avenger Heavy Carrier (Beta Model)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>48);
-        
+	$this->variantOf = "Avenger Heavy Carrier (Gamma)";
+	    $this->isd = 2203;
+	    
+	    
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
         

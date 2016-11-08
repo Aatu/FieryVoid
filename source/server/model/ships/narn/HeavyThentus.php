@@ -11,6 +11,7 @@ class HeavyThentus extends MediumShip{
         $this->shipClass = "Heavy Thentus";
         $this->agile = true;
         $this->occurence = "uncommon";
+	$this->variantOf = "Thentus";
 
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

@@ -11,6 +11,7 @@ class Trann extends BaseShip{
         $this->shipClass = "T'Rann Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
+	$this->variantOf = "T'Loth";
         $this->fighters = array("normal"=>24);
         
         $this->forwardDefense = 16;

@@ -10,6 +10,9 @@ class ThunderboltStarfury extends FighterFlight{
         $this->shipClass = "Starfury: Thunderbolt Heavy flight";
         $this->imagePath = "img/ships/thunderboltStarfury.png";
         
+        $this->isd = 2259;
+        $this->notes = 'Needs updated hangars to handle.';
+        
         $this->forwardDefense = 8;
         $this->sideDefense = 7;
         $this->freethrust = 13;

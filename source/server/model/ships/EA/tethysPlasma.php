@@ -8,8 +8,12 @@ class TethysPlasma extends MediumShip{
 		$this->faction = "EA";
 		$this->phpclass = "TethysPlasma";
 		$this->imagePath = "img/ships/tethys.png";
-		$this->shipClass = "Tethys Plasma Boat";
+		$this->shipClass = "Tethys Plasma Boat (Epsilon)";
 		$this->canvasSize = 100;
+	    
+
+	        $this->variantOf = 'Tethys Police Cutter (Kappa)';
+	        $this->isd = 2191;
 
 		$this->forwardDefense = 13;
 		$this->sideDefense = 13;

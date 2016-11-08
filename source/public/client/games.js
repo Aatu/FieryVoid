@@ -17,7 +17,8 @@ window.gamedata = {
 
 				var link = document.createElement("a");
 					link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
-					link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
+					//link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
+					link.innerHTML = data[i].name + " @ Turn " + data[i].turn;
 
 				div.appendChild(link);
 				

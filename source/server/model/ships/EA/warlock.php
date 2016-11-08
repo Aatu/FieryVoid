@@ -13,6 +13,8 @@ class Warlock extends BaseShip{
 		$this->canvasSize= 400;
 		$this->limited = 10;
 		$this->fighters = array("normal"=>24);
+	        $this->isd = 2261;
+	        $this->notes = 'Thunderbolt capable';
 
 		$this->forwardDefense = 15;
 		$this->sideDefense = 19;

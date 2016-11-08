@@ -74,12 +74,19 @@
 
 .store .factionname{
 	font-size:14px;
-	
 }
 
 .store .ship{
 	color:#496791;
 }
+
+.store .shipsizehdr{
+	color:#6495ED;
+	margin-left:10px;
+	font-size:12px;
+	font-style: italic;
+}
+
 .store .ship .clickable{
 	cursor:pointer;
 	color:#DEEBFF;

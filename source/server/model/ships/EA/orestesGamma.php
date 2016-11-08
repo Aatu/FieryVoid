@@ -8,9 +8,12 @@ class OrestesGamma extends BaseShip{
 		$this->faction = "EA";
 		$this->phpclass = "OrestesGamma";
 		$this->imagePath = "img/ships/orestes.png";
-		$this->shipClass = "Orestes Gamma (Plasma)";
+		$this->shipClass = "Orestes System Monitor (Gamma)";
 		$this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>12);
+	    
+	        $this>variantOf = "Orestes System Monitor (Epsilon)";
+	        $this->isd = 2219;
 
 		$this->forwardDefense = 16;
 		$this->sideDefense = 16;

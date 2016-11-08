@@ -8,8 +8,10 @@
         public $EW = array();
         public $fighters = array();
         public $hitChart = array();
-
+        public $notes = '';//notes to be displayed on fleet selection screen
+	    
         public $occurence = "common";
+	public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
         public $limited = 0;
         public $agile = false;
         public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
@@ -341,63 +343,50 @@
 	    
 
         
-        public function getHitChanceMod($shooter, $pos, $turn){
+        public function getHitChanceMod($shooter, $pos, $turn, $weapon){
             $affectingSystems = array();
-            
             foreach($this->systems as $system){
-                
-                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
-                    continue;
-                
-                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn);
-                
-                if ( !isset($affectingSystems[$system->getDefensiveType()])
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveHitChangeMod($this, $shooter, $pos, $turn, $weapon);
+                if ( !isset($affectingSystems[$system->getDefensiveType()]) //no system of this kind is taken into account yet, or it is but it's weaker
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
                     $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
-                
             }
             return (-array_sum($affectingSystems));
     	}
         
-        public function getDamageMod($shooter, $pos, $turn){
+        public function getDamageMod($shooter, $pos, $turn, $weapon){
 	    $affectingSystems = array();
             foreach($this->systems as $system){
-                
-                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn))
-                    continue;
-                
-                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn);
-                
+                if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
+                $mod = $system->getDefensiveDamageMod($this, $shooter, $pos, $turn, $weapon);
                 if ( !isset($affectingSystems[$system->getDefensiveType()])
                     || $affectingSystems[$system->getDefensiveType()] < $mod){
                     $affectingSystems[$system->getDefensiveType()] = $mod;
                 }
-                
             }
             return array_sum($affectingSystems);
-		}
+	}
         
-        private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn){
-            if (!($system instanceof DefensiveSystem))
-                return false;
+        private function checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon){
+            if (!($system instanceof DefensiveSystem)) return false; //this isn't a defensive system at all
                 
             //If the system was destroyed last turn continue 
             //(If it has been destroyed during this turn, it is still usable)
-            if ($system->isDestroyed($turn-1))
-               return false;
+            if ($system->isDestroyed($turn-1)) return false;
 
             //If the system is offline either because of a critical or power management, continue
-            if ($system->isOfflineOnTurn($turn))
-                return false;
+            if ($system->isOfflineOnTurn($turn)) return false;
 
             //if the system has arcs, check that the position is on arc
             if(is_int($system->startArc) && is_int($system->endArc)){
-
-                $tf = $this->getFacingAngle();
-
-                //get the heading of position, not ship (in case ballistic)
+                //get bearing on incoming fire...
+		if($weapon->ballistic){
 		    $relativeBearing = $this->getBearingOnPos($pos);
+		}else{ //direct fire weapon - check from shooter...
+		    $relativeBearing = $this->getBearingOnUnit($shooter);
+		}
 
                 //if not on arc, continue!
                 if (!mathlib::isInArc($relativeBearing, $system->startArc, $system->endArc)){
@@ -659,7 +648,7 @@
 	    
              
 
-        public function doGetHitSectionBearing($relativeBearing, $preGoal=0){ //pick section hit from given bearing; return array with all data!  
+        public function doGetHitSectionBearing($relativeBearing){ //pick section hit from given bearing; return array with all data!  
             $locs = $this->getLocations();
             $valid = array();
             foreach ($locs as $loc){
@@ -668,22 +657,22 @@
                 }
             }
             $valid = $this->fillLocations($valid);
-            $pick = $this->pickLocationForHit($valid, $preGoal);
+            $pick = $this->pickLocationForHit($valid);
             return $pick;
         }
 	    
 	    
-        public function doGetHitSectionPos($pos, $preGoal=0){ //pick section hit from given coordinates; return array with all data!  
+        public function doGetHitSectionPos($pos){ //pick section hit from given coordinates; return array with all data!  
             $relativeBearing =  $this->getBearingOnPos($pos);
-            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
+            $result = $this->doGetHitSectionBearing($relativeBearing);
             return $result;
         }
 	    
 	    
 	    
-        public function doGetHitSection($shooter, $preGoal=0){   //pick section hit from given unit; return array with all data!  
+        public function doGetHitSection($shooter){   //pick section hit from given unit; return array with all data!  
             $relativeBearing =  $this->getBearingOnUnit($shooter);
-            $result = $this->doGetHitSectionBearing($relativeBearing, $preGoal);
+            $result = $this->doGetHitSectionBearing($relativeBearing);
             return $result;
         }
 	    
@@ -713,7 +702,7 @@
         }
 
 
-        public function pickLocationForHit($locs, $preGoal=0){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
+        public function pickLocationForHit($locs){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
 		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
 		foreach ($locs as $loc){
 			//compare current best pick with current loop iteration, change if new pick is better
@@ -787,7 +776,7 @@
         }   	    
 
 	    
-	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon, $preGoal = 0){ //returns value - profile! chooses method based on weapon and fire order!
+	public function getHitSectionProfileChoice($shooter, $fireOrder, $weapon){ //returns value - profile! chooses method based on weapon and fire order!
 		$foundProfile = 0;
 		if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
@@ -798,7 +787,7 @@
 		}
 		return $foundProfile;
         }
-        public function getHitSectionProfile($shooter, $preGoal = 0){ //returns value - profile! DO NOT USE FOR BALLISTICS!
+        public function getHitSectionProfile($shooter){ //returns value - profile! DO NOT USE FOR BALLISTICS!
 		$foundProfile = 0;
 		if(isset($this->activeHitLocations[$shooter->id]) ){
 			$foundProfile = $this->activeHitLocations[$shooter->id]["profile"];	
@@ -809,9 +798,9 @@
 		}
 		return $foundProfile;
         }   
-        public function getHitSectionProfilePos($pos, $preGoal = 0){ //returns value - profile! THIS IS FOR BALLISTICS!
+        public function getHitSectionProfilePos($pos){ //returns value - profile! THIS IS FOR BALLISTICS!
 		$foundProfile = 0;
-		$loc = $this->doGetHitSectionPos($pos, $preGoal); //finds array with relevant data!
+		$loc = $this->doGetHitSectionPos($pos); //finds array with relevant data!
 		$foundProfile = $loc["profile"];
 		return $foundProfile;
         }   	    
@@ -842,6 +831,7 @@
 
 
         public function getHitSystemByTable($shooter, $fire, $weapon, $location){ 
+		/*DOES NOT take care of overkill!!! returns section structure if no system can be hit, whether that section is still alive or not*/
 		$system = null;
 		$name = false;
 		$location_different = false; //target system may be on different location?
@@ -852,7 +842,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null && !$system->isDestroyed()) return $system;
+		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
 		if ($location == null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
@@ -860,7 +850,7 @@
           
 		$hitChart = $this->hitChart[$location];
 		$rngTotal = 20; //standard hit chart has 20 possible locations
-		if ($weapon->flashDamage){ //Flash - change hit chart! 
+		if($weapon->damageType == 'Flash'){ //Flash - change hit chart! - only undestroyed systems
 			$hitChart = array();
 			//use only non-destroyed systems on section hit
 			$rngTotal = 0; //range of current system
@@ -881,6 +871,28 @@
 			}
 			if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! penetrate to PRIMARY...
 		}
+		if($weapon->damageType == 'Piercing'){ //Piercing - change hit chart! - no PRIMARY hits!
+			$hitChart = array();
+			//use only non-destroyed systems on section hit
+			$rngTotal = 0; //range of current system
+			$rngCurr = 0; //total range of live systems
+			for($roll = 1;$roll<=20;$roll++){
+				$rngCurr++;
+				if (isset($this->hitChart[$location][$roll])){
+                   			$name = $this->hitChart[$location][$roll];
+					if($name != 'Primary'){ //no PRIMARY penetrating hits for Piercing!
+						$systemsArray = $this->getSystemsByNameLoc($name, $location, true);//accept destroyed systems too
+						if(sizeof($systemsArray)>0){ //there actually are such systems!
+							$rngTotal+= $rngCurr;
+							$hitChart[$rngTotal] = $name;						
+						}
+					}
+					$rngCurr = 0;
+				}
+			}
+			if($rngTotal ==0) return $this->getStructureSystem($location);//there is nothing here! return facing Structure anyway, overkill methods will handle it
+		}
+		
 			
 		//now choose system from chart...
 		$roll = Dice::d($rngTotal);
@@ -889,16 +901,16 @@
 		while ($name == ''){
 			if (isset($hitChart[$roll])){
 				$name = $hitChart[$roll];
-				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
+				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure hits
 					$isSystemKiller = false; //don't do that again
 					$name = ''; //reset
 					$roll = Dice::d($rngTotal); //new location roll
 				}				
 			}else{
 				$roll++;
-				if($roll>$rngTotal)//out of range already!
+				if($roll>$rngTotal)//out of range already! return facing Structure... Should not happen.
 				{
-					return $this->getStructureSystem(0);
+					return $this->getStructureSystem($location);
 				}
 			}
 		}
@@ -907,13 +919,12 @@
 			return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, overkill to Structure
+		if(sizeof($systems)==0){ //if empty, damage is done to Structure
 			$struct = $this->getStructureSystem($location);
-			if($struct->isDestroyed()) $struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 		
-		//now choose one of equal eligible systems (they're already known to be undestroyed)
+		//now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
                 $roll = Dice::d(sizeof($systems));
                 $system = $systems[$roll-1];
 		return $system;
@@ -933,7 +944,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null && !$system->isDestroyed()) return $system;
+		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
 		if ($location == null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
@@ -948,7 +959,7 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
@@ -961,7 +972,7 @@
 		}
 		//add Structure
 		$system =  $this->getStructureSystem($location);
-		if((!$weapon->flashDamage) || (!$system->isDestroyed() )) {
+		if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
 			if($location == 0){
 				$multiplier = 2; //PRIMARY has relatively low Structure, increase chance
 			}else{
@@ -972,14 +983,14 @@
 			$rngTotal = $rngTotal+$rngCurr;
 			$hitChart[$rngTotal] = $system->displayName;
 		} 
-		//is there anything to be hit? if not, just overkill to PRIMARY Structure...
+		//is there anything to be hit? if not, just return facing Structure...
 		if($rngTotal==0){
-			$struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
+			$struct = $this->getStructureSystem($location); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 			
-		//for non-Flash, add PRIMARY to hit table...
-		if(!$weapon->flashDamage){
+		//for non-Flash/Piercing, add PRIMARY to hit table...
+		if( ($weapon->damageType != 'Flash') && ($weapon->damageType != 'Piercing') ){
 			$multiplier = 0.1; //10% chance for PRIMARY penetration
 			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
 			$rngCurr =  ceil($rngTotal * $multiplier);
@@ -1012,9 +1023,8 @@
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, overkill to Structure
+		if(sizeof($systems)==0){ //if empty, just return Structure
 			$struct = $this->getStructureSystem($location);
-			if($struct->isDestroyed()) $struct = $this->getStructureSystem(0); //if Structure destroyed, overkill to PRIMARY Structure
 			return $struct;
 		}
 		
@@ -1027,11 +1037,13 @@
 		
 		
 
-        
+        /* no longer needed, keeping code just in case
         public function getPiercingDamagePerLoc($damage){
             return ceil($damage/3);
         }
+	*/
         
+	    /* no longer needed, keeping code just in case
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true); //return location even if destroyed
             
@@ -1058,6 +1070,7 @@
             return $finallocs;
             
         }
+	*/
         
         
         public static function hasBetterIniative($a, $b){
@@ -1406,6 +1419,7 @@
 
     class StarBaseSixSections extends StarBase{
 
+	    /* no longer needed, keeping code just in case
         public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true);
             
@@ -1438,6 +1452,7 @@
             return $finallocs;
             
         }
+	*/
 
 
         public function getLocations(){
@@ -1458,6 +1473,7 @@
 
 
     class StarBaseFiveSections extends StarBase{
+	    /* no longer needed, keeping code just in case
 	public function getPiercingLocations($shooter, $pos, $turn, $weapon){
 		$location = $this->getHitSection($shooter, $turn, true);
             
@@ -1500,6 +1516,7 @@
             return $finallocs;
             
         }
+	*/
 
         public function getLocations(){
         //debug::log("getLocations");         

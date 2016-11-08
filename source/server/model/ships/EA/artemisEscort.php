@@ -8,8 +8,10 @@ class ArtemisEscort extends HeavyCombatVessel{
         $this->faction = "EA";
         $this->phpclass = "ArtemisEscort";
         $this->imagePath = "img/ships/artemis.png";
-        $this->shipClass = "Artemis Escort Frigate (Zeta Model)";
+        $this->shipClass = "Artemis Escort Frigate (Zeta)";
         $this->occurence = "uncommon";
+        $this->variantOf = "Artemis Heavy Frigate (Beta)";
+        $this->isd = 2242;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

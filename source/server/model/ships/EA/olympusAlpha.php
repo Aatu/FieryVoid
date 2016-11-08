@@ -8,7 +8,9 @@ class OlympusAlpha extends HeavyCombatVessel{
         $this->faction = "EA";
         $this->phpclass = "OlympusAlpha";
         $this->imagePath = "img/ships/olympus.png";
-        $this->shipClass = "Olympus Alpha Corvette (Plasma)";
+        $this->shipClass = "Olympus Corvette (Alpha)";
+        $this->variantOf = "Olympus Corvette (Delta)";
+	    $this->isd = 2200;
                 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

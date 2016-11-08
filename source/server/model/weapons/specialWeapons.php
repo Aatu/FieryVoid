@@ -18,55 +18,47 @@ class PlasmaStream extends Raking{
 	public $rangeDamagePenalty = 1;	
         public $rangePenalty = 1;
         public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
+	
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        protected function getSystemArmour($system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmour($system, $gamedata, $fireOrder, $pos);
-
-            if (is_numeric($armor)){
-                $toIgnore = ceil($armor /2);
-                $new = $armor - $toIgnore;
-                return $new;
-            }
-            else {
-                return 0;
-            }
-        }
-
 
 	
 		public function setSystemDataWindow($turn){
-
-            $this->data["Damage type"] = "Raking (5)";
-            $this->data["Weapon type"] = "Plasma";
-            $this->data["Special"] = "Reduces armor of hit systems.";
+		    //$this->data["Damage type"] = "Raking (5)";
+		    //$this->data["Weapon type"] = "Plasma";
+		    $this->data["Special"] = "Reduces armor of hit systems.";
+		    $this->data["Special"] .= "5-point rakes.";
+		    $this->data["Special"] .= "Damage reduced by 1 point per hex.";			
 						
 			parent::setSystemDataWindow($turn);
 		}
 		
+	
+	
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-				
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
-            $crit->inEffect = false;
-            $system->criticals[] =  $crit;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		}
 		
 		
 		public function getDamage($fireOrder){        return Dice::d(10,3)+4;   }
-		public function setMinDamage(){     $this->minDamage = 7 - $this->dp;      }
-		public function setMaxDamage(){     $this->maxDamage = 34 - $this->dp;      }
+		public function setMinDamage(){     $this->minDamage = 7 ;/*- $this->dp;*/      }
+		public function setMaxDamage(){     $this->maxDamage = 34 /*- $this->dp*/;      }
+}//endof class PlasmaStream
 
-	}
 
 
-    class ShockCannon extends Weapon{
 
+class ShockCannon extends Weapon{
         public $name = "shockCannon";
         public $displayName = "Shock Cannon";
         public $animation = "laser";
@@ -84,12 +76,15 @@ class PlasmaStream extends Raking{
         public $rangePenalty = 1;
         public $fireControl = array(3, 3, 3); // fighters, <=mediums, <=capitals
 
+		public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Electromagnetic";
+            //$this->data["Weapon type"] = "Electromagnetic";
             parent::setSystemDataWindow($turn);
         }
 
@@ -118,9 +113,9 @@ class PlasmaStream extends Raking{
 	}
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
-        public function setMinDamage(){     $this->minDamage = 5 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 14 - $this->dp;      }
-    }
+        public function setMinDamage(){     $this->minDamage = 5 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 /*- $this->dp*/;      }
+}//endof class ShockCannon
 
 
 
@@ -144,28 +139,28 @@ class BurstBeam extends Weapon{
         public $rangePenalty = 2;
         public $fireControl = array(4, 2, 2); // fighters, <=mediums, <=capitals 
 
+		    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
        
 		public function setSystemDataWindow($turn){
-
-			$this->data["Weapon type"] = "Electromagnetic";
-						
+			//$this->data["Weapon type"] = "Electromagnetic";
+	
 			parent::setSystemDataWindow($turn);
 		}
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
-			
-            debug::log($system->displayName);
+            		//debug::log($system->displayName);
 			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
-                $crit->inEffect = true;
+                		$crit->inEffect = true;
 				$system->criticals[] =  $crit;
-            }else if ($system instanceof Structure){
+            		}else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
 				$crit->updated = true;
@@ -183,8 +178,8 @@ class BurstBeam extends Weapon{
 		public function getDamage($fireOrder){        return 0;   }
 		public function setMinDamage(){     $this->minDamage = 0;      }
 		public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof class BurstBeam
 
-	}
 
 	class DualBurstBeam extends BurstBeam{
 		public $name = "dualBurstBeam";
@@ -212,6 +207,8 @@ class BurstPulseCannon extends Pulse {
 	    public $loadingtime = 1;
         public $priority = 9;
         
+    public $damageType = "Pulse"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 			
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 3, 4); // fighters, <=mediums, <=capitals 
@@ -222,9 +219,7 @@ class BurstPulseCannon extends Pulse {
         }
        
 		public function setSystemDataWindow($turn){
-
-			$this->data["Weapon type"] = "Electromagnetic";
-						
+			//$this->data["Weapon type"] = "Electromagnetic";
 			parent::setSystemDataWindow($turn);
 		}
 
@@ -260,6 +255,7 @@ class BurstPulseCannon extends Pulse {
 	}
 
 
+
     class MediumBurstBeam extends BurstBeam{
         public $name = "mediumBurstBeam";
         public $displayName = "Medium Burst Beam";
@@ -278,6 +274,9 @@ class BurstPulseCannon extends Pulse {
         public $rangePenalty = 0.5;
         public $fireControl = array(0, 3, 40); // fighters, <=mediums, <=capitals 
 
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -319,6 +318,7 @@ class BurstPulseCannon extends Pulse {
             }
         }    
     }
+
 
 
     class HeavyBurstBeam extends BurstBeam{
@@ -387,16 +387,14 @@ class BurstPulseCannon extends Pulse {
 
     
     class TractorBeam extends ShipSystem{
-
         public $name = "tractorBeam";
         public $displayName = "Tractor Beam";
       
         function __construct($armour, $maxhealth, $powerReq, $output ){
             parent::__construct($armour, $maxhealth, $powerReq, $output );
         }
-
-
     }
+
 
     class ElectroPulseGun extends Weapon{
 
@@ -415,20 +413,22 @@ class BurstPulseCannon extends Pulse {
         public $loadingtime = 2;
         public $rangePenalty = 3;
         public $fireControl = array(3, null, null); // fighters, <=mediums, <=capitals
+	    public $calledShotMod = 0; //can call shot at no penalty! (eg. pick off undamaged fighter)
 
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            $this->data["Weapon type"] = "Electromagnetic";
+            //$this->data["Weapon type"] = "Electromagnetic";
 
             parent::setSystemDataWindow($turn);
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-
             // On a hit, make fighters drop out, but if this weapon had
             // a ReducedDamage crit, roll a d6 and substract 2 for each
             // ReducedDamage crit. If the result is less than 1, the hit

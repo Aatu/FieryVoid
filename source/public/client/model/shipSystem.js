@@ -70,6 +70,22 @@ Weapon.prototype.getAmmo = function(fireOrder)
     return null;
 }
 
+
+Weapon.prototype.translateFCtoD100txt = function(fireControl)
+{
+	var FCtxt = '';
+	var i = 0;
+	var toAdd;
+	for(i=0;i<=2;i++){
+		toAdd = fireControl[i];
+		if(fireControl[i] === null) toAdd = '-';
+		FCtxt = FCtxt+toAdd;
+		if(i<2) FCtxt = FCtxt+'/';
+	}
+	return FCtxt;
+} //endof Weapon.prototype.translateFCtoD100txt
+
+
 Weapon.prototype.changeFiringMode = function()
 {
     var mode = this.firingMode+1;
@@ -103,11 +119,14 @@ Weapon.prototype.changeFiringMode = function()
 	}
 	if(!mathlib.arrayIsEmpty(this.fireControlArray)){
 		this.fireControl = this.fireControlArray[this.firingMode];
-		this.data["Fire control (fighter/med/cap)"] = this.fireControl[0]+'/'+this.fireControl[1]+'/'+this.fireControl[2];
+		this.data["Fire control (fighter/med/cap)"] = this.translateFCtoD100txt(this.fireControl);
+			//this.fireControl[0]+'/'+this.fireControl[1]+'/'+this.fireControl[2];
 	}
 	if(!mathlib.arrayIsEmpty(this.loadingtimeArray)) this.loadingtime = this.loadingtimeArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.turnsloadedArray)) this.turnsloaded = this.turnsloadedArray[this.firingMode];
 	this.data["Loading"] = this.turnsloaded + '/' + this.loadingtime;
+	if(!mathlib.arrayIsEmpty(this.extraoverloadshotsArray)) this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
+	
 	if(!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.shotsArray)) this.shots = this.shotsArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.$damageTypeArray)){
@@ -121,6 +140,7 @@ Weapon.prototype.changeFiringMode = function()
 	if(!mathlib.arrayIsEmpty(this.defaultShotsArray)) this.defaultShots = this.defaultShotsArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.groupingArray)) this.grouping = this.groupingArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.gunsArray)) this.guns = this.gunsArray[this.firingMode];
+
 	
 	//firing animation related...
 	if(!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];

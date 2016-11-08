@@ -53,10 +53,12 @@ class DualWeapon extends Weapon{
     }
     
     // Never called if all is well
+/* should not be needed - base weapon is never actually fired for dual weapon!
     public function fire($gamedata, $fireOrder){
         $firingMode = $fireOrder->firingMode;
         $this->weapons[$firingMode]->fire($gamedata, $fireOrder);
     }
+*/
     
     public function onConstructed($ship, $turn, $phase){
         parent::onConstructed($ship, $turn, $phase);
@@ -116,6 +118,8 @@ class DualWeapon extends Weapon{
         }
     }
     
+	
+	
     public function onAdvancingGamedata($ship)
     {
         $weaponFired = false;
@@ -175,6 +179,7 @@ class DualWeapon extends Weapon{
         SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
     
+	
     public function setInitialSystemData($ship)
     {
         foreach ($this->weapons as $i=>$weapon)
@@ -193,6 +198,8 @@ class DualWeapon extends Weapon{
         SystemData::addDataForSystem($this->id, 0, $ship->id, $data->toJSON());
     }
 }
+
+
 
 class LaserPulseArray extends DualWeapon{
     
