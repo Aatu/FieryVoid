@@ -579,14 +579,14 @@ class FighterMissileRack extends MissileLauncher
     }
     
     public function setMinDamage(){
-        if(isset($this->missileArray[$newMode])){  //it might not be set in the beginning!
+        if(isset($this->missileArray[$this->firingMode])){  //it might not be set in the beginning!
             $ammo = $this->missileArray[$this->firingMode];
             $ammo->setMinDamage();
             $this->minDamage =  $ammo->minDamage;
         }
     }
     public function setMaxDamage(){
-        if(isset($this->missileArray[$newMode])){  //it might not be set in the beginning!
+        if(isset($this->missileArray[$this->firingMode])){  //it might not be set in the beginning!
             $ammo = $this->missileArray[$this->firingMode];
             $ammo->setMaxDamage();
             $this->maxDamage =  $ammo->maxDamage;
