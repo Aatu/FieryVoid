@@ -79,6 +79,7 @@ spl_autoload_register(
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 //custom weapons StarWars
+                'swrayshield' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
