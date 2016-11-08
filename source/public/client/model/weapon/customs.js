@@ -28,10 +28,10 @@ var CustomHeavyMatterCannon = function(json, ship){
 CustomHeavyMatterCannon.prototype = Object.create( Weapon.prototype );
 CustomHeavyMatterCannon.prototype.constructor = CustomHeavyMatterCannon;
 
-var HLPA = function(json, ship){
+var Hlpa = function(json, ship){
     Weapon.call( this, json, ship);
 }
-HLPA.prototype = Object.create( Weapon.prototype );
-HLPA.prototype.constructor = HLPA;
+Hlpa.prototype = Object.create( Weapon.prototype );
+Hlpa.prototype.constructor = Hlpa;
 
 
