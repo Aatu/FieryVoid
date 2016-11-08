@@ -46,6 +46,7 @@ spl_autoload_register(
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
                 'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
                 'eacgemini' => '/server/model/ships/customs/eacGemini.php',
+                
                 //custom Brakiri
                 'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
@@ -55,6 +56,7 @@ spl_autoload_register(
             	'wlcashinar' => '/server/model/ships/minbari/wlcAshinar.php',
             	'wlctigata' => '/server/model/ships/minbari/wlcTigata.php',
             	'wlctishat1950' => '/server/model/ships/minbari/wlcTishat1950.php',
+                
                 //custom Narn
                 'zzunoffdagkur' => '/server/model/ships/narn/zzunoffDagkur.php',
             	'zzunoffgkon' => '/server/model/ships/narn/zzunoffGkon.php',
@@ -71,12 +73,14 @@ spl_autoload_register(
             	'zzunofftshon' => '/server/model/ships/narn/zzunoffTshon.php',
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
+                
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
                 
                 //custom weapons StarWars
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
+                'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
@@ -94,7 +98,17 @@ spl_autoload_register(
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
+                'protector' =>  '/server/model/ships/deneth/protector.php', 
+                'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
+                'watcher' =>  '/server/model/ships/deneth/watcher.php', 
+                
+                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
+                
+                'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
+                
+                'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
+                
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
@@ -110,7 +124,8 @@ spl_autoload_register(
                 'raven' => '/server/model/ships/drazi_raiders/raven.php',
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
-                // early drazi adds
+                
+                // early Drazi
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
                 'earlywartalon' => '/server/model/ships/drazi_old/earlywartalon.php',
                 'merlin' => '/server/model/ships/drazi_old/merlin.php',
@@ -123,6 +138,11 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
+
+                'peregrine' => '/server/model/ships/drazi_old/peregrine.php',
+                'peregrineold' => '/server/model/ships/drazi_old/peregrineOld.php',
+                'peregrinecmd' => '/server/model/ships/drazi_old/peregrineCmd.php',
+                
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
                 //Streib guns

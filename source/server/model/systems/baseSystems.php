@@ -135,11 +135,10 @@ class Shield extends ShipSystem implements DefensiveSystem{
         parent::onConstructed($ship, $turn, $phase);
 		$this->tohitPenalty = $this->getOutput();
 		$this->damagePenalty = $this->getOutput();
-     
     }
     
     private function checkIsFighterUnderShield($target, $shooter){
-	if(!($shooter instanceof FighterFlight) return false; //only fighters may fly under shield!
+	if(!($shooter instanceof FighterFlight)) return false; //only fighters may fly under shield!
         $dis = mathlib::getDistanceOfShipInHex($target, $shooter);
         if ( $dis == 0 ){ //If shooter are fighers and range is 0, they are under the shield
             return true;
