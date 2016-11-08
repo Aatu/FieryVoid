@@ -142,7 +142,7 @@ window.gamedata = {
             swapped = false;
             
             for(var y=0; y < shipList.length - x; y++){
-                if(shipList[y+1].pointCost < shipList[y].pointCost){
+                if(shipList[y+1].pointCost > shipList[y].pointCost){ //top-down
                     var temp = shipList[y];
                     shipList[y] = shipList[y+1];
                     shipList[y+1] = temp;
