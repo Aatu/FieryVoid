@@ -1017,11 +1017,13 @@ class Weapon extends ShipSystem{
 			$damageOut = $damage - $damageEntry -$damagePRIMARY;
 		}
 		//first part: facing structure
-		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
         	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, false, $facingLocation);
 		//second part: PRIMARY Structure
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
 		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
 		//last part: opposite Structure
+		$system = $target->getHitSystem($shooter, $fireOrder, $this,  $outLocation);
 		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
 	}elseif( ($this->damageType=='Raking') && (!($target instanceof FighterFlight)) ){ //Raking hit... but not at fighters - that's effectively Standard shot!
 		//split into rakes; armor will not need to be penetrated twice!
