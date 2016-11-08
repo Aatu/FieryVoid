@@ -9,7 +9,8 @@ class ArtemisBeta extends HeavyCombatVessel{
         $this->faction = "EA";
         $this->phpclass = "ArtemisBeta";
         $this->imagePath = "img/ships/artemis.png";
-        $this->shipClass = "Artemis Heavy Frigate (Beta Model)";
+        $this->shipClass = "Artemis Heavy Frigate (Beta)";
+        $this->isd = 2190;
         
         
         $this->forwardDefense = 14;
