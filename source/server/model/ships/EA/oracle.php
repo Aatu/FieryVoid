@@ -8,9 +8,12 @@ class Oracle extends BaseShip{
 		$this->faction = "EA";
 		$this->phpclass = "Oracle";
 		$this->imagePath = "img/ships/oracle.png";
-		$this->shipClass = "Oracle Light Cruiser";
+		$this->shipClass = "Oracle Light Cruiser (Delta)";
 		$this->shipSizeClass = 3;
 		$this->occurence = "rare";
+	        $this->variantOf = "Oracle Scout Cruiser (Gamma)";
+	        $this->isd = 2231;
+	    
 
 		$this->forwardDefense = 13;
 		$this->sideDefense = 16;
@@ -57,8 +60,8 @@ class Oracle extends BaseShip{
 		$this->addFrontSystem(new Structure( 4, 48));
 		$this->addAftSystem(new Structure( 4, 42));
 		$this->addLeftSystem(new Structure( 4, 55));
-        $this->addRightSystem(new Structure( 4, 55));
-        $this->addPrimarySystem(new Structure( 5, 48));
+		$this->addRightSystem(new Structure( 4, 55));
+		$this->addPrimarySystem(new Structure( 5, 48));
 		
 		
 		$this->hitChart = array(
