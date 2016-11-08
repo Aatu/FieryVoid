@@ -122,14 +122,9 @@ class ShipSystem{
         }
     }
     
-	
-	
-/*
-    public function getArmour($target, $shooter, $dmgClass){
+    public function getArmour($target, $shooter, $dmgClass){ //total armour
         $armour = $this->armour;
         $activeAA = 0;
-
-    //    debug::log("hit by: ".$dmgClass);
 
         if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])){
@@ -138,34 +133,25 @@ class ShipSystem{
                 $armour += $activeAA;
             }
         }
-
         return $armour;
-
     }
 	
-    public function getArmourPos($gamedata, $pos){
-        return $this->armour;
-    }
-    */
-	
-        public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
-		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
-		return $armour;
-        }
-		
-		
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
+	//$pos is to be included if launch position is different than firing unit position
 	return $this->armour;
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
+	//$pos is to be included if launch position is different than firing unit position
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
-            if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
+            if (isset($target->armourSettings[$dmgClass][1])){
+                $activeAA = $target->armourSettings[$dmgClass][1];
+                $armour += $activeAA;
+            }
         } 
 	return $activeAA;
     }
-	
 	
     
     public function setSystemDataWindow($turn){
@@ -214,14 +200,12 @@ class ShipSystem{
             }
         }        
 
-/* moved to potentially exploding systems themselves  
         if ($this instanceof MissileLauncher || $this instanceof ReloadRack){
             $crit = $this->testAmmoExplosion($ship, $gamedata);
             $crits[] = $crit;
         }
-*/	
-        if($this instanceof SubReactor){
-            //debug::log("subreactor, multi damage 0.5");
+        else if ($this instanceof SubReactor){
+            debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
 
