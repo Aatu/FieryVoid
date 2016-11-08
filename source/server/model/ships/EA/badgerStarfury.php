@@ -9,6 +9,10 @@ class BadgerStarfury extends FighterFlight{
         $this->phpclass = "BadgerStarfury";
         $this->shipClass = "Starfury: Badger Heavy flight";
         $this->imagePath = "img/ships/badgerStarfury.png";
+	    
+	$this->occurence = 'uncommon';//by original rules: not a variant, but special deployment restrictions (1 in 4 fighter flights)
+	$this->variantOf = "Starfury: Aurora Heavy flight";//I think Uncommon variant of Aurora is close enough
+	    $this->isd = 2255;
 
         $this->forwardDefense = 9;
         $this->sideDefense = 6;
@@ -31,7 +35,7 @@ class BadgerStarfury extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 2, 2);
             $fighter = new Fighter("badgerStarfury", $armour, 15, $this->id);
-            $fighter->displayName = "Badger Starfury Heavy Fighter";
+            $fighter->displayName = "Badger Long-Range Fighter";
             $fighter->imagePath = "img/ships/badgerStarfury.png";
             $fighter->iconPath = "img/ships/badgerStarfury_large.png";
 
