@@ -246,7 +246,7 @@ window.gamedata = {
 	/*prepares fleet list for purchases for display*/
 	parseShips: function(jsonShips){
 		for (var faction in jsonShips){
-			var targetNode = document.getElementById(ship.faction);
+			var targetNode = document.getElementById(faction);
 			var h;
 			var ship;
 			var shipV;
