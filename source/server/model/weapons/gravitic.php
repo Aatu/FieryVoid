@@ -555,7 +555,6 @@ class GraviticLance extends DualWeapon{
         public $overloadable = true;
         public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
-        public $damageType = "raking";
         public $raking = 10;
         
         public $rangePenalty = 0.2;
