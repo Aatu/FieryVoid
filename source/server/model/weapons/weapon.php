@@ -655,7 +655,7 @@ class Weapon extends ShipSystem{
             $mod -= 1;
         }
 
-        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
+        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 
         $ammo = $this->getAmmo($fireOrder);
