@@ -8,7 +8,8 @@
         public $EW = array();
         public $fighters = array();
         public $hitChart = array();
-
+        public $notes = '';//notes to be displayed on fleet selection screen
+	    
         public $occurence = "common";
 	public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
         public $limited = 0;
