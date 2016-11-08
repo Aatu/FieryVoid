@@ -460,6 +460,10 @@ shipWindowManager = {
                 }
             }
            
+            if(ship.notes != ''){
+                notes.push("&nbsp;" + ship.notes);
+            }
+		
             if(ship.limited != 0){
                 notes.push("&nbsp;limited: " + ship.limited + "%");
             }
