@@ -41,7 +41,7 @@
      
         }
         
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
                 return 0;
 
@@ -50,7 +50,7 @@
             return $output;
         }
 
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             return 0;
         }
         
@@ -80,7 +80,8 @@
         public $output = 4;
         public $intercept = 4;
         
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+        /*already declared in MkI
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
                 return 0;
 
@@ -89,9 +90,10 @@
             return $output;
         }
 
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             return 0;
         }
+        */
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
@@ -108,7 +110,8 @@
         public $output = 2;
         public $intercept = 2;
         
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn){
+        /*already declared in MkI
+        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
                 return 0;
 
@@ -117,9 +120,9 @@
             return $output;
         }
 
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn){
+        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             return 0;
-        }
+        }*/
         
         public function setSystemDataWindow($turn){
             $this->data["DEFENSIVE BONUS:"] = "-10 to hit on arc";
