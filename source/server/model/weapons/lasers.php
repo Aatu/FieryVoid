@@ -478,8 +478,8 @@
         }
 
         public function getDamage($fireOrder){ return Dice::d(10, 4)+8; }
-        public function setMinDamage(){ $this->minDamage = 12 - $this->dp; }
-        public function setMaxDamage(){ $this->maxDamage = 48 - $this->dp; }
+        public function setMinDamage(){ $this->minDamage = 12 ; }
+        public function setMaxDamage(){ $this->maxDamage = 48 ; }
     }
 
 
