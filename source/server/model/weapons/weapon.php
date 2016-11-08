@@ -882,7 +882,7 @@ class Weapon extends ShipSystem{
 	
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-            $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
+            $this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
     }
 	
 	
