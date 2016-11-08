@@ -58,7 +58,7 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- New fleet selection screen organisation. Not all fleets take full advantage of it yet - EA does ;) .";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "Enjoy and report BUGS on FB. Also hit F5 whenever something weird happens.";
+                    news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
                     
                     news.innerHTML += "<br><br>----------<b>LINKS</b>----------";
