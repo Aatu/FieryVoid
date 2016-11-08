@@ -1218,8 +1218,8 @@ class Weapon extends ShipSystem{
 		if(isset($this->maxDamageArray[$i])) $this->maxDamage = $this->maxDamageArray[$i];
 		if(isset($this->dpArray[$i])) $this->dp = $this->dpArray[$i];
 		
-		f(isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
-		f(isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
+		if(isset($this->systemKillerArray[$i])) $this->systemKiller = $this->systemKillerArray[$i];
+		if(isset($this->noOverkillArray[$i])) $this->noOverkill = $this->noOverkillArray[$i];
 		
 	}//endof function changeFiringMode
 	
