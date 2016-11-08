@@ -509,7 +509,7 @@
         /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
         public function getShotHitChanceMod($shotInSequence){ 
             $prevExpectedChance = $this->getPrevShotHitChanceMod($shotInSequence-1);
-            if($prevExpectedChance ne $this->hitChanceMod){ //something missed in between
+            if($prevExpectedChance != $this->hitChanceMod){ //something missed in between
                 $this->hitChanceMod = 10000; //clear miss!!!
             }else{
                 $this->hitChanceMod = $this->getPrevShotHitChanceMod($shotInSequence);
