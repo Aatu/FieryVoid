@@ -8,9 +8,10 @@ class Avenger extends BaseShip{
 	$this->faction = "EA";
         $this->phpclass = "Avenger";
         $this->imagePath = "img/ships/avenger.png";
-        $this->shipClass = "Avenger Heavy Carrier";
+        $this->shipClass = "Avenger Heavy Carrier (Gamma)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>48);
+	    $this->isd = 2240;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
