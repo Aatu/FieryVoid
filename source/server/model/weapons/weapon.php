@@ -589,7 +589,7 @@ class Weapon extends ShipSystem{
             if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
             {
                 // Target is not in distance range. Move to next shot.
-		$notes. = ' Target moved out of range. '.;
+		$notes .= ' Target moved out of range. ';
 		$fireOrder->needed = 0; //auto-miss
 		$fireOrder->notes = $notes;
 		$fireOrder->updated = true;
