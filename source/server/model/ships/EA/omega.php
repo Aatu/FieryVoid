@@ -14,6 +14,7 @@ class Omega  extends BaseShip{
         $this->fighters = array("normal"=>24);
 	    
 	    $this->isd = 2250;
+	    $this->notes = 'Thunderbolt capable.';
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
