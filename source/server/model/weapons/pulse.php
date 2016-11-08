@@ -50,8 +50,8 @@ class Pulse extends Weapon{
 	}
 	
 	//Pulse weapon usually have fixed damage, so... non-fixed damage weapons would have to override as usual
-        public function setMinDamage(){     $this->getDamage();      }
-        public function setMaxDamage(){     $this->getDamage();      }
+        public function setMinDamage(){     $this->getDamage(null);      }
+        public function setMaxDamage(){     $this->getDamage(null);      }
 
 	
 /*no longer needed, code left just in case	
