@@ -9,6 +9,7 @@ class NovaStarfury extends FighterFlight{
         $this->phpclass = "NovaStarfury";
         $this->shipClass = "Starfury: Nova Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
+	    $this->isd = 2230;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
@@ -30,7 +31,7 @@ class NovaStarfury extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("novaStarfury", $armour, 12, $this->id);
-            $fighter->displayName = "Nova StarFury Heavy Fighter";
+            $fighter->displayName = "Nova Heavy Fighter";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
 
