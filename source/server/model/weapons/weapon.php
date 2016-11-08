@@ -827,6 +827,7 @@ class Weapon extends ShipSystem{
         $intercept = $this->getIntercept($gamedata, $fireOrder);
 
         for ($i=0;$i<$fireOrder->shots;$i++){
+		$needed = $fireOrder->needed;
 		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
             		$needed = $fireOrder->needed - getShotHitChanceMod($i);
 		}
