@@ -91,6 +91,7 @@ spl_autoload_register(
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
+                'hlpa' => '/server/model/weapons/customs.php',
                 
                 //Deneth
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
