@@ -78,27 +78,30 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
 
                 //Star Wars (sort of) - Centauri Galactic Empire
+                /*
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
                 'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
-                
+                */
                 //custom weapons StarWars
+                /*
                 'swrayshield' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
-                
+                */
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
                 'customheavymattercannon' => '/server/model/weapons/customs.php',
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
-                'hlpa' => '/server/model/weapons/customs.php',
+                //'hlpa' => '/server/model/weapons/customs.php',
 
 
                 //Deneth
+                /*
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
                 'liberatorcannon' =>  '/server/model/ships/deneth/liberatorCannon.php', 
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
@@ -114,7 +117,7 @@ spl_autoload_register(
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
-                
+                */
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
@@ -146,10 +149,11 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
+                /*
                 'peregrine' => '/server/model/ships/drazi_old/peregrine.php',
                 'peregrineold' => '/server/model/ships/drazi_old/peregrineOld.php',
                 'peregrinecmd' => '/server/model/ships/drazi_old/peregrineCmd.php',
-                
+                */
 
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
@@ -797,6 +801,7 @@ spl_autoload_register(
                 'yuan' => '/server/model/ships/yolu/yuan.php'
             );
         }
+    
         $cn = strtolower($class);
         if (isset($classes[$cn])) {
             require __DIR__ . $classes[$cn];
