@@ -829,7 +829,7 @@ class Weapon extends ShipSystem{
         for ($i=0;$i<$fireOrder->shots;$i++){
 		$needed = $fireOrder->needed;
 		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
-            		$needed = $fireOrder->needed - getShotHitChanceMod($i);
+            		$needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
 		}
             
 		//for linked shot: further shots will do the same as first!
