@@ -1186,7 +1186,7 @@ class Weapon extends ShipSystem{
 		$i = $newMode;
 		if(isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
 		
-		if(isset($this->animationArray[$i])) $this->animation = $this->animarionArray[$i];
+		if(isset($this->animationArray[$i])) $this->animation = $this->animationArray[$i];
 		if(isset($this->animationImgArray[$i])) $this->animationImg = $this->animationImgArray[$i];
 		if(isset($this->animationImgSpriteArray[$i])) $this->animationImgSprite = $this->animationImgSpriteArray[$i];
 		if(isset($this->animationColorArray[$i])) $this->animationColor = $this->animationColorArray[$i];
