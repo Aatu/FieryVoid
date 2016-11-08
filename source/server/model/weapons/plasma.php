@@ -277,8 +277,8 @@ class PlasmaTorch extends Plasma{
 		
 		
     	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
-        public function setMinDamage(){     $this->minDamage = 12 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 30 - $this->dp;      }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 30 ;      }
 
 		public function setSystemDataWindow($turn){
 			//$this->data["Weapon type"] = "Plasma";
