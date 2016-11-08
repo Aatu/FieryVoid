@@ -56,8 +56,8 @@
             // Yeah, I know: dirty.
             //$this->data["REMARK"] = "Max. power might cause<br> crits on this system";
 	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
-	    $this->data["Special"]. = "Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
-	    $this->data["Special"]. = "Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
+	    $this->data["Special"] .= "Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
+	    $this->data["Special"] .= "Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
             //$this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
 
