@@ -237,7 +237,7 @@ window.gamedata = {
 		
 		displayName=displayName+' ('+addOn+')';
 		if(ship.variantOf !=''){
-			displayName = '<i>'+displayName+'</i>';
+			displayName = '&nbsp;&nbsp;&nbsp;<i>'+displayName+'</i>';
 		}
 		
 		return displayName;
