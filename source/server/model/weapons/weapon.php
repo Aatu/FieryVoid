@@ -1144,17 +1144,17 @@ class Weapon extends ShipSystem{
 		//armor may be ignored for some reason...
 		$armourIgnored = 0;
 		if(isset($fireOrder->armorIgnored[$system->id])){
-			$armorIgnored =  $fireOrder->armorIgnored[$system->id];
+			$armourIgnored =  $fireOrder->armorIgnored[$system->id];
 			$armour = $armour - $armourIgnored;
 		}
 		$armour = max($armour,0);
 		
-		if ($damage-$armour >= $systemHealth){ //target will be destroyed
+		if ($modifiedDamage-$armour >= $systemHealth){ //target will be destroyed
 		    $destroyed = true;
 		    $modifiedDamage = $systemHealth + $armour;
 		}elseif($this->damageType == 'Raking' ){ //note that armour was already pierced for this shot...
-			$armorIgnored = $armourIgnored+$modifiedDamage;
-			$fireOrder->armorIgnored[$system->id] = $armorIgnored;
+			$armourIgnored = $armourIgnored+$modifiedDamage;
+			$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 		}
 
 		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
