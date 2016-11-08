@@ -147,7 +147,7 @@
         public $rangePenalty = 1;
 
         public $fireControlArray = array( 1=>array(-4, 2, 4), 2=>array(null, -2, 0) ); //Raking and Piercing mode, respectively - Piercing adds -4!
-        public $fireControl = $this->fireControl[1];  // fighters, <mediums, <capitals
+        //public $fireControl = $this->fireControlArray[1];  // fighters, <mediums, <capitals
         //private $damagebonus = 30;
 
         public $damageType = "Raking"; 
