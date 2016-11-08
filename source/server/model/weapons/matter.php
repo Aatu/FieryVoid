@@ -171,13 +171,13 @@
 
 	    
 	    
-	public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){ //always hit Structure...
+	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
 		if ($target->isDestroyed()) return;
 		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 
 		$system = $target->getStructureSystem($tmpLocation);
 		if ($system == null || $system->isDestroyed()) $system = $target->getStructureSystem(0);//facing Structure nonexistent, go to PRIMARY
-		if ($system == null || $system->isDestroyed()) return; 
+		if ($system == null || $system->isDestroyed()) return; //PRIMARY Structure nonexistent also
 		$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
 	}
 	    
