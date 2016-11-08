@@ -8,10 +8,13 @@ class HyperionRail extends BaseShip{
     	$this->faction = "EA";
         $this->phpclass = "HyperionRail";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Zeta (Rail Cruiser)";
+        $this->shipClass = "Hyperion Rail Cruiser (Zeta)";
         $this->shipSizeClass = 3;
-        $this->occurence = "rare";
         $this->fighters = array("normal"=>6);
+	    
+	
+        $this->occurence = "rare";
+	$this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
