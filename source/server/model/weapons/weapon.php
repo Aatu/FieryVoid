@@ -1147,7 +1147,7 @@ class Weapon extends ShipSystem{
 			$armorIgnored =  $fireOrder->armorIgnored[$system->id];
 			$armour = $armour - $armourIgnored;
 		}
-		$armour = min($armour,0);
+		$armour = max($armour,0);
 		
 		if ($damage-$armour >= $systemHealth){ //target will be destroyed
 		    $destroyed = true;
