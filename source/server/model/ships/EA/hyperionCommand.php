@@ -8,9 +8,13 @@ class HyperionCommand extends BaseShip{
 		$this->faction = "EA";
         $this->phpclass = "HyperionCommand";
         $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Epsilon (Command Cruiser)";
+        $this->shipClass = "Hyperion Command Cruiser (Epsilon)";
         $this->shipSizeClass = 3;
+	    
         $this->occurence = "uncommon";
+        $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+        $this->isd = 2246;
+	    
         $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 14;
