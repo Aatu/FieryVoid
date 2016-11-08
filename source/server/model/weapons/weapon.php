@@ -1120,7 +1120,7 @@ class Weapon extends ShipSystem{
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
         $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $weapon);
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 
         return $damage;
     }
