@@ -248,6 +248,7 @@ spl_autoload_register(
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
                 'plasmagun' => '/server/model/weapons/plasma.php',
                 'particleprojector' => '/server/model/weapons/particle.php',
+                
                 //various
                 'hkflight' => '/server/model/ships/HK.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
@@ -571,6 +572,7 @@ spl_autoload_register(
                 'olympusbeta' => '/server/model/ships/EA/olympusBeta.php',
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
+                'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
