@@ -9,6 +9,7 @@ class AuroraStarfury extends FighterFlight{
         $this->phpclass = "AuroraStarfury";
         $this->shipClass = "Starfury: Aurora Heavy flight";
         $this->imagePath = "img/ships/auroraStarfury.png";
+        $this->isd = 2244;
         
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
