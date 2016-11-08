@@ -8,8 +8,10 @@ class OracleScout extends BaseShip{
 	$this->faction = "EA";
         $this->phpclass = "OracleScout";
         $this->imagePath = "img/ships/oracle.png";
-        $this->shipClass = "Oracle Scout Cruiser";
+        $this->shipClass = "Oracle Scout Cruiser (Gamma)";
         $this->shipSizeClass = 3;
+	    
+	$this->isd = 2216;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
