@@ -489,7 +489,6 @@
         public $trailLength = 12;
         
         public $loadingtime = 3;
-        public $damageType = "raking";
         public $raking = 10;
         public $exclusive = true;
         public $priority = 7;
