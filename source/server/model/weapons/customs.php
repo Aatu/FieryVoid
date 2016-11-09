@@ -196,6 +196,7 @@ class HLPA extends Weapon{
 	public $raking = 10; //only useful for Raking mode
         public $priorityArray = array(1=>7, 2=>5);
 	public $uninterceptableArray = array(1=>true, 2=>false);
+	public $defaultshotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
 	
         public $loadingtimeArray = array(1=>4, 2=>3);
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
