@@ -10,6 +10,8 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/sunhawk.png";
         $this->shipClass = "Jumphawk Command Cruiser";
         $this->occurence = "uncommon";
+	    $this->variantOf = "Sunhawk Battlecruiser";
+	    $this->isd = 2230;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;
