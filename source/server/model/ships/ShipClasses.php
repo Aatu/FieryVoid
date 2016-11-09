@@ -324,6 +324,7 @@
 	    
 	public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
 		/*name may indicate different location?...*/
+		/*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
 		$location_different_array = explode (':' , $name);
 		if(sizeof($location_different_array)==2){ //indicated different section: exactly 2 items - first location, then name
 			return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
@@ -576,9 +577,7 @@
 
         
         public function isDestroyed($turn = false){
-        
             foreach($this->systems as $system){
-
                 if ($system instanceof Reactor && $system->isDestroyed($turn)){
                     return true;
                 }
@@ -592,6 +591,7 @@
             return false;
         }
         
+	    
         public function isDisabled(){
             if ($this->isPowerless())
                 return true;
@@ -602,6 +602,7 @@
             
             return false;
         }
+	    
         
         public function isPowerless(){
             $output = 0;
@@ -834,8 +835,8 @@
 		/*DOES NOT take care of overkill!!! returns section structure if no system can be hit, whether that section is still alive or not*/
 		$system = null;
 		$name = false;
-		$location_different = false; //target system may be on different location?
-		$location_different_array = array(); //array(location,system) if so indicated
+		//$location_different = false; //target system may be on different location?
+		//$location_different_array = array(); //array(location,system) if so indicated
 		$systems = array();
 
 		if ($fire->calledid != -1){
@@ -844,7 +845,7 @@
 
 		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
-		if ($location == null) { 
+		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
           
@@ -936,8 +937,8 @@
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
 		$name = false;
-		$location_different = false; //target system may be on different location?
-		$location_different_array = array(); //array(location,system) if so indicated
+		//$location_different = false; //target system may be on different location?
+		//$location_different_array = array(); //array(location,system) if so indicated
 		$systems = array();
 
 		if ($fire->calledid != -1){
@@ -946,7 +947,7 @@
 
 		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
-		if ($location == null) { 
+		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
 
@@ -959,7 +960,7 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
+				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed())) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
@@ -1023,7 +1024,7 @@
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, just return Structure
+		if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not
 			$struct = $this->getStructureSystem($location);
 			return $struct;
 		}

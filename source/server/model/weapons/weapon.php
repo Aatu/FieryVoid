@@ -103,10 +103,10 @@ class Weapon extends ShipSystem{
 
 	//damage type-related variables
 	public $isLinked = false; //for linked weapons - they will all hit the exact same system!
-	private $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
-	private $systemKillerArray = array();
-	private $noOverkill = false; //this will let simplify entire Matter line enormously!
-	private $noOverkillArray = array();
+	public $systemKiller = false;	//for custom weapons - increased chance to hit system and not Structure
+	protected $systemKillerArray = array();
+	public $noOverkill = false; //this will let simplify entire Matter line enormously!
+	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	//public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
@@ -177,7 +177,7 @@ class Weapon extends ShipSystem{
 	//min/max damage arrays are created automatically, so they will always be present
 	if($dp>0){
 		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a percentage, however! - low rolls should be affected lefss than high ones, after all
-		foreach($this->firingModes as $dmgMode){
+		foreach($this->firingModes as $dmgMode=>$modeName){
 			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );
 			$this->dpArray[$dmgMode] = $mod/(($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2);//convert to fraction -  of average result ;)
 			$this->dpArray[$dmgMode] = min(0.9,$this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
@@ -190,14 +190,19 @@ class Weapon extends ShipSystem{
 	while($rp>0){
 		if($this->rangePenalty>=1){
 			$this->rangePenalty += 1;
-		}else{
+		}else if($this->rangePenalty>0){
 			$this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
+		}else{ //no range penalty - range itself will be reduced! 
+			//no calculations needed
 		}
 		foreach($this->rangePenaltyArray As $dmgMode=>$penaltyV){
-			if($this->rangePenaltyArray[$dmgMode]>=1){
+			if($this->rangePenaltyArray[$dmgMode]>=1){ //long range
 				$this->rangePenaltyArray[$dmgMode] += 1;
-			}else{
+			}else if($this->rangePenalty>0){ //short range
 				$this->rangePenaltyArray[$dmgMode] = 1/(round(1/$this->rangePenaltyArray[$dmgMode])-1);
+			}else{ //no range penalty - affect range itself
+				if(!isset($this->rangeArray[$dmgMode]))$this->rangeArray[$dmgMode] = $this->range;
+				$this->rangeArray[$dmgMode] = floor($this->rangeArray[$dmgMode] * 0.8); //loss 20% range for very crit
 			}
 		}
 		$rp--;
@@ -655,7 +660,7 @@ class Weapon extends ShipSystem{
             $mod -= 1;
         }
 
-        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn);
+        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 
         $ammo = $this->getAmmo($fireOrder);
@@ -825,10 +830,16 @@ class Weapon extends ShipSystem{
 
         $this->calculateHit($gamedata, $fireOrder);
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-
-        for ($i=0;$i<$fireOrder->shots;$i++){
+	$shotsFired = $fireOrder->shots; //number of actual shots fired
+	
+	if($this->damageType == 'Pulse'){//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
+            	$shotsFired = 1;
+	}
+	    
+        for ($i=0;$i<$shotsFired;$i++){
+		$needed = $fireOrder->needed;
 		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
-            		$needed = $fireOrder->needed - getShotHitChanceMod($i);
+            		$needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
 		}
             
 		//for linked shot: further shots will do the same as first!
@@ -854,23 +865,23 @@ class Weapon extends ShipSystem{
 			    }
 		}
 
-            $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
-	    $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
-            if ($rolled <= $needed){
-		$hitsRemaining=1;
-		    
-		if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
-	            $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
-		    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
-		    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+		$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+		$fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+		if ($rolled <= $needed){
+			$hitsRemaining=1;
+
+			if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
+			    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+			    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
+			    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+			}
+
+			while($hitsRemaining>0){
+				$hitsRemaining--;
+				$fireOrder->shotshit++;
+				$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
+			}
 		}
-		    
-		while($hitsRemaining>0){
-			$hitsRemaining--;
-                	$fireOrder->shotshit++;
-                	$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
-		}
-            }
         }
 
         $fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
@@ -881,7 +892,7 @@ class Weapon extends ShipSystem{
 	
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
             $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
-            $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage);
+            $this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
     }
 	
 	
@@ -970,7 +981,7 @@ class Weapon extends ShipSystem{
                         $this->doDamage($ship, $shooter, $fighter, $flashDamageAmount, $fireOrder, $explosionPos, $gamedata, false);
                     }
                 }else{
-		    $loc = doGetHitSectionBearing($relativeBearing); //full array
+		    $loc = $ship->doGetHitSectionBearing($relativeBearing); //full array
 		    $tmpLocation = $loc["loc"];
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
                     $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
@@ -1013,14 +1024,16 @@ class Weapon extends ShipSystem{
 		}else{ //standard split to 3 parts; defender allocates, so protecting Primary
 			$damageEntry = ceil($damage/3);
 			$damagePRIMARY = floor($damage/3);
-			$damageOut = $damage - $damageOut -$damagePRIMARY;
+			$damageOut = $damage - $damageEntry -$damagePRIMARY;
 		}
 		//first part: facing structure
-		$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
         	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, false, $facingLocation);
 		//second part: PRIMARY Structure
+		$system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
 		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
 		//last part: opposite Structure
+		$system = $target->getHitSystem($shooter, $fireOrder, $this,  $outLocation);
 		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
 	}elseif( ($this->damageType=='Raking') && (!($target instanceof FighterFlight)) ){ //Raking hit... but not at fighters - that's effectively Standard shot!
 		//split into rakes; armor will not need to be penetrated twice!
@@ -1119,7 +1132,7 @@ class Weapon extends ShipSystem{
     protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder){
         $damage = $this->getDamage($fireOrder);
         $damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
-        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $weapon);
+        $damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 
         return $damage;
     }
@@ -1143,17 +1156,17 @@ class Weapon extends ShipSystem{
 		//armor may be ignored for some reason...
 		$armourIgnored = 0;
 		if(isset($fireOrder->armorIgnored[$system->id])){
-			$armorIgnored = $armour - $fireOrder->armorIgnored[$system->id];
+			$armourIgnored =  $fireOrder->armorIgnored[$system->id];
 			$armour = $armour - $armourIgnored;
 		}
-		$armour = min($armour,0);
+		$armour = max($armour,0);
 		
-		if ($damage-$armour >= $systemHealth){ //target will be destroyed
+		if ($modifiedDamage-$armour >= $systemHealth){ //target will be destroyed
 		    $destroyed = true;
 		    $modifiedDamage = $systemHealth + $armour;
 		}elseif($this->damageType == 'Raking' ){ //note that armour was already pierced for this shot...
-			$armorIgnored = $armourIgnored+$modifiedDamage;
-			$fireOrder->armorIgnored[$system->id] = $armorIgnored;
+			$armourIgnored = $armourIgnored+$modifiedDamage;
+			$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 		}
 
 		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);

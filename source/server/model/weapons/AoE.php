@@ -27,7 +27,7 @@
 		
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled;
-            	if ($rolled > $needed){ //miss!
+            	if ($rolled > $fireOrder->needed){ //miss!
 			$fireOrder->pubnotes .= "Charge dissipates. ";  
 		}else{//hit!
 			$fireOrder->shotshit++;
@@ -48,7 +48,7 @@
 			$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
                     	$ships1 = $gamedata->getShipsInDistance($pos);
 			$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
-			foreach($ships2 as $target){
+			foreach($ships2 as $targetShip){
 				if(isset($ships1[ $target->id])){ //ship on target hex!
 					$sourceHex = $posLaunch;
 					$damage = $this->maxDamage;
@@ -56,7 +56,7 @@
 					$sourceHex = $target;
 					$damage = $this->minDamage;
 				}
-				$this->AOEdamage( $target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+				$this->AOEdamage( $targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 			}
 		}
 	    
@@ -67,7 +67,7 @@
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata){
             if ($target->isDestroyed()) continue; //no point allocating
 		$damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-		$damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn);
+		$damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
 		if ($target instanceof FighterFlight){
 		    foreach ($target->systems as $fighter){
 			if ($fighter == null || $fighter->isDestroyed()){

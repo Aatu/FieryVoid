@@ -8,11 +8,12 @@ class Nova extends BaseShip{
 		$this->faction = "EA";
         $this->phpclass = "Nova";
         $this->imagePath = "img/ships/nova.png";
-        $this->shipClass = "Nova Dreadnought";
+        $this->shipClass = "Nova Dreadnought (Beta)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->limited = 33;
         $this->fighters=array("normal"=>24);
+	    $this->isd = 2242;
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
