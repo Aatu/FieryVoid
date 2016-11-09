@@ -282,7 +282,8 @@ shipWindowManager = {
 		if (n > 0){ //there is retargeting
 		      name = name.substring(n+1);
 		}
-				
+		
+		/* since table rows don't grow needlessly now, I believe this is just misleading and not helpful
 		if (name == "Heavy Particle Cannon"){
 			return "Heavy Particle";
 		}
@@ -356,6 +357,8 @@ shipWindowManager = {
 			return "Burst PC";
 		}
 		else return name;
+		*/
+		return name;
 	},
 
 	
