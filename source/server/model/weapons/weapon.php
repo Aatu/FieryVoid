@@ -969,6 +969,7 @@ class Weapon extends ShipSystem{
 	    $explosionPos = $target->getCoPos();
             $ships1 = $gamedata->getShipsInDistance($explosionPos);
             foreach($ships1 as $ship){
+		    /*
                 if($ship === $target) continue;// make certain the target doesn't get the damage twice
 		if ($ship->isDestroyed()) continue; //no point allocating
 		$relativeBearing = $ship->getBearingOnUnit($target);//actual direction the damage comes from is from unit directly hit!	
@@ -985,7 +986,7 @@ class Weapon extends ShipSystem{
 		    $tmpLocation = $loc["loc"];
                     $system = $ship->getHitSystem($target, $fireOrder, $this, $tmpLocation);
                     $this->doDamage($ship, $shooter, $system, $flashDamageAmount, $fireOrder, null, $gamedata, false, $tmpLocation);
-                }   
+                }   */
 	    }
     }//endof function doCollateralDamage
 	
