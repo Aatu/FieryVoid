@@ -383,9 +383,9 @@
             //if the system has arcs, check that the position is on arc
             if(is_int($system->startArc) && is_int($system->endArc)){
                 //get bearing on incoming fire...
-		if($weapon->ballistic){
-		    $relativeBearing = $this->getBearingOnPos($pos);
-		}else{ //direct fire weapon - check from shooter...
+		if($pos!=null){ //firing position is explicitly declared
+			$relativeBearing = $this->getBearingOnPos($pos);
+		}else{ //check from shooter...
 		    $relativeBearing = $this->getBearingOnUnit($shooter);
 		}
 
