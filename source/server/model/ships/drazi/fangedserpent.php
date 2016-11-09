@@ -10,6 +10,8 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->shipClass = "Fanged Serpent Command Fighter";
 	$this->imagePath = "img/ships/skyserpent.png";
         $this->occurence = "rare";
+	     $this->variantOf = "Sky Serpent Heavy Assault Fighter";
+	    $this->isd = 2231;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 9;
@@ -22,7 +24,7 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->hasNavigator = true;
         
         $armour = array(4, 3, 4, 4);
-        $fighter = new Fighter("skyserpent", $armour, 32, $this->id);
+        $fighter = new Fighter("fangedserpent", $armour, 32, $this->id);
         $fighter->displayName = "Fanged Serpent Command Fighter";
         $fighter->imagePath = "img/ships/skyserpent.png";
         $fighter->iconPath = "img/ships/skyserpent_large.png";
