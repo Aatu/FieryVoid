@@ -830,10 +830,10 @@ class Weapon extends ShipSystem{
 
         $this->calculateHit($gamedata, $fireOrder);
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-	$shotsFired = $fireOrder->shots; //number of actual shots (NOT pulses!) fired
+	$shotsFired = $fireOrder->shots; //number of actual shots fired
 	
-	if($this->damageType == 'Pulse'){//Pulse mode needs to mark number of shots == number of pulses for animation purposes	
-            	$fireOrder->shots = $this->maxpulses;
+	if($this->damageType == 'Pulse'){//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
+            	$shotsFired = 1;
 	}
 	    
         for ($i=0;$i<$shotsFired;$i++){
