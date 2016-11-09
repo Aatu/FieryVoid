@@ -58,7 +58,7 @@
 	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
 	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
 	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
-            //$this->defaultShots = $this->getMaxPulses($turn);
+            $this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
 
             //$this->shots = $this->defaultShots;
