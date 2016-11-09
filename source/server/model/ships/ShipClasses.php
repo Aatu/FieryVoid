@@ -837,8 +837,8 @@
 		/*DOES NOT take care of overkill!!! returns section structure if no system can be hit, whether that section is still alive or not*/
 		$system = null;
 		$name = false;
-		$location_different = false; //target system may be on different location?
-		$location_different_array = array(); //array(location,system) if so indicated
+		//$location_different = false; //target system may be on different location?
+		//$location_different_array = array(); //array(location,system) if so indicated
 		$systems = array();
 
 		if ($fire->calledid != -1){
@@ -939,8 +939,8 @@
 		/*same as by table, but prepare table out of available systems...*/
 		$system = null;
 		$name = false;
-		$location_different = false; //target system may be on different location?
-		$location_different_array = array(); //array(location,system) if so indicated
+		//$location_different = false; //target system may be on different location?
+		//$location_different_array = array(); //array(location,system) if so indicated
 		$systems = array();
 
 		if ($fire->calledid != -1){
@@ -962,7 +962,8 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
+				$systemDestroyed = $system->isDestroyed($fire->turn-1) || ($system->getRemainingHealth == 0);
+				if(($weapon->damageType != 'Flash') || (!$systemDestroyed)) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
