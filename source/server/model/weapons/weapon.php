@@ -190,14 +190,19 @@ class Weapon extends ShipSystem{
 	while($rp>0){
 		if($this->rangePenalty>=1){
 			$this->rangePenalty += 1;
-		}else{
+		}else if($this->rangePenalty>0){
 			$this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
+		}else{ //no range penalty - range itself will be reduced! 
+			//no calculations needed
 		}
 		foreach($this->rangePenaltyArray As $dmgMode=>$penaltyV){
-			if($this->rangePenaltyArray[$dmgMode]>=1){
+			if($this->rangePenaltyArray[$dmgMode]>=1){ //long range
 				$this->rangePenaltyArray[$dmgMode] += 1;
-			}else{
+			}else if($this->rangePenalty>0){ //short range
 				$this->rangePenaltyArray[$dmgMode] = 1/(round(1/$this->rangePenaltyArray[$dmgMode])-1);
+			}else{ //no range penalty - affect range itself
+				if(!isset($this->rangeArray[$dmgMode]))$this->rangeArray[$dmgMode] = $this->range;
+				$this->rangeArray[$dmgMode] = floor($this->rangeArray[$dmgMode] * 0.8); //loss 20% range for very crit
 			}
 		}
 		$rp--;
