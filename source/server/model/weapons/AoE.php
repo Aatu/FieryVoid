@@ -48,7 +48,7 @@
 			$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
                     	$ships1 = $gamedata->getShipsInDistance($pos);
 			$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
-			foreach($ships2 as $target){
+			foreach($ships2 as $targetShip){
 				if(isset($ships1[ $target->id])){ //ship on target hex!
 					$sourceHex = $posLaunch;
 					$damage = $this->maxDamage;
@@ -56,7 +56,7 @@
 					$sourceHex = $target;
 					$damage = $this->minDamage;
 				}
-				$this->AOEdamage( $target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
+				$this->AOEdamage( $targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
 			}
 		}
 	    
