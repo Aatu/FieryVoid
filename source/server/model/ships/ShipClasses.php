@@ -325,6 +325,7 @@
 	public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
 		/*name may indicate different location?...*/
 		/*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
+		$prevTurn = TacGamedata::$currentTurn-1;
 		$location_different_array = explode (':' , $name);
 		if(sizeof($location_different_array)==2){ //indicated different section: exactly 2 items - first location, then name
 			return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
@@ -332,7 +333,7 @@
 			$returnTab = array();
 			foreach ($this->systems as $system){
 				if ( ($system->displayName == $name) && ($system->location == $location) ){
-			            $systemDestroyed = $system->isDestroyed(TacGamedata::$currentTurn-1) || ($system->getRemaininghealth()==0);
+			            $systemDestroyed = $system->isDestroyed($prevTurn) || ($system->getRemaininghealth()==0);
 				    if( ($acceptDestroyed == true) || (!$systemDestroyed) ){
 					    $returnTab[] = $system;
 				    }
