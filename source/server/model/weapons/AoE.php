@@ -27,7 +27,7 @@
 		
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled;
-            	if ($rolled > $fireorder->needed){ //miss!
+            	if ($rolled > $fireOrder->needed){ //miss!
 			$fireOrder->pubnotes .= "Charge dissipates. ";  
 		}else{//hit!
 			$fireOrder->shotshit++;
