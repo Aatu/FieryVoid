@@ -45,15 +45,15 @@
 			}
 			
 			//do damage to ships in range...
-			$pos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
-                    	$ships1 = $gamedata->getShipsInDistance($pos);
-			$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
+			$explosionPos = mathlib::hexCoToPixel($fireOrder->x, $fireOrder->y);
+                    	$ships1 = $gamedata->getShipsInDistance($explosionPos);
+			$ships2 = $gamedata->getShipsInDistance($explosionPos, mathlib::$hexWidth+1);
 			foreach($ships2 as $targetShip){
 				if(isset($ships1[$targetShip->id])){ //ship on target hex!
 					$sourceHex = $posLaunch;
 					$damage = $this->maxDamage;
 				}else{ //ship at range 1!
-					$sourceHex = $target;
+					$sourceHex = $explosionPos;
 					$damage = $this->minDamage;
 				}
 				$this->AOEdamage( $targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
