@@ -1,13 +1,12 @@
 <?php
 
-	class Plasma extends Weapon{
+class Plasma extends Weapon{
+	public $priority = 6;
+	public $damageType = "Standard"; 
+	public $weaponClass = "Plasma"; 
 
-        public $priority = 6;
-    	public $damageType = "Standard"; 
-    	public $weaponClass = "Plasma"; 
-
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 		
 		
@@ -37,7 +36,7 @@
 			$this->setMaxDamage();
 		}
 		
-	}
+} //endof class Plasma
 
 
 
@@ -128,9 +127,8 @@ class MagGun extends Plasma{
 	public $trailColor = array(255, 140, 60);
 	public $projectilespeed = 15;
         public $animationWidth = 6;
-	public $animationExplosionScale = 0.50;
+	public $animationExplosionScale = 0.70;
 	public $trailLength = 30;
-        public $flashDamage = true;
         public $priority = 2;
 		        
         public $loadingtime = 3;
@@ -138,6 +136,8 @@ class MagGun extends Plasma{
         public $rangePenalty = 1;
         public $fireControl = array(null, 2, 6); // fighters, <=mediums, <=capitals 
 
+	public $damageType = "Flash"; 
+	public $weaponClass = "Plasma"; 
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
