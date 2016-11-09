@@ -730,9 +730,9 @@ window.effects = {
         
         effects.frontAnimations.push(explosion);
     },
+        
     
     displayWeaponFire: function(fires, call){
-    
         effects.animationcallback = call;
     
         for (var i in fires){
@@ -743,6 +743,11 @@ window.effects = {
             
             var weapon = shipManager.systems.getSystem(shooter, fire.weaponid);
             weapon = weaponManager.getFiringWeapon(weapon, fire);
+            var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+            while(modeIteration > 1){
+                weapon.changeFiringMode();
+                modeIteration--;
+            }
 
             effects.setZoom(fire, weapon)
 
