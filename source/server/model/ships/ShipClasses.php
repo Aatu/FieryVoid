@@ -844,7 +844,7 @@
 
 		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
-		if ($location == null) { 
+		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
           
@@ -946,7 +946,7 @@
 
 		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
 
-		if ($location == null) { 
+		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
 		}
 
@@ -1023,7 +1023,7 @@
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-		if(sizeof($systems)==0){ //if empty, just return Structure
+		if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not
 			$struct = $this->getStructureSystem($location);
 			return $struct;
 		}
