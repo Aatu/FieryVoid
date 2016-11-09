@@ -10,6 +10,8 @@ class Guardhawk extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/sunhawk.png";
         $this->shipClass = "Guardhawk Battle Escort";
         $this->occurence = "uncommon";
+	     $this->variantOf = "Sunhawk Battlecruiser";
+	    $this->isd = 2234;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;
