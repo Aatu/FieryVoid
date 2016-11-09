@@ -485,6 +485,7 @@ spl_autoload_register(
                 'katoc' => '/server/model/ships/narn/Katoc.php',
                 'katanpulsedestroyer' => '/server/model/ships/narn/KatanPulseDestroyer.php',
                 'kestrel' => '/server/model/ships/drazi/kestrel.php',
+                'kestrelcommon' => '/server/model/ships/drazi/kestrelcommon.php',
                 'kraasus' => '/server/model/ships/balosian/kraasus.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
