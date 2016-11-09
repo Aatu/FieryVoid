@@ -1,5 +1,5 @@
 <?php
-class CestrelCommon extends MediumShip{
+class KestrelCommon extends MediumShip{
 /*Kestrel Leader became Kestrel class, so this has to be differentiated somehow ;)*/
     
     function __construct($id, $userid, $name,  $slot){
