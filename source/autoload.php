@@ -104,7 +104,7 @@ spl_autoload_register(
                 'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
                 'watcher' =>  '/server/model/ships/deneth/watcher.php', 
                 
-                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
+                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php',  
                 
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
