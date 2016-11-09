@@ -333,7 +333,7 @@
 			$returnTab = array();
 			foreach ($this->systems as $system){
 				if ( ($system->displayName == $name) && ($system->location == $location) ){
-			            $systemDestroyed = $system->isDestroyed($prevTurn) || ($system->getRemaininghealth()==0);
+			            $systemDestroyed = ( $system->isDestroyed($prevTurn) || ($system->getRemaininghealth()==0) );
 				    if( ($acceptDestroyed == true) || (!$systemDestroyed) ){
 					    $returnTab[] = $system;
 				    }
@@ -962,7 +962,7 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				$systemDestroyed = $system->isDestroyed($fire->turn-1) || ($system->getRemainingHealth == 0);
+				$systemDestroyed = ( $system->isDestroyed($fire->turn-1) || ($system->getRemainingHealth == 0) );
 				if(($weapon->damageType != 'Flash') || (!$systemDestroyed)) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
