@@ -10,6 +10,8 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/sunhawk.png";
         $this->shipClass = "Eyehawk Scout Cruiser";
         $this->occurence = "rare";
+	     $this->shipClass = "Sunhawk Battlecruiser";
+	    $this->isd = 2228;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;
