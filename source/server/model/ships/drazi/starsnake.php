@@ -7,8 +7,9 @@ class Starsnake extends FighterFlight{
 	$this->pointCost = 240;
 	$this->faction = "Drazi";
         $this->phpclass = "Starsnake";
-        $this->shipClass = "Starsnake Light Fighters";
+        $this->shipClass = "Star Snake Light Fighters";
 	$this->imagePath = "img/ships/starsnake.png";
+	    $this->isd = 2110;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
@@ -29,7 +30,7 @@ class Starsnake extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("starsnake", $armour, 8, $this->id);
-            $fighter->displayName = "Starsnake Light Fighter";
+            $fighter->displayName = "Star Snake Light Fighter";
             $fighter->imagePath = "img/ships/starsnake.png";
             $fighter->iconPath = "img/ships/starsnake_large.png";
 
