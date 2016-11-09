@@ -1143,10 +1143,8 @@ class Weapon extends ShipSystem{
 	    /*$pos ONLY relevant for FIGHTER armor if damage source position is different than one from weapon itself*/
 	    /*otherwise best leave null BUT fill $location!*/
 	    /*damageWasDealt indicates whether this hit already caused damage - important for overkill for some damage modes*/
-	$prevTurn = $fireOrder->turn-1;
-	$systemDestroyed = $system->isDestroyed($prevTurn) || ($system->getRemainingHealth() == 0); //it's not yet destroyed if just structure has been shot out from under it
 	    
-	if(!$systemDestroyed){ //else system was already destroyed, proceed to overkill
+	if(!$system->isDestroyed()){ //else system was already destroyed, proceed to overkill
 		$damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
 		$systemHealth = $system->getRemainingHealth();
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
