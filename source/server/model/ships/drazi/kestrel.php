@@ -23,6 +23,7 @@ class Kestrel extends MediumShip{
         $this->pivotcost = 2;
 	$this->iniativebonus = 70;
 	
+	    $this->isd = 2229;
 	$this->occurence = "rare";
 	$this->variantOf = "Kestrel Corvette";
 	
