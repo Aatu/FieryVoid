@@ -67,7 +67,7 @@
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata){
             if ($target->isDestroyed()) continue; //no point allocating
 		$damage = $this->getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
-		$damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn);
+		$damage -= $target->getDamageMod($shooter, $sourceHex, $gamedata->turn, $this);
 		if ($target instanceof FighterFlight){
 		    foreach ($target->systems as $fighter){
 			if ($fighter == null || $fighter->isDestroyed()){
