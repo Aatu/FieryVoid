@@ -49,7 +49,7 @@
                     	$ships1 = $gamedata->getShipsInDistance($pos);
 			$ships2 = $gamedata->getShipsInDistance($pos, mathlib::$hexWidth+1);
 			foreach($ships2 as $targetShip){
-				if(isset($ships1[ $target->id])){ //ship on target hex!
+				if(isset($ships1[$targetShip->id])){ //ship on target hex!
 					$sourceHex = $posLaunch;
 					$damage = $this->maxDamage;
 				}else{ //ship at range 1!
