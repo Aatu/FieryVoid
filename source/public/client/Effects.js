@@ -273,13 +273,15 @@ window.effects = {
                 }       
             }   
         }
+        
       shipFire.sort(function(obj1, obj2){
             if(obj1.targetid !== obj2.targetid){
                  return obj1.targetid-obj2.targetid;
-            }
-            else if (obj1.priority !== obj2.priority){
+            }else if (obj1.priority !== obj2.priority){
                 return obj1.priority-obj2.priority; 
-            }
+            }/*else if (obj1.firingMode !== obj2.firingMode){
+                return obj1.firingMode-obj2.firingMode; 
+            }*/
             else return obj1.shooterid - obj2.shooterid;
         });
 
@@ -313,9 +315,7 @@ window.effects = {
                     continue;
                 
                 if (fire.animated){
-                }
-
-                else{
+                }else{
                
                     fire.animated = true;
                     var fires = Array();
@@ -331,7 +331,7 @@ window.effects = {
                         var weapon2 = shipManager.systems.getSystem(shooter, otherFire.weaponid);
                         weapon2 = weaponManager.getFiringWeapon(weapon2, otherFire);
                         
-                        if (otherFire.rolled && weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
+                        if (otherFire.rolled && weapon2.name == weapon.name &&  otherFire.firingMode == fire.firingMode && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
                             || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y)){
                                 if (fire.pubnotes == otherFire.pubnotes){
