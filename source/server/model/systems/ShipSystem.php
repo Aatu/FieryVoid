@@ -303,14 +303,19 @@ class ShipSystem{
     
     }
     
+	
     public function isDestroyed($turn = false){
+	    /*system is destroyed if it was destroyed directly, up to indicated turn*/
+	    /*or if it's Structure system is destroyed AT LEAST ONE TURN EARLIER*/
+	    $currTurn = TacGamedata::$currentTurn;
+	    if($turn !== false) $currTurn = $turn;
+	    $prevTurn = $currTurn-1;
 
-        foreach ($this->damage as $damage){
-            if (($turn === false || $damage->turn <= $turn) && $damage->destroyed)
-                return true;
+        foreach ($this->damage as $damage){ //was actually destroyed up to indicated turn
+            if (($damage->turn <= $currTurn) && $damage->destroyed) return true;
         }
         
-        if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($turn))
+        if ( ! ($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn))
             return true;
   
         return false;
