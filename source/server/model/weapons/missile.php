@@ -69,7 +69,7 @@ class MissileLauncher extends Weapon{
     
     public function getWeaponHitChanceMod($turn)
     {
-        $ammo = $this->missileArray[$fireOrder->firingMode];
+        $ammo = $this->missileArray[$this->firingMode];
         return $ammo->hitChanceMod;
     }
     
