@@ -102,6 +102,7 @@ spl_autoload_register(
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
                 'protector' =>  '/server/model/ships/deneth/protector.php', 
                 'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
+                'vindicatorca' =>  '/server/model/ships/deneth/vindicatorCA.php', 
                 'watcher' =>  '/server/model/ships/deneth/watcher.php', 
                 
                 'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php',  
