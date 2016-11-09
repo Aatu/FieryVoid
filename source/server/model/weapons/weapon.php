@@ -830,8 +830,13 @@ class Weapon extends ShipSystem{
 
         $this->calculateHit($gamedata, $fireOrder);
         $intercept = $this->getIntercept($gamedata, $fireOrder);
-
-        for ($i=0;$i<$fireOrder->shots;$i++){
+	$shotsFired = $fireOrder->shots; //number of actual shots (NOT pulses!) fired
+	
+	if($this->damageType == 'Pulse'){//Pulse mode needs to mark number of shots == number of pulses for animation purposes	
+            	$fireOrder->shots = $this->maxpulses;
+	}
+	    
+        for ($i=0;$i<$shotsFired;$i++){
 		$needed = $fireOrder->needed;
 		if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
             		$needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
@@ -860,23 +865,23 @@ class Weapon extends ShipSystem{
 			    }
 		}
 
-            $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
-	    $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
-            if ($rolled <= $needed){
-		$hitsRemaining=1;
-		    
-		if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
-	            $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
-		    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
-		    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+		$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+		$fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+		if ($rolled <= $needed){
+			$hitsRemaining=1;
+
+			if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
+			    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+			    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
+			    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
+			}
+
+			while($hitsRemaining>0){
+				$hitsRemaining--;
+				$fireOrder->shotshit++;
+				$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
+			}
 		}
-		    
-		while($hitsRemaining>0){
-			$hitsRemaining--;
-                	$fireOrder->shotshit++;
-                	$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
-		}
-            }
         }
 
         $fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
