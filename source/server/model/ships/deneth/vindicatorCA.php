@@ -6,11 +6,12 @@ class VindicatorCA extends BaseShip{
         
         $this->pointCost = 745;
         $this->faction = "Deneth";
-        $this->phpclass = "Heavy Cruiser";
+        $this->phpclass = "vindicatorca";
         $this->imagePath = "img/ships/battlewagon.png";
-        $this->shipClass = "Heavy Cruiser";
+        $this->shipClass = "Vindicator Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
+	    $this->isd = 2243;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -24,7 +25,7 @@ class VindicatorCA extends BaseShip{
         $this->addPrimarySystem(new Reactor(5, 27, 0, 0));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 17, 5, 7));
-        $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
+        $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(5, 14));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   
