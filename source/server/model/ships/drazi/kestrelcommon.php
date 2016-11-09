@@ -21,6 +21,8 @@ class KestrelCommon extends MediumShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 70;
         
+        $this->isd = 2144;
+        
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 4, 6));
