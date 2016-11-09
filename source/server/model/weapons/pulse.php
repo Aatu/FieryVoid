@@ -27,7 +27,7 @@ class Pulse extends Weapon{
 	    */
 		 $this->data["Special"] = 'Pulse mode: D'.$this->useDie.' +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 
-            //$this->defaultShots = $this->maxpulses;
+            $this->defaultShots = $this->maxpulses;
             
             parent::setSystemDataWindow($turn);
         }
