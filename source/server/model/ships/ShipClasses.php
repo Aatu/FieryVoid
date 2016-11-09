@@ -325,7 +325,6 @@
 	public function getSystemsByNameLoc($name, $location, $acceptDestroyed = false){ /*get list of required systems on a particular location*/
 		/*name may indicate different location?...*/
 		/*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
-		$prevTurn = TacGamedata::$currentTurn-1;
 		$location_different_array = explode (':' , $name);
 		if(sizeof($location_different_array)==2){ //indicated different section: exactly 2 items - first location, then name
 			return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
@@ -333,8 +332,7 @@
 			$returnTab = array();
 			foreach ($this->systems as $system){
 				if ( ($system->displayName == $name) && ($system->location == $location) ){
-			            $systemDestroyed = ( $system->isDestroyed($prevTurn) || ($system->getRemaininghealth()==0) );
-				    if( ($acceptDestroyed == true) || (!$systemDestroyed) ){
+				    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
 					    $returnTab[] = $system;
 				    }
 				}
@@ -579,9 +577,7 @@
 
         
         public function isDestroyed($turn = false){
-        
             foreach($this->systems as $system){
-
                 if ($system instanceof Reactor && $system->isDestroyed($turn)){
                     return true;
                 }
@@ -595,6 +591,7 @@
             return false;
         }
         
+	    
         public function isDisabled(){
             if ($this->isPowerless())
                 return true;
@@ -605,6 +602,7 @@
             
             return false;
         }
+	    
         
         public function isPowerless(){
             $output = 0;
@@ -962,8 +960,7 @@
 		foreach ($this->systems as $system){ //ok, do use actual systems...
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
-				$systemDestroyed = ( $system->isDestroyed($fire->turn-1) || ($system->getRemainingHealth == 0) );
-				if(($weapon->damageType != 'Flash') || (!$systemDestroyed)) {
+				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed())) {
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
