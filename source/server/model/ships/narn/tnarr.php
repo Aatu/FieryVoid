@@ -10,6 +10,9 @@ class Tnarr extends BaseShip{
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Narr Early Cruiser";
         $this->fighters = array("normal"=>12);
+	$this->variantOf = "T'Loth Assault Cruiser";
+	$this->isd = 2211;
+
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
