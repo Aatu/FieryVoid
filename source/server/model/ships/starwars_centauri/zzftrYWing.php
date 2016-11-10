@@ -7,7 +7,7 @@ class zzftrywing extends FighterFlight{
         $this->pointCost = 60*6;
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "zzftrywing";
-        $this->shipClass = "Y-Wing Tech Demo flight";
+        $this->shipClass = "Y-Wing Assault Fighters";
         $this->imagePath = "img/starwars/yWing.png";
         
         //$this->isd = 2214;
@@ -34,7 +34,7 @@ class zzftrywing extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
-            $fighter->displayName = "Y-Wing Technology Demonstrator";
+            $fighter->displayName = "Y-Wing Assault Fighter";
             $fighter->imagePath = "img/starwars/yWing.png";
             $fighter->iconPath = "img/starwars/yWing_large.png"; 
             
