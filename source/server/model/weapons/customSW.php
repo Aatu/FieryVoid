@@ -121,6 +121,13 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	$output=max(0,$output); //no less than 0!
         return $output;
     }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["<font color='red'>Remark</font>"] = "Strength ".$this->output.".";      
+	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not decrease profile."; 
+	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
+    }
 	   
 } //endof class SWRayShield
 
