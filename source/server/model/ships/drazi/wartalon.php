@@ -11,6 +11,8 @@ class Wartalon extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Wartalon Escort Carrier";
         $this->occurence = "uncommon";
         $this->fighters = array("light" => 6);
+	    $this->variantOf = "Warbird Cruiser";
+	    $this->isd = 2234;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
