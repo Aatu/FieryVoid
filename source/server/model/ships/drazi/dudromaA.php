@@ -8,7 +8,8 @@ class DudromaA extends OSAT{
 		$this->faction = "Drazi";
         $this->phpclass = "DudromaA";
         $this->imagePath = "img/ships/dudroma.png";
-        $this->shipClass = 'Dudroma A Satellite';
+        $this->shipClass = 'Dudroma A Defense Satellite';
+	    $this->isd = 1938;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -33,5 +34,18 @@ class DudromaA extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(4, 28));
+	    
+	    
+		$this->hitChart = array(
+			0=> array(
+					9 => "Structure",
+					11 => "Thruster",
+					14 => "Heavy Plasma Cannon",
+          				16 => "Standard Particle Beam",
+					18 => "Scanner",
+					20 => "Reactor",
+			)
+		);
+	    
     }
 }
