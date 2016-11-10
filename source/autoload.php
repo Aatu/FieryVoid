@@ -105,6 +105,8 @@ spl_autoload_register(
                 'vindicatorca' =>  '/server/model/ships/deneth/vindicatorCA.php', 
                 'watcher' =>  '/server/model/ships/deneth/watcher.php', 
                 
+                'defenderftr' =>  '/server/model/ships/deneth/defenderFtr.php',
+                
                 'denethdefender' =>  '/server/model/ships/deneth/defenderFlight.php',  
                 
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
