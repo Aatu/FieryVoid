@@ -32,11 +32,12 @@ class VindicatorCA extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
 	$this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
+        $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
 	$this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
-        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
-        $this->addFrontSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 120));
+        $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));
+	    
         $this->addAftSystem(new TwinArray(2, 6, 2, 120, 300));
         $this->addAftSystem(new TwinArray(2, 6, 2, 60, 240));
         $this->addAftSystem(new Thruster(4, 16, 0, 4, 2));
