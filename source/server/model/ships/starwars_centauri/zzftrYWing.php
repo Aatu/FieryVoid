@@ -50,7 +50,7 @@ class zzftrywing extends FighterFlight{
             
             
             $roundGun = new SWFighterIon(330, 30, 1, 2); //all-around Ion Cannons
-            $roundGun->exclusive = true; //either this or lasers, not both!
+            $roundGun->exclusive = true; //either this or other weapons!
             $fighter->addAftSystem($roundGun);
             
             //Ray Shield, 3 points
