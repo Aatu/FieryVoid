@@ -743,7 +743,7 @@ window.effects = {
             
             var weapon = shipManager.systems.getSystem(shooter, fire.weaponid);
             weapon = weaponManager.getFiringWeapon(weapon, fire);
-            var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+            var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             while(modeIteration > 1){
                 weapon.changeFiringMode();
                 modeIteration--;
@@ -886,7 +886,7 @@ window.effects = {
 
         var hitSystem = fire.hitSystem;
         
-        var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+        var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
         while(modeIteration > 1){
             weapon.changeFiringMode();
             modeIteration--;
