@@ -34,4 +34,10 @@ var Hlpa = function(json, ship){
 Hlpa.prototype = Object.create( Weapon.prototype );
 Hlpa.prototype.constructor = Hlpa;
 
+var Mlpa = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+Mlpa.prototype = Object.create( Weapon.prototype );
+Mlpa.prototype.constructor = Mlpa;
+
 
