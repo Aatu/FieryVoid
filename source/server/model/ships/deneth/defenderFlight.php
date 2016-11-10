@@ -32,7 +32,9 @@ class DenethDefender extends FighterFlight{
             $fighter->displayName = "Defender Medium Fighter";
             $fighter->imagePath = "img/ships/dragon.png";
             $fighter->iconPath = "img/ships/dragon_large.png";
-            $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
+            
+            $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1, 2)); //2x d6+1
+            
             $this->addSystem($fighter);
         }
     }
