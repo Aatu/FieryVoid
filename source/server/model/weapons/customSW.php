@@ -294,7 +294,7 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
         parent::__construct($startArc, $endArc, $fireControl);
     }
 	
-    public function getDamage($fireOrder){        return $this->damage;   }
+    public function getDamage($fireOrder=null){        return $this->damage;   }
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
 }//end of SWFtrProtonTorpedo
