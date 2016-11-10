@@ -13,11 +13,13 @@ class Criticals{
                 
             foreach ($ship->systems as $system){
 
-    			if ($system instanceof MissileLauncher){
+		    /*no longer needed?...
+    		if ($system instanceof MissileLauncher){
 	                if ($system->isDamagedOnTurn($gamedata->turn)){       
 						$crits = $system->testCritical($ship, $gamedata, $crits);
              	   }
                 }
+		*/
                 if ($ship instanceof StarBase && $system instanceof SubReactor){
                 	if ($system->wasDestroyedThisTurn($gamedata->turn)){
 	                	if ($system->location != 0){
@@ -26,7 +28,7 @@ class Criticals{
                 	}
                 }
 
-				if ($system->isDestroyed()){
+				if ($system->isDestroyed() && (!($system instanceof MissileLauncher))){ //missile launchers may still explode
 					continue;
 				}
 				
@@ -40,14 +42,15 @@ class Criticals{
 					}
 				}
 					
+		    /*not needed
 				$stru = $ship->getStructureSystem($system->location);
 				if ($stru && $stru->isDestroyed())
 					continue;
-					
+				*/	
 				
-                if ($system->isDamagedOnTurn($gamedata->turn)){       
-					$crits = $system->testCritical($ship, $gamedata, $crits);
-                }
+				if ($system->isDamagedOnTurn($gamedata->turn)){       
+							$crits = $system->testCritical($ship, $gamedata, $crits);
+				}
             }
         }
         
