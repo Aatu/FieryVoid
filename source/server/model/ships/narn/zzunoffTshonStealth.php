@@ -11,7 +11,8 @@ class zzunoffTShonStealth extends BaseShip{
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Shon Explorer (Stealth)";
         //$this->fighters = array("normal"=>12); //12 Assault Shuttles in standared configuration
-        
+
+	$this->variantOf = "T'Loth Assault Cruiser";
 	$this->occurence = "rare";
 	$this->isd = 2214;
 	$this->unofficial = true;
