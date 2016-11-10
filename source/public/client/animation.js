@@ -101,8 +101,6 @@ window.animation = {
     },
     
     animateShipMoves: function(){
-    
-        
         var done = false;
         var found = false;
         var shipchanged = false;

@@ -11,6 +11,7 @@ class Stareagle extends MediumShipLeftRight{
         $this->shipClass = "Stareagle Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
+	    $this->isd = 2118;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 11;

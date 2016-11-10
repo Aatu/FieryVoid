@@ -1,5 +1,5 @@
 <?php
-class Throkan extends MediumShip{
+class KestrelCommon extends MediumShip{
 /*Kestrel Leader became Kestrel class, so this has to be differentiated somehow ;)*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -20,6 +20,8 @@ class Throkan extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 2;
         $this->iniativebonus = 70;
+        
+        $this->isd = 2144;
         
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));

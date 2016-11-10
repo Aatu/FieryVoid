@@ -14,6 +14,7 @@ class Firefalcon extends BaseShipNoAft{
         $this->occurence = "rare";
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->limited = 33;
+        $this->isd = 2255;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

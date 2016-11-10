@@ -7,8 +7,9 @@ class SkySerpent extends SuperHeavyFighter{
         $this->pointCost = 130;
         $this->faction = "Drazi";
         $this->phpclass = "SkySerpent";
-        $this->shipClass = "Sky Serpent Heavy Fighter";
+        $this->shipClass = "Sky Serpent Heavy Assault Fighter";
         $this->imagePath = "img/ships/skyserpent.png";
+	    $this->isd = 2220;
 
         $this->forwardDefense = 10;
         $this->sideDefense = 9;
@@ -22,7 +23,7 @@ class SkySerpent extends SuperHeavyFighter{
         
         $armour = array(4, 2, 3, 3);
         $fighter = new Fighter("skyserpent", $armour, 30, $this->id);
-        $fighter->displayName = "Sky Serpent Heavy Fighter";
+        $fighter->displayName = "Sky Serpent Heavy Assault Fighter";
         $fighter->imagePath = "img/ships/skyserpent.png";
         $fighter->iconPath = "img/ships/skyserpent_large.png";
 

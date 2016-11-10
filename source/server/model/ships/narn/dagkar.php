@@ -10,6 +10,7 @@ class Dagkar extends MediumShip{
         $this->imagePath = "img/ships/dagkar.png";
         $this->shipClass = "Dag'Kar Missile Frigate";
         $this->limited = 33;
+	    $this->isd = 2240;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

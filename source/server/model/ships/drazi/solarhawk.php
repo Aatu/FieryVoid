@@ -8,8 +8,10 @@ class Solarhawk extends HeavyCombatVesselLeftRight{
 	$this->faction = "Drazi";
         $this->phpclass = "Solarhawk";
         $this->imagePath = "img/ships/sunhawk.png";
-        $this->shipClass = "Solarhawk Battle Cruiser";
+        $this->shipClass = "Solarhawk Battlecruiser";
         $this->occurence = "rare";
+	     $this->variantOf = "Sunhawk Battlecruiser";
+	    $this->isd = 2258;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

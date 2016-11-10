@@ -273,13 +273,15 @@ window.effects = {
                 }       
             }   
         }
+        
       shipFire.sort(function(obj1, obj2){
             if(obj1.targetid !== obj2.targetid){
                  return obj1.targetid-obj2.targetid;
-            }
-            else if (obj1.priority !== obj2.priority){
+            }else if (obj1.priority !== obj2.priority){
                 return obj1.priority-obj2.priority; 
-            }
+            }/*else if (obj1.firingMode !== obj2.firingMode){
+                return obj1.firingMode-obj2.firingMode; 
+            }*/
             else return obj1.shooterid - obj2.shooterid;
         });
 
@@ -313,9 +315,7 @@ window.effects = {
                     continue;
                 
                 if (fire.animated){
-                }
-
-                else{
+                }else{
                
                     fire.animated = true;
                     var fires = Array();
@@ -331,7 +331,7 @@ window.effects = {
                         var weapon2 = shipManager.systems.getSystem(shooter, otherFire.weaponid);
                         weapon2 = weaponManager.getFiringWeapon(weapon2, otherFire);
                         
-                        if (otherFire.rolled && weapon2.name == weapon.name && !otherFire.animated && otherFire.turn == gamedata.turn){
+                        if (otherFire.rolled && weapon2.name == weapon.name &&  otherFire.firingMode == fire.firingMode && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
                             || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y)){
                                 if (fire.pubnotes == otherFire.pubnotes){
@@ -730,9 +730,9 @@ window.effects = {
         
         effects.frontAnimations.push(explosion);
     },
+        
     
     displayWeaponFire: function(fires, call){
-    
         effects.animationcallback = call;
     
         for (var i in fires){
@@ -743,6 +743,11 @@ window.effects = {
             
             var weapon = shipManager.systems.getSystem(shooter, fire.weaponid);
             weapon = weaponManager.getFiringWeapon(weapon, fire);
+            var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
+            while(modeIteration > 1){
+                weapon.changeFiringMode();
+                modeIteration--;
+            }
 
             effects.setZoom(fire, weapon)
 
@@ -881,7 +886,7 @@ window.effects = {
 
         var hitSystem = fire.hitSystem;
         
-        var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+        var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
         while(modeIteration > 1){
             weapon.changeFiringMode();
             modeIteration--;

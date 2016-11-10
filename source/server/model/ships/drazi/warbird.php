@@ -9,6 +9,7 @@ class Warbird extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Warbird";
         $this->imagePath = "img/ships/warbird.png";
         $this->shipClass = "Warbird Cruiser";
+	    $this->isd = 2234;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

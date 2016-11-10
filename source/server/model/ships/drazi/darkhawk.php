@@ -9,6 +9,8 @@ class Darkhawk extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Darkhawk";
         $this->imagePath = "img/ships/sunhawk.png";
         $this->shipClass = "Darkhawk Missile Cruiser";
+	     $this->variantOf = "Sunhawk Battlecruiser";
+	    $this->isd = 2214;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

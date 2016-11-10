@@ -102,9 +102,10 @@ spl_autoload_register(
                 'liberatorpulse' =>  '/server/model/ships/deneth/liberatorPulse.php', 
                 'protector' =>  '/server/model/ships/deneth/protector.php', 
                 'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
+                'vindicatorca' =>  '/server/model/ships/deneth/vindicatorCA.php', 
                 'watcher' =>  '/server/model/ships/deneth/watcher.php', 
                 
-                'denethdefender' =>  '/server/model/ships/deneth/defender_flight.php', 
+                'defenderftr' =>  '/server/model/ships/deneth/defenderFtr.php',
                 
                 'watchtower' => '/server/model/ships/deneth/watchtower.php',
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
@@ -119,6 +120,7 @@ spl_autoload_register(
                 // drazi and wotc centauro osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
                 'dudromab' => '/server/model/ships/drazi/dudromaB.php',
+                'shodromaosat' => '/server/model/ships/drazi/shodromaOSAT.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
                 'imperiallaser' => '/server/model/weapons/lasers.php',
@@ -485,6 +487,7 @@ spl_autoload_register(
                 'katoc' => '/server/model/ships/narn/Katoc.php',
                 'katanpulsedestroyer' => '/server/model/ships/narn/KatanPulseDestroyer.php',
                 'kestrel' => '/server/model/ships/drazi/kestrel.php',
+                'kestrelcommon' => '/server/model/ships/drazi/kestrelcommon.php',
                 'kraasus' => '/server/model/ships/balosian/kraasus.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',

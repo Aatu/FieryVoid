@@ -39,6 +39,12 @@ window.combatLog = {
             var fire = orders[a];
             
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
+            while(modeIteration > 1){
+                weapon.changeFiringMode();
+                modeIteration--;
+            }
+		    
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
@@ -88,7 +94,7 @@ window.combatLog = {
                notestext = '<span class="pubotes">'+notes+'</span>';
             
             if(mathlib.arrayIsEmpty(weapon.missileArray)){
-                html += ' firing ' +counttext + weapon.displayName + targettext+'. '+chancetext +shottext + notestext;
+                html += ' firing ' +counttext + weapon.displayName + ' ('+ weapon.firingModes[weapon.firingMode]+') '+ targettext+'. '+chancetext +shottext + notestext;
             }else{
                 html += ' firing ' +counttext + weapon.missileArray[weapon.firingMode].displayName + targettext+'. '+chancetext +shottext + notestext;
             }

@@ -532,6 +532,10 @@ class JumpEngine extends ShipSystem{
     
         $this->delay = $delay;
     }
+	
+     public function setSystemDataWindow($turn){
+        $this->data["<font color='red'>Remark</font>"] = "Can't be shut down for power, unless damaged >50% or in desperate circumstances.";
+    }
 }
 
 

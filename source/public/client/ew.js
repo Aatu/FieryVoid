@@ -333,24 +333,24 @@ window.ew = {
                         canvas.strokeStyle = "rgba(225,225,250,"+a+")";
                         canvas.fillStyle = "rgba(225,225,250,"+a+")";
                     }else{
-                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
-                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                        canvas.strokeStyle = "rgba(215,90,90,"+a+")";
+                        canvas.fillStyle = "rgba(215,90,90,"+a+")";
                     }
                 }else if (EW.type == "SOEW"){
                     if (ship.userid == gamedata.thisplayer){
                         canvas.strokeStyle = "rgba(100,220,240,"+a+")";
                         canvas.fillStyle = "rgba(100,220,240,"+a+")";
                     }else{
-                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
-                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                        canvas.strokeStyle = "rgba(215,90,90,"+a+")";
+                        canvas.fillStyle = "rgba(215,90,90,"+a+")";
                     }
                 }else if (EW.type == "SDEW"){
                     if (ship.userid == gamedata.thisplayer){
                         canvas.strokeStyle = "rgba(160,250,100,"+a+")";
                         canvas.fillStyle = "rgba(160,250,100,"+a+")";
                     }else{
-                        canvas.strokeStyle = "rgba(125,12,12,"+a+")";
-                        canvas.fillStyle = "rgba(125,12,12,"+a+")";
+                        canvas.strokeStyle = "rgba(215,90,90,"+a+")";
+                        canvas.fillStyle = "rgba(215,90,90,"+a+")";
                     }
                 }else if (EW.type == "DIST"){
                     if (ship.userid == gamedata.thisplayer){

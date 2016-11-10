@@ -121,6 +121,13 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	$output=max(0,$output); //no less than 0!
         return $output;
     }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["<font color='red'>Remark</font>"] = "Strength ".$this->output.".";      
+	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not decrease profile."; 
+	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
+    }
 	   
 } //endof class SWRayShield
 
@@ -209,7 +216,7 @@ class SWFighterIon extends SWIon{
 	
 
     public $loadingtime = 1;
-    public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
+    public $rangePenalty = 1.75; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
 
@@ -287,7 +294,7 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
         parent::__construct($startArc, $endArc, $fireControl);
     }
 	
-    public function getDamage($fireOrder){        return $this->damage;   }
+    public function getDamage($fireOrder=null){        return $this->damage;   }
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
 }//end of SWFtrProtonTorpedo

@@ -12,6 +12,7 @@ class zzunoffKaTor extends HeavyCombatVessel{
         $this->fighters = array("normal"=>6);        
         
 	$this->occurence = "common";
+	    $this->variantOf = "Ka'Toc Battle Destroyer";
 	$this->isd = 2234;
 	$this->unofficial = true;
 

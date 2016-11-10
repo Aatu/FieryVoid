@@ -20,6 +20,7 @@ class LiberatorEscort extends MediumShip{
 	//$this->occurence = "rare";
 	$this->isd = 2225;
 	//$this->unofficial = true;
+	$this->variantOf = "Liberator Plasma Gunboat";
   
 	$this->turncost = 0.25;
 	$this->turndelaycost = 0.25;

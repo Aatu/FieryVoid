@@ -95,8 +95,10 @@ class MissileLauncher extends Weapon{
             $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
             $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
         }else{
-            parent::testCritical($ship, $gamedata, $crits, $add);
+            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
         }
+        
+        return $crits;
     } //endof function testCritical
 
 
@@ -112,7 +114,7 @@ class MissileLauncher extends Weapon{
             $dmgToSelf += $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder, null); 
             */
             $dmgToSelf = 1000; //rely on $noOverkill instead of counting exact amount left - 1000 should be more than enough...
-            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->getLocation());
+            $this->doDamage($ship, $ship, $this, $dmgToSelf, $fireOrder, $pos, $gamedata, true, $this->location);
         }
         
         //then apply damage potential as a hit...
@@ -121,7 +123,7 @@ class MissileLauncher extends Weapon{
             $this->damageType = 'Flash'; //should be Raking by the rules, but Flash is much easier to do - and very fitting for explosion!
             $fireOrder =  new FireOrder(-1, "ammoExplosion", $ship->id,  $ship->id, $this->id, -1, 
                     $gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'ballistic');
-            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->getLocation()); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
+            $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
 

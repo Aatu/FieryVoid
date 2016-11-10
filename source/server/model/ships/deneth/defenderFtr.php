@@ -1,15 +1,14 @@
 <?php
-class DenethDefender extends FighterFlight{
+class DefenderFtr extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-    	$this->pointCost = 180;
+        $this->pointCost = 30*6;
         $this->faction = "Deneth";
-        $this->phpclass = "denethdefender";
+        $this->phpclass = "defenderftr";
         $this->shipClass = "Defender Medium Fighters";
-    	$this->imagePath = "img/ships/dragon.png";
-        
+        $this->imagePath = "img/ships/dragon.png";
         $this->isd = 2222;
         
         $this->forwardDefense = 6;
@@ -18,7 +17,8 @@ class DenethDefender extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
-        $this->iniativebonus = 90;
+        
+    	  $this->iniativebonus = 90;
         $this->populate();
     }
     
@@ -28,13 +28,16 @@ class DenethDefender extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 2, 2);
-            $fighter = new Fighter("denethdefender", $armour, 9, $this->id);
+            $fighter = new Fighter("defenderftr", $armour, 9, $this->id);
             $fighter->displayName = "Defender Medium Fighter";
             $fighter->imagePath = "img/ships/dragon.png";
             $fighter->iconPath = "img/ships/dragon_large.png";
-            $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
+            
+            $frontGun = new PairedParticleGun(330, 30, 1);
+            $fighter->addFrontSystem($frontGun);
+            
             $this->addSystem($fighter);
-        }
+       }
     }
 }
 ?>

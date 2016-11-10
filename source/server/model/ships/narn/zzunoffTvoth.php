@@ -1,6 +1,6 @@
 <?php
 class zzunoffTVoth extends BaseShip{
-    	/*Narn G'Voth Command Cruiser, Showdowns-10 (unofficial)*/
+    	/*Narn T'Voth Command Cruiser, Showdowns-10 (unofficial)*/
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -13,6 +13,7 @@ class zzunoffTVoth extends BaseShip{
         $this->fighters = array("normal"=>12);
         
 
+	$this->variantOf = "T'Loth Assault Cruiser";
 	$this->occurence = "rare";
 	$this->isd = 2231;
 	$this->unofficial = true;
