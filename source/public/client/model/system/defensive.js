@@ -96,14 +96,14 @@ ShieldGenerator.prototype.onTurnOn = function(ship)
 }
 
 
-var SWRayShield = function(json, ship)
+var Swrayshield = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
     this.defensiveType = "Shield";
 }
-SWRayShield.prototype = Object.create( ShipSystem.prototype );
-SWRayShield.prototype.constructor = SWRayShield;
-SWRayShield.prototype.getDefensiveHitChangeMod = 
+Swrayshield.prototype = Object.create( ShipSystem.prototype );
+Swrayshield.prototype.constructor = Swrayshield;
+Swrayshield.prototype.getDefensiveHitChangeMod = 
     function(target, shooter, pos)
 {
         return 0; //Ray shield does not affect hit chance
