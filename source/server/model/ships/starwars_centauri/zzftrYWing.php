@@ -41,19 +41,20 @@ class zzftrywing extends FighterFlight{
             $frontGun = new SWFighterLaser(330, 30, 2, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
-            $roundGun = new SWFighterIon(330, 30, 1, 2); //all-around Ion Cannons
-            $roundGun->exclusive = true; //either this or lasers, not both!
-            $fighter->addFrontSystem($roundGun);
-            
-            //Ray Shield, 3 points
-            $fighter->addFrontSystem(new SWRayShield(0, 1, 0, 3, 0, 360));
-            
+           
             //2 forward Proton Torpedo Launchers, 4 shots each
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
             
+            
+            $roundGun = new SWFighterIon(330, 30, 1, 2); //all-around Ion Cannons
+            $roundGun->exclusive = true; //either this or lasers, not both!
+            $fighter->addAftSystem($roundGun);
+            
+            //Ray Shield, 3 points
+            $fighter->addAftSystem(new SWRayShield(0, 1, 0, 3, 0, 360));
 
             
             
