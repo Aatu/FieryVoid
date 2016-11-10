@@ -9,6 +9,7 @@ class Katoc extends HeavyCombatVessel{
         $this->phpclass = "Katoc";
         $this->imagePath = "img/ships/katoc.png";
         $this->shipClass = "Ka'Toc Battle Destroyer";
+	    $this->isd = 2240;
         $this->fighters = array("normal"=>6);        
         
         $this->forwardDefense = 12;
