@@ -31,7 +31,7 @@ class DefenderFtr extends FighterFlight{
             $fighter = new Fighter("defenderftr", $armour, 9, $this->id);
             $fighter->displayName = "Defender Medium Fighter";
             $fighter->imagePath = "img/ships/dragon.png";
-            $fighter->iconPath = "img/ships/dragon_largei.png";
+            $fighter->iconPath = "img/ships/dragon_large.png";
             
             $frontGun = new PairedParticleGun(330, 30, 1);
             $fighter->addFrontSystem($frontGun);
