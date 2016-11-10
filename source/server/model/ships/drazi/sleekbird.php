@@ -9,6 +9,10 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Sleekbird";
         $this->imagePath = "img/ships/warbird.png";
         $this->shipClass = "Sleekbird Assault Cruiser";
+	    $this->variantOf = "Warbird Cruiser";
+	    $this->isd = 2052;
+	    
+        $this->fighters = array("assault shuttles" => 6); //originally 3 AS and 3 Breaching Pods
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
