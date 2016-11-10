@@ -120,6 +120,7 @@ spl_autoload_register(
                 // drazi and wotc centauro osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
                 'dudromab' => '/server/model/ships/drazi/dudromaB.php',
+                'shodromaosat' => '/server/model/ships/drazi/shodromaOSAT.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
                 'imperiallaser' => '/server/model/weapons/lasers.php',
