@@ -12,6 +12,8 @@ class Taileagle extends MediumShipLeftRight{
         $this->agile = true;
         $this->canvasSize = 100;
         $this->occurence = "uncommon";
+        $this->variantOf = "Stareagle Frigate";
+	$this->isd = 2162;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 11;
