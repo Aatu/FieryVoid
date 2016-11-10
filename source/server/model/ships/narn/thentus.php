@@ -8,8 +8,10 @@ class Thentus extends MediumShip{
 		$this->faction = "Narn";
         $this->phpclass = "Thentus";
         $this->imagePath = "img/ships/thentus.png";
-        $this->shipClass = "Thentus";
+        $this->shipClass = "Thentus Frigate";
         $this->agile = true;
+	    
+	    $this->isd = 2215;
         
 		
         $this->forwardDefense = 12;
