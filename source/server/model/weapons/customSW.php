@@ -209,7 +209,7 @@ class SWFighterIon extends SWIon{
 	
 
     public $loadingtime = 1;
-    public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
+    public $rangePenalty = 1.75; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
 
