@@ -13,6 +13,7 @@ class Nightfalcon extends BaseShipNoAft{
         $this->fighters = array("light" => 12, "superheavy" => 3);
         $this->occurence = "rare";
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
+        $this->isd = 2243;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;
