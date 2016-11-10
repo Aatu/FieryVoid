@@ -4,13 +4,14 @@ class Tloth extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 500;
-		$this->faction = "Narn";
+	$this->pointCost = 500;
+	$this->faction = "Narn";
         $this->phpclass = "Tloth";
         $this->imagePath = "img/ships/tloth.png";
-        $this->shipClass = "T'Loth";
+        $this->shipClass = "T'Loth Assault Cruiser";
         $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>12, "assault shuttles"=>12);        
+        $this->fighters = array("normal"=>12, "assault shuttles"=>12);  
+	    $this->isd = 2241;
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
