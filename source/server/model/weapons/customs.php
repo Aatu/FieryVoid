@@ -48,7 +48,7 @@ class CustomLightMatterCannonF extends Matter {
         
         public $rangePenalty = 1;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
- 
+
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -198,13 +198,16 @@ class HLPA extends Weapon{
 	public $uninterceptableArray = array(1=>true, 2=>false);
 	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
 	
-        public $loadingtimeArray = array(1=>4, 2=>3);
+        public $loadingtimeArray = array(1=>4, 2=>3); //mode 1 should be the one with longest loading time
         public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
         public $fireControlArray = array( 1=>array(-4, 2, 3), 2=>array(-1,3,4) ); // fighters, <mediums, <capitals 
 	
 	public $firingModes = array(1=>'Laser', 2=>'Pulse');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
     	public $weaponClassArray = array(1=>'Laser', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 1; //technically only Pulse Cannon can intercept, but entire weapon is fired anyway - so it affects visuals only, and mode 1 should be the one with interception for technical reasons
+ 
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
