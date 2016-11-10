@@ -95,8 +95,10 @@ class MissileLauncher extends Weapon{
             $this->ammoExplosion($ship, $gamedata, $this->rackExplosionDamage);            
             $this->addMissileCritOnSelf($ship->id, "AmmoExplosion", $gamedata);
         }else{
-            parent::testCritical($ship, $gamedata, $crits, $add);
+            $crits = parent::testCritical($ship, $gamedata, $crits, $add);
         }
+        
+        return $crits;
     } //endof function testCritical
 
 
