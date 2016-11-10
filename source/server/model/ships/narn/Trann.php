@@ -4,15 +4,16 @@ class Trann extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 575;
-		$this->faction = "Narn";
+	$this->pointCost = 575;
+	$this->faction = "Narn";
         $this->phpclass = "Trann";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Rann Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
-	$this->variantOf = "T'Loth";
+	$this->variantOf = "T'Loth Assault Cruiser";
         $this->fighters = array("normal"=>24);
+	    $this->isd = 2247;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 18;
