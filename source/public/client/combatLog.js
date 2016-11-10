@@ -39,7 +39,7 @@ window.combatLog = {
             var fire = orders[a];
             
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-	    var modeIteration = fire.firingmode; //change weapons data to reflect mode actually used
+	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             while(modeIteration > 1){
                 weapon.changeFiringMode();
                 modeIteration--;
