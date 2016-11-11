@@ -707,6 +707,7 @@ spl_autoload_register(
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 'thosalsi' => '/server/model/ships/balosian/thosalsi.php',
                 'thruster' => '/server/model/systems/baseSystems.php',
+                'invulnerablethruster' => '/server/model/systems/baseSystems.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigara' => '/server/model/ships/minbari/tigara.php',
