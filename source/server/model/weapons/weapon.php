@@ -170,6 +170,7 @@ class Weapon extends ShipSystem{
 
 
     public function effectCriticals(){
+	    /*
 	    $fmode = $this->firingMode;
 	    foreach($this->firingModes as $i=>$modeName){	    
 		$this->changeFiringMode($i);
@@ -177,7 +178,7 @@ class Weapon extends ShipSystem{
 		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
 	    }
 	    $this->changeFiringMode($fmode);
-	    
+	    */
 	    
 	    $this->dp=0;
 	    $this->rp=0;
@@ -191,12 +192,12 @@ class Weapon extends ShipSystem{
 	    $dp = $this->dp;
 	//min/max damage arrays are created automatically, so they will always be present
 	if($dp>0){
-		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a percentage, however! - low rolls should be affected lefss than high ones, after all
+		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all
 		foreach($this->firingModes as $dmgMode=>$modeName){
 			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );//2 or 20% of variability, whichever is higher
 			$avgDmg = ($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2;
 			if($avgDmg>0){
-				$this->dpArray[$dmgMode] = $mod/$avgDmg;//convert to fraction -  of average result ;)
+				$this->dpArray[$dmgMode] = $mod/$avgDmg;//convert to fraction -  of average result 
 			}else{
 				$this->dpArray[$dmgMode] = 1; //100% reduction
 			}
