@@ -210,6 +210,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -252,6 +253,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -291,6 +293,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
