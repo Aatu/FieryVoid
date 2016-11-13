@@ -192,8 +192,8 @@ class Weapon extends ShipSystem{
 				$this->dpArray[$dmgMode] = 1; //100% reduction
 			}
 			$this->dpArray[$dmgMode] = min(0.9,$this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
-			$this->minDamageArray[$dmgMode] = $this->minDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]);
-			$this->maxDamageArray[$dmgMode] = $this->maxDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]);
+			$this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]));
+			$this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]));
 		}
 	}
 		
