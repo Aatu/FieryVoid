@@ -136,7 +136,7 @@ class Weapon extends ShipSystem{
         $this->endArc = (int)$endArc;
 	    
 	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
-	    for($i = 1; $i <= count($this->firingModes); $i++){
+	    foreach($this->firingModes as $i=>$modeName){	    
 		$this->changeFiringMode($i);
 		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
 		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
