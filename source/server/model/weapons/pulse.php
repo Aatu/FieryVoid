@@ -11,7 +11,9 @@ class Pulse extends Weapon{
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
     	public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	private $useDie = 5; //die used for base number of hits
-
+        public $firingModes = array( 1 => "Pulse"); //just a convenient name for firing mode
+	
+	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
