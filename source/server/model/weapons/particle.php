@@ -695,7 +695,7 @@
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
             if(!$target instanceof FighterFlight){
                 $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-                $struct = $system->getStructure();
+                $struct = $target->getStructureSystem($system->location);
                 //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
                 $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
                 //reduce armor of system hit
