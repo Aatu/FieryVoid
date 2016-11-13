@@ -577,7 +577,7 @@ class FighterMissileRack extends MissileLauncher
     
     public function getDamage($fireOrder){
         $ammo = $this->missileArray[$fireOrder->firingMode];
-        return $ammo->getDamage();
+        return $ammo->getDamage($fireOrder);
     }
     
     public function setMinDamage(){
