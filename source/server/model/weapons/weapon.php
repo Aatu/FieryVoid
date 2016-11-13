@@ -178,11 +178,16 @@ class Weapon extends ShipSystem{
 	if($dp>0){
 		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a percentage, however! - low rolls should be affected lefss than high ones, after all
 		foreach($this->firingModes as $dmgMode=>$modeName){
-			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );
-			$this->dpArray[$dmgMode] = $mod/(($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2);//convert to fraction -  of average result ;)
+			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );//2 or 20% of variability, whichever is higher
+			$avgDmg = ($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2;
+			if($avgDmg>0){
+				$this->dpArray[$dmgMode] = $mod/$avgDmg;//convert to fraction -  of average result ;)
+			}else{
+				$this->dpArray[$dmgMode] = 1; //100% reduction
+			}
 			$this->dpArray[$dmgMode] = min(0.9,$this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
-			$this->minDamageArray[$dmgMode] = $this->minDamage[$dmgMode]-$this->minDamage[$dmgMode]*$this->dpArray[$dmgMode];
-			$this->maxDamageArray[$dmgMode] = $this->maxDamage[$dmgMode]-$this->maxDamage[$dmgMode]*$this->dpArray[$dmgMode];
+			$this->minDamageArray[$dmgMode] = $this->minDamage[$dmgMode]*(1-$this->dpArray[$dmgMode]);
+			$this->maxDamageArray[$dmgMode] = $this->maxDamage[$dmgMode]*(1-$this->dpArray[$dmgMode]);
 		}
 	}
 		
