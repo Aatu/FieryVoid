@@ -170,18 +170,8 @@ class Weapon extends ShipSystem{
 
 
     public function effectCriticals(){
-	    /*
-	    $fmode = $this->firingMode;
-	    foreach($this->firingModes as $i=>$modeName){	    
-		$this->changeFiringMode($i);
-		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
-		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
-	    }
-	    $this->changeFiringMode($fmode);
-	    */
-	    
-	    $this->dp=0;
-	    $this->rp=0;
+	$this->dp=0;
+	$this->rp=0;
         parent::effectCriticals();
 	        
         foreach ($this->criticals as $crit){
@@ -202,8 +192,8 @@ class Weapon extends ShipSystem{
 				$this->dpArray[$dmgMode] = 1; //100% reduction
 			}
 			$this->dpArray[$dmgMode] = min(0.9,$this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
-			$this->minDamageArray[$dmgMode] = $this->minDamage[$dmgMode]*(1-$this->dpArray[$dmgMode]);
-			$this->maxDamageArray[$dmgMode] = $this->maxDamage[$dmgMode]*(1-$this->dpArray[$dmgMode]);
+			$this->minDamageArray[$dmgMode] = $this->minDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]);
+			$this->maxDamageArray[$dmgMode] = $this->maxDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]);
 		}
 	}
 		
