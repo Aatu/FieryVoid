@@ -683,7 +683,9 @@
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
         public $noOverkill = true; // The damage of a solar cannon does not overkill.
-
+        public $firingModes = array( 1 => "Special"); 
+        
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
