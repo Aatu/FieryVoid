@@ -1178,7 +1178,7 @@ class Weapon extends ShipSystem{
 		$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
 	}
 	    
-        if ($damage > 0){//overkilling!
+        if (($damage > 0) || (!$damageWasDealt)){//overkilling!
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
              if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
