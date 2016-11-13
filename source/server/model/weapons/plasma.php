@@ -138,6 +138,7 @@ class MagGun extends Plasma{
 
 	public $damageType = "Flash"; 
 	public $weaponClass = "Plasma"; 
+	public $firingModes = array( 1 => "Flash"); 
 
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
