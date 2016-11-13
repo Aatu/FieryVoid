@@ -170,6 +170,15 @@ class Weapon extends ShipSystem{
 
 
     public function effectCriticals(){
+	    $fmode = $this->firingMode;
+	    foreach($this->firingModes as $i=>$modeName){	    
+		$this->changeFiringMode($i);
+		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
+		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
+	    }
+	    $this->changeFiringMode($fmode);
+	    
+	    
 	    $this->dp=0;
 	    $this->rp=0;
         parent::effectCriticals();
