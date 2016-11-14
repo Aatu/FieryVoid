@@ -1,13 +1,14 @@
 <?php
-class zzftrTIEInterceptor extends FighterFlight{
-    /*StarWars TIE Interceptor...*/
+class zzftrTIEInterceptorExport extends FighterFlight{
+    /*StarWars weakened TIE Interceptor...*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 40*6;
+        $this->pointCost = 37*6;
         $this->faction = "StarWars Galactic Empire";
-        $this->phpclass = "zzftrtieinterceptor";
-        $this->shipClass = "TIE Interceptors";
+        $this->phpclass = "zzftrtieinterceptorexport";
+        $this->shipClass = "TIE Interceptors (export)";
+        $this->variantOf = "TIE Interceptors";
         $this->imagePath = "img/starwars/tieInterceptor.png";
         
         //$this->isd = 2214;
@@ -15,8 +16,8 @@ class zzftrTIEInterceptor extends FighterFlight{
         
         $this->forwardDefense = 5;
         $this->sideDefense = 7;
-        $this->freethrust = 13;
-        $this->offensivebonus = 5;
+        $this->freethrust = 11;
+        $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
         $this->turncost = 0.25;
         
@@ -31,13 +32,13 @@ class zzftrTIEInterceptor extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("zzftrtieinterceptor", $armour, 7, $this->id);
+            $armour = array(0, 0, 1, 1);
+            $fighter = new Fighter("zzftrtieinterceptorexport", $armour, 7, $this->id);
             $fighter->displayName = "TIE Interceptor";
             $fighter->imagePath = "img/starwars/tieInterceptor.png";
             $fighter->iconPath = "img/starwars/tieInterceptor_large.png"; 
             
-            $frontGun = new SWFighterLaser(330, 30, 2, 4); //front Lasers
+            $frontGun = new SWFighterLaser(330, 30, 1, 4); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
            
