@@ -35,8 +35,10 @@
         public $enabledSpecialAbilities = array();
         
         public $canvasSize = 200;
+	    
+	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, defense
 
-        public $activeHitLocations = array(); //$shooterID->targetSection
+        protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
         //following values from DB
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
