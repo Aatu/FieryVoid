@@ -211,13 +211,13 @@ window.weaponManager = {
 				continue;
 
 			if (weaponManager.hasFiringOrder(ship, system)){
-				if (weapon.exclusive){
+				if (weapon.exclusive && weapon.isBallistic){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +weapon.displayName + ".");
 					return true;
 				}
 
-				if (system.exclusive){
+				if (system.exclusive && weapon.isBallistic){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
 					return true;
@@ -228,6 +228,7 @@ window.weaponManager = {
 		return false;
 	},
 
+	
 	checkOutOfAmmo: function(ship, weapon){
 
 		var p = ship;
@@ -270,6 +271,7 @@ window.weaponManager = {
 		return false;
 	},
 
+	
 	selectWeapon: function(ship, weapon){
 
 		if(weaponManager.checkOutOfAmmo(ship, weapon)){
@@ -319,6 +321,35 @@ window.weaponManager = {
 
 
 			for (var i = 0; i < section.length; i++){
+				switch(section[i]) {
+				    case 1:
+					html += "-FORWARD-";
+					break;
+				    case 2:
+					html += "-AFT-";
+					break;
+				    case 3:
+					html += "-PORT-";
+					break;
+				    case 4:
+					html += "-STARBORD-";
+					break;
+				    case 31:
+					html += "-PORT.FWD-";
+					break;
+				    case 32:
+					html += "-PORT.AFT-";
+					break;
+				    case 41:
+					html += "-STBD.FWD-";
+					break;
+				    case 42:
+					html += "-STBD.AFT-";
+					break;
+				    default:
+					break;
+				}
+				/*
 				if (section[i] == 1){
 					html += "-FRONT-";
 				}
@@ -331,6 +362,7 @@ window.weaponManager = {
 				if (section[i] == 4){
 					html += "-STARBORD-";
 				}
+				*/
 			}
 			$('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
 		}
@@ -344,13 +376,13 @@ window.weaponManager = {
 
 					var value = weapon.firingMode;
 						value = weapon.firingModes[value];
-
+/*no special treatment for Piercing!
 					if (value == "Piercing"){
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
 					}
-					else {
+					else {*/
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
-					}
+					//}
 				}
 				else{
 					$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
