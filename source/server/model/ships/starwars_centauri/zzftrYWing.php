@@ -53,8 +53,8 @@ class zzftrywing extends FighterFlight{
             $roundGun->exclusive = true; //either this or other weapons!
             $fighter->addAftSystem($roundGun);
             
-            //Ray Shield, 3 points
-            $fighter->addAftSystem(new SWRayShield(0, 1, 0, 3, 0, 360));
+            //Ray Shield, 2 points
+            $fighter->addAftSystem(new SWRayShield(0, 1, 0, 2, 0, 360));
 
             
             
