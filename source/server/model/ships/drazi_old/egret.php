@@ -10,7 +10,7 @@ class Egret extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Egret Combat Scout";
         
-        $this->occurence = 'uncommon'; //uncommon is for Plasma version
+        $this->occurence = 'uncommon'; 
         $this->variantOf = "Shrike Heavy Destroyer";
         $this->isd = 1986;
         
