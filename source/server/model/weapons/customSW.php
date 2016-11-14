@@ -5,8 +5,8 @@
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
 	private static $power = 1.5; //effect magnitude from hit: damage ^power
-	private static $free = 10; //this much damage doesn't cause anything
-	private static $threshold = 10; //this much damage (after $free) causes power shortage
+	private static $free = 2; //this much damage doesn't cause anything
+	private static $threshold = 8; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
 
 	
