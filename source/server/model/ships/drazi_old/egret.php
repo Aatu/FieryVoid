@@ -9,7 +9,10 @@ class Egret extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Egret";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Egret Combat Scout";
-        $this->occurence = "uncommon";
+        
+        $this->occurence = 'uncommon'; //uncommon is for Plasma version
+        $this->variantOf = "Shrike Heavy Destroyer";
+        $this->isd = 1986;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
