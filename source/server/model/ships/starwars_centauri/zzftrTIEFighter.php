@@ -1,21 +1,20 @@
 <?php
-class zzftrTIEInterceptorExport extends FighterFlight{
+class zzftrTIEFighter extends FighterFlight{
     /*StarWars weakened TIE Interceptor...*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 37*6;
+        $this->pointCost = 27*6;
         $this->faction = "StarWars Galactic Empire";
-        $this->phpclass = "zzftrtieinterceptorexport";
-        $this->shipClass = "TIE Interceptors (export)";
-        $this->variantOf = "TIE Interceptors";
-        $this->imagePath = "img/starwars/tieInterceptor.png";
+        $this->phpclass = "zzftrtiefighter";
+        $this->shipClass =  "TIE Fighters";
+        $this->imagePath = "img/starwars/tieFighter.png";
         
         //$this->isd = 2214;
         $this->unofficial = true;
         
         $this->forwardDefense = 5;
-        $this->sideDefense = 7;
+        $this->sideDefense = 6;
         $this->freethrust = 11;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 10;
@@ -33,12 +32,12 @@ class zzftrTIEInterceptorExport extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(0, 0, 1, 1);
-            $fighter = new Fighter("zzftrtieinterceptorexport", $armour, 7, $this->id);
-            $fighter->displayName = "TIE Interceptor";
-            $fighter->imagePath = "img/starwars/tieInterceptor.png";
-            $fighter->iconPath = "img/starwars/tieInterceptor_large.png"; 
+            $fighter = new Fighter("zzftrtiefighter", $armour, 7, $this->id);
+            $fighter->displayName = "TIE Fighter";
+            $fighter->imagePath = "img/starwars/tieFighter.png";
+            $fighter->iconPath = "img/starwars/tieFighter_large.png"; 
             
-            $frontGun = new SWFighterLaser(330, 30, 1, 4); //front Lasers
+            $frontGun = new SWFighterLaser(330, 30, 1, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
            
