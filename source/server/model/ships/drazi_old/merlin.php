@@ -9,6 +9,7 @@ class Merlin extends MediumShip{
         $this->phpclass = "Merlin";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Merlin Frigate";
+	    $this->isd = 2000;
         $this->agile = true;
         $this->canvasSize = 100;
         
