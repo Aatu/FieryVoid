@@ -10,6 +10,10 @@ class Auk extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Auk Gunship";
         
+        $this->occurence = 'rare'; //uncommon is for Plasma version
+        $this->variantOf = "Shrike Heavy Destroyer";
+        $this->isd = 1998;
+        
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         
