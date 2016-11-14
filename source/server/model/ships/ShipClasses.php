@@ -54,7 +54,7 @@
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-
+	    $this->fillLocationsGUI();//so called shots work properly
         }
         
         public function getInitiativebonus($gamedata){
