@@ -6,7 +6,7 @@ class SWIonHandler{
 	private static $accumulatedIonDmg = array();
 	private static $power = 1.5; //effect magnitude from hit: damage ^power
 	private static $free = 2; //this much damage doesn't cause anything
-	private static $threshold = 8; //this much damage (after $free) causes power shortage
+	private static $threshold = 7; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
 
 	
@@ -42,6 +42,7 @@ class SWIonHandler{
 		}
 	}
 }//endof class SWIonHandlerHandler
+
 
 /*base class for StarWars Ion weapons*/
 class SWIon extends Weapon{	
@@ -124,8 +125,8 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	$this->data["<font color='red'>Remark</font>"] = "Strength ".$this->output.".";      
-	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not decrease profile."; 
+	$this->data["Strength"] = $this->output;      
+	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile."; 
 	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
     }
 	   
@@ -139,6 +140,7 @@ class SWFighterLaser extends LinkedWeapon{
     public $displayName = "Fighter Laser";
     public $iconPath = "starwars/swFighter4.png";
 	
+	/*
     public $animation = "trail";
     public $projectilespeed = 13;
     public $animationExplosionScale = 0.15;
@@ -146,6 +148,14 @@ class SWFighterLaser extends LinkedWeapon{
     public $trailLength = 20;
     public $animationColor =  array(245, 75, 95);
     public $trailColor = array(245, 75, 95);
+    */
+	public $animation = "beam";
+        public $animationColor = array(245, 75, 95);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 13;
+    public $animationWidth = 3;
+    public $trailLength = 20;
+	
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -206,8 +216,9 @@ class SWFighterIon extends SWIon{
     public $displayName = "Fighter Ion Cannon";
 	public $iconPath = "starwars/swFighterIon1.png";	  
 	  
-    public $animation = "trail";
-    public $projectilespeed = 13;
+    //public $animation = "trail";
+	public $animation = "beam";
+    public $projectilespeed = 11;
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
     public $trailLength = 20;
