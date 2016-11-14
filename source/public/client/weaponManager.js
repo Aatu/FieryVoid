@@ -673,7 +673,6 @@ window.weaponManager = {
 
 	
 	calculateHitChange: function(shooter, target, weapon, calledid){
-
 		var sPos = shipManager.getShipPositionInWindowCo(shooter);
 		var tPos = shipManager.getShipPositionInWindowCo(target);
 		var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
@@ -793,8 +792,8 @@ window.weaponManager = {
 
 	},
 
+	
 	calculateFighterBallisticHitChange: function(shooter, target, weapon, calledid){
-
 		var sPos = shipManager.getShipPositionInWindowCo(shooter);
 		var tPos = shipManager.getShipPositionInWindowCo(target);
 		var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
@@ -833,7 +832,7 @@ window.weaponManager = {
 			mod--;
 		}
 
-		if (calledid){
+		if (calledid){ //hmm... ballistics shouldn't be able to do called shots...
 			mod += weapon.calledShotMod;
 		}
 
@@ -863,7 +862,7 @@ window.weaponManager = {
 				}
 			}
 		}
-
+		
 		var firecontrol =  weaponManager.getFireControl(target, weapon);
 
 		var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
