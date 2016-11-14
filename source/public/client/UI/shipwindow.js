@@ -450,7 +450,6 @@ shipWindowManager = {
         }
 
         if(gamedata.turn == 0){
-		notes.addClass("ontop");//display on top - but only on turn 0!!!
             if(ship.fighters.length != 0){
                 for (var i in ship.fighters){
                     var amount = ship.fighters[i];
