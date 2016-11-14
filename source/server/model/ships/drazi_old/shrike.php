@@ -9,6 +9,7 @@ class Shrike extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Shrike";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Shrike Heavy Destroyer";
+        $this->isd = 1999;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
