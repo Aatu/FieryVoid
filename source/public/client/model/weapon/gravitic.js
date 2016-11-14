@@ -98,6 +98,7 @@ GraviticBolt.prototype.initBoostableInfo = function(){
     // Needed because it can chance during initial phase
     // because of adding extra power.
     
+    /* no longer necessary information
     this.data["Weapon type"] ="Gravitic";
     this.data["Damage type"] ="Standard";
 
@@ -114,7 +115,8 @@ GraviticBolt.prototype.initBoostableInfo = function(){
         default:
             this.data["Damage"] = '9';
             break;
-    }            
+    }
+    */
     
     if(window.weaponManager.isLoaded(this)){
         this.loadingtime = 1 + shipManager.power.getBoost(this);
