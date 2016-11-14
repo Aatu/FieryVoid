@@ -36,7 +36,7 @@
         
         public $canvasSize = 200;
 	    
-	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, defense
+	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max (loc is location id, min/max is for arc)
 
         protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
         //following values from DB
@@ -679,7 +679,21 @@
             return $result;
         }
 	    
+	    
+	/*outer locations of unit and their arcs, used for GUI called shots*/
+	public function fillLocationsGUI(){      
+            $this->outerSections = array();
+	    $allOuter = $this->getLocations();
+	    foreach($allOuter as $curr){
+		    if($curr['loc']!=0){
+			$outer = array("loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max']);
+			$this->outerSections[] = $outer;
+		    }
+	    }
+        }
 
+	    
+	/*outer locations of unit and their arcs, used for assigning incoming fire*/
         public function getLocations(){      
             $locs = array();
             $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
