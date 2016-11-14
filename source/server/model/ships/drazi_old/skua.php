@@ -10,6 +10,10 @@ class Skua extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Skua Heavy Escort";
         
+        $this->occurence = 'rare'; 
+        $this->variantOf = "Shrike Heavy Destroyer";
+        $this->isd = 2002;
+        
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         
