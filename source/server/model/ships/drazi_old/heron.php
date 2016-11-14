@@ -10,6 +10,11 @@ class Heron extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Heron Minesweeper";
         
+
+        $this->occurence = 'uncommon'; 
+        $this->variantOf = "Shrike Heavy Destroyer";
+        $this->isd = 1989;
+        
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         
