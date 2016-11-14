@@ -17,11 +17,14 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
     // Needed because it can chance during initial phase
     // because of adding extra power.
     
+    /* no longer necessary information
     this.data["Weapon type"] ="Gravitic";
     this.data["Damage type"] ="Standard";
     this.data["Grouping range"] = "" + this.grouping + "%";
     this.data["Max pulses"] = shipManager.power.getBoost(this) + 3;
+    */
 
+    /* no longer necessary information
     switch(shipManager.power.getBoost(this)){
         case 0:
             this.data["Pulses"] = 'D2';
@@ -36,6 +39,7 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
             this.data["Pulses"] = 'D2';
             break;
     }
+    */
 
     if(window.weaponManager.isLoaded(this)){
         this.loadingtime = 1 + shipManager.power.getBoost(this);
