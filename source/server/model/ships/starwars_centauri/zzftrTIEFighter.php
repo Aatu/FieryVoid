@@ -32,7 +32,7 @@ class zzftrTIEFighter extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(0, 0, 1, 1);
-            $fighter = new Fighter("zzftrtiefighter", $armour, 7, $this->id);
+            $fighter = new Fighter("zzftrtiefighter", $armour, 5, $this->id);
             $fighter->displayName = "TIE Fighter";
             $fighter->imagePath = "img/starwars/tieFighter.png";
             $fighter->iconPath = "img/starwars/tieFighter_large.png"; 
