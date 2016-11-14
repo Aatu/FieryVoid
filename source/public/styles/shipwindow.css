@@ -1198,6 +1198,3 @@ body .shipwindow .system.modes.firing .mode
     border-collapse: collapse;
 }
 
-.ontop {
-    z-index:1000000;
-}
