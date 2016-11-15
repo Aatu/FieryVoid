@@ -214,7 +214,7 @@ class SWFighterLaser extends Pulse/*LinkedWeapon*/{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Pulse mode: 0..'.$this->useDie.', +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		 $this->data["Special"] = 'Pulse mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
         }
 	
