@@ -107,6 +107,7 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
             return 0; //Ray shield does not affect hit chance
     }
+/* for non-weapons it will be ok?...
     Swrayshield.prototype.initBoostableInfo = function(){
         // Needed because it can change during initial phase
         // because of adding extra power.
@@ -131,6 +132,7 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
             }
         }
     }
+    */
     Swrayshield.prototype.hasMaxBoost = function(){
         return true;
     }
