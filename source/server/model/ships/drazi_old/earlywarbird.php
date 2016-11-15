@@ -8,7 +8,8 @@ class EarlyWarbird extends HeavyCombatVesselLeftRight{
         $this->faction = "Drazi (WotCR)";
         $this->phpclass = "EarlyWarbird";
         $this->imagePath = "img/ships/warbird.png";
-        $this->shipClass = "Warbird Cruiser (early)";
+        $this->shipClass = "Warbird Cruiser";
+        $this->isd = 2002;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

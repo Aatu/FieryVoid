@@ -25,6 +25,8 @@ class ShipSystem{
     public $imagePath, $iconPath;
     
     public $possibleCriticals = array();
+	
+    public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     
         
     public $criticals = array();

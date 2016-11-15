@@ -9,7 +9,11 @@ class Swallow extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Swallow";
         $this->imagePath = "img/ships/shrike.png";
         $this->shipClass = "Swallow Light Carrier";
-        $this->occurence = "uncommon";
+        
+        $this->occurence = 'uncommon'; 
+        $this->variantOf = "Shrike Heavy Destroyer";
+        $this->isd = 1986;
+        
         $this->fighters = array("light" => 12);
         
         $this->forwardDefense = 13;

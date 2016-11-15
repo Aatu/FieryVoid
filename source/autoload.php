@@ -75,8 +75,17 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
+                'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
+                
+                'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
+                'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
+                'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
+                'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
+                
+                'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
-                'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
+                
+                
                 
                 //custom weapons StarWars
                 'swrayshield' => '/server/model/weapons/customSW.php',
@@ -707,6 +716,7 @@ spl_autoload_register(
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 'thosalsi' => '/server/model/ships/balosian/thosalsi.php',
                 'thruster' => '/server/model/systems/baseSystems.php',
+                'invulnerablethruster' => '/server/model/systems/baseSystems.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigara' => '/server/model/ships/minbari/tigara.php',

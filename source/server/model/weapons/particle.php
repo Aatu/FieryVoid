@@ -210,6 +210,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -252,6 +253,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -291,6 +293,7 @@
 
         public $damageType = "Raking"; 
         public $weaponClass = "Particle";
+        public $firingModes = array( 1 => "Raking");
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
@@ -680,7 +683,9 @@
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
         public $noOverkill = true; // The damage of a solar cannon does not overkill.
-
+        public $firingModes = array( 1 => "Special"); 
+        
+        
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -695,7 +700,7 @@
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
             if(!$target instanceof FighterFlight){
                 $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
-                $struct = $system->getStructure();
+                $struct = $target->getStructureSystem($system->location);
                 //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
                 $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
                 //reduce armor of system hit

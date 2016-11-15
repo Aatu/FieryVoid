@@ -62,6 +62,9 @@ class IonCannon extends Raking{
     public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
+        public $firingModes = array( 1 => "Raking");
+
+    
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {
@@ -98,6 +101,7 @@ class ImprovedIonCannon extends Raking{
     public $damageType = "Raking"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $weaponClass = "Ion"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
+        public $firingModes = array( 1 => "Raking");
     
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
     {

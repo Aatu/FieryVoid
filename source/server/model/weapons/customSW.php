@@ -5,8 +5,8 @@
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
 	private static $power = 1.5; //effect magnitude from hit: damage ^power
-	private static $free = 10; //this much damage doesn't cause anything
-	private static $threshold = 10; //this much damage (after $free) causes power shortage
+	private static $free = 2; //this much damage doesn't cause anything
+	private static $threshold = 7; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
 
 	
@@ -20,7 +20,7 @@ class SWIonHandler{
 			$baseDmg = ceil($dmgInflicted/2);
 		}
 		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
-		$effect = pow($baseDmg,$power);
+		$effect = pow($baseDmg,SWIonHandler::$power);
 		$targetID = $targetUnit->id;
 		$currentTurn = TacGamedata::$currentTurn;
 		if(SWIonHandler::$turn != $currentTurn){
@@ -42,6 +42,7 @@ class SWIonHandler{
 		}
 	}
 }//endof class SWIonHandlerHandler
+
 
 /*base class for StarWars Ion weapons*/
 class SWIon extends Weapon{	
@@ -84,6 +85,9 @@ class SWRayShield extends Shield implements DefensiveSystem{
     public $name = "swrayshield";
     public $displayName = "Ray Shield";
     public $iconPath = "shield.png";
+    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
+    public $baseOutput = 0; //base output, before boost
+	
 	
  	public $possibleCriticals = array( //different than usual B5Wars shield
             16=>"OutputReduced1",
@@ -93,6 +97,9 @@ class SWRayShield extends Shield implements DefensiveSystem{
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
         parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+	$this->baseOutput = $shieldFactor;
+	$this->boostEfficiency = $powerReq;
+	$this->maxBoostLevel = min(2,$shieldFactor); //maximum of +2 effect, costs $powerReq each - but can't more than double shield!
     }
 	
     public function onConstructed($ship, $turn, $phase){
@@ -112,7 +119,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
-        $output = $this->output;
+        $output = $this->output + $this->getBoostLevel($turn);
 	//Ballistic, Matter, SWIon - passes through!
 	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' ) $output = 0;
         $output -= $this->outputMod;
@@ -124,11 +131,23 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	$this->data["<font color='red'>Remark</font>"] = "Strength ".$this->output.".";      
-	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not decrease profile."; 
+	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+	$this->data["Basic Strength"] = $this->baseOutput;      
+	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile."; 
 	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
     }
-	   
+	  
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn) continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	
 } //endof class SWRayShield
 
 
@@ -139,6 +158,7 @@ class SWFighterLaser extends LinkedWeapon{
     public $displayName = "Fighter Laser";
     public $iconPath = "starwars/swFighter4.png";
 	
+	/*
     public $animation = "trail";
     public $projectilespeed = 13;
     public $animationExplosionScale = 0.15;
@@ -146,6 +166,14 @@ class SWFighterLaser extends LinkedWeapon{
     public $trailLength = 20;
     public $animationColor =  array(245, 75, 95);
     public $trailColor = array(245, 75, 95);
+    */
+	public $animation = "beam";
+        public $animationColor = array(245, 75, 95);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 11;
+    public $animationWidth = 3;
+    public $trailLength = 8;
+	
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -206,19 +234,20 @@ class SWFighterIon extends SWIon{
     public $displayName = "Fighter Ion Cannon";
 	public $iconPath = "starwars/swFighterIon1.png";	  
 	  
-    public $animation = "trail";
-    public $projectilespeed = 13;
+    //public $animation = "trail";
+	public $animation = "beam";
+    public $projectilespeed = 9;
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
-    public $trailLength = 20;
+    public $trailLength = 8;
     public $animationColor =  array( 100, 100, 245);
     public $trailColor = array( 100, 100, 245);
 	
 
     public $loadingtime = 1;
-    public $rangePenalty = 1.75; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
+    public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
     public $firingModes = array( 1 => "Standard");  
-    public $fireControl = array(-2, -1, -1); // fighters, <mediums, <capitals
+    public $fireControl = array(-3, -1, -1); // fighters, <mediums, <capitals
 
     public $exclusive = false; //can be always overridden in particular fighter!
     public $isLinked = true; //indicates that this is linked weapon

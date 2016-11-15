@@ -4,13 +4,17 @@ class EarlyWartalon extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-    	$this->pointCost = 500;
+    	$this->pointCost = 450;
         $this->faction = "Drazi (WotCR)";
         $this->phpclass = "EarlyWartalon";
         $this->imagePath = "img/ships/warbird.png";
-        $this->shipClass = "Wartalon Escort Carrier (early)";
-        $this->occurence = "uncommon";
+        $this->shipClass = "Wartalon Escort Carrier";
+        
         $this->fighters = array("light" => 6);
+        
+        $this->occurence = "uncommon";
+        $this->variantOf = "Warbird Cruiser";
+        $this->isd = 2003;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

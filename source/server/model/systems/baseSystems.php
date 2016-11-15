@@ -95,7 +95,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
 }
 
 interface SpecialAbility{
- 
     public function getSpecialAbilityValue($args);
 }
 
@@ -117,6 +116,8 @@ class Shield extends ShipSystem implements DefensiveSystem{
     public $damagePenalty = 0;
     public $rangePenalty = 0;
     public $range = 5;
+	
+	public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
     
     public $possibleCriticals = array(
             16=>"OutputReduced1",
@@ -395,6 +396,7 @@ class Thruster extends ShipSystem{
     public $direction;
     public $thrustused;
     public $thrustwasted = 0;
+public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
     
     public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
     
@@ -403,7 +405,25 @@ class Thruster extends ShipSystem{
          
         $this->thrustused = (int)$thrustused;
         $this->direction = (int)$direction;
-    
+        //arc depends on direction!
+	switch($this->direction){
+		case 1: //retro
+			$this->startArc = 330;
+        		$this->endArc = 30;
+			break;
+		case 2: //main
+			$this->startArc = 150;
+        		$this->endArc = 210;
+			break;	
+		case 3://port
+			$this->startArc = 210;
+        		$this->endArc = 330;
+			break;
+		case 4://Stbd
+			$this->startArc = 30;
+        		$this->endArc = 150;
+			break;
+	}
     }
 } //endof Thruster
 
@@ -412,6 +432,7 @@ class Thruster extends ShipSystem{
 class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
+public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
@@ -534,7 +555,7 @@ class JumpEngine extends ShipSystem{
     }
 	
      public function setSystemDataWindow($turn){
-        $this->data["<font color='red'>Remark</font>"] = "Can't be shut down for power, unless damaged >50% or in desperate circumstances.";
+        $this->data["<font color='red'>Remark</font>"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
     }
 }
 

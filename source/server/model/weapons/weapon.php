@@ -73,7 +73,7 @@ class Weapon extends ShipSystem{
     public $duoWeapon = false;
     public $dualWeapon = false;
     public $canChangeShots = false;
-
+    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 
     public $shots = 1;
 	public  $shotsArray = array();
@@ -123,6 +123,12 @@ class Weapon extends ShipSystem{
 
     public $possibleCriticals = array(14=>"ReducedRange", 19=>"ReducedDamage", 25=>array("ReducedRange","ReducedDamage"));
 
+	
+	
+	
+	
+	
+	
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $output = 0){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
 
@@ -130,7 +136,7 @@ class Weapon extends ShipSystem{
         $this->endArc = (int)$endArc;
 	    
 	    //things that are calculated and can change with mode (and are displayed in GUI) - for all modes...
-	    for($i = 1; $i <= count($this->firingModes); $i++){
+	    foreach($this->firingModes as $i=>$modeName){	    
 		$this->changeFiringMode($i);
 		$this->setMinDamage(); $this->minDamageArray[$i] = $this->minDamage;
 		$this->setMaxDamage(); $this->maxDamageArray[$i] = $this->maxDamage;
@@ -164,8 +170,8 @@ class Weapon extends ShipSystem{
 
 
     public function effectCriticals(){
-	    $this->dp=0;
-	    $this->rp=0;
+	$this->dp=0;
+	$this->rp=0;
         parent::effectCriticals();
 	        
         foreach ($this->criticals as $crit){
@@ -176,13 +182,18 @@ class Weapon extends ShipSystem{
 	    $dp = $this->dp;
 	//min/max damage arrays are created automatically, so they will always be present
 	if($dp>0){
-		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a percentage, however! - low rolls should be affected lefss than high ones, after all
+		//damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all
 		foreach($this->firingModes as $dmgMode=>$modeName){
-			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );
-			$this->dpArray[$dmgMode] = $mod/(($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2);//convert to fraction -  of average result ;)
+			$mod = $dp*max(2, 0.2*($this->maxDamageArray[$dmgMode]-$this->minDamageArray[$dmgMode]) );//2 or 20% of variability, whichever is higher
+			$avgDmg = ($this->maxDamageArray[$dmgMode]+$this->minDamageArray[$dmgMode])/2;
+			if($avgDmg>0){
+				$this->dpArray[$dmgMode] = $mod/$avgDmg;//convert to fraction -  of average result 
+			}else{
+				$this->dpArray[$dmgMode] = 1; //100% reduction
+			}
 			$this->dpArray[$dmgMode] = min(0.9,$this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
-			$this->minDamageArray[$dmgMode] = $this->minDamage[$dmgMode]-$this->minDamage[$dmgMode]*$this->dpArray[$dmgMode];
-			$this->maxDamageArray[$dmgMode] = $this->maxDamage[$dmgMode]-$this->maxDamage[$dmgMode]*$this->dpArray[$dmgMode];
+			$this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]));
+			$this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode]*(1-$this->dpArray[$dmgMode]));
 		}
 	}
 		
@@ -735,7 +746,7 @@ class Weapon extends ShipSystem{
 
         $change = round(($goal/20)*100);
 
-        $notes = $rp["notes"] . ", DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, OEW: $oew, SOEW: $soew, defence: $defence, intercept: $intercept, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change, jink: $jinkSelf $jinkTarget";
+        $notes = $rp["notes"] . ", defence: $defence, rpenalty: $rangePenalty, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
@@ -1178,7 +1189,7 @@ class Weapon extends ShipSystem{
 		$damage = $damage-$modifiedDamage;//reduce remaining damage by what was just dealt...
 	}
 	    
-        if ($damage > 0){//overkilling!
+        if (($damage > 0) || (!$damageWasDealt)){//overkilling!
              $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location);
              if ($overkillSystem != null)
                 $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);

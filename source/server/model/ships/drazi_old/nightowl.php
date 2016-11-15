@@ -11,6 +11,8 @@ class Nightowl extends BaseShipNoAft{
         $this->imagePath = "img/ships/nightowl.png";
         $this->shipClass = "Nightowl Hyperspace Probe";
         $this->fighters = array("normal" => 6);
+        $this->isd = 1994;
+        $this->limited = 10;
 
         $this->forwardDefense = 18;
         $this->sideDefense = 18;

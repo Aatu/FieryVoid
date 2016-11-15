@@ -9,7 +9,9 @@ class Swift extends MediumShip{
         $this->phpclass = "Swift";
         $this->imagePath = "img/ships/merlin.png";
         $this->shipClass = "Swift Escort Frigate";
-        $this->occurence = "uncommon";
+        $this->occurence = "uncommon"; 
+	    $this->variantOf = "Merlin Frigate";
+	    $this->isd = 2001;
         $this->agile = true;
         $this->canvasSize = 100;
         
