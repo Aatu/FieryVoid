@@ -34,7 +34,8 @@
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
 		<div class="panel" style="width:400px;margin:auto;">
-			<a href="http://fieryvoid.net/reg.php">Register new player account</a><br>;
+			<a href="http://fieryvoid.net/reg.php">Register new player account</a><br>
+			or <b>Log in:</b>
 			<form method="post">
 				<table>
 				<tr><td><label>Username:</label></td><td><input type="text" name="user"></input></td></tr>
