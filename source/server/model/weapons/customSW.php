@@ -85,6 +85,9 @@ class SWRayShield extends Shield implements DefensiveSystem{
     public $name = "swrayshield";
     public $displayName = "Ray Shield";
     public $iconPath = "shield.png";
+    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
+    public $baseOutput = 0; //base output, before boost
+	
 	
  	public $possibleCriticals = array( //different than usual B5Wars shield
             16=>"OutputReduced1",
@@ -94,6 +97,9 @@ class SWRayShield extends Shield implements DefensiveSystem{
     function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
         // shieldfactor is handled as output.
         parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+	$this->baseOutput = $shieldFactor;
+	$this->boostEfficiency = $powerReq;
+	$this->maxBoostLevel = min(2,$shieldFactor); //maximum of +2 effect, costs $powerReq each - but can't more than double shield!
     }
 	
     public function onConstructed($ship, $turn, $phase){
@@ -113,7 +119,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
         if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
-        $output = $this->output;
+        $output = $this->output + $this->getBoostLevel($turn);
 	//Ballistic, Matter, SWIon - passes through!
 	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' ) $output = 0;
         $output -= $this->outputMod;
@@ -125,11 +131,23 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
+	$this->output = $this->baseOutput + $this->getBoostLevel($turn);
 	$this->data["Strength"] = $this->output;      
 	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile."; 
 	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
     }
-	   
+	  
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn) continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	
 } //endof class SWRayShield
 
 
