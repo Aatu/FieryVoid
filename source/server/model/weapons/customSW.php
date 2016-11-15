@@ -172,7 +172,7 @@ class SWFighterLaser extends LinkedWeapon{
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 11;
     public $animationWidth = 3;
-    public $trailLength = 12;
+    public $trailLength = 8;
 	
 	
     public $priority = 4;
@@ -239,7 +239,7 @@ class SWFighterIon extends SWIon{
     public $projectilespeed = 9;
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
-    public $trailLength = 11;
+    public $trailLength = 8;
     public $animationColor =  array( 100, 100, 245);
     public $trailColor = array( 100, 100, 245);
 	
