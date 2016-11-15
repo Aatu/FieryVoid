@@ -75,8 +75,15 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
+                'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
+                'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
+                'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
+                'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
+                
+                'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
-                'aurorax' => '/server/model/ships/starwars_centauri/aurorax.php', 
+                
+                
                 
                 //custom weapons StarWars
                 'swrayshield' => '/server/model/weapons/customSW.php',
