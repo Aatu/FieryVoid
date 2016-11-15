@@ -1,6 +1,6 @@
 <?php
 class zzftrTIEFighter extends FighterFlight{
-    /*StarWars weakened TIE Interceptor...*/
+    /*StarWars TIE Fighter...*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
