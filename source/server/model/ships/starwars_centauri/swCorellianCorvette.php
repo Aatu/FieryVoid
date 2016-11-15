@@ -8,11 +8,12 @@ class swCorellianCorvette extends MediumShip{
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliancorvette";
         $this->imagePath = "img/starwars/cr90.png";
+	    $this->canvasSize = 100;
         $this->shipClass = "Corellian Corvette";
 	    
 	$this->unofficial = true;
         // $this->agile = true;
-        //$this->canvasSize = 100;
+
         
         $this->forwardDefense = 10;
         $this->sideDefense = 15;
