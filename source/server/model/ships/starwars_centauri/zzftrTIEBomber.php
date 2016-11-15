@@ -1,26 +1,26 @@
 <?php
-class zzftrTIEFighter extends FighterFlight{
-    /*StarWars weakened TIE Interceptor...*/
+class zzftrTIEBomber extends FighterFlight{
+    /*StarWars TIE Bomber...*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 27*6;
+        $this->pointCost = 25*6;
         $this->faction = "StarWars Galactic Empire";
-        $this->phpclass = "zzftrtiefighter";
-        $this->shipClass =  "TIE Fighters";
-        $this->imagePath = "img/starwars/tieFighter.png";
+        $this->phpclass = "zzftrtiebomber";
+        $this->shipClass =  "TIE Bombers";
+        $this->imagePath = "img/starwars/tieBomber.png";
         
         //$this->isd = 2214;
         $this->unofficial = true;
         
-        $this->forwardDefense = 5;
-        $this->sideDefense = 6;
-        $this->freethrust = 11;
+        $this->forwardDefense = 7;
+        $this->sideDefense = 7;
+        $this->freethrust = 10;
         $this->offensivebonus = 4;
-        $this->jinkinglimit = 10;
-        $this->turncost = 0.25;
+        $this->jinkinglimit = 8;
+        $this->turncost = 0.33;
         
-    	$this->iniativebonus = 20 *5; 
+    	$this->iniativebonus = 18 *5; 
         
         $this->populate();
     }
@@ -31,16 +31,20 @@ class zzftrTIEFighter extends FighterFlight{
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
-            $armour = array(0, 0, 1, 1);
-            $fighter = new Fighter("zzftrtiefighter", $armour, 5, $this->id);
-            $fighter->displayName = "TIE Fighter";
-            $fighter->imagePath = "img/starwars/tieFighter.png";
-            $fighter->iconPath = "img/starwars/tieFighter_large.png"; 
+            $armour = array(1, 1, 2, 2);
+            $fighter = new Fighter("zzftrtiebomber", $armour, 10, $this->id);
+            $fighter->displayName = "TIE Bomber";
+            $fighter->imagePath = "img/starwars/tieBomber.png";
+            $fighter->iconPath = "img/starwars/tieBomber_large.png"; 
             
             $frontGun = new SWFighterLaser(330, 30, 1, 2); //front Lasers
             $fighter->addFrontSystem($frontGun);
             
-           
+            //2 forward Proton Torpedo Launchers, 4 shots each
+            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
+            $fighter->addFrontSystem($torpedoLauncher);
+            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
+            $fighter->addFrontSystem($torpedoLauncher);
             
             $this->addSystem($fighter);
        }
