@@ -152,7 +152,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 
 
 
-class SWFighterLaser extends LinkedWeapon{
+class SWFighterLaser extends Pulse/*LinkedWeapon*/{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
@@ -174,14 +174,21 @@ class SWFighterLaser extends LinkedWeapon{
     public $animationWidth = 3;
     public $trailLength = 8;
 	
-	
+
+    public $shots = 1;
     public $priority = 4;
     public $loadingtime = 1;
     public $rangePenalty = 2;
     public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	
+	//for Pulse mode
+        public $grouping = 25;
+        public $maxpulses = 1;	
+	private $useDie = 3; //die used for base number of hits
  
-    public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+    //public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
+	public $damageType = "Pulse";
     public $weaponClass = "Particle"; //weapon class - overrides $this->data["Weapon type"] if set!
 
 	private $damagebonus = 0;
@@ -192,23 +199,24 @@ class SWFighterLaser extends LinkedWeapon{
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
-/*
-		$this->damagebonusArray[1] = $damagebonus;
-		$this->damagebonusArray[2] = $damagebonus; //first gun provides basic damage bonus in linked mode
-		if($nrOfShots>1)$this->damagebonusArray[2] += 2; //+2 for second linked weapon
-		if($nrOfShots>2)$this->damagebonusArray[2] += ($nrOfShots - 2); //+1 for each additional linked weapon
-*/
-		$this->shots = $nrOfShots;
-//		$this->shotsArray = array(1=>$nrOfShots, 2=>1);
-		
+
+		$this->maxpulses = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
 		$this->intercept = $nrOfShots;
+		$this->grouping = 30-4*$nrOfShots; //more guns means better grouping!
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 
 		//appropriate icon (number of barrels)...
 		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
+	
+        public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		 $this->data["Special"] = 'Pulse mode: D'.$this->useDie.'-1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		$this->data["Special"] .= '<br>This weapon CAN achieve 0 hits on a successful to hit roll!';
+        }
 	
 /* sadly fighter weapons can't change modes... but shipborne ones can, so this remains as an example!
 	public function changeFiringMode($newMode){ //change parameters with mode change - those not changed by standard
@@ -219,7 +227,11 @@ class SWFighterLaser extends LinkedWeapon{
 	}
 */	
     
-	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
+	protected function getPulses($turn)
+        {
+	    $baseHits = Dice::d($this->useDie) -1; //this CAN be 0!!!
+            return $baseHits;
+        }
 	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
