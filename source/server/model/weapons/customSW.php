@@ -214,8 +214,8 @@ class SWFighterLaser extends Pulse/*LinkedWeapon*/{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Pulse mode: D'.$this->useDie.'-1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
-		$this->data["Special"] .= '<br>This weapon CAN achieve 0 hits on a successful to hit roll!';
+		 $this->data["Special"] = 'Pulse mode: 0..'.$this->useDie.', +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
         }
 	
 /* sadly fighter weapons can't change modes... but shipborne ones can, so this remains as an example!
@@ -227,11 +227,14 @@ class SWFighterLaser extends Pulse/*LinkedWeapon*/{
 	}
 */	
     
-	protected function getPulses($turn)
-        {
-	    $baseHits = Dice::d($this->useDie) -1; //this CAN be 0!!!
-            return $baseHits;
-        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses -= 1;
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
+		$pulses=max($pulses,1); //no less than 1
+		return $pulses;
+	}
 	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
