@@ -20,7 +20,7 @@ class SWIonHandler{
 			$baseDmg = ceil($dmgInflicted/2);
 		}
 		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
-		$effect = pow($baseDmg,$power);
+		$effect = pow($baseDmg,SWIonHandler::$power);
 		$targetID = $targetUnit->id;
 		$currentTurn = TacGamedata::$currentTurn;
 		if(SWIonHandler::$turn != $currentTurn){
