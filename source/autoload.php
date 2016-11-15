@@ -75,6 +75,8 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
+                'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
+                
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
