@@ -42,7 +42,7 @@ class zzftrxwing extends FighterFlight{
             $fighter->addFrontSystem($frontGun);
             
            
-            //2 forward Proton Torpedo Launchers, 4 shots each
+            //2 forward Proton Torpedo Launchers, 3 shots each
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(3, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(3, 330, 30);
