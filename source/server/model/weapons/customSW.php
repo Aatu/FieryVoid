@@ -1,6 +1,97 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)*/
 
+
+class SWDirectWeapon extends Pulse{
+    /*StarWars weapon - extension of Pulse mode!*/
+    public $shots = 1;
+    public $firingModes = array( 1 => "Standard");  //and give option of linked fire immediately, too!
+	
+	//for Pulse mode
+	public $grouping = 25;
+	public $maxpulses = 1;	
+	private $useDie = 3; //die used for base number of hits
+ 
+    public $damageType = "Pulse"; //and this should remain!
+    public $weaponClass = "Particle"; //and may be easily overridden
+   
+	//animation for fighter laser - bigger guns need to change size and speed attributes :)
+	public $animation = "beam";
+        public $animationColor = array(245, 75, 95);
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 11;
+    public $animationWidth = 3;
+    public $trailLength = 8;
+	
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
+		$this->maxpulses = $nrOfShots;
+		$this->defaultShots = $nrOfShots;
+		$this->intercept = $nrOfShots;
+		$this->grouping = 35-5*$nrOfShots; //more guns means better grouping!
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
+		
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}    
+	
+	
+        public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		 $this->data["Special"] = 'Pulse mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
+        }
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses -= 1;
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
+		$pulses=max($pulses,1); //no less than 1
+		return $pulses;
+	}
+	
+	//these will ned to be overridden!
+	//public function getDamage($fireOrder){        return ??;   }
+	//public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+	//public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+} //end of class SWDirectWeapon
+
+
+
+/*base class for StarWars Ion weapons*/
+class SWIon extends SWDirectWeapon{	
+	/*compared to SW Lasers: a bit better range, but poor FC and damage (and possible RoF as well)*/
+    public $name = "swion";
+    public $priority = 10; //Ions usually fire last, to take advantage of induced criticals
+ 
+    public $weaponClass = "SWIon"; //weapon class
+	  
+    //public $systemKiller = true; //let's not go overhead - do NOT use $systemKiller...
+
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+      $this->data["<font color='red'>Remark</font>"] = "Damage may cause power shortages.";      
+      $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical on systems damaged."; 
+    }
+	
+    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+      $dmg = $damage - $armour;
+      if($dmg<=0) return; //no damage was actually done
+      SWIonHandler::addDamage($ship, $system, $dmg);//possibly cause power shortage
+      if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
+      if($system instanceof Structure) return; //structure does not suffer critical hits anyway
+
+      $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $dmg); //for ship system and fighter alike
+      $system->criticals[] =  $crit;
+    }
+
+} //end of class SWIon
+
+
+
 /*static class to handle accumulating Ion damage*/
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
@@ -44,36 +135,6 @@ class SWIonHandler{
 }//endof class SWIonHandlerHandler
 
 
-/*base class for StarWars Ion weapons*/
-class SWIon extends Weapon{	
-	/*compared to SW Lasers: a bit better range, but poor FC and damage (and possible RoF as well)*/
-    public $name = "swion";
-    public $priority = 10; //Ions usually fire last, to take advantage of induced criticals
- 
-    public $damageType = "Standard"; //most if not all SWIon weapons will be Standard mode
-    public $weaponClass = "SWIon"; //weapon class
-	  
-    //public $systemKiller = true; //let's not go overhead - do NOT use $systemKiller...
-
-	
-    public function setSystemDataWindow($turn){
-      parent::setSystemDataWindow($turn);
-      $this->data["<font color='red'>Remark</font>"] = "Damage may cause power shortages.";      
-      $this->data["<font color='red'>Remark</font>"] .= "<br>Increased chance of critical on systems damaged."; 
-    }
-	
-    protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
-      $dmg = $damage - $armour;
-      if($dmg<=0) return; //no damage was actually done
-      SWIonHandler::addDamage($ship, $system, $dmg);//possibly cause power shortage
-      if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
-      if($system instanceof Structure) return; //structure does not suffer critical hits anyway
-
-      $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $dmg); //for ship system and fighter alike
-      $system->criticals[] =  $crit;
-    }
-
-} //end of class SWIon
 
 
 /*
@@ -152,89 +213,32 @@ class SWRayShield extends Shield implements DefensiveSystem{
 
 
 
-class SWFighterLaser extends Pulse/*LinkedWeapon*/{
+class SWFighterLaser extends SWDirectWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
     public $iconPath = "starwars/swFighter4.png";
 	
-	/*
-    public $animation = "trail";
-    public $projectilespeed = 13;
-    public $animationExplosionScale = 0.15;
-    public $animationWidth = 3;
-    public $trailLength = 20;
-    public $animationColor =  array(245, 75, 95);
-    public $trailColor = array(245, 75, 95);
-    */
-	public $animation = "beam";
-        public $animationColor = array(245, 75, 95);
-        public $animationExplosionScale = 0.15;
-        public $projectilespeed = 11;
-    public $animationWidth = 3;
-    public $trailLength = 8;
-	
-
-    public $shots = 1;
     public $priority = 4;
     public $loadingtime = 1;
     public $rangePenalty = 2;
-    public $firingModes = array( 1 => "Standard");  
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	
-	//for Pulse mode
-        public $grouping = 25;
-        public $maxpulses = 1;	
-	private $useDie = 3; //die used for base number of hits
- 
-    //public $damageType = "Standard"; //actual mode of dealing damage (standard, flash, raking...) - overrides $this->data["Damage type"] if set!
-	public $damageType = "Pulse";
-    public $weaponClass = "Particle"; //weapon class - overrides $this->data["Weapon type"] if set!
 
 	private $damagebonus = 0;
-	
 
-    public $exclusive = false;   
    
     
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
-
-		$this->maxpulses = $nrOfShots;
-		$this->defaultShots = $nrOfShots;
 		$this->intercept = $nrOfShots;
-		$this->grouping = 30-4*$nrOfShots; //more guns means better grouping!
-		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 
 		//appropriate icon (number of barrels)...
 		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
 		
-		parent::__construct(0, 1, 0, $startArc, $endArc);
+		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
 	
-        public function setSystemDataWindow($turn){
-		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Pulse mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
-		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
-        }
-	
-/* sadly fighter weapons can't change modes... but shipborne ones can, so this remains as an example!
-	public function changeFiringMode($newMode){ //change parameters with mode change - those not changed by standard
-		//to display in GUI, shipSystem.js changeFiringMode function also needs to be redefined
-		parent::changeFiringMode($newMode);
-		$i = $newMode;
-		if(isset($this->damagebonusArray[$i])) $this->damagebonus = $this->damagebonusArray[$i];
-	}
-*/	
-    
-	public function rollPulses($turn, $needed, $rolled){
-		$pulses = $this->getPulses($turn);
-		$pulses -= 1;
-		$pulses+= $this->getExtraPulses($needed, $rolled);
-		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
-		$pulses=max($pulses,1); //no less than 1
-		return $pulses;
-	}
+	public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
 	public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
