@@ -131,7 +131,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	$this->output = $this->baseOutput + $this->getBoostLevel($turn);
+	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
 	$this->data["Basic Strength"] = $this->baseOutput;      
 	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile."; 
 	$this->data["<font color='red'>Remark</font>"] .= "<br>Does not protect from Ballistic, Matter and StarWars Ion damage."; 
