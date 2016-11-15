@@ -33,7 +33,7 @@ class swCorellianCorvette extends MediumShip{
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 	    
 	$hyperdrive = new JumpEngine(4, 8, 4, 10);
-	$hyperdrive->name = 'Hyperdrive';
+	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
 	    
 	$this->addPrimarySystem(new GuardianArray(0, 4, 2, 185, 175)); //_almost_ all-around! vast thrusters block firing arc directly aft...
