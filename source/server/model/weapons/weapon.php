@@ -1239,6 +1239,7 @@ class Weapon extends ShipSystem{
 		if(isset($this->uninterceptableArray[$i])) $this->uninterceptable = $this->uninterceptableArray[$i];
 		if(isset($this->shotsArray[$i])) $this->shots = $this->shotsArray[$i];
 		if(isset($this->defaultShotsArray[$i])) $this->defaultShots = $this->defaultShotsArray[$i];
+		if(isset($this->maxpulsesArray[$i])) $this->maxpulses = $this->maxpulsesArray[$i];
 		if(isset($this->groupingArray[$i])) $this->grouping = $this->groupingArray[$i];
 		if(isset($this->gunsArray[$i])) $this->guns = $this->gunsArray[$i];
 		
