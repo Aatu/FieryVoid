@@ -158,7 +158,7 @@ class SWDirectWeapon extends Pulse{
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
 		$new = $this->priority+1;
-		$this=>priorityArray = array(1=>$this=>priority, 2=>$new);
+		$this->priorityArray = array(1=>$this=>priority, 2=>$new);
 		$fc1 = $this->fireControl;
 		$fc2 = array($fc1[0]-4, $fc1[1]-2, $fc1[2]-1); //FC of salvo mode: worse (much worse vs fighters)
 		$this->fireControlArray = array(1=>$fc1, 2=>$fc2);
