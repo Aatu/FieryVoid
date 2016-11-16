@@ -160,7 +160,7 @@ class SWDirectWeapon extends Pulse{
 		$this->fireControlArray = array(1=>$fc1, 2=>$fc2);
 		//damage bonus: at least +1 per extra gun (+2 for second gun), but otherwise percentage based
 		$damagebonusMin = 2;
-		$damagebonusPerc = 120; //percentage: +20% for first gun, +10% for each one after that; counted from average damage
+		$damagebonusPerc = 20; //percentage: +20% for first gun, +10% for each one after that; counted from average damage
 		if($this->defaultShots > 2) {
 			$damagebonusMin += $this->defaultShots - 2;//+1 for each barrel after that
 			$damagebonusPerc += 10*($this->defaultShots-2);//+15% for each barrel after that
