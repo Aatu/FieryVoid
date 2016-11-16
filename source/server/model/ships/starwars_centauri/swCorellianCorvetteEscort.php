@@ -51,8 +51,8 @@ class swCorellianCorvetteEscort extends MediumShip{
 	$this->addFrontSystem(new SWLightLaser(0, 270, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
         $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(1,4,2,1,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
