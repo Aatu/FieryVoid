@@ -189,7 +189,7 @@ class SWDirectWeapon extends Pulse{
 	
 	public function changeFiringMode($newMode){ //do modify elements not present in usual weapons
 		parent::changeFiringMode($newMode);
-		if(isset($this->damagebonusArray[$i])) $this->damagebonus = $this->damagebonusArray[$i];
+		if(isset($this->damagebonusArray[$newMode])) $this->damagebonus = $this->damagebonusArray[$newMode];
 	}
 
 } //end of class SWDirectWeapon
