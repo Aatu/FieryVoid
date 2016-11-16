@@ -15,7 +15,7 @@ class swCorellianCorvetteEscort extends MediumShip{
 	    $this->variantOf = "Corellian Corvette";
 	    $this->occurence = 'uncommon';
 	    
-	$this->fighters = array("normal"=>6);
+	$this->fighters = array("light"=>6);
 	    
 	$this->unofficial = true;
         // $this->agile = true;
