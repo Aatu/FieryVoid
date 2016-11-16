@@ -1,9 +1,5 @@
 <?php
 /*custom weapons - from StarWars universe (to keep them separate)
-
-   WARNING: general classes from this file aren't included in autoload.php file
-   	they would need to be if they are used by a system outside of customSW.php file.
-	
 */
 
 
