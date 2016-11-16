@@ -858,7 +858,10 @@ class Weapon extends ShipSystem{
 		if($i==0){ //clear variables that may be relevant for further shots in line
 			$fireOrder->linkedHit=null;
 		}
-		if($this->isLinked && $i > 0){
+		$rolled = Dice::d(100);
+		if($this->isLinked && $i > 0){ //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
+			$rolled = $fireOrder->rolled;
+			/*
 			$rolled = 50; //irrelevant really, just 0<roll<100
 			if($fireOrder->linkedHit==null){ //first linked shot did not hit, so neither will further ones
 				$needed = 0;
@@ -866,26 +869,28 @@ class Weapon extends ShipSystem{
 			}else{//first linked shot did hit, and so will further ones
 				$needed = 100;
 			}
-		}else{ //standard - find hit and interception
-			$rolled = Dice::d(100);
-			    if ($rolled > $needed && $rolled <= $needed+($intercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
-				    if($this->damageType == 'Pulse'){
-					$fireOrder->intercepted += $this->maxpulses;
-				    }else{
-					$fireOrder->intercepted += 1;
-				    }
-			    }
+			*/
 		}
+		
+		//interception?
+		if ($rolled > $needed && $rolled <= $needed+($intercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
+		    if($this->damageType == 'Pulse'){
+			$fireOrder->intercepted += $this->maxpulses;
+		    }else{
+			$fireOrder->intercepted += 1;
+		    }
+		}
+		
 
 		$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
 		$fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+		
+		//hit?
 		if ($rolled <= $needed){
 			$hitsRemaining=1;
 
 			if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
 			    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
-			    //$this->getPulses($gamedata->turn) + $this->getExtraPulses($needed, $rolled);
-			    //$hitsRemaining=min($hitsRemaining,$this->maxpulses);			    
 			}
 
 			while($hitsRemaining>0){
