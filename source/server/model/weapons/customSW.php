@@ -454,6 +454,10 @@ class SWMediumLaser extends SWDirectWeapon{
     public $rangePenalty = 1.5; // 3 per 2 hexes
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
    
+        public $animationExplosionScale = 0.2;
+        public $projectilespeed = 12;
+	public $animationWidth = 3;
+	public $trailLength = 10;
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = floor($nrOfShots*0.9); //this gives distinctly worse interception than light laser
@@ -484,6 +488,11 @@ class SWHeavyLaser extends SWDirectWeapon{
     public $loadingtime = 2;
     public $rangePenalty = 1; 
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
+	
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 13;
+	public $animationWidth = 4;
+	public $trailLength = 12;
    
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -516,7 +525,11 @@ class SWLightTLaser extends SWDirectWeapon{
     public $rangePenalty = 1;
     public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
    
-    
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 15;
+	public $animationWidth = 4;
+	public $trailLength = 12;
+	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
 
@@ -547,6 +560,10 @@ class SWMediumTLaser extends SWDirectWeapon{
     public $rangePenalty = 0.5;
     public $fireControl = array(-3, 1, 3); // fighters, <mediums, <capitals
    
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 15;
+	public $animationWidth = 5;
+	public $trailLength = 14;
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = 0;
@@ -578,6 +595,12 @@ class SWHeavyTLaser extends SWDirectWeapon{
     public $loadingtime = 3;
     public $rangePenalty = 0.33;
     public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
+	
+	
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 16;
+	public $animationWidth = 6;
+	public $trailLength = 18;
    
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
