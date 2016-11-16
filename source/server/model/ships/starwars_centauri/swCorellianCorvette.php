@@ -25,30 +25,30 @@ class swCorellianCorvette extends MediumShip{
         $this->pivotcost = 4;
 	$this->iniativebonus = 9 *5; //as semi-civilian ship, initiative isn't what it would be for a true warship
         
-        $this->addPrimarySystem(new Reactor(4, 10, 0, 5));
+        $this->addPrimarySystem(new Reactor(3, 10, 0, 5));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 3));
-        $this->addPrimarySystem(new Engine(4, 13, 0, 9, 3));
-	$this->addPrimarySystem(new Hangar(2, 4));
+        $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
+	$this->addPrimarySystem(new Hangar(1, 4));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
-	$this->addPrimarySystem(new CargoBay(2, 30));
-	$this->addPrimarySystem(new CargoBay(2, 30));
+	$this->addPrimarySystem(new CargoBay(1, 30));
+	$this->addPrimarySystem(new CargoBay(1, 30));
 	    
-	$hyperdrive = new JumpEngine(4, 8, 4, 10);
+	$hyperdrive = new JumpEngine(3, 8, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
 	    
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 			    
-        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addFrontSystem(new CnC(4, 8, 0, 0));
+        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(2,6,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
-        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
-	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
+	$this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
        
         $this->addPrimarySystem(new Structure( 3, 50));
