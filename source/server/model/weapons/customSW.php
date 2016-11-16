@@ -166,7 +166,7 @@ class SWDirectWeapon extends Pulse{
 			$damagebonusPerc += 15*($this->defaultShots-2);//+15% for each barrel after that
 		}
 		$avgDmg = ($this->minDamage+$this->maxDamage) /2;
-		$this->damagebonusEffect = $this->damagebonus + max($damagebonusMin,ceil($avgDmg*$damagebonusPerc/100));
+		$damagebonusEffect = $this->damagebonus + max($damagebonusMin,ceil($avgDmg*$damagebonusPerc/100));
 		$this->damagebonusArray = array(1=>$this->damagebonus, 2=>$damagebonusEffect);
 		
 		foreach($this->firingModes as $i=>$modeName){ //recalculating min and max damage - taking into account new firing mode!	    
