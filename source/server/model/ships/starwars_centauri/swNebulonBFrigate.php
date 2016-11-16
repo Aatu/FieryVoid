@@ -1,14 +1,13 @@
 <?php
-class swCorellianCorvetteEscort extends MediumShip{
-	/*escort variant: not so heavy shielding, but lots of light guns instead of some cargo space*/
-	/*also, fighter capacity*/
+class swNebulonBFrigate extends HeavyCombatVessel{
+	/*generic NebulonBFrigate*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 340;
 	$this->faction = "StarWars Galactic Empire";
-        $this->phpclass = "swcorelliancorvetteescort";
+        $this->phpclass = "swNebulonBFrigate";
         $this->imagePath = "img/starwars/cr90.png";
 	    $this->canvasSize = 100;
         $this->shipClass = "Corellian Escort Corvette";
@@ -64,8 +63,10 @@ class swCorellianCorvetteEscort extends MediumShip{
 	$this->addAftSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
 	    
-        $this->addPrimarySystem(new Structure( 3, 50));
-	    
+
+        $this->addFrontSystem(new Structure( 5, 50));
+        $this->addAftSystem(new Structure( 4, 46));
+        $this->addPrimarySystem(new Structure( 6, 30));
 	    
 	    
         $this->hitChart = array(
