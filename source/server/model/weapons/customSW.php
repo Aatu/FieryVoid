@@ -106,7 +106,7 @@ class SWDirectWeapon extends Pulse{
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
 		$this->maxpulses = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
-		$this->intercept = $nrOfShots;
+		//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
 		$this->grouping = 35-5*$nrOfShots; //more guns means better grouping!
 		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 		
