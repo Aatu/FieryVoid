@@ -46,9 +46,9 @@ class swCorellianCorvette extends MediumShip{
         $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(2,6,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-	$this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
        
         $this->addPrimarySystem(new Structure( 3, 50));
