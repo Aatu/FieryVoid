@@ -104,6 +104,8 @@ class SWDirectWeapon extends Pulse{
 	public $animationWidth = 3;
 	public $trailLength = 8;
 	
+	protected $damagebonus = 0;
+	protected $damagebonusArray = array();
     
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
 		$this->maxpulses = $nrOfShots;
@@ -112,6 +114,12 @@ class SWDirectWeapon extends Pulse{
 		$this->grouping = 35-5*$nrOfShots; //more guns means better grouping!
 		$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
 		
+		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
+		//size: +40% for second gun, +20% for each further!
+		//power: +60% for second gun, 
+		
+		$maxhealth = ceil($maxhealth);
+		$powerReq = ceil($powerReq);
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
 	
@@ -137,6 +145,7 @@ class SWDirectWeapon extends Pulse{
 	  AFTER calling parent::__construct! (else variables like maxpulses may be not yet filled correctly
 	*/
 	public function addSalvoMode{
+		if($this->defaultShots <2) return; //no point
 		$this->firingModes[2] = 'Salvo';
 		$new = ceil($this->animationExplosionScale*1.25);
 		$this->animationExplosionScaleArray = array(1=>$this->animationExplosionScale, 2=>$new);
@@ -146,6 +155,19 @@ class SWDirectWeapon extends Pulse{
 		$this->trailLengthArray = array(1=>$this->trailLengthScale, 2=>$new);
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
+		$fc1 = $this->fireControl;
+		$fc2 = array($fc1[0]-4, $fc1[1]-2, $fc1[2]-1); //FC of salvo mode: worse (much worse vs fighters)
+		$this->fireControlArray = array(1=>$fc1, 2=>$fc2);
+		//damage bonus: at least +1 per extra gun (+2 for second gun), but otherwise percentage based
+		$damagebonusMin = 2;
+		$damagebonusPerc = 125; //percentage: +25% for first gun, +15% for each one after that; counted from average damage
+		if($this->defaultShots > 2) {
+			$damagebonusMin += $this->defaultShots - 2;//+1 for each barrel after that
+			$damagebonusPerc += 15*($this->defaultShots-2);//+15% for each barrel after that
+		}
+		$avgDmg = ($this->minDamage+$this->maxDamage) /2;
+		$damagebonusEffect = $this->damagebonus + max($damagebonusMin,ceil($avgDmg*$damagebonusPerc/100));
+		$damagebonusArray = array(1=>$this->damagebonus, 2=>$damagebonusEffect);
 		
 		foreach($this->firingModes as $i=>$modeName){ //recalculating min and max damage - taking into account new firing mode!	    
 			$this->changeFiringMode($i);
@@ -160,6 +182,11 @@ class SWDirectWeapon extends Pulse{
 	//public function getDamage($fireOrder){        return ??;   }
 	//public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
 	//public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+	
+	public function changeFiringMode($newMode){ //do modify elements not present in usual weapons
+		parent::changeFiringMode($newMode);
+		if(isset($this->damagebonusArray[$i])) $this->damagebonus = $this->damagebonusArray[$i];
+	}
 
 } //end of class SWDirectWeapon
 
@@ -263,7 +290,7 @@ class SWFighterLaser extends SWDirectWeapon{
     public $rangePenalty = 2;
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
-	private $damagebonus = 0;
+	protected $damagebonus = 0;
 
    
     
@@ -301,7 +328,7 @@ class SWFighterIon extends SWIon{
 
     public $exclusive = false; //can be always overridden in particular fighter!
     public $isLinked = true; //indicates that this is linked weapon
-    private $damagebonus = 0;     	
+    protected $damagebonus = 0;     	
 	
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
@@ -378,6 +405,38 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
 
 
 
+
+
+
+class SWLightLaser extends SWDirectWeapon{
+    /*StarWars weapon - a Particle weapon!*/
+    /*d6+2 damage as a single gun
+    
+    */
+    public $name = "SWLightLaser";
+    public $displayName = "Light Laser";
+    public $iconPath = "starwars/laserSmall4.png";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 2;
+    public $fireControl = array(4, 2, 1); // fighters, <mediums, <capitals
+   
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){
+		$this->intercept = $nrOfShots;
+
+		//appropriate icon (number of barrels)...
+		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 3, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+2 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 3+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 8+$this->damagebonus ;      }
+
+} //end of class SWFighterLaser
 
 
 
