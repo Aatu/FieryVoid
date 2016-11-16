@@ -1,7 +1,6 @@
 <?php
 class swCorellianCorvetteEscortH extends MediumShip{
-	/*escort variant: not so heavy shielding, but lots of light guns instead of some cargo space*/
-	/*also, fighter capacity*/
+	/*anti-ship escort variant: additional turbolasers*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -11,11 +10,10 @@ class swCorellianCorvetteEscortH extends MediumShip{
         $this->phpclass = "swcorelliancorvetteescorth";
         $this->imagePath = "img/starwars/cr90.png";
 	    $this->canvasSize = 100;
-        $this->shipClass = "Corellian Escort Corvette";
+        $this->shipClass = "Corellian Heavy Escort Corvette";
 	    $this->variantOf = "Corellian Corvette";
-	    $this->occurence = 'common';
+	    $this->occurence = 'uncommon';
 	    
-	$this->fighters = array("normal"=>6);
 	    
 	$this->unofficial = true;
         // $this->agile = true;
@@ -33,11 +31,11 @@ class swCorellianCorvetteEscortH extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 10, 0, 5));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(4, 13, 0, 9, 3));
-	$this->addPrimarySystem(new Hangar(2, 10));
+	$this->addPrimarySystem(new Hangar(2, 4));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
-	$this->addPrimarySystem(new CargoBay(2, 10));
-	$this->addPrimarySystem(new CargoBay(2, 10));
+	$this->addPrimarySystem(new CargoBay(1, 10));
+	$this->addPrimarySystem(new CargoBay(1, 10));
 	    
 	$hyperdrive = new JumpEngine(4, 8, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
@@ -47,21 +45,20 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 			    
 	    
-	$this->addFrontSystem(new SWLightLaser(0, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWLightLaser(0, 270, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWLightTLaser(0, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWLightTLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new CnC(4, 8, 0, 0));
-	$this->addFrontSystem(new SWRayShield(1,4,2,1,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new SWRayShield(2,6,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
-	$this->addAftSystem(new SWRayShield(1,4,2,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWLightLaser(0, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWLightTLaser(0, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightTLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
 	    
         $this->addPrimarySystem(new Structure( 3, 50));
@@ -70,18 +67,18 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				5 => "Thruster",
-        				8 => "Cargo Bay",
-        				11 => "Medium Turbolaser",
-        				13 => "Scanner",
-        				15 => "Engine",
+        				6 => "Thruster",
+        				10 => "Cargo Bay",
+        				13 => "Medium Turbolaser",
+        				15 => "Scanner",
+        				17 => "Engine",
         				18 => "Hangar",
         				19 => "Hyperdrive",
         				20 => "Reactor",
         		),
         		1=> array(
         				4 => "Thruster",
-					7 => 'Light Laser',
+					7 => 'Light Turbolaser',
         				8 => "Ray Shield",
         				16 => "Structure",
         				17 => "C&C",
@@ -89,7 +86,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
         		),
         		2=> array(
         				8 => "Thruster",
-					10 => 'Light Laser',
+					10 => 'Light Turbolaser',
         				11 => "Ray Shield",
         				17 => "Structure",
         				20 => "Primary",
