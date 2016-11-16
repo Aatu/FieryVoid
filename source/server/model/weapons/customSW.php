@@ -146,7 +146,7 @@ class SWDirectWeapon extends Pulse{
 	  to be called in create function where needed
 	  AFTER calling parent::__construct! (else variables like maxpulses may be not yet filled correctly
 	*/
-	public function addSalvoMode{
+	public function addSalvoMode(){
 		if($this->defaultShots <2) return; //no point
 		$this->firingModes[2] = 'Salvo';
 		$new = ceil($this->animationExplosionScale*1.25);
@@ -435,6 +435,7 @@ class SWLightLaser extends SWDirectWeapon{
 		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(6)+2 +$this->damagebonus;   }
@@ -465,6 +466,7 @@ class SWMediumLaser extends SWDirectWeapon{
 		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 3, 0.7, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(6)+4 +$this->damagebonus;   }
@@ -495,6 +497,7 @@ class SWHeavyLaser extends SWDirectWeapon{
 		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(8)+4 +$this->damagebonus;   }
@@ -525,6 +528,7 @@ class SWLightTLaser extends SWDirectWeapon{
 		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(6)+6 +$this->damagebonus;   }
@@ -555,6 +559,7 @@ class SWMediumTLaser extends SWDirectWeapon{
 		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(8)+6 +$this->damagebonus;   }
@@ -586,6 +591,7 @@ class SWHeavyTLaser extends SWDirectWeapon{
 		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
 	}    
 	
 	public function getDamage($fireOrder){ return  Dice::d(6,2)+7 +$this->damagebonus;   }
