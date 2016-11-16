@@ -1,14 +1,14 @@
 var SWFighterLaser = function(json, ship){
-    Particle.call( this, json, ship);
+    Weapon.call( this, json, ship);
 }
-SWFighterLaser.prototype = Object.create( Particle.prototype );
+SWFighterLaser.prototype = Object.create( Weapon.prototype );
 SWFighterLaser.prototype.constructor = SWFighterLaser;
 
 
 var SWFighterIon = function(json, ship){
-    Particle.call( this, json, ship);
+    Weapon.call( this, json, ship);
 }
-SWFighterIon.prototype = Object.create( Particle.prototype );
+SWFighterIon.prototype = Object.create( Weapon.prototype );
 SWFighterIon.prototype.constructor = SWFighterIon;
 
 
@@ -28,3 +28,41 @@ var SWFtrProtonTorpedoLauncher = function(json, ship)
 }
 SWFtrProtonTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
 SWFtrProtonTorpedoLauncher.prototype.constructor = SWFtrProtonTorpedoLauncher;
+
+
+var SWLightLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWLightLaser.prototype = Object.create( Weapon.prototype );
+SWLightLaser.prototype.constructor = SWLightLaser;
+
+var SWMediumLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumLaser.prototype = Object.create( Weapon.prototype );
+SWMediumLaser.prototype.constructor = SWMediumLaser;
+
+var SWHeavyLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWHeavyLaser.prototype = Object.create( Weapon.prototype );
+SWHeavyLaser.prototype.constructor = SWHeavyLaser;
+
+
+var SWLightTLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWLightTLaser.prototype = Object.create( Weapon.prototype );
+SWLightTLaser.prototype.constructor = SWLightTLaser;
+
+var SWMediumTLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumTLaser.prototype = Object.create( Weapon.prototype );
+SWMediumTLaser.prototype.constructor = SWMediumTLaser;
+
+var SWHeavyTLaser = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWHeavyTLaser.prototype = Object.create( Weapon.prototype );
+SWHeavyTLaser.prototype.constructor = SWHeavyTLaser;
