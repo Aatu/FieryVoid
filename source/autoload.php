@@ -76,6 +76,8 @@ spl_autoload_register(
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
+                'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
+                'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
@@ -88,12 +90,21 @@ spl_autoload_register(
                 
                 
                 //custom weapons StarWars
+                //base classes for weapons aren't put here - it would need to be done if they're to be used in a different file!
                 'swrayshield' => '/server/model/weapons/customSW.php',
-                'swfighterlaser' => '/server/model/weapons/customSW.php',
+                
                 'swion' => '/server/model/weapons/customSW.php',
                 'swfighterion' => '/server/model/weapons/customSW.php',
+                'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
+                
+                'swlightlaser' => '/server/model/weapons/customSW.php',
+                'swmediumlaser' => '/server/model/weapons/customSW.php',
+                'swheavylaser' => '/server/model/weapons/customSW.php',
+                'swlighttlaser' => '/server/model/weapons/customSW.php',
+                'swmediumtlaser' => '/server/model/weapons/customSW.php',
+                'swheavytlaser' => '/server/model/weapons/customSW.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
