@@ -154,7 +154,7 @@ class SWDirectWeapon extends Pulse{
 		$new = ceil($this->animationWidth*1.25);
 		$this->animationWidthArray = array(1=>$this->animationWidth, 2=>$new);
 		$new = ceil($this->trailLength*1.25);
-		$this->trailLengthArray = array(1=>$this->trailLengthScale, 2=>$new);
+		$this->trailLengthArray = array(1=>$this->trailLength, 2=>$new);
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
 		$new = $this->priority+1;
