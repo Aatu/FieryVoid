@@ -30,16 +30,16 @@ class swCorellianCorvetteEscort extends MediumShip{
         $this->pivotcost = 4;
 	$this->iniativebonus = 12 *5; 
         
-        $this->addPrimarySystem(new Reactor(4, 10, 0, 5));
+        $this->addPrimarySystem(new Reactor(3, 10, 0, 5));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
-        $this->addPrimarySystem(new Engine(4, 13, 0, 9, 3));
-	$this->addPrimarySystem(new Hangar(2, 10));
+        $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
+	$this->addPrimarySystem(new Hangar(1, 10));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
-	$this->addPrimarySystem(new CargoBay(2, 10));
-	$this->addPrimarySystem(new CargoBay(2, 10));
+	$this->addPrimarySystem(new CargoBay(1, 10));
+	$this->addPrimarySystem(new CargoBay(1, 10));
 	    
-	$hyperdrive = new JumpEngine(4, 8, 4, 10);
+	$hyperdrive = new JumpEngine(3, 8, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
 	    
@@ -51,9 +51,9 @@ class swCorellianCorvetteEscort extends MediumShip{
 	$this->addFrontSystem(new SWLightLaser(0, 270, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
-        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-        $this->addFrontSystem(new CnC(4, 8, 0, 0));
+        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(1,4,2,1,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
