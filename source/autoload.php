@@ -90,10 +90,13 @@ spl_autoload_register(
                 
                 
                 //custom weapons StarWars
-                //base classes for weapons aren't put here - it would need to be done if they're to be used in a different file!
+                'swion' => '/server/model/weapons/customSW.php',
+                'swdirectweapon' => '/server/model/weapons/customSW.php',
+                
+                
                 'swrayshield' => '/server/model/weapons/customSW.php',
                 
-                'swion' => '/server/model/weapons/customSW.php',
+                
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
