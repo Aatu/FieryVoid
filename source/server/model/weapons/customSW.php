@@ -117,8 +117,8 @@ class SWDirectWeapon extends Pulse{
 		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
 		//size: +40% for each additional gun
 		//power: +65% for each additional gun 
-		$maxhealth += $maxhealth*0,4*($nrOfShots-1);
-		$powerReq += $powerReq*0,65*($nrOfShots-1);
+		$maxhealth += $maxhealth*0.4*($nrOfShots-1);
+		$powerReq += $powerReq*0.65*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
 				
