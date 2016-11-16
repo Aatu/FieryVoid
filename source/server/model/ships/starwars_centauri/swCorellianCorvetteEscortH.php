@@ -12,7 +12,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    $this->canvasSize = 100;
         $this->shipClass = "Corellian Heavy Escort Corvette";
 	    $this->variantOf = "Corellian Corvette";
-	    $this->occurence = 'uncommon';
+	    $this->occurence = 'common';
 	    
 	    
 	$this->unofficial = true;
