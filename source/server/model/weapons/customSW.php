@@ -387,8 +387,8 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
     public $cost = 10;
     public $damage = 12;
     public $amount = 0;
-    public $range = 15;
-    public $distanceRange = 15;
+    public $range = 8;
+    public $distanceRange = 16;
     public $hitChanceMod = 0;
     public $priority = 2;
 	public $damageType = 'Standard'; 
