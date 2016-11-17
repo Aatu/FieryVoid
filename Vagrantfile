@@ -86,6 +86,9 @@ Vagrant.configure("2") do |config|
     apt-get install -y php5.6 libapache2-mod-php5
     apt-get install -y php5-mysqlnd
 
+    apt-get install -y git
+    apt-get install -y zip
+
     if ! [ -L /var/www ]; then
       rm -rf /var/www
       ln -fs /vagrant /var/www
@@ -95,13 +98,14 @@ Vagrant.configure("2") do |config|
 
     apt-get install -y curl
 
+
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     php -r "if (hash_file('SHA384', 'composer-setup.php') === 'aa96f26c2b67226a324c27919f1eb05f21c248b987e6195cad9690d5c1ff713d53020a02ac8c217dbf90a7eacc9d141d') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-    php composer-setup.php
+    php composer-setup.php --install-dir=/vagrant/
     php -r "unlink('composer-setup.php');"
 
     if [[ -s /vagrant/composer.json ]] ;then
-      sudo -u vagrant -H sh -c "composer install"
+      sudo -u vagrant -H sh -c "php composer.phar install"
     fi
 
      mysql -uroot -proot < /vagrant/db/db17112016.sql
