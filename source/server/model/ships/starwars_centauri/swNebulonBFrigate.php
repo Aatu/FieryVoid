@@ -46,8 +46,6 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	$this->addFrontSystem(new SWMediumTLaser(2, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(2, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(2, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWMediumLaser(2, 180, 60, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWMediumLaser(2, 300, 180, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 240, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 0, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 180, 300, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -62,8 +60,8 @@ class swNebulonBFrigate extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 12, 0, 3, 2));
 	$this->addAftSystem(new Thruster(2, 12, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,8,4,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWMediumLaser(2, 180, 60, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWMediumLaser(2, 300, 180, 1)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWMediumLaser(2, 180, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWMediumLaser(2, 300, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
 	    
 
