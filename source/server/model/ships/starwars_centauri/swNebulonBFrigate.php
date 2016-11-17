@@ -94,7 +94,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 		        		12 => "Hyperdrive",
 					13 => 'Medium Laser',
         				14 => "Ray Shield",
-        				17 => "Structure",
+        				18 => "Structure",
         				20 => "Primary",
         		),
         );
