@@ -82,9 +82,9 @@ class swNebulonBFrigate extends HeavyCombatVessel{
         		1=> array(
         				3 => "Thruster",
         				4 => "Ray Shield",
-					8 => "Hangar",
-        				11 => "Medium Turbolaser",
-        				13 => "Medium Laser",
+					7 => "Hangar",
+        				10 => "Medium Turbolaser",
+        				12 => "Medium Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
