@@ -8,13 +8,13 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	$this->pointCost = 340;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swNebulonBFrigate";
-        $this->imagePath = "img/starwars/cr90.png";
-	    $this->canvasSize = 100;
-        $this->shipClass = "Corellian Escort Corvette";
-	    $this->variantOf = "Corellian Corvette";
-	    $this->occurence = 'uncommon';
+        $this->imagePath = "img/starwars/nebulonb.png";
+	    //$this->canvasSize = 100;
+        $this->shipClass = "Nebulon-B Frigate";
+	    //$this->variantOf = "Corellian Corvette";
+	    //$this->occurence = 'uncommon';
 	    
-	$this->fighters = array("normal"=>6);
+	$this->fighters = array("normal"=>24);
 	    
 	$this->unofficial = true;
         // $this->agile = true;
