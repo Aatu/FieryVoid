@@ -5,7 +5,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 340;
+	$this->pointCost = 500;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swNebulonBFrigate";
         $this->imagePath = "img/starwars/nebulonb.png";
@@ -22,13 +22,14 @@ class swNebulonBFrigate extends HeavyCombatVessel{
         $this->forwardDefense = 10;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.5;
-        $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
-        $this->rollcost = 2;
+        $this->turncost = 0.66;
+        $this->turndelaycost = 0.75;
+        $this->accelcost = 3;
+        $this->rollcost = 4;
         $this->pivotcost = 4;
-	$this->iniativebonus = 12 *5; 
+	$this->iniativebonus = 6 *5; 
         
+	$this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Reactor(3, 10, 0, 5));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
@@ -52,7 +53,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	    
         $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
-        $this->addFrontSystem(new CnC(3, 8, 0, 0));
+        
 	$this->addFrontSystem(new SWRayShield(1,4,2,1,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
