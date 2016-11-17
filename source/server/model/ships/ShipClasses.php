@@ -36,7 +36,7 @@
         
         public $canvasSize = 200;
 	    
-	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max (loc is location id, min/max is for arc)
+	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
 
         protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
         //following values from DB
@@ -681,12 +681,13 @@
 	    
 	    
 	/*outer locations of unit and their arcs, used for GUI called shots*/
-	public function fillLocationsGUI(){      
+	public function fillLocationsGUI(){    
+	    $call = ($this->shipSizeClass>1); //MCVs are one big PRIMARY
             $this->outerSections = array();
 	    $allOuter = $this->getLocations();
 	    foreach($allOuter as $curr){
 		    if($curr['loc']!=0){
-			$outer = array("loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max']);
+			$outer = array("loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call);
 			$this->outerSections[] = $outer;
 		    }
 	    }
