@@ -416,7 +416,7 @@ class SWLightLaser extends SWDirectWeapon{
     */
     public $name = "SWLightLaser";
     public $displayName = "Light Laser";
-    public $iconPath = "starwars/laserSmall4.png";
+    public $iconPath = "starwars/swFighter4.png";
 	
     public $priority = 3;
     public $loadingtime = 1;
@@ -428,7 +428,7 @@ class SWLightLaser extends SWDirectWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
 		
 		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
