@@ -493,6 +493,7 @@
         public $animationWidth = 5;
         public $animationWidth2 = 0.5;
         public $uninterceptable = true;
+        public $noPrimaryHits = true;
         public $priority = 6;
 
         public $loadingtime = 3;
