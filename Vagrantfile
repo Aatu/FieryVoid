@@ -81,6 +81,8 @@ Vagrant.configure("2") do |config|
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
     apt-get install -y mysql-server
 
+    mysql -uroot -proot < /vagrant/db/db17112016.sql
+
     add-apt-repository ppa:ondrej/php
     apt-get update -y
     apt-get install -y php5.6 libapache2-mod-php5
@@ -104,11 +106,9 @@ Vagrant.configure("2") do |config|
     php composer-setup.php --install-dir=/vagrant/
     php -r "unlink('composer-setup.php');"
 
-    if [[ -s /vagrant/composer.json ]] ;then
-      sudo -u vagrant -H sh -c "php composer.phar install"
-    fi
-
-     mysql -uroot -proot < /vagrant/db/db17112016.sql
+    cd /vagrant/
+    php composer.phar install
+    ./autoload.sh
 
   SHELL
 end
