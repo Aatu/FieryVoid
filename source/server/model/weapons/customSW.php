@@ -237,8 +237,8 @@ class SWIon extends SWDirectWeapon{
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
 	private static $power = 1.4; //effect magnitude from hit: damage ^power
-	private static $free = 1; //this much damage doesn't cause anything
-	private static $threshold = 6; //this much damage (after $free) causes power shortage
+	private static $free = 3; //this much damage doesn't cause anything
+	private static $threshold = 7; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
 
 	
@@ -246,9 +246,8 @@ class SWIonHandler{
 		if($dmgInflicted<1) return;//no point if no damage was actually done
 		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
 		if ($targetUnit->isDestroyed()) return; //no point in doing anything
-		if(($targetSystem->displayName == 'Structure') || ($targetSystem instanceof Reactor) ){ //full damage counts
-			$baseDmg = $dmgInflicted;
-		}else{ //half damage counts 
+		$baseDmg = $dmgInflicted+1; //boost light damage a bit
+		if(($targetSystem->displayName != 'Structure') && (!($targetSystem instanceof Reactor)) ){ //half damage counts 
 			$baseDmg = ceil($dmgInflicted/2);
 		}
 		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
