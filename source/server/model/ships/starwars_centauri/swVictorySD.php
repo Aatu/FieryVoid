@@ -1,5 +1,5 @@
 <?php
-class VictorySD extends BaseShip{
+class swVictorySD extends BaseShip{
     /*StarWars Victory class Star Destroyer*/
 	
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class VictorySD extends BaseShip{
         
 	$this->pointCost = 1100;
 	$this->faction = "StarWars Galactic Empire";
-        $this->phpclass = "VictorySD";
+        $this->phpclass = "swVictorySD";
         $this->imagePath = "img/starwars/victory1.png";
         $this->shipClass = "Victory Star Destroyer";
         $this->shipSizeClass = 3;
@@ -96,7 +96,7 @@ class VictorySD extends BaseShip{
         $this->addPrimarySystem(new Structure( 5, 70));
 	    
 	    
-            $this->hitChart = array(
+        $this->hitChart = array(
             0=> array(
                     8 => "Structure",
                     10 => "Hyperdrive",
@@ -142,7 +142,9 @@ class VictorySD extends BaseShip{
                     18 => "Structure",
                     20 => "Primary",
             ),
-    );
+       );
+	    
+	    
     }
 }
 ?>
