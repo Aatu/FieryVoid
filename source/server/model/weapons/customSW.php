@@ -197,7 +197,7 @@ class SWBallisticWeapon extends Torpedo{
     public $firingModes = array( 1 => "Spread");  
     public $priority = 6;
 	
-	$this->iconPath = "starwars/photonTorpedo.png"; //to be changed!
+	public $iconPath = "starwars/photonTorpedo.png"; //to be changed!
 
     private $useDie = 3; //die used for base number of hits
  
