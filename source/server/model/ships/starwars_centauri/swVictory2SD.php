@@ -83,7 +83,7 @@ class swVictory2SD extends BaseShip{
 	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3));
 	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWHeavyIon(3, 0, 120, 3));
+	$this->addRightSystem(new SWHeavyIon(3, 0, 120, 3));
 	    
 	    
         
