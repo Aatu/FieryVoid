@@ -192,6 +192,86 @@ class SWDirectWeapon extends Pulse{
 
 
 
+class SWBallisticWeapon extends Torpedo{
+    /*StarWars weapon - extension of Pulse mode!*/
+    public $firingModes = array( 1 => "Spread");  
+    public $priority = 6;
+
+    private $useDie = 3; //die used for base number of hits
+ 
+    public $damageType = "Pulse"; //and this should remain!
+    public $weaponClass = "Ballistic"; //and may be easily overridden
+   
+	//animation for capital concussion missile - others need to change things
+        public $trailColor = array(141, 240, 255);
+        public $animation = "torpedo";
+        public $animationColor = array(90, 170, 190);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 10;
+        public $animationWidth = 12;
+        public $trailLength = 12;
+		
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
+		$this->maxpulses = $nrOfShots;
+		$this->defaultShots = $nrOfShots;
+		//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
+		$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+		$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+		
+		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
+		//let size advance quicker than for energy weapons, and powe rlower
+		//size: +55% for each additional gun
+		//power: +35% for each additional gun 
+		$maxhealth += $maxhealth*0.55*($nrOfShots-1);
+		$powerReq += $powerReq*0.35*($nrOfShots-1);
+		$maxhealth = ceil($maxhealth);
+		$powerReq = ceil($powerReq);
+				
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}    
+	
+	
+        public function setSystemDataWindow($turn){
+	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+		$this->data["Special"] .= '<br>Minimum of 1 missile.';
+            parent::setSystemDataWindow($turn);
+        }
+	
+	
+	//needed as this is not based on Pulse class
+        protected function getPulses($turn)
+        {
+            return Dice::d($this->useDie);
+        }
+	
+	//needed as this is not based on Pulse class
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn); //$this->useDie usually
+		$pulses -= 1;
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
+		$pulses=max($pulses,1); //no less than 1
+		return $pulses;
+	}
+
+	
+	//these will ned to be overridden for each particular weapon!
+	//public function getDamage($fireOrder){        return ??;   }
+	//public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
+	//public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
+} //end of class SWBallisticWeapon
+
+
+
+
 /*base class for StarWars Ion weapons*/
 /*compared to SW Lasers: a bit better range, but poor FC and damage (and possible RoF as well)*/
 class SWIon extends SWDirectWeapon{
@@ -727,6 +807,59 @@ class SWHeavyIon extends SWDirectWeapon{
 	public function setMaxDamage(){     $this->maxDamage = 15+$this->damagebonus ;      }
 
 } //end of class SWHeavyTLaser
+
+
+/*shipborne concussion missile launcher - implemented as torpedo
+   can use EW, no seeking head
+*/
+class SWCapitalConcussion extends SWBallisticWeapon{
+        public $name = "SWCapitalConcussion";
+        public $displayName = "Concussion Missile Battery";
+        public $range = 15;
+	public $distanceRange = 25;
+        public $loadingtime = 3;
+        
+        public $fireControl = array(-6, -1, 0); // fighters, <mediums, <capitals 
+
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		//appropriate icon (number of barrels)...
+		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 6, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+	}    
+        
+        public function getDamage($fireOrder){        return 15;   }
+        public function setMinDamage(){     $this->minDamage = 15;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;     }
+    
+}//endof class SWCapitalConcussion
+
+
+/*shipborne proton torpedo launcher - implemented as torpedo
+   can use EW, no seeking head
+*/
+class SWCapitalProton extends SWBallisticWeapon{
+        public $name = "SWCapitalProton";
+        public $displayName = "Proton Torpedo Battery";
+        public $range = 20;
+	public $distanceRange = 30;
+        public $loadingtime = 3;
+        
+        public $fireControl = array(-8, 0, 1); // fighters, <mediums, <capitals 
+
+	
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		//appropriate icon (number of barrels)...
+		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 7, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+	}    
+        
+        public function getDamage($fireOrder){        return 18;   }
+        public function setMinDamage(){     $this->minDamage = 18;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;     }
+    
+}//endof class SWCapitalProton
 
 
 ?>
