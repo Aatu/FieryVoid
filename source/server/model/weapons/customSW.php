@@ -619,4 +619,114 @@ class SWHeavyTLaser extends SWDirectWeapon{
 } //end of class SWHeavyTLaser
 
 
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
+
+
+class SWLightIon extends SWDirectWeapon{
+    /*StarWars lightest shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
+    */
+    public $name = "SWLightIon";
+    public $displayName = "Light Ion Cannon";
+    public $iconPath = "starwars/hvyIon.png";
+	
+    public $priority = 10;
+    public $loadingtime = 2;
+    public $rangePenalty = 0.75; //-3/4 hexes
+    public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
+   
+        public $animationExplosionScale = 0.25;
+        public $projectilespeed = 12;
+	public $animationWidth = 4;
+	public $trailLength = 12;
+	
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+
+		//appropriate icon (number of barrels)...
+		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(4)+4 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 5+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 8+$this->damagebonus ;      }
+
+} //end of class SWLightTLaser
+
+
+
+class SWMediumIon extends SWDirectWeapon{
+    /*StarWars standard shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
+    */
+    public $name = "SWMediumIon";
+    public $displayName = "Medium Ion Cannon";
+    public $iconPath = "starwars/hvyIon.png";
+	
+    public $priority = 10;
+    public $loadingtime = 3;
+    public $rangePenalty = 0.33; //-1/3 hexes
+    public $fireControl = array(-6, 0, 2); // fighters, <mediums, <capitals
+   
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 13;
+	public $animationWidth = 5;
+	public $trailLength = 14;
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+
+		//appropriate icon (number of barrels)...
+		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+6 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 14+$this->damagebonus ;      }
+
+} //end of class SWMediumTLaser
+
+
+
+
+class SWHeavyTLaser extends SWDirectWeapon{
+    /*StarWars heavy turbolaser - excellent if slow-firing andiship weapon
+    */
+    public $name = "SWHeavyTLaser";
+    public $displayName = "Heavy Turbolaser";
+    public $iconPath = "starwars/hvyIon.png";
+	
+    public $priority = 5;
+    public $loadingtime = 3;
+    public $rangePenalty = 0.33;
+    public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
+	
+	
+        public $animationExplosionScale = 0.35;
+        public $projectilespeed = 16;
+	public $animationWidth = 6;
+	public $trailLength = 18;
+   
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+
+		//appropriate icon (number of barrels)...
+		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		
+		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6,2)+7 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 9+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 19+$this->damagebonus ;      }
+
+} //end of class SWHeavyTLaser
+
+
 ?>
