@@ -108,6 +108,9 @@ spl_autoload_register(
                 'swlighttlaser' => '/server/model/weapons/customSW.php',
                 'swmediumtlaser' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+                'swlightion' => '/server/model/weapons/customSW.php',
+                'swmediumion' => '/server/model/weapons/customSW.php',
+                'swheavyion' => '/server/model/weapons/customSW.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
