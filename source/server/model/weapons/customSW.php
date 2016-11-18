@@ -717,7 +717,7 @@ class SWHeavyTLaser extends SWDirectWeapon{
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
 
 
-class SWLightIon extends SWDirectWeapon{
+class SWLightIon extends SWIon{
     /*StarWars lightest shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
     */
     public $name = "SWLightIon";
@@ -752,7 +752,7 @@ class SWLightIon extends SWDirectWeapon{
 
 
 
-class SWMediumIon extends SWDirectWeapon{
+class SWMediumIon extends SWIon{
     /*StarWars standard shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
     */
     public $name = "SWMediumIon";
@@ -788,7 +788,7 @@ class SWMediumIon extends SWDirectWeapon{
 
 
 
-class SWHeavyIon extends SWDirectWeapon{
+class SWHeavyIon extends SWIon{
     /*StarWars heaviest shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
     */
     public $name = "SWHeavyIon";
