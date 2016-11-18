@@ -19,8 +19,8 @@ class swVictorySD extends BaseShip{
 	    
 	    //$this->isd = 2246;
         
-        $this->forwardDefense = 16;
-        $this->sideDefense = 20;
+        $this->forwardDefense = 17;
+        $this->sideDefense = 19;
         
         $this->turncost = 1.25;
         $this->turndelaycost = 1.25;
