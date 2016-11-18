@@ -67,10 +67,10 @@ class swVictory2SD extends BaseShip{
 	    
 	$this->addLeftSystem(new Thruster(3, 20, 0, 4, 3));
 	$this->addLeftSystem(new SWRayShield(3,13,8,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 2));
 	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3));
-	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3));
-	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyLaser(3, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWHeavyIon(3, 240, 0, 3));
 
@@ -78,10 +78,10 @@ class swVictory2SD extends BaseShip{
 	    
 	$this->addRightSystem(new Thruster(3, 20, 0, 4, 4));
 	$this->addRightSystem(new SWRayShield(3,13,8,3,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2));
 	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3));
-	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3));
-	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyIon(3, 0, 120, 3));
 	    
