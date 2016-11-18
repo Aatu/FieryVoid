@@ -78,6 +78,9 @@ spl_autoload_register(
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
                 'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
+                'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',
+                'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
+                'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
