@@ -815,8 +815,8 @@ class SWHeavyIon extends SWDirectWeapon{
 class SWCapitalConcussion extends SWBallisticWeapon{
         public $name = "SWCapitalConcussion";
         public $displayName = "Concussion Missile Battery";
-        public $range = 15;
-	public $distanceRange = 25;
+        public $range = 16;
+	public $distanceRange = 24;
         public $loadingtime = 3;
         
         public $fireControl = array(-6, -1, 0); // fighters, <mediums, <capitals 
