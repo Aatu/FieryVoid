@@ -684,30 +684,30 @@ class SWMediumIon extends SWDirectWeapon{
 		$this->addSalvoMode();
 	}    
 	
-	public function getDamage($fireOrder){ return  Dice::d(6)+6 +$this->damagebonus;   }
-	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
-	public function setMaxDamage(){     $this->maxDamage = 14+$this->damagebonus ;      }
+	public function getDamage($fireOrder){ return  Dice::d(5)+5 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 6+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10+$this->damagebonus ;      }
 
 } //end of class SWMediumTLaser
 
 
 
 
-class SWHeavyTLaser extends SWDirectWeapon{
-    /*StarWars heavy turbolaser - excellent if slow-firing andiship weapon
+class SWHeavyIon extends SWDirectWeapon{
+    /*StarWars heaviest shipborne ion cannon - equivalent of appropriate TURBOLaser (less damage and FC and RoF, more range)
     */
-    public $name = "SWHeavyTLaser";
-    public $displayName = "Heavy Turbolaser";
+    public $name = "SWHeavyIon";
+    public $displayName = "Heavy Ion Cannon";
     public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 5;
-    public $loadingtime = 3;
-    public $rangePenalty = 0.33;
-    public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
+    public $loadingtime = 4;
+    public $rangePenalty = 0.25; //-1/4 hexes!
+    public $fireControl = array(null, -1, 1); // fighters, <mediums, <capitals
 	
 	
         public $animationExplosionScale = 0.35;
-        public $projectilespeed = 16;
+        public $projectilespeed = 13;
 	public $animationWidth = 6;
 	public $trailLength = 18;
    
@@ -722,9 +722,9 @@ class SWHeavyTLaser extends SWDirectWeapon{
 		$this->addSalvoMode();
 	}    
 	
-	public function getDamage($fireOrder){ return  Dice::d(6,2)+7 +$this->damagebonus;   }
-	public function setMinDamage(){     $this->minDamage = 9+$this->damagebonus ;      }
-	public function setMaxDamage(){     $this->maxDamage = 19+$this->damagebonus ;      }
+	public function getDamage($fireOrder){ return  Dice::d(4,2)+5 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 15+$this->damagebonus ;      }
 
 } //end of class SWHeavyTLaser
 
