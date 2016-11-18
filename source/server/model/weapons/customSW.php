@@ -94,7 +94,7 @@ class SWDirectWeapon extends Pulse{
    
 	//animation for fighter laser - bigger guns need to change size and speed attributes :)
 	public $animation = "beam";
-        public $animationColor = array(245, 75, 95);
+        public $animationColor = array(225, 100, 110);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 11;
 	public $animationWidth = 3;
@@ -204,11 +204,11 @@ class SWBallisticWeapon extends Torpedo{
    
 	//animation for capital concussion missile - others need to change things
         public $trailColor = array(141, 240, 255);
-        public $animation = "torpedo";
+        public $animation = "trail";
         public $animationColor = array(90, 170, 190);
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 10;
-        public $animationWidth = 12;
+        public $animationWidth = 5;
         public $trailLength = 12;
 		
 	
@@ -288,8 +288,10 @@ class SWIon extends SWDirectWeapon{
     public $animationExplosionScale = 0.15;
     public $animationWidth = 3;
     public $trailLength = 8;
-    public $animationColor =  array( 100, 100, 245);
-    public $trailColor = array( 100, 100, 245);
+    public $animationColor =  array( 80, 150, 250);
+    public $trailColor = array( 80, 150, 250);
+	
+
 	
 	
     public function setSystemDataWindow($turn){
@@ -851,7 +853,7 @@ class SWCapitalProton extends SWBallisticWeapon{
         public $animationColor = array(150, 190, 230);
         public $animationExplosionScale = 0.4;
         public $projectilespeed = 11;
-        public $animationWidth = 12;
+        public $animationWidth = 6;
         public $trailLength = 12;
 	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
