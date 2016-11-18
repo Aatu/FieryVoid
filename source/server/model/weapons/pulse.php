@@ -5,7 +5,6 @@ class Pulse extends Weapon{
         public $trailColor = array(190, 75, 20);
         public $animationColor = array(190, 75, 20);
         public $grouping = 20;
-        public $rof = 1;
         public $maxpulses = 6;
         public $priority = 5;
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
