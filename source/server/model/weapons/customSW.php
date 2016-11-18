@@ -203,6 +203,7 @@ class SWBallisticWeapon extends Torpedo{
  
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Ballistic"; //and may be easily overridden
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
    
 	//animation for capital concussion missile - others need to change things
         public $trailColor = array(141, 240, 255);
@@ -212,6 +213,7 @@ class SWBallisticWeapon extends Torpedo{
         public $projectilespeed = 10;
         public $animationWidth = 5;
         public $trailLength = 12;
+	
 		
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
@@ -237,6 +239,7 @@ class SWBallisticWeapon extends Torpedo{
         public function setSystemDataWindow($turn){
 	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
+		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
             parent::setSystemDataWindow($turn);
         }
 	
@@ -446,10 +449,18 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $maxAmount = 0;
     public $priority = 4;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
+	
     
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Ballistic"; 
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+	
     
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Special"] = 'Cannot penetrate to PRIMARY when hitting outer section.';
+    }
+	
     function __construct($maxAmount, $startArc, $endArc){
         parent::__construct($maxAmount, $startArc, $endArc);
         $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $this->fireControl);
