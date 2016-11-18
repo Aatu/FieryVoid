@@ -66,3 +66,35 @@ var SWHeavyTLaser = function(json, ship){
 }
 SWHeavyTLaser.prototype = Object.create( Weapon.prototype );
 SWHeavyTLaser.prototype.constructor = SWHeavyTLaser;
+
+
+
+var SWLightIon = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWLightIon.prototype = Object.create( Weapon.prototype );
+SWLightIon.prototype.constructor = SWLightIon;
+
+var SWMediumIon = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumIon.prototype = Object.create( Weapon.prototype );
+SWMediumIon.prototype.constructor = SWMediumIon;
+
+var SWHeavyIon = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWHeavyIon.prototype = Object.create( Weapon.prototype );
+SWHeavyIon.prototype.constructor = SWHeavyIon;
+
+var SWCapitalConcussion = function(json, ship){
+    Torpedo.call( this, json, ship);
+}
+SWCapitalConcussion.prototype = Object.create( Torpedo.prototype );
+SWCapitalConcussion.prototype.constructor = SWCapitalConcussion;
+
+var SWCapitalProton = function(json, ship){
+    Torpedo.call( this, json, ship);
+}
+SWCapitalProton.prototype = Object.create( Torpedo.prototype );
+SWCapitalProton.prototype.constructor = SWCapitalProton;

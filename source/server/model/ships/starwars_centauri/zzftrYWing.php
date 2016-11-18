@@ -4,7 +4,7 @@ class zzftrywing extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 60*6;
+        $this->pointCost = 55*6;
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "zzftrywing";
         $this->shipClass = "Y-Wing Assault Fighters";
@@ -16,7 +16,7 @@ class zzftrywing extends FighterFlight{
         $this->forwardDefense = 7;
         $this->sideDefense = 10;
         $this->freethrust = 8;
-        $this->offensivebonus = 6;
+        $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         

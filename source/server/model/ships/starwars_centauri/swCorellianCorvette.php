@@ -4,7 +4,7 @@ class swCorellianCorvette extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 275;
+	$this->pointCost = 330;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliancorvette";
         $this->imagePath = "img/starwars/cr90.png";
@@ -41,14 +41,14 @@ class swCorellianCorvette extends MediumShip{
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addPrimarySystem(new SWMediumTLaser(2, 0, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 			    
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
         $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(2,6,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-	$this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
        
         $this->addPrimarySystem(new Structure( 3, 50));

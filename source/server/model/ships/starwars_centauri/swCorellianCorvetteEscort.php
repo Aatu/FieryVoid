@@ -6,16 +6,16 @@ class swCorellianCorvetteEscort extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 340;
+	$this->pointCost = 385;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliancorvetteescort";
         $this->imagePath = "img/starwars/cr90.png";
 	    $this->canvasSize = 100;
         $this->shipClass = "Corellian Escort Corvette";
 	    $this->variantOf = "Corellian Corvette";
-	    $this->occurence = 'common';
+	    $this->occurence = 'uncommon';
 	    
-	$this->fighters = array("normal"=>6);
+	$this->fighters = array("light"=>6);
 	    
 	$this->unofficial = true;
         // $this->agile = true;
@@ -51,14 +51,14 @@ class swCorellianCorvetteEscort extends MediumShip{
 	$this->addFrontSystem(new SWLightLaser(0, 270, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(1, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(1, 10, 0, 3, 1));
         $this->addFrontSystem(new CnC(3, 8, 0, 0));
 	$this->addFrontSystem(new SWRayShield(1,4,2,1,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
-	$this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+	$this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(1,4,2,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWLightLaser(0, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWLightLaser(0, 0, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!

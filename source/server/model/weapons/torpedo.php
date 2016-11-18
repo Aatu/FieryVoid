@@ -16,8 +16,9 @@
         {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled!
 
-            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->range)
+            if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $distanceRange )
             {
                 $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
                 return false;

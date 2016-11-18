@@ -74,6 +74,7 @@ class Weapon extends ShipSystem{
     public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
+	
 
     public $shots = 1;
 	public  $shotsArray = array();
@@ -109,8 +110,7 @@ class Weapon extends ShipSystem{
 	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
         public $hextarget = false; //this weapon is targeted on hex, not unit
-	//public $piercing = false; //this weapons deal Piercing damage - to be deleted once damageType takes over
-	//public $flashDamage = false; //this weapon deal Flash damage - to be deleted once damageType takes over...
+	public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
     public $minDamage, $maxDamage;
 	public $minDamageArray = array();

@@ -36,7 +36,7 @@
         
         public $canvasSize = 200;
 	    
-	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max (loc is location id, min/max is for arc)
+	    public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
 
         protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
         //following values from DB
@@ -681,12 +681,13 @@
 	    
 	    
 	/*outer locations of unit and their arcs, used for GUI called shots*/
-	public function fillLocationsGUI(){      
+	public function fillLocationsGUI(){    
+	    $call = ($this->shipSizeClass>1); //MCVs are one big PRIMARY
             $this->outerSections = array();
 	    $allOuter = $this->getLocations();
 	    foreach($allOuter as $curr){
 		    if($curr['loc']!=0){
-			$outer = array("loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max']);
+			$outer = array("loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call);
 			$this->outerSections[] = $outer;
 		    }
 	    }
@@ -859,7 +860,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
+		if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
 
 		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
@@ -888,7 +889,8 @@
 			}
 			if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! penetrate to PRIMARY...
 		}
-		if($weapon->damageType == 'Piercing'){ //Piercing - change hit chart! - no PRIMARY hits!
+		$noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));
+		if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
 			$hitChart = array();
 			//use only non-destroyed systems on section hit
 			$rngTotal = 0; //range of current system
@@ -897,7 +899,7 @@
 				$rngCurr++;
 				if (isset($this->hitChart[$location][$roll])){
                    			$name = $this->hitChart[$location][$roll];
-					if($name != 'Primary'){ //no PRIMARY penetrating hits for Piercing!
+					if($name != 'Primary'){ //no PRIMARY penetrating hits 
 						$systemsArray = $this->getSystemsByNameLoc($name, $location, true);//accept destroyed systems too
 						if(sizeof($systemsArray)>0){ //there actually are such systems!
 							$rngTotal+= $rngCurr;
@@ -961,7 +963,7 @@
 			$system = $this->getSystemById($fire->calledid);
 		}
 
-		if ($system != null /*&& !$system->isDestroyed()*/) return $system;
+		if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
 
 		if ($location === null) { 
 			$location = $this->getHitSectionChoice($shooter, $fire, $weapon);
@@ -1007,7 +1009,8 @@
 		}
 			
 		//for non-Flash/Piercing, add PRIMARY to hit table...
-		if( ($weapon->damageType != 'Flash') && ($weapon->damageType != 'Piercing') ){
+		$noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash'));
+		if(!$noPrimaryHits){ 
 			$multiplier = 0.1; //10% chance for PRIMARY penetration
 			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
 			$rngCurr =  ceil($rngTotal * $multiplier);
