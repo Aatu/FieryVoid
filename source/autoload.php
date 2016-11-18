@@ -92,6 +92,7 @@ spl_autoload_register(
                 //custom weapons StarWars
                 'swion' => '/server/model/weapons/customSW.php',
                 'swdirectweapon' => '/server/model/weapons/customSW.php',
+                'swballisticweapon' => '/server/model/weapons/customSW.php',
                 
                 
                 'swrayshield' => '/server/model/weapons/customSW.php',
@@ -111,6 +112,8 @@ spl_autoload_register(
                 'swlightion' => '/server/model/weapons/customSW.php',
                 'swmediumion' => '/server/model/weapons/customSW.php',
                 'swheavyion' => '/server/model/weapons/customSW.php',
+                'swcapitalconcussion' => '/server/model/weapons/customSW.php',
+                'swcapitalproton' => '/server/model/weapons/customSW.php',
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
