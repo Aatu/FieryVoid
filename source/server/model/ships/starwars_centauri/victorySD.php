@@ -1,63 +1,71 @@
 <?php
-class Hyperion extends BaseShip{
+class VictorySD extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 705;
-	$this->faction = "EA";
-        $this->phpclass = "Hyperion";
-        $this->imagePath = "img/ships/hyperion.png";
-        $this->shipClass = "Hyperion Heavy Cruiser (Theta)";
+	$this->faction = "StarWars Galactic Empire";
+        $this->phpclass = "VictorySD";
+        $this->imagePath = "img/starwars/victory1.png";
+        $this->shipClass = "Victory Star Destroyer";
         $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>6);
 	    
-	    $this->isd = 2246;
+	$this->fighters = array("fighter flights"=>8);
+
+	    
+	$this->unofficial = true;
+	    
+	    //$this->isd = 2246;
         
-        $this->forwardDefense = 14;
-        $this->sideDefense = 16;
+        $this->forwardDefense = 16;
+        $this->sideDefense = 20;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
-        $this->accelcost = 3;
-        $this->rollcost = 2;
-        $this->pivotcost = 3;
+        $this->turncost = 1.25;
+        $this->turndelaycost = 1.25;
+        $this->accelcost = 5;
+        $this->rollcost = 4;
+        $this->pivotcost = 6;
+	$this->iniativebonus = 0 *5; 
 		
-        
+	    
+	    
+	$this->addPrimarySystem(new CnC(6, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 26, 0, 10));
+        $this->addPrimarySystem(new Scanner(4, 14, 4, 3)); //split to Aft, too
+        $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
+	$hyperdrive = new JumpEngine(4, 24, 8, 20);
+	$hyperdrive->displayName = 'Hyperdrive';
+	$this->addPrimarySystem($hyperdrive);
+	$this->addPrimarySystem(new Hangar(3, 48, 12));
          
-        $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 18, 3, 6));
-        $this->addPrimarySystem(new Engine(6, 18, 0, 7, 3));
-		$this->addPrimarySystem(new Hangar(5, 8));
-        $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
+
         
 		
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 120));
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));
-        $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-		$this->addAftSystem(new Thruster(4, 12, 0, 3, 2));
-        $this->addAftSystem(new Thruster(4, 9, 0, 2, 2));
-        $this->addAftSystem(new JumpEngine(4, 16, 3, 24));
-		$this->addAftSystem(new InterceptorMkI(2, 4, 1, 120, 300));
-        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
+        $this->addFrontSystem(new Thruster(3, 18, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 18, 0, 4, 1));
+	$this->addFrontSystem(new SWRayShield(3,13,8,4,330,30)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	    
+	    
+
+	    
+        $this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
+	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
+	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
+        $this->addAftSystem(new Scanner(3, 12, 4, 3)); //split to Primary, too
+        $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
+	$this->addAftSystem(new SWRayShield(2,10,5,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	    
         
-		$this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
-		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 300, 0));
-		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 180, 240));
-		$this->addLeftSystem(new MediumPulse(3, 6, 3, 180, 0));
+	    
+	$this->addLeftSystem(new Thruster(3, 20, 0, 4, 3));
+	$this->addLeftSystem(new SWRayShield(3,13,8,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	
+
 		
-		$this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
-		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 60));
-		$this->addRightSystem(new HeavyLaser(4, 8, 6, 120, 180));
-		$this->addRightSystem(new MediumPulse(3, 6, 3, 0, 180));
+	    
+	$this->addRightSystem(new Thruster(3, 20, 0, 4, 4));
+	$this->addRightSystem(new SWRayShield(3,13,8,3,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -66,6 +74,8 @@ class Hyperion extends BaseShip{
         $this->addLeftSystem(new Structure( 4, 60));
         $this->addRightSystem(new Structure( 4, 60));
         $this->addPrimarySystem(new Structure( 5, 54));
+	    
+	    
             $this->hitChart = array(
             0=> array(
                     10 => "Structure",
