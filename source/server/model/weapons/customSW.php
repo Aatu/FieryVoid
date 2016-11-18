@@ -847,6 +847,12 @@ class SWCapitalProton extends SWBallisticWeapon{
         
         public $fireControl = array(-8, 0, 1); // fighters, <mediums, <capitals 
 
+        public $trailColor = array(171, 240, 255);
+        public $animationColor = array(150, 190, 230);
+        public $animationExplosionScale = 0.4;
+        public $projectilespeed = 11;
+        public $animationWidth = 12;
+        public $trailLength = 12;
 	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
