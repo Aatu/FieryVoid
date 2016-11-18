@@ -196,6 +196,8 @@ class SWBallisticWeapon extends Torpedo{
     /*StarWars weapon - extension of Pulse mode!*/
     public $firingModes = array( 1 => "Spread");  
     public $priority = 6;
+	
+	$this->iconPath = "starwars/photonTorpedo.png"; //to be changed!
 
     private $useDie = 3; //die used for base number of hits
  
