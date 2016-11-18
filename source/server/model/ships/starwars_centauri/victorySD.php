@@ -45,7 +45,10 @@ class VictorySD extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 18, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 18, 0, 4, 1));
 	$this->addFrontSystem(new SWRayShield(3,13,8,4,330,30)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	    
+	$this->addFrontSystem(new SWCapitalConcussion(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyTLaser(3, 300, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyTLaser(3, 300, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWHeavyLaser(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
 
 	    
@@ -55,63 +58,86 @@ class VictorySD extends BaseShip{
         $this->addAftSystem(new Scanner(3, 12, 4, 3)); //split to Primary, too
         $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,10,5,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
         
 	    
 	$this->addLeftSystem(new Thruster(3, 20, 0, 4, 3));
 	$this->addLeftSystem(new SWRayShield(3,13,8,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	
+	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 2));
+	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 2));
+	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWHeavyLaser(3, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWCapitalConcussion(3, 240, 0, 4));
+	$this->addLeftSystem(new SWCapitalConcussion(3, 240, 0, 4));
 
 		
 	    
 	$this->addRightSystem(new Thruster(3, 20, 0, 4, 4));
 	$this->addRightSystem(new SWRayShield(3,13,8,3,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-        
+	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 2));
+	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 2));
+	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWHeavyLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalConcussion(3, 0, 120, 4));
+	$this->addRightSystem(new SWCapitalConcussion(3, 0, 120, 4));
+	    
+	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 52));
-        $this->addAftSystem(new Structure( 4, 42));
-        $this->addLeftSystem(new Structure( 4, 60));
-        $this->addRightSystem(new Structure( 4, 60));
-        $this->addPrimarySystem(new Structure( 5, 54));
+        $this->addFrontSystem(new Structure( 5, 55));
+        $this->addAftSystem(new Structure( 3, 85));
+        $this->addLeftSystem(new Structure( 4, 65));
+        $this->addRightSystem(new Structure( 4, 65));
+        $this->addPrimarySystem(new Structure( 5, 70));
 	    
 	    
             $this->hitChart = array(
             0=> array(
-                    10 => "Structure",
-                    12 => "Standard Particle Beam",
-                    14 => "Scanner",
-                    16 => "Engine",
-                    18 => "Hangar",
+                    8 => "Structure",
+                    10 => "Hyperdrive",
+                    12 => "Scanner",
+                    13 => "Engine",
+                    17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
-                    4 => "Thruster",
-                    7 => "Medium Plasma Cannon",
-                    8 => "Medium Pulse Cannon",
-                    12 => "Interceptor I",
+                    5 => "Thruster",
+		    6 => "Ray Shield",
+                    9 => "Heavy Turbolaser",
+                    10 => "Heavy Laser",
+                    12 => "Concussion Missile Battery",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
-                    10 => "Jump Engine",
-                    13 => "Interceptor I",
-                    18 => "Structure",
+                    7 => "Thruster",
+		    8 => "Ray Shield",
+                    10 => "Heavy Laser",
+                    12 => "Scanner",
+                    13 => "Engine",
+                    17 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-                    9 => "Heavy Laser",
-                    11 => "Medium Pulse Cannon",
+		    5 => "Ray Shield",
+                    9 => "Heavy Turbolaser",
+                    10 => "Heavy Laser",
+                    13 => "Concussion Missile Battery",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-                    9 => "Heavy Laser",
-                    11 => "Medium Pulse Cannon",
+		    5 => "Ray Shield",
+                    9 => "Heavy Turbolaser",
+                    10 => "Heavy Laser",
+                    13 => "Concussion Missile Battery",
                     18 => "Structure",
                     20 => "Primary",
             ),
