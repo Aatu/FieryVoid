@@ -30,7 +30,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	$this->iniativebonus = 6 *5; 
         
 	$this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Reactor(4, 15, 0, 6));
+        $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 5, 3));
 	$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
@@ -39,7 +39,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 
         $this->addFrontSystem(new Thruster(2, 12, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 12, 0, 3, 1));
-	$this->addFrontSystem(new Hangar(1, 15));        
+	$this->addFrontSystem(new Hangar(1, 14));        
 	$this->addFrontSystem(new SWRayShield(2,8,4,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumTLaser(2, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(2, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
