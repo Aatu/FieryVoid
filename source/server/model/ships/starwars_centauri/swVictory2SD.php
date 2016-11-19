@@ -59,7 +59,7 @@ class swVictory2SD extends BaseShip{
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
         $this->addAftSystem(new Scanner(3, 14, 5, 4)); //split to Primary, too
         $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
-	$this->addAftSystem(new SWRayShield(2,10,5,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWRayShield(2,10,5,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyIon(2, 120, 240, 1));
