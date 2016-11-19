@@ -32,13 +32,13 @@ class swVictorySD extends BaseShip{
 	    
 	    
 	$this->addPrimarySystem(new CnC(6, 20, 0, 0));
-        $this->addPrimarySystem(new Reactor(5, 26, 0, 10));
+        $this->addPrimarySystem(new Reactor(5, 26, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 3)); //split to Aft, too
         $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
 	$hyperdrive = new JumpEngine(4, 24, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
-	$this->addPrimarySystem(new Hangar(3, 48, 12));
+	$this->addPrimarySystem(new Hangar(3, 30, 12));
          
 
         
