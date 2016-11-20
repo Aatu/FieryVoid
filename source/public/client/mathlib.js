@@ -5,13 +5,13 @@ window.mathlib = {
 		return a;
 	},
 	
-        arrayIsEmpty: function(array){
-            for(var i in array){
-                return false;
-            }
+	arrayIsEmpty: function(array){
+		for(var i in array){
+			return false;
+		}
 
-            return true;
-        },
+		return true;
+	},
     
 	addToDirection: function(current, add){
         add = add % 360;

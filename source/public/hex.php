@@ -400,9 +400,9 @@
 </div>
 
 <div id="pagecontainer" oncontextmenu="return false;">
-<canvas width="0" height="0" id="hexgrid" class="tacticalcanvas"></canvas>
-<canvas width="0" height="0" id="EWindicators" class="tacticalcanvas"></canvas>
-<canvas width="0" height="0" id="effects" class="tacticalcanvas"></canvas>
+<div id="hexgrid" class="tacticalcanvas"></div>
+<canvas id="EWindicators" class="tacticalcanvas"></canvas>
+<canvas id="effects" class="tacticalcanvas"></canvas>
 
 	<div id="systemInfo">
 		<div class="name"><span class="name header">test</span></div>

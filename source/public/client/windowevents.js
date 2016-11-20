@@ -239,7 +239,7 @@ window.scrolling = {
 		if (!event || event.which !== 3)
             return;
         
-        event.stopPropagation(event);
+        //event.stopPropagation(event);
         if (gamedata.effectsDrawing)
 			return;
 			
@@ -275,7 +275,7 @@ window.scrolling = {
     },
     
     mousemove: function(event){
-		event.stopPropagation(event);
+        //event.stopPropagation(event);
 		
 		if (gamedata.effectsDrawing)
 			return;
