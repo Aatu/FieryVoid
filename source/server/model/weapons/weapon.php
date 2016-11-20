@@ -46,7 +46,7 @@ class Weapon extends ShipSystem{
 	private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
 	public $rangeArray = array();
-    public $distanceRange = 0;
+    protected $distanceRange = 0;
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
 	public $fireControlArray = array();
 
