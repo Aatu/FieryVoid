@@ -189,15 +189,13 @@
             return $this->sideDefense;
         }
         
-        public function doGetHitSection($tf, $shooterCompassHeading, $turn, $weapon){
+        public function doGetHitSection($shooter){
             return 0;
         }
            
         
         
-        public function getHitSection($pos, $shooter, $turn, $weapon){
-            
-            
+        public function getHitSection($shooter, $turn, $returnDestroyed = false){
             return 0;
             
         }
@@ -229,7 +227,7 @@
         }
         
         
-        public function getHitSystem($pos, $shooter, $fire, $weapon, $location = null){
+        public function getHitSystem($shooter, $fire, $weapon, $location = null){
         
                  //print("getHitSystem, location: $location ");
             $systems = array();

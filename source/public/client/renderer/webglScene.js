@@ -1,4 +1,8 @@
 window.webglScene = (function(){
+
+    var ZOOM_MAX = 8;
+    var ZOOM_MIN = 0.2;
+
     function webglScene() {
         this.scene = null;
         this.camera = null;
@@ -32,17 +36,14 @@ window.webglScene = (function(){
             1000
         );
 
-        var geometry = new THREE.PlaneGeometry( 1024, 128, 1, 1 );
+        var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
         var cube = new THREE.Mesh( geometry, material );
+        this.scene.add( cube );
 
-        //this.scene.add( cube );
 
-        var geometry2 = new THREE.PlaneGeometry( 128, 128, 1, 1 );
-        var material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
-        var cube2 = new THREE.Mesh( geometry2, material2 );
 
-        this.scene.add( cube2 );
+
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -56,7 +57,7 @@ window.webglScene = (function(){
 
         this.initialized = true;
 
-        this.hexGridRenderer.renderHexGrid(this.scene);
+        this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
         this.render();
     };
 
@@ -81,7 +82,6 @@ window.webglScene = (function(){
     webglScene.prototype.zoomCamera = function(zoom)
     {
         this.zoom = zoom;
-        console.log(zoom);
 
         if (! this.initialized) {
             return;
@@ -131,7 +131,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseDown = function(event)
     {
-        var pos = getMousePositionInObservedElement(event);
+        var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
 
         this.draggingStartPosition = getViewPortAndGameObject(pos, gamePos);
@@ -192,7 +192,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.doMouseMove = function(event)
     {
-        var pos = getMousePositionInObservedElement(event);
+        var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
 
         this.fireEvent(
@@ -204,7 +204,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.drag = function(event)
     {
-        var pos = getMousePositionInObservedElement(event);
+        var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
         var current = getViewPortAndGameObject(pos, gamePos);
 
@@ -232,7 +232,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.click = function(event)
     {
-        var pos = getMousePositionInObservedElement(event);
+        var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
 
         var payload = this.getViewPortAndGameObject(pos, gamePos);
@@ -337,11 +337,11 @@ window.webglScene = (function(){
         this.zoominprogress = false;
         var newzoom = this.zoom + (this.zoom * zoom);
 
-        if (newzoom < 0.2)
-            newzoom = 0.2;
+        if (newzoom < ZOOM_MIN)
+            newzoom = ZOOM_MIN;
 
-        if (newzoom > 6)
-            newzoom = 6;
+        if (newzoom > ZOOM_MAX)
+            newzoom = ZOOM_MAX;
 
         this.zoomTarget = newzoom;
     };

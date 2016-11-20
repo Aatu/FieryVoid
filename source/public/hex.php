@@ -53,6 +53,12 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
+    <script src="client/renderer/webglHexGridRenderer.js"></script>
+    <script src="client/renderer/canvasHexGridRenderer.js"></script>
+    <script src="client/renderer/webglScene.js"></script>
+    <script src="client/renderer/webglScrolling.js"></script>
+    <script src="client/renderer/webglZooming.js"></script>
+
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/hexgrid.js"></script>
     <script src="client/gamedata.js"></script>
@@ -400,7 +406,7 @@
 </div>
 
 <div id="pagecontainer" oncontextmenu="return false;">
-<div id="hexgrid" class="tacticalcanvas"></div>
+<canvas id="hexgrid" class="tacticalcanvas"></canvas>
 <canvas id="EWindicators" class="tacticalcanvas"></canvas>
 <canvas id="effects" class="tacticalcanvas"></canvas>
 

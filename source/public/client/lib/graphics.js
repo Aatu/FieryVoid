@@ -156,10 +156,9 @@ window.graphics = {
 
 
     },
-
     drawCenteredHexagon: function(canvas, x, y, l, leftside, topleft, topright) {
-        var a = l*0.5;
-        var b = l*0.8660254;
+        var a = l * Math.sin(30/180*Math.PI);
+        var b = l * Math.cos(30/180*Math.PI);
 
         x = x - b;
         y = y - a*2;
@@ -167,8 +166,8 @@ window.graphics = {
     },
 
     drawHexagon: function(canvas, x, y, l, leftside, topleft, topright){
-        var a = l*0.5
-        var b = l*0.8660254 //0.86602540378443864676372317075294
+        var a = l * Math.sin(30/180*Math.PI);
+        var b = l * Math.cos(30/180*Math.PI);
 
         var p1, p2, p3, p4, p5, p6
 
