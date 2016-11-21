@@ -207,13 +207,12 @@ window.weaponManager = {
 
 		for (var i in p.systems){
 			var system = p.systems[i];
-			if (system.id == weapon.id)
-				continue;
+			if (system.id == weapon.id) continue; //can't conflict itself
 
 			if (weaponManager.hasFiringOrder(ship, system)){
-				if ( (weapon.exclusive || system.exclusive) && (weapon.isBallistic==system.isBallistic)){
+				if ( (weapon.exclusive || system.exclusive) && (weapon.isBallistic==system.isBallistic) ){
 					if (alert)
-						confirm.error("You cannot fire  " +weapon.displayName + " and "system.displayName +" together!");
+						confirm.error("You cannot fire <b>" + weapon.displayName + "</b> and <b>" + system.displayName +"</b> together!");
 					return true;
 				}
 				/* compressed into a single statement above
