@@ -106,7 +106,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
     }
@@ -140,7 +140,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 1;
+		$pulses -= 2;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -229,14 +229,14 @@ class SWDirectWeapon extends Pulse{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Burst mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		 $this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
         }
 	
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 1;
+		$pulses -= 2;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -342,7 +342,7 @@ class SWBallisticWeapon extends Torpedo{
 	
 	
         public function setSystemDataWindow($turn){
-	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
             parent::setSystemDataWindow($turn);
@@ -364,7 +364,7 @@ class SWBallisticWeapon extends Torpedo{
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 1;
+		$pulses -= 2;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
