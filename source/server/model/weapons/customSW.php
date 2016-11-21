@@ -988,7 +988,7 @@ class SWCapitalConcussion extends SWBallisticWeapon{
 
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
-		$nr = min(4, $noOfShots); //images are not unlimited
+		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsCapConcussion".$nr.".png";
 		
 		parent::__construct($armor, 6, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
