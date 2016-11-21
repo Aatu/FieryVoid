@@ -107,6 +107,8 @@ spl_autoload_register(
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
+                'swftrconcmissilelauncher' => '/server/model/weapons/customSW.php', //weapon
+                'swftconcmissile' => '/server/model/weapons/customSW.php', //ammo
                 
                 'swlightlaser' => '/server/model/weapons/customSW.php',
                 'swmediumlaser' => '/server/model/weapons/customSW.php',
