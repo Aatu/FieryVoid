@@ -96,6 +96,8 @@ spl_autoload_register(
                 'swion' => '/server/model/weapons/customSW.php',
                 'swdirectweapon' => '/server/model/weapons/customSW.php',
                 'swballisticweapon' => '/server/model/weapons/customSW.php',
+                'swftrballisticweapon' => '/server/model/weapons/customSW.php',
+                'swballisticmissile' => '/server/model/weapons/customSW.php',
                 
                 
                 'swrayshield' => '/server/model/weapons/customSW.php',
