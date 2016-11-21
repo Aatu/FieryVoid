@@ -556,6 +556,10 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
 	
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
+	//appropriate icon (number of barrels)...
+	$nr = min(4, $noOfShots); //images are not unlimited
+	$this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+	    
         parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
         $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $noOfShots, $this->fireControl);
         $this->missileArray = array( 1 => $Torp );
