@@ -211,17 +211,23 @@ window.weaponManager = {
 				continue;
 
 			if (weaponManager.hasFiringOrder(ship, system)){
-				if (weapon.exclusive && weapon.isBallistic){
+				if ( (weapon.exclusive || system.exclusive) && (weapon.isBallistic==system.isBallistic)){
+					if (alert)
+						confirm.error("You cannot fire  " +weapon.displayName + " and "system.displayName +" together!");
+					return true;
+				}
+				/* compressed into a single statement above
+				if ( weapon.exclusive && (weapon.isBallistic==system.isBallistic)){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +weapon.displayName + ".");
 					return true;
 				}
-
-				if (system.exclusive && weapon.isBallistic){
+				
+				if (system.exclusive && (weapon.isBallistic==system.isBallistic)){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
 					return true;
-				}
+				}*/
 			}
 		}
 
