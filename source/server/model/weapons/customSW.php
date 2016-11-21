@@ -582,7 +582,7 @@ class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorp
     public $distanceRange = 16;
     public $hitChanceMod = 0;
     public $priority = 2;
-	public $damageType = 'Standard'; 
+	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
 	
     function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
@@ -593,6 +593,58 @@ class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorp
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
 }//end of SWFtrProtonTorpedo
+
+
+
+class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher, which needs separate ammo
+{
+    public $name = "SWFtrConcMissileLauncher";
+    public $missileClass = "Torpedo";
+    public $displayName = "Fighter Proton Missile";
+    public $firingModes = array( 1 => "FtrMissile" );
+    public $loadingtime = 1;
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $priority = 4;
+    public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
+	
+    function __construct($maxAmount, $startArc, $endArc, $noOfShots){
+	//appropriate icon (number of barrels)...
+	$nr = min(4, $noOfShots); //images are not unlimited
+	$this->iconPath = "starwars/mjsLightConcussion".$nr.".png";
+	    
+        parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
+        $Torp = new SWFtrConcMissile($startArc, $endArc, $noOfShots, $this->fireControl);
+        $this->missileArray = array( 1 => $Torp );
+        $this->maxAmount = $maxAmount;
+    }
+	
+} //end of SWFtrConcMissileLauncher
+class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
+{
+    public $name = "SWFtrConcMissile";
+    public $missileClass = "FtrTorpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 2;
+    public $damage = 8;
+    public $amount = 0;
+    public $range = 6;
+    public $distanceRange = 18;
+    public $hitChanceMod = 0;
+    public $priority = 2;
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	
+    function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
+        parent::__construct($startArc, $endArc, $noOfShots, $fireControl);
+    }
+	
+    public function getDamage($fireOrder=null){        return $this->damage;   }
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
+}//end of SWFtrConcMissile
+
 
 
 
