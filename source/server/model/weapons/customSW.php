@@ -148,7 +148,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	}
 	
 	
-} //end of SWFtrBallisticLauncher
+} /*end of SWFtrBallisticLauncher*/
 
 
 
