@@ -539,7 +539,7 @@ class SWFighterIon extends SWIon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends SWFtrBallisticWeapon //this is launcher, which needs separate ammo
+class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launcher, which needs separate ammo
 {
 	//proton torpedo launcher for fighters
     public $name = "SWFtrProtonTorpedo";
