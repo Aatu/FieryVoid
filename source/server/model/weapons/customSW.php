@@ -79,6 +79,111 @@ class SWRayShield extends Shield implements DefensiveSystem{
 
 
 
+class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launcher, which needs separate ammo
+{
+	/*
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "Torpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $iconPath = "lightIonTorpedo.png";
+    public $firingModes = array( 1 => "FtrTorpedo" );
+    public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
+*/
+    public $loadingtime = 1;
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $priority = 4;
+    public $firingModes = array( 1 => "Spread");  
+	
+    
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+	
+	private $useDie = 3; //die used for base number of hits
+	
+    
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+		$this->data["Special"] .= '<br>Minimum of 1 missile.';
+		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+    }
+	
+    function __construct($maxAmount, $startArc, $endArc, $nrOfShots){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        $Torp = new SWFtrProtonTorpedo($startArc, $endArc,  $nrOfShots, $this->fireControl);
+        $this->missileArray = array( 1 => $Torp );
+        $this->maxAmount = $maxAmount;
+	    //Pulse mode data
+	$this->maxpulses = $nrOfShots;
+	$this->defaultShots = $nrOfShots;
+	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
+	$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+	$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+    }	
+	
+	
+	//needed as this is not based on Pulse class
+        protected function getPulses($turn)
+        {
+            return Dice::d($this->useDie);
+        }
+	
+	//needed as this is not based on Pulse class
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn); //$this->useDie usually
+		$pulses -= 1;
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
+		$pulses=max($pulses,1); //no less than 1
+		return $pulses;
+	}
+	
+	
+} //end of SWFtrBallisticLauncher
+
+
+
+class SWFtrMissile extends MissileFB //generic class; this is AMMO for SWFtrProtonTorpedoLauncher
+{
+	/*
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "FtrTorpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 8;
+    public $damage = 11;
+    public $amount = 0;
+    public $range = 8;
+    public $distanceRange = 16;
+    public $hitChanceMod = 0;
+    */
+    public $priority = 4;
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	
+	
+    function __construct($startArc, $endArc, $noOfLaunchers, $fireControl = null){
+	//number of linked launchers affects price!
+	$this->cost = $this->cost * $noOfLaunchers;
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+	
+    public function getDamage($fireOrder=null){        return $this->damage;   }
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
+}//end of SWFtrMissile
+
+
+
+
 class SWDirectWeapon extends Pulse{
     /*StarWars weapon - extension of Pulse mode!*/
     public $shots = 1;
@@ -434,7 +539,7 @@ class SWFighterIon extends SWIon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo; 2 shots per turn!
+class SWFtrProtonTorpedoLauncher extends SWFtrBallisticWeapon //this is launcher, which needs separate ammo
 {
 	//proton torpedo launcher for fighters
     public $name = "SWFtrProtonTorpedo";
@@ -450,20 +555,9 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $priority = 4;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
 	
-    
-	public $damageType = 'Standard'; 
-    	public $weaponClass = "Ballistic"; 
-	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
-	
-    
-    public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	$this->data["Special"] = 'Cannot penetrate to PRIMARY when hitting outer section.';
-    }
-	
-    function __construct($maxAmount, $startArc, $endArc){
-        parent::__construct($maxAmount, $startArc, $endArc);
-        $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $this->fireControl);
+    function __construct($maxAmount, $startArc, $endArc, $noOfShots){
+        parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
+        $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $noOfShots, $this->fireControl);
         $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
     }
@@ -473,7 +567,7 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
 
 
 
-class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedoLauncher
+class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
 {
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "FtrTorpedo";
@@ -488,8 +582,8 @@ class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedo
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Ballistic"; 
 	
-    function __construct($startArc, $endArc, $fireControl = null){
-        parent::__construct($startArc, $endArc, $fireControl);
+    function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
+        parent::__construct($startArc, $endArc, $noOfShots, $fireControl);
     }
 	
     public function getDamage($fireOrder=null){        return $this->damage;   }
