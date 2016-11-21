@@ -545,7 +545,6 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $iconPath = "lightIonTorpedo.png";
     public $firingModes = array( 1 => "FtrTorpedo" );
 
     public $loadingtime = 1;
@@ -558,7 +557,7 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     function __construct($maxAmount, $startArc, $endArc, $noOfShots){
 	//appropriate icon (number of barrels)...
 	$nr = min(4, $noOfShots); //images are not unlimited
-	$this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+	$this->iconPath = "starwars/mjsLightProton".$nr.".png";
 	    
         parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
         $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $noOfShots, $this->fireControl);
@@ -939,7 +938,8 @@ class SWCapitalConcussion extends SWBallisticWeapon{
 
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $noOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsCapConcussion".$nr.".png";
 		
 		parent::__construct($armor, 6, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 	}    
@@ -972,7 +972,8 @@ class SWCapitalProton extends SWBallisticWeapon{
 	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $noOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsCapProton".$nr.".png";
 		
 		parent::__construct($armor, 7, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 	}    
