@@ -479,7 +479,9 @@ class FighterMissileRack extends MissileLauncher
             $this->data["Damage"] = "".$this->missileArray[$this->firingMode]->minDamage;
         }
         
+        $distRange = max($this->missileArray[$this->firingMode]->range, $this->missileArray[$this->firingMode]->distanceRange);
         $this->data["Range"] = $this->missileArray[$this->firingMode]->range;
+        if( $distRange > $this->missileArray[$this->firingMode]->range) $this->data["Range"] .= $this->missileArray[$this->firingMode]->distanceRange;
     }
 
     /* no longer needed
