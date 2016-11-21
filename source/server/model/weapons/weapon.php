@@ -748,7 +748,7 @@ class Weapon extends ShipSystem{
 
         $change = round(($goal/20)*100);
 
-	    /*range penalty already logged?... rpenalty: $rangePenalty, */
+	    /*range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, */
         $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
