@@ -545,7 +545,6 @@ class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launch
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $firingModes = array( 1 => "FtrTorpedo" );
 
     public $loadingtime = 1;
     public $rangeMod = 0;
@@ -599,9 +598,8 @@ class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorp
 class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher, which needs separate ammo
 {
     public $name = "SWFtrConcMissileLauncher";
-    public $missileClass = "Torpedo";
-    public $displayName = "Fighter Proton Missile";
-    public $firingModes = array( 1 => "FtrMissile" );
+    public $missileClass = "FtrMissile";
+    public $displayName = "Fighter Concussion Missile";
     public $loadingtime = 1;
     public $rangeMod = 0;
     public $firingMode = 1;
@@ -624,8 +622,8 @@ class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher
 class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
 {
     public $name = "SWFtrConcMissile";
-    public $missileClass = "FtrTorpedo";
-    public $displayName = "Fighter Proton Torpedo";
+    public $missileClass = "FtrMissile";
+    public $displayName = "Fighter Concussion Missile";
     public $cost = 2;
     public $damage = 8;
     public $amount = 0;
