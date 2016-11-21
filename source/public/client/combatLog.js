@@ -50,8 +50,7 @@ window.combatLog = {
             shotsintercepted += fire.intercepted;
             weaponManager.getDamagesCausedBy(damages, fire);
             var needed = fire.needed;
-            if (needed < 0)
-				needed = 0;
+            //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
 				
             if (needed < lowC)
                 lowC = needed;
@@ -146,14 +145,14 @@ window.combatLog = {
                     
                 }
                 
-                if (totaldam > 0){
+                //if (totaldam > 0){ //display fire orders that did no damage, too!
           //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';   
             
                     html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
                     if (damagehtml.length > 1){
                         html += '<li>' + damagehtml + '</li>';
                     }
-                }
+                //}
                 
             }
             
