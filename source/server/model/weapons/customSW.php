@@ -525,7 +525,7 @@ class SWFighterIon extends SWIon{
 		
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
-		$this->iconPath = "starwars/swIonFtr".$nr.".png";
+		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -892,7 +892,7 @@ class SWLightIon extends SWIon{
 
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
-		$this->iconPath = "starwars/swIonLight".$nr.".png";
+		$this->iconPath = "starwars/mjsIonLight".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -927,7 +927,7 @@ class SWMediumIon extends SWIon{
 
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
-		$this->iconPath = "starwars/swIonMedium".$nr.".png";
+		$this->iconPath = "starwars/mjsIonMedium".$nr.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -965,7 +965,7 @@ class SWHeavyIon extends SWIon{
 
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
-		$this->iconPath = "starwars/swIonHvy".$nr.".png";
+		$this->iconPath = "starwars/mjsIonHvy".$nr.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
