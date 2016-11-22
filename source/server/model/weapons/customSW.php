@@ -658,7 +658,6 @@ class SWLightLaser extends SWDirectWeapon{
     */
     public $name = "SWLightLaser";
     public $displayName = "Light Laser";
-    public $iconPath = "starwars/swFighter4.png";
 	
     public $priority = 3;
     public $loadingtime = 1;
@@ -670,7 +669,8 @@ class SWLightLaser extends SWDirectWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
 		
 		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -689,7 +689,6 @@ class SWMediumLaser extends SWDirectWeapon{
     */
     public $name = "SWMediumLaser";
     public $displayName = "Medium Laser";
-    public $iconPath = "starwars/laserSmall4.png";
 	
     public $priority = 3;
     public $loadingtime = 1;
@@ -705,7 +704,8 @@ class SWMediumLaser extends SWDirectWeapon{
 		$this->intercept = floor($nrOfShots*0.9); //this gives distinctly worse interception than light laser
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserMedium".$nr.".png";
 		
 		parent::__construct($armor, 3, 0.7, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -724,7 +724,6 @@ class SWHeavyLaser extends SWDirectWeapon{
     */
     public $name = "SWHeavyLaser";
     public $displayName = "Heavy Laser";
-    public $iconPath = "starwars/laserSmall4.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
@@ -741,7 +740,8 @@ class SWHeavyLaser extends SWDirectWeapon{
 		$this->intercept = floor($nrOfShots*0.5); //this gives very poor interception, but still interception is possible
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserHvy".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -760,7 +760,6 @@ class SWLightTLaser extends SWDirectWeapon{
     */
     public $name = "SWLightTLaser";
     public $displayName = "Light Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
@@ -778,7 +777,8 @@ class SWLightTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserLight".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -797,7 +797,6 @@ class SWMediumTLaser extends SWDirectWeapon{
     */
     public $name = "SWMediumTLaser";
     public $displayName = "Medium Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
@@ -815,7 +814,8 @@ class SWMediumTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserMedium".$nr.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -835,7 +835,6 @@ class SWHeavyTLaser extends SWDirectWeapon{
     */
     public $name = "SWHeavyTLaser";
     public $displayName = "Heavy Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 5;
     public $loadingtime = 3;
@@ -854,7 +853,8 @@ class SWHeavyTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserHvy".$nr.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
