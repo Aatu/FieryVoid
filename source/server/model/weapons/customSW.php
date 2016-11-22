@@ -475,7 +475,6 @@ class SWFighterLaser extends SWDirectWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
-    public $iconPath = "starwars/swFighter4.png";
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -491,7 +490,8 @@ class SWFighterLaser extends SWDirectWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -508,11 +508,8 @@ class SWFighterLaser extends SWDirectWeapon{
 class SWFighterIon extends SWIon{
     /*StarWars fighter Ion weapon*/
     public $name = "SWFighterIon";
-    public $displayName = "Fighter Ion Cannon";
-	public $iconPath = "starwars/swFighterIon1.png";	  
+    public $displayName = "Fighter Ion Cannon";	  
 	  
-
-	
 
     public $loadingtime = 1;
     public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
@@ -525,6 +522,10 @@ class SWFighterIon extends SWIon{
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
 		$this->intercept = 0;
+		
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swIonFtr".$nr.".png";
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -875,7 +876,6 @@ class SWLightIon extends SWIon{
     */
     public $name = "SWLightIon";
     public $displayName = "Light Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 10;
     public $loadingtime = 2;
@@ -891,7 +891,8 @@ class SWLightIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swIonLight".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -910,7 +911,6 @@ class SWMediumIon extends SWIon{
     */
     public $name = "SWMediumIon";
     public $displayName = "Medium Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 10;
     public $loadingtime = 3;
@@ -926,7 +926,8 @@ class SWMediumIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swIonMedium".$nr.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -946,7 +947,6 @@ class SWHeavyIon extends SWIon{
     */
     public $name = "SWHeavyIon";
     public $displayName = "Heavy Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 5;
     public $loadingtime = 4;
@@ -964,7 +964,8 @@ class SWHeavyIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swIonHvy".$nr.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
