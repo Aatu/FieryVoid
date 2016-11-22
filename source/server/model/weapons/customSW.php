@@ -201,7 +201,7 @@ class SWDirectWeapon extends Pulse{
 	public $animation = "beam";
         public $animationColor = array(225, 0, 0); //I aim ar bright red here... Blue for Ion, green for Blasters
 	public $trailColor = array(225, 0, 0);
-        public $animationExplosionScale = 0.15;
+        public $animationExplosionScale = 0.1;
         public $projectilespeed = 11;
 	public $animationWidth = 3;
 	public $trailLength = 8;
@@ -695,7 +695,7 @@ class SWMediumLaser extends SWDirectWeapon{
     public $rangePenalty = 1.5; // 3 per 2 hexes
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.2;
+        public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
 	public $animationWidth = 3;
 	public $trailLength = 10;
@@ -730,7 +730,7 @@ class SWHeavyLaser extends SWDirectWeapon{
     public $rangePenalty = 1; 
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
 	
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 13;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -768,7 +768,7 @@ class SWLightTLaser extends SWDirectWeapon{
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
 	public $trailColor = array(245, 0, 0);
    
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 15;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -805,7 +805,7 @@ class SWMediumTLaser extends SWDirectWeapon{
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
 	public $trailColor = array(245, 0, 0);
    
-        public $animationExplosionScale = 0.3;
+        public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
 	public $animationWidth = 5;
 	public $trailLength = 14;
@@ -843,7 +843,7 @@ class SWHeavyTLaser extends SWDirectWeapon{
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
 	public $trailColor = array(245, 0, 0);
 	
-        public $animationExplosionScale = 0.35;
+        public $animationExplosionScale = 0.3;
         public $projectilespeed = 16;
 	public $animationWidth = 6;
 	public $trailLength = 18;
@@ -882,7 +882,7 @@ class SWLightIon extends SWIon{
     public $rangePenalty = 0.75; //-3/4 hexes
     public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -917,7 +917,7 @@ class SWMediumIon extends SWIon{
     public $rangePenalty = 0.33; //-1/3 hexes
     public $fireControl = array(-6, 0, 2); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.3;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 13;
 	public $animationWidth = 5;
 	public $trailLength = 14;
