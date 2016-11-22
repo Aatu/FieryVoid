@@ -25,10 +25,10 @@ class swCorellianCorvette extends MediumShip{
         $this->pivotcost = 4;
 	$this->iniativebonus = 9 *5; //as semi-civilian ship, initiative isn't what it would be for a true warship
         
-        $this->addPrimarySystem(new Reactor(3, 10, 0, 5));
+        $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 3));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
-	$this->addPrimarySystem(new Hangar(1, 4));
+	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 	$this->addPrimarySystem(new CargoBay(1, 30));
@@ -47,7 +47,7 @@ class swCorellianCorvette extends MediumShip{
 	$this->addFrontSystem(new SWRayShield(2,6,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 		
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 11, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
        

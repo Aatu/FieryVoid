@@ -79,6 +79,111 @@ class SWRayShield extends Shield implements DefensiveSystem{
 
 
 
+class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launcher, which needs separate ammo
+{
+	/*
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "Torpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $iconPath = "lightIonTorpedo.png";
+    public $firingModes = array( 1 => "FtrTorpedo" );
+    public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
+*/
+    public $loadingtime = 1;
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $priority = 4;
+    public $firingModes = array( 1 => "Spread");  
+	
+    
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
+	
+	private $useDie = 3; //die used for base number of hits
+	
+    
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+		$this->data["Special"] .= '<br>Minimum of 1 missile.';
+		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
+    }
+	
+    function __construct($maxAmount, $startArc, $endArc, $nrOfShots){
+        parent::__construct($maxAmount, $startArc, $endArc);
+        $Torp = new SWFtrProtonTorpedo($startArc, $endArc,  $nrOfShots, $this->fireControl);
+        $this->missileArray = array( 1 => $Torp );
+        $this->maxAmount = $maxAmount;
+	    //Pulse mode data
+	$this->maxpulses = $nrOfShots;
+	$this->defaultShots = $nrOfShots;
+	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
+	$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+	$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+    }	
+	
+	
+	//needed as this is not based on Pulse class
+        protected function getPulses($turn)
+        {
+            return Dice::d($this->useDie);
+        }
+	
+	//needed as this is not based on Pulse class
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn); //$this->useDie usually
+		$pulses -= 2;
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
+		$pulses=max($pulses,1); //no less than 1
+		return $pulses;
+	}
+	
+	
+} /*end of SWFtrBallisticLauncher*/
+
+
+
+class SWFtrMissile extends MissileFB //generic class; this is AMMO for SWFtrProtonTorpedoLauncher
+{
+	/*
+    public $name = "SWFtrProtonTorpedo";
+    public $missileClass = "FtrTorpedo";
+    public $displayName = "Fighter Proton Torpedo";
+    public $cost = 8;
+    public $damage = 11;
+    public $amount = 0;
+    public $range = 8;
+    public $distanceRange = 16;
+    public $hitChanceMod = 0;
+    */
+    public $priority = 4;
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	
+	
+    function __construct($startArc, $endArc, $noOfLaunchers, $fireControl = null){
+	//number of linked launchers affects price!
+	$this->cost = $this->cost * $noOfLaunchers;
+        parent::__construct($startArc, $endArc, $fireControl);
+    }
+	
+    public function getDamage($fireOrder=null){        return $this->damage;   }
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
+}//end of SWFtrMissile
+
+
+
+
 class SWDirectWeapon extends Pulse{
     /*StarWars weapon - extension of Pulse mode!*/
     public $shots = 1;
@@ -94,8 +199,9 @@ class SWDirectWeapon extends Pulse{
    
 	//animation for fighter laser - bigger guns need to change size and speed attributes :)
 	public $animation = "beam";
-        public $animationColor = array(225, 100, 110);
-        public $animationExplosionScale = 0.15;
+        public $animationColor = array(225, 0, 0); //I aim ar bright red here... Blue for Ion, green for Blasters
+	public $trailColor = array(225, 0, 0);
+        public $animationExplosionScale = 0.1;
         public $projectilespeed = 11;
 	public $animationWidth = 3;
 	public $trailLength = 8;
@@ -124,14 +230,14 @@ class SWDirectWeapon extends Pulse{
 	
         public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		 $this->data["Special"] = 'Burst mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+		 $this->data["Special"] = 'Burst mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
 		$this->data["Special"] .= '<br>Minimum of 1 pulse.';
         }
 	
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 1;
+		$pulses -= 2;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -237,7 +343,7 @@ class SWBallisticWeapon extends Torpedo{
 	
 	
         public function setSystemDataWindow($turn){
-	    $this->data["Special"] = 'Spread mode: 0..2 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
+	    $this->data["Special"] = 'Spread mode: -1..1 +1/'. $this->grouping."%, max. ".$this->maxpulses." missiles";
 		$this->data["Special"] .= '<br>Minimum of 1 missile.';
 		$this->data["Special"] .= '<br>Cannot penetrate to PRIMARY when hitting outer section.';
             parent::setSystemDataWindow($turn);
@@ -259,7 +365,7 @@ class SWBallisticWeapon extends Torpedo{
     
 	public function rollPulses($turn, $needed, $rolled){
 		$pulses = $this->getPulses($turn); //$this->useDie usually
-		$pulses -= 1;
+		$pulses -= 2;
 		$pulses+= $this->getExtraPulses($needed, $rolled);
 		$pulses=min($pulses,$this->maxpulses); //no more than maxpulses
 		$pulses=max($pulses,1); //no less than 1
@@ -369,7 +475,6 @@ class SWFighterLaser extends SWDirectWeapon{
     /*StarWars fighter weapon - a Particle weapon!*/
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
-    public $iconPath = "starwars/swFighter4.png";
 	
     public $priority = 4;
     public $loadingtime = 1;
@@ -385,7 +490,8 @@ class SWFighterLaser extends SWDirectWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -402,11 +508,8 @@ class SWFighterLaser extends SWDirectWeapon{
 class SWFighterIon extends SWIon{
     /*StarWars fighter Ion weapon*/
     public $name = "SWFighterIon";
-    public $displayName = "Fighter Ion Cannon";
-	public $iconPath = "starwars/swFighterIon1.png";	  
+    public $displayName = "Fighter Ion Cannon";	  
 	  
-
-	
 
     public $loadingtime = 1;
     public $rangePenalty = 1.5; //poor FC, but good range compared to Lasers! Perhaps lower rate of fire, too - but that would not be noticeable on fighter weapons (maybe in damage)
@@ -419,6 +522,10 @@ class SWFighterIon extends SWIon{
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
 		$this->damagebonus = $damagebonus;
 		$this->intercept = 0;
+		
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -434,14 +541,12 @@ class SWFighterIon extends SWIon{
 
 
 
-class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, which needs separate ammo; 2 shots per turn!
+class SWFtrProtonTorpedoLauncher extends SWFtrBallisticLauncher //this is launcher, which needs separate ammo
 {
 	//proton torpedo launcher for fighters
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "Torpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $iconPath = "lightIonTorpedo.png";
-    public $firingModes = array( 1 => "FtrTorpedo" );
 
     public $loadingtime = 1;
     public $rangeMod = 0;
@@ -450,20 +555,13 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
     public $priority = 4;
     public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
 	
-    
-	public $damageType = 'Standard'; 
-    	public $weaponClass = "Ballistic"; 
-	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
-	
-    
-    public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);
-	$this->data["Special"] = 'Cannot penetrate to PRIMARY when hitting outer section.';
-    }
-	
-    function __construct($maxAmount, $startArc, $endArc){
-        parent::__construct($maxAmount, $startArc, $endArc);
-        $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $this->fireControl);
+    function __construct($maxAmount, $startArc, $endArc, $noOfShots){
+	//appropriate icon (number of barrels)...
+	$nr = min(4, $noOfShots); //images are not unlimited
+	$this->iconPath = "starwars/mjsLightProton".$nr.".png";
+	    
+        parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
+        $Torp = new SWFtrProtonTorpedo($startArc, $endArc, $noOfShots, $this->fireControl);
         $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
     }
@@ -473,29 +571,80 @@ class SWFtrProtonTorpedoLauncher extends FighterMissileRack //this is launcher, 
 
 
 
-class SWFtrProtonTorpedo extends MissileFB //this is AMMO for SWFtrProtonTorpedoLauncher
+class SWFtrProtonTorpedo extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
 {
     public $name = "SWFtrProtonTorpedo";
     public $missileClass = "FtrTorpedo";
     public $displayName = "Fighter Proton Torpedo";
-    public $cost = 10;
-    public $damage = 12;
+    public $cost = 8;
+    public $damage = 11;
     public $amount = 0;
     public $range = 8;
     public $distanceRange = 16;
     public $hitChanceMod = 0;
     public $priority = 2;
-	public $damageType = 'Standard'; 
+	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
 	
-    function __construct($startArc, $endArc, $fireControl = null){
-        parent::__construct($startArc, $endArc, $fireControl);
+    function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
+        parent::__construct($startArc, $endArc, $noOfShots, $fireControl);
     }
 	
     public function getDamage($fireOrder=null){        return $this->damage;   }
     public function setMinDamage(){     $this->minDamage = $this->damage;      }
     public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
 }//end of SWFtrProtonTorpedo
+
+
+
+class SWFtrConcMissileLauncher extends SWFtrBallisticLauncher //this is launcher, which needs separate ammo
+{
+    public $name = "SWFtrConcMissileLauncher";
+    public $missileClass = "FtrMissile";
+    public $displayName = "Fighter Concussion Missile";
+    public $loadingtime = 1;
+    public $rangeMod = 0;
+    public $firingMode = 1;
+    public $maxAmount = 0;
+    public $priority = 4;
+    public $fireControl = array(2, 1, 0); // fighters, <mediums, <capitals 
+	
+    function __construct($maxAmount, $startArc, $endArc, $noOfShots){
+	//appropriate icon (number of barrels)...
+	$nr = min(4, $noOfShots); //images are not unlimited
+	$this->iconPath = "starwars/mjsLightConcussion".$nr.".png";
+	    
+        parent::__construct($maxAmount, $startArc, $endArc, $noOfShots);
+        $Torp = new SWFtrConcMissile($startArc, $endArc, $noOfShots, $this->fireControl);
+        $this->missileArray = array( 1 => $Torp );
+        $this->maxAmount = $maxAmount;
+    }
+	
+} //end of SWFtrConcMissileLauncher
+class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorpedoLauncher
+{
+    public $name = "SWFtrConcMissile";
+    public $missileClass = "FtrMissile";
+    public $displayName = "Fighter Concussion Missile";
+    public $cost = 2;
+    public $damage = 8;
+    public $amount = 0;
+    public $range = 6;
+    public $distanceRange = 18;
+    public $hitChanceMod = 0;
+    public $priority = 2;
+	public $damageType = 'Pulse'; 
+    	public $weaponClass = "Ballistic"; 
+	
+    function __construct($startArc, $endArc, $noOfShots, $fireControl = null){
+        parent::__construct($startArc, $endArc, $noOfShots, $fireControl);
+    }
+	
+    public function getDamage($fireOrder=null){        return $this->damage;   }
+    public function setMinDamage(){     $this->minDamage = $this->damage;      }
+    public function setMaxDamage(){     $this->maxDamage = $this->damage;      }              
+}//end of SWFtrConcMissile
+
 
 
 
@@ -510,7 +659,6 @@ class SWLightLaser extends SWDirectWeapon{
     */
     public $name = "SWLightLaser";
     public $displayName = "Light Laser";
-    public $iconPath = "starwars/swFighter4.png";
 	
     public $priority = 3;
     public $loadingtime = 1;
@@ -522,7 +670,8 @@ class SWLightLaser extends SWDirectWeapon{
 		$this->intercept = $nrOfShots;
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/swFighter".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
 		
 		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -541,14 +690,13 @@ class SWMediumLaser extends SWDirectWeapon{
     */
     public $name = "SWMediumLaser";
     public $displayName = "Medium Laser";
-    public $iconPath = "starwars/laserSmall4.png";
 	
     public $priority = 3;
     public $loadingtime = 1;
     public $rangePenalty = 1.5; // 3 per 2 hexes
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.2;
+        public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
 	public $animationWidth = 3;
 	public $trailLength = 10;
@@ -557,7 +705,8 @@ class SWMediumLaser extends SWDirectWeapon{
 		$this->intercept = floor($nrOfShots*0.9); //this gives distinctly worse interception than light laser
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserMedium".$nr.".png";
 		
 		parent::__construct($armor, 3, 0.7, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -576,14 +725,13 @@ class SWHeavyLaser extends SWDirectWeapon{
     */
     public $name = "SWHeavyLaser";
     public $displayName = "Heavy Laser";
-    public $iconPath = "starwars/laserSmall4.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
     public $rangePenalty = 1; 
     public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals
 	
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 13;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -593,7 +741,8 @@ class SWHeavyLaser extends SWDirectWeapon{
 		$this->intercept = floor($nrOfShots*0.5); //this gives very poor interception, but still interception is possible
 
 		//appropriate icon (number of barrels)...
-		if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserHvy".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -612,14 +761,15 @@ class SWLightTLaser extends SWDirectWeapon{
     */
     public $name = "SWLightTLaser";
     public $displayName = "Light Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
     public $rangePenalty = 1;
     public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
    
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 15;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -628,7 +778,8 @@ class SWLightTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserLight".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -647,14 +798,15 @@ class SWMediumTLaser extends SWDirectWeapon{
     */
     public $name = "SWMediumTLaser";
     public $displayName = "Medium Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 4;
     public $loadingtime = 2;
     public $rangePenalty = 0.5;
     public $fireControl = array(-3, 1, 3); // fighters, <mediums, <capitals
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
    
-        public $animationExplosionScale = 0.3;
+        public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
 	public $animationWidth = 5;
 	public $trailLength = 14;
@@ -663,7 +815,8 @@ class SWMediumTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserMedium".$nr.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -683,15 +836,15 @@ class SWHeavyTLaser extends SWDirectWeapon{
     */
     public $name = "SWHeavyTLaser";
     public $displayName = "Heavy Turbolaser";
-    public $iconPath = "starwars/hvyTurbo.png";
 	
     public $priority = 5;
     public $loadingtime = 3;
     public $rangePenalty = 0.33;
     public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
 	
-	
-        public $animationExplosionScale = 0.35;
+        public $animationExplosionScale = 0.3;
         public $projectilespeed = 16;
 	public $animationWidth = 6;
 	public $trailLength = 18;
@@ -701,7 +854,8 @@ class SWHeavyTLaser extends SWDirectWeapon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserHvy".$nr.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -722,14 +876,13 @@ class SWLightIon extends SWIon{
     */
     public $name = "SWLightIon";
     public $displayName = "Light Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 10;
     public $loadingtime = 2;
     public $rangePenalty = 0.75; //-3/4 hexes
     public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.25;
+        public $animationExplosionScale = 0.15;
         public $projectilespeed = 12;
 	public $animationWidth = 4;
 	public $trailLength = 12;
@@ -738,7 +891,8 @@ class SWLightIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonLight".$nr.".png";
 		
 		parent::__construct($armor, 4, 1.1, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -757,14 +911,13 @@ class SWMediumIon extends SWIon{
     */
     public $name = "SWMediumIon";
     public $displayName = "Medium Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 10;
     public $loadingtime = 3;
     public $rangePenalty = 0.33; //-1/3 hexes
     public $fireControl = array(-6, 0, 2); // fighters, <mediums, <capitals
    
-        public $animationExplosionScale = 0.3;
+        public $animationExplosionScale = 0.2;
         public $projectilespeed = 13;
 	public $animationWidth = 5;
 	public $trailLength = 14;
@@ -773,7 +926,8 @@ class SWMediumIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonMedium".$nr.".png";
 		
 		parent::__construct($armor, 5, 2, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -793,7 +947,6 @@ class SWHeavyIon extends SWIon{
     */
     public $name = "SWHeavyIon";
     public $displayName = "Heavy Ion Cannon";
-    public $iconPath = "starwars/hvyIon.png";
 	
     public $priority = 5;
     public $loadingtime = 4;
@@ -811,7 +964,8 @@ class SWHeavyIon extends SWIon{
 		$this->intercept = 0;
 
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsIonHvy".$nr.".png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
@@ -838,7 +992,8 @@ class SWCapitalConcussion extends SWBallisticWeapon{
 
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsCapConcussion".$nr.".png";
 		
 		parent::__construct($armor, 6, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 	}    
@@ -871,7 +1026,8 @@ class SWCapitalProton extends SWBallisticWeapon{
 	
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		//appropriate icon (number of barrels)...
-		//if($nrOfShots<5) $this->iconPath = "starwars/laserSmall".$nrOfShots.".png";
+		$nr = min(4, $noOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsCapProton".$nr.".png";
 		
 		parent::__construct($armor, 7, 0.4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 	}    

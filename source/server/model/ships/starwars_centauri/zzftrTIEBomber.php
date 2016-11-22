@@ -41,11 +41,12 @@ class zzftrTIEBomber extends FighterFlight{
             $fighter->addFrontSystem($frontGun);
             
             //2 forward Proton Torpedo Launchers, 4 shots each
+            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30, 2); //single dual launcher! like for direct fire
+            $fighter->addFrontSystem($torpedoLauncher);
+            /*
             $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
             $fighter->addFrontSystem($torpedoLauncher);
-            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(4, 330, 30);
-            $fighter->addFrontSystem($torpedoLauncher);
-            
+            */
             $this->addSystem($fighter);
        }
     }

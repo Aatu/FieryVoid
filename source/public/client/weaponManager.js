@@ -207,21 +207,27 @@ window.weaponManager = {
 
 		for (var i in p.systems){
 			var system = p.systems[i];
-			if (system.id == weapon.id)
-				continue;
+			if (system.id == weapon.id) continue; //can't conflict itself
 
 			if (weaponManager.hasFiringOrder(ship, system)){
-				if (weapon.exclusive && weapon.isBallistic){
+				/*I make it so guns prevent guns from firing, but not missiles - and vice versa*/
+				if ( (weapon.exclusive || system.exclusive) && (weapon.ballistic==system.ballistic) ){
+					if (alert)
+						confirm.error("You cannot fire <b>" + weapon.displayName + "</b> and <b>" + system.displayName +"</b> together!");
+					return true;
+				}
+				/* compressed into a single statement above
+				if ( weapon.exclusive && (weapon.ballistic==system.ballistic)){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +weapon.displayName + ".");
 					return true;
 				}
-
-				if (system.exclusive && weapon.isBallistic){
+				
+				if (system.exclusive && (weapon.ballistic==system.ballistic)){
 					if (alert)
 						confirm.error("You cannot fire another weapon at the same time as " +system.displayName + ".");
 					return true;
-				}
+				}*/
 			}
 		}
 

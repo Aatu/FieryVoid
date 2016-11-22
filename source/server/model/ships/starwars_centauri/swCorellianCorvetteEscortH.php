@@ -28,10 +28,10 @@ class swCorellianCorvetteEscortH extends MediumShip{
         $this->pivotcost = 4;
 	$this->iniativebonus = 12 *5; 
         
-        $this->addPrimarySystem(new Reactor(3, 10, 0, 5));
+        $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
-	$this->addPrimarySystem(new Hangar(1, 4));
+	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 	$this->addPrimarySystem(new CargoBay(1, 10));
@@ -55,7 +55,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 11, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,6,3,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWLightTLaser(1, 180, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!

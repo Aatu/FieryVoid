@@ -46,6 +46,7 @@ class Weapon extends ShipSystem{
 	private $rp = 0; //range penalty - number of crits ! effect is reflected on $range anyway, no need to hold an array
     public $range = 0;
 	public $rangeArray = array();
+    protected $distanceRange = 0;
     public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
 	public $fireControlArray = array();
 
@@ -304,6 +305,7 @@ class Weapon extends ShipSystem{
             $this->data["Range penalty"] = number_format(($this->rangePenalty * 5), 2) . " per hex";
         }else{
             $this->data["Range"] = $this->range;
+		if ($this->distanceRange > $this->range) $this->data["Range"] .= '/' . $this->distanceRange;
         }
 
         //public $fireControl =  array(0, 0, 0); // fighters, <mediums, <capitals
@@ -746,7 +748,8 @@ class Weapon extends ShipSystem{
 
         $change = round(($goal/20)*100);
 
-        $notes = $rp["notes"] . ", defence: $defence, rpenalty: $rangePenalty, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+	    /*range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, */
+        $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
