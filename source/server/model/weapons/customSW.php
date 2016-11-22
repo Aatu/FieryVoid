@@ -200,6 +200,7 @@ class SWDirectWeapon extends Pulse{
 	//animation for fighter laser - bigger guns need to change size and speed attributes :)
 	public $animation = "beam";
         public $animationColor = array(225, 0, 0); //I aim ar bright red here... Blue for Ion, green for Blasters
+	public $trailColor = array(225, 0, 0);
         public $animationExplosionScale = 0.15;
         public $projectilespeed = 11;
 	public $animationWidth = 3;
@@ -766,6 +767,7 @@ class SWLightTLaser extends SWDirectWeapon{
     public $rangePenalty = 1;
     public $fireControl = array(-1, 2, 3); // fighters, <mediums, <capitals
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
    
         public $animationExplosionScale = 0.25;
         public $projectilespeed = 15;
@@ -802,6 +804,7 @@ class SWMediumTLaser extends SWDirectWeapon{
     public $rangePenalty = 0.5;
     public $fireControl = array(-3, 1, 3); // fighters, <mediums, <capitals
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
    
         public $animationExplosionScale = 0.3;
         public $projectilespeed = 15;
@@ -839,7 +842,7 @@ class SWHeavyTLaser extends SWDirectWeapon{
     public $rangePenalty = 0.33;
     public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
 	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
-	
+	public $trailColor = array(245, 0, 0);
 	
         public $animationExplosionScale = 0.35;
         public $projectilespeed = 16;
