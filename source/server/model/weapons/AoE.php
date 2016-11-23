@@ -22,7 +22,7 @@
 		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!	
 		
 		//sometimes player does manage to target ship after all..
-		if($fireOrder->targetid !=null){
+		if($fireOrder->targetid != -1){ 
 			$targetship = $gamedata->getShipById($fireOrder->targetid); 
 			//insert correct target coordinates: last turns' target position
 			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
