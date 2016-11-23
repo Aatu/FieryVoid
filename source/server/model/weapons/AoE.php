@@ -36,6 +36,7 @@
 		
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled;
+$rolled = 80;//TEST! always hit AND deviate!
             	if ($rolled > $fireOrder->needed){ //miss!
 			$fireOrder->pubnotes .= "Charge dissipates. ";  
 		}else{//hit!
@@ -48,8 +49,10 @@
 				for ($i=0;$i<$dis;$i++){
 					$target = mathlib::getHexToDirection($direction, $target["x"], $target["y"]);
 				}
+				$fireOrder->pubnotes .= " deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
 				$fireOrder->x = $target["x"];
 				$fireOrder->y = $target["y"];
+				$fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y;
 				$fireOrder->pubnotes .= "Shot deviates $dis hexes. ";   
 			}
 			
