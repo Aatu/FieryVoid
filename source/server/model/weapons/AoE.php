@@ -28,7 +28,7 @@
 			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
         		$fireOrder->x = $movement->x; 
 			$fireOrder->y = $movement->y;
-			$fireorder->targetid = -1; //correct the error
+			$fireOrder->targetid = -1; //correct the error
 		}
 		
             	$target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
