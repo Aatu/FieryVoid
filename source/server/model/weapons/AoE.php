@@ -23,7 +23,7 @@
 		
 		//sometimes player does manage to target ship after all..
 		if($fireOrder->targetid !=null){
-			$targetship = $gamedata->getShipById($fireOrder->shooterid); 
+			$targetship = $gamedata->getShipById($fireOrder->targetid); 
 			//insert correct target coordinates: last turns' target position
 			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
         		$fireOrder->x = $movement->x; $fireorder->y = $movement->y;
