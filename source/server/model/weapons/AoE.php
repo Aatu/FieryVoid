@@ -37,7 +37,6 @@
 		
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled;
-$rolled = 80;//TEST! always hit AND deviate!
             	if ($rolled > $fireOrder->needed){ //miss!
 			$fireOrder->pubnotes .= "Charge dissipates. ";  
 		}else{//hit!
