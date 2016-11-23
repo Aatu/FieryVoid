@@ -37,7 +37,7 @@
 				$dis = min($dis,floor($maxdis));
 				$direction = Dice::d(6); //deviation direction
 				for ($i=0;$i<$dis;$i++){
-					$target = mathlib::getHexToDirection($rolled, $target["x"], $target["y"]);
+					$target = mathlib::getHexToDirection($direction, $target["x"], $target["y"]);
 				}
 				$fireOrder->x = $target["x"];
 				$fireOrder->y = $target["y"];
