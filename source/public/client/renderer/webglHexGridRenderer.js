@@ -15,15 +15,16 @@ window.webglHexGridRenderer = (function(){
         this.mesh = null;
         this.minZoom = 0;
         this.maxZoom = 0;
+        this.hexSize = 128;
     }
 
 
-    webglHexGridRenderer.prototype.renderHexGrid = function (scene, minZoom, maxZoom) {
+    webglHexGridRenderer.prototype.renderHexGrid = function (scene, minZoom, maxZoom, hexLength) {
         this.minZoom = minZoom;
         this.maxZoom = maxZoom;
+        HEX_LENGTH = hexLength;
 
         var width = getGeometryWidth();
-        console.log("WIDTH", width);
         var height = getGeometryHeight();
 
         var texture = getTexture(renderHex(graphics), HEX_COUNT_WIDTH, HEX_COUNT_HEIGHT);
@@ -55,18 +56,10 @@ window.webglHexGridRenderer = (function(){
     webglHexGridRenderer.prototype.onZoom = function (zoom) {
 
         if (zoom > 1) {
-            var opacity = (HEX_MAX_OPACITY - HEX_OPACITY) * ((zoom-1) / (this.maxZoom-1)) + HEX_OPACITY;
-            console.log(zoom, opacity);
-            this.material.opacity = opacity;
-            return;
+            this.material.opacity = (HEX_MAX_OPACITY - HEX_OPACITY) * ((zoom-1) / (this.maxZoom-1)) + HEX_OPACITY;
+        } else {
+            this.material.opacity = zoom * HEX_OPACITY;
         }
-
-        var opacity = zoom * HEX_OPACITY;
-
-        if (opacity > HEX_MAX_OPACITY)
-            opacity = HEX_MAX_OPACITY;
-
-        this.material.opacity = opacity;
     };
 
     function buildHexagonGeomatry(x, y, l) {

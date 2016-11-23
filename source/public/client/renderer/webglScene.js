@@ -2,6 +2,7 @@ window.webglScene = (function(){
 
     var ZOOM_MAX = 8;
     var ZOOM_MIN = 0.2;
+    var HEX_LENGTH = 128;
 
     function webglScene() {
         this.scene = null;
@@ -11,11 +12,15 @@ window.webglScene = (function(){
         this.element = null;
 
         this.initialized = false;
+
         this.zoom = 1;
         this.zoomTarget = this.zoom;
+
         this.draggingStartPosition = null;
         this.lastDraggingPosition = null;
         this.dragging = false;
+        this.draggingDistanceTreshold = 20;
+        this.distanceDragged = 0;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer) {
@@ -57,7 +62,7 @@ window.webglScene = (function(){
 
         this.initialized = true;
 
-        this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
+        this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX, HEX_LENGTH);
         this.render();
     };
 
@@ -105,8 +110,6 @@ window.webglScene = (function(){
 
     webglScene.prototype.initEventListeners = function()
     {
-        //this.zooming.init(element);
-
         bindMouseWheelEvent.call(this, this.element);
         animateZoom.call(this);
 
@@ -134,8 +137,8 @@ window.webglScene = (function(){
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
 
-        this.draggingStartPosition = getViewPortAndGameObject(pos, gamePos);
-        this.lastDraggingPosition = getViewPortAndGameObject(pos, gamePos);
+        this.draggingStartPosition = getPositionObject(pos, gamePos);
+        this.lastDraggingPosition = getPositionObject(pos, gamePos);
 
         var self = this;
         var payload = {
@@ -155,6 +158,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseUp = function(event)
     {
+        console.log(this.distanceDragged);
         if (this.distanceDragged < this.draggingDistanceTreshold)
             this.click(event);
 
@@ -197,7 +201,7 @@ window.webglScene = (function(){
 
         this.fireEvent(
             'MouseMoveEvent',
-            getViewPortAndGameObject(pos, gamePos)
+            getPositionObject(pos, gamePos)
         );
 
     };
@@ -206,7 +210,7 @@ window.webglScene = (function(){
     {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
-        var current = getViewPortAndGameObject(pos, gamePos);
+        var current = getPositionObject(pos, gamePos);
 
         var deltaView = {
             x: pos.x - this.lastDraggingPosition.view.x,
@@ -222,7 +226,7 @@ window.webglScene = (function(){
             start: this.draggingStartPosition,
             previous: this.lastDraggingPosition,
             current: current,
-            delta: getViewPortAndGameObject(deltaView, deltaGame)
+            delta: getPositionObject(deltaView, deltaGame)
         };
 
         this.distanceDragged += mathlib.distance({x:0, y:0}, deltaView);
@@ -234,8 +238,8 @@ window.webglScene = (function(){
     {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.fromViewPortToGame(pos);
-
-        var payload = this.getViewPortAndGameObject(pos, gamePos);
+        var hexPos = this.fromGameToHex(gamePos);
+        var payload = getPositionObject.call(this, pos, gamePos, hexPos);
 
         this.fireEvent(
             'ClickEvent',
@@ -248,16 +252,46 @@ window.webglScene = (function(){
 
     };
 
-    webglScene.prototype.fromViewPortToGame = function(pos)
+    webglScene.prototype.fromViewPortToGame = function(pos, debug)
     {
         var cameraPos = this.camera.position;
         var zoom = this.zoom;
         var windowDimensions = {width:this.width, height: this.height};
-        var positionFromCenterOfScreen = {x: pos.x - windowDimensions.width/2, y: windowDimensions.height/2 - pos.y };
-        var withZoom = {x: positionFromCenterOfScreen.x / zoom, y: positionFromCenterOfScreen.y / zoom};
 
-        var positionFromCamera = {x:withZoom.x + cameraPos.x, y:withZoom.y + cameraPos.y}
+        if (debug) {
+            console.log(pos, cameraPos, zoom, windowDimensions);
+        }
+
+        var positionFromCenterOfScreen = {x: pos.x - windowDimensions.width/2, y: windowDimensions.height/2 - pos.y };
+        var withZoom = {x: positionFromCenterOfScreen.x * zoom, y: positionFromCenterOfScreen.y * zoom};
+
+        if (debug) {
+            console.log(positionFromCenterOfScreen, withZoom);
+        }
+
+
+        var positionFromCamera = {x:withZoom.x + cameraPos.x, y:withZoom.y + cameraPos.y};
         return positionFromCamera;
+    };
+
+    webglScene.prototype.fromGameToHex = function(gameCoordinates)
+    {
+        var q = (1/3 * Math.sqrt(3) * gameCoordinates.x - 1/3 * gameCoordinates.y) / HEX_LENGTH;
+        var r = 2/3 * gameCoordinates.y / HEX_LENGTH;
+
+        var x = q;
+        var z = r;
+        var y = -x - z;
+
+        return new hexagon.Cube(x, y, z).round().toEvenR();
+    };
+
+    webglScene.prototype.fromHexToGame = function(offsetHex)
+    {
+        var x = HEX_LENGTH * Math.sqrt(3) * (offsetHex.q - 0.5 * (offsetHex.r&1))
+        var y = HEX_LENGTH * 3/2 * offsetHex.r
+
+        return {x: x, y: y};
     };
 
     webglScene.prototype.fromGameToViewPort = function(pos)
@@ -311,7 +345,7 @@ window.webglScene = (function(){
                 this.zoomCamera(this.zoom + change*0.1);
             }
         }
-    };
+    }
 
     function mouseWheel(e)
     {
@@ -326,7 +360,7 @@ window.webglScene = (function(){
 
         changeZoom.call(this, step);
         return cancelEvent(e);
-    };
+    }
 
     function changeZoom(zoom)
     {
@@ -344,7 +378,7 @@ window.webglScene = (function(){
             newzoom = ZOOM_MAX;
 
         this.zoomTarget = newzoom;
-    };
+    }
 
     function bindMouseWheelEvent(element)
     {
@@ -354,22 +388,7 @@ window.webglScene = (function(){
             element.addEventListener('DOMMouseScroll', mouseWheel.bind(this), false);
             element.addEventListener('mousewheel', mouseWheel.bind(this), false);
         }
-    };
-
-    function cancelMouseWheelEvent(e)
-    {
-        e = e ? e : window.event;
-        if(e.stopPropagation)
-            e.stopPropagation();
-        if(e.preventDefault)
-            e.preventDefault();
-        e.cancelBubble = true;
-        e.cancel = true;
-        e.returnValue = false;
-        return false;
-    };
-
-
+    }
 
     function getMousePositionInObservedElement(event)
     {
@@ -380,12 +399,19 @@ window.webglScene = (function(){
     }
 
 
-    function getViewPortAndGameObject(v, g)
+    function getPositionObject(view, game, hex)
     {
-        return {
-            view: v,
-            game: g
+        var o = {
+            view: view,
+            game: game
         };
+
+        if (hex) {
+            o.hex = hex;
+            o.fvHex =  {x: hex.q, y:hex.r * -1};
+        }
+
+        return o;
     }
 
 

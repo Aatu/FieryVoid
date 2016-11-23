@@ -1,6 +1,13 @@
 window.mathlib = {
 
 	distance: function (x1,y1,x2,y2){
+		if (typeof x1 == 'object' && typeof y1 == 'object'){
+			x2 = y1.x;
+			y2 = y1.y;
+			y1 = x1.y;
+			x1 = x1.x;
+		};
+
 		var a = Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
 		return a;
 	},
