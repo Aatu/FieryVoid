@@ -26,7 +26,8 @@
 			$targetship = $gamedata->getShipById($fireOrder->targetid); 
 			//insert correct target coordinates: last turns' target position
 			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
-        		$fireOrder->x = $movement->x; $fireorder->y = $movement->y;
+        		$fireOrder->x = $movement->x; 
+			$fireOrder->y = $movement->y;
 		}
 		
             	$target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
