@@ -21,6 +21,16 @@
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!	
 		
+		//sometimes player does manage to target ship after all..
+		if($fireOrder->targetid != -1){ 
+			$targetship = $gamedata->getShipById($fireOrder->targetid); 
+			//insert correct target coordinates: last turns' target position
+			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
+        		$fireOrder->x = $movement->x; 
+			$fireOrder->y = $movement->y;
+			$fireOrder->targetid = -1; //correct the error
+		}
+		
             	$target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
             
             	$this->calculateHit($gamedata, $fireOrder);
@@ -37,10 +47,12 @@
 				$dis = min($dis,floor($maxdis));
 				$direction = Dice::d(6); //deviation direction
 				for ($i=0;$i<$dis;$i++){
-					$target = mathlib::getHexToDirection($rolled, $target["x"], $target["y"]);
+					$target = mathlib::getHexToDirection($direction, $target["x"], $target["y"]);
 				}
+				$fireOrder->pubnotes .= " deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
 				$fireOrder->x = $target["x"];
 				$fireOrder->y = $target["y"];
+				$fireOrder->pubnotes .= " to " . $fireOrder->x . ' ' . $fireOrder->y;
 				$fireOrder->pubnotes .= "Shot deviates $dis hexes. ";   
 			}
 			

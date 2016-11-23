@@ -748,6 +748,11 @@ window.effects = {
                 weapon.changeFiringMode();
                 modeIteration--;
             }
+            
+            //sometimes hex-target weapon gets incorrectly drawn to an unit..correct animation!
+            if(weapon.hextarget){
+                fire.targetid = -1;
+            }
 
             effects.setZoom(fire, weapon)
 
