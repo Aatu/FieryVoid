@@ -32,6 +32,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
     <script src="client/lib/three.min.js"></script>
+
+    <?php include_once 'shaders.php'; ?>
     <script>
 					
         $(window).load(function(){
@@ -47,7 +49,14 @@
 				gamedata.waiting = false;
 			}
 
-            webglScene.init('#webgl', jQuery('#pagecontainer'), new window.webglHexGridRenderer(graphics));
+            webglScene.init(
+                '#webgl',
+                jQuery('#pagecontainer'),
+                new window.webglHexGridRenderer(graphics),
+                new window.animationDirector(graphics),
+                gamedata.ships,
+                new window.coordinateConverter()
+            );
 
             $("#pagecontainer").show();
             animation.animationLoop();
@@ -62,10 +71,18 @@
     <script src="client/renderer/webglScene.js"></script>
     <script src="client/renderer/webglScrolling.js"></script>
     <script src="client/renderer/webglZooming.js"></script>
+    <script src="client/renderer/AnimationDirector.js"></script>
+    <script src="client/renderer/Animation.js"></script>
+    <script src="client/renderer/webglSprite.js"></script>
+    <script src="client/renderer/webglShipIcon.js"></script>
+    <script src="client/coordinateConverter.js"></script>
+
+    <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
 
 
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
+    <script src="client/model/hexagon/FVHex.js"></script>
 
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/hexgrid.js"></script>

@@ -34,8 +34,8 @@ window.webglHexGridRenderer = (function(){
         this.mesh.position.x += getHexB(HEX_LENGTH)/2;
         scene.add(this.mesh);
 
-        debug(scene);
-        debug2(scene);
+        //debug(scene);
+        //debug2(scene);
     };
 
     function debug(scene){

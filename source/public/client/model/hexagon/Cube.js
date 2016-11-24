@@ -151,7 +151,11 @@ window.hexagon.Cube = (function(){
     Cube.prototype._formatNumber = function(number)
     {
         return parseFloat(number.toFixed(hexagon.Cube.PRECISION));
-    }
+    };
+
+    Cube.prototype.toFVHex = function () {
+        return this.toEvenR().toFVHex();
+    };
 
     return Cube;
 })();

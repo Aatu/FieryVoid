@@ -1,0 +1,102 @@
+window.webglSprite = (function(){
+
+    var SHADER_VERTEX = null;
+    var SHADER_FRAGMENT = null;
+
+    function Sprite(image, size, z)
+    {
+        this.z = z || 0;
+        this.mesh = null;
+        this.uniforms = {
+            texture:		{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
+            //opacity:		{ type: 'f',	value: 1.0},
+            //tileDimensions: { type: 'v2',	value: new THREE.Vector2(1, 1)},
+            //damageLookup:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
+            //damageLookup2:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
+            //damageBrushes:  { type: 't', 	value: THREE.ImageUtils.loadTexture("/misc/damageBrushes.png")},
+            //damageNormalMap:{ type: 't', 	value: THREE.ImageUtils.loadTexture("/misc/damageBrushes-normal.png")},
+            //normalMap:		{ type: 't', 	value: new THREE.DataTexture(null, 0, 0)},
+            //worldPosition:	{ type: 'v3',	value: new THREE.Vector3(0, 0, 0)},
+            //scale:			{ type: 'v2',	value: new THREE.Vector2(1, 1)},
+            //flatLight:		{ type: 'f',	value: 1.0}
+        };
+
+        this.mesh = create.call(this, size, image);
+    }
+
+    Sprite.prototype.hide = function()
+    {
+        this.mesh.visible = false;
+        return this;
+    };
+
+    Sprite.prototype.show = function()
+    {
+        this.mesh.visible = true;
+        return this;
+    };
+
+    Sprite.prototype.setPosition = function(pos)
+    {
+        this.mesh.position = new THREE.Vector3(pos.x, pos.y, pos.z);
+        return this;
+    };
+
+    Sprite.prototype.scale = function(width, height)
+    {
+        this.mesh.scale.set(
+            width,
+            height,
+            1
+        );
+    };
+
+    function getShaders(){
+        if (! SHADER_VERTEX)
+            SHADER_VERTEX = document.getElementById('spriteVertexShader').innerHTML;
+
+        if (! SHADER_FRAGMENT)
+            SHADER_FRAGMENT = document.getElementById('spriteFragmentShader').innerHTML;
+
+        return {vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT};
+    }
+
+    function create(size, image)
+    {
+        console.log(this);
+        var geometry = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
+
+        //var attributes = {};
+
+        if (typeof image  == "string") {
+            var tex = new THREE.TextureLoader().load(image);
+            //tex.magFilter = THREE.NearestFilter;
+            tex.minFilter = THREE.LinearMipMapNearestFilter;//THREE.NearestFilter;
+
+            //THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.NearestMipMapLinearFilter, THREE.LinearFilter, and THREE.LinearMipMapNearestFilter
+
+            this.uniforms.texture.value = tex;
+        }
+
+        var shaders = getShaders();
+
+        this.material = new THREE.ShaderMaterial(
+            {
+                uniforms: this.uniforms,
+                //attributes: attributes,
+                vertexShader:   shaders.vertex,
+                fragmentShader: shaders.fragment,
+                transparent: true
+            });
+
+        var mesh = new THREE.Mesh(
+            geometry,
+            this.material
+        );
+
+       // mesh.position = new THREE.Vector3(5000, 0, this.z);
+        return mesh;
+    }
+
+    return Sprite;
+})();

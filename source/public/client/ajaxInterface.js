@@ -22,7 +22,7 @@ window.ajaxInterface = {
             gameid: gamedata.gameid,
             shipid: id,
             turn: gamedata.turn
-        }
+        };
 
         $.ajax({
             type : 'GET',

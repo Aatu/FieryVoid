@@ -54,20 +54,20 @@ window.hexagon.Offset = (function () {
         }, this);
 
         return neighbours;
-    }
+    };
 
     Offset.prototype.add = function (offset) {
         var q = this.q + offset.q;
         var r = this.r + offset.r;
 
         return new hexagon.Offset(q, r, this.layout);
-    }
+    };
 
     Offset.prototype.equals = function (offset) {
         return this.q === offset.q &&
             this.r === offset.r &&
             this.layout === offset.layout;
-    }
+    };
 
     Offset.prototype.toCube = function () {
 
@@ -86,7 +86,11 @@ window.hexagon.Offset = (function () {
         }
 
         return new hexagon.Cube(x, y, z).round();
-    }
+    };
+
+    Offset.prototype.toFVHex = function () {
+       return new hexagon.FVHex(this.q, this.r * -1);
+    };
 
     return Offset;
 })();

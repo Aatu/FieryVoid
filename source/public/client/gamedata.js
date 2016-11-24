@@ -883,6 +883,10 @@ gamedata = {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
         }
+
+        if (window.webglScene && window.webglScene.animationDirector) {
+            window.webglScene.animationDirector.receiveShips(gamedata.ships);
+        }
     },
     
     listShipPositions: function(){
