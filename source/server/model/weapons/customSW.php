@@ -259,7 +259,7 @@ class SWDirectWeapon extends Pulse{
 		$this->trailLengthArray = array(1=>$this->trailLength, 2=>$new);
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
-		$new = $this->priority+1;
+		$new = min(10,$this->priority+1);//system doesn't accept more than 10 for now
 		$this->priorityArray = array(1=>$this->priority, 2=>$new);
 		$fc1 = $this->fireControl;
 		$fc2 = array($fc1[0]-4, $fc1[1]-2, $fc1[2]-1); //FC of salvo mode: worse (much worse vs fighters)
@@ -948,7 +948,7 @@ class SWHeavyIon extends SWIon{
     public $name = "SWHeavyIon";
     public $displayName = "Heavy Ion Cannon";
 	
-    public $priority = 5;
+    public $priority = 10;
     public $loadingtime = 4;
     public $rangePenalty = 0.25; //-1/4 hexes!
     public $fireControl = array(null, -1, 1); // fighters, <mediums, <capitals
