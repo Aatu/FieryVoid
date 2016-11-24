@@ -120,8 +120,8 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	$this->maxpulses = $nrOfShots;
 	$this->defaultShots = $nrOfShots;
 	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-	$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-	$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+	$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
     }	
 	
 	
@@ -326,8 +326,8 @@ class SWBallisticWeapon extends Torpedo{
 		$this->maxpulses = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
 		//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-		$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-		$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+		$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
 		
 		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
 		//let size advance quicker than for energy weapons, and powe rlower
