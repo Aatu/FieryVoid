@@ -439,7 +439,7 @@ class SWIonHandler{
 		if($dmgInflicted<1) return;//no point if no damage was actually done
 		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
 		if ($targetUnit->isDestroyed()) return; //no point in doing anything
-		//$baseDmg = $dmgInflicted+1; //boost light damage a bit
+		$baseDmg = $dmgInflicted;//$baseDmg = $dmgInflicted+1; //boost light damage a bit (..or not)
 		if(($targetSystem->displayName != 'Structure') && (!($targetSystem instanceof Reactor)) ){ //half damage counts 
 			$baseDmg = ceil($dmgInflicted/2);
 		}
