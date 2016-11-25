@@ -443,8 +443,8 @@ class SWIonHandler{
 		if(($targetSystem->displayName != 'Structure') && (!($targetSystem instanceof Reactor)) ){ //half damage counts 
 			$baseDmg = ceil($dmgInflicted/2);
 		}
-		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
-		//$effect = pow($baseDmg,SWIonHandler::$power);
+		//effect is stronger than raw damage inflicted, and bigger hits do more damage: //after all, skip that - paper-frienfdliness
+		$effect = $baseDmg;//$effect = pow($baseDmg,SWIonHandler::$power);
 		$targetID = $targetUnit->id;
 		$currentTurn = TacGamedata::$currentTurn;
 		if(SWIonHandler::$turn != $currentTurn){
