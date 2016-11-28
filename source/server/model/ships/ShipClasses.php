@@ -332,13 +332,20 @@
 			return $this->getSystemsByNameLoc($location_different_array[1], $location_different_array[0], $acceptDestroyed);
 		}else{
 			$returnTab = array();
-			foreach ($this->systems as $system){
-				if ( ($system->displayName == $name) && ($system->location == $location) ){
-				    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
-					    $returnTab[] = $system;
-				    }
+			if($name=='Structure'){ //Structure is special, as it might actually belong to a different section! (on MCVs)
+				$system = getStructureSystem($location);
+				if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
+					$returnTab[] = $system;
 				}
-			}            
+			}else{
+				foreach ($this->systems as $system){
+					if ( ($system->displayName == $name) && ($system->location == $location) ){
+					    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
+						    $returnTab[] = $system;
+					    }
+					}
+				}
+			}
 			return $returnTab;
 		}
 		return array(); //should never reach here
