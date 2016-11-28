@@ -73,7 +73,7 @@ class Dagkar extends MediumShip{
 			1=> array(
 				4 => "Thruster",
 				8 => "Energy Mine",
-				12 => "Ion torpedo",
+				12 => "Ion Torpedo",
 				17 => "Structure",
 				20 => "Primary",
 			),

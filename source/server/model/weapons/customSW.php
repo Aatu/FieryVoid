@@ -120,8 +120,8 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	$this->maxpulses = $nrOfShots;
 	$this->defaultShots = $nrOfShots;
 	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-	$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-	$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+	$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
     }	
 	
 	
@@ -259,7 +259,7 @@ class SWDirectWeapon extends Pulse{
 		$this->trailLengthArray = array(1=>$this->trailLength, 2=>$new);
 		$this->maxpulsesArray = array(1=>$this->maxpulses, 2=>1);
 		$this->defaultShotsArray = array(1=>$this->defaultShots, 2=>1);
-		$new = $this->priority+1;
+		$new = min(10,$this->priority+1);//system doesn't accept more than 10 for now
 		$this->priorityArray = array(1=>$this->priority, 2=>$new);
 		$fc1 = $this->fireControl;
 		$fc2 = array($fc1[0]-4, $fc1[1]-2, $fc1[2]-1); //FC of salvo mode: worse (much worse vs fighters)
@@ -326,8 +326,8 @@ class SWBallisticWeapon extends Torpedo{
 		$this->maxpulses = $nrOfShots;
 		$this->defaultShots = $nrOfShots;
 		//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-		$this->grouping = 34-6*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-		$this->grouping = max(8,$this->grouping); //but no better than +1 per 8!
+		$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
+		$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
 		
 		//maxhealth and powerReq affected by number of barrels - received is for single -gun mount!
 		//let size advance quicker than for energy weapons, and powe rlower
@@ -429,7 +429,7 @@ class SWIon extends SWDirectWeapon{
 /*static class to handle accumulating Ion damage*/
 class SWIonHandler{
 	private static $accumulatedIonDmg = array();
-	private static $power = 1.4; //effect magnitude from hit: damage ^power
+	//private static $power = 1.4; //effect magnitude from hit: damage ^power
 	private static $free = 3; //this much damage doesn't cause anything
 	private static $threshold = 7; //this much damage (after $free) causes power shortage
 	private static $turn = 0; //turn for which data is held
@@ -439,12 +439,12 @@ class SWIonHandler{
 		if($dmgInflicted<1) return;//no point if no damage was actually done
 		if($targetUnit instanceof FighterFlight) return;//no effect on fighters
 		if ($targetUnit->isDestroyed()) return; //no point in doing anything
-		$baseDmg = $dmgInflicted+1; //boost light damage a bit
+		$baseDmg = $dmgInflicted;//$baseDmg = $dmgInflicted+1; //boost light damage a bit (..or not)
 		if(($targetSystem->displayName != 'Structure') && (!($targetSystem instanceof Reactor)) ){ //half damage counts 
 			$baseDmg = ceil($dmgInflicted/2);
 		}
-		//effect is stronger than raw damage inflicted, and bigger hits do more damage:
-		$effect = pow($baseDmg,SWIonHandler::$power);
+		//effect is stronger than raw damage inflicted, and bigger hits do more damage: //after all, skip that - paper-frienfdliness
+		$effect = $baseDmg;//$effect = pow($baseDmg,SWIonHandler::$power);
 		$targetID = $targetUnit->id;
 		$currentTurn = TacGamedata::$currentTurn;
 		if(SWIonHandler::$turn != $currentTurn){
@@ -948,7 +948,7 @@ class SWHeavyIon extends SWIon{
     public $name = "SWHeavyIon";
     public $displayName = "Heavy Ion Cannon";
 	
-    public $priority = 5;
+    public $priority = 10;
     public $loadingtime = 4;
     public $rangePenalty = 0.25; //-1/4 hexes!
     public $fireControl = array(null, -1, 1); // fighters, <mediums, <capitals

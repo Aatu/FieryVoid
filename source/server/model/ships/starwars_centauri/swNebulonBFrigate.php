@@ -47,8 +47,8 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	$this->addFrontSystem(new SWMediumTLaser(2, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 240, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 180, 300, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWMediumLaser(2, 0, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumLaser(2, 60, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWMediumLaser(2, 0, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	 
 	    
 	$this->addAftSystem(new Engine(3, 10, 0, 4, 3));
