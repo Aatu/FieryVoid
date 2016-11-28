@@ -42,7 +42,7 @@ class zzftrywing extends FighterFlight{
             $fighter->addFrontSystem($frontGun);
             
             $roundGun = new SWFighterIon(0, 360, 1, 2); //all-around Ion Cannons
-            $roundGun->exclusive = true; //either this or other weapons!
+            //$roundGun->exclusive = true; //either this or other weapons! no - gunner operates that...
             $fighter->addFrontSystem($roundGun);
            
             //2 forward Proton Torpedo Launchers, 4 shots each
