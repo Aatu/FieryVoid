@@ -333,7 +333,7 @@
 		}else{
 			$returnTab = array();
 			if($name=='Structure'){ //Structure is special, as it might actually belong to a different section! (on MCVs)
-				$system = getStructureSystem($location);
+				$system = $this->getStructureSystem($location);
 				if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
 					$returnTab[] = $system;
 				}
