@@ -53,11 +53,7 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
-    <script src="client/renderer/webglHexGridRenderer.js"></script>
     <script src="client/renderer/canvasHexGridRenderer.js"></script>
-    <script src="client/renderer/webglScene.js"></script>
-    <script src="client/renderer/webglScrolling.js"></script>
-    <script src="client/renderer/webglZooming.js"></script>
 
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/hexgrid.js"></script>

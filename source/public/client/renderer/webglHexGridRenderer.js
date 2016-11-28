@@ -6,7 +6,7 @@ window.webglHexGridRenderer = (function(){
     var HEX_LINE_COLOR = "rgba(255,255,255,255)";
     var HEX_LINE_WIDTH = 20;
     var HEX_CANVAS_SIZE = 1024;
-    var HEX_OPACITY = 0.1;
+    var HEX_OPACITY = 0.2;
     var HEX_MAX_OPACITY = 0.3;
 
     function webglHexGridRenderer (graphics){
@@ -34,12 +34,52 @@ window.webglHexGridRenderer = (function(){
         this.mesh.position.x += getHexB(HEX_LENGTH)/2;
         scene.add(this.mesh);
 
+        drawGameSpace(scene);
+
+
         //debug(scene);
         //debug2(scene);
     };
 
+    function drawGameSpace(scene) {
+        var gamespace = gamedata.gamespace;
+
+        if(!gamespace) {
+            return
+        }
+
+        var width = parseInt(gamespace.substr(0, gamespace.indexOf("x")));
+        var height = parseInt(gamespace.substr(gamespace.indexOf("x")+1));
+
+        if(width == -1 || height == -1){
+            return;
+        }
+
+        var lefttop = new hexagon.FVHex(-(width/2), (height - (height/2)));
+        var righttop = new hexagon.FVHex((width-(width/2)), (height - (height/2)));
+        var leftbottom = new hexagon.FVHex(-(width/2), -(height/2));
+        //var rightbottom = new hexagon.FVHex((width-(width/2)), - (height/2));
+
+        var lineWidth = 10;
+
+        var gameWidth = window.coordinateConverter.fromHexToGame(righttop).x - window.coordinateConverter.fromHexToGame(lefttop).x;
+        var gameHeight = window.coordinateConverter.fromHexToGame(lefttop).y - window.coordinateConverter.fromHexToGame(leftbottom).y;
+
+        var sprite = new window.BoxSprite(
+            {
+                width: gameWidth + lineWidth,
+                height: gameHeight + lineWidth
+            },
+            10,
+            0,
+            new THREE.Color(0,0,0),
+            1
+        );
+        scene.add(sprite.mesh);
+    }
+
     function debug(scene){
-        for (var i = 0; i < 100; i++ ){
+        for (var i = 0; i < 15; i++ ){
             x = getHexWidth(HEX_LENGTH)/2* i;
             y = (getHexHeight(HEX_LENGTH) - getHexA(HEX_LENGTH)) * i;
             scene.add(buildHexagonGeomatry(x,y, HEX_LENGTH));
@@ -47,7 +87,7 @@ window.webglHexGridRenderer = (function(){
     }
 
     function debug2(scene){
-        for (var i = 0; i < 100; i++ ){
+        for (var i = 0; i < 21; i++ ){
             x = getHexWidth(HEX_LENGTH) * i;
             scene.add(buildHexagonGeomatry(x,0, HEX_LENGTH));
         }
@@ -171,21 +211,7 @@ window.webglHexGridRenderer = (function(){
     }
 
     function createCanvas(width, height, debug){
-        var canvas = $('<canvas width="'+width+'" height="'+height+'"></canvas>').css({
-            position: 'absolute',
-            top: '100px',
-            right: '100px',
-            border: '1px solid red',
-            zIndex: 1000,
-            backgroundColor: 'black'//'transparent'
-            //,display: 'none'
-        });
-        if (debug) {
-            $(document.body).append(canvas);
-        }
-
-        canvas = canvas[0];
-        return canvas;
+        return window.AbstractCanvas.create(width, height, debug);
     }
 
     function getTexture(canvas, gridWidth, gridHeight){

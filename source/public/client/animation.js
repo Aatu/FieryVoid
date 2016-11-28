@@ -10,6 +10,10 @@ window.animation = {
     animationloopdelay:0,
     
     animationLoop: function(){
+
+        if (window.webglScene) {
+            return;
+        }
         
         animation.animateActiveship();
         
@@ -20,8 +24,8 @@ window.animation = {
                 animation.animating();
             }
         }
-    
-        window.requestAnimFrame(animation.animationLoop);
+
+        requestAnimationFrame(animation.animationLoop);
     },
     
     setAnimating: function(animatefunction, callback){

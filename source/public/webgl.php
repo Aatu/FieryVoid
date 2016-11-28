@@ -32,6 +32,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
     <script src="client/lib/three.min.js"></script>
+    <script src="client/lib/stats.min.js"></script>
 
     <?php include_once 'shaders.php'; ?>
     <script>
@@ -54,8 +55,8 @@
                 jQuery('#pagecontainer'),
                 new window.webglHexGridRenderer(graphics),
                 new window.animationDirector(graphics),
-                gamedata.ships,
-                new window.coordinateConverter()
+                gamedata,
+                window.coordinateConverter
             );
 
             $("#pagecontainer").show();
@@ -66,6 +67,7 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
+    <script src="client/lib/AbstractCanvas.js"></script>
     <script src="client/renderer/webglHexGridRenderer.js"></script>
     <script src="client/renderer/canvasHexGridRenderer.js"></script>
     <script src="client/renderer/webglScene.js"></script>
@@ -73,11 +75,23 @@
     <script src="client/renderer/webglZooming.js"></script>
     <script src="client/renderer/AnimationDirector.js"></script>
     <script src="client/renderer/Animation.js"></script>
-    <script src="client/renderer/webglSprite.js"></script>
+
+    <script src="client/renderer/sprite/webglSprite.js"></script>
+    <script src="client/renderer/sprite/ShipEWSprite.js"></script>
+    <script src="client/renderer/sprite/ShipSelectedSprite.js"></script>
+    <script src="client/renderer/sprite/BoxSprite.js"></script>
+
     <script src="client/renderer/webglShipIcon.js"></script>
-    <script src="client/coordinateConverter.js"></script>
+    <script src="client/lib/coordinateConverter.js"></script>
+    <script src="client/renderer/ShipIconContainer.js"></script>
 
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
+
+    <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
+
+
+    <script src="client/UI/ShipTooltip.js"></script>
 
 
     <script src="client/model/hexagon/Cube.js"></script>
@@ -440,14 +454,13 @@
 		<div class="name"><span class="name header">test</span></div>
 		<div class="datacontainer"></div>
 	</div>
-	
+
     <div id="shipNameContainer">
         <div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>
-		
+
 		<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>
 		<div class="fire targeting"></div>
     </div>
-    
 	
     <div id="weaponTargetingContainer">
         <div class="infolist">

@@ -11,12 +11,11 @@ window.hexgrid = {
     drawHexGrid: function(){
 
         var renderer  = new window.canvasHexGridRenderer(hexgrid, gamedata, graphics, deployment);
-        //renderer.renderHexGridOnCanvas("hexgrid");
+        renderer.renderHexGridOnCanvas("hexgrid");
 
     },
     
     drawGameSpace: function(pos){
-        return;
         var gamespace = gamedata.gamespace;
         
         if(gamespace != null && gamespace != ""){

@@ -1,37 +1,42 @@
 window.IdleAnimationStrategy = (function(){
     function IdleAnimationStrategy(){
-        this.shipIcons = null;
+        this.shipIconContainer = null;
         this.turn = 0;
     }
 
-    IdleAnimationStrategy.prototype.activate = function(shipIcons, turn) {
-        this.shipIcons = shipIcons;
+    IdleAnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
+        this.shipIconContainer = shipIcons;
         this.turn = turn;
 
         return this;
     };
 
+    IdleAnimationStrategy.prototype.deactivate = function(scene) {
+
+
+        return this;
+    };
+
     IdleAnimationStrategy.prototype.render = function(coordinateConverter){
-        Object.keys(this.shipIcons).forEach(function (key) {
-            var icon = this.shipIcons[key];
-            positionAndFaceIcon(icon, coordinateConverter);
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            this.positionAndFaceIcon(icon, coordinateConverter);
         }, this);
     };
 
-    function positionAndFaceIcon(icon, coordinateConverter){
+    IdleAnimationStrategy.prototype.positionAndFaceIcon = function(icon, coordinateConverter){
         var movements = icon.getMovements();
-        var movement = getLastMovement(movements);
-        var gamePosition = coordinateConverter.fromFVHexToGame(movement.position);
+        var movement = this.getLastMovement(movements);
+        var gamePosition = coordinateConverter.fromHexToGame(movement.position);
 
         var facing = shipManager.hexFacingToAngle(movement.facing);
 
         icon.setPosition(gamePosition);
         icon.setFacing(facing);
-    }
+    };
 
-    function getLastMovement(movements) {
+    IdleAnimationStrategy.prototype.getLastMovement = function(movements) {
         return movements[movements.length - 1];
-    }
+    };
 
     return IdleAnimationStrategy;
 })();

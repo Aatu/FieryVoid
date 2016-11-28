@@ -31,8 +31,7 @@ window.hexagon.FVHex = (function () {
     };
 
     FVHex.prototype.equals = function (fvHex) {
-        return this.x === fvHex.x &&
-            this.y === fvHex.y;
+        return this.x === fvHex.x && this.y === fvHex.y;
     };
 
     FVHex.prototype.toOffset = function () {

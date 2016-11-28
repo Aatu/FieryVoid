@@ -1,7 +1,7 @@
 window.webglScene = (function(){
 
     var ZOOM_MAX = 8;
-    var ZOOM_MIN = 0.5;
+    var ZOOM_MIN = 0.1;
     var HEX_LENGTH = 50;
 
     function webglScene() {
@@ -23,6 +23,7 @@ window.webglScene = (function(){
         this.dragging = false;
         this.draggingDistanceTreshold = 20;
         this.distanceDragged = 0;
+        this.stats = null;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, ships, coordinateConverter) {
@@ -30,13 +31,13 @@ window.webglScene = (function(){
         this.hexGridRenderer = hexGridRenderer;
         this.animationDirector = animationTimeline;
         this.coordinateConverter = coordinateConverter;
-        console.log(this.coordinateConverter);
 
         this.scene = new THREE.Scene();
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.coordinateConverter.init(HEX_LENGTH, this.width, this.height);
+        this.animationDirector.init(this.coordinateConverter);
 
         this.camera = new THREE.OrthographicCamera(
             this.zoom*this.width / - 2,
@@ -47,10 +48,12 @@ window.webglScene = (function(){
             1000
         );
 
+
         var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
         var cube = new THREE.Mesh( geometry, material );
         this.scene.add( cube );
+
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -62,9 +65,13 @@ window.webglScene = (function(){
 
         this.initEventListeners();
 
+        this.stats = new Stats();
+        this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild( this.stats.dom );
+
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX, HEX_LENGTH);
-        this.animationDirector.receiveShips(ships, this.scene);
+        this.animationDirector.receiveGamedata(ships, this.scene);
         this.render();
     };
 
@@ -78,6 +85,10 @@ window.webglScene = (function(){
 
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
+        this.animationDirector.relayEvent(
+            'ScrollEvent',
+            this.camera.position
+        );
     };
 
     webglScene.prototype.moveCameraTo = function(position) {
@@ -89,9 +100,13 @@ window.webglScene = (function(){
         this.camera.position.y = position.y;
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
+        this.animationDirector.relayEvent(
+            'ScrollEvent',
+            this.camera.position
+        );
     };
 
-    webglScene.prototype.zoomCamera = function(zoom)
+    webglScene.prototype.zoomCamera = function(zoom, animationReady)
     {
         this.zoom = zoom;
 
@@ -108,12 +123,23 @@ window.webglScene = (function(){
 
         this.coordinateConverter.onZoom(this.zoom);
         this.hexGridRenderer.onZoom(this.zoom);
+        this.animationDirector.relayEvent(
+            'ZoomEvent',
+            {
+                zoom: this.zoom,
+                animationReady: Boolean(animationReady)
+            }
+        );
     };
 
     webglScene.prototype.render = function () {
-        requestAnimationFrame(this.render.bind(this));
+        this.stats.begin();
         this.animationDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render( this.scene, this.camera);
+        animateZoom.call(this);
+        this.stats.end();
+
+        requestAnimationFrame(this.render.bind(this));
     };
 
 
@@ -168,7 +194,6 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseUp = function(event)
     {
-        console.log(this.distanceDragged);
         if (this.distanceDragged < this.draggingDistanceTreshold)
             this.click(event);
 
@@ -207,10 +232,11 @@ window.webglScene = (function(){
     {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
+        var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
 
-        this.fireEvent(
+        this.animationDirector.relayEvent(
             'MouseMoveEvent',
-            getPositionObject(pos, gamePos)
+            getPositionObject(pos, gamePos, hexPos)
         );
 
     };
@@ -250,7 +276,18 @@ window.webglScene = (function(){
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
 
-        this.fireEvent(
+        /*
+        var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);
+        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        var cube = new THREE.Mesh( geometry, material );
+        this.scene.add( cube );
+        var pos = this.coordinateConverter.fromHexToGame(hexPos);
+        cube.position.x = pos.x;
+        cube.position.y = pos.y;
+        */
+
+
+        this.animationDirector.relayEvent(
             'ClickEvent',
             payload
         );
@@ -260,6 +297,7 @@ window.webglScene = (function(){
     {
 
     };
+
     function scroll(payload)
     {
         if (payload.stopped)
@@ -284,17 +322,16 @@ window.webglScene = (function(){
 
     function animateZoom()
     {
-        requestAnimationFrame( animateZoom.bind(this) );
         if ( this.zoomTarget && this.zoomTarget != this.zoom)
         {
-            var change = (this.zoomTarget - this.zoom);
-            if (Math.abs(change) < 0.00001 || (this.zoomTarget == 1 && Math.abs(change) < 0.01))
+            var change = (this.zoomTarget - this.zoom)*0.1;
+            if (Math.abs(change) < 0.0001 || (this.zoomTarget == 1 && Math.abs(change) < 0.0001))
             {
-                this.zoomCamera(this.zoomTarget);
+                this.zoomCamera(this.zoomTarget, true);
             }
             else
             {
-                this.zoomCamera(this.zoom + change*0.1);
+                this.zoomCamera(this.zoom + change);
             }
         }
     }

@@ -83,6 +83,36 @@ window.graphics = {
         canvas.fill();
     },
 
+    drawDottedCircle: function( canvas, x, y, r, r2, segments, gapratio)
+    {
+        var deg = 360/segments;
+        var gap = deg*gapratio;
+
+        for (var d = 0; d<360; d +=deg)
+        {
+            this.drawCircleSegment(canvas, x, y, r, r2, mathlib.degreeToRadian(d), mathlib.degreeToRadian(d+deg-gap));
+        }
+    },
+
+    drawFilledCircle: function( canvas, x, y, r1, r2) {
+        this.drawCircleSegment(canvas, x, y, r1, r2, mathlib.degreeToRadian(0), mathlib.degreeToRadian(360));
+    },
+
+    drawCircleSegment:function( canvas, x, y, r, r2, s, e) {
+        canvas.beginPath();
+        canvas.arc(x,y,r2,s,e, false); // outer (filled)
+
+        var p1 = mathlib.getPointInDirection(r, mathlib.radianToDegree(e), x, y);
+        canvas.lineTo(p1.x, p1.y);
+        canvas.arc(x,y,r,e,s, true); // inner (unfills it)
+        var p2 = mathlib.getPointInDirection(r2, mathlib.radianToDegree(s), x, y);
+        canvas.lineTo(p2.x, p2.y);
+
+        canvas.closePath();
+        canvas.stroke();
+        canvas.fill();
+    },
+
     drawCircleAndFill: function(canvas, x, y, r, w){
         canvas.lineWidth = w;
         canvas.beginPath();

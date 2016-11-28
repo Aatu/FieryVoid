@@ -4,6 +4,10 @@ window.shipManager = {
     initiated: 0,
 
     initShips: function(){
+        if (window.webglScene) {
+            return;
+        }
+
         shipManager.initiated = 1;
         for (var i in gamedata.ships){
             shipManager.createHexShipDiv(gamedata.ships[i]);

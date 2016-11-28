@@ -7,6 +7,7 @@ window.webglSprite = (function(){
     {
         this.z = z || 0;
         this.mesh = null;
+        this.size = size;
         this.uniforms = {
             texture:		{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
             //opacity:		{ type: 'f',	value: 1.0},
@@ -42,7 +43,7 @@ window.webglSprite = (function(){
         return this;
     };
 
-    Sprite.prototype.scale = function(width, height)
+    Sprite.prototype.setScale = function(width, height)
     {
         this.mesh.scale.set(
             width,
@@ -63,7 +64,6 @@ window.webglSprite = (function(){
 
     function create(size, image)
     {
-        console.log(this);
         var geometry = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
 
         //var attributes = {};
@@ -94,7 +94,7 @@ window.webglSprite = (function(){
             this.material
         );
 
-       // mesh.position = new THREE.Vector3(5000, 0, this.z);
+        mesh.position.z = this.z;
         return mesh;
     }
 

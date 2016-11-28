@@ -292,7 +292,7 @@ body {
     z-index:201;
 }
 
-#shipNameContainer{
+#shipNameContainer, .shipNameContainer{
   
     z-index:7001;
     opacity:0.65;
@@ -307,23 +307,27 @@ body {
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
 	padding:3px 15px 3px 15px;
-
 }
-#shipNameContainer span{
+
+.shipNameContainer .fire {
+    display:none;
+}
+
+#shipNameContainer span, .shipNameContainer span{
 	padding-top:2px;
 }
 
-#shipNameContainer .name{
+#shipNameContainer .name, .shipNameContainer .name{
    font-size:18px;
    font-style:italic;
 
 }
 
-#shipNameContainer .enemy.name{
+.enemy.name{
     color:#b34119;
 }
 
-#shipNameContainer .ally.name{
+.ally.name{
     color:#2f5123;
 }
 

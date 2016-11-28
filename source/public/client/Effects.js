@@ -61,7 +61,7 @@ window.effects = {
             
         }
     
-        window.requestAnimFrame(effects.animationLoop);
+        requestAnimationFrame(effects.animationLoop);
     },
     
     clearCanvas: function(){

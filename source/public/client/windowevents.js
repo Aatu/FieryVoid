@@ -2,7 +2,8 @@ $(window).resize(function () {
     getWindowDimensions();
     resizeGame();
  });
- 
+
+/*
  window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       || 
             window.webkitRequestAnimationFrame || 
@@ -13,6 +14,7 @@ $(window).resize(function () {
             window.setTimeout(callback, 1000 / 60);
             };
 })();
+*/
  
 
  function getWindowDimensions(){
@@ -39,12 +41,14 @@ $(window).resize(function () {
  }
  
 function drawEntities(){
-    
-    hexgrid.drawHexGrid();
-    hexgrid.drawGameSpace();
-    shipManager.drawShips();
-    ballistics.drawBallistics();
-    EWindicators.drawEWindicators();
+
+    if (!window.webglScene) {
+        hexgrid.drawHexGrid();
+        hexgrid.drawGameSpace();
+        shipManager.drawShips();
+        ballistics.drawBallistics();
+        EWindicators.drawEWindicators()
+    };
     
 }
  

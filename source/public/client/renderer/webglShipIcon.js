@@ -6,11 +6,17 @@ window.webglShipIcon = (function (){
         this.imagePath = ship.imagePath;
         this.movements = consumeMovement.call(this, ship.movement);
         this.mesh = null;
-        this.shipSprite = null;
-
+        this.size = ship.canvasSize;
         this.addedToScene = false;
+        this.mine = gamedata.isMyShip(ship);
 
-        create.call(this, ship.imagePath, ship.canvasSize, scene);
+
+        this.shipSprite = null;
+        this.shipEWSprite = null;
+        this.ShipSelectedSprite = null;
+        this.ShipSideSprite = null;
+
+        create.call(this, ship.imagePath, scene);
     }
 
     webglShipIcon.prototype.render = function (scene, coordinateConverter) {
@@ -26,6 +32,10 @@ window.webglShipIcon = (function (){
         this.mesh.position.y = position.y;
     };
 
+    webglShipIcon.prototype.getPosition = function() {
+        return {x: this.mesh.position.x, y: this.mesh.position.y};
+    };
+
     webglShipIcon.prototype.setFacing = function(facing) {
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
@@ -36,13 +46,59 @@ window.webglShipIcon = (function (){
         }, this);
     };
 
-    function create(imagePath, size, scene) {
+    webglShipIcon.prototype.setScale = function(width, height){
+        this.shipEWSprite.setScale(width, height);
+        this.shipSprite.setScale(width, height);
+        this.ShipSelectedSprite.setScale(width, height);
+        this.ShipSideSprite.setScale(width, height);
+    };
+
+    webglShipIcon.prototype.displayEW = function(DEW, CCEW){
+        this.shipEWSprite.update(DEW, CCEW);
+        this.shipEWSprite.show();
+    };
+
+    webglShipIcon.prototype.hideEW = function(){
+        if (this.shipEWSprite) {
+            this.shipEWSprite.hide();
+        }
+    };
+
+    webglShipIcon.prototype.showSideSprite = function(value) {
+        if (value) {
+            this.ShipSideSprite.show();
+        } else {
+            this.ShipSideSprite.hide();
+        }
+    };
+
+    webglShipIcon.prototype.setSelected = function(value) {
+        if (value) {
+            this.ShipSelectedSprite.show();
+        } else {
+            this.ShipSelectedSprite.hide();
+        }
+    };
+
+
+
+    function create(imagePath, scene) {
         this.mesh = new THREE.Object3D();
         this.mesh.position = new THREE.Vector3(500, 0, 0);
         this.mesh.renderDepth = 10;
 
-        this.shipSprite = new window.webglSprite(imagePath, {width: size/2, height: size/2}, 0);
+        this.shipSprite = new window.webglSprite(imagePath, {width: this.size/2, height: this.size/2}, 0);
         this.mesh.add(this.shipSprite.mesh);
+
+        this.shipEWSprite = new window.ShipEWSprite({width: this.size/2, height: this.size/2}, -1);
+        this.mesh.add(this.shipEWSprite.mesh);
+
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({width: this.size/2, height: this.size/2}, -2, this.mine ? 'ally' : 'enemy', true).hide();
+        this.mesh.add(this.ShipSelectedSprite.mesh);
+
+        this.ShipSideSprite = new window.ShipSelectedSprite({width: this.size/2, height: this.size/2}, -2, this.mine ? 'ally' : 'enemy', false).hide();
+        this.mesh.add(this.ShipSideSprite.mesh);
+
         scene.add(this.mesh);
     }
 
