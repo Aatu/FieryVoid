@@ -33,9 +33,24 @@ window.coordinateConverter = (function(){
         return this.fromGameToViewPort(this.fromHexToGame(hex));
     };
 
+    coordinateConverter.prototype.getHexWidth = function()
+    {
+        return getHexB(this.hexlenght) * 2;
+    };
+
+    coordinateConverter.prototype.getHexRowHeight = function()
+    {
+        return this.hexlenght + getHexA(this.hexlenght);
+    };
+
     coordinateConverter.prototype.getHexHeight = function()
     {
-        return (this.hexlenght + 2* getHexA(this.hexlenght)) / this.zoom;
+        return (this.hexlenght + 2* getHexA(this.hexlenght));
+    };
+
+    coordinateConverter.prototype.getHexHeightViewport = function()
+    {
+        return this.getHexHeight() / this.zoom;
     };
 
     coordinateConverter.prototype.fromGameToHex = function(gameCoordinates)
@@ -98,6 +113,10 @@ window.coordinateConverter = (function(){
 
     function getHexA(l) {
         return l * Math.sin(30/180*Math.PI);
+    }
+
+    function getHexB(l) {
+        return l * Math.cos(30/180*Math.PI);
     }
 
     return new coordinateConverter();

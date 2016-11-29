@@ -1,20 +1,27 @@
 window.ShipIconContainer = (function(){
-    function ShipIconContainer(coordinateConverter){
+    function ShipIconContainer(coordinateConverter, scene){
         this.iconsAsObject = {};
         this.iconsAsArray = [];
         this.coordinateConverter = coordinateConverter;
+        this.scene = scene;
     }
 
-    ShipIconContainer.prototype.setShips = function (ships, scene) {
+    ShipIconContainer.prototype.consumeGamedata = function(gamedata) {
+        setShips.call(this, gamedata.ships);
+    };
+
+    function setShips (ships) {
         ships.forEach(function (ship) {
             if (! this.hasIcon(ship.id)) {
-                var icon = new window.webglShipIcon(ship, scene);
+                var icon = new window.ShipIcon(ship, this.scene);
                 this.iconsAsObject[ship.id] = icon;
+            } else {
+                this.iconsAsObject[ship.id].consumeShipdata(ship);
             }
         }, this);
 
         buildShipArray.call(this);
-    };
+    }
 
     ShipIconContainer.prototype.getById = function(id) {
         return this.iconsAsObject[id];
@@ -57,7 +64,7 @@ window.ShipIconContainer = (function(){
 
     ShipIconContainer.prototype.getIconsInProximity = function (payload) {
         /* TODO: sort this out when we have two ships in same hex
-        var hexHeight = this.coordinateConverter.getHexHeight();
+        var hexHeight = this.coordinateConverter.getHexHeightViewport();
         var distance = hexHeight/10;
 
         console.log(distance);

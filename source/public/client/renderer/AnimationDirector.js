@@ -2,7 +2,7 @@ window.animationDirector = (function() {
 
     function animationDirector(graphics) {
         this.graphics = graphics;
-        this.shipIconContainer = new ShipIconContainer();
+        this.shipIconContainer = null;
         this.ballisticIcons = [];
         this.timeline = [];
 
@@ -11,18 +11,13 @@ window.animationDirector = (function() {
         this.coordinateConverter = null;
     }
 
-    animationDirector.prototype.init = function (coordinateConverter) {
+    animationDirector.prototype.init = function (coordinateConverter, scene) {
         this.coordinateConverter = coordinateConverter;
-        this.shipIconContainer = new ShipIconContainer(this.coordinateConverter);
+        this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
     };
 
-    animationDirector.prototype.receiveGamedata = function (gamedata, scene) {
-        this.receiveShips(gamedata.ships, scene);
-        resolvePhaseStrategy.call(this, gamedata, scene);
-    };
-
-    animationDirector.prototype.receiveShips = function (ships, scene) {
-        this.shipIconContainer.setShips(ships, scene);
+    animationDirector.prototype.receiveGamedata = function (gamedata, webglScene) {
+        resolvePhaseStrategy.call(this, gamedata, webglScene);
     };
 
     animationDirector.prototype.relayEvent = function (name, payload) {
@@ -54,7 +49,7 @@ window.animationDirector = (function() {
         return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
     }
 
-    function activatePhaseStrategy(phaseStrategy, scene) {
+    function activatePhaseStrategy(phaseStrategy, gamedata, scene) {
         if (this.phaseStrategy) {
             this.phaseStrategy.deactivate();
         }

@@ -4,11 +4,12 @@ window.BoxSprite = (function(){
     {
         this.z = z || 0;
         this.mesh = null;
-        this.size = size;
+        this.size = {width: size.width + lineWidth, height: size.height + lineWidth};
+
         this.color = color;
         this.opacity = opacity;
 
-        this.mesh = create.call(this, size, lineWidth);
+        this.mesh = create.call(this, this.size, lineWidth);
     }
 
     BoxSprite.prototype = Object.create(webglSprite.prototype);
@@ -36,20 +37,20 @@ window.BoxSprite = (function(){
 
         i = createSide(
             geometry,
-            new THREE.Vector3(-width/2, -height/2, 0),
-            new THREE.Vector3(-width/2+lineWidth, -height/2, 0),
             new THREE.Vector3(-width/2, height/2, 0),
             new THREE.Vector3(-width/2+lineWidth, height/2, 0),
+            new THREE.Vector3(-width/2, -height/2, 0),
+            new THREE.Vector3(-width/2+lineWidth, -height/2, 0),
             i
         );
 
 
         i = createSide(
             geometry,
-            new THREE.Vector3(width/2, height/2, 0),
-            new THREE.Vector3(width/2-lineWidth, height/2, 0),
             new THREE.Vector3(width/2, -height/2, 0),
             new THREE.Vector3(width/2-lineWidth, -height/2, 0),
+            new THREE.Vector3(width/2, height/2, 0),
+            new THREE.Vector3(width/2-lineWidth, height/2, 0),
             i
         );
 

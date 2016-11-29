@@ -39,7 +39,8 @@ window.webglSprite = (function(){
 
     Sprite.prototype.setPosition = function(pos)
     {
-        this.mesh.position = new THREE.Vector3(pos.x, pos.y, pos.z);
+        this.mesh.position.x = pos.x;
+        this.mesh.position.y = pos.y;
         return this;
     };
 

@@ -80,10 +80,13 @@
     <script src="client/renderer/sprite/ShipEWSprite.js"></script>
     <script src="client/renderer/sprite/ShipSelectedSprite.js"></script>
     <script src="client/renderer/sprite/BoxSprite.js"></script>
+    <script src="client/renderer/sprite/PlainSprite.js"></script>
 
-    <script src="client/renderer/webglShipIcon.js"></script>
+    <script src="client/renderer/icon/ShipIcon.js"></script>
+    <script src="client/renderer/icon/DeploymentIcon.js"></script>
+
     <script src="client/lib/coordinateConverter.js"></script>
-    <script src="client/renderer/ShipIconContainer.js"></script>
+    <script src="client/renderer/icon/ShipIconContainer.js"></script>
 
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
 

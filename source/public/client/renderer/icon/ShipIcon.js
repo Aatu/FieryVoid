@@ -1,10 +1,10 @@
-window.webglShipIcon = (function (){
+window.ShipIcon = (function (){
 
-    function webglShipIcon(ship, scene){
+    function ShipIcon(ship, scene){
 
         this.shipId = ship.id;
         this.imagePath = ship.imagePath;
-        this.movements = consumeMovement.call(this, ship.movement);
+        this.movements = null;
         this.mesh = null;
         this.size = ship.canvasSize;
         this.addedToScene = false;
@@ -16,10 +16,15 @@ window.webglShipIcon = (function (){
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
 
+        this.consumeShipdata(ship);
         create.call(this, ship.imagePath, scene);
     }
 
-    webglShipIcon.prototype.render = function (scene, coordinateConverter) {
+    ShipIcon.prototype.consumeShipdata = function (ship){
+        this.movements = consumeMovement.call(this, ship.movement);
+    };
+
+    ShipIcon.prototype.render = function (scene, coordinateConverter) {
         if (! this.addedToScene) {
             scene.add(this.mesh);
         }
@@ -27,44 +32,44 @@ window.webglShipIcon = (function (){
         position.call(this, coordinateConverter);
     };
 
-    webglShipIcon.prototype.setPosition = function(position) {
+    ShipIcon.prototype.setPosition = function(position) {
         this.mesh.position.x = position.x;
         this.mesh.position.y = position.y;
     };
 
-    webglShipIcon.prototype.getPosition = function() {
+    ShipIcon.prototype.getPosition = function() {
         return {x: this.mesh.position.x, y: this.mesh.position.y};
     };
 
-    webglShipIcon.prototype.setFacing = function(facing) {
+    ShipIcon.prototype.setFacing = function(facing) {
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
 
-    webglShipIcon.prototype.getMovements = function(turn){
+    ShipIcon.prototype.getMovements = function(turn){
         return this.movements.filter(function(movement){
             return (turn === undefined || movement.turn === turn);
         }, this);
     };
 
-    webglShipIcon.prototype.setScale = function(width, height){
+    ShipIcon.prototype.setScale = function(width, height){
         this.shipEWSprite.setScale(width, height);
         this.shipSprite.setScale(width, height);
         this.ShipSelectedSprite.setScale(width, height);
         this.ShipSideSprite.setScale(width, height);
     };
 
-    webglShipIcon.prototype.displayEW = function(DEW, CCEW){
+    ShipIcon.prototype.displayEW = function(DEW, CCEW){
         this.shipEWSprite.update(DEW, CCEW);
         this.shipEWSprite.show();
     };
 
-    webglShipIcon.prototype.hideEW = function(){
+    ShipIcon.prototype.hideEW = function(){
         if (this.shipEWSprite) {
             this.shipEWSprite.hide();
         }
     };
 
-    webglShipIcon.prototype.showSideSprite = function(value) {
+    ShipIcon.prototype.showSideSprite = function(value) {
         if (value) {
             this.ShipSideSprite.show();
         } else {
@@ -72,7 +77,7 @@ window.webglShipIcon = (function (){
         }
     };
 
-    webglShipIcon.prototype.setSelected = function(value) {
+    ShipIcon.prototype.setSelected = function(value) {
         if (value) {
             this.ShipSelectedSprite.show();
         } else {
@@ -116,5 +121,5 @@ window.webglShipIcon = (function (){
         });
     }
 
-    return webglShipIcon;
+    return ShipIcon;
 })();

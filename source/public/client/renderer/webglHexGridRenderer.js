@@ -55,31 +55,38 @@ window.webglHexGridRenderer = (function(){
             return;
         }
 
-        var lefttop = new hexagon.FVHex(-(width/2), (height - (height/2)));
-        var righttop = new hexagon.FVHex((width-(width/2)), (height - (height/2)));
-        var leftbottom = new hexagon.FVHex(-(width/2), -(height/2));
-        //var rightbottom = new hexagon.FVHex((width-(width/2)), - (height/2));
+        var size = {
+            width: window.coordinateConverter.getHexWidth() * width,
+            height: window.coordinateConverter.getHexRowHeight() * height
+        };
 
-        var lineWidth = 10;
-
-        var gameWidth = window.coordinateConverter.fromHexToGame(righttop).x - window.coordinateConverter.fromHexToGame(lefttop).x;
-        var gameHeight = window.coordinateConverter.fromHexToGame(lefttop).y - window.coordinateConverter.fromHexToGame(leftbottom).y;
+        var position = {
+            x: width % 2 == 0 ? - window.coordinateConverter.getHexWidth() / 2 : 0,
+            y: 0
+        };
 
         var sprite = new window.BoxSprite(
-            {
-                width: gameWidth + lineWidth,
-                height: gameHeight + lineWidth
-            },
+            size,
             10,
             0,
             new THREE.Color(0,0,0),
             1
         );
+
+        sprite.setPosition(position);
         scene.add(sprite.mesh);
     }
 
     function debug(scene){
-        for (var i = 0; i < 15; i++ ){
+        var amount = 15;
+
+        for (var i = 1; i <= 15; i++ ){
+            x = getHexWidth(HEX_LENGTH)/2* i;
+            y = (getHexHeight(HEX_LENGTH) - getHexA(HEX_LENGTH)) * i;
+            scene.add(buildHexagonGeomatry(x,y, HEX_LENGTH));
+        }
+
+        for (var i = -1; i >= amount * -1; i-- ){
             x = getHexWidth(HEX_LENGTH)/2* i;
             y = (getHexHeight(HEX_LENGTH) - getHexA(HEX_LENGTH)) * i;
             scene.add(buildHexagonGeomatry(x,y, HEX_LENGTH));
@@ -87,7 +94,13 @@ window.webglHexGridRenderer = (function(){
     }
 
     function debug2(scene){
-        for (var i = 0; i < 21; i++ ){
+        var amount = 20;
+        for (var i = 1; i <= amount; i++ ){
+            x = getHexWidth(HEX_LENGTH) * i;
+            scene.add(buildHexagonGeomatry(x,0, HEX_LENGTH));
+        }
+
+        for (var i = -1; i >= amount*-1; i-- ){
             x = getHexWidth(HEX_LENGTH) * i;
             scene.add(buildHexagonGeomatry(x,0, HEX_LENGTH));
         }
@@ -183,7 +196,6 @@ window.webglHexGridRenderer = (function(){
         var x = b;
 
         var height = getTextureHeight(hl);
-        console.log(height, width - height);
 
         var canvas = createCanvas(width, height, false);
         var context = canvas.getContext("2d", {antialias: true});

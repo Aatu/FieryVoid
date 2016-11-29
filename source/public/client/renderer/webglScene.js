@@ -37,7 +37,7 @@ window.webglScene = (function(){
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.coordinateConverter.init(HEX_LENGTH, this.width, this.height);
-        this.animationDirector.init(this.coordinateConverter);
+        this.animationDirector.init(this.coordinateConverter, this.scene);
 
         this.camera = new THREE.OrthographicCamera(
             this.zoom*this.width / - 2,
@@ -71,7 +71,7 @@ window.webglScene = (function(){
 
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX, HEX_LENGTH);
-        this.animationDirector.receiveGamedata(ships, this.scene);
+        this.animationDirector.receiveGamedata(ships, this);
         this.render();
     };
 
@@ -275,6 +275,7 @@ window.webglScene = (function(){
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
+        console.log("clicked hex" , hexPos.x, hexPos.y);
 
         /*
         var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);

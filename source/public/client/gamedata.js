@@ -124,6 +124,24 @@ gamedata = {
             
         }
     },
+
+    getFirstFriendlyShip: function(){
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isMyShip(ship)){
+                return ship;
+            }
+        }
+    },
+
+    getFirstEnemyShip: function(){
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (!gamedata.isMyShip(ship)){
+                return ship;
+            }
+        }
+    },
     
     getActiveShip: function(){
         return gamedata.getShip(gamedata.activeship);
@@ -433,9 +451,10 @@ gamedata = {
     },
     
     getPlayerTeam: function(){
+        console.log("this player", gamedata.thisplayer);
         for (var i in gamedata.slots){
             var slot = gamedata.slots[i];
-            if (slot.playerid = gamedata.thisplayer)
+            if (slot.playerid == gamedata.thisplayer)
                 return slot.team;
         }
     },
@@ -443,7 +462,7 @@ gamedata = {
     getPlayerNameById: function(id){
         for(var i in gamedata.slots){
             var slot = gamedata.slots[i];
-            if(slot.playerid = id){
+            if(slot.playerid == id){
                 return slot.playername;
             }
         }
@@ -746,6 +765,14 @@ gamedata = {
             backDiv.style.marginLeft = "0px";
             document.getElementById("iniSlider").src = "img/pullOut.png";
         }
+    },
+
+    showCommitButton: function() {
+        $(".committurn").show();
+    },
+
+    hideCommitButton: function() {
+        $(".committurn").hide();
     },
             
     checkGameStatus: function(){

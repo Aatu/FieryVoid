@@ -119,7 +119,7 @@ window.ShipTooltip = (function(){
             position = window.coordinateConverter.fromHexToViewport(position);
         }
 
-        var yOffset = window.coordinateConverter.getHexHeight()/2;
+        var yOffset = window.coordinateConverter.getHexHeightViewport()/2;
 
         if (yOffset > 100) {
             yOffset = 100;

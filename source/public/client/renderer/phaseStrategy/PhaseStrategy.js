@@ -16,10 +16,15 @@ window.PhaseStrategy = (function(){
         this.activeShip = null;
     }
 
+    PhaseStrategy.prototype.consumeGamedata = function() {
+        this.shipIconContainer.consumeGamedata(this.gamedata);
+    };
+
     PhaseStrategy.prototype.activate = function (shipIcons, gamedata) {
         this.shipIconContainer = shipIcons;
         this.gamedata = gamedata;
         this.inactive = false;
+        this.consumeGamedata();
         return this;
     };
 
@@ -54,8 +59,12 @@ window.PhaseStrategy = (function(){
             this.onShipsClicked(icons.map(function(icon) {return this.gamedata.getShip(icon.shipId);}, this));
         } else if (icons.length === 1) {
             this.onShipClicked(this.gamedata.getShip(icons[0].shipId));
+        }else{
+            this.onHexClicked(payload);
         }
     };
+
+    PhaseStrategy.prototype.onHexClicked = function(payload) {};
 
     PhaseStrategy.prototype.onShipsClicked = function(ships) {
         console.log("CLICKING MULTIPLE SHIPS IS NOT YET IMPLEMENTED");

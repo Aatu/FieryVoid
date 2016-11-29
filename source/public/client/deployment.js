@@ -140,7 +140,6 @@ window.deployment = {
     },
     
     validateDeploymentPos: function(ship, hexpos){
-        
         if (!hexpos)
             hexpos = shipManager.getShipPosition(ship);
 
