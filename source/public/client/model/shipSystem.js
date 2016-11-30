@@ -77,8 +77,12 @@ Weapon.prototype.translateFCtoD100txt = function(fireControl)
 	var i = 0;
 	var toAdd;
 	for(i=0;i<=2;i++){
-		toAdd = fireControl[i];
-		if(fireControl[i] === null) toAdd = '-';
+		toAdd = fireControl[i]; 
+		if(fireControl[i] === null){ 
+			toAdd = '-';
+		}else{
+			toAdd = toAdd * 5;//d20 to d100
+		}
 		FCtxt = FCtxt+toAdd;
 		if(i<2) FCtxt = FCtxt+'/';
 	}
