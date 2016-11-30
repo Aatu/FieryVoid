@@ -13,8 +13,7 @@ window.ShipIconContainer = (function(){
     function setShips (ships) {
         ships.forEach(function (ship) {
             if (! this.hasIcon(ship.id)) {
-                var icon = new window.ShipIcon(ship, this.scene);
-                this.iconsAsObject[ship.id] = icon;
+                this.iconsAsObject[ship.id] = createIcon(ship, this.scene);
             } else {
                 this.iconsAsObject[ship.id].consumeShipdata(ship);
             }
@@ -36,18 +35,21 @@ window.ShipIconContainer = (function(){
 
     ShipIconContainer.prototype.onZoomEvent = function (payload) {
         var zoom = payload.zoom;
-        if (zoom >= 0.5) {
-            return;
+        if (zoom <= 0.5) {
+            var newzoom = 2 * zoom;
+            this.iconsAsArray.forEach(function (icon) {
+                icon.setScale(newzoom, newzoom);
+            })
         }
 
-        /**
-         * 0.5 = 1;
-         *
-         */
-        var newzoom = 2 * zoom;
-        this.iconsAsArray.forEach(function(icon){
-            icon.setScale(newzoom, newzoom);
+        var alpha = zoom > 6 ? zoom - 6 : 0;
+        if (alpha > 1) {
+            alpha = 1;
+        }
+        this.iconsAsArray.forEach(function (icon) {
+            icon.setOverlayColorAlpha(alpha);
         })
+
     };
 
     ShipIconContainer.prototype.getArray = function () {
@@ -89,6 +91,15 @@ window.ShipIconContainer = (function(){
         this.iconsAsArray = Object.keys(this.iconsAsObject).map(function(key){
            return this.iconsAsObject[key];
         }, this);
+    }
+
+    function createIcon(ship, scene) {
+        if (ship.flight) {
+            //TODO: not the best place to create SCS
+            return new window.FlightIcon(ship, scene);
+        } else {
+            return new window.ShipIcon(ship, scene);
+        }
     }
 
     return ShipIconContainer;

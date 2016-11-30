@@ -58,7 +58,11 @@ window.PhaseStrategy = (function(){
         if (icons.length > 1){
             this.onShipsClicked(icons.map(function(icon) {return this.gamedata.getShip(icon.shipId);}, this));
         } else if (icons.length === 1) {
-            this.onShipClicked(this.gamedata.getShip(icons[0].shipId));
+            if (payload.button != 0) {
+                this.onShipRightClicked(this.gamedata.getShip(icons[0].shipId));
+            } else {
+                this.onShipClicked(this.gamedata.getShip(icons[0].shipId));
+            }
         }else{
             this.onHexClicked(payload);
         }
@@ -68,6 +72,10 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.onShipsClicked = function(ships) {
         console.log("CLICKING MULTIPLE SHIPS IS NOT YET IMPLEMENTED");
+    };
+
+    PhaseStrategy.prototype.onShipRightClicked = function(ship) {
+        shipWindowManager.open(ship);
     };
 
     PhaseStrategy.prototype.onShipClicked = function(ship) {

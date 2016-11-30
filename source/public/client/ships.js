@@ -43,7 +43,7 @@ window.shipManager = {
             ship.shipclickableContainer.on("mouseover", shipClickable.shipclickableMouseOver);
             ship.shipclickableContainer.on("mouseout", shipClickable.shipclickableMouseOut);
             if (ship.flight){
-		ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
+		        ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
             }else{
                 ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
             }

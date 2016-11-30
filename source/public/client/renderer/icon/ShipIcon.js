@@ -7,9 +7,7 @@ window.ShipIcon = (function (){
         this.movements = null;
         this.mesh = null;
         this.size = ship.canvasSize;
-        this.addedToScene = false;
         this.mine = gamedata.isMyShip(ship);
-
 
         this.shipSprite = null;
         this.shipEWSprite = null;
@@ -17,19 +15,24 @@ window.ShipIcon = (function (){
         this.ShipSideSprite = null;
 
         this.consumeShipdata(ship);
-        create.call(this, ship.imagePath, scene);
+        this.create(ship.imagePath, scene);
     }
 
     ShipIcon.prototype.consumeShipdata = function (ship){
-        this.movements = consumeMovement.call(this, ship.movement);
+        this.movements = this.consumeMovement(ship.movement);
+        this.createShipWindow(ship);
     };
 
-    ShipIcon.prototype.render = function (scene, coordinateConverter) {
-        if (! this.addedToScene) {
-            scene.add(this.mesh);
+    ShipIcon.prototype.createShipWindow = function(ship) {
+        var element = jQuery(".shipwindow.ship_"+ship.id);
+;
+        if (!element.length) {
+            ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+        } else {
+            ship.shipStatusWindow = element;
         }
 
-        position.call(this, coordinateConverter);
+        shipWindowManager.setData(ship);
     };
 
     ShipIcon.prototype.setPosition = function(position) {
@@ -45,6 +48,10 @@ window.ShipIcon = (function (){
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
 
+    ShipIcon.prototype.setOverlayColorAlpha = function(alpha) {
+        this.shipSprite.setOverlayColorAlpha(alpha);
+    };
+
     ShipIcon.prototype.getMovements = function(turn){
         return this.movements.filter(function(movement){
             return (turn === undefined || movement.turn === turn);
@@ -52,10 +59,11 @@ window.ShipIcon = (function (){
     };
 
     ShipIcon.prototype.setScale = function(width, height){
-        this.shipEWSprite.setScale(width, height);
-        this.shipSprite.setScale(width, height);
-        this.ShipSelectedSprite.setScale(width, height);
-        this.ShipSideSprite.setScale(width, height);
+        this.mesh.scale.set(
+            width,
+            height,
+            1
+        );
     };
 
     ShipIcon.prototype.displayEW = function(DEW, CCEW){
@@ -87,12 +95,13 @@ window.ShipIcon = (function (){
 
 
 
-    function create(imagePath, scene) {
+    ShipIcon.prototype.create = function(imagePath, scene) {
         this.mesh = new THREE.Object3D();
         this.mesh.position = new THREE.Vector3(500, 0, 0);
         this.mesh.renderDepth = 10;
 
         this.shipSprite = new window.webglSprite(imagePath, {width: this.size/2, height: this.size/2}, 0);
+        this.shipSprite.setOverlayColor(this.mine ? new THREE.Color(160/255,250/255,100/255) : new THREE.Color(255/255,40/255,40/255));
         this.mesh.add(this.shipSprite.mesh);
 
         this.shipEWSprite = new window.ShipEWSprite({width: this.size/2, height: this.size/2}, -1);
@@ -105,9 +114,9 @@ window.ShipIcon = (function (){
         this.mesh.add(this.ShipSideSprite.mesh);
 
         scene.add(this.mesh);
-    }
+    };
 
-    function consumeMovement(movements){
+    ShipIcon.prototype.consumeMovement = function(movements){
         return movements.map(function(movement) {
             return {
                 id: movement.id,
@@ -119,7 +128,7 @@ window.ShipIcon = (function (){
                 offset: {x: movement.xOffset, y: movement.yOffset}
             };
         });
-    }
+    };
 
     return ShipIcon;
 })();

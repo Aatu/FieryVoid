@@ -1,6 +1,6 @@
 window.webglScene = (function(){
 
-    var ZOOM_MAX = 8;
+    var ZOOM_MAX = 7;
     var ZOOM_MIN = 0.1;
     var HEX_LENGTH = 50;
 
@@ -48,15 +48,16 @@ window.webglScene = (function(){
             1000
         );
 
-
+        /*
         var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
         var cube = new THREE.Mesh( geometry, material );
         this.scene.add( cube );
+        */
 
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
-        this.renderer = new THREE.WebGLRenderer({ alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize( this.width, this.height );
         this.renderer.context.getExtension('OES_standard_derivatives');
 
@@ -130,6 +131,13 @@ window.webglScene = (function(){
                 animationReady: Boolean(animationReady)
             }
         );
+
+        var alpha = zoom > 6 ? zoom - 6 : 0;
+        if (alpha > 1) {
+            alpha = 1;
+        }
+
+        jQuery('#background').css({opacity: 1-alpha});
     };
 
     webglScene.prototype.render = function () {
@@ -275,6 +283,7 @@ window.webglScene = (function(){
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
+        payload.button = event.button;
         console.log("clicked hex" , hexPos.x, hexPos.y);
 
         /*

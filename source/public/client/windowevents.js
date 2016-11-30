@@ -53,6 +53,7 @@ function drawEntities(){
 }
  
 jQuery(function(){
+    /*
     $("#zoomin").on("click", zooming.zoomin);
     $("#zoomout").on("click", zooming.zoomout);
     $("#pagecontainer").on("mousedown", scrolling.mousedown);
@@ -76,6 +77,7 @@ jQuery(function(){
         event = event || window.event;
         
     }
+    */
 });
 
 window.windowEvents = {

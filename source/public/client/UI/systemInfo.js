@@ -76,6 +76,4 @@ window.systemInfo = {
 		$("#systemInfo").hide();
         $('.UI').removeClass("active");
 	}
-
-
-}
+};

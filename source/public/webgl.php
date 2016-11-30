@@ -30,7 +30,9 @@
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
     <script src="client/lib/stats.min.js"></script>
 
@@ -83,6 +85,7 @@
     <script src="client/renderer/sprite/PlainSprite.js"></script>
 
     <script src="client/renderer/icon/ShipIcon.js"></script>
+    <script src="client/renderer/icon/FlightIcon.js"></script>
     <script src="client/renderer/icon/DeploymentIcon.js"></script>
 
     <script src="client/lib/coordinateConverter.js"></script>
@@ -163,7 +166,7 @@
 </head>
 
 
-<body style="background-image:url(img/maps/<?php print($serverdata->background); ?>)">
+<body>
 
 
 <div id="phaseheader" class="roundedright" style="">
@@ -447,16 +450,19 @@
     
 </div>
 
+<div id="systemInfo">
+    <div class="name"><span class="name header">test</span></div>
+    <div class="datacontainer"></div>
+</div>
+
 <div id="pagecontainer" oncontextmenu="return false;">
+    <div id="background" style="background-image:url(img/maps/<?php print($serverdata->background); ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
     <canvas id="hexgrid" class="tacticalcanvas"></canvas>
     <canvas id="EWindicators" class="tacticalcanvas"></canvas>
     <canvas id="effects" class="tacticalcanvas"></canvas>
 
-	<div id="systemInfo">
-		<div class="name"><span class="name header">test</span></div>
-		<div class="datacontainer"></div>
-	</div>
+
 
     <div id="shipNameContainer">
         <div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>

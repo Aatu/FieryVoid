@@ -1,8 +1,8 @@
 jQuery(function(){
-	$(".system .on").bind("contextmenu", function(e) {
+	$(".system .on").on("contextmenu", function(e) {
 		e.preventDefault();
 	}); 
-	$(".system .off").bind("contextmenu", function(e) {
+	$(".system .off").on("contextmenu", function(e) {
 		e.preventDefault();
 	}); 
 });
@@ -28,7 +28,8 @@ shipWindowManager = {
 	},	
 	
 	open: function(ship){
-	
+
+		console.log("hi");
 		
 		var old;
 		if (ship.userid == gamedata.thisplayer){
@@ -43,9 +44,12 @@ shipWindowManager = {
 		
 		if (!n)
 			return;
-			
+
+		console.log("!n");
 		if (n.css("display") == "block")
 			return;
+
+        console.log("visible");
 			
 		if (old.length){
 			old.hide();

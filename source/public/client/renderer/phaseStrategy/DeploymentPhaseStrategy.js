@@ -20,7 +20,7 @@ window.DeploymentPhaseStrategy = (function(){
         var ship = gamedata.getFirstFriendlyShip();
 
         if (ship) {
-            this.selectShip();
+            this.selectShip(ship);
         }
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
@@ -125,8 +125,6 @@ window.DeploymentPhaseStrategy = (function(){
             };
 
             var result = Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width/2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height/2);
-
-            console.log("deployment offset", offsetPosition, result);
 
             return result;
         }
