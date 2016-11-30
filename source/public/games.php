@@ -44,19 +44,17 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 8th of November 2016";
+                    header.innerHTML = "Latest News 30th of November 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Large technical update: firing procedures severely changed";
+                    news.innerHTML += "- This time just a small update, but useful one (I hope)";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- (yes, again You'll see mainly bugs... sorry!!! but it'll get better)"; 
+                    news.innerHTML += "- Number of criticals is didplayed along with name :)"; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- New playable race: Deneth! (courtesy of Wolfgang Lackner-Warton)";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- New fleet selection screen organisation. Not all fleets take full advantage of it yet - EA does ;) .";
+                    news.innerHTML += "- So now You'll know just how many 'double cost' crits Your thruster has :) ";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
