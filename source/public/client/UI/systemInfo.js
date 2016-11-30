@@ -37,7 +37,15 @@ window.systemInfo = {
 			h +="<div><span>DAMAGE:</span></div><ul>"
 			
 			for (var i in system.critData){
-				h += "<li class='crit'>"+system.critData[i]+"</li>";
+				var noOfCrits = 0;
+				for(var j in system.criticals){
+					if(system.criticals[j].phpclass == i) noOfCrits++;
+				}
+				if(noOfCrits>1){ //display multiplier too
+					h += "<li class='crit'>("+noOfCrits+"x) "+system.critData[i]+"</li>";
+				}else{ //just crit name
+					h += "<li class='crit'>"+system.critData[i]+"</li>";
+				}
 			}
 			h += "</ul>"
 		}
