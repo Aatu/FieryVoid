@@ -39,7 +39,7 @@ window.systemInfo = {
 			for (var i in system.critData){
 				var noOfCrits = 0;
 				for(var j in system.criticals){
-					if(system.criticals[j].phpclass == i) noOfCrits++;
+					//if(system.criticals[j].phpclass == i) noOfCrits++;
 				}
 				if(noOfCrits>1){ //display multiplier too
 					h += "<li class='crit'>("+noOfCrits+"x) "+system.critData[i]+"</li>";
