@@ -183,6 +183,7 @@ gamedata = {
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         hexgrid.unSelectHex();
+        window.webglScene.receiveGamedata(this);
     },
     
     onCommitClicked: function(e){
@@ -513,8 +514,10 @@ gamedata = {
 //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
         if (gamedata.gamephase == -1){
             if (gamedata.waiting == false){
+                //TODO: move to new renderer
                 combatLog.onTurnStart();
                 infowindow.informPhase(5000, null);
+
                 for (var i in gamedata.ships){
                     var ship = gamedata.ships[i];
                     if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
@@ -531,6 +534,7 @@ gamedata = {
                 effects.displayAllWeaponFire(function(){
 					gamedata.subphase = 1;
                     damageDrawer.checkDamages();
+                    //TODO: move to new renderer
                     infowindow.informPhase(5000, null);
                     
                     });
@@ -538,7 +542,8 @@ gamedata = {
                 gamedata.subphase = 1;
                 damageDrawer.checkDamages();
             }
-            
+
+            //TODO: move to new renderer
             fleetListManager.updateFleetList();
         }
         
@@ -555,9 +560,11 @@ gamedata = {
                 var ship = gamedata.getActiveShip();
                 
                 if (ship.userid == gamedata.thisplayer){
+                    //TODO: move to new renderer
                     shipManager.movement.doForcedPivot(ship);
 
                     if (ship.base){
+                        //TODO: move to new renderer
                         shipManager.movement.doRotate(ship);
                         gamedata.autoCommitOnMovement(ship);
                     }
@@ -568,6 +575,7 @@ gamedata = {
         }
           
         if (gamedata.gamephase == 1 && gamedata.waiting == false){
+            //TODO: move to new renderer
             shipManager.power.repeatLastTurnPower();
             infowindow.informPhase(5000, function(){shipWindowManager.prepare()});
             if (gamedata.waiting == false){
@@ -852,6 +860,7 @@ gamedata = {
             gamedata.waiting = true;
             ajaxInterface.startPollingGamedata();
             gamedata.checkGameStatus();
+            webglScene.receiveGamedata(this);
         }
     },
 
@@ -893,6 +902,7 @@ gamedata = {
             gamedata.initPhase();
             drawEntities();
             gamedata.drawIniGUI();
+            window.webglScene.receiveGamedata(this);
 
         }
         gamedata.checkGameStatus();
@@ -909,10 +919,6 @@ gamedata = {
         {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
-        }
-
-        if (window.webglScene && window.webglScene.animationDirector) {
-            window.webglScene.animationDirector.receiveShips(gamedata.ships);
         }
     },
     

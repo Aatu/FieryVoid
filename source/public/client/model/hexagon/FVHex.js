@@ -4,7 +4,7 @@ if (typeof window.hexagon === 'undefined')
 window.hexagon.FVHex = (function () {
 
     function FVHex(x, y) {
-        if (typeof x == "object" && x.x && x.y) {
+        if (typeof x == "object" && x.x != undefined && x.y != undefined) {
             this.x = x.x;
             this.y = x.y;
         }else {
@@ -43,6 +43,4 @@ window.hexagon.FVHex = (function () {
     };
 
     return FVHex;
-})();/**
- * Created by aatu on 24.11.2016.
- */
+})();

@@ -35,7 +35,8 @@ jQuery(function(){
 });
 
 window.botPanel = {
-    
+
+	updateCallback: null,
     onLogUIClicked: function(e){
         
         var e = $(this);
@@ -51,53 +52,52 @@ window.botPanel = {
     },
 
 	onShipStatusChanged: function(ship){
-		if (!gamedata.isSelected(ship))
-			return;
-			
-		if (gamedata.gamephase == 1){
-			botPanel.setEW(ship);
-		}
-		
-		if (gamedata.gamephase == 2){
-			botPanel.setMovement(ship);
-		}
-	
+		if (botPanel.updateCallback) {
+            botPanel.updateCallback(ship);
+        }
+	},
+
+	deactivate: function() {
+        botPanel.updateCallback = null;
 	},
 	
 	setEW: function(ship){
+        botPanel.updateCallback = botPanel.setEW;
 		shipWindowManager.addEW(ship, $("#botPanel"));
 	},
 	
 	setMovement: function(ship){
-            var speed = shipManager.movement.getSpeed(ship);
-            var turncost = Math.ceil(speed * ship.turncost);
-            var turndelay = Math.ceil(speed * ship.turndelaycost);
-            
-            $("#botPanel .value.currentturndelay").html(shipManager.movement.calculateCurrentTurndelay(ship));
-            $("#botPanel .value.turndelay").html(turndelay);
-            $("#botPanel .value.turncost").html(turncost);
-		
-            $("#botPanel .value.accelcost").html(ship.accelcost);
-            if(ship.pivotcost == 999){
-                $("#botPanel .value.pivotcost").html("N/A");
-            }else{
-                $("#botPanel .value.pivotcost").html(ship.pivotcost);
-            }
+        botPanel.updateCallback = botPanel.setMovement;
 
-            if(ship.rollcost == 999){
-                $("#botPanel .value.rollcost").html("N/A");
-            }else{
-                $("#botPanel .value.rollcost").html(ship.rollcost);
-            }
+		var speed = shipManager.movement.getSpeed(ship);
+		var turncost = Math.ceil(speed * ship.turncost);
+		var turndelay = Math.ceil(speed * ship.turndelaycost);
 
-            if (ship.flight){
-                    $("#botPanel .value.evasion").html(shipManager.movement.getJinking(ship));
-                    $("#botPanel .entry.evasion").show();
-            }else{
-                    $("#botPanel .entry.evasion").hide();
-            }
+		$("#botPanel .value.currentturndelay").html(shipManager.movement.calculateCurrentTurndelay(ship));
+		$("#botPanel .value.turndelay").html(turndelay);
+		$("#botPanel .value.turncost").html(turncost);
 
-            $("#botPanel .value.unusedthrust").html(shipManager.movement.getRemainingEngineThrust(ship));
+		$("#botPanel .value.accelcost").html(ship.accelcost);
+		if(ship.pivotcost == 999){
+			$("#botPanel .value.pivotcost").html("N/A");
+		}else{
+			$("#botPanel .value.pivotcost").html(ship.pivotcost);
+		}
+
+		if(ship.rollcost == 999){
+			$("#botPanel .value.rollcost").html("N/A");
+		}else{
+			$("#botPanel .value.rollcost").html(ship.rollcost);
+		}
+
+		if (ship.flight){
+				$("#botPanel .value.evasion").html(shipManager.movement.getJinking(ship));
+				$("#botPanel .entry.evasion").show();
+		}else{
+				$("#botPanel .entry.evasion").hide();
+		}
+
+		$("#botPanel .value.unusedthrust").html(shipManager.movement.getRemainingEngineThrust(ship));
 	},
 	
 	setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){

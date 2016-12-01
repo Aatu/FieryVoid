@@ -14,6 +14,7 @@ window.PhaseStrategy = (function(){
         this.selectedShip = null;
         this.targetedShip = null;
         this.activeShip = null;
+        this.animationStrategy = null;
 
 
         this.movementUI = null;
@@ -29,11 +30,17 @@ window.PhaseStrategy = (function(){
         this.positionMovementUI();
     };
 
-    PhaseStrategy.prototype.activate = function (shipIcons, gamedata) {
+    PhaseStrategy.prototype.update = function (gamedata) {
+        this.gamedata = gamedata;
+        this.consumeGamedata();
+    };
+
+    PhaseStrategy.prototype.activate = function (shipIcons, gamedata, webglScene) {
         this.shipIconContainer = shipIcons;
         this.gamedata = gamedata;
         this.inactive = false;
         this.consumeGamedata();
+        this.animationStrategy.activate(shipIcons, gamedata.turn, webglScene.scene);
         return this;
     };
 
@@ -184,29 +191,16 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.showShipEW = function(ship) {
-        var dew = window.ew.getDefensiveEW(ship);
-        if (ship.flight)
-            dew = shipManager.movement.getJinking(ship);
+        this.shipIconContainer.getByShip(ship).showEW();
+    };
 
-        var ccew = window.ew.getCCEW(ship);
-        this.shipIconContainer.getById(ship.id).displayEW(dew, ccew);
+    PhaseStrategy.prototype.hideShipEW = function(ship) {
+        this.shipIconContainer.getByShip(ship).hideEW();
     };
 
     PhaseStrategy.prototype.showShipTooltip = function(ships, payload) {
         ships = [].concat(ships);
         var shipTooltip = new window.ShipTooltip(ships, payload.hex);
-        this.onMouseOutCallbacks.push(function(){ shipTooltip.destroy(); });
-        this.onZoomCallbacks.push(function(){ shipTooltip.reposition(); });
-        this.onScrollCallbacks.push(function(){shipTooltip.reposition();});
-    };
-
-    PhaseStrategy.prototype.onMouseOverShips = function(ship, hex) {
-        icon.displayEW(8, 2);
-        var ships = shipIcons.map(function(icon){
-            return gamedata.getShip(icon.shipId);
-        }, this);
-
-        var shipTooltip = new window.ShipTooltip(ships, hex);
         this.onMouseOutCallbacks.push(function(){ shipTooltip.destroy(); });
         this.onZoomCallbacks.push(function(){ shipTooltip.reposition(); });
         this.onScrollCallbacks.push(function(){shipTooltip.reposition();});
@@ -244,6 +238,14 @@ window.PhaseStrategy = (function(){
     PhaseStrategy.prototype.hideMovementUI = function() {
         UI.shipMovement.hide();
         this.movementUI = null;
+    };
+
+    PhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function() {
+        var ship = gamedata.getFirstFriendlyShip();
+
+        if (ship) {
+            this.selectShip(ship);
+        }
     };
 
     function getInterestingStuffInPosition(payload){

@@ -62,12 +62,12 @@ jQuery(function(){
     $("#pagecontainer").on("mouseout", scrolling.mouseout);
     $("#pagecontainer").on("click", hexgrid.onHexClicked);
     $(document).on("keyup", windowEvents.onKeyUp);
-    
+    */
     
     $(".committurn").on("click", gamedata.onCommitClicked);
     $(".cancelturn").on("click", gamedata.onCancelClicked);
     $(".logUiEntry").on("click", botPanel.onLogUIClicked);
-    
+    /*
 //	$("#helphide").on("click", window.helper.onClickHelpHide);
 //	$("#autocommit").on("click", window.helper.onClickAutoCommit);
 //	$(".ingamehelppanel").on("click", window.helper.onClickInHelp);

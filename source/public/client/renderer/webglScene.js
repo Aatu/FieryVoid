@@ -26,7 +26,7 @@ window.webglScene = (function(){
         this.stats = null;
     }
 
-    webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, ships, coordinateConverter) {
+    webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
         this.element = element;
         this.hexGridRenderer = hexGridRenderer;
         this.animationDirector = animationTimeline;
@@ -72,8 +72,16 @@ window.webglScene = (function(){
 
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX, HEX_LENGTH);
-        this.animationDirector.receiveGamedata(ships, this);
+        this.animationDirector.receiveGamedata(gamedata, this);
         this.render();
+    };
+
+    webglScene.prototype.receiveGamedata = function(gamedata) {
+        if (!this.animationDirector) {
+            return;
+        }
+
+        this.animationDirector.receiveGamedata(gamedata, this);
     };
 
     webglScene.prototype.moveCamera = function(position) {
@@ -178,7 +186,6 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseDown = function(event)
     {
-        console.log("mouse down WEBGLSCENE");
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
 

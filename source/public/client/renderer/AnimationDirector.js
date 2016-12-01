@@ -46,10 +46,19 @@ window.animationDirector = (function() {
             return activatePhaseStrategy.call(this, window.DeploymentPhaseStrategy, gamedata, scene);
         }
 
+        if (gamedata.gamephase === 1) {
+            return activatePhaseStrategy.call(this, window.InitialPhaseStrategy, gamedata, scene);
+        }
+
         return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
     }
 
     function activatePhaseStrategy(phaseStrategy, gamedata, scene) {
+        if (this.phaseStrategy && this.phaseStrategy instanceof phaseStrategy) {
+            this.phaseStrategy.update(gamedata);
+            return;
+        }
+
         if (this.phaseStrategy) {
             this.phaseStrategy.deactivate();
         }

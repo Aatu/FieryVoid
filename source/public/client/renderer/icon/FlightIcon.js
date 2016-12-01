@@ -3,7 +3,7 @@ window.FlightIcon = (function (){
     var FIGHTER_SPRITE_SIZE = 34;
 
     function FlightIcon(ship, scene){
-        this.fighters = [];
+        this.fighters = consumeFighters.call(this, ship);
         this.fighterSprites = [];
 
         ShipIcon.call(this, ship, scene);
@@ -35,7 +35,8 @@ window.FlightIcon = (function (){
         });
     };
 
-    FlightIcon.prototype.create = function(imagePath, scene) {
+    FlightIcon.prototype.create = function(ship, scene) {
+        var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
         this.mesh.position = new THREE.Vector3(500, 0, 0);
         this.mesh.renderDepth = 10;

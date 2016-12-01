@@ -1,8 +1,8 @@
 window.DeploymentPhaseStrategy = (function(){
 
     function DeploymentPhaseStrategy(coordinateConverter){
-        this.animationStrategy = new window.IdleAnimationStrategy();
         PhaseStrategy.call(this, coordinateConverter);
+        this.animationStrategy = new window.IdleAnimationStrategy();
 
         this.deploymentSprites = [];
     }
@@ -10,18 +10,12 @@ window.DeploymentPhaseStrategy = (function(){
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
     DeploymentPhaseStrategy.prototype.activate = function (shipIcons, gamedata, webglScene) {
-        PhaseStrategy.prototype.activate.call(this, shipIcons, gamedata);
-        this.animationStrategy.activate(shipIcons, gamedata.turn, webglScene.scene);
-        this.gamedata = gamedata;
+        PhaseStrategy.prototype.activate.call(this, shipIcons, gamedata, webglScene);
 
         console.log(gamedata);
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);
 
-        var ship = gamedata.getFirstFriendlyShip();
-
-        if (ship) {
-            this.selectShip(ship);
-        }
+        this.selectFirstOwnShipOrActiveShip();
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
 
@@ -162,7 +156,7 @@ window.DeploymentPhaseStrategy = (function(){
             var ship = gamedata.ships[i];
 
             if (! gamedata.isMyShip(ship)) {
-                return true;
+                continue;
             }
 
             if (! validateDeploymentPosition(ship, null, deploymentSprites)){
@@ -174,8 +168,9 @@ window.DeploymentPhaseStrategy = (function(){
     }
 
     function validateDeploymentPosition(ship, hex, deploymentSprites){
-        if (!hex)
+        if (!hex) {
             hex = new hexagon.FVHex(shipManager.getShipPosition(ship));
+        }
 
         var icon = getSlotById(ship.slot, deploymentSprites);
         return icon.isValidDeploymentPosition(hex);

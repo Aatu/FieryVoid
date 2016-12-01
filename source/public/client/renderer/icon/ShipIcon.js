@@ -14,12 +14,13 @@ window.ShipIcon = (function (){
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
 
+        this.create(ship, scene);
         this.consumeShipdata(ship);
-        this.create(ship.imagePath, scene);
     }
 
     ShipIcon.prototype.consumeShipdata = function (ship){
         this.movements = this.consumeMovement(ship.movement);
+        this.consumeEW(ship);
         this.createShipWindow(ship);
     };
 
@@ -66,8 +67,18 @@ window.ShipIcon = (function (){
         );
     };
 
-    ShipIcon.prototype.displayEW = function(DEW, CCEW){
-        this.shipEWSprite.update(DEW, CCEW);
+    ShipIcon.prototype.consumeEW = function(ship) {
+        var dew = ew.getDefensiveEW(ship);
+        if (ship.flight) {
+            dew = shipManager.movement.getJinking(ship);
+        }
+
+        var ccew = ew.getCCEW(ship);
+
+        this.shipEWSprite.update(dew, ccew);
+    };
+
+    ShipIcon.prototype.showEW = function(){
         this.shipEWSprite.show();
     };
 
@@ -93,7 +104,8 @@ window.ShipIcon = (function (){
         }
     };
 
-    ShipIcon.prototype.create = function(imagePath, scene) {
+    ShipIcon.prototype.create = function(ship, scene) {
+        var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
         this.mesh.position = new THREE.Vector3(500, 0, 0);
         this.mesh.renderDepth = 10;

@@ -95,6 +95,8 @@
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
 
 
     <script src="client/UI/ShipTooltip.js"></script>
