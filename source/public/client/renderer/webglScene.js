@@ -178,6 +178,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseDown = function(event)
     {
+        console.log("mouse down WEBGLSCENE");
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
 

@@ -98,6 +98,7 @@
 
 
     <script src="client/UI/ShipTooltip.js"></script>
+    <script src="client/ShipMovementCallbacks.js"></script>
 
 
     <script src="client/model/hexagon/Cube.js"></script>

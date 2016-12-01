@@ -39,6 +39,7 @@ window.DeploymentPhaseStrategy = (function(){
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0){
                 shipManager.movement.deploy(this.selectedShip, hex);
                 this.consumeGamedata();
+                this.drawMovementUI(this.selectedShip);
 
                 if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
                     gamedata.showCommitButton();
@@ -52,11 +53,17 @@ window.DeploymentPhaseStrategy = (function(){
     DeploymentPhaseStrategy.prototype.selectShip = function(ship) {
         PhaseStrategy.prototype.selectShip.call(this, ship);
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
+
+        var hex = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+        if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
+            this.drawMovementUI(this.selectedShip);
+        }
     };
 
     DeploymentPhaseStrategy.prototype.deselectShip = function(ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         hideDeploymentArea(ship, this.deploymentSprites, this.gamedata);
+        this.hideMovementUI();
     };
 
     DeploymentPhaseStrategy.prototype.targetShip = function(ship) {};

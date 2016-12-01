@@ -93,8 +93,6 @@ window.ShipIcon = (function (){
         }
     };
 
-
-
     ShipIcon.prototype.create = function(imagePath, scene) {
         this.mesh = new THREE.Object3D();
         this.mesh.position = new THREE.Vector3(500, 0, 0);

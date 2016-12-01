@@ -34,7 +34,7 @@ window.animationDirector = (function() {
             return;
         }
 
-        this.phaseStrategy.animationStrategy.render(coordinateConverter, scene);
+        this.phaseStrategy.render(coordinateConverter, scene);
     };
 
     function resolvePhaseStrategy(gamedata, scene) {

@@ -14,10 +14,19 @@ window.PhaseStrategy = (function(){
         this.selectedShip = null;
         this.targetedShip = null;
         this.activeShip = null;
+
+
+        this.movementUI = null;
     }
 
     PhaseStrategy.prototype.consumeGamedata = function() {
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.redrawMovementUI();
+    };
+
+    PhaseStrategy.prototype.render = function(coordinateConverter, scene){
+        this.animationStrategy.render(coordinateConverter, scene);
+        this.positionMovementUI();
     };
 
     PhaseStrategy.prototype.activate = function (shipIcons, gamedata) {
@@ -201,10 +210,41 @@ window.PhaseStrategy = (function(){
         this.onMouseOutCallbacks.push(function(){ shipTooltip.destroy(); });
         this.onZoomCallbacks.push(function(){ shipTooltip.reposition(); });
         this.onScrollCallbacks.push(function(){shipTooltip.reposition();});
-
     };
 
+    PhaseStrategy.prototype.positionMovementUI = function(){
+        if (!this.movementUI) {
+            return;
+        }
 
+        var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
+        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px");
+    };
+
+    PhaseStrategy.prototype.redrawMovementUI = function(){
+        if (!this.movementUI) {
+            return;
+        }
+
+        this.drawMovementUI(this.movementUI.ship);
+    };
+
+    PhaseStrategy.prototype.drawMovementUI = function(ship) {
+        UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.consumeGamedata.bind(this)));
+        this.movementUI = {
+            element: UI.shipMovement.uiElement,
+            ship: ship,
+            icon: this.shipIconContainer.getByShip(ship),
+            position: null
+        };
+
+        this.positionMovementUI();
+    };
+
+    PhaseStrategy.prototype.hideMovementUI = function() {
+        UI.shipMovement.hide();
+        this.movementUI = null;
+    };
 
     function getInterestingStuffInPosition(payload){
        return this.shipIconContainer.getIconsInProximity(payload);

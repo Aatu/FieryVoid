@@ -22,6 +22,10 @@ window.ShipIconContainer = (function(){
         buildShipArray.call(this);
     }
 
+    ShipIconContainer.prototype.getByShip = function(ship) {
+        return this.iconsAsObject[ship.id];
+    };
+
     ShipIconContainer.prototype.getById = function(id) {
         return this.iconsAsObject[id];
     };

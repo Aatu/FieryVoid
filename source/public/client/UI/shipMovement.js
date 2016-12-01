@@ -66,8 +66,14 @@ window.UI = {
                 UI.shipMovement.morejinkElement.on("click", UI.shipMovement.morejinkCallback);
                 UI.shipMovement.lessjinkElement.on("click", UI.shipMovement.lessjinkCallback);
                 
-                
-                
+                jQuery('#shipMovementUI div').on('mousedown', cancelEvent);
+                jQuery('#shipMovementUI div').on('mouseup', cancelEvent);
+
+                function cancelEvent(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
                 UI.shipMovement.iniated = true;
         },
         
@@ -92,58 +98,27 @@ window.UI = {
         },
         
         cancelCallback: function(e){
-			e.stopPropagation();
-                
-            if (gamedata.gamephase == 2){
-                var ship = gamedata.getActiveShip();
-                shipManager.movement.deleteMove(ship);
-            }
-
-            if (gamedata.gamephase == 3){
-                var ship = gamedata.getSelectedShip();
-                shipManager.movement.deleteMove(ship);
-            }
+            UI.shipMovement.callbackHandler.cancelCallback(e);
 		},
         
         morejinkCallback: function(e){
-			e.stopPropagation();
-                
-            var ship = gamedata.getActiveShip();
-            shipManager.movement.doJink(ship, 1);
+            UI.shipMovement.callbackHandler.morejinkCallback(e);
 		},
 		
         lessjinkCallback: function(e){
-			e.stopPropagation();
-                
-            var ship = gamedata.getActiveShip();
-            shipManager.movement.doJink(ship, -1);
+            UI.shipMovement.callbackHandler.lessjinkCallback(e);
 		},        
         
         accelCallback: function(e){
-            e.stopPropagation();
-                
-            var ship = gamedata.getActiveShip();
-                if (!ship)
-                ship = gamedata.getSelectedShip();
-
-            shipManager.movement.changeSpeed(ship, true);
+            UI.shipMovement.callbackHandler.accelCallback(e);
         },
         
         deaccCallback: function(e){
-            e.stopPropagation();
-                
-            var ship = gamedata.getActiveShip();
-                if (!ship)
-                ship = gamedata.getSelectedShip();
-            shipManager.movement.changeSpeed(ship, false);
+            UI.shipMovement.callbackHandler.deaccCallback(e);
         },
         
         rollCallback: function(e){
-            e.stopPropagation();
-                
-            var ship = gamedata.getActiveShip();
-            shipManager.movement.doRoll(ship);
-            
+            UI.shipMovement.callbackHandler.rollCallback(e);
         }, 
         
         pivotrightCallback: function(e){
@@ -158,15 +133,7 @@ window.UI = {
         }, 
         
         pivotCallback: function(e, right){
-			if (UI.shipMovement.checkUITimeout())
-                return false;
-                
-            var ship = gamedata.getActiveShip();
-            
-            if (gamedata.gamephase == 3)
-                ship = gamedata.getSelectedShip();
-            
-            shipManager.movement.doPivot(ship, right);
+            UI.shipMovement.callbackHandler.pivotCallback(e, right);
             
         },
 
@@ -181,13 +148,7 @@ window.UI = {
         }, 
 
         rotateCallback: function(e, right){
-            e.stopPropagation();  
-            var ship = gamedata.getActiveShip();
-            if (!ship)
-                ship = gamedata.getSelectedShip();
-            if (ship.base){
-                shipManager.movement.pickRotation(ship, right);
-            }
+            UI.shipMovement.callbackHandler.rotateCallback(e, right);
         },
 
         
@@ -202,12 +163,7 @@ window.UI = {
         }, 
         
         slipCallback: function(e, right){
-                        
-            var ship = gamedata.getActiveShip();
-                    
-            shipManager.drawShip(ship);     
-            shipManager.movement.doSlip(ship, right);
-            
+            UI.shipMovement.callbackHandler.slipCallback(e, right);
         },
         
         turnrightCallback: function(e){
@@ -221,37 +177,17 @@ window.UI = {
         }, 
         
         turnCallback: function(e, right){
-            var ship = gamedata.getActiveShip();
-            if (!ship)
-                ship = gamedata.getSelectedShip();
-            
-            shipManager.movement.doTurn(ship, right);
-                
-            shipManager.drawShip(ship);
+            UI.shipMovement.callbackHandler.turnCallback(e, right);
             
         }, 
         
         moveCallback: function(e){
-            e.stopPropagation();
-            
-            if (UI.shipMovement.checkUITimeout())
-                return false;
-    
-            var ship = gamedata.getActiveShip();
-            
-            shipManager.movement.doMove(ship);
-        
-            shipManager.drawShip(ship);
-        
-            
+            UI.shipMovement.callbackHandler.moveCallback(e);
         },
         
-        drawShipMovementUI: function(ship){
-        
-            if (!shipManager.hasAnimationsDone(ship)){
-                UI.shipMovement.hide();
-                return;
-            }
+        drawShipMovementUI: function(ship, callbackHandler){
+
+            UI.shipMovement.callbackHandler = callbackHandler;
             
                     
             UI.shipMovement.initMoveUI();
@@ -263,8 +199,8 @@ window.UI = {
             var shipX = ship.movement[ship.movement.length-1].x;
             var shipY = ship.movement[ship.movement.length-1].y;
             
-            var pos = shipManager.getShipPositionInWindowCo(ship);
-            ui.css("top", pos.y +"px").css("left", pos.x +"px");
+            var pos = {x:400, y: 400};
+            //ui.css("top", pos.y +"px").css("left", pos.x +"px");
             
             var move = UI.shipMovement.moveElement;
             var s = 40;

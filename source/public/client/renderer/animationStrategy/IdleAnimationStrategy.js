@@ -31,7 +31,7 @@ window.IdleAnimationStrategy = (function(){
         var facing = shipManager.hexFacingToAngle(movement.facing);
 
         icon.setPosition(gamePosition);
-        icon.setFacing(facing);
+        icon.setFacing(-facing);
     };
 
     IdleAnimationStrategy.prototype.getLastMovement = function(movements) {
