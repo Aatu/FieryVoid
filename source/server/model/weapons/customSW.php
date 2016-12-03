@@ -3,6 +3,17 @@
 */
 
 
+/*SW Scanners have boostability reduced to +2*/
+class SWScanner extends Scanner {
+    public $maxBoostLevel = 2;
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["<font color='red'>Remark</font>"] = "<br>Boostability limited to +$maxBoostLevel.";  
+    }
+	
+}
+
 
 
 /*
