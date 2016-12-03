@@ -879,6 +879,151 @@ class SWHeavyTLaser extends SWDirectWeapon{
 } //end of class SWHeavyTLaser
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class SWLightLaserE extends SWLightLaser{
+    public $name = "SWLightLaserE";
+    public $displayName = "Light Laser (Early)";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 2;
+    public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
+
+	public function getDamage($fireOrder){ return  Dice::d(6)+1 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 7+$this->damagebonus ;      }
+} //end of class SWLightLaserE
+class SWMediumLaserE extends SWMediumLaser{
+    /*StarWars standard ship-mounted laser - an universal (if still very light) weapon
+    */
+    public $name = "SWMediumLaserE";
+    public $displayName = "Medium Laser (Early)";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 1.5; // 3 per 2 hexes
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+	
+	public function getDamage($fireOrder){ return  Dice::d(8)+2 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 3 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 +$this->damagebonus ;      }
+} //end of class SWMediumLaserE
+class SWHeavyLaserE extends SWHeavyLaser{
+    public $name = "SWHeavyLaserE";
+    public $displayName = "Heavy Laser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 2;
+    public $rangePenalty = 1; 
+    public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+
+	public function getDamage($fireOrder){ return  Dice::d(8)+3 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 4 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11 +$this->damagebonus ;      }
+} //end of class SWHeavyLaserE
+class SWLightTLaserE extends SWLightTLaser{
+    public $name = "SWLightTLaserE";
+    public $displayName = "Light Turbolaser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 2;
+    public $rangePenalty = 1;
+    public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+5 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 6+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11+$this->damagebonus ;      }
+} //end of class SWLightTLaserE
+class SWMediumTLaserE extends SWMediumTLaser{
+    public $name = "SWMediumTLaserE";
+    public $displayName = "Medium Turbolaser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 3;
+    public $rangePenalty = 0.6;
+    public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals
+    
+	
+	public function getDamage($fireOrder){ return  Dice::d(8)+6 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 14+$this->damagebonus ;      }
+} //end of class SWMediumTLaser
+class SWHeavyTLaser extends SWDirectWeapon{
+    /*StarWars heavy turbolaser - excellent if slow-firing andiship weapon
+    */
+    public $name = "SWHeavyTLaser";
+    public $displayName = "Heavy Turbolaser";
+	
+    public $priority = 5;
+    public $loadingtime = 3;
+    public $rangePenalty = 0.33;
+    public $fireControl = array(-6, 0, 3); // fighters, <mediums, <capitals
+	public $animationColor = array(245, 0, 0); //let's make it brighter than regular lasers :)
+	public $trailColor = array(245, 0, 0);
+	
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 16;
+	public $animationWidth = 6;
+	public $trailLength = 18;
+   
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = 0;
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsTLaserHvy".$nr.".png";
+		
+		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6,2)+7 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 9+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 19+$this->damagebonus ;      }
+} //end of class SWHeavyTLaser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
 
 
