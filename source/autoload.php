@@ -101,6 +101,7 @@ spl_autoload_register(
                 
                 
                 'swrayshield' => '/server/model/weapons/customSW.php',
+                'swscanner' => '/server/model/weapons/customSW.php',
                 
                 
                 'swfighterion' => '/server/model/weapons/customSW.php',
@@ -116,6 +117,14 @@ spl_autoload_register(
                 'swlighttlaser' => '/server/model/weapons/customSW.php',
                 'swmediumtlaser' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+
+                'swlightlasere' => '/server/model/weapons/customSW.php',
+                'swmediumlasere' => '/server/model/weapons/customSW.php',
+                'swheavylasere' => '/server/model/weapons/customSW.php',
+                'swlighttlasere' => '/server/model/weapons/customSW.php',
+                'swmediumtlasere' => '/server/model/weapons/customSW.php',
+                'swheavytlasere' => '/server/model/weapons/customSW.php',
+                
                 'swlightion' => '/server/model/weapons/customSW.php',
                 'swmediumion' => '/server/model/weapons/customSW.php',
                 'swheavyion' => '/server/model/weapons/customSW.php',
