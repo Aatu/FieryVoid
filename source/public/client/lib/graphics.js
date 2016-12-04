@@ -233,9 +233,11 @@ window.graphics = {
 
         canvas.lineTo(p5.x, p5.y);
         canvas.lineTo(p6.x, p6.y);
-        canvas.lineTo(p1.x, p1.y)
+        canvas.lineTo(p1.x, p1.y);
+        canvas.closePath();
 
         canvas.stroke();
+        canvas.fill();
     },
 
     drawAndRotate: function(canvas, w, h, iw, ih, angle, img, rolled){

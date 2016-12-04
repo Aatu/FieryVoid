@@ -1050,8 +1050,7 @@ shipWindowManager = {
 		var template = $("#templatecontainer .ewentry");
 		shipwindow.find(".ewentry.deletable").remove();
 		
-		
-		
+
 		for (var i in ship.EW){
 			var entry = ship.EW[i];
 			if ((entry.type != "OEW" && entry.type != "DIST" && entry.type != "SOEW" && entry.type != "SDEW" )|| entry.turn != gamedata.turn)
@@ -1698,17 +1697,14 @@ setSystemData: function(ship, system, shipwindow){
 		var ship = gamedata.getShip(shipwindow.data("ship"));
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
                 system = shipManager.systems.initializeSystem(system);
-                
-	//	console.log(system);
-		var selectedShip = gamedata.getSelectedShip();
 		
 		if (gamedata.waiting)
-			return
+			return;
 		
 		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship))
 			return;
 					
-		if (system.weapon && selectedShip.id == ship.id){
+		if (system.weapon){
 			
 			if (gamedata.gamephase != 3 && !system.ballistic)
 				return;
@@ -1723,7 +1719,8 @@ setSystemData: function(ship, system, shipwindow){
 			}
 			
 		}
-		
+
+		/* TODO: implement called shot with new scs
 		if (gamedata.isEnemy(ship, selectedShip) 
 			&& gamedata.gamephase == 3 
 			&& gamedata.selectedSystems.length > 0 
@@ -1731,6 +1728,7 @@ setSystemData: function(ship, system, shipwindow){
 		{
 			weaponManager.targetShip(ship, system);
 		}
+		*/
 	
 	},
 	

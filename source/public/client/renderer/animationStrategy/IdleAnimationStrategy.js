@@ -24,18 +24,13 @@ window.IdleAnimationStrategy = (function(){
     };
 
     IdleAnimationStrategy.prototype.positionAndFaceIcon = function(icon, coordinateConverter){
-        var movements = icon.getMovements();
-        var movement = this.getLastMovement(movements);
+        var movement = icon.getLastMovement();
         var gamePosition = coordinateConverter.fromHexToGame(movement.position);
 
         var facing = shipManager.hexFacingToAngle(movement.facing);
 
         icon.setPosition(gamePosition);
         icon.setFacing(-facing);
-    };
-
-    IdleAnimationStrategy.prototype.getLastMovement = function(movements) {
-        return movements[movements.length - 1];
     };
 
     return IdleAnimationStrategy;

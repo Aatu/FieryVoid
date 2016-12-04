@@ -9,8 +9,8 @@ window.DeploymentPhaseStrategy = (function(){
 
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, gamedata, webglScene) {
-        PhaseStrategy.prototype.activate.call(this, shipIcons, gamedata, webglScene);
+    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
         console.log(gamedata);
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);
@@ -140,8 +140,8 @@ window.DeploymentPhaseStrategy = (function(){
 
         var position = window.coordinateConverter.fromHexToGame(new hexagon.FVHex(slot.depx,slot.depy));
         var size = {
-            width: window.coordinateConverter.getHexWidth() * slot.depwidth,
-            height: window.coordinateConverter.getHexRowHeight() * slot.depheight
+            width: window.HexagonMath.getHexWidth() * slot.depwidth,
+            height: window.HexagonMath.getHexRowHeight() * slot.depheight
         };
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;

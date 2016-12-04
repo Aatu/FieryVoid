@@ -2,7 +2,6 @@ window.webglScene = (function(){
 
     var ZOOM_MAX = 7;
     var ZOOM_MIN = 0.1;
-    var HEX_LENGTH = 50;
 
     function webglScene() {
         this.scene = null;
@@ -36,7 +35,7 @@ window.webglScene = (function(){
 
         this.width = window.innerWidth;
         this.height = window.innerHeight;
-        this.coordinateConverter.init(HEX_LENGTH, this.width, this.height);
+        this.coordinateConverter.init(this.width, this.height);
         this.animationDirector.init(this.coordinateConverter, this.scene);
 
         this.camera = new THREE.OrthographicCamera(
@@ -53,8 +52,12 @@ window.webglScene = (function(){
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
         var cube = new THREE.Mesh( geometry, material );
         this.scene.add( cube );
-        */
 
+
+        var sprite = new BallisticSprite({x:0, y:0}, 'launch');
+        sprite.show();
+        this.scene.add(sprite.mesh);
+         */
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -71,7 +74,7 @@ window.webglScene = (function(){
         document.body.appendChild( this.stats.dom );
 
         this.initialized = true;
-        this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX, HEX_LENGTH);
+        this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
         this.animationDirector.receiveGamedata(gamedata, this);
         this.render();
     };
@@ -292,7 +295,6 @@ window.webglScene = (function(){
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
-        console.log("clicked hex" , hexPos.x, hexPos.y);
 
         /*
         var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);

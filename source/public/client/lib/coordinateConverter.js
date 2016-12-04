@@ -9,8 +9,8 @@ window.coordinateConverter = (function(){
         this.zoom = 1;
     }
 
-    coordinateConverter.prototype.init = function (hexLength, width, height) {
-        this.hexlenght = hexLength;
+    coordinateConverter.prototype.init = function (width, height) {
+        this.hexlenght = window.Config.HEX_SIZE;
         this.width = width;
         this.height = height;
     };
@@ -33,24 +33,9 @@ window.coordinateConverter = (function(){
         return this.fromGameToViewPort(this.fromHexToGame(hex));
     };
 
-    coordinateConverter.prototype.getHexWidth = function()
-    {
-        return getHexB(this.hexlenght) * 2;
-    };
-
-    coordinateConverter.prototype.getHexRowHeight = function()
-    {
-        return this.hexlenght + getHexA(this.hexlenght);
-    };
-
-    coordinateConverter.prototype.getHexHeight = function()
-    {
-        return (this.hexlenght + 2* getHexA(this.hexlenght));
-    };
-
     coordinateConverter.prototype.getHexHeightViewport = function()
     {
-        return this.getHexHeight() / this.zoom;
+        return window.HexagonMath.getHexHeight() / this.zoom;
     };
 
     coordinateConverter.prototype.fromGameToHex = function(gameCoordinates)
@@ -110,14 +95,6 @@ window.coordinateConverter = (function(){
 
         return positionFromCenterOfScreen;
     };
-
-    function getHexA(l) {
-        return l * Math.sin(30/180*Math.PI);
-    }
-
-    function getHexB(l) {
-        return l * Math.cos(30/180*Math.PI);
-    }
 
     return new coordinateConverter();
 })();

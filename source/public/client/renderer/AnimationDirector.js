@@ -3,7 +3,8 @@ window.animationDirector = (function() {
     function animationDirector(graphics) {
         this.graphics = graphics;
         this.shipIconContainer = null;
-        this.ballisticIcons = [];
+        this.ewIconContainer = null;
+        this.ballisticIconContainer = null;
         this.timeline = [];
 
         this.animationStrategy = null;
@@ -14,6 +15,8 @@ window.animationDirector = (function() {
     animationDirector.prototype.init = function (coordinateConverter, scene) {
         this.coordinateConverter = coordinateConverter;
         this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
+        this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene);
+        this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
     };
 
     animationDirector.prototype.receiveGamedata = function (gamedata, webglScene) {
@@ -27,6 +30,7 @@ window.animationDirector = (function() {
 
         this.phaseStrategy.onEvent(name, payload);
         this.shipIconContainer.onEvent(name, payload);
+        this.ewIconContainer.onEvent(name, payload);
     };
 
     animationDirector.prototype.render = function (scene, coordinateConverter) {
@@ -63,7 +67,7 @@ window.animationDirector = (function() {
             this.phaseStrategy.deactivate();
         }
 
-        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, gamedata, scene);
+        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene);
     }
 
 

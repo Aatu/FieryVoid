@@ -140,5 +140,24 @@ window.ShipIcon = (function (){
         });
     };
 
+    ShipIcon.prototype.getLastMovement = function(){
+        return this.movements[this.movements.length - 1]
+    };
+
+    ShipIcon.prototype.getFirstMovementOnTurn = function(turn, ignore){
+
+        if (!ignore) {
+            ignore = [];
+        }
+
+        ignore = [].concat(ignore);
+
+        return this.movements.filter(function (move) {
+            console.log(move, ignore, turn, ignore.indexOf(move.type));
+            return ignore.indexOf(move.type) === -1 && move.turn == turn;
+        }).shift();
+    };
+
+
     return ShipIcon;
 })();

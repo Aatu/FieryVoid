@@ -35,6 +35,11 @@
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
     <script src="client/lib/stats.min.js"></script>
+    <script>
+        window.Config = {
+            HEX_SIZE: 50
+        };
+    </script>
 
     <?php include_once 'shaders.php'; ?>
     <script>
@@ -69,6 +74,8 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
+    <script src="client/lib/graphics.js"></script>
+    <script src="client/lib/HexagonMath.js"></script>
     <script src="client/lib/AbstractCanvas.js"></script>
     <script src="client/renderer/webglHexGridRenderer.js"></script>
     <script src="client/renderer/canvasHexGridRenderer.js"></script>
@@ -79,10 +86,13 @@
     <script src="client/renderer/Animation.js"></script>
 
     <script src="client/renderer/sprite/webglSprite.js"></script>
+    <script src="client/renderer/sprite/HexagonSprite.js"></script>
     <script src="client/renderer/sprite/ShipEWSprite.js"></script>
     <script src="client/renderer/sprite/ShipSelectedSprite.js"></script>
     <script src="client/renderer/sprite/BoxSprite.js"></script>
     <script src="client/renderer/sprite/PlainSprite.js"></script>
+    <script src="client/renderer/sprite/LineSprite.js"></script>
+    <script src="client/renderer/sprite/BallisticSprite.js"></script>
 
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
@@ -90,6 +100,8 @@
 
     <script src="client/lib/coordinateConverter.js"></script>
     <script src="client/renderer/icon/ShipIconContainer.js"></script>
+    <script src="client/renderer/icon/EWIconContainer.js"></script>
+    <script src="client/renderer/icon/BallisticIconContainer.js"></script>
 
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
 
@@ -97,6 +109,9 @@
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
+
+
+    <script src="client/renderer/texture/HexagonTexture.js"></script>
 
 
     <script src="client/UI/ShipTooltip.js"></script>
@@ -116,13 +131,11 @@
     <script src="client/debug.js"></script>
     <script src="client/ajaxInterface.js"></script>
     <script src="client/ew.js"></script>
-    <script src="client/EWindicators.js"></script>
     <script src="client/weaponManager.js"></script>
     <script src="client/damage.js"></script>
 	<script src="client/Effects.js"></script>
 	<script src="client/combatLog.js"></script>
 	<script src="client/player.js"></script>
-	<script src="client/lib/graphics.js"></script>
     <script src="client/ships.js"></script>
     <script src="client/movement.js"></script>
     <script src="client/criticals.js"></script>

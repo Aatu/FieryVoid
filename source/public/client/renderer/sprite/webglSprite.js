@@ -63,6 +63,10 @@ window.webglSprite = (function(){
         );
     };
 
+    Sprite.prototype.setFacing = function(facing) {
+        this.mesh.rotation.z = mathlib.degreeToRadian(facing);
+    };
+
     function getShaders(){
         if (! SHADER_VERTEX)
             SHADER_VERTEX = document.getElementById('spriteVertexShader').innerHTML;

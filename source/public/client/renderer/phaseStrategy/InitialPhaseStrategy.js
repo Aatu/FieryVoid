@@ -7,8 +7,16 @@ window.InitialPhaseStrategy = (function(){
 
     InitialPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    InitialPhaseStrategy.prototype.activate = function (shipIcons, gamedata, webglScene) {
-        PhaseStrategy.prototype.activate.call(this, shipIcons, gamedata, webglScene);
+    InitialPhaseStrategy.prototype.update = function (gamedata) {
+        PhaseStrategy.prototype.update.call(this, gamedata);
+        this.ewIconContainer.hide();
+        if (this.selectedShip) {
+            this.ewIconContainer.showForShip(this.selectedShip);
+        }
+    };
+
+    InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         console.log("enabled initial phase strategy");
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
@@ -21,7 +29,20 @@ window.InitialPhaseStrategy = (function(){
         return this;
     };
 
-    InitialPhaseStrategy.prototype.onHexClicked = function(payload) {};
+    InitialPhaseStrategy.prototype.onHexClicked = function(payload) {
+        if (! this.selectedShip) {
+            return;
+        }
+
+        var ballistics = gamedata.selectedSystems.filter(function(system) {
+            return system.ballistic;
+        });
+
+        if (ballistics.length > 0) {
+            console.log("targeting ballistics");
+            weaponManager.targetHex(this.selectedShip, payload.hex);
+        }
+    };
 
     InitialPhaseStrategy.prototype.selectShip = function(ship) {
         PhaseStrategy.prototype.selectShip.call(this, ship);
@@ -46,8 +67,21 @@ window.InitialPhaseStrategy = (function(){
     };
 
     InitialPhaseStrategy.prototype.targetShip = function(ship) {
-
+        //TODO: Targeting ship with ballistic weapons
+        //TODO: Targeting ship with support EW (defensive or offensive)
+        //TODO: Targeting ship with
+        addOEW(this.selectedShip, ship);
     };
+
+    function addOEW(ship, target) {
+        var entry = ew.getEntryByTargetAndType(ship, target, "OEW");
+
+        if (! entry) {
+            ew.AssignOEW(ship, target, "OEW");
+        } else {
+            ew.assignEW(ship, entry);
+        }
+    }
 
     return InitialPhaseStrategy;
 })();

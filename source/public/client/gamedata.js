@@ -38,8 +38,6 @@ gamedata = {
         
         if (!gamedata.isSelected(ship)){   
             gamedata.selectedShips.push(ship);
-            if (gamedata.gamephase == 1)
-                ew.adEWindicators(ship);
             
             gamedata.shipStatusChanged(ship);
             shipWindowManager.checkIfAnyStatusOpen(ship);
@@ -182,7 +180,6 @@ gamedata = {
         botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
-        hexgrid.unSelectHex();
         window.webglScene.receiveGamedata(this);
     },
     

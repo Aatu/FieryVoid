@@ -4,6 +4,8 @@ window.PhaseStrategy = (function(){
         this.inactive = true;
         this.gamedata = null;
         this.shipIconContainer = null;
+        this.ewIconContainer = null;
+        this.ballisticIconContainer = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
 
@@ -13,7 +15,6 @@ window.PhaseStrategy = (function(){
 
         this.selectedShip = null;
         this.targetedShip = null;
-        this.activeShip = null;
         this.animationStrategy = null;
 
 
@@ -22,6 +23,8 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.consumeGamedata = function() {
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.redrawMovementUI();
     };
 
@@ -35,8 +38,10 @@ window.PhaseStrategy = (function(){
         this.consumeGamedata();
     };
 
-    PhaseStrategy.prototype.activate = function (shipIcons, gamedata, webglScene) {
+    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
         this.shipIconContainer = shipIcons;
+        this.ewIconContainer = ewIconContainer;
+        this.ballisticIconContainer = ballisticIconContainer;
         this.gamedata = gamedata;
         this.inactive = false;
         this.consumeGamedata();
@@ -91,6 +96,7 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function(ship) {
+        this.onShipClicked(ship);
         shipWindowManager.open(ship);
     };
 
@@ -174,6 +180,7 @@ window.PhaseStrategy = (function(){
         ships.forEach(function(ship) {
             var icon = this.shipIconContainer.getById(ship.id);
             icon.hideEW();
+            this.ewIconContainer.hide();
             //TODO: User settings, should this be hidden or not?
             icon.showSideSprite(false);
         }, this);
@@ -192,10 +199,12 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.showShipEW = function(ship) {
         this.shipIconContainer.getByShip(ship).showEW();
+        this.ewIconContainer.showForShip(ship);
     };
 
     PhaseStrategy.prototype.hideShipEW = function(ship) {
         this.shipIconContainer.getByShip(ship).hideEW();
+        this.ewIconContainer.hide();
     };
 
     PhaseStrategy.prototype.showShipTooltip = function(ships, payload) {

@@ -1693,8 +1693,6 @@ shipManager.movement = {
         //return (mathlib.addToHexFacing(heading, 3) == facing)
             
     },
-    
-    //TURNdo
 
 	hasTurned: function(ship){
 		for (var i = 0; i < ship.movement.length; i++){
@@ -2463,37 +2461,7 @@ shipManager.movement = {
         }
         
     },
-    
-    
-    RemoveMovementIndicators: function(){
-        for(var i = EWindicators.indicators.length-1; i >= 0; i--){  
-            if(EWindicators.indicators[i].type == "movement"){              
-                EWindicators.indicators.splice(i,1);                 
-            }
-        }
-        EWindicators.drawEWindicators();                
-        
-    },
-    
-    adMovementIndicators: function(ship, hex){
-        
-        
-        
-        var indicators = Array(); 
-        
-        var indi = shipManager.movement.makeMovementIndicator(ship, hex);
-        if (indi)
-            indicators.push(indi);
-        
-              
-        if (indicators.length > 0)
-            EWindicators.indicators = EWindicators.indicators.concat(indicators);
-      
-        EWindicators.drawEWindicators();
-    }, 
-    
-    
-    
+
     makeMovementIndicator: function(ship, hex){
        
         var effect = {};

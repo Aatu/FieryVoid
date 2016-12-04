@@ -279,7 +279,7 @@ window.weaponManager = {
 
 	
 	selectWeapon: function(ship, weapon){
-
+		console.log("select weapon");
 		if(weaponManager.checkOutOfAmmo(ship, weapon)){
 			return
 		}
@@ -1390,13 +1390,10 @@ window.weaponManager = {
 		return (distance <= range);
 	},
 
-	targetHex: function(hexpos){
+	targetHex: function(selectedShip, hexpos){
 
-		var selectedShip = gamedata.getSelectedShip();
 		if (shipManager.isDestroyed(selectedShip))
 			return;
-
-
 
 		var toUnselect = Array();
 		for (var i in gamedata.selectedSystems){
@@ -1444,10 +1441,6 @@ window.weaponManager = {
 						shooterid:selectedShip.id,
 						weaponid:weapon.id,
 						shots:fire.shots});
-
-						ballistics.calculateBallisticLocations();
-						ballistics.calculateDrawBallistics();
-						drawEntities();
 					}
 
 					toUnselect.push(weapon);
@@ -1547,6 +1540,25 @@ window.weaponManager = {
 
 		return false;
 
+	},
+
+	getAllFireOrdersForAllShipsForTurn: function(turn, type) {
+		var fires = [];
+		gamedata.ships.forEach(function(ship){
+			fires = fires.concat(weaponManager.getAllFireOrders(ship));
+		});
+
+		fires = fires.filter(function(fireOrder) {
+			return fireOrder.turn == turn;
+		});
+
+		if (type) {
+            fires = fires.filter(function(fireOrder) {
+                return fireOrder.type == type;
+            });
+		}
+
+		return fires;
 	},
 
 	getAllFireOrders: function(ship)
@@ -1673,25 +1685,11 @@ window.weaponManager = {
 	},
 
 	removeArcIndicators: function(){
-
-		for(var i = EWindicators.indicators.length-1; i >= 0; i--){
-			if(EWindicators.indicators[i].type == "Arcs"){
-				EWindicators.indicators.splice(i,1);
-			}
-		}
-
-
+		//TODO: add new arc indicator
 	},
 
 	addArcIndicators: function(ship, weapon){
-		weapon = shipManager.systems.initializeSystem(weapon);
-
-		weaponManager.removeArcIndicators(ship);
-		var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
-
-		if (ind)
-			EWindicators.indicators.push(ind);
-
+        //TODO: add new arc indicator
 	},
 
 	makeWeaponArcindicator: function(ship, weapon){
