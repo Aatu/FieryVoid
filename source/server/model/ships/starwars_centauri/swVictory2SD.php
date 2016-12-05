@@ -34,7 +34,7 @@ class swVictory2SD extends BaseShip{
      
 	    
 	    
-	$this->addPrimarySystem(new CnC(6, 20, 0, 0));
+	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 28, 0, 0));
         $this->addPrimarySystem(new SWScanner(4, 14, 4, 3)); //split to Aft, too
         $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
