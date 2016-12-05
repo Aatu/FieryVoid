@@ -21,7 +21,10 @@ window.BallisticIconContainer = (function(){
 
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
-                this.scene.remove(icon.sprite);
+                this.scene.remove(icon.launchSprite);
+                if (icon.targetSprite) {
+                    this.scene.remove(icon.targetSprite);
+                }
                 return false;
             }
 
@@ -30,15 +33,18 @@ window.BallisticIconContainer = (function(){
     };
 
     BallisticIconContainer.prototype.hide = function() {
+        console.log("ballistics hide");
         this.ballisticIcons.forEach(function(icon) {
-            icon.sprite.hide();
+            icon.launchSprite.hide();
+            if (icon.targetSprite){
+                icon.targetSprite.hide();
+            }
         })
     };
 
-    BallisticIconContainer.prototype.showForShip = function(ship) {
-        this.ewIcons.filter(function(icon) {
-            return icon.shipId == ship.id || icon.targetId == ship.id;
-        }).forEach(function(icon) {
+    BallisticIconContainer.prototype.show = function() {
+        console.log("ballistics show");
+        this.ballisticIcons.forEach(function(icon) {
             icon.launchSprite.show();
             if (icon.targetSprite){
                 icon.targetSprite.show();
@@ -68,13 +74,18 @@ window.BallisticIconContainer = (function(){
     };
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn) {
-        console.log(ballistic);
         var icon = getBallisticIcon.call(this, ballistic.id);
         if (icon){
-
+            updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn)
         }else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene);
         }
+    }
+
+    function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
+        //TODO: if target is ship and has moved, reposition stuff
+
+        icon.used = true;
     }
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
@@ -82,7 +93,6 @@ window.BallisticIconContainer = (function(){
         var shooterIcon = iconContainer.getById(ballistic.shooterid);
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn, 'start').position);
         var targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.FVHex(ballistic.x, ballistic.y));
-        console.log(targetPosition);
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');
         var targetSprite = ballistic.targetid === -1 ? new BallisticSprite(targetPosition, 'hex') : null;

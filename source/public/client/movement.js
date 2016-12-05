@@ -441,8 +441,12 @@ shipManager.movement = {
         var angle = shipManager.hexFacingToAngle(lm.heading);
         var shipX = ship.movement[ship.movement.length-1].x;
         var shipY = ship.movement[ship.movement.length-1].y;
-        var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
+        //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
+        var pos = new hexagon.FVHex(shipX, shipY).getNeighbourAtDirection(lm.heading);
 		var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
+
+		console.log("moving from", {x:shipX, y:shipY}, "to", pos);
+
         ship.movement[ship.movement.length] = {
             id:-1,
             type:"move",
@@ -465,7 +469,6 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-        hexgrid.unSelectHex();
         //gamedata.shipStatusChanged(ship);
     },
     
@@ -532,8 +535,11 @@ shipManager.movement = {
         var angle = shipManager.hexFacingToAngle(newheading);
         var shipX = ship.movement[ship.movement.length-1].x;
         var shipY = ship.movement[ship.movement.length-1].y;
-        var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
+        //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
 
+        var pos = new hexagon.FVHex(shipX, shipY).getNeighbourAtDirection(newheading);
+
+        console.log("slipping from", {x: shipX, y: shipY}, "to", pos);
 
 		var isPivoting = shipManager.movement.isPivoting(ship);
 
@@ -639,9 +645,6 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-        
-        hexgrid.unSelectHex();
-        shipManager.drawShip(ship);
 
         if (!ship.flight){
             shipManager.movement.autoAssignThrust(ship)
@@ -923,13 +926,7 @@ shipManager.movement = {
             turn:gamedata.turn,
             forced:true,
             value:0
-        }
-        
-        
-        shipManager.drawShip(ship);
-        
-        
-        
+        };
     },
     
     isPivoting: function(ship){
@@ -2509,7 +2506,23 @@ shipManager.movement = {
         
         return effect;
     
-    }
-    
+    },
 
-}
+    getMovementPseudoId: function(move, index) {
+        if (index === undefined) {
+            index = "";
+        }
+        var hash = "";
+        Object.keys(move).forEach(function (key) {
+            var entry = move[key];
+            if (typeof entry === "object") {
+                hash += shipManager.movement.getMovementPseudoId(entry);
+            } else {
+                hash += move[key];
+            }
+        });
+
+        hash += index;
+        return hash;
+    }
+};

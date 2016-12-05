@@ -103,12 +103,17 @@
     <script src="client/renderer/icon/EWIconContainer.js"></script>
     <script src="client/renderer/icon/BallisticIconContainer.js"></script>
 
+    <script src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
+    <script src="client/renderer/animationStrategy/MovementAnimationStrategy.js"></script>
+
+    <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
 
 
     <script src="client/renderer/texture/HexagonTexture.js"></script>

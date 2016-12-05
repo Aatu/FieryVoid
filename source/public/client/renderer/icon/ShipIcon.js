@@ -3,6 +3,7 @@ window.ShipIcon = (function (){
     function ShipIcon(ship, scene){
 
         this.shipId = ship.id;
+        this.shipName = ship.name;
         this.imagePath = ship.imagePath;
         this.movements = null;
         this.mesh = null;
@@ -134,9 +135,16 @@ window.ShipIcon = (function (){
                 turn: movement.turn,
                 facing: movement.facing,
                 heading: movement.heading,
-                position: {x: movement.x, y: movement.y},
+                position: new hexagon.FVHex(movement.x, movement.y),
                 offset: {x: movement.xOffset, y: movement.yOffset}
             };
+        });
+    };
+
+    ShipIcon.prototype.getMovingMovements = function(turn){
+        var accept = ["move", "slipleft", "slipright", "rotateRight", "rotateLeft", "turnleft", "turnright", "pivotleft", "pivotright"];
+        return this.movements.filter(function (move) {
+            return accept.indexOf(move.type) !== -1 && move.turn == turn;
         });
     };
 
@@ -153,9 +161,18 @@ window.ShipIcon = (function (){
         ignore = [].concat(ignore);
 
         return this.movements.filter(function (move) {
-            console.log(move, ignore, turn, ignore.indexOf(move.type));
             return ignore.indexOf(move.type) === -1 && move.turn == turn;
         }).shift();
+    };
+
+    ShipIcon.prototype.getMovementBefore = function (move) {
+        for (var i in this.movements) {
+            if (this.movements[i] === move) {
+                return this.movements[i-1];
+            }
+        }
+
+        return null;
     };
 
 

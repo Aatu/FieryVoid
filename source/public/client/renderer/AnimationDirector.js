@@ -54,6 +54,10 @@ window.animationDirector = (function() {
             return activatePhaseStrategy.call(this, window.InitialPhaseStrategy, gamedata, scene);
         }
 
+        if (gamedata.gamephase ===2) {
+            return activatePhaseStrategy.call(this, window.MovementPhaseStrategy, gamedata, scene);
+        }
+
         return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
     }
 

@@ -23,6 +23,7 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.consumeGamedata = function() {
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.animationStrategy.update(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.redrawMovementUI();
@@ -36,6 +37,8 @@ window.PhaseStrategy = (function(){
     PhaseStrategy.prototype.update = function (gamedata) {
         this.gamedata = gamedata;
         this.consumeGamedata();
+        this.ewIconContainer.hide();
+        this.ballisticIconContainer.show();
     };
 
     PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
@@ -44,8 +47,9 @@ window.PhaseStrategy = (function(){
         this.ballisticIconContainer = ballisticIconContainer;
         this.gamedata = gamedata;
         this.inactive = false;
-        this.consumeGamedata();
         this.animationStrategy.activate(shipIcons, gamedata.turn, webglScene.scene);
+        this.consumeGamedata();
+        this.ballisticIconContainer.show();
         return this;
     };
 
@@ -92,6 +96,7 @@ window.PhaseStrategy = (function(){
     PhaseStrategy.prototype.onHexClicked = function(payload) {};
 
     PhaseStrategy.prototype.onShipsClicked = function(ships) {
+        //TODO: implement clicking multiple ships
         console.log("CLICKING MULTIPLE SHIPS IS NOT YET IMPLEMENTED");
     };
 
@@ -114,11 +119,13 @@ window.PhaseStrategy = (function(){
         }
         this.selectedShip = ship;
         this.shipIconContainer.getById(ship.id).setSelected(true);
+        this.showShipEW(this.selectedShip);
     };
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
         this.shipIconContainer.getById(ship.id).setSelected(false);
         this.selectedShip = null;
+        this.hideShipEW(ship);
     };
 
     PhaseStrategy.prototype.targetShip = function(ship) {
@@ -184,6 +191,10 @@ window.PhaseStrategy = (function(){
             //TODO: User settings, should this be hidden or not?
             icon.showSideSprite(false);
         }, this);
+
+        if (this.selectedShip) {
+            this.showShipEW(this.selectedShip);
+        }
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function(ships, payload) {
@@ -253,6 +264,14 @@ window.PhaseStrategy = (function(){
         var ship = gamedata.getFirstFriendlyShip();
 
         if (ship) {
+            this.selectShip(ship);
+        }
+    };
+
+    PhaseStrategy.prototype.selectActiveShip = function() {
+        var ship = gamedata.getActiveShip();
+
+        if (ship && gamedata.isMyShip(ship)) {
             this.selectShip(ship);
         }
     };

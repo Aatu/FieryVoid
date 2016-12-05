@@ -9,7 +9,6 @@ window.InitialPhaseStrategy = (function(){
 
     InitialPhaseStrategy.prototype.update = function (gamedata) {
         PhaseStrategy.prototype.update.call(this, gamedata);
-        this.ewIconContainer.hide();
         if (this.selectedShip) {
             this.ewIconContainer.showForShip(this.selectedShip);
         }
@@ -46,24 +45,17 @@ window.InitialPhaseStrategy = (function(){
 
     InitialPhaseStrategy.prototype.selectShip = function(ship) {
         PhaseStrategy.prototype.selectShip.call(this, ship);
-
         botPanel.setEW(ship);
-        this.showShipEW(this.selectedShip);
     };
 
     InitialPhaseStrategy.prototype.deselectShip = function(ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         botPanel.onShipStatusChanged(ship);
-        this.hideShipEW(ship);
     };
 
 
     InitialPhaseStrategy.prototype.onMouseOutShips = function(ships) {
         PhaseStrategy.prototype.onMouseOutShips.call(this, ships);
-
-        if (this.selectedShip) {
-            this.showShipEW(this.selectedShip);
-        }
     };
 
     InitialPhaseStrategy.prototype.targetShip = function(ship) {

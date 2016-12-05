@@ -38,7 +38,7 @@ window.coordinateConverter = (function(){
         return window.HexagonMath.getHexHeight() / this.zoom;
     };
 
-    coordinateConverter.prototype.fromGameToHex = function(gameCoordinates)
+    coordinateConverter.prototype.fromGameToHex = function(gameCoordinates, debug)
     {
         var q = (1/3 * Math.sqrt(3) * gameCoordinates.x - 1/3 * gameCoordinates.y) / this.hexlenght;
         var r = 2/3 * gameCoordinates.y / this.hexlenght;
@@ -46,6 +46,9 @@ window.coordinateConverter = (function(){
         var x = q;
         var z = r;
         var y = -x - z;
+
+        if (debug)
+            console.log("conversion", new hexagon.Cube(x, y, z).round().toEvenR());
 
         return new hexagon.Cube(x, y, z).round().toEvenR().toFVHex();
     };

@@ -89,7 +89,16 @@ window.hexagon.Offset = (function () {
     };
 
     Offset.prototype.toFVHex = function () {
-       return new hexagon.FVHex(this.q, this.r * -1);
+
+        var x = this.q + this.r / 2;
+
+        if (this.r < 0) {
+            x = Math.ceil(x);
+        } else {
+            x = Math.floor(x);
+        }
+
+        return new hexagon.FVHex(x, this.r * -1);
     };
 
     return Offset;

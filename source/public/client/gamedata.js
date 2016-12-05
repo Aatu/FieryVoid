@@ -546,6 +546,7 @@ gamedata = {
         
                
         if (gamedata.gamephase == 2){
+            return;
 			$(".ballclickable").remove();
 			$(".ballisticcanvas").remove();
             ew.RemoveEWEffects();

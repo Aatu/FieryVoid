@@ -1,37 +1,9 @@
 window.IdleAnimationStrategy = (function(){
     function IdleAnimationStrategy(){
-        this.shipIconContainer = null;
-        this.turn = 0;
+        AnimationStrategy.call(this);
     }
 
-    IdleAnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
-        this.shipIconContainer = shipIcons;
-        this.turn = turn;
-
-        return this;
-    };
-
-    IdleAnimationStrategy.prototype.deactivate = function(scene) {
-
-
-        return this;
-    };
-
-    IdleAnimationStrategy.prototype.render = function(coordinateConverter){
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            this.positionAndFaceIcon(icon, coordinateConverter);
-        }, this);
-    };
-
-    IdleAnimationStrategy.prototype.positionAndFaceIcon = function(icon, coordinateConverter){
-        var movement = icon.getLastMovement();
-        var gamePosition = coordinateConverter.fromHexToGame(movement.position);
-
-        var facing = shipManager.hexFacingToAngle(movement.facing);
-
-        icon.setPosition(gamePosition);
-        icon.setFacing(-facing);
-    };
+    IdleAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
 
     return IdleAnimationStrategy;
 })();
