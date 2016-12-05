@@ -1101,7 +1101,7 @@ class SWHeavyIon extends SWIon{
 */
 class SWCapitalConcussion extends SWBallisticWeapon{
         public $name = "SWCapitalConcussion";
-        public $displayName = "Concussion Missile";
+        public $displayName = "Capital Concussion Missile";
         public $range = 16;
 	public $distanceRange = 24;
         public $loadingtime = 3;
@@ -1128,7 +1128,7 @@ class SWCapitalConcussion extends SWBallisticWeapon{
 */
 class SWCapitalProton extends SWBallisticWeapon{
         public $name = "SWCapitalProton";
-        public $displayName = "Proton Torpedo";
+        public $displayName = "Capital Proton Torpedo";
         public $range = 20;
 	public $distanceRange = 30;
         public $loadingtime = 3;
