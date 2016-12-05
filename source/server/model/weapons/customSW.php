@@ -123,7 +123,13 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     }
 	
     function __construct($maxAmount, $startArc, $endArc, $nrOfShots){
+	//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+	if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+	if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+	if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
+	    
         parent::__construct($maxAmount, $startArc, $endArc);
+	    
         $Torp = new SWFtrProtonTorpedo($startArc, $endArc,  $nrOfShots, $this->fireControl);
         $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
@@ -131,8 +137,8 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	$this->maxpulses = $nrOfShots;
 	$this->defaultShots = $nrOfShots;
 	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-	$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
+	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! 
+	$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
     }	
 	
 	
@@ -234,6 +240,12 @@ class SWDirectWeapon extends Pulse{
 		$powerReq += $powerReq*0.65*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
+		
+		
+		//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+		if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 				
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
@@ -348,6 +360,10 @@ class SWBallisticWeapon extends Torpedo{
 		$powerReq += $powerReq*0.35*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
+		//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+		if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 				
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
