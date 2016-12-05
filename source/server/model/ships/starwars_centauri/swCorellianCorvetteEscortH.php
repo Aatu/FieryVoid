@@ -29,7 +29,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	$this->iniativebonus = 12 *5; 
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
+        $this->addPrimarySystem(new SWScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
 	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
