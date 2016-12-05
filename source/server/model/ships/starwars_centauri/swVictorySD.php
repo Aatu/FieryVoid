@@ -12,7 +12,7 @@ class swVictorySD extends BaseShip{
         $this->shipClass = "Victory Star Destroyer";
         $this->shipSizeClass = 3;
 	    
-	$this->fighters = array("fighter flights"=>8);
+	$this->fighters = array("fighter flights"=>4, "assault flights"=>4);
 
 	    
 	$this->unofficial = true;
@@ -31,9 +31,9 @@ class swVictorySD extends BaseShip{
 		
 	    
 	    
-	$this->addPrimarySystem(new CnC(6, 20, 0, 0));
+	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 26, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 4, 3)); //split to Aft, too
+        $this->addPrimarySystem(new SWScanner(4, 14, 4, 3)); //split to Aft, too
         $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
 	$hyperdrive = new JumpEngine(4, 24, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
@@ -56,7 +56,7 @@ class swVictorySD extends BaseShip{
         $this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
-        $this->addAftSystem(new Scanner(3, 12, 4, 3)); //split to Primary, too
+        $this->addAftSystem(new SWScanner(3, 12, 4, 3)); //split to Primary, too
         $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,10,5,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
