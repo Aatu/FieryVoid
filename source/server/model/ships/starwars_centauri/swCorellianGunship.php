@@ -71,7 +71,7 @@ class swCorellianGunship extends MediumShip{
         		1=> array(
         				4 => "Thruster",
         				5 => "Ray Shield",
-					7 => "Concussion Missile",
+					7 => "Capital Concussion Missile",
         				11 => "Medium Turbolaser",
         				17 => "Structure",
            				20 => "Primary",
