@@ -58,15 +58,15 @@ class swVictory2SD extends BaseShip{
         $this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
-        $this->addAftSystem(new SWScanner(3, 14, 5, 4)); //split to Primary, too
-        $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
+        $this->addAftSystem(new SWScanner(3, 12, 4, 3)); //split to Primary, too
+        $this->addAftSystem(new Engine(4, 20, 0, 6, 5)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,10,5,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyIon(2, 120, 240, 1));
         
 	    
-	$this->addLeftSystem(new Thruster(3, 20, 0, 4, 3));
+	$this->addLeftSystem(new Thruster(3, 22, 0, 5, 3));
 	$this->addLeftSystem(new SWRayShield(3,13,8,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 2));
 	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -77,7 +77,7 @@ class swVictory2SD extends BaseShip{
 
 		
 	    
-	$this->addRightSystem(new Thruster(3, 20, 0, 4, 4));
+	$this->addRightSystem(new Thruster(3, 22, 0, 5, 4));
 	$this->addRightSystem(new SWRayShield(3,13,8,3,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2));
 	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -107,10 +107,10 @@ class swVictory2SD extends BaseShip{
                     20 => "C&C",
             ),
             1=> array(
-                    5 => "Thruster",
-		    6 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    10 => "Heavy Laser",
+                    4 => "Thruster",
+		    5 => "Ray Shield",
+                    8 => "Heavy Turbolaser",
+                    9 => "Heavy Laser",
                     11 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
