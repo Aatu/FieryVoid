@@ -4,7 +4,7 @@ class swCorellianGunship extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 400;
+	$this->pointCost = 450;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliangunship";
         $this->imagePath = "img/starwars/dp20.png";
@@ -24,7 +24,7 @@ class swCorellianGunship extends MediumShip{
         $this->pivotcost = 2;
 	$this->iniativebonus = 12 *5; //true warship
         
-        $this->addPrimarySystem(new Reactor(4, 12, 0, 3));
+        $this->addPrimarySystem(new Reactor(4, 16, 0, 3));
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 2));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
@@ -39,7 +39,7 @@ class swCorellianGunship extends MediumShip{
 	    
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
-	$this->addFrontSystem(new SWCapitalConcussion(3, 210, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWCapitalConcussion(3, 300, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWRayShield(3,8,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
