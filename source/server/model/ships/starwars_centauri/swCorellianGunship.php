@@ -25,7 +25,7 @@ class swCorellianGunship extends MediumShip{
 	$this->iniativebonus = 12 *5; //true warship
         
         $this->addPrimarySystem(new Reactor(4, 16, 0, 3));
-        $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
+        $this->addPrimarySystem(new SWScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 2));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 3));
@@ -37,9 +37,9 @@ class swCorellianGunship extends MediumShip{
 	$this->addPrimarySystem($hyperdrive);
 	    
 	    
-        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
-	$this->addFrontSystem(new SWCapitalConcussion(3, 300, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
+	$this->addFrontSystem(new SWCapitalConcussion(3, 300, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWRayShield(3,8,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -48,7 +48,7 @@ class swCorellianGunship extends MediumShip{
 		
         $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
    	$this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
-	$this->addAftSystem(new SWRayShield(2,5,3,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWRayShield(1,4,2,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWLightLaser(1, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWLightLaser(1, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!       
 
@@ -58,26 +58,27 @@ class swCorellianGunship extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				8 => "Thruster",
-        				10 => "Hyperdrive",
-					13 => "Scanner",
-        				15 => "Engine",
-        				16 => "Hangar",
-        				17 => "C&C",
-					18 => "Light Laser", 
-       					20 => "Reactor",
+        				6 => "Thruster",
+					8 => "Light Laser", 
+        				9 => "Hyperdrive",
+					11 => "Scanner",
+        				13 => "Engine",
+        				14 => "Hangar",
+					16 => "Light Laser", 
+       					19 => "Reactor",
+        				20 => "C&C",
         		),
         		1=> array(
         				4 => "Thruster",
         				5 => "Ray Shield",
-					7 => "Concussion Missile Battery",
+					7 => "Concussion Missile",
         				11 => "Medium Turbolaser",
         				17 => "Structure",
            				20 => "Primary",
         		),
         		2=> array(
         				7 => "Thruster",
-        				9 => "Ray Shield",
+        				8 => "Ray Shield",
 					11 => "Light Laser", 
         				17 => "Structure",
         				20 => "Primary",
