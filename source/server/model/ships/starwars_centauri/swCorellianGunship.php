@@ -1,0 +1,90 @@
+<?php
+class swCorellianGunship extends MediumShip{
+    
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+	$this->pointCost = 400;
+	$this->faction = "StarWars Galactic Empire";
+        $this->phpclass = "swcorelliangunship";
+        $this->imagePath = "img/starwars/dp20.png";
+	    $this->canvasSize = 100;
+        $this->shipClass = "Corellian Gunship";
+	    
+	$this->unofficial = true;
+        // $this->agile = true;
+        
+        $this->forwardDefense = 11;
+        $this->sideDefense = 13;
+        
+        $this->turncost = 0.33;
+        $this->turndelaycost = 0.5;
+        $this->accelcost = 2;
+        $this->rollcost = 1;
+        $this->pivotcost = 2;
+	$this->iniativebonus = 12 *5; //true warship
+        
+        $this->addPrimarySystem(new Reactor(4, 12, 0, 3));
+        $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 2));
+        $this->addPrimarySystem(new CnC(4, 8, 0, 0));
+	$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 3));
+	$this->addPrimarySystem(new Thruster(2, 8, 0, 4, 4));
+	$this->addPrimarySystem(new SWLightLaser(1, 0, 360, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	    
+	$hyperdrive = new JumpEngine(3, 6, 4, 10);
+	$hyperdrive->displayName = 'Hyperdrive';
+	$this->addPrimarySystem($hyperdrive);
+	    
+	    
+        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
+	$this->addFrontSystem(new SWCapitalConcussion(3, 210, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWRayShield(3,8,3,2,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWMediumTLaser(3, 240, 60, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWMediumTLaser(3, 300, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWMediumTLaser(3, 300, 120, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		
+        $this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
+   	$this->addAftSystem(new Thruster(3, 8, 0, 4, 2));
+	$this->addAftSystem(new SWRayShield(2,5,3,1,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addAftSystem(new SWLightLaser(1, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightLaser(1, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!       
+
+        $this->addPrimarySystem(new Structure(4, 38));
+	    
+	    
+	    
+        $this->hitChart = array(
+        		0=> array(
+        				8 => "Thruster",
+        				10 => "Hyperdrive",
+					13 => "Scanner",
+        				15 => "Engine",
+        				16 => "Hangar",
+        				17 => "C&C",
+					18 => "Light Laser", 
+       					20 => "Reactor",
+        		),
+        		1=> array(
+        				4 => "Thruster",
+        				5 => "Ray Shield",
+					7 => "Concussion Missile Battery",
+        				11 => "Medium Turbolaser",
+        				17 => "Structure",
+           				20 => "Primary",
+        		),
+        		2=> array(
+        				7 => "Thruster",
+        				9 => "Ray Shield",
+					11 => "Light Laser", 
+        				17 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+	    
+	    
+    }
+}
+?>
