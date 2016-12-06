@@ -84,12 +84,12 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',                
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
-                
+                */
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
-                */
+
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
 
