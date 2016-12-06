@@ -76,8 +76,8 @@ spl_autoload_register(
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
-                'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 /*
+                'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
 
                 'swcorelliangunship' => '/server/model/ships/starwars_centauri/swCorellianGunship.php',                
