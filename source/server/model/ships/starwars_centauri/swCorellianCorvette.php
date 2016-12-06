@@ -26,7 +26,7 @@ class swCorellianCorvette extends MediumShip{
 	$this->iniativebonus = 9 *5; //as semi-civilian ship, initiative isn't what it would be for a true warship
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
-        $this->addPrimarySystem(new SWScanner(3, 8, 3, 3));
+        $this->addPrimarySystem(new swScanner(3, 8, 3, 3));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
 	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
