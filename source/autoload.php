@@ -103,12 +103,10 @@ spl_autoload_register(
                 'swballisticweapon' => '/server/model/weapons/customSW.php',
                 'swftrballisticlauncher' => '/server/model/weapons/customSW.php',
                 'swftrmissile' => '/server/model/weapons/customSW.php',
-                
-                
+                                
                 'swrayshield' => '/server/model/weapons/customSW.php',
-                'swscanner' => '/server/model/weapons/customSW.php',
-                
-                
+                'swscanner' => '/server/model/systems/baseSystems.php',
+                                
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
@@ -136,6 +134,7 @@ spl_autoload_register(
                 'swcapitalconcussion' => '/server/model/weapons/customSW.php',
                 'swcapitalproton' => '/server/model/weapons/customSW.php',
                 
+                
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
                 'customlightmattercannonf' => '/server/model/weapons/customs.php',
@@ -143,6 +142,7 @@ spl_autoload_register(
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
                 'hlpa' => '/server/model/weapons/customs.php',
+                
                 
                 //Deneth
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
