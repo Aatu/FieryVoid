@@ -15,9 +15,9 @@ Scanner.prototype.constructor = Scanner;
 
 var SWScanner = function(json, ship)
 {
-    ShipSystem.call( this, json, ship);
+    Scanner.call( this, json, ship);
 }
-SWScanner.prototype = Object.create( ShipSystem.prototype );
+SWScanner.prototype = Object.create( Scanner.prototype );
 SWScanner.prototype.constructor = SWScanner;
 
 
