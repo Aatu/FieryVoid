@@ -643,7 +643,8 @@ shipManager.power = {
 	},
 	
 	clickPlus: function(ship, system){
-            if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+            //if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+	    if (system.isScanner() &&  ew.getUsedEW(ship) > 0){
                 confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
                 return;
             }
@@ -662,7 +663,8 @@ shipManager.power = {
 	
 	clickMinus: function(ship, system){
 		
-		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		if (system.isScanner() &&  ew.getUsedEW(ship) > 0){
 			
             confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             
@@ -754,7 +756,9 @@ shipManager.power = {
 		
         system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
 		
-		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		if (system.isScanner() &&  ew.getUsedEW(ship) > 0){	
+			
 			
             confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             
