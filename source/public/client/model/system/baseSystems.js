@@ -13,12 +13,12 @@ var Scanner = function(json, ship)
 Scanner.prototype = Object.create( ShipSystem.prototype );
 Scanner.prototype.constructor = Scanner;
 
-var swScanner = function(json, ship)
+var SwScanner = function(json, ship)
 {
     Scanner.call( this, json, ship);
 }
-swScanner.prototype = Object.create( Scanner.prototype );
-swScanner.prototype.constructor = swScanner;
+SwScanner.prototype = Object.create( Scanner.prototype );
+SwScanner.prototype.constructor = SwScanner;
 
 
 var ElintScanner = function(json, ship)
