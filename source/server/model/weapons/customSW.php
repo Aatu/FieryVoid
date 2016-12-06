@@ -967,7 +967,7 @@ class SWMediumTLaserE extends SWMediumTLaser{
 	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
 	public function setMaxDamage(){     $this->maxDamage = 14+$this->damagebonus ;      }
 } //end of class SWMediumTLaser
-class SWHeavyTLaserE extends SWHeavyTLase{
+class SWHeavyTLaserE extends SWHeavyTLaser{
     public $name = "SWHeavyTLaserE";
     public $displayName = "Heavy Turbolaser (Early)";
 	
