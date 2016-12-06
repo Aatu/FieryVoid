@@ -304,7 +304,6 @@ class Engine extends ShipSystem{
 }
 
 class Scanner extends ShipSystem{
-
     public $name = "scanner";
     public $displayName = "Scanner";
     public $primary = true;
@@ -361,6 +360,7 @@ class ElintScanner extends Scanner implements SpecialAbility{
 
 /*SW Scanners have boostability reduced to +2*/
 class SWScanner extends Scanner {
+    public $name = "swScanner";
     //public $maxBoostLevel = 2;
 	
     public function setSystemDataWindow($turn){
