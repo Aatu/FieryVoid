@@ -117,7 +117,8 @@ shipManager.power = {
             var boost = shipManager.power.getBoost(system);
 
             if (system.boostable && !boost){
-                if(system.name == "scanner" || system.name == "elintScanner"){
+                //if(system.name == "scanner" || system.name == "elintScanner"){
+		if(system.isScanner()){
                     if(system.id == shipManager.power.getHighestSensorsId(ship)){
                         // You can only boost the highest sensor rating
                         // if multiple sensors are present on one ship
@@ -144,7 +145,8 @@ shipManager.power = {
             for(var i in ship.systems){
                 var system = ship.systems[i];
                 
-                if(system.name == "scanner" || system.name == "elintScanner"){
+                //if(system.name == "scanner" || system.name == "elintScanner"){
+		if(system.isScanner()){
                     if(!shipManager.power.isOffline(ship, system)){
                         var rating = shipManager.systems.getOutput(ship, system);
                         if(rating > highestRating){
@@ -432,7 +434,8 @@ shipManager.power = {
 		for (var i = 0; i < ship.systems.length; i++){
 			var sys = ship.systems[i];
 
-			if (sys.name == "scanner" || sys.name == "elintScanner"){
+			//if (sys.name == "scanner" || sys.name == "elintScanner"){
+			if(sys.isScanner()){
 				var online = true;	
 				for (var j in sys.power){
 					var power = sys.power[j];
