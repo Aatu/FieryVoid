@@ -368,6 +368,9 @@ class SWScanner extends Scanner {
 	$boostability = $this->$maxBoostLevel;
 	$this->data["<font color='red'>Remark</font>"] = "<br>Boostability limited to +$boostability.";  
     }*/
+     public function setSystemDataWindow($turn){
+        $this->data["<font color='red'>Remark</font>"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+    }
 } //end of swScanner
 
 
