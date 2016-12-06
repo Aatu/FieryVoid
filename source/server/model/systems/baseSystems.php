@@ -362,9 +362,9 @@ class ElintScanner extends Scanner implements SpecialAbility{
 class SWScanner extends Scanner {
     public $name = "SWScanner";
     public $iconPath = "scanner.png";
-	/*
-    public $maxBoostLevel = 2;
 
+    public $maxBoostLevel = 2;
+	/*
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
 	$this->data["<font color='red'>Remark</font>"] = "<br>Boostability limited to +$maxBoostLevel.";  
