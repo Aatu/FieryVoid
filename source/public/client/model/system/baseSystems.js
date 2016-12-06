@@ -19,7 +19,9 @@ var SWScanner = function(json, ship)
 }
 SWScanner.prototype = Object.create( Scanner.prototype );
 SWScanner.prototype.constructor = SWScanner;
-
+SWScanner.prototype.hasMaxBoost = function(){
+    return true;
+}
 
 var ElintScanner = function(json, ship)
 {
