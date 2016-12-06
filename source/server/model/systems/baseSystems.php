@@ -363,13 +363,9 @@ class SWScanner extends Scanner {
     public $name = "SWScanner";
     public $iconPath = "scanner.png";
     public $maxBoostLevel = 2;
-/*
+
      public function setSystemDataWindow($turn){
-	$boostability = $this->$maxBoostLevel;
-	$this->data["<font color='red'>Remark</font>"] = "<br>Boostability limited to +$boostability.";  
-    }*/
-     public function setSystemDataWindow($turn){
-	$boostability = $this->$maxBoostLevel;
+	$boostability = $this->maxBoostLevel;
         $this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";
     }
 } //end of swScanner
