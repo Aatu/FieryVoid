@@ -78,18 +78,21 @@ spl_autoload_register(
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
                 'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
-                'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',
+                'swcorelliangunship' => '/server/model/ships/starwars_centauri/swCorellianGunship.php',  
+                'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
+                'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
+
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
-                
+
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
-                
+
                 
                 
                 //custom weapons StarWars
@@ -98,11 +101,10 @@ spl_autoload_register(
                 'swballisticweapon' => '/server/model/weapons/customSW.php',
                 'swftrballisticlauncher' => '/server/model/weapons/customSW.php',
                 'swftrmissile' => '/server/model/weapons/customSW.php',
-                
-                
+                                
                 'swrayshield' => '/server/model/weapons/customSW.php',
-                
-                
+                'swscanner' => '/server/model/systems/baseSystems.php',
+                                
                 'swfighterion' => '/server/model/weapons/customSW.php',
                 'swfighterlaser' => '/server/model/weapons/customSW.php',
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
@@ -116,11 +118,20 @@ spl_autoload_register(
                 'swlighttlaser' => '/server/model/weapons/customSW.php',
                 'swmediumtlaser' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+
+                'swlightlasere' => '/server/model/weapons/customSW.php',
+                'swmediumlasere' => '/server/model/weapons/customSW.php',
+                'swheavylasere' => '/server/model/weapons/customSW.php',
+                'swlighttlasere' => '/server/model/weapons/customSW.php',
+                'swmediumtlasere' => '/server/model/weapons/customSW.php',
+                'swheavytlasere' => '/server/model/weapons/customSW.php',
+                
                 'swlightion' => '/server/model/weapons/customSW.php',
                 'swmediumion' => '/server/model/weapons/customSW.php',
                 'swheavyion' => '/server/model/weapons/customSW.php',
                 'swcapitalconcussion' => '/server/model/weapons/customSW.php',
                 'swcapitalproton' => '/server/model/weapons/customSW.php',
+                
                 
                 //custom guns
                 'customlightmattercannon' => '/server/model/weapons/customs.php',
@@ -129,6 +140,7 @@ spl_autoload_register(
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
                 'hlpa' => '/server/model/weapons/customs.php',
+                
                 
                 //Deneth
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 

@@ -44,17 +44,19 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 30th of November 2016";
+                    header.innerHTML = "Latest News 6th of December 2016";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- This time just a small update, but useful one (I hope)";
+                    news.innerHTML += "- StarWars ;)";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Number of criticals is didplayed along with name :)"; 
+                    news.innerHTML += "- A few ships were deployed for tests, and were met with more general interest than I expected."; 
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- So now You'll know just how many 'double cost' crits Your thruster has :) ";
+                    news.innerHTML += "- Now they're available somewhat better balanced - after initial playtesting :) (so point values do have some correlation with their performance) ";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- Note easy to overlook capabilities! (alternate firing mode for direct fire weapons, boosting shields) ";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 

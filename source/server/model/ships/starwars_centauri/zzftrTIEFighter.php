@@ -4,7 +4,7 @@ class zzftrTIEFighter extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 27*6;
+        $this->pointCost = 20*6;
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "zzftrtiefighter";
         $this->shipClass =  "TIE Fighters";
@@ -16,7 +16,7 @@ class zzftrTIEFighter extends FighterFlight{
         $this->forwardDefense = 5;
         $this->sideDefense = 6;
         $this->freethrust = 11;
-        $this->offensivebonus = 4;
+        $this->offensivebonus = 3;
         $this->jinkinglimit = 10;
         $this->turncost = 0.25;
         

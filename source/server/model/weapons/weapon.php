@@ -837,7 +837,8 @@ class Weapon extends ShipSystem{
         //$this->firingMode = $fireOrder->firingMode;
 	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 
-        $pos = $shooter->getCoPos();
+        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
+	//$pos = $shooter->getCoPos();
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);

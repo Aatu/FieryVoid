@@ -16,7 +16,7 @@ class zzftrxwing extends FighterFlight{
         $this->forwardDefense = 7;
         $this->sideDefense = 8;
         $this->freethrust = 12;
-        $this->offensivebonus = 5;
+        $this->offensivebonus = 4;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         

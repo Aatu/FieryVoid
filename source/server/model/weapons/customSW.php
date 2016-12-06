@@ -5,6 +5,7 @@
 
 
 
+
 /*
 	StarWars Ray Shield: does not affect profile
 	protects vs all weapoon classes except Matter, Ballistic and SW Ion
@@ -112,7 +113,13 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     }
 	
     function __construct($maxAmount, $startArc, $endArc, $nrOfShots){
+	//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+	if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+	if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+	if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
+	    
         parent::__construct($maxAmount, $startArc, $endArc);
+	    
         $Torp = new SWFtrProtonTorpedo($startArc, $endArc,  $nrOfShots, $this->fireControl);
         $this->missileArray = array( 1 => $Torp );
         $this->maxAmount = $maxAmount;
@@ -120,8 +127,8 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 	$this->maxpulses = $nrOfShots;
 	$this->defaultShots = $nrOfShots;
 	//$this->intercept = $nrOfShots; //each weapon needs to calculate this by itself!
-	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! let's give them better grouping than direct fire...
-	$this->grouping = max(10,$this->grouping); //but no better than +1 per 8!
+	$this->grouping = 35-5*$nrOfShots; //more launchers means better grouping! 
+	$this->grouping = max(10,$this->grouping); //but no better than +1 per 10!
     }	
 	
 	
@@ -223,6 +230,12 @@ class SWDirectWeapon extends Pulse{
 		$powerReq += $powerReq*0.65*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
+		
+		
+		//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+		if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 				
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
@@ -337,6 +350,10 @@ class SWBallisticWeapon extends Torpedo{
 		$powerReq += $powerReq*0.35*($nrOfShots-1);
 		$maxhealth = ceil($maxhealth);
 		$powerReq = ceil($powerReq);
+		//number of barrels influences FC, too! +1/2 vs fighters, +1/3 vs ships
+		if($this->fireControl[0]!==null) $this->fireControl[0] += floor($nrOfShots/2);
+		if($this->fireControl[1]!==null) $this->fireControl[1] += floor($nrOfShots/3);
+		if($this->fireControl[2]!==null) $this->fireControl[2] += floor($nrOfShots/3);
 				
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	}    
@@ -868,6 +885,97 @@ class SWHeavyTLaser extends SWDirectWeapon{
 } //end of class SWHeavyTLaser
 
 
+
+
+
+
+class SWLightLaserE extends SWLightLaser{
+    public $name = "SWLightLaserE";
+    public $displayName = "Light Laser (Early)";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 2;
+    public $fireControl = array(3, 2, 1); // fighters, <mediums, <capitals
+
+	public function getDamage($fireOrder){ return  Dice::d(6)+1 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 2+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 7+$this->damagebonus ;      }
+} //end of class SWLightLaserE
+class SWMediumLaserE extends SWMediumLaser{
+    /*StarWars standard ship-mounted laser - an universal (if still very light) weapon
+    */
+    public $name = "SWMediumLaserE";
+    public $displayName = "Medium Laser (Early)";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 1.5; // 3 per 2 hexes
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals
+	
+	public function getDamage($fireOrder){ return  Dice::d(8)+2 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 3 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 +$this->damagebonus ;      }
+} //end of class SWMediumLaserE
+class SWHeavyLaserE extends SWHeavyLaser{
+    public $name = "SWHeavyLaserE";
+    public $displayName = "Heavy Laser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 2;
+    public $rangePenalty = 1; 
+    public $fireControl = array(0, 2, 2); // fighters, <mediums, <capitals
+
+	public function getDamage($fireOrder){ return  Dice::d(8)+3 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 4 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11 +$this->damagebonus ;      }
+} //end of class SWHeavyLaserE
+class SWLightTLaserE extends SWLightTLaser{
+    public $name = "SWLightTLaserE";
+    public $displayName = "Light Turbolaser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 2;
+    public $rangePenalty = 1;
+    public $fireControl = array(-2, 2, 3); // fighters, <mediums, <capitals
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+5 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 6+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 11+$this->damagebonus ;      }
+} //end of class SWLightTLaserE
+class SWMediumTLaserE extends SWMediumTLaser{
+    public $name = "SWMediumTLaserE";
+    public $displayName = "Medium Turbolaser (Early)";
+	
+    public $priority = 4;
+    public $loadingtime = 3;
+    public $rangePenalty = 0.6;
+    public $fireControl = array(-4, 1, 3); // fighters, <mediums, <capitals
+    
+	
+	public function getDamage($fireOrder){ return  Dice::d(8)+6 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 7+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 14+$this->damagebonus ;      }
+} //end of class SWMediumTLaser
+class SWHeavyTLaserE extends SWHeavyTLaser{
+    public $name = "SWHeavyTLaserE";
+    public $displayName = "Heavy Turbolaser (Early)";
+	
+    public $priority = 5;
+    public $loadingtime = 4;
+    public $rangePenalty = 0.4;
+    public $fireControl = array(-7, 0, 3); // fighters, <mediums, <capitals
+   
+	public function getDamage($fireOrder){ return  Dice::d(6,2)+7 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 9+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 19+$this->damagebonus ;      }
+} //end of class SWHeavyTLaserE
+
+
+
+
+
+
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
 
 
@@ -983,7 +1091,7 @@ class SWHeavyIon extends SWIon{
 */
 class SWCapitalConcussion extends SWBallisticWeapon{
         public $name = "SWCapitalConcussion";
-        public $displayName = "Concussion Missile Battery";
+        public $displayName = "Capital Concussion Missile";
         public $range = 16;
 	public $distanceRange = 24;
         public $loadingtime = 3;
@@ -1010,7 +1118,7 @@ class SWCapitalConcussion extends SWBallisticWeapon{
 */
 class SWCapitalProton extends SWBallisticWeapon{
         public $name = "SWCapitalProton";
-        public $displayName = "Proton Torpedo Battery";
+        public $displayName = "Capital Proton Torpedo";
         public $range = 20;
 	public $distanceRange = 30;
         public $loadingtime = 3;

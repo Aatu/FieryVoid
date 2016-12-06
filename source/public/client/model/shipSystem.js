@@ -20,6 +20,9 @@ ShipSystem.prototype.initBoostableInfo = function(){
 ShipSystem.prototype.hasMaxBoost = function(){
     return false;
 }
+ShipSystem.prototype.isScanner = function(){
+    return false;
+}
 
 var Fighter = function(json, ship)
 {

@@ -304,7 +304,6 @@ class Engine extends ShipSystem{
 }
 
 class Scanner extends ShipSystem{
-
     public $name = "scanner";
     public $displayName = "Scanner";
     public $primary = true;
@@ -357,6 +356,20 @@ class ElintScanner extends Scanner implements SpecialAbility{
         return true;
     }
 }
+
+
+/*SW Scanners have boostability reduced to +2*/
+class SWScanner extends Scanner {
+    public $name = "SWScanner";
+    public $iconPath = "scanner.png";
+    public $maxBoostLevel = 2;
+
+     public function setSystemDataWindow($turn){
+	$boostability = $this->maxBoostLevel;
+        $this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";
+    }
+} //end of swScanner
+
 
 class CnC extends ShipSystem{
 

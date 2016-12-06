@@ -12,7 +12,19 @@ var Scanner = function(json, ship)
 }
 Scanner.prototype = Object.create( ShipSystem.prototype );
 Scanner.prototype.constructor = Scanner;
+Scanner.prototype.isScanner = function(){
+    return true;
+}
 
+var SWScanner = function(json, ship)
+{
+    Scanner.call( this, json, ship);
+}
+SWScanner.prototype = Object.create( Scanner.prototype );
+SWScanner.prototype.constructor = SWScanner;
+SWScanner.prototype.hasMaxBoost = function(){
+    return true;
+}
 
 var ElintScanner = function(json, ship)
 {
