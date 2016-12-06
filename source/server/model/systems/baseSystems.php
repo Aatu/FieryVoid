@@ -359,8 +359,8 @@ class ElintScanner extends Scanner implements SpecialAbility{
 
 
 /*SW Scanners have boostability reduced to +2*/
-class swScanner extends Scanner {
-    public $name = "swScanner";
+class SWScanner extends Scanner {
+    public $name = "SWScanner";
     //public $maxBoostLevel = 2;
 	/*
     public function setSystemDataWindow($turn){
