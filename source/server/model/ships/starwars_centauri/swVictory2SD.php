@@ -90,7 +90,7 @@ class swVictory2SD extends BaseShip{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 5, 55));
-        $this->addAftSystem(new Structure( 3, 85));
+        $this->addAftSystem(new Structure( 3, 70));
         $this->addLeftSystem(new Structure( 4, 65));
         $this->addRightSystem(new Structure( 4, 65));
         $this->addPrimarySystem(new Structure( 5, 70));
