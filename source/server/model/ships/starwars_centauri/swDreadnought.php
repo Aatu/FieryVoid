@@ -4,7 +4,7 @@ class swDreadnought extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 675;
+	$this->pointCost = 625;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swDreadnought";
         $this->imagePath = "img/starwars/dreadnaught.png";
