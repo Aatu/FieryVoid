@@ -160,7 +160,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
             return 0;
 
         $output = $this->output;
-        $output -= $this->outputMod;
+        $output += $this->outputMod; //outputMod itself is negative!
         return $output;
     }
     
@@ -175,7 +175,7 @@ class Shield extends ShipSystem implements DefensiveSystem{
             return 0;
         
         $output = $this->output;
-        $output -= $this->outputMod;
+        $output += $this->outputMod; //outputMod itself is negative!
         return $output;
     }
 }

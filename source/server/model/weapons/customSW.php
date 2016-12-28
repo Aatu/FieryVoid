@@ -50,7 +50,7 @@ class SWRayShield extends Shield implements DefensiveSystem{
         $output = $this->output + $this->getBoostLevel($turn);
 	//Ballistic, Matter, SWIon - passes through!
 	if($weapon->weaponClass == 'Ballistic' || $weapon->weaponClass == 'Matter' || $weapon->weaponClass == 'SWIon' ) $output = 0;
-        $output -= $this->outputMod;
+        $output += $this->outputMod; //outputMod itself is negative!
 	if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
 	$output=max(0,$output); //no less than 0!
         return $output;

@@ -4,11 +4,11 @@ class swDreadnought extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 675;
+	$this->pointCost = 625;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swDreadnought";
         $this->imagePath = "img/starwars/dreadnaught.png";
-	    $this->canvasSize = 100;
+	    //$this->canvasSize = 100;
         $this->shipClass = "Dreadnought";
 	
 	$this->fighters = array("fighter flights"=>2);
@@ -51,8 +51,8 @@ class swDreadnought extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
 	$this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
 	$this->addAftSystem(new SWRayShield(2,12,6,2,90,270)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWLightTLaser(3, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWLightTLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightTLaser(3, 180, 300, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightTLaser(3, 60, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(3, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(3, 180, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(3, 0, 180, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
