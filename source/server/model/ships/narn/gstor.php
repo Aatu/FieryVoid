@@ -8,11 +8,12 @@ class Gstor extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "Gstor";
         $this->imagePath = "img/ships/gquan.png";
-        $this->shipClass = "G'Stor";
+        $this->shipClass = "G'Stor Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
-	$this->variantOf = "G'Quan";
-        $this->fighters = array("normal"=>12);        
+	$this->variantOf = "G'Quan Heavy Cruiser";
+        $this->fighters = array("normal"=>12);
+	    $this->isd = 2246;
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
