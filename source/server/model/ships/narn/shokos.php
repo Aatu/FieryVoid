@@ -11,6 +11,7 @@ class Shokos extends MediumShip{
         $this->shipClass = "Sho'Kos Patrol Cutter";
         $this->agile = true;
         $this->canvasSize = 100;
+	    $this->isd = 2240;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
