@@ -8,7 +8,7 @@ class Glan extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "Glan";
         $this->imagePath = "img/ships/gquan.png";
-        $this->shipClass = "G'Lan";
+        $this->shipClass = "G'Lan Mag Cruiser";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
 	$this->variantOf = "G'Quan Heavy Cruiser";
