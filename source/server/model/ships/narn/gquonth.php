@@ -8,11 +8,12 @@ class Gquonth extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "Gquonth";
         $this->imagePath = "img/ships/gquan.png";
-        $this->shipClass = "G'Quonth";
+        $this->shipClass = "G'Quonth Attack Cruiser";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
-	$this->variantOf = "G'Quan";
-		
+	$this->variantOf = "G'Quan Heavy Cruiser";
+	$this->isd = 2252;	
+	    
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         
