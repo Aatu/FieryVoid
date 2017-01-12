@@ -8,7 +8,8 @@ class Trakk extends HeavyCombatVessel{
 		$this->faction = "Narn";
         $this->phpclass = "Trakk";
         $this->imagePath = "img/ships/trakk.png";
-        $this->shipClass = "T'Rakk";
+        $this->shipClass = "T'Rakk Frigate";
+	    $this->isd = 2213;
        
         
 		
