@@ -8,7 +8,7 @@ class Shokos extends MediumShip{
 		$this->faction = "Narn";
         $this->phpclass = "Shokos";
         $this->imagePath = "img/ships/shokos.png";
-        $this->shipClass = "Sho'Kos";
+        $this->shipClass = "Sho'Kos Patrol Cutter";
         $this->agile = true;
         $this->canvasSize = 100;
         
