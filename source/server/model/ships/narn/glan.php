@@ -11,8 +11,9 @@ class Glan extends BaseShip{
         $this->shipClass = "G'Lan";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
-	$this->variantOf = "G'Quan";
+	$this->variantOf = "G'Quan Heavy Cruiser";
         $this->fighters = array("normal"=>12);
+	    $this->isd = 2259;
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
