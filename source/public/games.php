@@ -44,19 +44,15 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 6th of December 2016";
+                    header.innerHTML = "Latest News 13th of January 2017";
                    
 
                 var news = document.getElementById("newsEntry");
-                    news.innerHTML += "The latest update includes:";
+                    news.innerHTML += "The latest update (minor one this time) includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- StarWars ;)";
+                    news.innerHTML += "- first Hurr ships, courtesy of Wolfgang";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- A few ships were deployed for tests, and were met with more general interest than I expected."; 
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Now they're available somewhat better balanced - after initial playtesting :) (so point values do have some correlation with their performance) ";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "- Note easy to overlook capabilities! (alternate firing mode for direct fire weapons, boosting shields) ";
+                    news.innerHTML += "- finished restructuring of Narn fleet, so variants are properly displayed as such";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
