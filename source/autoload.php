@@ -161,6 +161,11 @@ spl_autoload_register(
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
                 
+                //Hurr
+                'boroca' => '/server/model/ships/hurr/boroca.php',
+                'orak' => '/server/model/ships/hurr/orak.php',
+                
+                
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
