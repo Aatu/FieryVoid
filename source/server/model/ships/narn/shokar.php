@@ -8,9 +8,10 @@ class ShoKar extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "ShoKar";
         $this->imagePath = "img/ships/shokar.png";
-        $this->shipClass = "Sho'Kar";
+        $this->shipClass = "Sho'Kar Light Scout Cruiser";
         $this->limited = 33;
         $this->fighters = array("normal"=>6);
+	    $this->isd = 2240;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
