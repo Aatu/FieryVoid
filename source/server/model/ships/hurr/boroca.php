@@ -32,11 +32,12 @@ class boroca extends BaseShip{
         $this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 60));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
         
-        $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
+
 	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
+        $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
        	$this->addAftSystem(new JumpEngine(4, 20, 4, 36));
-	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
         $this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
+	$this->addAftSystem(new Engine(4, 14, 0, 4, 5));
                 
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 	$this->addLeftSystem(new StdParticleBeam(2, 4, 1, 270, 90)); 
