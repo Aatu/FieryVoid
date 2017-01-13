@@ -1,13 +1,13 @@
 <?php
-class BorocaGunship extends BaseShip{
+class boroca extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 500;
         $this->faction = "Hurr";
-        $this->phpclass = "BorocaGunship";
-        $this->imagePath = "img/ships/battlewagon.png";
+        $this->phpclass = "boroca";
+        $this->imagePath = "img/ships/hurrBoroca.png";
         $this->shipClass = "Boroca Gunship";
         $this->shipSizeClass = 3;
         
