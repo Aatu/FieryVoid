@@ -13,7 +13,7 @@ class Shokov extends MediumShip{
         $this->canvasSize = 100;
         $this->occurence = "rare";
 	$this->variantOf = "Sho'Kos Patrol Cutter";
-	    $this>isd = 2243;
+	    $this->isd = 2243;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
