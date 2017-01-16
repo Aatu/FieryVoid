@@ -7,8 +7,9 @@ class Koeth extends FighterFlight{
         $this->pointCost = 180;
         $this->faction = "Hurr";
         $this->phpclass = "Koeth";
-        $this->shipClass = "Koeth Light Fighters";
+        $this->shipClass = "Koeth Light Fighters (w/FY)";
         $this->imagePath = "img/ships/deltaV.png";
+	    $this->variantOf = "Koeth Light Fighters";
         
         $this->forwardDefense = 5;
         $this->sideDefense = 5;
@@ -31,17 +32,12 @@ class Koeth extends FighterFlight{
 		$fighter->imagePath = "img/ships/deltaV.png";
 		$fighter->iconPath = "img/ships/deltaV_large.png";
 
+		
+		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
 
             	$missileRack = new FighterMissileRack(2, 330, 30);
-            	$missileRack->firingModes = array(
-                1 => "FY"
-            	);
-            	$missileRack->missileArray = array(
-                1 => new MissileFY(330, 30)
-            	);
-
-			
-		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
+            	$missileRack->firingModes = array( 1 => "FY" );
+            	$missileRack->missileArray = array( 1 => new MissileFY(330, 30) );
 		$fighter->addFrontSystem($missileRack);	
 	
 		$this->addSystem($fighter);
