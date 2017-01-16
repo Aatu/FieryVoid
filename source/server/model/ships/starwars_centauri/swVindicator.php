@@ -8,7 +8,7 @@ class swVindicator extends HeavyCombatVessel{
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swVindicator";
         $this->imagePath = "img/starwars/vindicator.png";
-	    $this->canvasSize = 100;
+	    //$this->canvasSize = 100;
         $this->shipClass = "Vindicator Patrol Ship";
 
 	$this->fighters = array("fighter flights"=>4);
