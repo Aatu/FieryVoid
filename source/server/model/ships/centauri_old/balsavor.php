@@ -10,6 +10,7 @@ class Balsavor extends HeavyCombatVessel{
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balsavor Gunship";
         $this->occurence = "rare";
+        $this->variantOf = "Balciron Destroyer";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
