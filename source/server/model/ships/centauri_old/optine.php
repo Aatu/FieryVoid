@@ -8,7 +8,7 @@ class Optine extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Optine";
         $this->imagePath = "img/ships/optine.png";
-        $this->shipClass = "Optine Battlecruiser ";
+        $this->shipClass = "Optine Battlecruiser";
         $this->shipSizeClass = 3;
 
         $this->forwardDefense = 16;
