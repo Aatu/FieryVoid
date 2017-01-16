@@ -8,12 +8,14 @@ class wlcGarut2006 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 800;
-        $this->faction = "Custom Ships";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "wlcGarut2006";
-        $this->shipClass = "Centauri Garut Survey Ship (2006)";
+        $this->shipClass = "Garut Survey Ship";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 
         $this->fighters = array("heavy"=>18); 
+		$this->isd = 2006;
+		$this->unofficial = true; 
 
         $this->shipSizeClass = 3; //Enormous is not implemented
         $this->forwardDefense = 19;
