@@ -11,6 +11,8 @@ class AthraskalaC extends BaseShip{
         $this->imagePath = "img/ships/athraskala.png";
         $this->shipClass = "Athraskala-C War Bomber";
         $this->shipSizeClass = 3;
+        $this->variantOf = "Athraskala Heavy Bomber";
+        $this->isd = 2232;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

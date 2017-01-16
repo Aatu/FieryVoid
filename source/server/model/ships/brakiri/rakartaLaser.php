@@ -8,8 +8,9 @@ class RakartaLaser extends MediumShip{
 		$this->faction = "Brakiri";
 		$this->phpclass = "RakartaLaser";
 		$this->imagePath = "img/ships/rakarta.png";
-		$this->shipClass = "Rakarta Frigate (Ly Nakir)";
+		$this->shipClass = "Rakarta Frigate (Ly-Nakir)";
 		$this->canvasSize = 100;
+		$this->variantOf = "Rakarta Frigate";
 
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;

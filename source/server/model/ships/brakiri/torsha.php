@@ -12,6 +12,7 @@ class Torsha extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6, "light"=>12);
         $this->occurence = "rare";
+        $this->variantOf = "Devaskar Carrier";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;

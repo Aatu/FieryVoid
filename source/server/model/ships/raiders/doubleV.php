@@ -35,6 +35,7 @@ class DoubleV extends FighterFlight{
 		$fighter->iconPath = "img/ships/doubleV_large.png";
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
+		$fighter->addFrontSystem(new FighterMissileRack(2, 330, 30));
 			
 		$this->addSystem($fighter);
 	}

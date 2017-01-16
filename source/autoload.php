@@ -75,6 +75,7 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
+                'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php',
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
                 'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
@@ -83,6 +84,7 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
+                'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
 
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
@@ -159,6 +161,20 @@ spl_autoload_register(
                 'wardsat' => '/server/model/ships/deneth/wardSat.php',
                 
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
+                
+                
+                //Hurr
+                'boroca' => '/server/model/ships/hurr/boroca.php',
+                    'borocada' => '/server/model/ships/hurr/borocada.php',
+                    'brokoth' => '/server/model/ships/hurr/brokoth.php',
+                    'tonak' => '/server/model/ships/hurr/tonak.php',
+                'orak' => '/server/model/ships/hurr/orak.php',
+                    'anoro' => '/server/model/ships/hurr/anoro.php',
+                    'norek' => '/server/model/ships/hurr/norek.php',
+                
+                'koeth' => '/server/model/ships/hurr/koethFlight.php',
+                    'koethy' => '/server/model/ships/hurr/koethYFlight.php',
+                
                 
                 
                 // centauri raiders

@@ -11,6 +11,7 @@ class Halos extends BaseShip{
         $this->shipClass = "Halos Heavy Scout";
         $this->shipSizeClass = 3;
         $this->occurence = "rare";
+	    $this->variantOf = "Avioki Heavy Cruiser";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 18;

@@ -11,6 +11,7 @@ class Calorta extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Calorta Elint Cruiser";
         $this->occurence = "uncommon";
         $this->limited = 33;
+        $this->variantOf = "Ikorta Light Assault Cruiser";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

@@ -11,6 +11,9 @@ class Varloth extends BaseShip{
         $this->shipClass = "Var'Loth Assault Destroyer";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
+        $this->variantOf = "Var'Nic Long Range Destroyer";
+        $this->fighters = array("assault shuttles"=>6);
+	    $this->isd = 2243;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

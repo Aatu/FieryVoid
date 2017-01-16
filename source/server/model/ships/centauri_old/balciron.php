@@ -9,7 +9,7 @@ class Balciron extends HeavyCombatVessel{
         $this->phpclass = "Balciron";
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balciron Destroyer";
-     //   $this->occurence = "rare";
+        $this->isd = 2005;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

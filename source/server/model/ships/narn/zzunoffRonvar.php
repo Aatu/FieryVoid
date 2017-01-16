@@ -11,6 +11,7 @@ class zzunoffRonvar extends HeavyCombatVessel{
         $this->shipClass = "Ronvar Pulsar Destroyer";
         
         //$this->limited = 33;
+	    $this->variantOf = "Rongoth Destroyer";
 	$this->occurence = "uncommon";
 	$this->isd = 2238;
 	$this->unofficial = true;

@@ -9,6 +9,7 @@ class LegionB extends OSAT{
         $this->phpclass = "LegionB";
         $this->imagePath = "img/ships/legion.png";
         $this->shipClass = 'Legion B Satellite';
+        $this->variantOf = 'Legion A Satellite';
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

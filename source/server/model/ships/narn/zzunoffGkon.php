@@ -14,7 +14,7 @@ class zzunoffGkon extends BaseShip{
         $this->fighters = array("normal"=>12);
 
       	$this->occurence = "common";
-	$this->variantOf = "G'Quan";
+	$this->variantOf = "G'Quan Heavy Cruiser";
       	$this->isd = 2228;
       	$this->unofficial = true;
 		

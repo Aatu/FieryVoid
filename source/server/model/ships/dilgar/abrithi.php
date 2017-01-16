@@ -11,6 +11,9 @@ class Abrithi extends BaseShip{
         $this->imagePath = "img/ships/abrithi.png";
         $this->shipClass = "Abrithi Assault Cruiser";
         $this->shipSizeClass = 3;
+        
+        $this->fighters = array("assault shuttles"=>14);
+        $this->isd = 2226;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

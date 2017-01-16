@@ -8,8 +8,9 @@ class BrathonCannon extends BaseShip{
 	$this->faction = "Brakiri";
         $this->phpclass = "BrathonCannon";
         $this->imagePath = "img/ships/brathon.png";
-        $this->shipClass = "Brathon Auxiliary Cruiser (non Kam-Lassit)";
+        $this->shipClass = "Brathon Auxiliary Cruiser (non-Kam-Lassit)";
         $this->shipSizeClass = 3;
+        $this->variantOf = "Brathon Auxiliary Cruiser";
         
         $this->forwardDefense = 15;
         $this->sideDefense = 13;

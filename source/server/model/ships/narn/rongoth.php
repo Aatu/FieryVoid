@@ -8,7 +8,8 @@ class Rongoth extends HeavyCombatVessel{
         $this->faction = "Narn";
         $this->phpclass = "Rongoth";
         $this->imagePath = "img/ships/rongoth.png";
-        $this->shipClass = "Rongoth";
+        $this->shipClass = "Rongoth Destroyer";
+	    $this->isd = 2241;
         
         
         $this->forwardDefense = 12;

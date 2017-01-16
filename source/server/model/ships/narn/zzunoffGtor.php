@@ -14,7 +14,7 @@ class zzunoffGTor extends BaseShip{
         $this->fighters = array("normal"=>12);
 
       	$this->occurence = "rare";
-	$this->variantOf = "G'Quan";
+	$this->variantOf = "G'Quan Heavy Cruiser";
       	$this->isd = 2234;
       	$this->unofficial = true;
 		

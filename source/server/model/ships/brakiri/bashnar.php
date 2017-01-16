@@ -10,6 +10,7 @@ class Bashnar extends BaseShip{
         $this->imagePath = "img/ships/brathon.png";
         $this->shipClass = "Bashnar Auxiliary Carrier";
         $this->shipSizeClass = 3;
+        $this->variantOf = "Brathon Auxiliary Cruiser";
         
         $this->occurence = "uncommon";
         $this->fighters = array("light"=>6);

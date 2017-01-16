@@ -13,6 +13,7 @@ class zzunoffShoKanElite extends BaseShip{
         $this->shipClass = "Sho'Kan Scout Cruiser (Elite)";
         $this->fighters = array("normal"=>6);
         
+	    $this->variantOf = "Sho'Kar Light Scout Cruiser";
         $this->limited = 33;
 	$this->occurence = "common";
 	
