@@ -11,6 +11,7 @@ class Balcirax extends HeavyCombatVessel{
         $this->shipClass = "Balcirax Attack Destroyer";
         $this->occurence = "uncommon";
         $this->variantOf = "Balciron Destroyer";
+        $this->isd = 1985;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -23,7 +24,7 @@ class Balcirax extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         
          
-        $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 15, 0, 1));
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 3, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
