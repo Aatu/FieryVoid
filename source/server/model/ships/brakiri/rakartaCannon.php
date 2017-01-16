@@ -10,7 +10,7 @@ class RakartaCannon extends MediumShip{
 		$this->imagePath = "img/ships/rakarta.png";
 		$this->shipClass = "Rakarta Frigate (non-Kam-Lassit)";
 		$this->canvasSize = 100;
-		$this->shipClass = "Rakarta Frigate";
+		$this->variantOf = "Rakarta Frigate";
 
 		$this->forwardDefense = 11;
 		$this->sideDefense = 13;
