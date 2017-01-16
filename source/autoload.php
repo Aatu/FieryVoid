@@ -173,7 +173,7 @@ spl_autoload_register(
                     'norek' => '/server/model/ships/hurr/norek.php',
                 
                 'koeth' => '/server/model/ships/hurr/koethFlight.php',
-                    'koethy' => '/server/model/ships/hurr/koethYFlight.php',
+                    //'koethy' => '/server/model/ships/hurr/koethYFlight.php',
                 
                 
                 
