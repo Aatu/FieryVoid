@@ -165,6 +165,10 @@ spl_autoload_register(
                 'boroca' => '/server/model/ships/hurr/boroca.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
                 
+                'koeth' => '/server/model/ships/hurr/koethFlight.php',
+                'koethy' => '/server/model/ships/hurr/koethYFlight.php',
+                
+                
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
