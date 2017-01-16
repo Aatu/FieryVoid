@@ -83,6 +83,7 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
+                'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
 
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
