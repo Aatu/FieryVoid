@@ -163,10 +163,15 @@ spl_autoload_register(
                 
                 //Hurr
                 'boroca' => '/server/model/ships/hurr/boroca.php',
+                    'borocada' => '/server/model/ships/hurr/borocada.php',
+                    'brokoth' => '/server/model/ships/hurr/brokoth.php',
+                    'tonak' => '/server/model/ships/hurr/tonak.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
+                    'anoro' => '/server/model/ships/hurr/anoro.php',
+                    'norek' => '/server/model/ships/hurr/norek.php',
                 
                 'koeth' => '/server/model/ships/hurr/koethFlight.php',
-                'koethy' => '/server/model/ships/hurr/koethYFlight.php',
+                    'koethy' => '/server/model/ships/hurr/koethYFlight.php',
                 
                 
                 
