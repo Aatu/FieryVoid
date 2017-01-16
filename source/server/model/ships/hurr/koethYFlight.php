@@ -1,12 +1,12 @@
 <?php
-class Koeth extends FighterFlight{
+class KoethY extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
         $this->faction = "Hurr";
-        $this->phpclass = "Koeth";
+        $this->phpclass = "koethy";
         $this->shipClass = "Koeth Light Fighters (w/FY)";
         $this->imagePath = "img/ships/deltaV.png";
 	    $this->variantOf = "Koeth Light Fighters";
