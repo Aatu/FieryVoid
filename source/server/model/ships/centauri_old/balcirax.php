@@ -10,6 +10,7 @@ class Balcirax extends HeavyCombatVessel{
         $this->imagePath = "img/ships/balciron.png";
         $this->shipClass = "Balcirax Attack Destroyer";
         $this->occurence = "uncommon";
+        $this->variantOf = "Balciron Destroyer";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
