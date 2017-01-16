@@ -8,12 +8,14 @@ class wlcEmperorDN2090 extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 1100;
-        $this->faction = "Custom Ships";
+        $this->faction = "Centauri (WotCR)";
         $this->phpclass = "wlcEmperorDN2090";
-        $this->shipClass = "wlc Centauri Emperor Dreadnought (2090)";
+        $this->shipClass = "Emperor Dreadnought";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 
         $this->fighters = array("heavy"=>24); 
+		$this->unofficial = true;
+		$this->isd = 2090;
 
         $this->shipSizeClass = 3; //Enormousis not implemented
         $this->Enormous = true;		
