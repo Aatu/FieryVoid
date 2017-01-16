@@ -33,7 +33,7 @@ class borocada extends BaseShip{
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 300, 0));
-        $this->addFrontSystem(new PatricleCannon(4, 8, 7, 0, 60));
+        $this->addFrontSystem(new ParticleCannon(4, 8, 7, 0, 60));
 	$this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
         
 	$this->addAftSystem(new Thruster(3, 16, 0, 4, 2));
