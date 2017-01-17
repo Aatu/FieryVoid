@@ -25,7 +25,7 @@ class Nalor extends BaseShip{
         $this->pivotcost = 3;
         $this->occurence = "uncommon";    
          
-        $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 16, 0, 3));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 9, 3));
