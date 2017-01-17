@@ -10,6 +10,7 @@ class Celerian extends BaseShip{
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Celerian Warcruiser";
         $this->shipSizeClass = 3;
+	    $this->isd = 2007;
     //    $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 15;
