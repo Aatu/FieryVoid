@@ -10,7 +10,8 @@ class Falenna extends HeavyCombatVessel{
         $this->imagePath = "img/ships/falenna.png";
         $this->shipClass = "Falenna Garrison Ship";
 
-        $this->fighters = array("medium"=>6);
+        $this->fighters = array("heavy"=>6, "assault shuttles"=>6);
+        $this->isd = 1975;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
