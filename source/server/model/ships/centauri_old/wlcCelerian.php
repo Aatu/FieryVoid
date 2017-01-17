@@ -8,9 +8,11 @@ class Celerian extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Celerian";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Celerian Warcruiser";
+        $this->shipClass = "Celerian House Cruiser";
         $this->shipSizeClass = 3;
-	    $this->isd = 2007;
+
+        $this->variantOf = "Celerian Warcruiser";
+	    //$this->isd = ;
     //    $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 15;
@@ -20,7 +22,9 @@ class Celerian extends BaseShip{
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
-        $this->pivotcost = 3;       
+        $this->pivotcost = 3;     
+	    
+        $this->iniativebonus = 5;   //+1 Ini!
          
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
@@ -30,9 +34,9 @@ class Celerian extends BaseShip{
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 360));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 360));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
-        $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 0, 60));
+        $this->addFrontSystem(new ImperialLaser(3, 8, 5, 0, 60));
 		
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
@@ -72,7 +76,7 @@ class Celerian extends BaseShip{
 		1=> array(
 			5 => "Thruster",
 			7 => "Assault Laser",
-			10 => "Heavy Plasma Cannon",
+			10 => "Imperial Laser",
 			18 => "Structure",
 			20 => "Primary",
 		),
