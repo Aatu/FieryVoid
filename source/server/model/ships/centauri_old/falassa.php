@@ -9,13 +9,15 @@ class Falassa extends HeavyCombatVessel{
         $this->phpclass = "Falassa";
         $this->imagePath = "img/ships/falenna.png";
         $this->shipClass = "Falassa Escort Carrier";
-
+        
+        $this->variantOf = "Falenna Garrison Ship";
+        $this->occurence = "uncommon";
+        $this->isd = 2003;
         $this->fighters = array("light"=>12);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
 
-        $this->occurence = "uncommon";
         
         $this->turncost = 1;
         $this->turndelaycost = 0.66;
