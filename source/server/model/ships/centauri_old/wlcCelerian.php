@@ -1,12 +1,12 @@
 <?php
-class Celerian extends BaseShip{
+class wlcCelerian extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 650;
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "Celerian";
+        $this->phpclass = "wlcCelerian";
         $this->imagePath = "img/ships/celerian.png";
         $this->shipClass = "Celerian House Cruiser";
         $this->shipSizeClass = 3;
