@@ -11,6 +11,9 @@ class Nalor extends BaseShip{
         $this->shipClass = "Nalor Armored cruiser";
         $this->shipSizeClass = 3;
     //    $this->fighters = array("normal"=>12);
+	    
+        $this->variantOf = "Celerian Warcruiser";
+	    $this->isd = 1975;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
