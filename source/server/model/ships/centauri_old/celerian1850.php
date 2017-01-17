@@ -9,9 +9,10 @@ class Celerian1850 extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Celerian1850";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Celerian Warcruiser (ISD 1850)";
+        $this->shipClass = "Celerian Warcruiser";
         $this->shipSizeClass = 3;
-    //    $this->fighters = array("normal"=>12);
+        $this->variantOf = "Celerian Warcruiser";
+	    $this->isd = 1850;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
