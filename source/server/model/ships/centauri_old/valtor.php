@@ -8,9 +8,11 @@ class Valtor extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Valtor";
         $this->imagePath = "img/ships/optine.png";
-        $this->shipClass = "Valtor Strike Cruiser ";
+        $this->shipClass = "Valtor Strike Cruiser";
         $this->shipSizeClass = 3;
-
+	    
+        $this->variantOf = "Optine Battlecruiser";
+	    $this->isd = 1966;
         $this->occurence = "rare";
 
         $this->forwardDefense = 16;
