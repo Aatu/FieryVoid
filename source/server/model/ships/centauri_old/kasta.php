@@ -11,6 +11,8 @@ class Kasta extends BaseShip{
         $this->shipClass = "Kasta Support Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
+        $this->variantOf = "Celerian Warcruiser";
+	    $this->isd = 2007;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
