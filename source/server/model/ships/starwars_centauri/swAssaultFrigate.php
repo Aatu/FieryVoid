@@ -7,8 +7,8 @@ class swAssaultFrigate extends HeavyCombatVessel{
 	$this->pointCost = 725;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swAssaultFrigate";
-        $this->imagePath = "img/starwars/dreadnaught.png";
-	    $this->canvasSize = 100;
+        $this->imagePath = "img/starwars/assaultfrigate.png";
+	    //$this->canvasSize = 100;
         $this->shipClass = "Rebel Assault Frigate";
 	
 	$this->unofficial = true;
