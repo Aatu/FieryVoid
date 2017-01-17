@@ -12,6 +12,7 @@ class Celerian extends BaseShip{
         $this->shipSizeClass = 3;
 
         $this->variantOf = "Celerian Warcruiser";
+	    $this->unofficial = true;
 	    //$this->isd = ;
     //    $this->fighters = array("normal"=>12);
         
