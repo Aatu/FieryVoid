@@ -276,7 +276,7 @@ spl_autoload_register(
                 'laserlance' => '/server/model/weapons/lasers.php',
                 'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
-                //WotC Centauri
+                //WoCR Centauri
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
                 'balsavor' => '/server/model/ships/centauri_old/balsavor.php',
@@ -308,7 +308,11 @@ spl_autoload_register(
                 'valtor' => '/server/model/ships/centauri_old/valtor.php',
                 'varilon' => '/server/model/ships/centauri_old/varilon.php',
                 'sakar' => '/server/model/ships/centauri_old/sakar.php',
-                //WotC Centauri systems
+                
+                //WoCR unofficial
+                'wlccelerian' => '/server/model/ships/centauri_old/wlcCelerian.php',
+                
+                //WoCR Centauri systems
                 'taclaser' => '/server/model/weapons/lasers.php',
                 'sentinelpointdefense' => '/server/model/weapons/defensive.php',
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
