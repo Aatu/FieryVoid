@@ -13,7 +13,7 @@ class Haltona extends MediumShip{
         $this->shipSizeClass = 1;
         $this->canvasSize = 100;
         $this->occurence = "rare";
-        $this->shipClass = "Halik Fighter-Killer";
+        $this->variantOf = "Halik Fighter-Killer";
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
