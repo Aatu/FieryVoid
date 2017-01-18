@@ -1,32 +1,32 @@
 <?php
-class SkySerpent extends SuperHeavyFighter{
+class scionbp extends SuperHeavyFighter{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 130;
-        $this->faction = "Drazi";
-        $this->phpclass = "SkySerpent";
-        $this->shipClass = "Sky Serpent Heavy Assault Fighter";
+        $this->pointCost = 40;
+        $this->faction = "Centauri";
+        $this->phpclass = "scionbp";
+        $this->shipClass = "Scion Breaching Pod";
         $this->imagePath = "img/ships/skyserpent.png";
-	    $this->isd = 2220;
+	    //$this->isd = 2220;
 
-        $this->forwardDefense = 10;
-        $this->sideDefense = 9;
-        $this->freethrust = 10;
-        $this->offensivebonus = 7;
-        $this->jinkinglimit = 4;
+        $this->forwardDefense = 9;
+        $this->sideDefense = 8;
+        $this->freethrust = 9;
+        $this->offensivebonus = 0; //irrelevant
+        $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 
-        $this->iniativebonus = 70;
-        $this->hasNavigator = true;
+        $this->iniativebonus = 9 *5;
         
-        $armour = array(4, 2, 3, 3);
-        $fighter = new Fighter("skyserpent", $armour, 30, $this->id);
-        $fighter->displayName = "Sky Serpent Heavy Assault Fighter";
-        $fighter->imagePath = "img/ships/skyserpent.png";
-        $fighter->iconPath = "img/ships/skyserpent_large.png";
+        $armour = array(2, 2, 2, 2);
+        $fighter = new Fighter("scionbp", $armour, 16, $this->id);
+        $fighter->displayName = "Scion Breaching Pod";
+        $fighter->imagePath = "img/ships/phalan.png";
+        $fighter->iconPath = "img/ships/phalan_large.png";
 
+	/* no weapons!
         $fighter->addFrontSystem(new PairedParticleGun(330, 30, 5));
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
@@ -35,7 +35,7 @@ class SkySerpent extends SuperHeavyFighter{
         $particleBlaster->fireControl = array(-4, 0, 0);
         $particleBlaster->loadingtime = 3;
         $fighter->addFrontSystem($particleBlaster);
-        
+        */
         $this->addSystem($fighter);
     }
 
@@ -43,6 +43,7 @@ class SkySerpent extends SuperHeavyFighter{
         return;
     }
     
+	/* Serpent used special Ini bonus, other SHFs do not
     public function getInitiativebonus($gamedata){
         $initiativeBonusRet = parent::getInitiativebonus($gamedata);
         
@@ -65,6 +66,7 @@ class SkySerpent extends SuperHeavyFighter{
         
         return $initiativeBonusRet;
     }
+    */
 }
 
 ?>
