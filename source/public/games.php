@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 13th of January 2017";
+                    header.innerHTML = "Latest News 18th of January 2017";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -52,7 +52,9 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- first Hurr ships, courtesy of Wolfgang";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- finished restructuring of Narn fleet, so variants are properly displayed as such";
+                    news.innerHTML += "- finished restructuring of Narn and Brakiri fleets, so variants are properly displayed as such";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- unpicked games will disappear after 48 hours (instead of 24)";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
