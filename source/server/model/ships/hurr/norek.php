@@ -10,7 +10,7 @@ class norek extends HeavyCombatVessel{
         $this->imagePath = "img/ships/hurrOrak.png";
         $this->shipClass = "Norek Missile Frigate";
    
-        $this->occurence = "common";
+        $this->occurence = "uncommon";
         $this->variantOf = 'Orak Frigate';
         $this->isd = 2230;
         
