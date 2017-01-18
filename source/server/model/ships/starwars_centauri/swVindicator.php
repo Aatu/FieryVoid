@@ -8,7 +8,7 @@ class swVindicator extends HeavyCombatVessel{
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swVindicator";
         $this->imagePath = "img/starwars/vindicator.png";
-	    //$this->canvasSize = 100;
+	    $this->canvasSize = 100;
         $this->shipClass = "Vindicator Patrol Ship";
 
 	$this->fighters = array("fighter flights"=>4);
@@ -38,28 +38,28 @@ class swVindicator extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 15, 0, 4, 1));
 	$this->addFrontSystem(new SWRayShield(3,15,9,3,300,60)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWLightLaser(2, 240, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWLightLaser(2, 240, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightTLaser(3, 240, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!	
 	$this->addFrontSystem(new SWMediumTLaser(3, 270, 30, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(3, 300, 60, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWMediumTLaser(3, 330, 90, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addFrontSystem(new SWLightTLaser(3, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWLightLaser(2, 300, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addFrontSystem(new SWLightLaser(2, 300, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
 	$this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
 	$this->addAftSystem(new SWRayShield(2,12,6,2,180,300)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWRayShield(2,12,6,2,60,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addAftSystem(new SWLightTLaser(3, 180, 300, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWLightTLaser(3, 60, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWLightLaser(2, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWLightLaser(2, 120, 300, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addAftSystem(new SWLightLaser(2, 240, 60, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightTLaser(3, 180, 300, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWMediumTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWMediumTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addAftSystem(new SWLightTLaser(3, 60, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+        $this->addAftSystem(new SWLightLaser(2, 60, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWLightLaser(2, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWMediumTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addFrontSystem(new SWMediumTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-    
+	
 	    
         $this->addFrontSystem(new Structure( 4, 50));
         $this->addAftSystem(new Structure( 4, 50));

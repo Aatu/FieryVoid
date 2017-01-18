@@ -717,6 +717,7 @@ spl_autoload_register(
                 'sensorsdisrupted' => '/server/model/cricialClasses.php',
                 'sentri' => '/server/model/ships/centauri/sentri.php',
                 'larisias' => '/server/model/ships/centauri/larisiAS.php',
+                'scionbp' => '/server/model/ships/centauri/ScionBP.php',
                 'severeburnout' => '/server/model/cricialClasses.php',
                 'shadras' => '/server/model/ships/balosian/shadras.php',
                 'shantavi' => '/server/model/ships/minbari/shantavi.php',

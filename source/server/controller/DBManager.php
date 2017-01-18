@@ -1924,7 +1924,7 @@ class DBManager {
             WHERE
                 DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
             OR
-                (DATE_ADD(p.lastactivity, INTERVAL 1 DAY) < NOW() 
+                (DATE_ADD(p.lastactivity, INTERVAL 2 DAY) < NOW() 
                 AND
                 g.status = 'LOBBY')
 

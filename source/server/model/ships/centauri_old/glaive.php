@@ -4,11 +4,12 @@ class Glaive extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 168;
+	$this->pointCost = 28*6;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Glaive";
-        $this->shipClass = "Glaive flight";
-		$this->imagePath = "img/ships/glaive.png";
+        $this->shipClass = "Glaive Light Fighters";
+	$this->imagePath = "img/ships/glaive.png";
+	$this->isd = 1995;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
@@ -17,7 +18,7 @@ class Glaive extends FighterFlight{
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
         
-		$this->iniativebonus = 100;
+	$this->iniativebonus = 100;
         $this->populate();
     }
 

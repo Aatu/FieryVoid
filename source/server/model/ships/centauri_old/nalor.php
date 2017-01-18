@@ -8,7 +8,7 @@ class Nalor extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Celerian";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Nalor Armored cruiser";
+        $this->shipClass = "Nalor Armored Cruiser";
         $this->shipSizeClass = 3;
     //    $this->fighters = array("normal"=>12);
 	    

@@ -4,11 +4,12 @@ class Phalan extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 132;
+	$this->pointCost = 22*6;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Phalan";
-        $this->shipClass = "Phalan Assault Fighter flight";
-		$this->imagePath = "img/ships/phalan.png";
+        $this->shipClass = "Phalan Assault Fighters";
+	$this->imagePath = "img/ships/phalan.png";
+	$this->isd = 1882;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;
