@@ -9,6 +9,7 @@ class Estnassa extends HeavyCombatVessel{
         $this->phpclass = "Estnassa";
         $this->imagePath = "img/ships/esthasa.png";
         $this->shipClass = "Estnassa Destroyer";
+        $this->fighters = array("medium"=>6);
                 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
@@ -50,8 +51,8 @@ class Estnassa extends HeavyCombatVessel{
 		$this->hitChart = array(
             0=> array(
                     6 => "Structure",
-					9 => "Thruster",
-					12 => "Scanner",
+		    9 => "Thruster",
+		    12 => "Scanner",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
@@ -60,14 +61,14 @@ class Estnassa extends HeavyCombatVessel{
             1=> array(
                     3 => "Thruster",
                     7 => "Ion Cannon",
-					9 => "Standard Particle Beam",
+		    9 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     4 => "Thruster",
-					6 => "Ion Cannon",
-					8 => "Standard Particle Beam",
+			6 => "Ion Cannon",
+			8 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
