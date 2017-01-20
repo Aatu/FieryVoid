@@ -11,6 +11,7 @@ class Tatros extends MediumShip{
     $this->shipClass = "Tatros Escort Frigate";
     $this->agile = true;
     $this->canvasSize = 100;
+    $this->variantOf = "Jenas Attack Frigate";
 
     $this->forwardDefense = 11;
     $this->sideDefense = 12;
