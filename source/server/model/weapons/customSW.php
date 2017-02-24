@@ -644,7 +644,7 @@ class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorped
     public $missileClass = "FtrMissile";
     public $displayName = "Fighter Concussion Missile";
     public $cost = 2;
-    public $damage = 8;
+    public $damage = 6;
     public $amount = 0;
     public $range = 6;
     public $distanceRange = 18;
