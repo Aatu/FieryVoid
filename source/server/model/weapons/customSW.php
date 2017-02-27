@@ -1147,4 +1147,38 @@ class SWCapitalProton extends SWBallisticWeapon{
 }//endof class SWCapitalProton
 
 
+
+
+class SWTractorBeam extends SWDirectWeapon{
+    /*StarWars Tractor Beam - weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
+    */
+    /*d6+2 damage as a single gun
+      2 structure, 0.5 power usage as a single gun
+    */
+    public $name = "SWLightLaser";
+    public $displayName = "Light Laser";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 2;
+    public $fireControl = array(4, 2, 1); // fighters, <mediums, <capitals
+   
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = $nrOfShots;
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/swFighter".$nr.".png";
+		
+		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+2 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 3+$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 8+$this->damagebonus ;      }
+} //end of class SWTractorBeam
+
+
+
 ?>
