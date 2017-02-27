@@ -142,3 +142,11 @@ var SWCapitalProton = function(json, ship){
 }
 SWCapitalProton.prototype = Object.create( Torpedo.prototype );
 SWCapitalProton.prototype.constructor = SWCapitalProton;
+
+
+
+var SWTractorBeam = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWTractorBeam.prototype = Object.create( Weapon.prototype );
+SWTractorBeam.prototype.constructor = SWTractorBeam;
