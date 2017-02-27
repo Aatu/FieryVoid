@@ -1353,7 +1353,6 @@ shipManager.movement = {
 
             
     getRemainingEngineThrust: function(ship){
-        
         var rem = 0;
         if (ship.flight){
 			rem = ship.freethrust;
@@ -1369,7 +1368,9 @@ shipManager.movement = {
 				if (system.name == "thruster"){
 					rem -= system.thrustwasted;
 				}
-			
+				//tractor beams reduce thrust available!
+				var crits = shipManager.criticals.hasCritical(system, "SWTargetHeld");
+				rem -= crits;
 			}
 		}
         
