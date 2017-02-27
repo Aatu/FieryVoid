@@ -1181,6 +1181,13 @@ class SWTractorBeam extends SWDirectWeapon{
 		$this->addSalvoMode();
 	}    
 	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
+	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there!
+	      if($system->isDestroyed()) return; //destroyed system - critical is irrelevant
+	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); //for ship system and fighter alike
+	      $system->criticals[] =  $crit;
+	}
+	
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){     0 ;      }
 	public function setMaxDamage(){     0 ;      }
