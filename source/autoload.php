@@ -11,6 +11,7 @@ spl_autoload_register(
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',      		
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
+                'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
                 'kraken' => '/server/model/ships/centauri/kraken.php',
                 'orion' => '/server/model/ships/EA/orion.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
