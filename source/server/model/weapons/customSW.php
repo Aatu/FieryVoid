@@ -1150,33 +1150,40 @@ class SWCapitalProton extends SWBallisticWeapon{
 
 
 class SWTractorBeam extends SWDirectWeapon{
-    /*StarWars Tractor Beam - weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
+    /*StarWars Tractor Beam 
     */
-    /*d6+2 damage as a single gun
-      2 structure, 0.5 power usage as a single gun
+    /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
     */
-    public $name = "SWLightLaser";
-    public $displayName = "Light Laser";
+    public $name = "SWTractorBeam";
+    public $displayName = "Tractor Beam";
 	
-    public $priority = 3;
-    public $loadingtime = 1;
-    public $rangePenalty = 2;
-    public $fireControl = array(4, 2, 1); // fighters, <mediums, <capitals
+    public $priority = 10; //let's fire last
+    public $loadingtime = 2;
+    public $rangePenalty = 1;
+    public $intercept = 0;
+    public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!
    
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"RangeReduced"
+	);
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+      $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
+      $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options."; 
+    }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = $nrOfShots;
-		//appropriate icon (number of barrels)...
-		$nr = min(4, $nrOfShots); //images are not unlimited
-		$this->iconPath = "starwars/swFighter".$nr.".png";
+		$this->iconPath = "systemicons/tractorBeam.png";
 		
-		parent::__construct($armor, 2, 0.5, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
 	}    
 	
-	public function getDamage($fireOrder){ return  Dice::d(6)+2 +$this->damagebonus;   }
-	public function setMinDamage(){     $this->minDamage = 3+$this->damagebonus ;      }
-	public function setMaxDamage(){     $this->maxDamage = 8+$this->damagebonus ;      }
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){     0 ;      }
+	public function setMaxDamage(){     0 ;      }
 } //end of class SWTractorBeam
 
 
