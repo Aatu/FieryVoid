@@ -9,6 +9,8 @@ class Decurion extends BaseShip{
         $this->phpclass = "Decurion";
         $this->imagePath = "img/ships/centurion.png";
         $this->shipClass = "Decurion Assault Cruiser";
+        $this->variantOf = "Centurion Attack Cruiser";
+        $this->fighters = array("assault shuttles"=>24);
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
