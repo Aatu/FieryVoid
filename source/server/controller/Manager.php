@@ -865,7 +865,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	    //additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
 		$primaryStruct = $ship->getStructureSystem(0);
 		if($primaryStruct){
-			$mod += 5*($CnC->hasCritical("SWTargetHeld", $gamedata->turn));
+			$mod += 15*($primaryStruct->hasCritical("SWTargetHeld", $gamedata->turn)); //-3 Ini per hit
 		}
 		
             $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
