@@ -8,7 +8,8 @@ class Kutai extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Kutai";
         $this->imagePath = "img/ships/kutai.png";
-        $this->shipClass = "Kutai";
+        $this->shipClass = "Kutai Gunship";
+	    $this->isd = 2134;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
