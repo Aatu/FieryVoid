@@ -8,7 +8,7 @@ class Primus extends BaseShip{
 		$this->faction = "Centauri";
         $this->phpclass = "Primus";
         $this->imagePath = "img/ships/primus.png";
-        $this->shipClass = "Primus";
+        $this->shipClass = "Primus Battlecruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
         
