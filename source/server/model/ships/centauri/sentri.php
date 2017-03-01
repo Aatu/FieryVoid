@@ -7,7 +7,7 @@ class Sentri extends FighterFlight{
 		$this->pointCost = 252;
 		$this->faction = "Centauri";
         $this->phpclass = "Sentri";
-        $this->shipClass = "Sentri flight";
+        $this->shipClass = "Sentri Interceptors";
 		$this->imagePath = "img/ships/sentri.png";
         
         $this->forwardDefense = 7;
@@ -31,7 +31,7 @@ class Sentri extends FighterFlight{
 			
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sentri", $armour, 10, $this->id);
-			$fighter->displayName = "Sentri Medium Fighter";
+			$fighter->displayName = "Sentri Interceptor";
 			$fighter->imagePath = "img/ships/sentri.png";
 			$fighter->iconPath = "img/ships/sentri_large.png";
 			
