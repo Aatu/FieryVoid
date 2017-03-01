@@ -9,6 +9,8 @@ class KutaiPlasma extends HeavyCombatVessel{
         $this->phpclass = "KutaiPlasma";
         $this->imagePath = "img/ships/kutai.png";
         $this->shipClass = "Kutai Plasma Gunship";
+        $this->variantOf = "Kutai Gunship";
+	    $this->isd = 2047;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;
