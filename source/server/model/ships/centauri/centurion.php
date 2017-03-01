@@ -6,7 +6,8 @@ class Centurion extends BaseShip{
         
         $this->pointCost = 725;
         $this->faction = "Centauri";
-        $this->phpclass = "Centurion";
+        $this->phpclass = "Centurion Attack Cruiser";
+	    $this->isd = 2202;
         $this->imagePath = "img/ships/centurion.png";
         $this->shipClass = "Centurion";
         $this->shipSizeClass = 3;
