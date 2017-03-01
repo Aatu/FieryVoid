@@ -8,12 +8,14 @@ class Balvarix extends BaseShip{
 	$this->pointCost = 650;
 	$this->faction = "Centauri";
         $this->phpclass = "Balvarix";
-        $this->shipClass = "Balvarix";
+        $this->shipClass = "Balvarix Strike Carrier";
+        $this->shipClass = "Balvarin Carrier";
         $this->imagePath = "img/ships/balvarix.png";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24,
-            "medium (rutarian capable)"=>12);
+            "heavy"=>12);
         $this->occurence = "rare";
+	    $this->notes = 'Rutarian capable (12 fighters).';
 
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
