@@ -8,7 +8,7 @@ class Mograth extends MediumShip{
 	$this->faction = "Centauri";
         $this->phpclass = "Mograth";
         $this->imagePath = "img/ships/mograth.png";
-        $this->shipClass = "Mograth";
+        $this->shipClass = "Mograth Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
         
