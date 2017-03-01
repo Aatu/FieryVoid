@@ -1163,14 +1163,23 @@ class SWTractorBeam extends SWDirectWeapon{
     public $intercept = 0;
     public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!
    
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(55, 55, 55);
+        public $animationColor2 = array(100, 100, 100);
+        public $animationExplosionScale = 0.45;
+        public $animationWidth = 15;
+        public $animationWidth2 = 0.5;
+	
  	public $possibleCriticals = array( //no point in damage reduced crit
-            14=>"RangeReduced"
+            14=>"ReducedRange"
 	);
 	
     public function setSystemDataWindow($turn){
       parent::setSystemDataWindow($turn);
       $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
-      $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options."; 
+      $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
+      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn)."; 
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
