@@ -5,21 +5,21 @@ class trakhabp extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		    $this->pointCost = 30*6;
+		    $this->pointCost = 80*6;
 		    $this->faction = "Narn";
         $this->phpclass = "trakhabp";
-        $this->shipClass = "T'Khar Assault Shuttles";
-		    $this->imagePath = "img/ships/gorith.png";
+        $this->shipClass = "T'Rakh Armed Breaching Pods";
+		    $this->imagePath = "img/ships/NarnTRakh.png";
         
         $this->forwardDefense = 9;
-        $this->sideDefense = 9;
-        $this->freethrust = 7;
+        $this->sideDefense = 10;
+        $this->freethrust = 5;
         $this->offensivebonus = 2;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
-		    $this->iniativebonus = 9*5;
+		    $this->iniativebonus = 8*5;
       
         $this->populate();
     }
@@ -31,17 +31,18 @@ class trakhabp extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(2, 2, 2, 2);
-			$fighter = new Fighter("trakhabp", $armour, 8, $this->id);
-			$fighter->displayName = "T'Khar Assault Shuttle";
-			$fighter->imagePath = "img/ships/gorith.png";
-			$fighter->iconPath = "img/ships/gorith_large.png";
+			$armour = array(4, 4, 4, 4);
+			$fighter = new Fighter("trakhabp", $armour, 19, $this->id);
+			$fighter->displayName = "T'Rakh Armed Breaching Pod";
+			$fighter->imagePath = "img/ships/NarnTRakh.png";
+			$fighter->iconPath = "img/ships/NarnTRakh_Large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 5, 1)); //1 gun d6+5
+			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 5)); //2 guns d6+5
 			
 			
 			$this->addSystem($fighter);
+			
 			
 		}
 		
