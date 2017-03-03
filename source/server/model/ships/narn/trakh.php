@@ -6,7 +6,7 @@ class narntrakh extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 80*6;
-		    $this->faction = "Narn";
+		    $this->faction = "JustATest";
         $this->phpclass = "narntrakh";
         $this->shipClass = "T'Rakh Armed Breaching Pods";
 		    $this->imagePath = "img/ships/gorith.png";
@@ -32,7 +32,7 @@ class narntrakh extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(4, 4, 4, 4);
-			$fighter = new Fighter("narntrakh", $armour, 8, $this->id);
+			$fighter = new Fighter("narntrakh", $armour, 19, $this->id);
 			$fighter->displayName = "T'Rakh Armed Breaching Pod";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
