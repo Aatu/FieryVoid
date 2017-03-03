@@ -181,7 +181,8 @@ spl_autoload_register(
                 
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
-                'trakharmedbp.php' => '/server/model/ships/narn/trakhBP.php',
+                'trakharmedbp' => '/server/model/ships/narn/trakhBP.php',
+                
                 
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
