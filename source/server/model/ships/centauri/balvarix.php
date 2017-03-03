@@ -9,7 +9,7 @@ class Balvarix extends BaseShip{
 	$this->faction = "Centauri";
         $this->phpclass = "Balvarix";
         $this->shipClass = "Balvarix Strike Carrier";
-        $this->shipClass = "Balvarin Carrier";
+        $this->variantOf = "Balvarin Carrier";
         $this->imagePath = "img/ships/balvarix.png";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24,
