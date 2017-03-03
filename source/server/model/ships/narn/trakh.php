@@ -1,5 +1,5 @@
 <?php
-class narntrakh extends FighterFlight{
+class noewnamemjs extends FighterFlight{
     /*T'Rakh Narn Armed Breaching Pod*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class narntrakh extends FighterFlight{
         
 		    $this->pointCost = 80*6;
 		    $this->faction = "JustATest";
-        $this->phpclass = "narntrakh";
+        $this->phpclass = "noewnamemjs";
         $this->shipClass = "TRakh ABPs";
 		    $this->imagePath = "img/ships/gorith.png";
         
@@ -32,7 +32,7 @@ class narntrakh extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(4, 4, 4, 4);
-			$fighter = new Fighter("narntrakh", $armour, 19, $this->id);
+			$fighter = new Fighter("noewnamemjs", $armour, 19, $this->id);
 			$fighter->displayName = "TRakh ABP";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
