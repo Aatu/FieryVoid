@@ -1,5 +1,5 @@
 <?php
-class justatester extends FighterFlight{
+class trakharmedbp extends FighterFlight{
     /*T'Khar Narn Assault Shuttle*/
     
     function __construct($id, $userid, $name,  $slot){
@@ -7,7 +7,7 @@ class justatester extends FighterFlight{
         
 		    $this->pointCost = 30*6;
 		    $this->faction = "Narn";
-        $this->phpclass = "justatester";
+        $this->phpclass = "trakharmedbp";
         $this->shipClass = "T'Khar Assault Shuttles";
 		    $this->imagePath = "img/ships/gorith.png";
         
@@ -32,7 +32,7 @@ class justatester extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			
 			$armour = array(2, 2, 2, 2);
-			$fighter = new Fighter("justatester", $armour, 8, $this->id);
+			$fighter = new Fighter("trakharmedbp", $armour, 8, $this->id);
 			$fighter->displayName = "T'Khar Assault Shuttle";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
