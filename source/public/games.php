@@ -50,11 +50,13 @@
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update (minor one this time) includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- first Hurr ships, courtesy of Wolfgang";
+                    news.innerHTML += "- Hurr and Llort ships, courtesy of Wolfgang";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- finished restructuring of Narn and Brakiri fleets, so variants are properly displayed as such";
+                    news.innerHTML += "- finished restructuring of Centauri fleet, so variants are properly displayed as such";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- unpicked games will disappear after 48 hours (instead of 24)";
+                    news.innerHTML += "- new icons for Laser-Pulse Arrays (at last!). Warlock, Nova and Gemini refitted with new style weapons.";
+                    news.innerHTML += "<br>";		    
+                    news.innerHTML += "- new StarWars units (also courtesy of Wolfgang). Be aware that StarWars Tractor Beam is a real weapon, not just a placeholder :) .";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
