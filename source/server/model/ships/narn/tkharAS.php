@@ -38,7 +38,7 @@ class tkharas extends FighterFlight{
 			$fighter->iconPath = "img/ships/gorith_large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1, 5)); //1 gun d6+5
+			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 5, 1)); //1 gun d6+5
 			
 			
 			$this->addSystem($fighter);
