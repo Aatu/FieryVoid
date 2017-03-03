@@ -11,7 +11,7 @@ class Primus extends BaseShip{
         $this->shipClass = "Primus Battlecruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
-	    $this>isd = 2202;
+	    $this->isd = 2202;
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
