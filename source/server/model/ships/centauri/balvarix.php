@@ -16,6 +16,7 @@ class Balvarix extends BaseShip{
             "normal"=>12);
         $this->occurence = "rare";
 	    $this->notes = 'Rutarian capable (12 fighters).';
+	    $this->isd = 2262;
 
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
