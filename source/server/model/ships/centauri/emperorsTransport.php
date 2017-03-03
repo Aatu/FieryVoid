@@ -12,7 +12,7 @@ class EmperorsTransport extends BaseShip{
         $this->occurence = "special";
         $this->fighters = array("normal"=>12);
 	    
-	    $this->notes. = "scenario unit only";
+	    $this->notes .= "scenario unit only";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
