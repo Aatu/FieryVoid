@@ -6,7 +6,7 @@ class trakharmedbp extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
 		    $this->pointCost = 80*6;
-		    $this->faction = "Narn";
+		    $this->faction = "NarnTest";
         $this->phpclass = "trakharmedbp";
         $this->shipClass = "T'Rakh Armed Breaching Pods";
 		    $this->imagePath = "img/ships/NarnTRakh.png";
