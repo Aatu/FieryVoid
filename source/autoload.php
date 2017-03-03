@@ -179,6 +179,10 @@ spl_autoload_register(
                 
                 
                 
+                //various additional units
+                'tkharas' => '/server/model/ships/narn/tkharAS.php',
+                'trakharmedbp.php' => '/server/model/ships/narn/trakhBP.php',
+                
                 // centauri raiders
                 'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
                 'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
@@ -194,6 +198,8 @@ spl_autoload_register(
                 'raven' => '/server/model/ships/drazi_raiders/raven.php',
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
+                
+                
                 
                 // early Drazi
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
