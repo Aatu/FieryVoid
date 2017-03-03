@@ -8,12 +8,12 @@ class narntrakh extends FighterFlight{
 		    $this->pointCost = 80*6;
 		    $this->faction = "JustATest";
         $this->phpclass = "narntrakh";
-        $this->shipClass = "T'Rakh Armed Breaching Pods";
+        $this->shipClass = "TRakh ABPs";
 		    $this->imagePath = "img/ships/gorith.png";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
-        $this->freethrust = 5;
+        $this->freethrust = 15;
         $this->offensivebonus = 2;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
@@ -33,7 +33,7 @@ class narntrakh extends FighterFlight{
 			
 			$armour = array(4, 4, 4, 4);
 			$fighter = new Fighter("narntrakh", $armour, 19, $this->id);
-			$fighter->displayName = "T'Rakh Armed Breaching Pod";
+			$fighter->displayName = "TRakh ABP";
 			$fighter->imagePath = "img/ships/gorith.png";
 			$fighter->iconPath = "img/ships/gorith_large.png";
 			
