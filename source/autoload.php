@@ -190,6 +190,8 @@ spl_autoload_register(
                     'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
                 
                 
+                'scattergun' => '/server/model/weapons/pulse.php',
+                
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
