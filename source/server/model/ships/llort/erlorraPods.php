@@ -95,7 +95,7 @@ class ErlorraPods extends BaseShip{
         		3=> array(
         				5 => "Thruster",
         				7 => "Quad Pulsar",
-					9 => "Scatter Gun",
+					9 => "Scattergun",
         				18 => "Structure",
         				20 => "Primary",
         		),
