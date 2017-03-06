@@ -632,7 +632,7 @@ class QuadPulsar extends Pulse{
     {
 	    /*should do d6 SEPARATE shots, each of which may only intercept different incoming shot*/
 	    /*due to technical reasons I simplify this heavily - to fixed 3 separate shots with no extra limitations*/
-        public $name = "scattergun";
+        public $name = "scatterGun";
         public $displayName = "Scattergun";
         public $iconPath = "scattergun.png";
         public $animation = "trail";
@@ -665,17 +665,6 @@ class QuadPulsar extends Pulse{
         }
         
 	    
-        public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-            
-            parent::setSystemDataWindow($turn);
-            //$this->data["Pulses"] = '3';
-            //unset($this->data["Grouping range"]);
-            //unset($this->data["Max pulses"]);
-		
-		$this->data["Special"] = "Called shot penalty halved";
-        }
         
         public function getDamage($fireOrder){
             return Dice::d(6,2)+1; //2d6+1
