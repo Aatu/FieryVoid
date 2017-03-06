@@ -8,7 +8,7 @@ class ErlorraPods extends BaseShip{
         $this->faction = "Llort";
         $this->phpclass = "ErlorraPods";
         $this->imagePath = "img/ships/LlortErlorra.png";
-        $this->shipClass = "Erlorra Cruiser Cargo Pods";
+        $this->shipClass = "Erlorra Cruiser (w/Cargo Pods)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
      
