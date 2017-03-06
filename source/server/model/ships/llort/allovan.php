@@ -33,17 +33,17 @@ class Allovan extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new MediumBolter(4, 8, 4, 300, 60));
-        $this->addFrontSystem(new Light Bolter(4, 6, 2, 120, 360));
-        $this->addFrontSystem(new Light Bolter(4, 6, 2, 120, 360));
-        $this->addFrontSystem(new Light Bolter(4, 6, 2, 0, 240));
-        $this->addFrontSystem(new Light Bolter(4, 6, 2, 0, 240));
+        $this->addFrontSystem(new LightBolter(4, 6, 2, 120, 360));
+        $this->addFrontSystem(new LightBolter(4, 6, 2, 120, 360));
+        $this->addFrontSystem(new LightBolter(4, 6, 2, 0, 240));
+        $this->addFrontSystem(new LightBolter(4, 6, 2, 0, 240));
         
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
-        $this->addAftSystem(new Light Bolter(4, 6, 2, 120, 360));
-        $this->addAftSystem(new Light Bolter(4, 6, 2, 120, 360));
-        $this->addAftSystem(new Light Bolter(4, 6, 2, 0, 240));
-        $this->addAftSystem(new Light Bolter(4, 6, 2, 0, 240));
+        $this->addAftSystem(new LightBolter(4, 6, 2, 120, 360));
+        $this->addAftSystem(new LightBolter(4, 6, 2, 120, 360));
+        $this->addAftSystem(new LightBolter(4, 6, 2, 0, 240));
+        $this->addAftSystem(new LightBolter(4, 6, 2, 0, 240));
 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
