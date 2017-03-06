@@ -278,4 +278,113 @@ class HLPA extends Weapon{
 	
 } //endof class HLPA
 
+
+
+
+class MLPA extends Weapon{ 
+/*Medium Laser-Pulse Array - let's try to create it using new mode change mechanism...*/	
+        public $name = "mlpa";
+        public $displayName = "Medium Laser-Pulse Array";
+	    public $iconPath = "mlpa.png";
+	
+	//visual display - will it be enough to ensure correct animations?...
+	public $animationArray = array(1=>'laser', 2=>'trail');
+        public $animationColorArray = array(1=>array(255, 11, 11), 2=>array(190, 75, 20));
+        public $animationWidthArray = array(1=>4, 2=>5);
+        public $animationWidth2 = 0.2; //not used for Trail animation?...
+	public $trailColor = array(190, 75, 20); //not used for Laser animation?...
+        public $trailLength = 20;//not used for Laser animation?...
+        public $projectilespeed = 20;//not used for Laser animation?...
+        public $animationExplosionScale = 0.20;//not used for Laser animation?...
+	
+	
+	//actual weapons data
+        public $groupingArray = array(1=>0, 2=>20);
+        public $maxpulses = 6; //only useful for Pulse mode
+	public $raking = 10; //only useful for Raking mode
+        public $priorityArray = array(1=>7, 2=>5);
+	public $uninterceptableArray = array(1=>true, 2=>false);
+	public $defaultShotsArray = array(1=>1, 2=>6); //for Pulse mode it should be equal to maxpulses
+	
+        public $loadingtimeArray = array(1=>3, 2=>2); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.33, 2=>0.5);
+        public $fireControlArray = array( 1=>array(-4, 2, 3), 2=>array(-1,3,4) ); // fighters, <mediums, <capitals 
+	
+	public $firingModes = array(1=>'Laser', 2=>'Pulse');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Laser', 2=>'Particle'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 1; //technically only Pulse Cannon can intercept, but entire weapon is fired anyway - so it affects visuals only, and mode 1 should be the one with interception for technical reasons
+ 
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 5;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either Medium Laser or Medium Pulse Cannon. ';
+		parent::setSystemDataWindow($turn);
+        }
+
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 3)+12; //Medium Laser
+				break;
+			case 2:
+				return 10; //Medium Pulse
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				return 15; //Medium Laser
+				break;
+			case 2:
+				return 10; //Medium Pulse
+				break;	
+		}
+	}
+        public function setMaxDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				return 42; //Medium Laser
+				break;
+			case 2:
+				return 10; //Medium Pulse
+				break;	
+		}
+	}
+	
+	
+	//necessary for Pulse mode
+        protected function getPulses($turn)
+        {
+            return Dice::d(5);
+        }
+        protected function getExtraPulses($needed, $rolled)
+        {
+            return floor(($needed - $rolled) / ($this->grouping));
+        }
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn);
+		$pulses+= $this->getExtraPulses($needed, $rolled);
+		$pulses=min($pulses,$this->maxpulses);
+		return $pulses;
+	}
+	
+	
+} //endof class MLPA
+
+
 ?>
