@@ -649,7 +649,7 @@ class QuadPulsar extends Pulse{
         public $loadingtime = 1;
         public $normalload = 1;
 	    
-        public $priority = 4; //light weapon
+        public $priority = 3; //very light weapon
 	    
         public $intercept = 2; //should be towards different shots only, but I shkip this limitation
 	    
