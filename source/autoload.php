@@ -766,6 +766,7 @@ spl_autoload_register(
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
                 'smissilerack' => '/server/model/weapons/missile.php',
+                    'rmissilerack' => '/server/model/weapons/missile.php',
                 'solarcannon' => '/server/model/weapons/particle.php',
                 'solarhawk' => '/server/model/ships/drazi/solarhawk.php',
                 'somissilerack' => '/server/model/weapons/missile.php',
