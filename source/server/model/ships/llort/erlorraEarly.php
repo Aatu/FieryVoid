@@ -90,7 +90,7 @@ class ErlorraEarly extends BaseShip{
         		3=> array(
         				5 => "Thruster",
         				7 => "Particle Cannon",
-					9 => "Scatter Gun",
+					9 => "Scattergun",
         				18 => "Structure",
         				20 => "Primary",
         		),
