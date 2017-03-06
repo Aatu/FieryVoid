@@ -164,6 +164,7 @@ spl_autoload_register(
                 
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
+                               
                 
                 //Hurr
                 'boroca' => '/server/model/ships/hurr/boroca.php',
@@ -177,6 +178,12 @@ spl_autoload_register(
                 'koeth' => '/server/model/ships/hurr/koeth.php',
                     'koethy' => '/server/model/ships/hurr/koethY.php',
                 
+                
+                //Llort
+                'allovan' => '/server/model/ships/llort/allovan.php',
+                
+                'ftrlellata' => '/server/model/ships/llort/ftrLellatA.php',
+                    'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
                 
                 
                 //various additional units
