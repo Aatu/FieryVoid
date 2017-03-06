@@ -626,4 +626,71 @@ class QuadPulsar extends Pulse{
 	*/
     }
 
+
+
+    class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    {
+	    /*should do d6 SEPARATE shots, each of which may only intercept different incoming shot*/
+	    /*due to technical reasons I simplify this heavily - to fixed 3 separate shots with no extra limitations*/
+        public $name = "scattergun";
+        public $displayName = "Scattergun";
+        public $iconPath = "scattergun.png";
+        public $animation = "trail";
+        public $trailLength = 13;
+        public $animationWidth = 4;
+        public $projectilespeed = 25;
+        public $animationExplosionScale = 0.15;
+        public $animationColor =  array(175, 225, 175);
+        public $trailColor = array(110, 225, 110);
+        //public $rof = 2;
+	    public $guns = 3; //always 3, completely separate (not Pulse!) shots
+        public $maxpulses = 3;
+        public $grouping = 0;
+        public $loadingtime = 1;
+        public $normalload = 1;
+	    
+        public $priority = 4; //light weapon
+	    
+        public $intercept = 2; //should be towards different shots only, but I shkip this limitation
+	    
+        public $rangePenalty = 2;
+        public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
+	    
+	    public $damageType = "Standard"; 
+	    public $weaponClass = "Particle"; 
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    
+        public function setSystemDataWindow($turn){
+            //$this->data["Weapon type"] = "Particle";
+            //$this->data["Damage type"] = "Standard";
+            
+            parent::setSystemDataWindow($turn);
+            //$this->data["Pulses"] = '3';
+            //unset($this->data["Grouping range"]);
+            //unset($this->data["Max pulses"]);
+		
+		$this->data["Special"] = "Called shot penalty halved";
+        }
+        
+        public function getDamage($fireOrder){
+            return Dice::d(6,2)+1; //2d6+1
+        }
+ 
+        public function setMinDamage()
+        {
+            $this->minDamage = 3;
+        }
+        public function setMaxDamage()
+        {
+            $this->maxDamage = 13 ;
+        }
+ 
+    }
+
+
 ?>
