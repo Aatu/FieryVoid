@@ -73,7 +73,7 @@ class govall extends HeavyCombatVessel{
         	),
         	2=> array(
         		6 => "Thruster",
-        		8 => "Scatter Gun",
+        		8 => "Scattergun",
 			10 => "Class-L Missile Rack",
         		12 => "Hangar",
         		18 => "Structure",
