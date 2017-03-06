@@ -24,13 +24,14 @@ class ftrLellatA extends FighterFlight{
         $this->dropOutBonus = +1;
         $this->populate();
     }
+	
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(2, 1, 2, 2);
-		$fighter = new Fighter("LellatA", $armour, 10, $this->id);
+		$fighter = new Fighter("ftrLellatA", $armour, 10, $this->id);
 		$fighter->displayName = "Lellat-A Medium Fighter";
 		$fighter->imagePath = "img/ships/LlortLellat.png";
 		$fighter->iconPath = "img/ships/LlortLellat_large.png";
