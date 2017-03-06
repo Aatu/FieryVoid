@@ -181,6 +181,10 @@ spl_autoload_register(
                 
                 //Llort
                 'allovan' => '/server/model/ships/llort/allovan.php',
+                'erlorra' => '/server/model/ships/llort/erlorra.php',
+                    'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
+                    'erlorraearly' => '/server/model/ships/llort/erlorraEarly.php',
+                    'erlorraearlypods' => '/server/model/ships/llort/erlorraEarlyPods.php',
                 
                 'ftrlellata' => '/server/model/ships/llort/ftrLellatA.php',
                     'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
