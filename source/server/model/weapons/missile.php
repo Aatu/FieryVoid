@@ -262,17 +262,27 @@ class SMissileRack extends MissileLauncher{
     public $iconPath = "missile1.png";
 
     public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
-
-/*no longer needed    
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $base = false){
-        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-
-        if ($base){
-            $this->range = 40;
-            $this->rangeMod = 20;
-        }
+    
+    public function getDamage($fireOrder)
+    {
+//        $ammo = new $this->firingModes[$fireOrder->firingMode];
+//        return $ammo->getDamage();
+        return 20;
     }
-*/    
+    public function setMinDamage(){     $this->minDamage = 20 ;}
+    public function setMaxDamage(){     $this->maxDamage = 20 ;}     
+}
+
+
+class RMissileRack extends MissileLauncher{
+    public $name = "sMissileRack";
+    public $displayName = "Class-S Missile Rack";
+    public $range = 20;
+    public $distanceRange = 60;
+    public $loadingtime = 1;
+    public $iconPath = "missile2.png";
+
+    public $fireControl = array(3, 3, 3); // fighters, <mediums, <capitals 
     
     public function getDamage($fireOrder)
     {
