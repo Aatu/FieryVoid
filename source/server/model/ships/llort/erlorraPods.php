@@ -8,7 +8,7 @@ class ErlorraPods extends BaseShip{
         $this->faction = "Llort";
         $this->phpclass = "ErlorraPods";
         $this->imagePath = "img/ships/LlortErlorra.png";
-        $this->shipClass = "Erlorra Cruiser (w/Cargo Pods)";
+        $this->shipClass = "Erlorra Raiding Cruiser (w/Cargo Pods)";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
      
@@ -51,11 +51,11 @@ class ErlorraPods extends BaseShip{
         $this->addLeftSystem(new ScatterGun(3, 8, 3, 180, 360));
   
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
-        $this->addRightySystem(new CargoBay(2, 20));
-        $this->addRightySystem(new CargoBay(2, 20));
-        $this->addRightySystem(new CargoBay(2, 20));
-        $this->addRightySystem(new CargoBay(2, 20));
-        $this->addRightySystem(new CargoBay(2, 20));
+        $this->addRightSystem(new CargoBay(2, 20));
+        $this->addRightSystem(new CargoBay(2, 20));
+        $this->addRightSystem(new CargoBay(2, 20));
+        $this->addRightSystem(new CargoBay(2, 20));
+        $this->addRightSystem(new CargoBay(2, 20));
         $this->addRightSystem(new TwinArray(2, 6, 2, 90, 180));
         
         
