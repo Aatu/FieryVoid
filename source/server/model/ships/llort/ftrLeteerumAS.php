@@ -38,7 +38,7 @@ class ftrLeteerumAS extends FighterFlight{
 			$fighter->iconPath = "img/ships/LlortLeteerum_Large.png";
 			
 			
-			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1, 2)); //1 gun d6+2
+			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 1)); //1 gun d6+2
 			
 			
 			$this->addSystem($fighter);
