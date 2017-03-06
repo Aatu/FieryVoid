@@ -34,7 +34,7 @@ class ftrLellatA extends FighterFlight{
 		$fighter = new Fighter("ftrLellatA", $armour, 10, $this->id);
 		$fighter->displayName = "Lellat-A Medium Fighter";
 		$fighter->imagePath = "img/ships/LlortLellat.png";
-		$fighter->iconPath = "img/ships/LlortLellat_large.png";
+		$fighter->iconPath = "img/ships/LlortLellat_Large.png";
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2));
 	
