@@ -185,10 +185,14 @@ spl_autoload_register(
                     'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
                     'erlorraearly' => '/server/model/ships/llort/erlorraEarly.php',
                     'erlorraearlypods' => '/server/model/ships/llort/erlorraEarlyPods.php',
+                'fwellgon' => '/server/model/ships/llort/fwellgon.php',
+                'govall' => '/server/model/ships/llort/govall.php',
+                'terillon' => '/server/model/ships/llort/terillon.php',
+                
                 
                 'ftrlellata' => '/server/model/ships/llort/ftrLellatA.php',
                     'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
-                
+                'ftrleteerumas' => '/server/model/ships/llort/ftrLeteerumAS.php',
                 
                 'scattergun' => '/server/model/weapons/pulse.php',
                 
