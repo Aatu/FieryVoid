@@ -275,8 +275,8 @@ class SMissileRack extends MissileLauncher{
 
 
 class RMissileRack extends MissileLauncher{
-    public $name = "sMissileRack";
-    public $displayName = "Class-S Missile Rack";
+    public $name = "rMissileRack";
+    public $displayName = "Class-R Missile Rack";
     public $range = 20;
     public $distanceRange = 60;
     public $loadingtime = 1;
