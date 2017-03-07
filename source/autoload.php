@@ -174,11 +174,16 @@ spl_autoload_register(
                 'orak' => '/server/model/ships/hurr/orak.php',
                     'anoro' => '/server/model/ships/hurr/anoro.php',
                     'dorono' => '/server/model/ships/hurr/dorono.php',
+                    'martus' => '/server/model/ships/hurr/martus.php',
                     'norek' => '/server/model/ships/hurr/norek.php',
+                    'orano' => '/server/model/ships/hurr/orano.php',
+                    'torkoth' => '/server/model/ships/hurr/torkoth.php',
                 
                 'koeth' => '/server/model/ships/hurr/koeth.php',
                     'koethy' => '/server/model/ships/hurr/koethY.php',
                 'anroethas' => '/server/model/ships/hurr/anroethAS.php',
+                
+                'gorek' => '/server/model/ships/hurr/gorek.php', //freighters, civilians directory
                 
                 
                 //Llort
