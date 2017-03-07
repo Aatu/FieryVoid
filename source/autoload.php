@@ -173,10 +173,12 @@ spl_autoload_register(
                     'tonak' => '/server/model/ships/hurr/tonak.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
                     'anoro' => '/server/model/ships/hurr/anoro.php',
+                    'dorono' => '/server/model/ships/hurr/dorono.php',
                     'norek' => '/server/model/ships/hurr/norek.php',
                 
                 'koeth' => '/server/model/ships/hurr/koeth.php',
                     'koethy' => '/server/model/ships/hurr/koethY.php',
+                'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 
                 
                 //Llort
