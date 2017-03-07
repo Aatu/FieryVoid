@@ -181,6 +181,8 @@ spl_autoload_register(
                 
                 //Llort
                 'allovan' => '/server/model/ships/llort/allovan.php',
+                'daggaden' => '/server/model/ships/llort/daggaden.php',
+                    'daggadenpod' => '/server/model/ships/llort/daggadenPod.php',
                 'erlorra' => '/server/model/ships/llort/erlorra.php',
                     'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
                     'erlorraearly' => '/server/model/ships/llort/erlorraEarly.php',
@@ -188,11 +190,15 @@ spl_autoload_register(
                 'fwellgon' => '/server/model/ships/llort/fwellgon.php',
                 'govall' => '/server/model/ships/llort/govall.php',
                 'terillon' => '/server/model/ships/llort/terillon.php',
-                
+                'turlisk' => '/server/model/ships/llort/turlisk.php',
+                    'trathor' => '/server/model/ships/llort/trathor.php',
+                    'turgon' => '/server/model/ships/llort/turgon.php',
                 
                 'ftrlellata' => '/server/model/ships/llort/ftrLellatA.php',
                     'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
                 'ftrleteerumas' => '/server/model/ships/llort/ftrLeteerumAS.php',
+                
+                'graemlar' => '/server/model/ships/llort/graemlar.php',
                 
                 'scattergun' => '/server/model/weapons/pulse.php',
                 
