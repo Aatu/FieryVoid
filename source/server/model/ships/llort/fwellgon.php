@@ -4,7 +4,7 @@ class fwellgon extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 700;  //Too expensive at 800 as the +1 initiative from first draft was lost.
+        $this->pointCost = 700;  //Original price (800) assumes ship gives +1 comand bonus. No command bonus here, price reduced.
         $this->faction = "Llort";
         $this->phpclass = "fwellgon";
         $this->imagePath = "img/ships/LlortGovall.png";
