@@ -8,6 +8,7 @@ class PhalanM extends FighterFlight{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "PhalanM";
         $this->shipClass = "Phalan-M Missile Fighter flight";
+	    $this->variantOf = "Phalan Assault Fighters";
 		$this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 9;
