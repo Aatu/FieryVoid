@@ -24,7 +24,7 @@ class orak extends HeavyCombatVessel{
         
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 4, 4));
+        $this->addPrimarySystem(new Scanner(4, 14, 4, 5));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 4));
 	$this->addPrimarySystem(new Hangar(2, 8));
