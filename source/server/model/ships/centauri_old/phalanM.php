@@ -7,7 +7,7 @@ class PhalanM extends FighterFlight{
 		$this->pointCost = 150; //6*25
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "PhalanM";
-        $this->shipClass = "Phalan-M Missile Fighter flight";
+        $this->shipClass = "Phalan-M Missile Fighters";
 	    $this->variantOf = "Phalan Assault Fighters";
 		$this->imagePath = "img/ships/phalan.png";
         
@@ -29,7 +29,7 @@ class PhalanM extends FighterFlight{
 			
 			$armour = array(2, 1, 1, 1);
 			$fighter = new Fighter("phalani", $armour, 12, $this->id);
-			$fighter->displayName = "Centauri Phalan-M Missile Fighter";
+			$fighter->displayName = "Phalan-M Missile Fighter";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			
