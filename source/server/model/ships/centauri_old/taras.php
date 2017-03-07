@@ -9,6 +9,7 @@ class Taras extends HeavyCombatVessel{
     $this->phpclass = "Taras";
     $this->imagePath = "img/ships/tacit.png";
     $this->shipClass = "Taras Strike Destroyer";
+	    $this->variantOf = "Tacit Police Cruiser";
     $this->canvasSize = 200;
 
     $this->forwardDefense = 11;
