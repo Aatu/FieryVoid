@@ -11,6 +11,7 @@ class wlcEmperorDN2090 extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "wlcEmperorDN2090";
         $this->shipClass = "Emperor Dreadnought";
+		$this->variantOf = "Garut Survey Ship";
 	$this->limited = 10;   
         //$this->occurence = "rare"; 
         $this->fighters = array("heavy"=>24); 
