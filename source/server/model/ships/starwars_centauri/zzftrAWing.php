@@ -34,6 +34,7 @@ class zzftrawing extends FighterFlight{
             	$fighter->imagePath = "img/starwars/aWing.png";
             	$fighter->iconPath = "img/starwars/aWing_large.png"; 
             
+		/*
             	$frontGun = new SWFighterLaser(300, 60, 2, 2); //front Lasers
             	$fighter->addFrontSystem($frontGun);
             
@@ -44,7 +45,7 @@ class zzftrawing extends FighterFlight{
              
             	//Ray Shield, 1 points
             	$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
-            
+            */
             
             
             $this->addSystem($fighter);
