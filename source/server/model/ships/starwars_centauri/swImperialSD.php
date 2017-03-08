@@ -5,7 +5,7 @@ class swImperialSD extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 2000;
+	$this->pointCost = 2500;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swImperialSD";
         $this->imagePath = "img/starwars/imperator.png";
@@ -76,6 +76,9 @@ class swImperialSD extends BaseShip{
 	$this->addLeftSystem(new SWMediumIon(3, 240, 0, 4));
 	$this->addLeftSystem(new SWMediumIon(3, 240, 0, 4));
 	$this->addLeftSystem(new SWMediumIon(3, 240, 0, 4));
+	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
+	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
+	$this->addLeftSystem(new SWTractorBeam(2,240,0,1));
 		
 	    
 	$this->addRightSystem(new Thruster(3, 22, 0, 5, 4));
@@ -88,7 +91,9 @@ class swImperialSD extends BaseShip{
 	$this->addRightSystem(new SWMediumIon(3, 0, 120, 4));
 	$this->addRightSystem(new SWMediumIon(3, 0, 120, 4));
 	$this->addRightSystem(new SWMediumIon(3, 0, 120, 4));
-	    
+	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
+	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
+	$this->addRightSystem(new SWTractorBeam(2,0,120,1));
 	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -131,6 +136,7 @@ class swImperialSD extends BaseShip{
 		    5 => "Ray Shield",
                     9 => "Heavy Turbolaser",
                     12 => "Medium Ion Cannon",
+                    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -139,6 +145,7 @@ class swImperialSD extends BaseShip{
 		    5 => "Ray Shield",
                     9 => "Heavy Turbolaser",
                     12 => "Medium Ion Cannon",
+                    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
