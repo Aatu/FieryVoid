@@ -15,12 +15,11 @@ SWFighterIon.prototype.constructor = SWFighterIon;
 var SWFtrProtonTorpedo = function(json, ship)
 {
     Ammo.call( this, json, ship);
-    this.range = 15;
+    //this.range = 8;
     this.hitChanceMod = 0;
 }
 SWFtrProtonTorpedo.prototype = Object.create( Ammo.prototype );
 SWFtrProtonTorpedo.prototype.constructor = SWFtrProtonTorpedo;
-
 
 var SWFtrProtonTorpedoLauncher = function(json, ship)
 {
@@ -28,6 +27,30 @@ var SWFtrProtonTorpedoLauncher = function(json, ship)
 }
 SWFtrProtonTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
 SWFtrProtonTorpedoLauncher.prototype.constructor = SWFtrProtonTorpedoLauncher;
+
+
+
+
+var SWFtrConcMissile = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+    //this.range = 6;
+    this.hitChanceMod = 0;
+}
+SWFtrConcMissile.prototype = Object.create( Ammo.prototype );
+SWFtrConcMissile.prototype.constructor = SWFtrConcMissile;
+
+var SWFtrConcMissileLauncher = function(json, ship)
+{
+    FighterMissileRack.call( this, json, ship);
+}
+SWFtrConcMissileLauncher.prototype = Object.create( FighterMissileRack.prototype );
+SWFtrConcMissileLauncher.prototype.constructor = SWFtrConcMissileLauncher;
+
+
+
+
+
 
 
 var SWLightLaser = function(json, ship){
