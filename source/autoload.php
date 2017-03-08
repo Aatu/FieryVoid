@@ -75,6 +75,7 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
+                
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php',
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
@@ -83,16 +84,21 @@ spl_autoload_register(
                 'swcorelliangunship' => '/server/model/ships/starwars_centauri/swCorellianGunship.php',  
                 'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
+                
+                'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
+                'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
+                
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
-
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
+                'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
 
+                'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
 
