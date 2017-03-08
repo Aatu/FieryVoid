@@ -70,6 +70,8 @@ class swMonCalMC80 extends BaseShip{
 	$this->addLeftSystem(new SWHeavyTLaser(3, 210, 330, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumIon(3, 210, 330, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumIon(3, 210, 330, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!		
+	$this->addLeftSystem(new SWTractorBeam(2,210,330,1));
+	$this->addLeftSystem(new SWTractorBeam(2,210,330,1));
 	    
 	$this->addRightSystem(new Thruster(3, 16, 0, 3, 4));
 	$this->addRightSystem(new Thruster(3, 16, 0, 3, 4));
@@ -79,7 +81,8 @@ class swMonCalMC80 extends BaseShip{
 	$this->addRightSystem(new SWHeavyTLaser(3, 30, 150, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumIon(3, 30, 150, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWMediumIon(3, 30, 150, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	    
+	$this->addRightSystem(new SWTractorBeam(2,30,150,1));
+	$this->addRightSystem(new SWTractorBeam(2,30,150,1));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 68));
@@ -121,6 +124,7 @@ class swMonCalMC80 extends BaseShip{
 		    5 => "Ray Shield",
                     9 => "Heavy Turbolaser",
                     12 => "Medium Ion Cannon",
+		    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -129,6 +133,7 @@ class swMonCalMC80 extends BaseShip{
 		    5 => "Ray Shield",
                     9 => "Heavy Turbolaser",
                     12 => "Medium Ion Cannon",
+		    13 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
