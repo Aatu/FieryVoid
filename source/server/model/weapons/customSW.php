@@ -1156,7 +1156,6 @@ class SWTractorBeam extends SWDirectWeapon{
     */
     public $name = "SWTractorBeam";
     public $displayName = "Tractor Beam";
-    public $iconPath = "lightGraviticBolt.png";//"tractorBeam.png";
 	
     public $priority = 10; //let's fire last
     public $loadingtime = 2;
@@ -1185,7 +1184,7 @@ class SWTractorBeam extends SWDirectWeapon{
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
 		$this->intercept = $nrOfShots;
-		$this->iconPath = "systemicons/tractorBeam.png";
+		$this->iconPath = "tractorBeam.png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
 		$this->addSalvoMode();
