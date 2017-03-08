@@ -1156,6 +1156,7 @@ class SWTractorBeam extends SWDirectWeapon{
     */
     public $name = "SWTractorBeam";
     public $displayName = "Tractor Beam";
+    public $iconPath = "tractorBeam.png";
 	
     public $priority = 10; //let's fire last
     public $loadingtime = 2;
