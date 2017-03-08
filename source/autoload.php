@@ -93,7 +93,7 @@ spl_autoload_register(
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
-                //'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
+                'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
