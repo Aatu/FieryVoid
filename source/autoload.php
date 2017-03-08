@@ -93,12 +93,12 @@ spl_autoload_register(
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
-                'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
+                //'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
 
-                'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
+               //'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
 
@@ -150,6 +150,7 @@ spl_autoload_register(
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
                 'hlpa' => '/server/model/weapons/customs.php',
+                'mlpa' => '/server/model/weapons/customs.php',
                 
                 
                 //Deneth
