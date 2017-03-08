@@ -77,7 +77,8 @@ spl_autoload_register(
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
-                'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php',
+                'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php', //TO BE DELETED!
+                'swassaultfrigatesmallcap' => '/server/model/ships/starwars_centauri/swAssaultFrigateSmallCap.php',
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
                 'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
                 'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
