@@ -7,7 +7,7 @@ class zzftrtiedef extends FighterFlight{
         $this->pointCost = 65*6;
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "zzftrtiedef";
-        $this->shipClass = "Tie Defender Fighters";
+        $this->shipClass = "TIE Defender Superiority Fighters";
         $this->imagePath = "img/starwars/tieDefender.png";
         
         //$this->isd = 2214;
@@ -33,7 +33,7 @@ class zzftrtiedef extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("zzftrtiedef", $armour, 12, $this->id);
-            $fighter->displayName = "Tie Defender Fighter";
+            $fighter->displayName = "TIE Defender";
             $fighter->imagePath = "img/starwars/tieDefender.png";
             $fighter->iconPath = "img/starwars/tieDefender_large.png"; 
             
