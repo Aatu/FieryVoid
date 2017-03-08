@@ -9,7 +9,7 @@ class swImperialSD extends BaseShip{
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swImperialSD";
         $this->imagePath = "img/starwars/imperator.png";
-        $this->shipClass = "Imperial I Star Destroyer";
+        $this->shipClass = "Imperial Star Destroyer";
         $this->shipSizeClass = 3;
 	    
 	$this->fighters = array("fighter flights"=>12, "assault flights"=>12);
