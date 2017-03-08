@@ -32,8 +32,7 @@ class swMonCalMC80 extends BaseShip{
 	$this->addPrimarySystem(new CnC(5, 36, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 45, 0, 0));
         $this->addPrimarySystem(new SWScanner(4, 30, 8, 8));
-        $this->addPrimarySystem(new Engine(5, 16, 0, 6, 4));
-        $this->addPrimarySystem(new Engine(5, 16, 0, 6, 4));
+        $this->addPrimarySystem(new Engine(5, 32, 0, 14, 4));
 	$this->addPrimarySystem(new SWRayShield(3,10,5,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addPrimarySystem(new SWRayShield(3,10,5,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$hyperdrive = new JumpEngine(5, 24, 8, 20);
