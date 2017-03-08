@@ -56,7 +56,7 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
 
 	$this->addRightSystem(new Thruster(3, 14, 0, 6, 4));
 	$this->addRightSystem(new SWRayShield(2,12,6,2,60,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new SWLightTLaser(2, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!	    
+	$this->addRightSystem(new SWLightTLaser(2, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!	    
 	$this->addRightSystem(new SWLightTLaser(2, 0, 120, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(2, 0, 180, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addRightSystem(new SWHeavyLaser(2, 0, 180, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
