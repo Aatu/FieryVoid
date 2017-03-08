@@ -86,7 +86,7 @@ spl_autoload_register(
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 
                 //'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
-                //'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
+                'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
                 
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
@@ -119,7 +119,7 @@ spl_autoload_register(
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
                 'swftrconcmissilelauncher' => '/server/model/weapons/customSW.php', //weapon
-                'swftconcmissile' => '/server/model/weapons/customSW.php', //ammo
+                'swftrconcmissile' => '/server/model/weapons/customSW.php', //ammo
                 'swtractorbeam' => '/server/model/weapons/customSW.php',
                 
                 'swlightlaser' => '/server/model/weapons/customSW.php',
