@@ -42,10 +42,10 @@ class zzftrawing extends FighterFlight{
             	$ConcussionMissileLauncher = new SWFtrConcMissileLauncher(3, 330, 30, 2);//single dual launcher! like for direct fire
             	$fighter->addFrontSystem($ConcussionMissileLauncher);
 
-             /*
+             
             	//Ray Shield, 1 points
             	$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
-            */
+            
             
             
             $this->addSystem($fighter);
