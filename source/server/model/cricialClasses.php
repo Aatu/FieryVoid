@@ -305,7 +305,7 @@ class SWTargetHeld extends Critical{ /*next turn target is being held by tractor
     public $description = "Held by tractor beam! Initiative and remaining thrust reduced.";
     public $oneturn = true;	
     function __construct($id, $shipid, $systemid, $turn){
-	    $outputMod = $strength;
+	    //$outputMod = $strength;
             parent::__construct($id, $shipid, $systemid, 'SWTargetHeld', $turn);
     }
 }
