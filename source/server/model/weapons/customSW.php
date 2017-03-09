@@ -1230,12 +1230,16 @@ class SWTractorBeam extends SWDirectWeapon{
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
-		 $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, 2); 
+		$crit = new ArmorReduced(-1, $ship->id, $system->id, $gamedata->turn); 
 		$system->criticals[] =  $crit;
 		
 		
 	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
 	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
+		
+		$crit = new ArmorReduced(-1, $ship->id, $system->id, $gamedata->turn); 
+		$primaryStruct->criticals[] =  $crit;
+		
 	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
 	      $primaryStruct->criticals[] =  $crit;
 	}
