@@ -1250,7 +1250,7 @@ class SWTractorBeam extends SWDirectWeapon{
 	      $primaryStruct->criticals[] =  $crit;
 	      
 	      
-	      */
+	      
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }
