@@ -12,7 +12,7 @@ class Thosalsi extends BaseShip{
         $this->shipClass = "Thosalsi Heavy Carrier";
         $this->shipSizeClass = 3;
         $this->limited = 10;
-        $this->fighters = array("medium"=>12);
+        $this->fighters = array("medium"=>36);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
@@ -73,23 +73,23 @@ class Thosalsi extends BaseShip{
             ),
             2=> array(
                     7 => "Thruster",
-					9 => "Standard Particle Beam",
+		    9 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-					6 => "Standard Particle Beam",
-					8 => "Ion Cannon",
-					11 => "Hangar",
+		    6 => "Standard Particle Beam",
+		    8 => "Ion Cannon",
+		    11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-					6 => "Standard Particle Beam",
-					8 => "Ion Cannon",
-					11 => "Hangar",
+		    6 => "Standard Particle Beam",
+		    8 => "Ion Cannon",
+		    11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             ),

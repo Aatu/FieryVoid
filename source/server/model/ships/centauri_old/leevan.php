@@ -21,7 +21,7 @@ class Leevan extends HeavyCombatVessel{
         $this->iniativebonus = 30;
 
         $this->occurence = "uncommon";
-        
+        $this->variantOf = "Navask Escort Destroyer";
          
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));

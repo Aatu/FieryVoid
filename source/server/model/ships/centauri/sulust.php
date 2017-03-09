@@ -8,7 +8,7 @@ class Sulust extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Sulust";
         $this->imagePath = "img/ships/sulust.png";
-        $this->shipClass = "Sulust";
+        $this->shipClass = "Sulust Escort Destroyer";
         
         
         $this->forwardDefense = 14;

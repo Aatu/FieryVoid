@@ -7,7 +7,8 @@ class PhalanI extends FighterFlight{
 		$this->pointCost = 180; //6*30
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "PhalanI";
-        $this->shipClass = "Phalan-I Heavy Interceptor flight";
+        $this->shipClass = "Phalan-I Heavy Interceptors";
+	    $this->variantOf = "Phalan Assault Fighters";
 		$this->imagePath = "img/ships/phalan.png";
         
         $this->forwardDefense = 9;
@@ -29,7 +30,7 @@ class PhalanI extends FighterFlight{
 			
 			$armour = array(2, 1, 1, 1);
 			$fighter = new Fighter("phalani", $armour, 12, $this->id);
-			$fighter->displayName = "Centauri Phalan-I Heavy Interceptor";
+			$fighter->displayName = "Phalan-I Heavy Interceptor";
 			$fighter->imagePath = "img/ships/phalan.png";
 			$fighter->iconPath = "img/ships/phalan_large.png";
 			

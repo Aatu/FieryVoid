@@ -9,6 +9,7 @@ class Seltat extends HeavyCombatVessel{
         $this->phpclass = "Seltat";
         $this->imagePath = "img/ships/kutai.png";
         $this->shipClass = "Seltat Minesweeper";
+	    $this->variantOf = "Kutai Gunship";
         $this->occurence = "uncommon";
         
         $this->forwardDefense = 14;

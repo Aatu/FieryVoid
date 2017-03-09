@@ -8,7 +8,7 @@ class Razik extends FighterFlight{
 	$this->pointCost = 180;
 	$this->faction = "Centauri";
         $this->phpclass = "Razik";
-        $this->shipClass = "Razik Light flight";
+        $this->shipClass = "Razik Light Fighters";
 	$this->imagePath = "img/ships/razik.png";
         
         $this->forwardDefense = 6;

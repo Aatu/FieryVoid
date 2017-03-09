@@ -9,6 +9,8 @@ class Ventrus extends BaseShip{
         $this->phpclass = "Kendari";
         $this->imagePath = "img/ships/kendari.png";
         $this->shipClass = "Ventrus Light Cruiser";
+	$this->variantOf = "Kendari Fleet Scout";
+        $this->occurence = "uncommon";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>6);
         
@@ -20,8 +22,6 @@ class Ventrus extends BaseShip{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
-
-        $this->occurence = "uncommon";
 		       
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

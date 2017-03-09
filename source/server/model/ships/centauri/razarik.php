@@ -8,7 +8,9 @@ class Razarik extends FighterFlight{
 	$this->pointCost = 210;
 	$this->faction = "Centauri";
         $this->phpclass = "Razarik";
-        $this->shipClass = "Razarik Torpedo Fighter";
+        $this->shipClass = "Razarik Torpedo Fighters";
+        $this->variantOf = "Razik Light Fighters";
+	$this->occurence = "rare";
 	$this->imagePath = "img/ships/razik.png";
         
         $this->forwardDefense = 6;

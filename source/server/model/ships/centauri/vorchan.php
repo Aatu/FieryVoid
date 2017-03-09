@@ -8,7 +8,7 @@ class Vorchan extends HeavyCombatVessel{
 		$this->faction = "Centauri";
         $this->phpclass = "Vorchan";
         $this->imagePath = "img/ships/vorchan.png";
-        $this->shipClass = "Vorchan";
+        $this->shipClass = "Vorchan Warship";
         
         
         $this->forwardDefense = 12;

@@ -9,10 +9,14 @@ class AcceleratorPrimus extends BaseShip{
         $this->faction = "Centauri";
         $this->phpclass = "AcceleratorPrimus";
         $this->imagePath = "img/ships/primus.png";
-        $this->shipClass = "Accelerator Primus";
+        $this->shipClass = "Primus Accelerator Battlecruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal" => 12);
 
+        $this->isd = 2090;
+        $this->occurence = "uncommon";
+        $this->variantOf = "Primus Battlecruiser";
+        
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
 

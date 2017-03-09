@@ -10,6 +10,7 @@ class swAssaultFrigate extends HeavyCombatVessel{
         $this->imagePath = "img/starwars/assaultfrigate.png";
 	    //$this->canvasSize = 100;
         $this->shipClass = "Rebel Assault Frigate";
+	    $this->variantOf = 'to be deleted';
 	
 	$this->unofficial = true;
         

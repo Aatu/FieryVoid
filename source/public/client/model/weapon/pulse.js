@@ -78,3 +78,10 @@ var PairedLightBoltCannon = function(json, ship)
 PairedLightBoltCannon.prototype = Object.create( Particle.prototype );
 PairedLightBoltCannon.prototype.constructor = PairedLightBoltCannon;
 
+
+var ScatterGun = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+ScatterGun.prototype = Object.create( Weapon.prototype );
+ScatterGun.prototype.constructor = ScatterGun;

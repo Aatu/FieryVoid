@@ -8,7 +8,7 @@ class Covran extends BaseShip{
 		$this->faction = "Centauri";
         $this->phpclass = "Covran";
         $this->imagePath = "img/ships/covran.png";
-        $this->shipClass = "Covran";
+        $this->shipClass = "Covran Scout";
         $this->shipSizeClass = 3;
         $this->limited = 33;
         

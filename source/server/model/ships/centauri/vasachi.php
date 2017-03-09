@@ -8,8 +8,9 @@ class Vasachi extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Vasachi";
         $this->imagePath = "img/ships/sulust.png";
-        $this->shipClass = "Vasachi";
+        $this->shipClass = "Vasachi Escort Destroyer";
         $this->occurence = "rare";
+        $this->shipClass = "Sulust Escort Destroyer";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

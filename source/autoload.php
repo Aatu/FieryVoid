@@ -11,6 +11,7 @@ spl_autoload_register(
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',      		
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
+                'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
                 'kraken' => '/server/model/ships/centauri/kraken.php',
                 'orion' => '/server/model/ships/EA/orion.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
@@ -45,7 +46,8 @@ spl_autoload_register(
             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
                 'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
-                'eacgemini' => '/server/model/ships/customs/eacGemini.php',
+                'eacgemini' => '/server/model/ships/customs/eacGemini.php', //original version
+                'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php', //version with new MLPAs
                 
                 //custom Brakiri
                 'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
@@ -74,24 +76,30 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
+                
                 //Star Wars (sort of) - Centauri Galactic Empire
-                'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php',
+                'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php', //TO BE DELETED!
+                'swassaultfrigatesmallcap' => '/server/model/ships/starwars_centauri/swAssaultFrigateSmallCap.php',
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
-                'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
-                'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
+                    'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
+                    'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
                 'swcorelliangunship' => '/server/model/ships/starwars_centauri/swCorellianGunship.php',  
                 'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
+                'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
+                'swlancer' => '/server/model/ships/starwars_centauri/swLancer.php',
+                'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
-                'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
+                    'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
-
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
+                'zzftrtiedef' => '/server/model/ships/starwars_centauri/zzftrTIEDef.php',
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
 
+                'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
 
@@ -112,7 +120,8 @@ spl_autoload_register(
                 'swftrprotontorpedolauncher' => '/server/model/weapons/customSW.php', //weapon
                 'swftrprotontorpedo' => '/server/model/weapons/customSW.php', //ammo
                 'swftrconcmissilelauncher' => '/server/model/weapons/customSW.php', //weapon
-                'swftconcmissile' => '/server/model/weapons/customSW.php', //ammo
+                'swftrconcmissile' => '/server/model/weapons/customSW.php', //ammo
+                'swtractorbeam' => '/server/model/weapons/customSW.php',
                 
                 'swlightlaser' => '/server/model/weapons/customSW.php',
                 'swmediumlaser' => '/server/model/weapons/customSW.php',
@@ -120,6 +129,8 @@ spl_autoload_register(
                 'swlighttlaser' => '/server/model/weapons/customSW.php',
                 'swmediumtlaser' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+                
+                'swmediumlaseraf' => '/server/model/weapons/customSW.php',
 
                 'swlightlasere' => '/server/model/weapons/customSW.php',
                 'swmediumlasere' => '/server/model/weapons/customSW.php',
@@ -142,6 +153,7 @@ spl_autoload_register(
                 'customstrikelaser' => '/server/model/weapons/customs.php',
                 'custompulsarlaser' => '/server/model/weapons/customs.php',
                 'hlpa' => '/server/model/weapons/customs.php',
+                'mlpa' => '/server/model/weapons/customs.php',
                 
                 
                 //Deneth
@@ -162,6 +174,7 @@ spl_autoload_register(
                 
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
+                               
                 
                 //Hurr
                 'boroca' => '/server/model/ships/hurr/boroca.php',
@@ -170,11 +183,45 @@ spl_autoload_register(
                     'tonak' => '/server/model/ships/hurr/tonak.php',
                 'orak' => '/server/model/ships/hurr/orak.php',
                     'anoro' => '/server/model/ships/hurr/anoro.php',
+                    'dorono' => '/server/model/ships/hurr/dorono.php',
+                    'martus' => '/server/model/ships/hurr/martus.php',
                     'norek' => '/server/model/ships/hurr/norek.php',
+                    'orano' => '/server/model/ships/hurr/orano.php',
+                    'torkoth' => '/server/model/ships/hurr/torkoth.php',
                 
                 'koeth' => '/server/model/ships/hurr/koeth.php',
                     'koethy' => '/server/model/ships/hurr/koethY.php',
+                'anroethas' => '/server/model/ships/hurr/anroethAS.php',
                 
+                'gorek' => '/server/model/ships/hurr/gorek.php', //freighters, civilians directory
+                
+                
+                //Llort
+                'allovan' => '/server/model/ships/llort/allovan.php',
+                'daggaden' => '/server/model/ships/llort/daggaden.php',
+                    'daggadenpod' => '/server/model/ships/llort/daggadenPod.php',
+                'erlorra' => '/server/model/ships/llort/erlorra.php',
+                    'erlorrapods' => '/server/model/ships/llort/erlorraPods.php',
+                    'erlorraearly' => '/server/model/ships/llort/erlorraEarly.php',
+                    'erlorraearlypods' => '/server/model/ships/llort/erlorraEarlyPods.php',
+                'fwellgon' => '/server/model/ships/llort/fwellgon.php',
+                'govall' => '/server/model/ships/llort/govall.php',
+                'terillon' => '/server/model/ships/llort/terillon.php',
+                'turlisk' => '/server/model/ships/llort/turlisk.php',
+                    'trathor' => '/server/model/ships/llort/trathor.php',
+                    'turgon' => '/server/model/ships/llort/turgon.php',
+                
+                'ftrlellata' => '/server/model/ships/llort/ftrLellatA.php',
+                    'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
+                'ftrleteerumas' => '/server/model/ships/llort/ftrLeteerumAS.php',
+                
+                'graemlar' => '/server/model/ships/llort/graemlar.php',
+                
+                'scattergun' => '/server/model/weapons/pulse.php',
+                
+                //various additional units
+                'tkharas' => '/server/model/ships/narn/tkharAS.php',
+                'trakhabp' => '/server/model/ships/narn/trakhabp.php',
                 
                 
                 // centauri raiders
@@ -192,6 +239,8 @@ spl_autoload_register(
                 'raven' => '/server/model/ships/drazi_raiders/raven.php',
                 'throkan' => '/server/model/ships/drazi_raiders/throkan.php',
                 'vulture' => '/server/model/ships/drazi_raiders/vulture.php',
+                
+                
                 
                 // early Drazi
                 'earlywarbird' => '/server/model/ships/drazi_old/earlywarbird.php',
@@ -628,7 +677,8 @@ spl_autoload_register(
                 'nitratha' => '/server/model/ships/dilgar/nitratha.php',
                 'notai' => '/server/model/ships/yolu/notai.php',
                 'notali' => '/server/model/ships/yolu/notali.php',
-                'nova' => '/server/model/ships/EA/nova.php',
+                'nova' => '/server/model/ships/EA/nova.php', //original version
+                'novamlpa' => '/server/model/ships/EA/novaMlpa.php', //version with new MLPAs
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
                 'novastarfury' => '/server/model/ships/EA/novaStarfury.php',
                 'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
@@ -740,6 +790,7 @@ spl_autoload_register(
                 'sleekbird' => '/server/model/ships/drazi/sleekbird.php',
                 'sloop' => '/server/model/ships/raiders/sloop.php',
                 'smissilerack' => '/server/model/weapons/missile.php',
+                    'rmissilerack' => '/server/model/weapons/missile.php',
                 'solarcannon' => '/server/model/weapons/particle.php',
                 'solarhawk' => '/server/model/ships/drazi/solarhawk.php',
                 'somissilerack' => '/server/model/weapons/missile.php',
@@ -811,7 +862,8 @@ spl_autoload_register(
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
                 'warbird' => '/server/model/ships/drazi/warbird.php',
                 'wareagle' => '/server/model/ships/drazi/wareagle.php',
-                'warlock' => '/server/model/ships/EA/warlock.php',
+                'warlock' => '/server/model/ships/EA/warlock.php',//original version
+                'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
                 'wartalon' => '/server/model/ships/drazi/wartalon.php',
                 'weapon' => '/server/model/weapons/weapon.php',
                 'weaponloading' => '/server/model/BaseClasses.php',

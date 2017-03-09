@@ -8,7 +8,7 @@ class Demos extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Demos";
         $this->imagePath = "img/ships/demos.png";
-        $this->shipClass = "Demos";
+        $this->shipClass = "Demos Heavy Warship";
         
         
         $this->forwardDefense = 12;

@@ -9,6 +9,7 @@ class Nova extends BaseShip{
         $this->phpclass = "Nova";
         $this->imagePath = "img/ships/nova.png";
         $this->shipClass = "Nova Dreadnought (Beta)";
+	    $this->variantOf = 'DO NOT DISPLAY';
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->limited = 33;

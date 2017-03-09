@@ -644,7 +644,7 @@ class SWFtrConcMissile extends SWFtrMissile //this is AMMO for SWFtrProtonTorped
     public $missileClass = "FtrMissile";
     public $displayName = "Fighter Concussion Missile";
     public $cost = 2;
-    public $damage = 8;
+    public $damage = 6;
     public $amount = 0;
     public $range = 6;
     public $distanceRange = 18;
@@ -770,6 +770,45 @@ class SWHeavyLaser extends SWDirectWeapon{
 	public function setMaxDamage(){     $this->maxDamage = 12 +$this->damagebonus ;      }
 
 } //end of class SWHeavyLaser
+
+
+
+
+class SWMediumLaserAF extends SWDirectWeapon{
+    /*StarWars anti-fighter medium laser - for Lancer mainly
+    */
+    public $name = "SWMediumLaserAF";
+    public $displayName = "AF Medium Laser";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 1.5; // 3 per 2 hexes
+    public $fireControl = array(6, 2, 0); // fighters, <mediums, <capitals
+   
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+	public $animationWidth = 3;
+	public $trailLength = 10;
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = floor($nrOfShots*1); //this gives distinctly worse interception than light laser
+
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserMedium".$nr.".png";
+		
+		parent::__construct($armor, 3, 0.7, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+4 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 5 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 +$this->damagebonus ;      }
+
+} //end of class SWMediumLaser
+
+
+
 
 
 
@@ -1145,6 +1184,77 @@ class SWCapitalProton extends SWBallisticWeapon{
         public function setMaxDamage(){     $this->maxDamage = 18 ;     }
     
 }//endof class SWCapitalProton
+
+
+
+
+class SWTractorBeam extends SWDirectWeapon{
+    /*StarWars Tractor Beam 
+    */
+    /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
+    */
+    public $name = "SWTractorBeam";
+    public $displayName = "Tractor Beam";
+	
+    public $priority = 10; //let's fire last
+    public $loadingtime = 2;
+    public $rangePenalty = 1;
+    public $intercept = 0;
+    public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!
+   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(55, 55, 55);
+        public $animationColor2 = array(100, 100, 100);
+        public $animationExplosionScale = 0.45;
+        public $animationWidth = 15;
+        public $animationWidth2 = 0.5;
+	
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"ReducedRange"
+	);
+	
+    public function setSystemDataWindow($turn){
+      parent::setSystemDataWindow($turn);
+      $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
+      $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
+      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn)."; 
+	    $this->data["<font color='red'>Remark</font>"] = "NOT READY YET, SORRY!";   
+    }	
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = $nrOfShots;
+		$this->iconPath = "tractorBeam.png";
+		
+		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
+		/*
+		$crit = new ArmorReduced(-1, $ship->id, $system->id, 'ArmorReduced',$gamedata->turn); 
+		$system->criticals[] =  $crit;
+		
+		
+	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
+	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
+		
+		$crit = new ArmorReduced(-1, $ship->id, $primaryStruct->id, 'ArmorReduced', $gamedata->turn); 
+		$primaryStruct->criticals[] =  $crit;
+		
+		$trgtTurn = $gamedata->turn + 1;
+	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $trgtTurn); 
+	      $primaryStruct->criticals[] =  $crit;
+	      
+	      
+	      */
+	}
+	
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class SWTractorBeam
+
 
 
 ?>

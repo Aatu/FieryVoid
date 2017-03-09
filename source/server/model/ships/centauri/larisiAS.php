@@ -8,7 +8,7 @@ class larisiAS extends FighterFlight{
 		    $this->pointCost = 30*6;
 		    $this->faction = "Centauri";
         $this->phpclass = "larisias";
-        $this->shipClass = "Larisi Assault Shuttles flight";
+        $this->shipClass = "Larisi Assault Shuttles";
 		    $this->imagePath = "img/ships/sentri.png";
         
         $this->forwardDefense = 8;

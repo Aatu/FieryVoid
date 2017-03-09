@@ -8,10 +8,11 @@ class Mogratti extends MediumShip{
 	$this->faction = "Centauri";
         $this->phpclass = "Mogratti";
         $this->imagePath = "img/ships/mograth.png";
-        $this->shipClass = "Mogratti";
+        $this->shipClass = "Mogratti Battle Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
         $this->occurence = "uncommon";
+        $this->shipClass = "Mograth Frigate";
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

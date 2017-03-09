@@ -8,7 +8,8 @@ class AltarianMagnus extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "AltarianMagnus";
         $this->imagePath = "img/ships/altarian.png";
-        $this->shipClass = "Altarian Magnus";
+        $this->shipClass = "Altarian Magnus Destroyer Leader";
+        $this->variantOf = "Altarian Destroyer";
         $this->fighters = array("medium"=>6);
         $this->occurence = "rare";
         

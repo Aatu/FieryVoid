@@ -8,7 +8,7 @@ class Haven extends MediumShip{
 		$this->faction = "Centauri";
         $this->phpclass = "Haven";
         $this->imagePath = "img/ships/haven.png";
-        $this->shipClass = "Haven";
+        $this->shipClass = "Haven Patrol Boat";
         $this->agile = true;
         $this->canvasSize = 100;
         
