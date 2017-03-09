@@ -55,15 +55,15 @@ class NovaMlpa extends BaseShip{
         $this->addAftSystem(new InterceptorMkI(2, 4, 1, 60, 240));
         
         $this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));
-		$this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));
+	$this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));
         $this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));
         $this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));
         $this->addLeftSystem(new MLPA(3, 9, 5, 240, 0));        
-		$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
+	$this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
-		$this->addRightSystem(new MLPA(3, 9, 5, 0, 120));
+	$this->addRightSystem(new MLPA(3, 9, 5, 0, 120));
         $this->addRightSystem(new MLPA(3, 9, 5, 0, 120));
-        $this->addRightSystem(new MLPAy(3, 9, 5, 0, 120));
+        $this->addRightSystem(new MLPA(3, 9, 5, 0, 120));
         $this->addRightSystem(new MLPA(3, 9, 5, 0, 120));
         $this->addRightSystem(new MLPA(3, 9, 5, 0, 120));        
 		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
