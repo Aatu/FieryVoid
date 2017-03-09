@@ -9,6 +9,7 @@ class Warlock extends BaseShip{
 		$this->phpclass = "Warlock";
 		$this->imagePath = "img/ships/warlock.png";
 		$this->shipClass = "Warlock";
+	    		$this->variantOf = 'DO NOT DISPLAY';
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;
 		$this->limited = 10;
