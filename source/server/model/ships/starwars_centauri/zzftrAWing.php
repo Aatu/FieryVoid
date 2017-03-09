@@ -8,7 +8,7 @@ class zzftrawing extends FighterFlight{
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "zzftrawing";
         $this->shipClass = "A-Wing Light Fighters";
-        $this->imagePath = "img/starwars/vWing.png";
+        $this->imagePath = "img/starwars/aWing.png";
         
         //$this->isd = 2214;
         $this->unofficial = true;
@@ -31,8 +31,8 @@ class zzftrawing extends FighterFlight{
 		$armour = array(1, 1, 1, 1);
 		$fighter = new Fighter("zzftrawing", $armour, 7, $this->id);
 		$fighter->displayName = "A-Wing Light Fighter";
-            	$fighter->imagePath = "img/starwars/vWing.png";
-            	$fighter->iconPath = "img/starwars/vWing_large.png"; 
+            	$fighter->imagePath = "img/starwars/aWing.png";
+            	$fighter->iconPath = "img/starwars/aWing_large.png"; 
             
 		
             	$frontGun = new SWFighterLaser(300, 60, 2, 2); //front Lasers
