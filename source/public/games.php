@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 18th of January 2017";
+                    header.innerHTML = "Latest News 9th of March 2017";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -56,7 +56,7 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- new icons for Laser-Pulse Arrays (at last!). Warlock, Nova and Gemini refitted with new style weapons.";
                     news.innerHTML += "<br>";		    
-                    news.innerHTML += "- new StarWars units (also courtesy of Wolfgang). Be aware that StarWars Tractor Beam is a real weapon, not just a placeholder :) .";
+                    news.innerHTML += "- new StarWars units (also courtesy of Wolfgang). Be aware that details may be changed, they're before playtest :) .";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
