@@ -1241,8 +1241,8 @@ class SWTractorBeam extends SWDirectWeapon{
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }
-	public function setMinDamage(){     0 ;      }
-	public function setMaxDamage(){     0 ;      }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
 } //end of class SWTractorBeam
 
 
