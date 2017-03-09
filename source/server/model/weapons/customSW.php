@@ -773,6 +773,45 @@ class SWHeavyLaser extends SWDirectWeapon{
 
 
 
+
+class SWMediumLaserAF extends SWDirectWeapon{
+    /*StarWars anti-fighter medium laser - for Lancer mainly
+    */
+    public $name = "SWMediumLaserAF";
+    public $displayName = "AF Medium Laser";
+	
+    public $priority = 3;
+    public $loadingtime = 1;
+    public $rangePenalty = 1.5; // 3 per 2 hexes
+    public $fireControl = array(6, 2, 0); // fighters, <mediums, <capitals
+   
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 12;
+	public $animationWidth = 3;
+	public $trailLength = 10;
+    
+	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
+		$this->intercept = floor($nrOfShots*1); //this gives distinctly worse interception than light laser
+
+		//appropriate icon (number of barrels)...
+		$nr = min(4, $nrOfShots); //images are not unlimited
+		$this->iconPath = "starwars/mjsLaserMedium".$nr.".png";
+		
+		parent::__construct($armor, 3, 0.7, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
+		$this->addSalvoMode();
+	}    
+	
+	public function getDamage($fireOrder){ return  Dice::d(6)+4 +$this->damagebonus;   }
+	public function setMinDamage(){     $this->minDamage = 5 +$this->damagebonus ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 +$this->damagebonus ;      }
+
+} //end of class SWMediumLaser
+
+
+
+
+
+
 class SWLightTLaser extends SWDirectWeapon{
     /*StarWars lightest turbolaser - roughly comparable to heavy laser, but more dependable vs ships and longer ranged than lasers (but doing less raw damage)
     */
