@@ -33,7 +33,7 @@ class swImperialSD extends BaseShip{
 	    
 	$this->addPrimarySystem(new CnC(6, 36, 0, 0));
         $this->addPrimarySystem(new Reactor(6, 60, 0, 0));
-        $this->addPrimarySystem(new SWScanner(5, 18, 8, 4)); //split to Aft, too
+        $this->addPrimarySystem(new SWScanner(5, 12, 6, 3)); //split to Aft, too
         $this->addPrimarySystem(new Engine(5, 24, 0, 6, 8)); //split to Aft, too
 	$hyperdrive = new JumpEngine(5, 30, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
@@ -58,7 +58,7 @@ class swImperialSD extends BaseShip{
         $this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
 	$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
 	$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
-        $this->addAftSystem(new SWScanner(3, 12, 8, 3)); //split to Primary, too
+        $this->addAftSystem(new SWScanner(3, 18, 8, 4)); //split to Primary, too
         $this->addAftSystem(new Engine(4, 20, 0, 6, 8)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,18,8,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWMediumIon(3, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
