@@ -9,6 +9,7 @@ class eacGemini extends BaseShip{
 		$this->phpclass = "eacGemini";
 		$this->imagePath = "img/ships/gemini.png";
 		$this->shipClass = "Gemini Fleet Destroyer";
+	    	$this->variantOf = "DO NOT DISPLAY";
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 200;
 
