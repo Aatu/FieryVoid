@@ -133,6 +133,12 @@ SWHeavyTLaserE.prototype.constructor = SWHeavyTLaserE;
 
 
 
+var SWMediumLaserAF = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumLaserAF.prototype = Object.create( Weapon.prototype );
+SWMediumLaserAF.prototype.constructor = SWMediumLaserAF;
+
 
 
 
