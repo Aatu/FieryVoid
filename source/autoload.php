@@ -46,7 +46,8 @@ spl_autoload_register(
             	'wlcchlonastravoracl2240' => '/server/model/ships/customs/wlcChlonasTraVoraCL2240.php',
             	'wlcchlonaswyleraa' => '/server/model/ships/customs/wlcChlonasWyLeraA.php',
                 'wlcchlonaswylerab' => '/server/model/ships/customs/wlcChlonasWyLeraB.php',
-                'eacgemini' => '/server/model/ships/customs/eacGemini.php',
+                'eacgemini' => '/server/model/ships/customs/eacGemini.php', //original version
+                'eacgeminimlpa' => '/server/model/ships/customs/eacGeminiMlpa.php', //version with new MLPAs
                 
                 //custom Brakiri
                 'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
@@ -676,7 +677,8 @@ spl_autoload_register(
                 'nitratha' => '/server/model/ships/dilgar/nitratha.php',
                 'notai' => '/server/model/ships/yolu/notai.php',
                 'notali' => '/server/model/ships/yolu/notali.php',
-                'nova' => '/server/model/ships/EA/nova.php',
+                'nova' => '/server/model/ships/EA/nova.php', //original version
+                'novamlpa' => '/server/model/ships/EA/novaMlpa.php', //version with new MLPAs
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
                 'novastarfury' => '/server/model/ships/EA/novaStarfury.php',
                 'ochlavita' => '/server/model/ships/dilgar/ochlavita.php',
@@ -860,7 +862,8 @@ spl_autoload_register(
                 'vorchar' => '/server/model/ships/centauri/vorchar.php',
                 'warbird' => '/server/model/ships/drazi/warbird.php',
                 'wareagle' => '/server/model/ships/drazi/wareagle.php',
-                'warlock' => '/server/model/ships/EA/warlock.php',
+                'warlock' => '/server/model/ships/EA/warlock.php',//original version
+                'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
                 'wartalon' => '/server/model/ships/drazi/wartalon.php',
                 'weapon' => '/server/model/weapons/weapon.php',
                 'weaponloading' => '/server/model/BaseClasses.php',
