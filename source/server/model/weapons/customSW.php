@@ -1219,6 +1219,7 @@ class SWTractorBeam extends SWDirectWeapon{
       $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
       $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
       $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn)."; 
+	    $this->data["<font color='red'>Remark</font>"] = "NOT READY YET, SORRY!";   
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -1230,6 +1231,7 @@ class SWTractorBeam extends SWDirectWeapon{
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
+		/*
 		$crit = new ArmorReduced(-1, $ship->id, $system->id, 'ArmorReduced',$gamedata->turn); 
 		$system->criticals[] =  $crit;
 		
@@ -1243,6 +1245,9 @@ class SWTractorBeam extends SWDirectWeapon{
 		$trgtTurn = $gamedata->turn + 1;
 	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $trgtTurn); 
 	      $primaryStruct->criticals[] =  $crit;
+	      
+	      
+	      */
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }
