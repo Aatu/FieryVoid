@@ -1245,7 +1245,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		
 		$trgtTurn = $gamedata->turn + 1;
 		*/
-	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $trgtTurn); 
+	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
 		$crit->updated = true;
 	      $primaryStruct->criticals[] =  $crit;
 	      
