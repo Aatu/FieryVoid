@@ -6,9 +6,9 @@ class WarlockMlpa extends BaseShip{
 
 		$this->pointCost = 1800;
 		$this->faction = "EA";
-		$this->phpclass = "Warlock";
+		$this->phpclass = "WarlockMlpa";
 		$this->imagePath = "img/ships/warlock.png";
-		$this->shipClass = "WarlockMlpa";
+		$this->shipClass = "Warlock";
 		$this->shipSizeClass = 3;
 		$this->canvasSize= 400;
 		$this->limited = 10;
