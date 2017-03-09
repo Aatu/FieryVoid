@@ -1233,7 +1233,7 @@ class SWTractorBeam extends SWDirectWeapon{
 	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
 	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
 	      $crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
-	      $system->criticals[] =  $crit;
+	      $primaryStruct->criticals[] =  $crit;
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }
