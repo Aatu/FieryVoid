@@ -80,17 +80,16 @@ spl_autoload_register(
                 'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php', //TO BE DELETED!
                 'swassaultfrigatesmallcap' => '/server/model/ships/starwars_centauri/swAssaultFrigateSmallCap.php',
                 'swcorelliancorvette' => '/server/model/ships/starwars_centauri/swCorellianCorvette.php',
-                'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
-                'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
+                    'swcorelliancorvetteescort' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscort.php',
+                    'swcorelliancorvetteescorth' => '/server/model/ships/starwars_centauri/swCorellianCorvetteEscortH.php',
                 'swcorelliangunship' => '/server/model/ships/starwars_centauri/swCorellianGunship.php',  
                 'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
-                'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
-                
                 'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
+                'swlancer' => '/server/model/ships/starwars_centauri/swLancer.php',
                 'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
-                
+                'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
-                'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
+                    'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
                 
                 'zzftrtiebomber' => '/server/model/ships/starwars_centauri/zzftrTIEBomber.php',
@@ -129,6 +128,8 @@ spl_autoload_register(
                 'swlighttlaser' => '/server/model/weapons/customSW.php',
                 'swmediumtlaser' => '/server/model/weapons/customSW.php',
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
+                
+                'swmediumlaseraf' => '/server/model/weapons/customSW.php',
 
                 'swlightlasere' => '/server/model/weapons/customSW.php',
                 'swmediumlasere' => '/server/model/weapons/customSW.php',
