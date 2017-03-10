@@ -25,7 +25,7 @@ class swImperialSD extends BaseShip{
         $this->accelcost = 8;
         $this->rollcost = 6;
         $this->pivotcost = 8;
-	$this->iniativebonus = -2 *5; 
+	$this->iniativebonus = -4 *5; 
 		
 	    
      
@@ -38,7 +38,7 @@ class swImperialSD extends BaseShip{
 	$hyperdrive = new JumpEngine(5, 30, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
-	$this->addPrimarySystem(new Hangar(3, 48, 12));
+	$this->addPrimarySystem(new Hangar(3, 60, 12));
          
         
 		
