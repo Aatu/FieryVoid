@@ -1237,16 +1237,14 @@ class SWTractorBeam extends SWDirectWeapon{
                 $crit->inEffect = false;
      	 	$system->criticals[] =  $crit;
 		
-		$crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, 2); //for ship system and fighter alike
-		$crit->updated = true;
-     	 	$system->criticals[] =  $crit;
-		/*
-	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
+		
+	      //$primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
 	      //if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
-		$crit = new SWTargetHeld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
+		$crit = new SWTargetHeld(-1, $ship->id, $system->id, $gamedata->turn); 
 		$crit->updated = true;
-	      $primaryStruct->criticals[] =  $crit;
-	      */
+                $crit->inEffect = false;
+	      $system->criticals[] =  $crit;
+	      
 	      
 	      
 	}
