@@ -859,14 +859,13 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 			    $mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
 			    $mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
 			    $mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
+	    			$mod += 20*($primaryStruct->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 			}
 	    }
 		
-	    //additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-		$primaryStruct = $ship->getStructureSystem(0);
-		if($primaryStruct){
-			$mod += 15*($primaryStruct->hasCritical("swtargetheld", $gamedata->turn)); //-3 Ini per hit
-		}
+	    
+
 		
             $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
            //debug::log("ini submit for: ".$ship->shipClass."---:".$ship->iniative);
