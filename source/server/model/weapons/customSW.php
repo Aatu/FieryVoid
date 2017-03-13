@@ -1240,11 +1240,13 @@ class SWTractorBeam extends SWDirectWeapon{
                 $crit->inEffect = false;
 	      $primaryStruct->criticals[] =  $crit;
 		//to C&C too, to show to the player - but effective one will be on Structure!
-		$CnC = $ship->getSystemByName("C&C");
-		$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn); 
-		$crit->updated = true;
-                $crit->inEffect = false;
-	      $CnC->criticals[] =  $crit;
+		$CnC = $ship->getSystemByName("CnC");
+		if($CnC){
+			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn); 
+			$crit->updated = true;
+			$crit->inEffect = false;
+		      $CnC->criticals[] =  $crit;
+		}
 		
 		
 		
