@@ -293,19 +293,20 @@ class ArmorReduced extends Critical{
 class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be nastier*/
     public $description = "Vulnerable to critical.";
     public $oneturn = true;	
-    function __construct($id, $shipid, $systemid, $turn, $strength){
-	    $outputMod = $strength;
-            parent::__construct($id, $shipid, $systemid, 'NastierCrit', $turn);
+    public $outputMod = 1;
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
     }
 }
 
 
 
-class SWTargetHeld extends Critical{ /*next turn target is being held by tractor beam!*/
-    public $description = "Held by tractor beam! Initiative and remaining thrust reduced.";
+class swtargetheld extends Critical{ /*next turn target is being held by tractor beam!*/
+    public $description = "Held by tractor beam! Reduced Initiative (-20/hit) and remaining thrust (-1/hit).";
     public $oneturn = true;	
-    function __construct($id, $shipid, $systemid, $turn){
-	    //$outputMod = $strength;
-            parent::__construct($id, $shipid, $systemid, 'SWTargetHeld', $turn);
+	
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
     }
 }

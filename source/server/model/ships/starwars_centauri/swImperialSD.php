@@ -25,7 +25,7 @@ class swImperialSD extends BaseShip{
         $this->accelcost = 8;
         $this->rollcost = 6;
         $this->pivotcost = 8;
-	$this->iniativebonus = -2 *5; 
+	$this->iniativebonus = -4 *5; 
 		
 	    
      
@@ -38,7 +38,7 @@ class swImperialSD extends BaseShip{
 	$hyperdrive = new JumpEngine(5, 30, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
 	$this->addPrimarySystem($hyperdrive);
-	$this->addPrimarySystem(new Hangar(3, 48, 12));
+	$this->addPrimarySystem(new Hangar(3, 60, 12));
          
         
 		
@@ -115,10 +115,10 @@ class swImperialSD extends BaseShip{
                     20 => "C&C",
             ),
             1=> array(
-                    4 => "Thruster",
-		    5 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
+                    3 => "Thruster",
+		    4 => "Ray Shield",
+                    8 => "Heavy Turbolaser",
+                    11 => "Medium Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -132,20 +132,20 @@ class swImperialSD extends BaseShip{
                     20 => "Primary",
             ),
             3=> array(
-                    4 => "Thruster",
-		    5 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
-                    13 => "Tractor Beam",
+                    3 => "Thruster",
+		    4 => "Ray Shield",
+                    8 => "Heavy Turbolaser",
+                    11 => "Medium Ion Cannon",
+                    12 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
-                    4 => "Thruster",
-		    5 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    12 => "Medium Ion Cannon",
-                    13 => "Tractor Beam",
+                    3 => "Thruster",
+		    4 => "Ray Shield",
+                    8 => "Heavy Turbolaser",
+                    11 => "Medium Ion Cannon",
+                    12 => "Tractor Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

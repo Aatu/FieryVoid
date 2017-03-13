@@ -1369,7 +1369,7 @@ shipManager.movement = {
 					rem -= system.thrustwasted;
 				}
 				//tractor beams reduce thrust available!
-				var crits = shipManager.criticals.hasCritical(system, "SWTargetHeld");
+				var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
 				rem -= crits;
 			}
 		}

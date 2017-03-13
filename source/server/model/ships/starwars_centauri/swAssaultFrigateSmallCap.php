@@ -8,7 +8,7 @@ class swAssaultFrigateSmallCap extends BaseShipNoAft{
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swAssaultFrigateSmallCap";
         $this->imagePath = "img/starwars/assaultfrigate.png";
-	    $this->canvasSize = 100;
+	    //$this->canvasSize = 100;
         $this->shipClass = "Rebel Assault Frigate";
 	
 	$this->fighters = array("superheavy" => 1);

@@ -191,7 +191,7 @@ class ShipSystem{
 	foreach($crits as $key=>$value) {
 	  if($value instanceof NastierCrit){
 		$bonusCrit+= $value->$outputMod;
-		  unset($crits[$key]);
+		  //unset($crits[$key]); //no need, it'll go out on its own
 	  }
 	}
 	$crits = array_values($crits); //in case some criticals were deleted!
