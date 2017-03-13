@@ -1249,7 +1249,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		$CnC = $ship->getSystemByName("CnC");
 		if($CnC){
 			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn); 
-			$crit->updated = true;
+			$crit->updated = false;
 			//$crit->inEffect = true;
 		      $CnC->criticals[] =  $crit;
 			/*
