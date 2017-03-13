@@ -1236,7 +1236,7 @@ class SWTractorBeam extends SWDirectWeapon{
 	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
 		$crit = new swtargetheld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
 		$crit->updated = true;
-                $crit->inEffect = true;
+                //$crit->inEffect = true;
 	      $primaryStruct->criticals[] =  $crit;
 		/*
 		$crit = new swtargetheld(-1, $ship->id, $primaryStruct->id, $gamedata->turn+1); 
@@ -1250,7 +1250,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		if($CnC){
 			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn); 
 			$crit->updated = true;
-			$crit->inEffect = true;
+			//$crit->inEffect = true;
 		      $CnC->criticals[] =  $crit;
 			/*
 			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn+1); 
