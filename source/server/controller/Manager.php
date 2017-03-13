@@ -860,7 +860,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 			    $mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
 			    $mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
 				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-	    			$mod += 20*($primaryStruct->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
+	    			$mod += 20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 			}
 	    }
 		
