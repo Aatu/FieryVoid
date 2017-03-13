@@ -304,7 +304,12 @@ class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be n
 class swtargetheld extends Critical{ /*next turn target is being held by tractor beam!*/
     public $description = "Held by tractor beam! Initiative and remaining thrust reduced.";
     //public $oneturn = true;	
+	/*
     function __construct($id, $shipid, $systemid, $turn){
             parent::__construct($id, $shipid, $systemid, 'swtargetheld', $turn); //effective next turn too
+    }*/
+	
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
     }
 }
