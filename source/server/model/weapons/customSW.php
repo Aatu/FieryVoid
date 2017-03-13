@@ -437,6 +437,7 @@ class SWIon extends SWDirectWeapon{
 
       $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $dmg); //for ship system and fighter alike
 	$crit->updated = true;
+        $crit->inEffect = true;
       $system->criticals[] =  $crit;
     }
 
