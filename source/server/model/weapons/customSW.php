@@ -1220,8 +1220,7 @@ class SWTractorBeam extends SWDirectWeapon{
       parent::setSystemDataWindow($turn);
       $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
       $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
-      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn)."; 
-	    $this->data["<font color='red'>Remark</font>"] = "NOT READY YET, SORRY!";   
+      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn).";  
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -1248,14 +1247,7 @@ class SWTractorBeam extends SWDirectWeapon{
 		      $CnC->criticals[] =  $crit;
 		}
 		
-		
-		
-		/*
-		$crit = new swtargetheld(-1, $ship->id, $system->id, $gamedata->turn); 
-		$crit->updated = true;
-                $crit->inEffect = false;
-	      $system->criticals[] =  $crit;
-*/
+
 	}
 	
 	public function getDamage($fireOrder){ return  0;   }
