@@ -1223,7 +1223,7 @@ class SWTractorBeam extends SWDirectWeapon{
       parent::setSystemDataWindow($turn);
       $this->data["<font color='red'>Remark</font>"] = "Does no damage, but holds target next turn";      
       $this->data["<font color='red'>Remark</font>"] .= "<br>limiting its maneuvering options"; 
-      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -15 Initiative next turn).";  
+      $this->data["<font color='red'>Remark</font>"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
