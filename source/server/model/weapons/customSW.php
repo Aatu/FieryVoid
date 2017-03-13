@@ -435,10 +435,13 @@ class SWIon extends SWDirectWeapon{
       if($system->isDestroyed()) return; //destroyed system - vulnerability to critical is irrelevant
       if($system instanceof Structure) return; //structure does not suffer critical hits anyway
 
-      $crit = new NastierCrit(-1, $ship->id, $system->id, $gamedata->turn, $dmg); //for ship system and fighter alike
-	$crit->updated = true;
-        $crit->inEffect = true;
-      $system->criticals[] =  $crit;
+      while($dmg>0){
+	      $dmg--;
+	      $crit = new NastierCrit(-1, $ship->id, $system->id, 'NastierCrit' $gamedata->turn); //for ship system and fighter alike
+		$crit->updated = true;
+		$crit->inEffect = true;
+	      $system->criticals[] =  $crit;
+      }
     }
 
 } //end of class SWIon
@@ -1232,32 +1235,20 @@ class SWTractorBeam extends SWDirectWeapon{
 	}    
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
-	      $primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
+	      /*
+		$primaryStruct = $ship->getStructureSystem(0); //primary Structure is where the crit will reside - it has to be there! (weapon does not target fighters)
 	      if($primaryStruct->isDestroyed()) return; //destroyed system - critical is irrelevant
 		$crit = new swtargetheld(-1, $ship->id, $primaryStruct->id, $gamedata->turn); 
 		$crit->updated = true;
                 //$crit->inEffect = true;
-	      $primaryStruct->criticals[] =  $crit;
-		/*
-		$crit = new swtargetheld(-1, $ship->id, $primaryStruct->id, $gamedata->turn+1); 
-		$crit->updated = true;
-                $crit->inEffect = false;
-	      $primaryStruct->criticals[] =  $crit;
-	      */
+	      $primaryStruct->criticals[] =  $crit;*/
 		
-		//to C&C too, to show to the player - but effective one will be on Structure!
+		//to C&C, NOT Structure - on Structure it couldn't be shown to player
 		$CnC = $ship->getSystemByName("CnC");
 		if($CnC){
-			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn); 
-			$crit->updated = false;
-			//$crit->inEffect = true;
-		      $CnC->criticals[] =  $crit;
-			/*
-			$crit = new swtargetheld(-1, $ship->id, $CnC->id, $gamedata->turn+1); 
+			$crit = new swtargetheld(-1, $ship->id, $CnC->id, 'swtargetheld', $gamedata->turn); 
 			$crit->updated = true;
-			$crit->inEffect = false;
 		      $CnC->criticals[] =  $crit;
-		      */
 		}
 		
 
