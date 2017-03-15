@@ -1092,9 +1092,9 @@ class Weapon extends ShipSystem{
         return true;
     }
 
-    protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){ //standard part of armor
+    protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
 	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
@@ -1112,9 +1112,9 @@ class Weapon extends ShipSystem{
     }//endof function getSystemArmourStandard
 	
 	
-    protected function getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos=null){ //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
+    protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){ //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
 	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
@@ -1169,8 +1169,8 @@ class Weapon extends ShipSystem{
 		$damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
 		$systemHealth = $system->getRemainingHealth();
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
-		$armour = $this->getSystemArmourStandard($system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
-		$armour += $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos); //this can't be ignored
+		$armour = $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
+		$armour += $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos); //this can't be ignored
 		$modifiedDamage = $damage;
 		$destroyed = false;
 		
