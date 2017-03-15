@@ -702,7 +702,7 @@
                 $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
                 $struct = $target->getStructureSystem($system->location);
                 //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
-                $damage = $damage - $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
+                $damage = $damage - $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder);
                 //reduce armor of system hit
                 $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                 $crit->updated = true;
@@ -713,7 +713,7 @@
                 }
                 //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
                 //increase damage by armor of structure - to simulate armor-ignoring effect
-                $damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($struct, $gamedata, $fireOrder);
+                $damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
                 parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
             }
         } //endof function doDamage
