@@ -11,7 +11,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
 
@@ -358,7 +358,7 @@
         }
 
 
-        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
             return 0; //Matter ignores armor!
         }
 

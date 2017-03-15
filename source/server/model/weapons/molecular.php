@@ -424,8 +424,8 @@
         }
 
         
-        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
-            $armour = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos);
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor - reduce by 1!
+            $armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
             $armour = $armour - 1;
             $armour = max(0,$armour);
             return $armour;
