@@ -342,8 +342,8 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         }
 
 
-        protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){
-            $armor = parent::getSystemArmourStandard($system, $gamedata, $fireOrder, $pos);
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
 
             if (is_numeric($armor)){
                 $toIgnore = ceil($armor /2);
