@@ -366,7 +366,8 @@ class SWScanner extends Scanner {
 
      public function setSystemDataWindow($turn){
 	$boostability = $this->maxBoostLevel;
-        $this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";
+        //$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability."."; //does this prevent criticals from showing?...
+	$this->data["Notes"] = "Boostability limited to +".$boostability.".";	     
     }
 } //end of swScanner
 
