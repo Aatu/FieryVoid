@@ -31,7 +31,6 @@ class Allovan extends HeavyCombatVessel{
 
         $this->addFrontSystem(new Thruster(2, 5, 0, 2, 3));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new MediumBolter(4, 8, 4, 300, 60));
         $this->addFrontSystem(new LightBolter(4, 6, 2, 120, 360));
         $this->addFrontSystem(new LightBolter(4, 6, 2, 120, 360));
