@@ -365,9 +365,10 @@ class SWScanner extends Scanner {
     public $maxBoostLevel = 2;
 
      public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
 	$boostability = $this->maxBoostLevel;
         //$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability."."; //does this prevent criticals from showing?...
-	$this->data["Notes"] = "Boostability limited to +".$boostability.".";	     
+	$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";	     
     }
 } //end of swScanner
 
@@ -570,6 +571,7 @@ class JumpEngine extends ShipSystem{
 	
      public function setSystemDataWindow($turn){
         $this->data["<font color='red'>Remark</font>"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+	parent::setSystemDataWindow($turn);     
     }
 }
 
