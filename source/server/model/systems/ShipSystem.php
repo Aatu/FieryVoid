@@ -30,7 +30,7 @@ class ShipSystem{
     
         
     public $criticals = array();
-	private $advancedArmor = false; //indicates that system has advanced armor
+	protected $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
     
