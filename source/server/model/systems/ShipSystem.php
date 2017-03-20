@@ -158,8 +158,22 @@ class ShipSystem{
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
+	//special reductions are habndled here - technically weapons ay do that, but it began otherwise (as truly invulnerable for weapons)   
 	//$pos is to be included if launch position is different than firing unit position
 	$armour = 0;
+    
+	if($this->advancedArmor == true){
+		$armour += $this->armour;
+		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
+			$armour += 2;
+		}
+		if($dmgClass == 'Matter'){ //slight vulnerability vs Matter
+			$armour += -2;
+		}
+	}
+	    
+	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
+	    
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])){
@@ -168,12 +182,6 @@ class ShipSystem{
             }
         } 
 	    
-	if($this->advancedArmor == true){
-		$armour += $this->armour;
-		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
-			$armour += 2;
-		}
-	}
 	    
 	return $armour;
     }
