@@ -188,6 +188,10 @@ class ShipSystem{
 	
     
     public function setSystemDataWindow($turn){
+	if($this->advancedArmor == true){
+		$this->data["Others"] = "Advanced Armor";
+	}
+	    
         $counts = array();
         
         foreach ($this->criticals as $crit){
