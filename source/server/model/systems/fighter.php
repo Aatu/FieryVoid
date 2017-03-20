@@ -154,20 +154,44 @@
 		
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
 	//$pos is to be included if launch position is different than firing unit position
-	if($pos==null){
-		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
-	}else{ //firing position indicated!
-		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
+	if($this->advancedArmor != true){	    
+		if($pos==null){
+			$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
+		}else{ //firing position indicated!
+			$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
+		}
+		return $loc["armour"];
+	}else{
+		return 0;
 	}
-	return $loc["armour"];
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
 	//$pos is to be included if launch position is different than firing unit position
+	$armour = 0;
+	if($this->advancedArmor 0= true){
+	    if($pos==null){
+		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
+	    }else{ //firing position indicated!
+		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
+	    }
+	    $armour += $loc["armour"];
+		
+		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
+			$armour += 2;
+		}
+		if($dmgClass == 'Matter'){ //slight vulnerability vs Matter
+			$armour += -2;
+		}
+	}
+	    
+	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
+	    
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
         } 
+	    $armour += $activeAA
 	return $activeAA;
     }
 		
