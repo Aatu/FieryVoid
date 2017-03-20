@@ -30,6 +30,7 @@ class ShipSystem{
     
         
     public $criticals = array();
+	private $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
     
@@ -45,6 +46,9 @@ class ShipSystem{
     }
     
     public function onConstructed($ship, $turn, $phase){
+	if($ship->getAdvancedArmor()==true){
+		$this->advancedArmor = true;
+	}
         $this->structureSystem = $ship->getStructureSystem($this->location);
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
