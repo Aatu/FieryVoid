@@ -526,7 +526,7 @@ class customPhaseDisruptor extends Raking{
 		}
 	}
 	
-	public getRakeSize(){
+	public function getRakeSize(){
 		//variable rake size: first entry from $this->rakes (min of 3, in case of trouble - should not happen!)	
 		$rakesize = array_shift($this->rakes);
 		$rakesize = max(3,$rakesize); //just in case of trouble
