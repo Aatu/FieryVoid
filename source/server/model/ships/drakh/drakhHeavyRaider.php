@@ -37,7 +37,7 @@ class DrakhHeavyRaider extends MediumShip{
 	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
 	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
-	//$this->addPrimarySystem(new AbsorbtionShield(3,6,5,1,0,360));
+	$this->addPrimarySystem(new AbsorbtionShield(3,6,5,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
 	    
         $this->hitChart = array(
