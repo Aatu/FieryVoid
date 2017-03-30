@@ -10,10 +10,11 @@ class DrakhHeavyRaider extends MediumShip{
 	$this->phpclass = "DrakhHeavyRaider";
 	$this->shipClass = "Heavy Raider";
 	$this->imagePath = "img/ships/DrakhHeavyRaider.png";
+	    $this->canvasSize = 100;
 
 	$this->unofficial = true;
         $this->gravitic = true;
-	//$this->advancedArmor = true;   
+	$this->advancedArmor = true;   
 	$this->agile = true;
 	$this->forwardDefense = 10;
 	$this->sideDefense = 11;
