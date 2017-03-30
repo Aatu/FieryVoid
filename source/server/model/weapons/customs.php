@@ -470,6 +470,7 @@ class customPhaseDisruptor extends Raking{
     /*Phase Disruptor for Drakh ships*/
         public $name = "customPhaseDisruptor";
         public $displayName = "Phase Disruptor";
+	 public $iconPath = "PhaseDisruptor.png";
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
         public $animationWidth = 4;
