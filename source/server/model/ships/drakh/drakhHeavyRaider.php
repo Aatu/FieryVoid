@@ -13,7 +13,7 @@ class DrakhHeavyRaider extends MediumShip{
 
 	$this->unofficial = true;
         $this->gravitic = true;
-	$this->advancedArmor = true;   
+	//$this->advancedArmor = true;   
 	$this->agile = true;
 	$this->forwardDefense = 10;
 	$this->sideDefense = 11;
@@ -24,10 +24,13 @@ class DrakhHeavyRaider extends MediumShip{
 	$this->rollcost = 1;
 	$this->pivotcost = 2;
 	$this->iniativebonus = 14 *5;
+	    
 	$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
+	    
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 2)); //unhitable and with unlimited thrust allowance
 	$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 4)); //unhitable and with unlimited thrust allowance
+	    
 	$this->addPrimarySystem(new Reactor(4, 10, 0, 7));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
 	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
@@ -35,6 +38,7 @@ class DrakhHeavyRaider extends MediumShip{
 	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
 	$this->addPrimarySystem(new AbsorbtionShield(3,6,5,1,0,360));
 	$this->addPrimarySystem(new Structure( 4, 30));
+	    
         $this->hitChart = array(
         		0=> array( //should never happen
         				20 => "Structure",
