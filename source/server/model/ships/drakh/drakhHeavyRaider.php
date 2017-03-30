@@ -47,7 +47,7 @@ class DrakhHeavyRaider extends MediumShip{
         		1=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
-        				14 => "0:Ray Shield",
+        				14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
@@ -55,7 +55,7 @@ class DrakhHeavyRaider extends MediumShip{
         		2=> array( //PRIMARY hit table, effectively
         				10 => "Structure",
         				12 => "0:Phase Disruptor",
-        				14 => "0:Ray Shield",
+        				14 => "0:Absorbtion Shield",
         				16 => "0:Engine",
         				18 => "0:Reactor",
         				20 => "0:Scanner",
