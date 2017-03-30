@@ -82,6 +82,7 @@ spl_autoload_register(
                 'absorbtionshield' => '/server/model/weapons/custom.php',
                 'customphasedisruptor' => '/server/model/weapons/custom.php',
                 //units
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
