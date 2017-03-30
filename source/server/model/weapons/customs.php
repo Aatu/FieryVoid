@@ -480,6 +480,7 @@ class customPhaseDisruptor extends Raking{
         public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
         public $priority = 6;
 	public $rakes = array();
+	public $firingModes = array(1=>'Concentrated', 2=>'Divided');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
     
 	    //public $damageType = 'Raking'; 
