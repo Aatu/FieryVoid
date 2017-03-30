@@ -240,22 +240,24 @@ class HLPA extends Weapon{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				return 24; //Heavy Laser
+				$this->minDamage = 24; //Heavy Laser
 				break;
 			case 2:
-				return 15; //Heavy Pulse
+				$this->minDamage = 15; //Hvy Pulse
 				break;	
 		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){ 
+        public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				return 60; //Heavy Laser
+				$this->maxDamage = 60; //Hvy Laser
 				break;
 			case 2:
-				return 15; //Heavy Pulse
+				$this->maxDamage = 15; //Hvy Pulse
 				break;	
 		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 	
 	
@@ -348,23 +350,26 @@ class MLPA extends Weapon{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				return 15; //Medium Laser
+				$this->minDamage = 15; //Medium Laser
 				break;
 			case 2:
-				return 10; //Medium Pulse
+				$this->minDamage = 10; //Medium Pulse
 				break;	
 		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){ 
+        public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				return 42; //Medium Laser
+				$this->maxDamage = 42; //Medium Laser
 				break;
 			case 2:
-				return 10; //Medium Pulse
+				$this->maxDamage = 10; //Medium Pulse
 				break;	
 		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
+	
 	
 	
 	//necessary for Pulse mode
@@ -475,6 +480,7 @@ class customPhaseDisruptor extends Raking{
         public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
         public $priority = 6;
 	public $rakes = array();
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
     
 	    //public $damageType = 'Raking'; 
     	public $weaponClass = "Molecular"; 
@@ -510,9 +516,18 @@ class customPhaseDisruptor extends Raking{
 				return $damage; 
 				break;
 			case 2:
-				return Dice::d(6, 3); //damage for separate shot
+				$damage = Dice::d(6, 3); //damage for separate shot
+				$this->rakes = array($damage);
+				return $damage;
 				break;	
 		}
+	}
+	
+	public getRakeSize(){
+		//variable rake size: first entry from $this->rakes (min of 3, in case of trouble - should not happen!)	
+		$rakesize = array_shift($this->rakes);
+		$rakesize = max(3,$rakesize); //just in case of trouble
+		return $rakesize;		
 	}
 	
         public function setMinDamage(){
@@ -524,22 +539,28 @@ class customPhaseDisruptor extends Raking{
 				$this->minDamage = 3; //split
 				break;	
 		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){ $this->maxDamage = 28 ; }
-}//CustomStrikeLaser
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18*3; //concentrated
+				break;
+			case 2:
+				$this->maxDamage = 18; //split
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Special"] = 'In concentrate mode does 3 rakes, each 3d6 strong.';
+    }
+	
+}//customPhaseDisruptor
 
-
-Phase Disruptor
-Class: Molecular
-Mode: Raking (3d6)
-Damage: 9d6
-Range Penalty: -1 per 2 hexes
-Fire Control: +6/+4/+2
-Intercept Rating: n/a
-Rate of Fire: 1 per 2 turns
-For SHF and Heavy Fighter designs we took a version that fires every turn with 3 x 2D6 damage. Combined shot should work already (I hope).
-Wolfgang Lackner-Warton
-Wolfgang
+/*
 Multiphased Beam
 Accelerator
 Class: Molecular
@@ -586,6 +607,7 @@ Range Penalty: -2 per hex
 Fire Control: +3/+3/+4
 Intercept Rating: -2
 Rate of Fire: 1 per turn
+*/
 
 
 
