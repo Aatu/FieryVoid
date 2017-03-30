@@ -49,7 +49,7 @@
 
         public $movement = array();
         
-	    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+	    private $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    
