@@ -162,6 +162,11 @@ class Weapon extends ShipSystem{
         return 0;
     }
 
+    public function getRakeSize(){
+	return $this->raking;    
+    }
+	
+	
     public function getAvgDamage(){
         $min = $this->minDamage;
         $max = $this->maxDamage;
