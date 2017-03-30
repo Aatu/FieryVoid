@@ -494,7 +494,7 @@ class customPhaseDisruptor extends Raking{
         {
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
-		    $maxhealth = 6;
+		    $maxhealth = 9;
 		}
 		if ( $powerReq == 0 ){
 		    $powerReq = 5;
