@@ -49,6 +49,12 @@
 
         public $movement = array();
         
+	    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+	    
+	    public function getAdvancedArmor(){
+		return $this->advancedArmor;    
+	    }
+	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
             $this->userid = (int)$userid;

@@ -30,6 +30,7 @@ class ShipSystem{
     
         
     public $criticals = array();
+	protected $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
     
@@ -45,6 +46,9 @@ class ShipSystem{
     }
     
     public function onConstructed($ship, $turn, $phase){
+	if($ship->getAdvancedArmor()==true){
+		$this->advancedArmor = true;
+	}
         $this->structureSystem = $ship->getStructureSystem($this->location);
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
@@ -146,11 +150,30 @@ class ShipSystem{
 	
     public  function getArmourStandard($target, $shooter, $dmgClass, $pos=null){ //gets standard armor - from indicated direction if necessary direction 
 	//$pos is to be included if launch position is different than firing unit position
-	return $this->armour;
+	if($this->advancedArmor != true){
+		return $this->armour;
+	}else{
+		return 0;
+	}
     }
 	
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
+	//special reductions are habndled here - technically weapons ay do that, but it began otherwise (as truly invulnerable for weapons)   
 	//$pos is to be included if launch position is different than firing unit position
+	$armour = 0;
+    
+	if($this->advancedArmor == true){
+		$armour += $this->armour;
+		if($dmgClass == 'Ballistic'){ //extra protection against ballistics
+			$armour += 2;
+		}
+		if($dmgClass == 'Matter'){ //slight vulnerability vs Matter
+			$armour += -2;
+		}
+	}
+	    
+	$armour = max(0,$armour); //no less than 0, BEFORE adaptive armor kicks in!
+	    
 	$activeAA = 0;
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])){
@@ -158,11 +181,17 @@ class ShipSystem{
                 $armour += $activeAA;
             }
         } 
-	return $activeAA;
+	    
+	    
+	return $armour;
     }
 	
     
     public function setSystemDataWindow($turn){
+	if($this->advancedArmor == true){
+		$this->data["Others"] = "Advanced Armor";
+	}
+	    
         $counts = array();
         
         foreach ($this->criticals as $crit){
@@ -190,7 +219,7 @@ class ShipSystem{
 	$bonusCrit = 0;	
 	foreach($crits as $key=>$value) {
 	  if($value instanceof NastierCrit){
-		$bonusCrit+= $value->$outputMod;
+		$bonusCrit+= 1;//$value->$outputMod;
 		  //unset($crits[$key]); //no need, it'll go out on its own
 	  }
 	}

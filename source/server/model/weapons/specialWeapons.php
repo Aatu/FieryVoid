@@ -40,6 +40,18 @@ class PlasmaStream extends Raking{
 		}
 		
 	
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+		    if (is_numeric($armour)){
+			$toIgnore = ceil($armour /2);
+			$new = $armour - $toIgnore;
+			return $new;
+		    }
+		    else {
+			return 0;
+		    }
+        }
+	
 	
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);

@@ -174,7 +174,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2)
             return false;
         
-		/*if (!ship.flight) return false; */
+		if (!ship.flight) return false; 
 	
 		if (accel == 0)
 			return true;
