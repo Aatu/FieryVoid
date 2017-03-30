@@ -79,8 +79,8 @@ spl_autoload_register(
                 
                 // ***custom Drakh***
                 //weapons and systems
-                'absorbtionshield' => '/server/model/weapons/custom.php',
-                'customphasedisruptor' => '/server/model/weapons/custom.php',
+                'absorbtionshield' => '/server/model/weapons/customs.php',
+                'customphasedisruptor' => '/server/model/weapons/customs.php',
                 //units
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 
