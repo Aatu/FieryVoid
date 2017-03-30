@@ -41,3 +41,8 @@ Mlpa.prototype = Object.create( Weapon.prototype );
 Mlpa.prototype.constructor = Mlpa;
 
 
+var CustomPhaseDisruptor = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomPhaseDisruptor.prototype = Object.create( Weapon.prototype );
+CustomPhaseDisruptor.prototype.constructor = CustomPhaseDisruptor;
