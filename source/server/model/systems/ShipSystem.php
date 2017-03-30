@@ -30,7 +30,7 @@ class ShipSystem{
     
         
     public $criticals = array();
-	protected $advancedArmor = false; //indicates that system has advanced armor
+	public $advancedArmor = false; //indicates that system has advanced armor
     
     protected $structureSystem;
     
@@ -41,8 +41,6 @@ class ShipSystem{
         $this->maxhealth = (int)$maxhealth;
         $this->powerReq = (int)$powerReq;
         $this->output = (int)$output;
-
-
     }
     
     public function onConstructed($ship, $turn, $phase){
