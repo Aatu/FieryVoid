@@ -38,8 +38,8 @@ class wlcChlonasTraVoraCL2169 extends BaseShipNoAft{
 	$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addLeftSystem(new Thruster(4, 13, 0, 4, 3));
 
-        $this->addLeftSystem(new TacLaser(3, 6, 4, 0, 120));
-        $this->addLeftSystem(new TacLaser(3, 6, 4, 0, 120));
+        $this->addRightSystem(new TacLaser(3, 6, 4, 0, 120));
+        $this->addRightSystem(new TacLaser(3, 6, 4, 0, 120));
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
 	$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
         $this->addRightSystem(new Thruster(4, 13, 0, 4, 4));
