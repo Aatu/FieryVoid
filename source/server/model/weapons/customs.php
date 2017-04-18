@@ -111,7 +111,7 @@ class CustomPulsarLaser extends Pulse{
 
         public $grouping = 25;
         public $maxpulses = 4;
-        private $useDie = 3; //die used for base number of hits
+        protected $useDie = 3; //die used for base number of hits
         public $loadingtime = 3;
         
         public $rangePenalty = 0.33;
