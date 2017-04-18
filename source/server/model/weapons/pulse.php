@@ -9,7 +9,7 @@ class Pulse extends Weapon{
         public $priority = 5;
 	public $damageType = 'Pulse'; //indicates that this weapon does damage in Pulse mode
     	public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-	private $useDie = 5; //die used for base number of hits
+	protected $useDie = 5; //die used for base number of hits
         public $firingModes = array( 1 => "Pulse"); //just a convenient name for firing mode
 	
 	
