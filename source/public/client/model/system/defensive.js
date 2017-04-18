@@ -107,32 +107,6 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
             return 0; //Ray shield does not affect hit chance
     }
-/* for non-weapons it will be ok?...
-    Swrayshield.prototype.initBoostableInfo = function(){
-        // Needed because it can change during initial phase
-        // because of adding extra power.
-        if(window.weaponManager.isLoaded(this)){
-             this.output = this.baseOutput+shipManager.power.getBoost(this);
-        }
-        else{
-            var count = shipManager.power.getBoost(this);
-            for(var i = 0; i < count; i++){
-                shipManager.power.unsetBoost(null, this);
-            }
-        }
-        return this;
-    }
-    Swrayshield.prototype.clearBoost = function(){
-        for (var i in system.power){
-            var power = system.power[i];
-            if (power.turn != gamedata.turn) continue;
-            if (power.type == 2){
-                system.power.splice(i, 1);
-                return;
-            }
-        }
-    }
-    */
     Swrayshield.prototype.hasMaxBoost = function(){
         return true;
     }
@@ -140,3 +114,21 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
         return this.maxBoostLevel;
     }
 
+    
+var Absorbtionshield = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    this.defensiveType = "Shield";
+}
+Absorbtionshield.prototype = Object.create( ShipSystem.prototype );
+Absorbtionshield.prototype.constructor = Absorbtionshield;
+Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+    {
+            return 0; //absorbtion shield does not affect hit chance
+    }
+    Absorbtionshield.prototype.hasMaxBoost = function(){
+        return true;
+    }
+    Absorbtionshield.prototype.getMaxBoost = function(){
+        return this.maxBoostLevel;
+    }

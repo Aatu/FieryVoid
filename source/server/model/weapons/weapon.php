@@ -162,6 +162,11 @@ class Weapon extends ShipSystem{
         return 0;
     }
 
+    public function getRakeSize(){
+	return $this->raking;    
+    }
+	
+	
     public function getAvgDamage(){
         $min = $this->minDamage;
         $max = $this->maxDamage;
@@ -1060,7 +1065,7 @@ class Weapon extends ShipSystem{
 		//split into rakes; armor will not need to be penetrated twice!
 		$fireOrder->armorIgnored = array();//reset info about pierced armor
 		while($damage>0){
-			$rake=min($damage, $this->raking);
+			$rake=min($damage, $this->getRakeSize());
 			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
         		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, false, $tmpLocation);
 			$damage = $damage - $rake;

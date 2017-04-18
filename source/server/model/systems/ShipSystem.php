@@ -41,8 +41,6 @@ class ShipSystem{
         $this->maxhealth = (int)$maxhealth;
         $this->powerReq = (int)$powerReq;
         $this->output = (int)$output;
-
-
     }
     
     public function onConstructed($ship, $turn, $phase){

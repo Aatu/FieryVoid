@@ -169,7 +169,7 @@
     public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //gets invulnerable part of armour (Adaptive Armor, at the moment)
 	//$pos is to be included if launch position is different than firing unit position
 	$armour = 0;
-	if($this->advancedArmor 0= true){
+	if($this->advancedArmor == true){
 	    if($pos==null){
 		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
 	    }else{ //firing position indicated!
@@ -191,7 +191,7 @@
 	if (isset($target->adaptiveArmour)){
             if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
         } 
-	    $armour += $activeAA
+	$armour += $activeAA;
 	return $activeAA;
     }
 		

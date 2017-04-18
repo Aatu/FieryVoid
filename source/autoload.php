@@ -77,6 +77,14 @@ spl_autoload_register(
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
                 
+                // ***custom Drakh***
+                //weapons and systems
+                'absorbtionshield' => '/server/model/weapons/customs.php',
+                'customphasedisruptor' => '/server/model/weapons/customs.php',
+                //units
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                
+                
                 //Star Wars (sort of) - Centauri Galactic Empire
                 'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php', //TO BE DELETED!
                 'swassaultfrigatesmallcap' => '/server/model/ships/starwars_centauri/swAssaultFrigateSmallCap.php',

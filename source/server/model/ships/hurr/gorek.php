@@ -8,7 +8,7 @@ class gorek extends HeavyCombatVessel{
         $this->faction = "Civilians"; //as it's not a combat unit.
         $this->phpclass = "gorek";
         $this->imagePath = "img/ships/hurrOrak.png";
-        $this->shipClass = "Gorek Freighter";
+        $this->shipClass = " Hurr Gorek Freighter";
         $this->occurence = "common";
    
         $this->isd = 2230;

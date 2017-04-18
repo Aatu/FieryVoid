@@ -240,22 +240,24 @@ class HLPA extends Weapon{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				return 24; //Heavy Laser
+				$this->minDamage = 24; //Heavy Laser
 				break;
 			case 2:
-				return 15; //Heavy Pulse
+				$this->minDamage = 15; //Hvy Pulse
 				break;	
 		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){ 
+        public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				return 60; //Heavy Laser
+				$this->maxDamage = 60; //Hvy Laser
 				break;
 			case 2:
-				return 15; //Heavy Pulse
+				$this->maxDamage = 15; //Hvy Pulse
 				break;	
 		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 	
 	
@@ -348,23 +350,26 @@ class MLPA extends Weapon{
         public function setMinDamage(){ 
 		switch($this->firingMode){
 			case 1:
-				return 15; //Medium Laser
+				$this->minDamage = 15; //Medium Laser
 				break;
 			case 2:
-				return 10; //Medium Pulse
+				$this->minDamage = 10; //Medium Pulse
 				break;	
 		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
-        public function setMaxDamage(){ 
+        public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				return 42; //Medium Laser
+				$this->maxDamage = 42; //Medium Laser
 				break;
 			case 2:
-				return 10; //Medium Pulse
+				$this->maxDamage = 10; //Medium Pulse
 				break;	
 		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
+	
 	
 	
 	//necessary for Pulse mode
@@ -383,8 +388,230 @@ class MLPA extends Weapon{
 		return $pulses;
 	}
 	
-	
 } //endof class MLPA
+
+
+
+
+
+/***   DRAKH Weapons ***/
+/*
+	Drakh Absorbtion Shield: does not affect profile
+	protects vs all weapoon classes
+	doubly effective vs Raking weapons (to simulate longer burst)
+*/
+class AbsorbtionShield extends Shield implements DefensiveSystem{
+    public $name = "absorbtionshield";
+    public $displayName = "Absorbtion Shield";
+    public $iconPath = "shield.png";
+    public $boostable = true; //$this->boostEfficiency and $this->maxBoostLevel in __construct() 
+    public $baseOutput = 0; //base output, before boost
+	
+	
+ 	public $possibleCriticals = array( //different than usual B5Wars shield
+            16=>"OutputReduced1",
+            23=>array("OutputReduced1", "OutputReduced1")
+	);
+	
+    function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc);
+	$this->baseOutput = $shieldFactor;
+	$this->boostEfficiency = $powerReq;
+	$this->maxBoostLevel = min(2,$shieldFactor); //maximum of +2 effect, costs $powerReq each - but can't more than double shield!
+    }
+	
+    public function onConstructed($ship, $turn, $phase){
+        parent::onConstructed($ship, $turn, $phase);
+		$this->tohitPenalty = 0;
+		$this->damagePenalty = $this->getOutput();
+    }
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying under SW shield
+        return false;
+    }
+	
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+        if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn()) return 0; //destroyed shield gives no protection
+        $output = $this->output + $this->getBoostLevel($turn);
+	$output += $this->outputMod; //outputMod itself is negative!
+	if($weapon->damageType == 'Raking') $output = 2*$output;//Raking - double effect!
+	$output=max(0,$output); //no less than 0!
+        return $output;
+    }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+	$this->data["Basic Strength"] = $this->baseOutput;      
+	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile.";  
+	$this->data["<font color='red'>Remark</font>"] .= "<br>Doubly effective vs Raking weapons."; 
+    }
+	  
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn) continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	
+} //endof class  AbsorbtionShield
+
+
+
+class customPhaseDisruptor extends Raking{
+    /*Phase Disruptor for Drakh ships*/
+        public $name = "customPhaseDisruptor";
+        public $displayName = "Phase Disruptor";
+	 public $iconPath = "PhaseDisruptor.png";
+        public $animation = "laser";
+        public $animationColor = array(50, 125, 210);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.5;
+        public $uninterceptable = false;
+        public $loadingtime = 2;
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
+        public $priority = 6;
+	public $rakes = array();
+	public $firingModes = array(1=>'Concentrated', 2=>'Split');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
+	public $gunsArray = array(1=>1,2=>3);
+	
+	    //public $damageType = 'Raking'; 
+    	public $weaponClass = "Molecular"; 
+
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 5;
+		}
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1: //damage for concentrated shot
+				$this->rakes = array();
+				$damage = 0;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				return $damage; 
+				break;
+			case 2:
+				$damage = Dice::d(6, 3); //damage for separate shot
+				$this->rakes = array($damage);
+				return $damage;
+				break;	
+		}
+	}
+	
+	public function getRakeSize(){
+		//variable rake size: first entry from $this->rakes (min of 3, in case of trouble - should not happen!)	
+		$rakesize = array_shift($this->rakes);
+		$rakesize = max(3,$rakesize); //just in case of trouble
+		return $rakesize;		
+	}
+	
+        public function setMinDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 9; //concentrated
+				break;
+			case 2:
+				$this->minDamage = 3; //split
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18*3; //concentrated
+				break;
+			case 2:
+				$this->maxDamage = 18; //split
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Special"] = 'In concentrate mode does 3 rakes, each 3d6 strong.';
+    }
+	
+}//customPhaseDisruptor
+
+/*
+Multiphased Beam
+Accelerator
+Class: Molecular
+Mode: R, P, S
+Damage: 8d10+8
+Range Penalty: -1 per 3 hexes
+Fire Control: +5/+4/+3
+Intercept Rating: -1
+Rate of Fire: 1 per 3 turnsSpecial: Can fire at an
+accelerated ROF for less
+damage, as shown below:
+1 per turn: 2d10+2 Std
+1 per 2 turns: 4d10+4 R
+Multiphased Beam
+Accelerator
+Class: Molecular
+Mode: R, P, S
+Damage: 8d10+8
+Range Penalty: -1 per 3 hexes
+Fire Control: +5/+4/+3
+Intercept Rating: -1
+Rate of Fire: 1 per 3 turns
+10
+Ignores ½ standard armor
+Wolfgang Lackner-Warton
+Wolfgang
+Medium Polarity Pulsar
+Class: Molecular
+Mode: Pulse
+Damage: 12 1d4 Times
+Maximum Pulses: 5
+Grouping Range: +1 per 3
+Range Penalty: -1 per hex
+Fire Control: +4/+3/+2
+Intercept Rating: -2
+Rate of Fire: 1 per 2 turns
+Light Polarity Pulsar
+Class: Molecular
+Mode: Pulse
+Damage: 10 1d5 Times
+Maximum Pulses: 6
+Grouping Range: +1 per 3
+Range Penalty: -2 per hex
+Fire Control: +3/+3/+4
+Intercept Rating: -2
+Rate of Fire: 1 per turn
+*/
+
 
 
 ?>
