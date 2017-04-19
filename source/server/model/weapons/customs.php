@@ -587,7 +587,7 @@ class customLtPolarityPulsar extends Pulse{
         public $rangePenalty = 2;
         public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
         
-	public $grouping = 20;
+	public $grouping = 15; //+1 per 3
 	public $maxpulses = 6;
 	protected $useDie = 5; //die used for base number of hits;
         public $intercept = 2;
@@ -631,7 +631,7 @@ class customMedPolarityPulsar extends Pulse{
         public $rangePenalty = 1;
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
         
-	public $grouping = 20;
+	public $grouping = 15; //+1 per 3
 	public $maxpulses = 5;
 	protected $useDie = 4; //die used for base number of hits;
         public $intercept = 2;
