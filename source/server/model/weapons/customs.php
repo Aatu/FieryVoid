@@ -656,7 +656,7 @@ class customMedPolarityPulsar extends Pulse{
 
 
 
-    class customMphasedBeamAcc extends Plasma{
+    class customMphasedBeamAcc extends Weapon{
 	public $name = "customMphasedBeamAcc";
         public $displayName = "Multiphased Beam Accelerator";
 	public $animation = "laser";
@@ -743,6 +743,19 @@ class customMedPolarityPulsar extends Pulse{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
+	    //Multiphased Beam ignores half armor!
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+		    if (is_numeric($armour)){
+			$toIgnore = ceil($armour /2);
+			$new = $armour - $toIgnore;
+			return $new;
+		    }
+		    else {
+			return 0;
+		    }
+        }	    
+	    
         public function setSystemDataWindow($turn){
 		$this->data["Special"] = 'Ignores 1/2 of armor. Can fire accelerated for less damage.';
 		parent::setSystemDataWindow($turn);
