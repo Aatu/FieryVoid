@@ -85,7 +85,7 @@ spl_autoload_register(
                 'customMedPolarityPulsar' => '/server/model/weapons/customs.php',
                 'customMphasedBeamAcc' => '/server/model/weapons/customs.php',
                 //units
-                'drakhAttackShip' => '/server/model/ships/drakh/drakhAttackShip.php',
+                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 
                 
