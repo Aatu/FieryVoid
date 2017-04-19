@@ -8,7 +8,7 @@ class DrakhAttackShip extends HeavyCombatVessel{
 	$this->faction = "Drakh";
         $this->phpclass = "DrakhAttackShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
-        $this->shipClass = "Attack Destroyer";
+        $this->shipClass = "Attack Ship";
         $this->shipSizeClass = 3;
 
         $this->fighters = array("Shuttles" => 2, "Raiders" => 4);
@@ -31,8 +31,8 @@ class DrakhAttackShip extends HeavyCombatVessel{
 		
 	    
 	    
-	$this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
+	$this->addPrimarySystem(new CnC(6, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 6, 10));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 36));
