@@ -6,7 +6,7 @@ class drakhAttackShip extends HeavyCombatVessel{
         
 	$this->pointCost = 900;
 	$this->faction = "Drakh";
-        $this->phpclass = "drakhAttackShip";
+        $this->phpclass = "DrakhAttackShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
         $this->shipClass = "Attack Destroyer";
         $this->shipSizeClass = 3;
