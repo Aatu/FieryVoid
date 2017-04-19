@@ -52,11 +52,12 @@ class DrakhAttackShip extends HeavyCombatVessel{
 	    
         $this->addAftSystem(new Thruster(3, 18, 0, 5, 2));
 	$this->addAftSystem(new Thruster(3, 18, 0, 5, 2));
-	    $this->addAftSystem(new AbsorbtionShield(2,6,4,2,90,270) );
+	    $this->addAftSystem(new AbsorbtionShield(2,6,4,2,120,300) );
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120, 300));  
 	$this->addAftSystem(new customMedPolarityPulsar(3, 0, 0, 180, 240));
 	$this->addAftSystem(new customMedPolarityPulsar(3, 0, 0, 120, 180)); 
 	    $this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));
+	    $this->addAftSystem(new AbsorbtionShield(2,6,4,2,60,240) );
         $this->addAftSystem(new Catapult(4, 4));
         $this->addAftSystem(new Catapult(4, 4));
         $this->addAftSystem(new Catapult(4, 4));
@@ -93,7 +94,7 @@ class DrakhAttackShip extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Medium Polarity Pulsar",
 		    9 => "Light Polarity Pulsar",
-		    10 => "Absorbtion Shield",
+		    11 => "Absorbtion Shield",
                     13 => "Catapult",
                     18 => "Structure",
                     20 => "Primary",
