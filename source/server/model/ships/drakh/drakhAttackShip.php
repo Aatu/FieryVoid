@@ -6,12 +6,12 @@ class drakhAttackCruiser extends HeavyCombatVessel{
         
 	$this->pointCost = 900;
 	$this->faction = "Drakh";
-        $this->phpclass = "DrakhCruiser";
+        $this->phpclass = "drakhAttackCruiser";
         $this->imagePath = "img/ships/DrakhCruiser.png";
-        $this->shipClass = "Attack Cruiser";
+        $this->shipClass = "Attack Destroyer";
         $this->shipSizeClass = 3;
 
-        $this->fighters = array("Shuttles" => 2, "'Raiders" => 4);
+        $this->fighters = array("Shuttles" => 2, "Raiders" => 4);
 
         $this->gravitic = true;	 
 	$this->advancedArmor = true;   
@@ -34,7 +34,7 @@ class drakhAttackCruiser extends HeavyCombatVessel{
 	$this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 6, 10));
-        $this->addPrimarySystem(new Engine(5, 14, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 36));
 	$this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
@@ -42,20 +42,21 @@ class drakhAttackCruiser extends HeavyCombatVessel{
   
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
-	$this->addFrontSystem(new SWRayShield(2,6,3,2,240,60)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new SWRayShield(2,6,3,2,300,120));
-	$this->addFrontSystem(new LightPolarityPulsar(2, 4, 3, 240, 60)); 
-	$this->addFrontSystem(new LightPolarityPulsar(2, 4, 3, 300, 120));
-	$this->addFrontSystem(new MediumPolarityPulsar(3, 6, 4, 300, 0)); 	 	   
-	$this->addFrontSystem(new MultiphasedBeamAccelerator(3, 11, 10, 300, 60)); 
-	$this->addFrontSystem(new MediumPolarityPulsar(3, 6, 4, 0, 60));  
+	$this->addFrontSystem(new AbsorbtionShield(2,6,4,2,240,60) ); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new AbsorbtionShield(2,6,4,2,300,120) );
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 60)); 
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 300, 120));
+	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 300, 0)); 	 	   
+	$this->addFrontSystem(new customMphasedBeamAcc(3, 0, 0, 300, 60)); 
+	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 0, 60));  
 	    
         $this->addAftSystem(new Thruster(3, 18, 0, 5, 2));
 	$this->addAftSystem(new Thruster(3, 18, 0, 5, 2));
-	$this->addAftSystem(new LightPolarityPulsar(2, 4, 3, 120, 300));  
-	$this->addAftSystem(new LightPolarityPulsar(2, 4, 3, 60, 240));
-	$this->addAftSystem(new MediumPolarityPulsar(3, 6, 4, 180, 240));
-	$this->addAftSystem(new MediumPolarityPulsar(3, 6, 4, 120, 180)); 
+	    $this->addFrontSystem(new AbsorbtionShield(2,6,4,2,90,270) );
+	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120, 300));  
+	$this->addAftSystem(new customMedPolarityPulsar(3, 0, 0, 180, 240));
+	$this->addAftSystem(new customMedPolarityPulsar(3, 0, 0, 120, 180)); 
+	    $this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));
         $this->addAftSystem(new Catapult(4, 4));
         $this->addAftSystem(new Catapult(4, 4));
         $this->addAftSystem(new Catapult(4, 4));
@@ -81,18 +82,18 @@ class drakhAttackCruiser extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Multiphased Accelerator",
+                    6 => "Multiphased Beam Accelerator",
                     8 => "Medium Polarity Pulsar",
                     10 => "Light Polarity Pulsar",
-		    13 => "Ray Shield",
+		    13 => "Absorbtion Shield",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
-                    6 => "Thruster",
-                    8 => "Medium Polarity Pulsar",
-		    10 => "Light Polarity Pulsar",
-		    11 => "Ray Shield",
+                    5 => "Thruster",
+                    7 => "Medium Polarity Pulsar",
+		    9 => "Light Polarity Pulsar",
+		    10 => "Absorbtion Shield",
                     13 => "Catapult",
                     18 => "Structure",
                     20 => "Primary",
