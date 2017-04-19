@@ -1,5 +1,5 @@
 <?php
-class drakhAttackShip extends HeavyCombatVessel{
+class DrakhAttackShip extends HeavyCombatVessel{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
