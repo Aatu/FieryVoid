@@ -563,6 +563,80 @@ class customPhaseDisruptor extends Raking{
 	
 }//customPhaseDisruptor
 
+
+
+class customLtPolarityPulsar extends Pulse{
+        public $name = "customLtPolarityPulsar";
+        public $displayName = "Light Polarity Pulsar";
+	public $weaponClass = "Molecular"; 
+        public $animation = "trail";
+        public $animationWidth = 3;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.15;
+        public $rof = 2;
+        public $trailLength = 10;
+        
+	public $iconPath = "LightPolarityPulsar.png";
+        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        public $animationColor = array(255,140,0);
+
+		
+        public $loadingtime = 1;
+        public $priority = 4;
+	        
+        public $rangePenalty = 2;
+        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
+        
+	public $grouping = 20;
+	public $maxpulses = 6;
+	protected $useDie = 5; //die used for base number of hits;
+        public $intercept = 2;
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 10;   }
+
+    } //customLtPolarityPulsar
+
+
+class customMedPolarityPulsar extends Pulse{
+        public $name = "customMedPolarityPulsar";
+        public $displayName = "Medium Polarity Pulsar";
+	public $weaponClass = "Molecular"; 
+        public $animation = "trail";
+        public $rof = 2;
+        public $trailLength = 15;
+        public $animationWidth = 4;
+        public $projectilespeed = 15;
+        public $animationExplosionScale = 0.17;
+        
+	public $iconPath = "MediumPolarityPulsar.png";
+        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        public $animationColor = array(255,140,0);
+
+		
+        public $loadingtime = 2;
+        public $priority = 5;
+	        
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
+        
+	public $grouping = 20;
+	public $maxpulses = 5;
+	protected $useDie = 4; //die used for base number of hits;
+        public $intercept = 2;
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 12;   }
+
+    } //customMedPolarityPulsar
+
+
 /*
 Multiphased Beam
 Accelerator
@@ -586,30 +660,9 @@ Range Penalty: -1 per 3 hexes
 Fire Control: +5/+4/+3
 Intercept Rating: -1
 Rate of Fire: 1 per 3 turns
-10
 Ignores ½ standard armor
-Wolfgang Lackner-Warton
-Wolfgang
-Medium Polarity Pulsar
-Class: Molecular
-Mode: Pulse
-Damage: 12 1d4 Times
-Maximum Pulses: 5
-Grouping Range: +1 per 3
-Range Penalty: -1 per hex
-Fire Control: +4/+3/+2
-Intercept Rating: -2
-Rate of Fire: 1 per 2 turns
-Light Polarity Pulsar
-Class: Molecular
-Mode: Pulse
-Damage: 10 1d5 Times
-Maximum Pulses: 6
-Grouping Range: +1 per 3
-Range Penalty: -2 per hex
-Fire Control: +3/+3/+4
-Intercept Rating: -2
-Rate of Fire: 1 per turn
+
+
 */
 
 
