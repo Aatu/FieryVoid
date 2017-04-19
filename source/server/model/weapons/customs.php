@@ -592,8 +592,16 @@ class customLtPolarityPulsar extends Pulse{
 	protected $useDie = 5; //die used for base number of hits;
         public $intercept = 2;
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 4;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 3;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage($fireOrder){        return 10;   }
@@ -628,8 +636,17 @@ class customMedPolarityPulsar extends Pulse{
 	protected $useDie = 4; //die used for base number of hits;
         public $intercept = 2;
 	
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage($fireOrder){        return 12;   }
@@ -637,34 +654,101 @@ class customMedPolarityPulsar extends Pulse{
     } //customMedPolarityPulsar
 
 
-/*
-Multiphased Beam
-Accelerator
-Class: Molecular
-Mode: R, P, S
-Damage: 8d10+8
-Range Penalty: -1 per 3 hexes
-Fire Control: +5/+4/+3
-Intercept Rating: -1
-Rate of Fire: 1 per 3 turnsSpecial: Can fire at an
-accelerated ROF for less
-damage, as shown below:
-1 per turn: 2d10+2 Std
-1 per 2 turns: 4d10+4 R
-Multiphased Beam
-Accelerator
-Class: Molecular
-Mode: R, P, S
-Damage: 8d10+8
-Range Penalty: -1 per 3 hexes
-Fire Control: +5/+4/+3
-Intercept Rating: -1
-Rate of Fire: 1 per 3 turns
-Ignores ½ standard armor
 
 
-*/
-
+    class customMphasedBeamAcc extends Plasma{
+	public $name = "customMphasedBeamAcc";
+        public $displayName = "Multiphased Beam Accelerator";
+	public $animation = "laser";
+        public $animationColor = array(225,130,0);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.2;
+	    public $iconPath = "MultiphasedBeamAccelerator.png";
+	    
+        public $raking = 10;
+	    
+	   public $weaponClass = "Molecular"; 
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+        public $firingModes = array(
+            1 => "Raking",
+            2 => "Piercing"
+        );        
+        public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+	    
+        
+        public $loadingtime = 1;  //can fire every turn, but achieves full charge after 3 turns
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33; //-1/3 hexes
+        public $fireControl = array(3, 4, 5); // fighters, <=mediums, <=capitals 
+	    public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+		
+		
+	public function getDamage($fireOrder){
+            switch($this->turnsloaded){
+                case 0: 
+                case 1:
+                    return Dice::d(10,2)+2;
+                case 2:
+                    return Dice::d(10, 4)+4;
+                case 3:
+                default:
+                    return Dice::d(10,8)+8;
+            }
+	}
+        
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->minDamage = 4 ;
+                    break;
+                case 2:
+                    $this->minDamage = 8 ;  
+                    break;
+                case 3:
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+	}
+                
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    $this->maxDamage = 22 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 44 ;  
+                    break;
+                case 3:
+                default:
+                    $this->maxDamage = 88 ;  
+                    break;
+            }
+	}
+	    
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 11;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 10;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Ignores 1/2 of armor. Can fire accelerated for less damage.';
+		parent::setSystemDataWindow($turn);
+        }
+	    
+    }//endof class customMphasedBeamAcc
 
 
 ?>
