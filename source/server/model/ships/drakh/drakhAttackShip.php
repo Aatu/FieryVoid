@@ -1,12 +1,12 @@
 <?php
-class drakhAttackCruiser extends HeavyCombatVessel{
+class drakhAttackShip extends HeavyCombatVessel{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 900;
 	$this->faction = "Drakh";
-        $this->phpclass = "drakhAttackCruiser";
+        $this->phpclass = "drakhAttackShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
         $this->shipClass = "Attack Destroyer";
         $this->shipSizeClass = 3;
