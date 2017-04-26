@@ -43,7 +43,8 @@ class DrakhShuttle extends FighterFlight{
 		$fighter->addFrontSystem(new LightFusionCannon(330, 30, 3, 3));
 
 		$DisruptionGun = new LightFusionCannon(330, 30, 7, 1);
-		//$DisruptionGun->displayName = "Phased Disruption Gun";
+		$DisruptionGun->displayName = "Phased Disruption Gun";
+		$DisruptionGun->iconPath = "PhaseDisruptor.png";
         	$fighter->addFrontSystem($DisruptionGun);
             
         	//Absorbtion Shield, 1 points
