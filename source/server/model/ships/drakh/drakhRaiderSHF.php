@@ -1,5 +1,6 @@
 <?php
 class DrakhRaiderSHF extends SuperHeavyFighter{
+	/*exactly the same as Raider flight, but it's such a nasty unit You can take a single one too!*/
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -21,26 +22,30 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
         $this->offensivebonus = 7;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
-        $this->iniativebonus = 70;
+        $this->iniativebonus = 14 *5;
         
         $armour = array(4, 3, 4, 4);
-        $fighter = new Fighter("DrakhRaider", $armour, 25, $this->id);
+        $fighter = new Fighter("DrakhRaiderSHF", $armour, 25, $this->id);
         $fighter->displayName = "Raider Assault Fighter";
         $fighter->imagePath = "img/ships/DrakhRaider.png";
-        $fighter->iconPath = "img/ships/DrakhRaider_large.png";
+        $fighter->iconPath = "img/ships/DrakhRaider_Large.png";
 
-        $fighter->addFrontSystem(new LightPhaseDisruptor(330, 30, 5));
-
-	$CombPhaseDisruptor = new LightGravitonBeam(330, 30, 0);
-	$CombPhaseDisruptor->displayName = "Combined Phase Disruptor";
- 	$CombPhaseDisruptor->exclusive = true;
-        $fighter->addFrontSystem($CombPhaseDisruptor);
+		$ltDistuptor = new customLtPhaseDisruptor(330, 30);
+		$fighter->addFrontSystem($ltDistuptor);
+		
+		$CombPhaseDisruptor = new LightGravitonBeam(330, 30, 0); //intended as Combined mode for LtPhaseDisruptor main weapon
+		$CombPhaseDisruptor->displayName = "Combined Phase Disruptor";
+ 		$CombPhaseDisruptor->exclusive = true;
+		//and switch icon too...
+		$CombPhaseDisruptor->iconPath = "PhaseDisruptor.png";
+        	$fighter->addFrontSystem($CombPhaseDisruptor);
             
-        //Ray Shield, 1 points
-        $fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
+       		//Absorbtion Shield, 1 points
+        	$fighter->addAftSystem(new AbsorbtionShield(0, 1, 0, 1, 0, 360));
         
         $this->addSystem($fighter);
     }
+	
     public function populate(){
         return;
     }
