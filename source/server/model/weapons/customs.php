@@ -779,10 +779,11 @@ class customMedPolarityPulsar extends Pulse{
         public $projectilespeed = 10;
         public $animationWidth = 2;
         public $trailLength = 10;
-        public $intercept = 3;
+        public $intercept = 1;
         public $loadingtime = 1;
-        public $shots = 3;
-        public $defaultShots = 3;
+        public $shots = 1;
+	    public $guns = 3;
+        public $defaultShots = 1;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 	    public $priority = 5;
