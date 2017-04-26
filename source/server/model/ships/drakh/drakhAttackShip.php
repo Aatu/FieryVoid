@@ -9,7 +9,7 @@ class DrakhAttackShip extends HeavyCombatVessel{
         $this->phpclass = "DrakhAttackShip";
         $this->imagePath = "img/ships/DrakhCruiser.png";
         $this->shipClass = "Attack Ship";
-        $this->shipSizeClass = 3;
+        $this->shipSizeClass = 2;
 
         $this->fighters = array("Shuttles" => 2, "Raiders" => 4);
 
