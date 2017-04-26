@@ -88,6 +88,8 @@ spl_autoload_register(
                 //units
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
+                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
                 
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
                 'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
