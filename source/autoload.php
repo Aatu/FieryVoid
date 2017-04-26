@@ -90,7 +90,7 @@ spl_autoload_register(
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
                 
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
