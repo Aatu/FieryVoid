@@ -19,6 +19,7 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
 	    
 	$this->faction = "Ch'Lonas";
         $this->variantOf = "Tra'Vora Light Cruiser";
+	$this->occurence = "uncommon";
 	$this->isd = 2215;
 	$this->unofficial = true;
         
