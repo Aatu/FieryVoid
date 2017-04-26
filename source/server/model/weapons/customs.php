@@ -768,7 +768,7 @@ class customMedPolarityPulsar extends Pulse{
 
 
 
-    class customLtPhaseDisruptor extends LinkedWeapon{
+    class customLtPhaseDisruptor extends Weapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
         public $displayName = "Light Phase Disruptor";
@@ -789,11 +789,12 @@ class customMedPolarityPulsar extends Pulse{
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
 	    
-        
+        /*
         function __construct($startArc, $endArc){
 	    $this->isLinked = false; //shots are separate, not linked! 
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
+	*/
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] .= "Shots are NOT linked";
