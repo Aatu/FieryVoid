@@ -91,7 +91,7 @@ spl_autoload_register(
                 
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
                 'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
-                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttleFlt.php',
+                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
