@@ -81,9 +81,9 @@ spl_autoload_register(
                 //weapons and systems
                 'absorbtionshield' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
-                'customLtPolarityPulsar' => '/server/model/weapons/customs.php',
-                'customMedPolarityPulsar' => '/server/model/weapons/customs.php',
-                'customMphasedBeamAcc' => '/server/model/weapons/customs.php',
+                'customltpolaritypulsar' => '/server/model/weapons/customs.php',
+                'custompedpolaritypulsar' => '/server/model/weapons/customs.php',
+                'custommphasedbeamacc' => '/server/model/weapons/customs.php',
                 'customltphasedisruptor' => '/server/model/weapons/customs.php',
                 //units
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
