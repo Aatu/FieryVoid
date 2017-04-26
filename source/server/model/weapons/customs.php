@@ -772,16 +772,17 @@ class customMedPolarityPulsar extends Pulse{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
         public $displayName = "Light Phase Disruptor";
+	   public  $iconPath = "PhaseDisruptor.png";
         public $animation = "trail";
         public $animationColor = array(255, 170, 10);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 13;
         public $animationWidth = 2;
         public $trailLength = 13;
-        public $intercept;
+        public $intercept = 3;
         public $loadingtime = 1;
-        public $shots = 2;
-        public $defaultShots = 2;
+        public $shots = 3;
+        public $defaultShots = 3;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         
@@ -790,10 +791,6 @@ class customMedPolarityPulsar extends Pulse{
 	    
         
         function __construct($startArc, $endArc){
-            $this->defaultShots = 2;
-            $this->shots = 2;
-            $this->intercept = 2;
-            $this->iconPath = "PhaseDisruptor.png";
 	    $this->isLinked = false; //shots are separate, not linked! 
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
