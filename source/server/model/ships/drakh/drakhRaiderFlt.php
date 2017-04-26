@@ -37,10 +37,10 @@ class DrakhRaiderFlt extends FighterFlight{
             $fighter = new Fighter("DrakhRaiderFlt", $armour, 12, $this->id);
             $fighter->displayName = "Raider Assault Fighters";
             $fighter->imagePath = "img/ships/DrakhRaider.png";
-            $fighter->iconPath = "img/ships/DrakhRaider_large.png"; 
+            $fighter->iconPath = "img/ships/DrakhRaider_Large.png"; 
 
             
-        	//$fighter->addFrontSystem(new customLtPhaseDisruptor(330, 30));
+        	$fighter->addFrontSystem(new customLtPhaseDisruptor(330, 30));
 
 		
 		$CombPhaseDisruptor = new LightGravitonBeam(330, 30, 0); //intended as Combined mode for LtPhaseDisruptor main weapon
