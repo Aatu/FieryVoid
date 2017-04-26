@@ -4,11 +4,11 @@ class DrakhShuttle extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		    $this->pointCost = 90*6;
-		    $this->faction = "Drakh";
+	$this->pointCost = 90*6;
+	$this->faction = "Drakh";
         $this->phpclass = "DrakhShuttle";
         $this->shipClass = "Armed Shuttle";
-		    $this->imagePath = "img/ships/DrakhShuttle.png";
+	 $this->imagePath = "img/ships/DrakhShuttle.png";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;
@@ -20,7 +20,7 @@ class DrakhShuttle extends FighterFlight{
         $this->turndelaycost = 0.33;
         $this->advancedArmor = true;   
         
-		    $this->iniativebonus = 10*5;
+	$this->iniativebonus = 10*5;
       
         $this->populate();
     }
@@ -46,8 +46,8 @@ class DrakhShuttle extends FighterFlight{
 		$DisruptionGun->displayName = "Phased Disruption Gun";
         	$fighter->addFrontSystem($DisruptionGun);
             
-        	//Ray Shield, 1 points
-        	$fighter->addAftSystem(new SWRayShield(0, 1, 0, 1, 0, 360));
+        	//Absorbtion Shield, 1 points
+        	$fighter->addAftSystem(new AbsorbtionShield(0, 1, 0, 1, 0, 360));
 			
 		$this->addSystem($fighter);
 			
