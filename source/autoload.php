@@ -84,9 +84,12 @@ spl_autoload_register(
                 'customLtPolarityPulsar' => '/server/model/weapons/customs.php',
                 'customMedPolarityPulsar' => '/server/model/weapons/customs.php',
                 'customMphasedBeamAcc' => '/server/model/weapons/customs.php',
+                'customltphasedisruptor' => '/server/model/weapons/customs.php',
                 //units
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                
+                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire
