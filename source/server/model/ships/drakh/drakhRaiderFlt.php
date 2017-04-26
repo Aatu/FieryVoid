@@ -41,7 +41,8 @@ class DrakhRaiderFlt extends FighterFlight{
 
             
         	//$fighter->addFrontSystem(new customLtPhaseDisruptor(330, 30));
-$fighter->addFrontSystem(new customLtPhaseDisruptor(0,0,0,330, 30));
+		$ltDistuptor = new customLtPhaseDisruptor(330, 30);
+		$fighter->addFrontSystem($ltDistuptor);
 		
 		$CombPhaseDisruptor = new LightGravitonBeam(330, 30, 0); //intended as Combined mode for LtPhaseDisruptor main weapon
 		$CombPhaseDisruptor->displayName = "Combined Phase Disruptor";
