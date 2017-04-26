@@ -22,6 +22,7 @@ class TargathC extends BaseShip{
         $this->pivotcost = 4;
         
         $this->occurence = "rare";
+        $this->variantOf = "Targath Strike Cruiser";
 
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 21, 0, 0));
