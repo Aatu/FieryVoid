@@ -37,7 +37,8 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
 		$CombPhaseDisruptor->displayName = "Combined Phase Disruptor";
  		$CombPhaseDisruptor->exclusive = true;
 		//and switch icon too...
-		$CombPhaseDisruptor->iconPath = "PhaseDisruptor.png";
+		$CombPhaseDisruptor->iconPath = "molecularDisruptor.png.png";
+		$CombPhaseDisruptor->weaponClass = 'Molecular';
         	$fighter->addFrontSystem($CombPhaseDisruptor);
             
        		//Absorbtion Shield, 1 points
