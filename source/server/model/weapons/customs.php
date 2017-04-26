@@ -764,4 +764,49 @@ class customMedPolarityPulsar extends Pulse{
     }//endof class customMphasedBeamAcc
 
 
+
+
+
+
+    class customLtPhaseDisruptor extends LinkedWeapon{
+        public $trailColor = array(255, 170, 10);
+        public $name = "customLtPhaseDisruptor";
+        public $displayName = "Paired Particle guns";
+        public $animation = "trail";
+        public $animationColor = array(255, 170, 10);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 13;
+        public $animationWidth = 2;
+        public $trailLength = 13;
+        public $intercept;
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Molecular"; 
+	    
+        
+        function __construct($startArc, $endArc){
+            $this->defaultShots = 2;
+            $this->shots = 2;
+            $this->intercept = 2;
+            $this->iconPath = "PhaseDisruptor.png";
+	    $this->isLinked = false; //shots are separate, not linked! 
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] .= "Shots are NOT linked";
+        }
+	    
+        public function getDamage($fireOrder){        return Dice::d(6,2);   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    } //endof class customLtPhaseDisruptor
+
+
+
 ?>
