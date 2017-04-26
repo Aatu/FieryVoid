@@ -771,7 +771,7 @@ class customMedPolarityPulsar extends Pulse{
     class customLtPhaseDisruptor extends LinkedWeapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
-        public $displayName = "Paired Particle guns";
+        public $displayName = "Light Phase Disruptor";
         public $animation = "trail";
         public $animationColor = array(255, 170, 10);
         public $animationExplosionScale = 0.10;
