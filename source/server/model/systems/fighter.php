@@ -1,7 +1,5 @@
 <?php
 	class Fighter extends ShipSystem{
-		
-		
 		public $flightid;
 		public $location = 0;
 		public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
@@ -13,6 +11,7 @@
 		public $critData = array();
 		public $fighter = true;
 		public $systems = array();
+		protected $advancedArmor = false;
 		
 		public $possibleCriticals = array();
 		
