@@ -11,7 +11,6 @@
 		public $critData = array();
 		public $fighter = true;
 		public $systems = array();
-		protected $advancedArmor = false;
 		
 		public $possibleCriticals = array();
 		
