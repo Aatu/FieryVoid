@@ -73,4 +73,3 @@ var CustomLtPhaseDisruptor = function(json, ship){
 }
 CustomLtPhaseDisruptor.prototype = Object.create( Weapon.prototype );
 CustomLtPhaseDisruptor.prototype.constructor = CustomLtPhaseDisruptor;
-
