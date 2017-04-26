@@ -48,6 +48,7 @@ class DrakhRaiderFlt extends FighterFlight{
  		$CombPhaseDisruptor->exclusive = true;
 		//and switch icon too...
 		$CombPhaseDisruptor->iconPath = "LightMolecularDisruptor.png";
+		$CombPhaseDisruptor->weaponClass = 'Molecular';
         	$fighter->addFrontSystem($CombPhaseDisruptor);
             
        		//Absorbtion Shield, 1 points
