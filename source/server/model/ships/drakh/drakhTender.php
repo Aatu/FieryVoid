@@ -11,7 +11,7 @@ class DrakhTender extends BaseShip{
         $this->shipClass = "Tender";
         $this->shipSizeClass = 3;
 
-        $this->fighters = array("Shuttles" => 6, "'Raiders" => 4);
+        $this->fighters = array("Shuttles" => 6, "Raiders" => 4);
 
         $this->gravitic = true;	    
 	$this->unofficial = true;
@@ -43,23 +43,23 @@ class DrakhTender extends BaseShip{
  		
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
-	$this->addFrontSystem(new LightPolarityPulsar(2, 4, 3, 240, 60)); 
-	$this->addFrontSystem(new LightPolarityPulsar(2, 4, 3, 300, 120)); 	    
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 60)); 
+	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 300, 120)); 	    
 	    
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
 	$this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-	$this->addAftSystem(new LightPolarityPulsar(2, 4, 3, 120, 300));  
-	$this->addAftSystem(new LightPolarityPulsar(2, 4, 3, 60, 240));     
+	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120, 300));  
+	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));     
 	    
 	$this->addLeftSystem(new Thruster(3, 10, 0, 5, 3));
-	$this->addLeftSystem(new SWRayShield(3,6,3,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new AbsorbtionShield(3,6,4,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addLeftSystem(new CargoBay(4, 20));
         $this->addLeftSystem(new CargoBay(4, 20));
         $this->addLeftSystem(new Catapult(4, 4));
         $this->addLeftSystem(new Catapult(4, 4));			
 	    
 	$this->addRightSystem(new Thruster(3, 10, 0, 5, 4));
-	$this->addRightSystem(new SWRayShield(3,6,3,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new AbsorbtionShield(3,6,4,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addRightSystem(new CargoBay(4, 20));
         $this->addRightSystem(new CargoBay(4, 20)); 
         $this->addRightSystem(new Catapult(4, 4));	
@@ -98,7 +98,7 @@ class DrakhTender extends BaseShip{
             ),
             3=> array(
                     4 => "Thruster",
-		    6 => "Ray Shield",
+		    6 => "Absorbtion Shield",
                     10 => "Cargo Bay",
                     12 => "Catapult",
                     18 => "Structure",
@@ -106,7 +106,7 @@ class DrakhTender extends BaseShip{
             ),
             4=> array(
                     4 => "Thruster",
-		    6 => "Ray Shield",
+		    6 => "Absorbtion Shield",
                     10 => "Cargo Bay",
                     12 => "Catapult",
                     18 => "Structure",
