@@ -789,12 +789,12 @@ class customMedPolarityPulsar extends Pulse{
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
 	    
-        /*
+        
         function __construct($startArc, $endArc){
 	    $this->isLinked = false; //shots are separate, not linked! 
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
-	*/
+	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] .= "Shots are NOT linked";
