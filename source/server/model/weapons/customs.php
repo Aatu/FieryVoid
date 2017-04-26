@@ -796,12 +796,12 @@ class customMedPolarityPulsar extends Pulse{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	
-	    /*
+	
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] .= "Shots are NOT linked";
         }
-	*/
+	
 	    
         public function getDamage($fireOrder){        return Dice::d(6,2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
