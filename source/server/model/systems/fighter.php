@@ -190,7 +190,7 @@
             if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
         } 
 	$armour += $activeAA;
-	return $activeAA;
+	return $armour;
     }
 		
 		
