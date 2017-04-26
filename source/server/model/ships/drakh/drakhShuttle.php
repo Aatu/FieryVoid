@@ -40,15 +40,8 @@ class DrakhShuttle extends FighterFlight{
 
 		
 			
-		$fighter->addFrontSystem(new LightFusionCannon(330, 30, 3, 3));
-
-		$DisruptionGun = new LightFusionCannon(330, 30, 7, 1);
-		$DisruptionGun->displayName = "Phased Disruption Gun";
-		//and switch icon too...
-		$DisruptionGun->iconPath = "molecularDisruptor.png";
-		$DisruptionGun->weaponClass = 'Molecular';
-        	$fighter->addFrontSystem($DisruptionGun);
-            
+		$fighter->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));
+           
         	//Absorbtion Shield, 1 points
         	$fighter->addAftSystem(new AbsorbtionShield(0, 1, 0, 1, 0, 360));
 			
