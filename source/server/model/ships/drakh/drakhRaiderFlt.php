@@ -39,8 +39,6 @@ class DrakhRaiderFlt extends FighterFlight{
             $fighter->imagePath = "img/ships/DrakhRaider.png";
             $fighter->iconPath = "img/ships/DrakhRaider_Large.png"; 
 
-            
-        	//$fighter->addFrontSystem(new customLtPhaseDisruptor(330, 30));
 		$ltDistuptor = new customLtPhaseDisruptor(330, 30);
 		$fighter->addFrontSystem($ltDistuptor);
 		
