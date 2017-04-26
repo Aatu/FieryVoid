@@ -798,8 +798,8 @@ class customMedPolarityPulsar extends Pulse{
 	
 	
         public function setSystemDataWindow($turn){
+            $this->data["Special"] = "Shots are NOT linked";
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] .= "Shots are NOT linked";
         }
 	
 	    
