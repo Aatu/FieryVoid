@@ -776,15 +776,16 @@ class customMedPolarityPulsar extends Pulse{
         public $animation = "trail";
         public $animationColor = array(255, 170, 10);
         public $animationExplosionScale = 0.10;
-        public $projectilespeed = 13;
+        public $projectilespeed = 10;
         public $animationWidth = 2;
-        public $trailLength = 13;
+        public $trailLength = 10;
         public $intercept = 3;
         public $loadingtime = 1;
         public $shots = 3;
         public $defaultShots = 3;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	    public $priority = 5;
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -795,10 +796,12 @@ class customMedPolarityPulsar extends Pulse{
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
 	
+	    /*
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] .= "Shots are NOT linked";
         }
+	*/
 	    
         public function getDamage($fireOrder){        return Dice::d(6,2);   }
         public function setMinDamage(){     $this->minDamage = 2 ;      }
