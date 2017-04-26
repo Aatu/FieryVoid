@@ -7,7 +7,7 @@ class DrakhShuttle extends FighterFlight{
 	$this->pointCost = 90*6;
 	$this->faction = "Drakh";
         $this->phpclass = "DrakhShuttle";
-        $this->shipClass = "Armed Shuttle";
+        $this->shipClass = "Armed Shuttles";
 	 $this->imagePath = "img/ships/DrakhShuttle.png";
         
         $this->forwardDefense = 9;
