@@ -482,10 +482,10 @@ class customPhaseDisruptor extends Raking{
         public $priority = 6;
 	public $rakes = array();
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');
-	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
 	public $gunsArray = array(1=>1,2=>3);
 	
-	    //public $damageType = 'Raking'; 
+	public $damageType = 'Raking'; 
     	public $weaponClass = "Molecular"; 
 
 
@@ -667,6 +667,7 @@ class customMedPolarityPulsar extends Pulse{
 	    
         public $raking = 10;
 	    
+	    public $damageType = 'Raking'; 
 	   public $weaponClass = "Molecular"; 
         public $priority = 7;
         public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
