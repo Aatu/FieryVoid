@@ -19,7 +19,7 @@ class DrakhRaiderFlt extends FighterFlight{
         $this->sideDefense = 10;
         $this->freethrust = 10;
         $this->offensivebonus = 7;
-        $this->jinkinglimit = 4; //deliberately low jinking limit and Init
+        $this->jinkinglimit = 4; //deliberately low jinking limit and Init, they're SHFs grouped for convenience!
         $this->turncost = 0.33;
         
     	$this->iniativebonus = 14 *5; 
