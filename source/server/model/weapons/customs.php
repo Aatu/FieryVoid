@@ -772,7 +772,7 @@ class customMedPolarityPulsar extends Pulse{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
         public $displayName = "Light Phase Disruptor";
-	   public  $iconPath = "PhaseDisruptor.png";
+	   public  $iconPath = "LtPhaseDisruptor.png";
         public $animation = "trail";
         public $animationColor = array(255, 170, 10);
         public $animationExplosionScale = 0.10;
