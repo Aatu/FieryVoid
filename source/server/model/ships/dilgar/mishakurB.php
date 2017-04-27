@@ -11,6 +11,8 @@ class MishakurB extends BaseShip{
         $this->imagePath = "img/ships/mishakur.png";
         $this->shipClass = "Mishakur-B Supercarrier";
         $this->shipSizeClass = 3;
+        $this->variantOf = "Mishakur Dreadnought";        
+        $this->limited = 33;
         
         $this->fighters = array("normal"=>48);
 
@@ -23,7 +25,7 @@ class MishakurB extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 4;
 
-        $this->occurence = "rare/specialty";
+        $this->occurence = "rare";
         
         $this->addPrimarySystem(new Reactor(5, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 25, 0, 2));

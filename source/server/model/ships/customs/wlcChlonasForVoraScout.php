@@ -5,10 +5,9 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         $this->pointCost = 500;
-        $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasForVoraScout";
         $this->imagePath = "img/ships/brahassa.png";
-        $this->shipClass = "Ch'Lonas For'Vora Scout";
+        $this->shipClass = "For'Vora Scout";
         $this->fighters = array("heavy" => 12);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -17,6 +16,12 @@ class wlcChlonasForVoraScout extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
+	    
+	$this->faction = "Ch'Lonas";
+        $this->variantOf = "Tra'Vora Light Cruiser";
+	$this->occurence = "uncommon";
+	$this->isd = 2215;
+	$this->unofficial = true;
         
         $this->iniativebonus = 15;
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));

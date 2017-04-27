@@ -14,6 +14,7 @@ class OchlavitaD extends HeavyCombatVessel{
         $this->sideDefense = 15;
         
         $this->occurence = "rare";
+        $this->variantOf = "Ochlavita Destroyer";
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

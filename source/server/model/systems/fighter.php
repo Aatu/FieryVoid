@@ -1,7 +1,5 @@
 <?php
 	class Fighter extends ShipSystem{
-		
-		
 		public $flightid;
 		public $location = 0;
 		public $id, $armour, $maxhealth, $powerReq, $output, $name, $displayName;
@@ -192,7 +190,7 @@
             if (isset($target->armourSettings[$dmgClass][1])) $activeAA = $target->armourSettings[$dmgClass][1];
         } 
 	$armour += $activeAA;
-	return $activeAA;
+	return $armour;
     }
 		
 		

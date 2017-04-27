@@ -9,6 +9,7 @@ class ThorunHeavy extends FighterFlight{
         $this->phpclass = "ThorunHeavy";
         $this->shipClass = "Thorun Heavy Dartfighters";
 	$this->imagePath = "img/ships/thorun.png";
+        $this->variantOf = "Thorun Dartfighters";
         
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

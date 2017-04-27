@@ -46,3 +46,30 @@ var CustomPhaseDisruptor = function(json, ship){
 }
 CustomPhaseDisruptor.prototype = Object.create( Weapon.prototype );
 CustomPhaseDisruptor.prototype.constructor = CustomPhaseDisruptor;
+
+
+var CustomMphasedBeamAcc = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomMphasedBeamAcc.prototype = Object.create( Weapon.prototype );
+CustomMphasedBeamAcc.prototype.constructor = CustomMphasedBeamAcc;
+
+
+var CustomLtPolarityPulsar = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomLtPolarityPulsar.prototype = Object.create( Weapon.prototype );
+CustomLtPolarityPulsar.prototype.constructor = CustomLtPolarityPulsar;
+
+var CustomMedPolarityPulsar = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomMedPolarityPulsar.prototype = Object.create( Weapon.prototype );
+CustomMedPolarityPulsar.prototype.constructor = CustomMedPolarityPulsar;
+
+
+var CustomLtPhaseDisruptor = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomLtPhaseDisruptor.prototype = Object.create( Weapon.prototype );
+CustomLtPhaseDisruptor.prototype.constructor = CustomLtPhaseDisruptor;

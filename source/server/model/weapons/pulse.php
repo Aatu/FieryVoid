@@ -136,7 +136,7 @@ class EnergyPulsar extends Pulse{
         public $grouping = 25;
         public $maxpulses = 3;
         public $priority = 4;
-	private $useDie = 2; //die used for base number of hits	
+	protected $useDie = 2; //die used for base number of hits	
 
         public $loadingtime = 2;
         
@@ -213,7 +213,7 @@ class QuadPulsar extends Pulse{
         public $grouping = 25;
         public $maxpulses = 4;
         public $priority = 6;
-	private $useDie = 3; //die used for base number of hits	
+	protected $useDie = 3; //die used for base number of hits	
         
         public $loadingtime = 3;
         

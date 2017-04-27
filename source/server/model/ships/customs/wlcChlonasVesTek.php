@@ -4,11 +4,13 @@ class wlcChlonasVesTek extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 420; //70*6
-        $this->faction = "Custom Ships";
+        $this->pointCost = 70*6;
         $this->phpclass = "wlcChlonasVesTek";
-        $this->shipClass = "Ch'Lonas Ves'Tek Assault flight";
+        $this->shipClass = "Ves'Tek Assault flight";
         $this->imagePath = "img/ships/shadras.png";
+        
+        $this->faction = "Ch'Lonas";
+	    $this->unofficial = true;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;

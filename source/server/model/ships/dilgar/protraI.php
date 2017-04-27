@@ -15,6 +15,7 @@ class ProtraI extends BaseShip{
         
         $this->limited = 33;
         $this->occurence = "uncommon";
+        $this->variantOf = "Protra Scoutship";
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

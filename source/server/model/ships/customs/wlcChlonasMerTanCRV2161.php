@@ -8,9 +8,14 @@ class wlcChlonasMerTanCRV2161 extends MediumShip{
 	$this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasMerTanCRV2161";
         $this->imagePath = "img/ships/essusu.png";
-        $this->shipClass = "Ch'Lonas Mer'Tan Corvette (2161)";
+        $this->shipClass = "Mer'Tan Corvette";
         $this->agile = true;
         $this->canvasSize = 100;
+	    
+	$this->faction = "Ch'Lonas";
+        $this->variantOf = "Mer'Tan Corvette";
+	$this->isd = 2161;
+	$this->unofficial = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

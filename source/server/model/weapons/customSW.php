@@ -102,7 +102,7 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
     	public $weaponClass = "Ballistic"; 
 	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table
 	
-	private $useDie = 3; //die used for base number of hits
+	protected $useDie = 3; //die used for base number of hits
 	
     
     public function setSystemDataWindow($turn){
@@ -199,7 +199,7 @@ class SWDirectWeapon extends Pulse{
 	//for Pulse mode
 	//public $grouping = 25;
 	//public $maxpulses = 1;	
-	private $useDie = 3; //die used for base number of hits
+	protected $useDie = 3; //die used for base number of hits
  
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Particle"; //and may be easily overridden
@@ -318,7 +318,7 @@ class SWBallisticWeapon extends Torpedo{
 	
 	public $iconPath = "starwars/photonTorpedo.png"; //to be changed!
 
-    private $useDie = 3; //die used for base number of hits
+    protected $useDie = 3; //die used for base number of hits
  
     public $damageType = "Pulse"; //and this should remain!
     public $weaponClass = "Ballistic"; //and may be easily overridden

@@ -81,8 +81,19 @@ spl_autoload_register(
                 //weapons and systems
                 'absorbtionshield' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
+                'customltpolaritypulsar' => '/server/model/weapons/customs.php',
+                'custompedpolaritypulsar' => '/server/model/weapons/customs.php',
+                'custommphasedbeamacc' => '/server/model/weapons/customs.php',
+                'customltphasedisruptor' => '/server/model/weapons/customs.php',
                 //units
+                'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
+                'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
+                
+                'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
+                'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
+                'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
                 
                 
                 //Star Wars (sort of) - Centauri Galactic Empire

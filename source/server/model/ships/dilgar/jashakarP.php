@@ -15,6 +15,7 @@ class JashakarP extends MediumShip{
         $this->sideDefense = 12;
         
         $this->occurence = "uncommon";
+        $this->variantOf = "Jashakar Frigate";
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.5;
