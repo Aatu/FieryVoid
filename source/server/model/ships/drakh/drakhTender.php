@@ -17,8 +17,8 @@ class DrakhTender extends BaseShip{
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
 
-        $this->occurence = "uncommon";
-	$this->variantOf = 'Tanker';	    
+        //$this->occurence = "uncommon";
+	//$this->variantOf = 'Tanker'; //very different role, and not considered a variant after all 
 	$this->isd = 2208;
         
         $this->forwardDefense = 14;
