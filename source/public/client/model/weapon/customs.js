@@ -67,6 +67,12 @@ var CustomMedPolarityPulsar = function(json, ship){
 CustomMedPolarityPulsar.prototype = Object.create( Weapon.prototype );
 CustomMedPolarityPulsar.prototype.constructor = CustomMedPolarityPulsar;
 
+var CustomHeavyPolarityPulsar = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomHeavyPolarityPulsar.prototype = Object.create( Weapon.prototype );
+CustomHeavyPolarityPulsar.prototype.constructor = CustomHeavyPolarityPulsar;
+
 
 var CustomLtPhaseDisruptor = function(json, ship){
     Weapon.call( this, json, ship);
