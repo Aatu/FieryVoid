@@ -575,7 +575,7 @@ class customLtPhaseDisruptorShip extends Raking{
         public $animationWidth = 4;
         public $animationWidth2 = 4;
         public $uninterceptable = false;
-        public $loadingtime = 2;
+        public $loadingtime = 1;
         public $rangePenalty = 1;
         public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
         public $priority = 7;
