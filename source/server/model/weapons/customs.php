@@ -565,6 +565,77 @@ class customPhaseDisruptor extends Raking{
 
 
 
+class customLtPhaseDisruptorShip extends Raking{
+    /*LightPhase Disruptor for Drakh ships*/
+        public $name = "customLtPhaseDisruptorShip";
+        public $displayName = "Phase Disruptor";
+	 public $iconPath = "LtPhaseDisruptor.png";
+        public $animation = "laser";
+        public $animationColor = array(50, 125, 210);
+        public $animationWidth = 4;
+        public $animationWidth2 = 4;
+        public $uninterceptable = false;
+        public $loadingtime = 2;
+        public $rangePenalty = 1;
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
+        public $priority = 7;
+	public $rakes = array();
+	public $firingMode = 'Raking';
+	public $guns = 1;
+	
+	public $damageType = 'Raking'; 
+    	public $weaponClass = "Molecular"; 
+
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 3;
+		}
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	public function getDamage($fireOrder){ 
+				$this->rakes = array();
+				$damage = 0;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				return $damage; 
+	}
+	
+	public function getRakeSize(){
+		//variable rake size: first entry from $this->rakes (min of 3, in case of trouble - should not happen!)	
+		$rakesize = array_shift($this->rakes);
+		$rakesize = max(3,$rakesize); //just in case of trouble
+		return $rakesize;		
+	}
+	
+        public function setMinDamage(){
+		$this->minDamage = 6; 
+	}
+        public function setMaxDamage(){
+		$this->maxDamage = 18*2; 
+	}
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Special"] = 'Does always 2 rakes, each 3d6 strong.';
+    }
+	
+}//customLtPhaseDisruptorShip
+
+
+
+
 class customLtPolarityPulsar extends Pulse{
         public $name = "customLtPolarityPulsar";
         public $displayName = "Light Polarity Pulsar";
