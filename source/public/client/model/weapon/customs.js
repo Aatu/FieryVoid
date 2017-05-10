@@ -47,6 +47,11 @@ var CustomPhaseDisruptor = function(json, ship){
 CustomPhaseDisruptor.prototype = Object.create( Weapon.prototype );
 CustomPhaseDisruptor.prototype.constructor = CustomPhaseDisruptor;
 
+var CustomLtPhaseDisruptorShip = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+CustomLtPhaseDisruptorShip.prototype = Object.create( Weapon.prototype );
+CustomLtPhaseDisruptorShip.prototype.constructor = CustomLtPhaseDisruptorShip;
 
 var CustomMphasedBeamAcc = function(json, ship){
     Weapon.call( this, json, ship);
