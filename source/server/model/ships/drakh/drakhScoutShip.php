@@ -39,9 +39,9 @@ class DrakhScoutShip extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
 	$this->addFrontSystem(new AbsorbtionShield(2,4,3,1,270,90) ); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 240, 0)); 
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 0)); 
 	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 300, 60)); 	 	   
-	$this->addFrontSystem(new customPhaseDisruptor(3, 0, 0, 0, 120));  
+	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 120));  
 	    
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
 	$this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
@@ -64,7 +64,7 @@ class DrakhScoutShip extends MediumShip{
             1=> array(
                     5 => "Thruster",
                     7 => "Medium Polarity Pulsar",
-                    10 => "Phase Disruptor",
+                    10 => "Light Phase Disruptor",
 		    11 => "Absorbtion Shield",
                     18 => "Structure",
                     20 => "Primary",
