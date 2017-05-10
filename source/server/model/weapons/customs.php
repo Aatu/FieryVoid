@@ -625,10 +625,10 @@ class customMedPolarityPulsar extends Pulse{
         public $animationColor = array(255,140,0);
 
 		
-        public $loadingtime = 2;
-        public $priority = 5;
+        public $loadingtime = 3;
+        public $priority = 6;
 	        
-        public $rangePenalty = 1;
+        public $rangePenalty = 1; // -1 hex
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
@@ -652,6 +652,51 @@ class customMedPolarityPulsar extends Pulse{
         public function getDamage($fireOrder){        return 12;   }
 
     } //customMedPolarityPulsar
+
+
+class customHeavyPolarityPulsar extends Pulse{
+        public $name = "customHeavyPolarityPulsar";
+        public $displayName = "Heavy Polarity Pulsar";
+	public $weaponClass = "Molecular"; 
+        public $animation = "trail";
+        public $rof = 2;
+        public $trailLength = 17;
+        public $animationWidth = 5;
+        public $projectilespeed = 15;
+        public $animationExplosionScale = 0.2;
+        
+	public $iconPath = "MediumPolarityPulsar.png";
+        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        public $animationColor = array(255,140,0);
+
+		
+        public $loadingtime = 2;
+        public $priority = 6;
+	        
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
+        
+	public $grouping = 15; //+1 per 3
+	public $maxpulses = 5;
+	protected $useDie = 3; //die used for base number of hits;
+        public $intercept = 1;
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 18;   }
+
+    } //customHeavyPolarityPulsar
 
 
 
