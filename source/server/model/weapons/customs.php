@@ -665,7 +665,7 @@ class customHeavyPolarityPulsar extends Pulse{
         public $projectilespeed = 15;
         public $animationExplosionScale = 0.2;
         
-	public $iconPath = "MediumPolarityPulsar.png";
+	public $iconPath = "HeavyPolarityPulsar.png";
         public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
         public $animationColor = array(255,140,0);
 
