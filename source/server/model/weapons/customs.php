@@ -696,8 +696,8 @@ class customMedPolarityPulsar extends Pulse{
         public $animationColor = array(255,140,0);
 
 		
-        public $loadingtime = 3;
-        public $priority = 6;
+        public $loadingtime = 2;
+        public $priority = 5;
 	        
         public $rangePenalty = 1; // -1 hex
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
@@ -741,7 +741,7 @@ class customHeavyPolarityPulsar extends Pulse{
         public $animationColor = array(255,140,0);
 
 		
-        public $loadingtime = 2;
+        public $loadingtime = 3;
         public $priority = 6;
 	        
         public $rangePenalty = 0.5; //-1/2 hexes
