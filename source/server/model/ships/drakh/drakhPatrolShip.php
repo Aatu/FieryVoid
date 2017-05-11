@@ -8,6 +8,7 @@ class DrakhPatrolShip extends MediumShip{
 	$this->faction = "Drakh";
         $this->phpclass = "DrakhPatrolShip";
         $this->imagePath = "img/ships/DrakhPatrolShip.png";
+	    $this->canvasSize = 100;
         $this->shipClass = "Patrol Ship";
         $this->gravitic = true;	 
 	$this->advancedArmor = true;   
