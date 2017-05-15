@@ -796,8 +796,8 @@ class customHeavyPolarityPulsar extends Pulse{
         public $displayName = "Multiphased Beam Accelerator";
 	public $animation = "laser";
         public $animationColor = array(225,130,0);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.2;
+        public $animationWidth = 6;
+        public $animationWidth2 = 1.2;
 	    public $iconPath = "MultiphasedBeamAccelerator.png";
 	    
         public $raking = 10;
