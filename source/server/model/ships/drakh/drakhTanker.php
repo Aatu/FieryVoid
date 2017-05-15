@@ -39,22 +39,22 @@ class DrakhTanker extends BaseShip{
         //$this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
 	$this->addPrimarySystem(new Hangar(4, 6, 2));
  		
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 60)); 
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 300, 120)); 	    
 	    
-        $this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
-	$this->addAftSystem(new Thruster(3, 12, 0, 5, 2));
+        $this->addAftSystem(new GraviticThruster(3, 12, 0, 5, 2));
+	$this->addAftSystem(new GraviticThruster(3, 12, 0, 5, 2));
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 120, 300));  
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 60, 240));     
 	    
-	$this->addLeftSystem(new Thruster(3, 10, 0, 5, 3));
+	$this->addLeftSystem(new GraviticThruster(3, 10, 0, 5, 3));
 	$this->addLeftSystem(new AbsorbtionShield(3,6,4,2,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addLeftSystem(new CargoBay(4, 20));
         $this->addLeftSystem(new CargoBay(4, 20));		
 	    
-	$this->addRightSystem(new Thruster(3, 10, 0, 5, 4));
+	$this->addRightSystem(new GraviticThruster(3, 10, 0, 5, 4));
 	$this->addRightSystem(new AbsorbtionShield(3,6,4,2,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addRightSystem(new CargoBay(4, 20));
         $this->addRightSystem(new CargoBay(4, 20));   
