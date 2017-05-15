@@ -65,14 +65,14 @@ class DrakhPatrolShip extends MediumShip{
                     7 => "Heavy Polarity Pulsar",
                     10 => "Phase Disruptor",
 		    11 => "Absorbtion Shield",
-                    18 => "Structure",
+                    17 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     7 => "Thruster",
 		    9 => "Light Polarity Pulsar",
 		    10 => "Absorbtion Shield",
-                    18 => "Structure",
+                    17 => "Structure",
                     20 => "Primary",
             ),
        );
