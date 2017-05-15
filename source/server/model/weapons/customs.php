@@ -474,12 +474,12 @@ class customPhaseDisruptor extends Raking{
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
         public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
+        public $animationWidth2 = 0.7;
         public $uninterceptable = false;
         public $loadingtime = 2;
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
-        public $priority = 6;
+        public $priority = 8;
 	public $rakes = array();
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
@@ -573,7 +573,7 @@ class customLtPhaseDisruptorShip extends Raking{
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
         public $animationWidth = 4;
-        public $animationWidth2 = 4;
+        public $animationWidth2 = 0.5;
         public $uninterceptable = false;
         public $loadingtime = 1;
         public $rangePenalty = 1;
