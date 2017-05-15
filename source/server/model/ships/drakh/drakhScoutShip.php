@@ -34,18 +34,18 @@ class DrakhScoutShip extends MediumShip{
         $this->addPrimarySystem(new ElintScanner(5, 18, 4, 12));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 	$this->addPrimarySystem(new Hangar(3, 1, 1));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
-        $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));
+        $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 5, 3));
+        $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 5, 4));
   
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(3, 8, 0, 4, 1));
 	$this->addFrontSystem(new AbsorbtionShield(2,4,3,1,270,90) ); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 240, 0)); 
 	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 300, 60)); 	 	   
 	$this->addFrontSystem(new customLtPhaseDisruptorShip(3, 0, 0, 0, 120));  
 	    
-        $this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
-	$this->addAftSystem(new Thruster(3, 12, 0, 6, 2));
+        $this->addAftSystem(new GraviticThruster(3, 12, 0, 6, 2));
+	$this->addAftSystem(new GraviticThruster(3, 12, 0, 6, 2));
 	$this->addAftSystem(new AbsorbtionShield(2,4,3,1,90,270));
 	$this->addAftSystem(new customLtPolarityPulsar(2, 0, 0, 90,270));  
         
