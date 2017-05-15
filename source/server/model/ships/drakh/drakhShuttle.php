@@ -16,6 +16,7 @@ class DrakhShuttle extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 2;
         $this->pivotcost = 2; //shuttles have pivot cost higher
+	    $this->gravitic = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
         $this->advancedArmor = true;   
