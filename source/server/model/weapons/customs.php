@@ -583,7 +583,10 @@ class customLtPhaseDisruptorShip extends Raking{
 	public $firingMode = 'Raking';
 	public $guns = 1;
 	
-	public $damageType = 'Raking'; 
+	public $firingModes = array(1=>'Concentrated', 2=>'Split');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
+	public $gunsArray = array(1=>1,2=>2);
+	
     	public $weaponClass = "Molecular"; 
 
 
@@ -620,15 +623,31 @@ class customLtPhaseDisruptorShip extends Raking{
 	}
 	
         public function setMinDamage(){
-		$this->minDamage = 6; 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //concentrated
+				break;
+			case 2:
+				$this->minDamage = 3; //split
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
         public function setMaxDamage(){
-		$this->maxDamage = 18*2; 
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18*2; //concentrated
+				break;
+			case 2:
+				$this->maxDamage = 18; //split
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
-	$this->data["Special"] = 'Does always 2 rakes, each 3d6 strong.';
+	$this->data["Special"] = 'In concentrated mode does 2 rakes, each 3d6 strong.';
     }
 	
 }//customLtPhaseDisruptorShip
