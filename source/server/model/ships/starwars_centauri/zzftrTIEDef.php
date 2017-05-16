@@ -41,7 +41,7 @@ class zzftrtiedef extends FighterFlight{
             $fighter->addFrontSystem($frontGun);
 
             $frontGun = new SWFighterIon(330, 30, 1, 2); //front ion cannons
-            $frontGun->exclusive = true; //either this or other weapons! no - gunner operates that...
+            $frontGun->exclusive = true; //either this or other weapons! no separate gunner here!
             $fighter->addFrontSystem($frontGun);
             
            
