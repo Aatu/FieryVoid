@@ -76,7 +76,7 @@ class ShipSystem{
     }
     
     public function setDamage($damage){ //$damage object 
-	    
+	    /* ...not sure how it will behave when damage is dealt and saved!
 	//let's try to reduce amount of data transferred - don't note every hit, just total damage and Destroyed status... at least for past turns!
 	$count = count($this->damage); 
 	$currTurn = TacGamedata::$currentTurn -1; //let's say current AND PREVIOUS turn damage will be fully transferred...
@@ -91,10 +91,10 @@ class ShipSystem{
 			}	
 		}
 		$this->damage[] = $damage; //no eligible entry found! behave as usual
-	}
+	}*/
 	
 	//original code was just this:
-        //$this->damage[] = $damage;
+        $this->damage[] = $damage;
     }
     
     public function setDamages($damages){
