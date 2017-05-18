@@ -75,11 +75,11 @@ class ShipSystem{
         $this->setSystemDataWindow($turn);
     }
     
-    public function setDamage($damage, $condense = false){ //$damage object and $condense = whether damage should be condensed for transfer
+    public function setDamage($damage){ //$damage object and $condense = whether damage should be condensed for transfer
 	//let's try to reduce amount of data transferred - don't note every hit, just total damage and Destroyed status... at least for past turns!
 	$count = count($this->damage); 
 	$currTurn = TacGamedata::$currentTurn -1; //let's say current AND PREVIOUS turn damage will be fully transferred...
-	if (($count == 0) || ($damage->turn >= $currTurn) || ($condense == false)) { //no entries yet, add!
+	if (($count == 0) || ($damage->turn >= $currTurn) ) { //no entries yet, add!
 		$this->damage[] = $damage;
 	}else{ //modify existing entry... unless damage is from current turn!
 		foreach( $this->damage as $oldDmg ){
