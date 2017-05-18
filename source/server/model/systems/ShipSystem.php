@@ -86,6 +86,8 @@ class ShipSystem{
 		foreach( $this->damage as $key=>$oldDmg ){
 			if($oldDmg->turn < $currTurn){
 				$oldDmg->damage += $damage->damage; //shields and armour absorbtion irrelevant
+				$oldDmg->armour += $damage->armour;
+				$oldDmg->shields += $damage->shields;
 				if ($damage->destroyed == true) $oldDmg->destroyed = true;
 				return; //nothing else to do
 			}	
