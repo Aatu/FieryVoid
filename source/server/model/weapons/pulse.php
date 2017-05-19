@@ -661,6 +661,13 @@ class QuadPulsar extends Pulse{
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 3;
+		}		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
