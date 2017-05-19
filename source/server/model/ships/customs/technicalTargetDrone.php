@@ -38,9 +38,9 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
 		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
-		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
+		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));*/
 		$this->addFrontSystem(new ScatterGun(1, 0, 0, 270, 90));
-		*/
+		
 		/*
 		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
