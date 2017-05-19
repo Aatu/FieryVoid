@@ -240,7 +240,12 @@ spl_autoload_register(
                 
                 'graemlar' => '/server/model/ships/llort/graemlar.php',
                 
+                
+                
+                //Markab
                 'scattergun' => '/server/model/weapons/pulse.php',
+                'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
+                'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
