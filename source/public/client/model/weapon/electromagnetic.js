@@ -60,3 +60,11 @@ var BurstPulseCannon = function(json, ship)
 }
 BurstPulseCannon.prototype = Object.create( Pulse.prototype );
 BurstPulseCannon.prototype.constructor = BurstPulseCannon;
+
+
+var StunBeam = function(json, ship)
+{
+    Electromagnetic.call( this, json, ship);
+}
+StunBeam.prototype = Object.create( Electromagnetic.prototype );
+StunBeam.prototype.constructor = StunBeam;

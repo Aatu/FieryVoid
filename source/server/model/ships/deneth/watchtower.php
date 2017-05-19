@@ -43,8 +43,8 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Structure( 5, 60));
 		
 		for ($i = 0; $i < sizeof($this->locations); $i++){
-			$min = 300 + ($i*90);
-			$max = 60 + ($i*90);
+			$min = 270 + ($i*90); //original design has 120-degree arcs (300..60), but it was just very bad and not worth the points
+			$max = 90 + ($i*90);
 			$systems = array(
 				new TwinArray(4, 6, 2, $min, $max),
 				new TwinArray(4, 6, 2, $min, $max),
@@ -76,11 +76,18 @@ class Watchtower extends SmallStarBaseFourSections{
         //Watchtower has atypical arcs, for a base!
 	public function getLocations(){        
             $locs = array();
+		/* changing to 180-degree-wide...
             $locs[] = array("loc" => 1, "min" => 300, "max" => 60, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 2, "min" => 120, "max" => 240, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 3, "min" => 210, "max" => 330, "profile" => $this->forwardDefense);
             $locs[] = array("loc" => 4, "min" => 30, "max" => 150, "profile" => $this->forwardDefense);
-            return $locs;
+	    */
+	    $locs[] = array("loc" => 1, "min" => 270, "max" => 90, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 2, "min" => 90, "max" => 270, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 3, "min" => 180, "max" => 360, "profile" => $this->forwardDefense);
+            $locs[] = array("loc" => 4, "min" => 0, "max" => 180, "profile" => $this->forwardDefense);
+		
+	    return $locs;
         }
 	
 }

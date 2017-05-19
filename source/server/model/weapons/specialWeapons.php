@@ -1,7 +1,6 @@
 <?php
 
 class PlasmaStream extends Raking{
-
 	public $name = "plasmaStream";
         public $displayName = "Plasma Stream";
         public $animation = "beam";
@@ -162,6 +161,7 @@ class BurstBeam extends Weapon{
 			//$this->data["Weapon type"] = "Electromagnetic";
 	
 			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Forces dropout on fighters, turns off powered systems, causes extra criticals, can cause power shortages. ';
 		}
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -438,6 +438,7 @@ class BurstPulseCannon extends Pulse {
             //$this->data["Weapon type"] = "Electromagnetic";
 
             parent::setSystemDataWindow($turn);
+		$this->data["Special"] = 'Forces dropout on fighters. ';
         }
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
@@ -469,4 +470,68 @@ class BurstPulseCannon extends Pulse {
         public function setMinDamage(){     $this->minDamage = 0;      }
         public function setMaxDamage(){     $this->maxDamage = 0;      }
     }
+
+
+
+class StunBeam extends Weapon{
+	public $name = "StunBeam";
+        public $displayName = "Stun Beam";
+	   public  $iconPath = "StunBeam.png";
+        public $animation = "laser";
+        public $animationColor = array(158, 240, 255);
+	public $trailColor = array(158, 240, 255);
+	public $projectilespeed = 15;
+        public $animationWidth = 2;
+        public $animationWidth2 = 0.2;
+        public $animationExplosionScale = 0.10;
+	public $trailLength = 30;
+		        
+	public $loadingtime = 2;
+        public $priority = 9; //as antiship weapon; as antifighter should go first...
+        
+			
+        public $rangePenalty = 1;
+        public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
+		    
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+       
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Forces dropout on fighters, turns off powered systems. ';
+		}
+		
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			$crit = null;
+            		//debug::log($system->displayName);
+			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+                		$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+            		}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			}
+		}
+		
+		
+		public function getDamage($fireOrder){        return 0;   }
+		public function setMinDamage(){     $this->minDamage = 0;      }
+		public function setMaxDamage(){     $this->maxDamage = 0;      }
+}//endof class StunBeam
+
+
+
 ?>

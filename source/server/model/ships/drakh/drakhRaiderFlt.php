@@ -36,7 +36,7 @@ class DrakhRaiderFlt extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 3, 4, 4);
             $fighter = new Fighter("DrakhRaiderFlt", $armour, 25, $this->id);
-            $fighter->displayName = "Raider Assault Fighters";
+            $fighter->displayName = "Raider Assault Fighter";
             $fighter->imagePath = "img/ships/DrakhRaider.png";
             $fighter->iconPath = "img/ships/DrakhRaider_Large.png"; 
 

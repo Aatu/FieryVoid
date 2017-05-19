@@ -152,4 +152,63 @@
 
 
 
+    class PlasmaWaveTorpedo extends Torpedo{
+        public $name = "PlasmaWaveTorpedo";
+        public $displayName = "Plasma Wave";
+        public $iconPath = "PlasmaWaveTorpedo.png";
+        public $range = 30;
+        public $loadingtime = 3;
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        
+        public $fireControl = array(null, 0, 2); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(75, 230, 90);
+        public $animation = "torpedo";
+        public $animationColor = array(75, 230, 90);
+        public $animationExplosionScale = 0.3;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!)
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+		if (is_numeric($armour)){
+		$toIgnore = ceil($armour /2);
+		$new = $armour - $toIgnore;
+		return $new;
+		}
+		else {
+		return 0;
+		}
+	    }
+    	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
+	}
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3);   }
+        public function setMinDamage(){     $this->minDamage = 3;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class PlasmaWaveTorpedo
+
+
 ?>

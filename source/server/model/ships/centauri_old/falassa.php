@@ -40,9 +40,9 @@ class Falassa extends HeavyCombatVessel{
         $this->addFrontSystem(new TacLaser(3, 5, 4, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));

@@ -81,13 +81,17 @@ spl_autoload_register(
                 //weapons and systems
                 'absorbtionshield' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
+                'customltphasedisruptorship' => '/server/model/weapons/customs.php', //ship weapon
                 'customltpolaritypulsar' => '/server/model/weapons/customs.php',
-                'custompedpolaritypulsar' => '/server/model/weapons/customs.php',
+                'custommedpolaritypulsar' => '/server/model/weapons/customs.php',
+                'customheavypolaritypulsar' => '/server/model/weapons/customs.php',
                 'custommphasedbeamacc' => '/server/model/weapons/customs.php',
-                'customltphasedisruptor' => '/server/model/weapons/customs.php',
+                'customltphasedisruptor' => '/server/model/weapons/customs.php', //fighter weapon
                 //units
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
                 'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
+                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
                 'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
                 'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
                 
@@ -236,7 +240,12 @@ spl_autoload_register(
                 
                 'graemlar' => '/server/model/ships/llort/graemlar.php',
                 
+                
+                
+                //Markab
                 'scattergun' => '/server/model/weapons/pulse.php',
+                'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
+                'stunbeam' => '/server/model/weapons/specialWeapons.php',
                 
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
@@ -406,6 +415,7 @@ spl_autoload_register(
                 'wolf' => '/server/model/ships/raiders/wolf.php',
                 'xebec' => '/server/model/ships/raiders/xebec.php',
                 'duxraider' => '/server/model/ships/raiders/duxRaider.php',
+                'raidergunboat' => '/server/model/ships/raiders/RaiderGunboat.php',
                 
                 'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',

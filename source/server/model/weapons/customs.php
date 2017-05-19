@@ -474,12 +474,12 @@ class customPhaseDisruptor extends Raking{
         public $animation = "laser";
         public $animationColor = array(50, 125, 210);
         public $animationWidth = 4;
-        public $animationWidth2 = 0.5;
+        public $animationWidth2 = 0.7;
         public $uninterceptable = false;
         public $loadingtime = 2;
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 4, 6); // fighters, <mediums, <capitals
-        public $priority = 6;
+        public $priority = 8;
 	public $rakes = array();
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
@@ -565,6 +565,96 @@ class customPhaseDisruptor extends Raking{
 
 
 
+class customLtPhaseDisruptorShip extends Raking{
+    /*LightPhase Disruptor for Drakh ships*/
+        public $name = "customLtPhaseDisruptorShip";
+        public $displayName = "Light Phase Disruptor";
+	 public $iconPath = "LtPhaseDisruptor.png";
+        public $animation = "laser";
+        public $animationColor = array(50, 125, 210);
+        public $animationWidth = 4;
+        public $animationWidth2 = 0.5;
+        public $uninterceptable = false;
+        public $loadingtime = 1;
+        public $rangePenalty = 1;
+        public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
+        public $priority = 8;
+	public $rakes = array();
+	public $firingMode = 'Raking';
+	public $guns = 1;
+	
+	public $firingModes = array(1=>'Concentrated', 2=>'Split');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
+	public $gunsArray = array(1=>1,2=>2);
+	
+    	public $weaponClass = "Molecular"; 
+
+
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 3;
+		}
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	public function getDamage($fireOrder){ 
+				$this->rakes = array();
+				$damage = 0;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				$rake = Dice::d(6, 3);
+				$damage+=$rake;
+				$this->rakes[] = $rake;
+				return $damage; 
+	}
+	
+	public function getRakeSize(){
+		//variable rake size: first entry from $this->rakes (min of 3, in case of trouble - should not happen!)	
+		$rakesize = array_shift($this->rakes);
+		$rakesize = max(3,$rakesize); //just in case of trouble
+		return $rakesize;		
+	}
+	
+        public function setMinDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 6; //concentrated
+				break;
+			case 2:
+				$this->minDamage = 3; //split
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 18*2; //concentrated
+				break;
+			case 2:
+				$this->maxDamage = 18; //split
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	$this->data["Special"] = 'In concentrated mode does 2 rakes, each 3d6 strong.';
+    }
+	
+}//customLtPhaseDisruptorShip
+
+
+
+
 class customLtPolarityPulsar extends Pulse{
         public $name = "customLtPolarityPulsar";
         public $displayName = "Light Polarity Pulsar";
@@ -628,7 +718,7 @@ class customMedPolarityPulsar extends Pulse{
         public $loadingtime = 2;
         public $priority = 5;
 	        
-        public $rangePenalty = 1;
+        public $rangePenalty = 1; // -1 hex
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals 
         
 	public $grouping = 15; //+1 per 3
@@ -654,6 +744,51 @@ class customMedPolarityPulsar extends Pulse{
     } //customMedPolarityPulsar
 
 
+class customHeavyPolarityPulsar extends Pulse{
+        public $name = "customHeavyPolarityPulsar";
+        public $displayName = "Heavy Polarity Pulsar";
+	public $weaponClass = "Molecular"; 
+        public $animation = "trail";
+        public $rof = 2;
+        public $trailLength = 17;
+        public $animationWidth = 5;
+        public $projectilespeed = 15;
+        public $animationExplosionScale = 0.2;
+        
+	public $iconPath = "HeavyPolarityPulsar.png";
+        public $trailColor = array(255,140,0); //let's make Polarity Pulsars orange...
+        public $animationColor = array(255,140,0);
+
+		
+        public $loadingtime = 3;
+        public $priority = 6;
+	        
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(0, 3, 5); // fighters, <mediums, <capitals 
+        
+	public $grouping = 15; //+1 per 3
+	public $maxpulses = 5;
+	protected $useDie = 3; //die used for base number of hits;
+        public $intercept = 1;
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 9;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 18;   }
+
+    } //customHeavyPolarityPulsar
+
+
 
 
     class customMphasedBeamAcc extends Weapon{
@@ -661,8 +796,8 @@ class customMedPolarityPulsar extends Pulse{
         public $displayName = "Multiphased Beam Accelerator";
 	public $animation = "laser";
         public $animationColor = array(225,130,0);
-        public $animationWidth = 4;
-        public $animationWidth2 = 0.2;
+        public $animationWidth = 6;
+        public $animationWidth2 = 1.2;
 	    public $iconPath = "MultiphasedBeamAccelerator.png";
 	    
         public $raking = 10;

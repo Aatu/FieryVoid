@@ -31,12 +31,23 @@ class technicalTargetDrone extends BaseShip{
 		
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-		$this->addFrontSystem(new Hangar(4, 6));
+		//$this->addFrontSystem(new Hangar(4, 6));
+		
+		//new weapon showcase
+		
+		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
+		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
+		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
+		$this->addFrontSystem(new ScatterGun(1, 0, 0, 270, 90));
+		
+		/*
 		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
 		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
 		$this->addFrontSystem(new ImperialLaser(3, 8, 5, 300, 60));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
+		*/
 		
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
@@ -74,6 +85,9 @@ class technicalTargetDrone extends BaseShip{
 				20 => "C&C",
 			),
 			1=> array(
+				5 => "Plasma Wave",
+				10 => "Stun Beam",
+				15 => "Scattergun",
 				20 => "3:Thruster", //front targets Port Thruster - but once destroyed, Front Structure shall be next
 			),
 			2=> array(
