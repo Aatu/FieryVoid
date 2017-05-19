@@ -185,23 +185,23 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-    //ignores half armor (as a Plasma weapon should!)
+	    //ignores half armor (as a Plasma weapon should!)
 	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
-        if (is_numeric($armour)){
-        $toIgnore = ceil($armour /2);
-        $new = $armour - $toIgnore;
-        return $new;
-        }
-        else {
-        return 0;
-        }
-    }
-    	
-		public function setSystemDataWindow($turn){
-			parent::setSystemDataWindow($turn);
-            $this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
+		if (is_numeric($armour)){
+		$toIgnore = ceil($armour /2);
+		$new = $armour - $toIgnore;
+		return $new;
 		}
+		else {
+		return 0;
+		}
+	    }
+    	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
+	}
         
         
         public function getDamage($fireOrder){        return Dice::d(10, 3);   }
