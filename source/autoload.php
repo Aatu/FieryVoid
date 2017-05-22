@@ -246,7 +246,20 @@ spl_autoload_register(
                 'scattergun' => '/server/model/weapons/pulse.php',
                 'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
-                
+            	'shafab' => '/server/model/ships/markab/shafab.php',
+            	'romak' => '/server/model/ships/markab/romak.php',
+            	'martoba' => '/server/model/ships/markab/martoba.php',
+            	'maftora' => '/server/model/ships/markab/maftora.php',
+            	'mafka' => '/server/model/ships/markab/mafka.php',
+            	'mantaka' => '/server/model/ships/markab/mantaka.php',
+            	'malaka' => '/server/model/ships/markab/malaka.php',
+            	'kowart' => '/server/model/ships/markab/kowart.php',
+            	'talafat' => '/server/model/ships/markab/talafat.php',
+            	'markabliner' => '/server/model/ships/markab/markabliner.php',
+            	'drofta' => '/server/model/ships/markab/drofta.php',
+            	'makar' => '/server/model/ships/markab/makar.php',
+            	'shadrak' => '/server/model/ships/markab/shadrak.php',
+            		
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
