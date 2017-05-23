@@ -476,7 +476,7 @@ class BurstPulseCannon extends Pulse {
 class StunBeam extends Weapon{
 	public $name = "StunBeam";
         public $displayName = "Stun Beam";
-	   public  $iconPath = "StunBeam.png";
+	   public  $iconPath = "stunBeam.png";
         public $animation = "laser";
         public $animationColor = array(158, 240, 255);
 	public $trailColor = array(158, 240, 255);
