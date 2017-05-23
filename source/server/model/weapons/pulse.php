@@ -634,7 +634,7 @@ class QuadPulsar extends Pulse{
 	    /*due to technical reasons I simplify this heavily - to fixed 3 separate shots with no extra limitations*/
         public $name = "scatterGun";
         public $displayName = "Scattergun";
-        public $iconPath = "scattergun.png";
+        public $iconPath = "scatterGun.png";
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
