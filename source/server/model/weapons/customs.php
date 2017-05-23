@@ -947,4 +947,62 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
+
+class LightScattergun extends Torpedo{
+    /*Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)*/
+       public $shots = 1;
+    public $firingModes = array( 1 => "Burst");  
+	
+	//for Pulse mode
+	public $grouping = 2500; //NO GROUPING BONUS
+	public $maxpulses = 2;	
+	protected $useDie = 3; //die used for base number of hits
+ 
+    public $damageType = "Pulse"; 
+    public $weaponClass = "Particle";
+   
+	//animation for fighter laser - bigger guns need to change size and speed attributes :)
+	public $name = "LightScattergun";
+        public $displayName = "Light Scattergun";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 12;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+	
+	public $intercept = 2;
+
+	
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
+		$this->maxpulses = 3;
+		$this->defaultShots = 2;	
+						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}    
+	
+	
+        public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		 $this->data["Special"] = 'does always d3 pulses, no grouping bonus';
+        }
+	
+    
+	public function rollPulses($turn, $needed, $rolled){
+		$pulses = $this->getPulses($turn); //$this->useDie usually
+		//$pulses+= $this->getExtraPulses($needed, $rolled); //no grouping bonus for this weapon
+		return $pulses;
+	}
+	
+	
+	public function getDamage($fireOrder){        return Dice::d(6,2);   }
+	public function setMinDamage(){     $this->minDamage = 2 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+	
+
+
+} //end of class LightScattergun
+
+
 ?>
