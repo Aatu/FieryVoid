@@ -244,7 +244,7 @@ spl_autoload_register(
                 
                 //Markab
                 'scattergun' => '/server/model/weapons/pulse.php',
-                'lightscattergun' => '/server/model/weapons/custom.php',
+                'lightscattergun' => '/server/model/weapons/customs.php',
                 'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
             	'shafab' => '/server/model/ships/markab/shafab.php',
