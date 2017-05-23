@@ -84,3 +84,12 @@ var CustomLtPhaseDisruptor = function(json, ship){
 }
 CustomLtPhaseDisruptor.prototype = Object.create( Weapon.prototype );
 CustomLtPhaseDisruptor.prototype.constructor = CustomLtPhaseDisruptor;
+
+
+var LightScattergun = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+LightScattergun.prototype = Object.create( Weapon.prototype );
+LightScattergun.prototype.constructor = LightScattergun;
+
+
