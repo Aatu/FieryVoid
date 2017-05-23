@@ -257,7 +257,8 @@ spl_autoload_register(
             	'kowart' => '/server/model/ships/markab/kowart.php',
             	'talafat' => '/server/model/ships/markab/talafat.php',
             	'markabliner' => '/server/model/ships/markab/markabliner.php',
-            	'drofta' => '/server/model/ships/markab/drofta.php',
+            	'droftae' => '/server/model/ships/markab/droftaE.php',
+                'droftan' => '/server/model/ships/markab/droftaN.php',
             	'makar' => '/server/model/ships/markab/makar.php',
             	'shadrak' => '/server/model/ships/markab/shadrak.php',
             		
