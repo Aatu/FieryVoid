@@ -1,13 +1,13 @@
 <?php
 
-class DroftaN extends FighterFlight{
+class DroftaE extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40*6;
         $this->faction = "Markab";
-        $this->phpclass = "DroftaN";
+        $this->phpclass = "DroftaE";
         $this->shipClass = "Drofta Medium Fighters (early)";
 	    $this->variantOf = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/auroraStarfury.png";
@@ -32,7 +32,7 @@ class DroftaN extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){        
             $armour = array(3, 1, 2, 2);
-            $fighter = new Fighter("Drofta", $armour, 10, $this->id);
+            $fighter = new Fighter("DroftaE", $armour, 10, $this->id);
             $fighter->displayName = "Drofta";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
