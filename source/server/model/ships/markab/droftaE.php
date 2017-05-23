@@ -8,7 +8,8 @@ class Drofta extends FighterFlight{
         $this->pointCost = 40*6;
         $this->faction = "Markab";
         $this->phpclass = "Drofta";
-        $this->shipClass = "Dofta Medium Fighters (early)";
+        $this->shipClass = "Drofta Medium Fighters (early)";
+	    $this->variantOf = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/auroraStarfury.png";
 		$this->isd = 1925;
         
