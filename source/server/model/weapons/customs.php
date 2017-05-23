@@ -975,11 +975,11 @@ class LightScattergun extends Pulse{
 
 	
     
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $nrOfShots){
+	function __construct($startArc, $endArc){//more than a single emplacement not supported!
 		$this->maxpulses = 3;
 		$this->defaultShots = 2;	
 						
-		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		parent::__construct(0, 1, 0, $startArc, $endArc);
 	}    
 	
 	
