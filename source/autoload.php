@@ -244,7 +244,7 @@ spl_autoload_register(
                 
                 //Markab
                 'scattergun' => '/server/model/weapons/pulse.php',
-                'lightscattergun' => '/server/model/weapons/custom.php',
+                //'lightscattergun' => '/server/model/weapons/custom.php',
                 'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
             	'shafab' => '/server/model/ships/markab/shafab.php',
@@ -258,7 +258,7 @@ spl_autoload_register(
             	'talafat' => '/server/model/ships/markab/talafat.php',
             	'markabliner' => '/server/model/ships/markab/markabliner.php',
             	//'droftae' => '/server/model/ships/markab/droftaE.php',
-                'droftan' => '/server/model/ships/markab/droftaN.php',
+                //'droftan' => '/server/model/ships/markab/droftaN.php',
             	'makar' => '/server/model/ships/markab/makar.php',
             	'shadrak' => '/server/model/ships/markab/shadrak.php',
             		
