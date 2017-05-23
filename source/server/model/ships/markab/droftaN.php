@@ -1,16 +1,16 @@
 <?php
 
-class Drofta extends FighterFlight{
+class DroftaN extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 40*6;
+        $this->pointCost = 46*6;
         $this->faction = "Markab";
-        $this->phpclass = "Drofta";
-        $this->shipClass = "Dofta Medium Fighters (early)";
+        $this->phpclass = "DroftaN";
+        $this->shipClass = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/auroraStarfury.png";
-		$this->isd = 1925;
+		$this->isd = 2000;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 8;
@@ -36,9 +36,9 @@ class Drofta extends FighterFlight{
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
 
-            $frontGun = new LightParticleBeam(330, 30, 1);
-            $frontGun->displayName = "Ultralight Particle Beam";
+            $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
             $fighter->addFrontSystem($frontGun);
+		
             $this->addSystem($fighter);
 	   }
     }
