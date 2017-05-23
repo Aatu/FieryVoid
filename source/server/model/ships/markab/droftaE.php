@@ -1,13 +1,13 @@
 <?php
 
-class Drofta extends FighterFlight{
+class DroftaN extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 40*6;
         $this->faction = "Markab";
-        $this->phpclass = "Drofta";
+        $this->phpclass = "DroftaN";
         $this->shipClass = "Drofta Medium Fighters (early)";
 	    $this->variantOf = "Drofta Medium Fighters";
         $this->imagePath = "img/ships/auroraStarfury.png";
