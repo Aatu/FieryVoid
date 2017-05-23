@@ -121,11 +121,9 @@ spl_autoload_register(
                 'zzftrtiefighter' => '/server/model/ships/starwars_centauri/zzftrTIEFighter.php',
                 'zzftrtieinterceptor' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptor.php',
                 'zzftrtieinterceptorexport' => '/server/model/ships/starwars_centauri/zzftrTIEInterceptorExport.php',
-
                 'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
-
                 
                 
                 //custom weapons StarWars
@@ -154,7 +152,6 @@ spl_autoload_register(
                 'swheavytlaser' => '/server/model/weapons/customSW.php',
                 
                 'swmediumlaseraf' => '/server/model/weapons/customSW.php',
-
                 'swlightlasere' => '/server/model/weapons/customSW.php',
                 'swmediumlasere' => '/server/model/weapons/customSW.php',
                 'swheavylasere' => '/server/model/weapons/customSW.php',
@@ -244,7 +241,7 @@ spl_autoload_register(
                 
                 //Markab
                 'scattergun' => '/server/model/weapons/pulse.php',
-                //'lightscattergun' => '/server/model/weapons/custom.php',
+                'lightscattergun' => '/server/model/weapons/customs.php',
                 'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
             	'shafab' => '/server/model/ships/markab/shafab.php',
@@ -257,8 +254,8 @@ spl_autoload_register(
             	'kowart' => '/server/model/ships/markab/kowart.php',
             	'talafat' => '/server/model/ships/markab/talafat.php',
             	'markabliner' => '/server/model/ships/markab/markabliner.php',
-            	//'droftae' => '/server/model/ships/markab/droftaE.php',
-                //'droftan' => '/server/model/ships/markab/droftaN.php',
+            	'droftae' => '/server/model/ships/markab/droftaE.php',
+                'droftan' => '/server/model/ships/markab/droftaN.php',
             	'makar' => '/server/model/ships/markab/makar.php',
             	'shadrak' => '/server/model/ships/markab/shadrak.php',
             		
@@ -298,7 +295,6 @@ spl_autoload_register(
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swift' => '/server/model/ships/drazi_old/swift.php',
-
                 'peregrine' => '/server/model/ships/drazi_old/peregrine.php',
                 'peregrineold' => '/server/model/ships/drazi_old/peregrineOld.php',
                 'peregrinecmd' => '/server/model/ships/drazi_old/peregrineCmd.php',
