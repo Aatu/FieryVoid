@@ -20,7 +20,7 @@ class DroftaE extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         
-    	$this->iniativebonus = 80;
+    	$this->iniativebonus = 18 *5;
         $this->populate();        
     }
 
