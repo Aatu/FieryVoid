@@ -155,7 +155,7 @@
     class PlasmaWaveTorpedo extends Torpedo{
         public $name = "PlasmaWaveTorpedo";
         public $displayName = "Plasma Wave";
-        public $iconPath = "PlasmaWaveTorpedo.png";
+        public $iconPath = "plasmaWaveTorpedo.png";
         public $range = 30;
         public $loadingtime = 3;
         
