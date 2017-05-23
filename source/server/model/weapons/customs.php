@@ -948,10 +948,10 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
-class LightScattergun extends Torpedo{
+class LightScattergun extends Pulse{
     /*Markab fighter weapon - d3 shots (here treated as a single Pulse shot, no grouping bonus)*/
-       public $shots = 1;
-    public $firingModes = array( 1 => "Burst");  
+       public $shots = 2;
+	public  $iconPath = "scattergun.png";
 	
 	//for Pulse mode
 	public $grouping = 2500; //NO GROUPING BONUS
