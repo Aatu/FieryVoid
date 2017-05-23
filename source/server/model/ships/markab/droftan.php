@@ -31,7 +31,7 @@ class DroftaN extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){        
             $armour = array(3, 1, 2, 2);
-            $fighter = new Fighter("Drofta", $armour, 10, $this->id);
+            $fighter = new Fighter("DroftaN", $armour, 10, $this->id);
             $fighter->displayName = "Drofta";
             $fighter->imagePath = "img/ships/auroraStarfury.png";
             $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
