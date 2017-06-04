@@ -10,7 +10,7 @@ class DroftaE extends FighterFlight{
         $this->phpclass = "DroftaE";
         $this->shipClass = "Drofta Medium Fighters (early)";
 	    $this->variantOf = "Drofta Medium Fighters";
-        $this->imagePath = "img/ships/auroraStarfury.png";
+        $this->imagePath = "img/ships/deltaV.png";
 		$this->isd = 1925;
         
         $this->forwardDefense = 6;

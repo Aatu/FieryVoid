@@ -9,7 +9,7 @@ class DroftaN extends FighterFlight{
         $this->faction = "Markab";
         $this->phpclass = "DroftaN";
         $this->shipClass = "Drofta Medium Fighters";
-        $this->imagePath = "img/ships/auroraStarfury.png";
+        $this->imagePath = "img/ships/deltaV.png";
 		$this->isd = 2000;
         
         $this->forwardDefense = 6;

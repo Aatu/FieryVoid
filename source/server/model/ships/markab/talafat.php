@@ -6,7 +6,7 @@ class Talafat extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Talafat";
         $this->isd = 2015;        
-        $this->imagePath = "img/ships/apollo.png"; //needs to be changed
+        $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
         $this->shipClass = "Talafat Scout";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;

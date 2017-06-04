@@ -7,7 +7,7 @@ class Maftora extends HeavyCombatVessel{
         $this->pointCost = 475;
         $this->faction = "Markab";
         $this->phpclass = "Maftora";
-        $this->imagePath = "img/ships/cronos.png"; //change
+        $this->imagePath = "img/ships/brigantine.png"; //change
         $this->shipClass = "Maftora Police Ship";
         
         $this->forwardDefense = 14;
