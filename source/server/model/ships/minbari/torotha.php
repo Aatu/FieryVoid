@@ -4,23 +4,21 @@ class Torotha extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 550;
-	$this->faction = "Minbari";
+		$this->pointCost = 550;
+		$this->faction = "Minbari";
         $this->phpclass = "Torotha";
         $this->imagePath = "img/ships/torotha.png";
         $this->shipClass = "Torotha";
         $this->gravitic = true;
-
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
-
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-	$this->iniativebonus = 65;
-
+		$this->iniativebonus = 65;
+		$this->isd = 2006;
 
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

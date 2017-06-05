@@ -4,26 +4,26 @@ class GreySharlin extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 2100;
-	$this->faction = "Minbari";
+		$this->pointCost = 2100;
+		$this->faction = "Minbari";
         $this->phpclass = "GreySharlin";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Grey Sharlin";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-	$this->canvasSize = 280;
-        $this->occurence = "unique";
+		$this->canvasSize = 280;
         $this->fighters = array("normal"=>24);
-
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
-
         $this->turncost = 1.33;
         $this->turndelaycost = 1.0;
         $this->accelcost = 5;
         $this->rollcost = 4;
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
+        $this->isd = 2058;
+        $this->occurence = "unique";
+        $this->variantOf = "Sharlin";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, 0));
@@ -31,12 +31,12 @@ class GreySharlin extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 35, 4, 14));
         $this->addPrimarySystem(new Engine(6, 31, 0, 15, 4));
         $this->addPrimarySystem(new JumpEngine(6, 30, 4, 10));
-	$this->addPrimarySystem(new Hangar(6, 28));
+		$this->addPrimarySystem(new Hangar(6, 28));
         $this->addPrimarySystem(new Jammer(6, 10, 5));
         $this->addPrimarySystem(new TractorBeam(6, 10, 0, 0));
 
         // weapons arguments: armor, health, power, start arc, end arc
-	$this->addFrontSystem(new GraviticThruster(5, 12, 0, 5, 1));
+		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 5, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
@@ -67,7 +67,7 @@ class GreySharlin extends BaseShip{
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new GraviticThruster(5, 16, 0, 7, 4));
-	$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
+		$this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

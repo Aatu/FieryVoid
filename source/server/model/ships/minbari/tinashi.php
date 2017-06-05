@@ -10,17 +10,15 @@ class Tinashi extends HeavyCombatVessel{
         $this->imagePath = "img/ships/tinashi.png";
         $this->shipClass = "Tinashi";
         $this->gravitic = true;
-
-
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
+        $this->isd = 2052;
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 4));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

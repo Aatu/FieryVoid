@@ -23,7 +23,8 @@ class Sharlin extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
-
+		$this->isd = 2058;
+        
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));

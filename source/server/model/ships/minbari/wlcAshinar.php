@@ -8,19 +8,20 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "wlcAshinar";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "wlc Ashinar";
+        $this->shipClass = "Ashinar";
         $this->gravitic = true;
-        $this->occurence = "uncommon";
-
+        $this->occurence = "rare";
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
+        $this->isd = 1994;
+        $this->unofficial = true;
+        $this->variantOf = "Tinashi";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 8));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
@@ -48,7 +49,6 @@ class wlcAshinar extends HeavyCombatVessel{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 240, 0));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 0, 120));
-                
         $this->addAftSystem(new GraviticThruster(4, 33, 0, 9, 2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

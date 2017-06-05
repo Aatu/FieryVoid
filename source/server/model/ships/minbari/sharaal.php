@@ -4,26 +4,26 @@ class Sharaal extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 1600;
-	$this->faction = "Minbari";
+		$this->pointCost = 1600;
+		$this->faction = "Minbari";
         $this->phpclass = "Sharaal";
         $this->imagePath = "img/ships/sharlin.png";
         $this->shipClass = "Sharaal";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-	$this->canvasSize = 280;
+		$this->canvasSize = 280;
         $this->occurence = "uncommon";
         $this->fighters = array("normal"=>24);
-
         $this->forwardDefense = 15;
         $this->sideDefense = 19;
-
         $this->turncost = 1.33;
         $this->turndelaycost = 1.0;
         $this->accelcost = 5;
         $this->rollcost = 4;
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
+        $this->isd = 1999;
+        $this->variantOf = "Sharlin";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(5, 33, 0, -2));

@@ -14,16 +14,15 @@ class Leshath extends BaseShip{
         $this->limited = 10;
         $this->fighters = array();
         $this->fighters = array("normal"=>6);
-
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
+        $this->isd = 1995;
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));

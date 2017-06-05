@@ -12,16 +12,15 @@ class Trolata extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->occurence = "uncommon";
-
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
+        $this->isd = 2201;
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(7, 23, 0, 0));
@@ -44,7 +43,7 @@ class Trolata extends BaseShip{
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new GraviticThruster(6, 30, 0, 9, 2));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-	$this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
+		$this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
 
         $this->addLeftSystem(new AntimatterConverter(5, 7, 5, 240, 0));

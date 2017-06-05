@@ -12,16 +12,15 @@ class Morshin extends HeavyCombatVessel{
         $this->gravitic = true;
         $this->limited = 33;
         $this->fighters = array("normal"=>48);
-
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
-
         $this->turncost = 0.75;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 2;
         $this->iniativebonus = 35;
+        $this->isd = 2022;
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, 2));
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));

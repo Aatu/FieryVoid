@@ -12,16 +12,15 @@ class Neshatan extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->limited = 33;
-        
         $this->forwardDefense = 16;
         $this->sideDefense = 19;
-
         $this->turncost = 1.33;
         $this->turndelaycost = 1.33;
         $this->accelcost = 5;
         $this->rollcost = 5;
         $this->pivotcost = 5;
         $this->iniativebonus = 5;
+        $this->isd = 2251;
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 35, 0, -6));

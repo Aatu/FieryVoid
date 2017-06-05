@@ -20,6 +20,7 @@ class Tishat extends FighterFlight{
         $this->iniativebonus = 95;
         $this->gravitic = true;
         $this->populate();
+        $this->isd = 1880;
     }
 
     public function populate(){
