@@ -18,7 +18,12 @@ spl_autoload_register(
                 'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
-            	
+            		
+            	//Custom Minbari
+            	'upgtorotha' => '/server/model/ships/minbari/upgTorotha.php',
+            	'shanteen' => '/server/model/ships/minbari/shanteen.php',
+            	'rolotha' => '/server/model/ships/minbari/rolotha.php',
+            		
                 //starbase  classes              
                 'smallbase' => '/server/model/ships/civilians/smallBase.php',
                 'starbase' => '/server/model/ships/ShipClasses.php',
