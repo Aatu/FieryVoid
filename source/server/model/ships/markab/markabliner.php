@@ -7,7 +7,7 @@ class MarkabLiner extends MediumShip{
 		$this->pointCost = 70;
 		$this->faction = "Markab";
         $this->phpclass = "MarkabLiner";
-        $this->imagePath = "img/ships/tethys.png"; //change
+        $this->imagePath = "img/ships/sloop.png"; //change
         $this->shipClass = "Markab Liner";
         $this->canvasSize = 100;
 	    
