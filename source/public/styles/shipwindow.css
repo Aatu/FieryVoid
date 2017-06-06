@@ -20,7 +20,7 @@
     margin-top: 7px;
     margin-left:3px;
     margin-right:3px;
-    color:#496791;
+    color:#C6E2FF;
 }
 
 .shipwindow .shipclass{
@@ -34,7 +34,7 @@
     margin-right:3px;
     margin-top: 10px;
     display: inline-block;
-    color:#496791;
+    color:#C6E2FF;
 }
 
 .shipwindow .valueheader{
@@ -211,7 +211,7 @@
 }
 
 .shipwindow .ewentry .shiplink{
-    color:#496791;
+    color:#C6E2FF;
 }
 
 .ewentry .button2{
@@ -1093,7 +1093,7 @@ body .shipwindow .system.modes.firing .mode
 }
 #systemInfo .value{
 	padding-left:4px;
-    color: #496791;
+    color: #C6E2FF;
 }
 
 #systemInfo div.name{
