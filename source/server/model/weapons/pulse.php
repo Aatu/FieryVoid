@@ -628,10 +628,10 @@ class QuadPulsar extends Pulse{
 
 
 
-    class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    class ScatterGun extends Pulse
     {
 	    /*should do d6 SEPARATE shots, each of which may only intercept different incoming shot*/
-	    /*due to technical reasons I simplify this heavily - to fixed 3 separate shots with no extra limitations*/
+	    /*due to technical reasons I simplify this - just Pulse shot with d6 pulses*/
         public $name = "scatterGun";
         public $displayName = "Scattergun";
         public $iconPath = "scatterGun.png";
@@ -642,22 +642,26 @@ class QuadPulsar extends Pulse{
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
-        //public $rof = 2;
-	    public $guns = 3; //always 3, completely separate (not Pulse!) shots
-        public $maxpulses = 3;
-        public $grouping = 0;
+        public $rof = 2;
+	    
         public $loadingtime = 1;
         public $normalload = 1;
 	    
         public $priority = 3; //very light weapon
 	    
-        public $intercept = 2; //should be towards different shots only, but I shkip this limitation
+        public $intercept = 4; //should be 2 per shot, I change this to flat 4 - much weaker but can strongly combine vs one shot!
 	    
         public $rangePenalty = 2;
         public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
 	    
-	    public $damageType = "Standard"; 
+	    public $damageType = "Pulse"; 
 	    public $weaponClass = "Particle"; 
+	
+	//for Pulse mode
+	public $grouping = 2500; //NO GROUPING BONUS
+	public $maxpulses = 6;	
+	protected $useDie = 6; //die used for base number of hits
+	    
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
