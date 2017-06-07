@@ -44,15 +44,15 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 27th of April 2017";
+                    header.innerHTML = "Latest News 12th of June 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Drakh ships (custom), courtesy of Wolfgang. ";
+                    news.innerHTML += "- Markab ships, courtesy of TKS. ";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "-Please note Advanced Armor present :)";
+                    news.innerHTML += "- colour change in system window (dark blue just killed my eyes with such a small font!)";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
