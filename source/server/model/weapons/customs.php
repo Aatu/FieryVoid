@@ -972,6 +972,8 @@ class LightScattergun extends Pulse{
         public $trailLength = 10;
 	
 	public $intercept = 2;
+	
+        public $rangePenalty = 2;
 
 	
     
