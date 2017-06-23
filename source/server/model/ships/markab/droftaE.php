@@ -10,7 +10,7 @@ class DroftaE extends FighterFlight{
         $this->phpclass = "DroftaE";
         $this->shipClass = "Drofta Medium Fighters (early)";
 	    $this->variantOf = "Drofta Medium Fighters";
-        $this->imagePath = "img/ships/deltaV.png";
+        $this->imagePath = "img/ships/MarkabDrofta.png";
 		$this->isd = 1925;
         
         $this->forwardDefense = 6;
@@ -34,8 +34,8 @@ class DroftaE extends FighterFlight{
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("DroftaE", $armour, 10, $this->id);
             $fighter->displayName = "Drofta";
-            $fighter->imagePath = "img/ships/auroraStarfury.png";
-            $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
+            $fighter->imagePath = "img/ships/MarkabDrofta.png";
+            $fighter->iconPath = "img/ships/MarkabDroftaLARGE.png";
 
             $frontGun = new LightParticleBeam(330, 30, 1);
             $frontGun->displayName = "Ultralight Particle Beam";
