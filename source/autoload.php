@@ -245,6 +245,7 @@ spl_autoload_register(
                 'plasmawavetorpedo' => '/server/model/weapons/torpedo.php',
                 'stunbeam' => '/server/model/weapons/specialWeapons.php',
             	'shafab' => '/server/model/ships/markab/shafab.php',
+                'shofab' => '/server/model/ships/markab/shofab.php',
             	'romak' => '/server/model/ships/markab/romak.php',
             	'martoba' => '/server/model/ships/markab/martoba.php',
             	'maftora' => '/server/model/ships/markab/maftora.php',
