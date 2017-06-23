@@ -10,7 +10,7 @@ class Dragonship extends BaseShip{
         $this->imagePath = "img/ships/dragonship.png";
         $this->shipClass = "Dragonship";
         $this->shipSizeClass = 3;
-        $this->fighters = array("regular"=>12);
+        $this->fighters = array("heavy"=>12);
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
