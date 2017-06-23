@@ -6,7 +6,7 @@ class Kowart extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Kowart";
         $this->isd = 2010;        
-        $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/MarkabCruiser.png"; //needs to be changed
         $this->shipClass = "Kowart Rescue Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
