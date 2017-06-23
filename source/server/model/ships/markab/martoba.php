@@ -7,7 +7,7 @@ class Martoba extends HeavyCombatVessel{
         $this->pointCost = 480;
         $this->faction = "Markab";
         $this->phpclass = "Martoba";
-        $this->imagePath = "img/ships/MarkabPatrolShip.png"; //change
+        $this->imagePath = "img/ships/MarkabPoliceShip.png"; //change
         $this->shipClass = "Martoba Patrol Cutter";
         
         $this->forwardDefense = 14;
