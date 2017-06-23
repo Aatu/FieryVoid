@@ -6,7 +6,7 @@ class Malaka extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Malaka";
         $this->isd = 2000;        
-        $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/MarkabCruiser.png"; //needs to be changed
         $this->shipClass = "Malaka Transport";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
