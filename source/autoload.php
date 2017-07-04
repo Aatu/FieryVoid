@@ -194,6 +194,10 @@ spl_autoload_register(
                 
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
+                
+                //various small races
+                'tovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
+                
                                
                 
                 //Hurr
