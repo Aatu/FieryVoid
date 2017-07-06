@@ -5,7 +5,7 @@ class Tovin extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Custom";
+        $this->faction = "Small Races";
         $this->phpclass = "Tovin";
         $this->imagePath = "img/ships/RogolonSmallWarship.png";
         $this->shipClass = "Rogolon Tovin Small Warship";
