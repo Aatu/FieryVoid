@@ -177,6 +177,8 @@ spl_autoload_register(
                 
                 
                  //various small races
+                'rogolonrogon' =>  '/server/model/ships/smallraces/rogolonRogon.php',
+                'rogolontolov' =>  '/server/model/ships/smallraces/rogolonTolov.php',
                 'rogolontovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
                 
                 
