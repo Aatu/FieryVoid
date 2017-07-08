@@ -86,6 +86,7 @@ class RogolonRogon extends BaseShip{
                         10 => "Jump Engine",
         		18 => "Structure",
         		20 => "Primary",  
+		),
                 3=> array(
                         5 => "Thruster",
                         7 => "Hangar",
