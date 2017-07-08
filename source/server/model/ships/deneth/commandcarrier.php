@@ -1,22 +1,25 @@
 <?php
-class DenethCommandCarrier extends BaseShip{
+class DCommandCarrier extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
         $this->faction = "Deneth";
-        $this->phpclass = "DenethCommandCarrier";
+        $this->phpclass = "dcommandcarrier";
         $this->imagePath = "img/ships/sakar.png"; 
         $this->shipClass = "Command Carrier";
         $this->shipSizeClass = 3;
+	    
         $this->limited = 33;
+	$this->unofficial = true;
+	$this->isd = 2230;
+	    
         $this->fighters = array("normal"=>48);
-	    $this->isd = 2230;
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
 
-	$this->unofficial = true;
+	
         
         $this->turncost = 1.33;
         $this->turndelaycost = 1.33;
