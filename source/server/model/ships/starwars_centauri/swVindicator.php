@@ -68,9 +68,9 @@ class swVindicator extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
         		0=> array(
-					8 => "Structure",
-        				12 => "Thruster",
-		        		13 => "Hyperdrive",
+					7 => "Structure",
+        				9 => "Thruster",
+		        		10 => "Hyperdrive",
 					14=> "Hangar",
         				16 => "Scanner",
         				18 => "Engine",
@@ -78,18 +78,18 @@ class swVindicator extends HeavyCombatVessel{
 					20 => "C&C",
         		),
         		1=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				9 => "Medium Turbolaser",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				8 => "Medium Turbolaser",
  					11 => "Light Turbolaser",
 					12 => "Light Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				8 => "Medium Turbolaser",	
+        				3 => "Thruster",
+        				4 => "Ray Shield",
+        				7 => "Medium Turbolaser",	
 					10 => "Light Turbolaser",
 		        		13 => "Light Laser",
         				18 => "Structure",
