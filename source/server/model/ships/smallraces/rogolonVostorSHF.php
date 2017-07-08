@@ -30,10 +30,10 @@ class RogolonVostorSHF extends SuperHeavyFighter{
         $fighter->iconPath = "img/ships/RogolonVostor_Large.png";
 
         $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
-        $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 2));
+        $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
         $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
 
-        $fighter->addAftSystem(new RogolonLtPlasmaGun(150, 210, 1));
+        $fighter->addAftSystem(new RogolonLtPlasmaGun(150, 210, 5, 1));
         
         $this->addSystem($fighter);
     }
