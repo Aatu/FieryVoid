@@ -182,6 +182,7 @@ spl_autoload_register(
                 'rogolontovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
                 
                 'rogolonchelekftr' =>  '/server/model/ships/smallraces/rogolonChelekFtr.php',
+                'rogolonvasturshf' =>  '/server/model/ships/smallraces/rogolonVasturSHF.php',
                 'rogolonvostorshf' =>  '/server/model/ships/smallraces/rogolonVostorSHF.php',
                 
                 
