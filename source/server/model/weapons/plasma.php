@@ -467,7 +467,66 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public function getDamage($fireOrder){        return Dice::d(3)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
         public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+    }
 
+
+class RogolonLtPlasmaCannon extends LinkedWeapon{
+	/*dedicated anti-ship weapon of Rogolon fighters - very nasty!*/
+        public $name = "RogolonLtPlasmaCannon";
+        public $displayName = "Light Plasma Cannon";
+	public $iconPath = "mediumPlasma.png";
+	
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 13;
+        public $animationExplosionScale = 0.23;
+
+
+        public $intercept = 0; //no interception for this weapon!
+        public $loadingtime = 2;
+        public $shots = 1;
+        public $defaultShots = 1;
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+	/*Plasma - armor ignoring*/
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
+        }
+        
+    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
     }
 
 
