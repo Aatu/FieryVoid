@@ -177,7 +177,7 @@ spl_autoload_register(
                 
                 
                  //various small races
-                'tovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
+                'rogolontovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
                 
                 
                 //Deneth
