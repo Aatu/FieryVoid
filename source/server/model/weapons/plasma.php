@@ -432,13 +432,15 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 1;
+	public $damageBonus = 5;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $shots = 2){
+        function __construct($startArc, $endArc, $damageBonus=5, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
+	    $this->damageBonus = $damageBonus;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -464,9 +466,9 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         }
 
 
-        public function getDamage($fireOrder){        return Dice::d(3)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+        public function getDamage($fireOrder){        return Dice::d(3) +$this->damageBonus;   }
+        public function setMinDamage(){     $this->minDamage = 1 +$this->damageBonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 3 +$this->damageBonus ;      }
     }
 
 
