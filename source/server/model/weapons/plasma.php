@@ -410,4 +410,66 @@ class PlasmaGun extends Plasma{
 
 
 
+class RogolonLtPlasmaGun extends LinkedWeapon{
+	/*weapon of Rogolon fighters - very nasty!*/
+        public $name = "RogolonLtPlasmaGun";
+        public $displayName = "Light Plasma Gun";
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 11;
+        public $animationWidth = 4;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.25;
+        public $rangeDamagePenalty = 1;
+
+        public $intercept = 0; //no interception for this weapon!
+
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 1;
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $damagebonus, $shots = 2){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+	/*Plasma - armor ignoring*/
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
+        }
+        
+    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(3)+5;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 8 ;      }
+
+    }
+
+
+
 ?>
