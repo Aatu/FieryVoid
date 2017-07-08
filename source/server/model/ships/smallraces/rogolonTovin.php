@@ -1,12 +1,12 @@
 <?php
-class Tovin extends HeavyCombatVessel{
+class RogolonTovin extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
         $this->faction = "Small Races";
-        $this->phpclass = "Tovin";
+        $this->phpclass = "RogolonTovin";
         $this->imagePath = "img/ships/RogolonSmallWarship.png";
         $this->shipClass = "Rogolon Tovin Small Warship";
         $this->occurence = "common";
