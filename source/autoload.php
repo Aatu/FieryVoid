@@ -421,6 +421,7 @@ spl_autoload_register(
                 'plasmagun' => '/server/model/weapons/plasma.php',
                 'particleprojector' => '/server/model/weapons/particle.php',
                 'rogolonltplasmagun' => '/server/model/weapons/plasma.php',
+                'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 
                 //various
                 'hkflight' => '/server/model/ships/HK.php',
