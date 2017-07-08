@@ -436,7 +436,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damagebonus, $shots = 2){
+        function __construct($startArc, $endArc, $shots = 2){
             $this->shots = $shots;
             $this->defaultShots = $shots;
             
