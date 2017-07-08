@@ -5,7 +5,7 @@ class RogolonChelekFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 37*6;
-        $this->faction = "Custom";
+        $this->faction = "Small Races";
         $this->phpclass = "RogolonChelekFtr";
         $this->shipClass = "Rogolon Chelek Strike Fighters";
         $this->imagePath = "img/ships/RogolonChelek.png";
