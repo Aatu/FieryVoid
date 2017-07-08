@@ -70,8 +70,8 @@ class swDreadnought extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
         		0=> array(
-					7 => "Structure",
-        				11 => "Thruster",
+					8 => "Structure",
+        				10 => "Thruster",
 		        		12 => "Hyperdrive",
 					14=> "Hangar",
         				16 => "Scanner",
@@ -80,17 +80,17 @@ class swDreadnought extends HeavyCombatVessel{
 					20 => "C&C",
         		),
         		1=> array(
-        				3 => "Thruster",
-        				4 => "Ray Shield",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
         				8 => "Medium Turbolaser (Early)",
  					12 => "Light Turbolaser",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				8 => "Medium Turbolaser (Early)",	
+        				3 => "Thruster",
+        				4 => "Ray Shield",
+        				7 => "Medium Turbolaser (Early)",	
 					10 => "Light Turbolaser",
 		        		13 => "Heavy Laser",
         				18 => "Structure",
