@@ -80,6 +80,7 @@ class RogolonTolov extends BaseShip{
         		9 => "Thruster",
         		18 => "Structure",
         		20 => "Primary",  
+		),
                 3=> array(
                         5 => "Thruster",
                         7 => "Hangar",
