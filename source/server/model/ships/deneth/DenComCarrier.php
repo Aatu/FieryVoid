@@ -1,12 +1,12 @@
 <?php
-class DCommandCarrier extends BaseShip{
+class DenComCarrier extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 480;
         $this->faction = "Deneth";
-        $this->phpclass = "dcommandcarrier";
+        $this->phpclass = "DenComCarrier";
         $this->imagePath = "img/ships/dragonship.png";
         $this->shipClass = "Command Carrier Proxy";
         $this->shipSizeClass = 3;
