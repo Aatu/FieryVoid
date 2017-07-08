@@ -414,6 +414,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
         public $name = "RogolonLtPlasmaGun";
         public $displayName = "Light Plasma Gun";
+	
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
         public $trailColor = array(75, 250, 90);
@@ -421,14 +422,12 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $animationWidth = 4;
         public $trailLength = 12;
         public $animationExplosionScale = 0.25;
-        public $rangeDamagePenalty = 1;
+
 
         public $intercept = 0; //no interception for this weapon!
-
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
-
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 1;
