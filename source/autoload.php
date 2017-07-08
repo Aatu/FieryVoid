@@ -181,6 +181,9 @@ spl_autoload_register(
                 'rogolontolov' =>  '/server/model/ships/smallraces/rogolonTolov.php',
                 'rogolontovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
                 
+                'rogolonchelekftr' =>  '/server/model/ships/smallraces/rogolonChelekFtr.php',
+                'rogolonvostorshf' =>  '/server/model/ships/smallraces/rogolonVostorSHF.php',
+                
                 
                 //Deneth
                 'dencomcarrier' =>  '/server/model/ships/deneth/DenComCarrier.php', 
