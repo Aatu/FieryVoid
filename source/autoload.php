@@ -176,9 +176,13 @@ spl_autoload_register(
                 'mlpa' => '/server/model/weapons/customs.php',
                 
                 
+                 //various small races
+                'tovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
+                
+                
                 //Deneth
                 'denethcommandcarrier' =>  '/server/model/ships/deneth/commandcarrier.php', 
-                'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
+                //'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
                 'liberatorcannon' =>  '/server/model/ships/deneth/liberatorCannon.php', 
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
                 'liberatorplasma' =>  '/server/model/ships/deneth/liberatorPlasma.php', 
@@ -196,8 +200,7 @@ spl_autoload_register(
                 'providerfreighter' =>  '/server/model/ships/deneth/providerFreighter.php',  //civilian unit, actually...
                 
                 
-                //various small races
-                'tovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
+               
                 
                                
                 
