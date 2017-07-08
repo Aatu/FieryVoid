@@ -181,7 +181,7 @@ spl_autoload_register(
                 
                 
                 //Deneth
-                'dcommandcarrier' =>  '/server/model/ships/deneth/commandcarrier.php', 
+                'dencomcarrier' =>  '/server/model/ships/deneth/DenComCarrier.php', 
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
                 'liberatorcannon' =>  '/server/model/ships/deneth/liberatorCannon.php', 
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
