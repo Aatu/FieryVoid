@@ -33,7 +33,7 @@ class RogolonVostorSHF extends SuperHeavyFighter{
         $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 2));
         $fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
 
-        $fighter->addAftSystem(new RogolonLtPlasmaGun(330, 30, 1));
+        $fighter->addAftSystem(new RogolonLtPlasmaGun(150, 210, 1));
         
         $this->addSystem($fighter);
     }
