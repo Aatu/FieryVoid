@@ -177,6 +177,7 @@ spl_autoload_register(
                 
                 
                 //Deneth
+                'denethcommandcarrier' =>  '/server/model/ships/deneth/commandcarrier.php', 
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 
                 'liberatorcannon' =>  '/server/model/ships/deneth/liberatorCannon.php', 
                 'liberatorescort' =>  '/server/model/ships/deneth/liberatorEscort.php', 
@@ -185,7 +186,7 @@ spl_autoload_register(
                 'protector' =>  '/server/model/ships/deneth/protector.php', 
                 'sentryff' =>  '/server/model/ships/deneth/sentryFF.php', 
                 'vindicatorca' =>  '/server/model/ships/deneth/vindicatorCA.php', 
-                'watcher' =>  '/server/model/ships/deneth/watcher.php', 
+                'watcher' =>  '/server/model/ships/deneth/watcher.php',  
                 
                 'defenderftr' =>  '/server/model/ships/deneth/defenderFtr.php',
                 
