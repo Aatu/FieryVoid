@@ -6,7 +6,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
         
         $this->pointCost = 125;
         $this->faction = "Small Races";
-        $this->phpclass = "RogolonVostorSHF";
+        $this->phpclass = "RogolonVasturSHF";
         $this->shipClass = "Rogolon Vastur Assault Fighter";
         $this->variantOf = "Rogolon Vostor Assault Fighter";
         $this->imagePath = "img/ships/RogolonVostor.png";
