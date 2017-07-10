@@ -10,6 +10,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
         $this->shipClass = "Rogolon Vastur Assault Fighter";
         $this->variantOf = "Rogolon Vostor Assault Fighter";
         $this->imagePath = "img/ships/RogolonVostor.png";
+	    $this->unofficial = true;
 	
 	$this->isd = 2255;
         $this->forwardDefense = 8;
