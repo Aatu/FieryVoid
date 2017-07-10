@@ -26,8 +26,8 @@ class Plasma extends Weapon{
 			//$this->data["Weapon type"] = "Plasma";
             		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
 		}
 		
 		public function setSystemData($data, $subsystem){
