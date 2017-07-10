@@ -1142,7 +1142,12 @@ class Weapon extends ShipSystem{
 	    
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
-            $dis = mathlib::getDistanceHex($pos, $targetPos);
+	    if($pos!=null){
+	    	$sourcePos = $pos;
+	    }else{
+	    	$sourcePos = $shooter->getCoPos();
+	    }
+            $dis = mathlib::getDistanceHex($sourcePos, $targetPos);
             $damage -= ($dis * $this->rangeDamagePenalty);
         }
 	    
