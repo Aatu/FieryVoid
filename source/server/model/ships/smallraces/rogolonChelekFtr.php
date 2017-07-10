@@ -36,7 +36,7 @@ class RogolonChelekFtr extends FighterFlight{
             $fighter->imagePath = "img/ships/RogolonChelek.png";
             $fighter->iconPath = "img/ships/RogolonChelek_Large.png"; 
 
-            $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 2));
+            $fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
             $this->addSystem($fighter);
        }
     }
