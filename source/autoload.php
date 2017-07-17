@@ -478,6 +478,7 @@ spl_autoload_register(
                 'artemisescort' => '/server/model/ships/EA/artemisEscort.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
                 'artemisbeta' => '/server/model/ships/EA/artemisBeta.php',
+                'artemisgamma' => '/server/model/ships/EA/artemisGamma.php',
                 'ashinta' => '/server/model/ships/minbari/ashinta.php',
                 'assaultlaser' => '/server/model/weapons/lasers.php',
                 'advancedassaultlaser' => '/server/model/weapons/lasers.php',
