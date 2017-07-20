@@ -702,7 +702,8 @@ class QuadPulsar extends Pulse{
         public $animationWidth = 5;
         public $projectilespeed = 12;
         public $animationExplosionScale = 0.10;
-        public $rof = 2;
+        public $rof = 3; //used for threat estimation at interception
+	public $intercept = 1;
 	    
         public $priority = 3;	    
 	public $grouping = 25; //+1/5
@@ -717,20 +718,11 @@ class QuadPulsar extends Pulse{
             return 0; //Matter ignores armor!
         }
 	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		//maxhealth and power reqirement are fixed; left option to override with hand-written values
-		if ( $maxhealth == 0 ){
-		    $maxhealth = 4;
-		}
-		if ( $powerReq == 0 ){
-		    $powerReq = 1;
-		}		
-                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+
     } //end of class BlastCannonFamily
 
 
-    class LtBlastCannon extends BlastCannonFamilye{
+    class LtBlastCannon extends BlastCannonFamily{
 	/* Belt Alliance Light Blast Cannon - Matter Pulse weapon*/
         public $name = "LtBlastCannon";
         public $displayName = "Light Blast Cannon";
@@ -749,8 +741,87 @@ class QuadPulsar extends Pulse{
         
         public $rangePenalty = 1; //-1/hex
         public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
-        
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 4;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 1;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
         public function getDamage($fireOrder){        return 3;   }
+    }
+
+    class MedBlastCannon extends BlastCannonFamily{
+	/* Belt Alliance Medium Blast Cannon - Matter Pulse weapon*/
+        public $name = "MedBlastCannon";
+        public $displayName = "Medium Blast Cannon";
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+
+        public $priority = 4;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 5;
+	protected $useDie = 5; //die used for base number of hits
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0.5; //-1/2hex
+        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals 
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 5;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 2;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 5;   }
+    }
+
+    class HvyBlastCannon extends BlastCannonFamily{
+	/* Belt Alliance Heavy Blast Cannon - Matter Pulse weapon*/
+        public $name = "HvyBlastCannon";
+        public $displayName = "Heavy Blast Cannon";
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.15;
+
+        public $priority = 5;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 6;
+	protected $useDie = 6; //die used for base number of hits
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33; //-1/3hex
+        public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals 
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 8;   }
     }
 
 
