@@ -314,7 +314,7 @@
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
 
-
+    
     class PairedGatlingGun extends LinkedWeapon{
         public $name = "pairedGatlingGun";
         public $displayName = "Paired Gatling Guns";
@@ -354,7 +354,7 @@
             //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor.";
-            $this->data["<font color='red'>Ammunition</font color>"] = $this->ammunition;
+            $this->data["Ammunition"] = $this->ammunition;
         }
 
 
@@ -384,5 +384,23 @@
         public function setMaxDamage(){     $this->maxDamage = 6;      }
 
     }
+
+
+   class MatterGun extends PairedGatlingGun{
+	   /*Belt Alliance fighter weapon, with limited ammo - poorer cousin of Orieni fighter weapon*/
+        public $name = "MatterGun";
+        public $displayName = "Matter Gun";  
+	    public $iconPath = 'pairedGatlingGun.png'.
+	  
+        public function getDamage($fireOrder){ //d6-1, minimum 1
+            $dmg = Dice::d(6, 1) -1;
+	    $dmg = max(1,$dmg);
+            return $dmg;
+       }
+	public function setMinDamage(){     $this->minDamage = 1;      }
+        public function setMaxDamage(){     $this->maxDamage = 5;      }
+    }
+
+
 
 ?>
