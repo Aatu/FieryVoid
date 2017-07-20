@@ -178,6 +178,7 @@ spl_autoload_register(
                 'ltblastcannon' => '/server/model/weapons/pulse.php',
                 'medblastcannon' => '/server/model/weapons/pulse.php',
                 'hvyblastcannon' => '/server/model/weapons/pulse.php',
+                'mattergun' => '/server/model/weapons/matter.php',
                 
                  //various small races
                 'rogolonrogon' =>  '/server/model/ships/smallraces/rogolonRogon.php',
