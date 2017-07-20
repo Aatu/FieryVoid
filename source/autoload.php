@@ -175,6 +175,9 @@ spl_autoload_register(
                 'hlpa' => '/server/model/weapons/customs.php',
                 'mlpa' => '/server/model/weapons/customs.php',
                 
+                'ltblastcannon' => '/server/model/weapons/pulse.php',
+                'medblastcannon' => '/server/model/weapons/pulse.php',
+                'hvyblastcannon' => '/server/model/weapons/pulse.php',
                 
                  //various small races
                 'rogolonrogon' =>  '/server/model/ships/smallraces/rogolonRogon.php',
