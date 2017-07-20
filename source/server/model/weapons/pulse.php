@@ -638,7 +638,7 @@ class QuadPulsar extends Pulse{
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 20;
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
@@ -690,6 +690,67 @@ class QuadPulsar extends Pulse{
             $this->maxDamage = 13 ;
         }
  
+    }
+
+
+    class BlastCannonFamily extends Pulse{
+	/*core for all Blast Cannon family weapons*/
+        public $animation = "trail";
+	public $trailColor = array(140, 140, 140);
+        public $animationColor = array(140, 140, 140);
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+        public $rof = 2;
+	    
+        public $priority = 3;	    
+	public $grouping = 25; //+1/5
+        public $maxpulses = 4;
+	protected $useDie = 3; //die used for base number of hits
+	    
+	public $noOverkill = true;//Matter weapons do not overkill
+    	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	         
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 4;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 1;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+    } //end of class BlastCannonFamily
+
+
+    class LtBlastCannon extends BlastCannonFamilye{
+	/* Belt Alliance Light Blast Cannon - Matter Pulse weapon*/
+        public $name = "LtBlastCannon";
+        public $displayName = "Light Blast Cannon";
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+
+        public $priority = 3;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 4;
+	protected $useDie = 3; //die used for base number of hits
+        
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
+        
+        public function getDamage($fireOrder){        return 3;   }
     }
 
 
