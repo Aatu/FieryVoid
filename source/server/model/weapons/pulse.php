@@ -726,6 +726,7 @@ class QuadPulsar extends Pulse{
 	/* Belt Alliance Light Blast Cannon - Matter Pulse weapon*/
         public $name = "LtBlastCannon";
         public $displayName = "Light Blast Cannon";
+	    public $iconPath = 'LightBlastCannon.png';
         public $trailLength = 20;
         public $animationWidth = 5;
         public $projectilespeed = 12;
@@ -760,6 +761,7 @@ class QuadPulsar extends Pulse{
 	/* Belt Alliance Medium Blast Cannon - Matter Pulse weapon*/
         public $name = "MedBlastCannon";
         public $displayName = "Medium Blast Cannon";
+	    public $iconPath = 'MediumBlastCannon.png';
         public $trailLength = 20;
         public $animationWidth = 5;
         public $projectilespeed = 12;
@@ -794,6 +796,7 @@ class QuadPulsar extends Pulse{
 	/* Belt Alliance Heavy Blast Cannon - Matter Pulse weapon*/
         public $name = "HvyBlastCannon";
         public $displayName = "Heavy Blast Cannon";
+	    public $iconPath = 'HeavyBlastCannon.png';
         public $trailLength = 20;
         public $animationWidth = 5;
         public $projectilespeed = 12;
