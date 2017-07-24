@@ -1009,7 +1009,6 @@
 
 
     class ParticleProjector extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "particleProjector";
@@ -1029,19 +1028,12 @@
         public $fireControl = array(1, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		    //maxhealth and power reqirement are fixed; left option to override with hand-written values
-            if ( $maxhealth == 0 ){
-                $maxhealth = 4;
-            }
-            if ( $powerReq == 0 ){
-                $powerReq = 1;
-            }	
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 1)+5;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
 
 
@@ -1069,10 +1061,15 @@
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
         
-
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct(
-                $armour, $maxhealth, $powerReq, $startArc, $endArc, $this->output);
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }	
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
