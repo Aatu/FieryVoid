@@ -7,7 +7,7 @@ class DrakhHeavyTender extends BaseShip{
 	$this->pointCost = 1000;
 	$this->faction = "Drakh";
         $this->phpclass = "DrakhHeavyTender";
-        $this->imagePath = "img/ships/DrakhDreadnaught.png";
+        $this->imagePath = "img/ships/DrakhHeavyTender.png";
         $this->shipClass = "Heavy Tender";
         $this->shipSizeClass = 3;
         $this->limited = 33;
