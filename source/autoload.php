@@ -653,6 +653,7 @@ spl_autoload_register(
                 'interceptormki' => '/server/model/weapons/defensive.php',
                 'interceptormkii' => '/server/model/weapons/defensive.php',
                 'interceptorprototype' => '/server/model/weapons/defensive.php',
+                'bainterceptormki' => '/server/model/weapons/particle.php',
                 'ionbolt' => '/server/model/weapons/ion.php',
                 'ioncannon' => '/server/model/weapons/ion.php',
                 'iontorpedo' => '/server/model/weapons/torpedo.php',
