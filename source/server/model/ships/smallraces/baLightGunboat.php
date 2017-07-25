@@ -37,7 +37,7 @@ class BALightGunboat extends MediumShip{
 	$this->addPrimarySystem(new Engine(4, 11, 0, 4, 1));
 	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 60));
 	$this->addPrimarySystem(new MedBlastCannon(3, 0, 0, 270, 90));
-	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 240, 180));
+	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
 	$this->addPrimarySystem(new BAInterceptorMkI(2, 0, 0, 0, 360));
 	$this->addPrimarySystem(new Structure( 5, 30));
   
