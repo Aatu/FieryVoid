@@ -1,5 +1,5 @@
 <?php
-class LightGunboatEscort extends MediumShip{
+class BALightGunboatEscort extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
