@@ -8,7 +8,7 @@ class BALightGunboatEscort extends MediumShip{
         $this->faction = "Small Races";
         $this->phpclass = "BALightGunboatEscort";
         $this->imagePath = "img/ships/BALightGunboat.png";
-        $this->shipClass = "BA Light Gunboat Escort";
+        $this->shipClass = "BA Light Gunboat (Escort)";
 
         $this->occurence = "common";
         $this->variantOf = 'BA Light Gunboat';
