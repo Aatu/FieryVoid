@@ -182,6 +182,11 @@ spl_autoload_register(
                 'mattergun' => '/server/model/weapons/matter.php',
                 
                  //various small races
+                'balightgunboat' =>  '/server/model/ships/smallraces/baLightGunboat.php',
+                'balightgunboatescort' =>  '/server/model/ships/smallraces/baLightGunboatEscort.php',
+                'balightgunboatpulse' =>  '/server/model/ships/smallraces/baLightGunboatPulse.php',
+                
+                
                 'rogolonrogon' =>  '/server/model/ships/smallraces/rogolonRogon.php',
                 'rogolontolov' =>  '/server/model/ships/smallraces/rogolonTolov.php',
                 'rogolontovin' =>  '/server/model/ships/smallraces/rogolonTovin.php',
