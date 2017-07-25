@@ -186,6 +186,8 @@ spl_autoload_register(
                 'balightgunboatescort' =>  '/server/model/ships/smallraces/baLightGunboatEscort.php',
                 'balightgunboatpulse' =>  '/server/model/ships/smallraces/baLightGunboatPulse.php',
                 
+                'bastarfoxftr' =>  '/server/model/ships/smallraces/baStarfoxFtr.php',
+                
                 
                 'rogolonrogon' =>  '/server/model/ships/smallraces/rogolonRogon.php',
                 'rogolontolov' =>  '/server/model/ships/smallraces/rogolonTolov.php',
