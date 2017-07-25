@@ -23,8 +23,6 @@ class Plasma extends Weapon{
         }
     	
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
             		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
 			$this->data["Remark"] .= "<br>Ignores half of armor.";
@@ -145,10 +143,7 @@ class MagGun extends Plasma{
         }
 		
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-			//$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
 		}
 	
 		
@@ -280,14 +275,12 @@ class PlasmaTorch extends Plasma{
     	public function getDamage($fireOrder){        return Dice::d(10,2)+10;   }
         public function setMinDamage(){     $this->minDamage = 12 ;      }
         public function setMaxDamage(){     $this->maxDamage = 30 ;      }
-/*
+
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-			$this->data["<font color='red'>Remark</font>"] .= "<br>If fired, Plasma Torch may overheat.";
+			$this->data["Remark"] .= "<br>If fired, Plasma Torch may overheat.";
 		}
-	
+/*	
         public function fire($gamedata, $fireOrder){
             // If fired, a Plasma Torch might overheat and go in shutdown for 2 turns.
             // Make a crit roll taking into account any damage already sustained.
