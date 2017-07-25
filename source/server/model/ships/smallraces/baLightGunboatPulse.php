@@ -5,7 +5,7 @@ class BALightGunboatPulse extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "Custom";
+        $this->faction = "Small Races";
         $this->phpclass = "BALightGunboatPulse";
         $this->imagePath = "img/ships/BALightGunboat.png";
         $this->shipClass = "BA Light Gunboat (Pulse)";
