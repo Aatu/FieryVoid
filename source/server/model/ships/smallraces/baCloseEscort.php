@@ -36,8 +36,8 @@ class BACloseEscort extends MediumShip{
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new BAInterceptorMkI(2, 4, 1, 270, 90));
-	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 120));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
 		
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
