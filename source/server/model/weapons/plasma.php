@@ -24,7 +24,7 @@ class Plasma extends Weapon{
     	
 		public function setSystemDataWindow($turn){
 			parent::setSystemDataWindow($turn);
-            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
 			$this->data["Remark"] .= "<br>Ignores half of armor.";
 		}
 		
@@ -280,7 +280,7 @@ class PlasmaTorch extends Plasma{
 			parent::setSystemDataWindow($turn);
 			$this->data["Remark"] .= "<br>If fired, Plasma Torch may overheat.";
 		}
-/*	
+	
         public function fire($gamedata, $fireOrder){
             // If fired, a Plasma Torch might overheat and go in shutdown for 2 turns.
             // Make a crit roll taking into account any damage already sustained.
@@ -288,8 +288,7 @@ class PlasmaTorch extends Plasma{
 		
             $roll = Dice::d(20) + $this->getTotalDamage();
             
-            if($roll >= 16){
-                // It has overheated.
+            if($roll >= 16){ // It has overheated.
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
@@ -299,8 +298,8 @@ class PlasmaTorch extends Plasma{
             }
 		
         }
-	*/
-    }
+	
+    } //end of PlasmaTorch
 
 
 
