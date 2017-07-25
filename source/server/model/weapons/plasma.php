@@ -254,8 +254,8 @@ class LightPlasma extends Plasma{
 
 
 class PlasmaTorch extends Plasma{
-
-    	public $name = "plasmaTorch";
+    	public $iconPath = "plasmaTorch.png";
+	public $name = "PlasmaTorch";
         public $displayName = "Plasma Torch";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
