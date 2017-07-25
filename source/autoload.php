@@ -483,8 +483,8 @@ spl_autoload_register(
                 
                 //Dilgar moved to one place!                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
+                                /*
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
-                /*
                 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
                 'athraskalac' => '/server/model/ships/dilgar/athraskalaC.php',                
                 'garasoch' => '/server/model/ships/dilgar/garasoch.php',
