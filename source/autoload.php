@@ -183,6 +183,8 @@ spl_autoload_register(
                 
                  //various small races
                 'bacloseescort' =>  '/server/model/ships/smallraces/baCloseEscort.php',
+                'baheavygunboat' =>  '/server/model/ships/smallraces/baHeavyGunboat.php',
+                'baheavygunboatpulse' =>  '/server/model/ships/smallraces/baHeavyGunboatPulse.php',
                 'balightgunboat' =>  '/server/model/ships/smallraces/baLightGunboat.php',
                 'balightgunboatescort' =>  '/server/model/ships/smallraces/baLightGunboatEscort.php',
                 'balightgunboatpulse' =>  '/server/model/ships/smallraces/baLightGunboatPulse.php',
@@ -190,6 +192,8 @@ spl_autoload_register(
                 'bamediumgunboatpulse' =>  '/server/model/ships/smallraces/baMediumGunboatPulse.php',
                 'baescortcarrier' =>  '/server/model/ships/smallraces/baEscortCarrier.php',
                 'baescortcarrierrefit' =>  '/server/model/ships/smallraces/baEscortCarrierRefit.php',
+                'basurveyship' =>  '/server/model/ships/smallraces/baSurveyShip.php',
+                'bascoutcarrier' =>  '/server/model/ships/smallraces/baScoutCarrier.php',
                 
                 'bastarfoxftr' =>  '/server/model/ships/smallraces/baStarfoxFtr.php',
                 
