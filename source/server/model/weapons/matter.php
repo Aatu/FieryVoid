@@ -390,7 +390,7 @@
 	   /*Belt Alliance fighter weapon, with limited ammo - poorer cousin of Orieni fighter weapon*/
         public $name = "MatterGun";
         public $displayName = "Matter Gun";  
-	    public $iconPath = 'pairedGatlingGun.png'.
+	    public $iconPath = 'pairedGatlingGun.png';
 	  
         public function getDamage($fireOrder){ //d6-1, minimum 1
             $dmg = Dice::d(6, 1) -1;
