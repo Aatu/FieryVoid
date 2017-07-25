@@ -6,7 +6,7 @@ class LightGunboatEscort extends MediumShip{
         
         $this->pointCost = 175;
         $this->faction = "Small Races";
-        $this->phpclass = "LightGunboatEscort";
+        $this->phpclass = "BALightGunboatEscort";
         $this->imagePath = "img/ships/BALightGunboat.png";
         $this->shipClass = "BA Light Gunboat Escort";
 
