@@ -1,6 +1,6 @@
 <?php
     include_once 'global.php';
-
+ 
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
 //      return;
