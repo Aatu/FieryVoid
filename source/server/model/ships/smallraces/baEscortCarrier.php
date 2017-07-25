@@ -5,7 +5,7 @@ class BAEscortCarrier extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 350;
-        $this->faction = ""Small Races";
+        $this->faction = "Small Races";
         $this->phpclass = "BAEscortCarrier";
         $this->imagePath = "img/ships/BAEscortCarrier.png";
         $this->shipClass = "BA Escort Carrier";
