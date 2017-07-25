@@ -5,7 +5,7 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
-        $this->faction = "Custom";
+        $this->faction = "Small Races";
         $this->phpclass = "BAHeavyGunboatPulse";
         $this->imagePath = "img/ships/BAHeavyGunboat.png";
         $this->shipClass = "BA Heavy Gunboat (Pulse)";
