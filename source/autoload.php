@@ -483,7 +483,6 @@ spl_autoload_register(
                 
                 //Dilgar moved to one place!                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
-                                /*
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
                 'athraskalac' => '/server/model/ships/dilgar/athraskalaC.php',                
@@ -513,7 +512,6 @@ spl_autoload_register(
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
                 'tratharti' => '/server/model/ships/dilgar/tratharti.php',
                 'trathartig' => '/server/model/ships/dilgar/trathartiG.php',
-                */
                 
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
