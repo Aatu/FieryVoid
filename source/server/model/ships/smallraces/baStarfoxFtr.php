@@ -5,7 +5,7 @@ class BAStarfoxFtr extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 240;
-        $this->faction = "SmallRaces";
+        $this->faction = "Small Races";
         $this->phpclass = "BAStarfoxFtr";
         $this->shipClass = "BA Starfox Fighters";
         $this->imagePath = "img/ships/BAStarFox.png";
