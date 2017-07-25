@@ -37,12 +37,12 @@ class Abrithi extends BaseShip{
         $this->addFrontSystem(new LightLaser(1, 4, 3, 300, 60));
         $this->addFrontSystem(new LightLaser(1, 4, 3, 300, 60));
 
-        //$this->addAftSystem(new PlasmaTorch(1, 4, 2, 180, 360));
+        $this->addAftSystem(new PlasmaTorch(1, 4, 2, 180, 360));
         $this->addAftSystem(new Thruster(2, 4, 0, 1, 2));
         $this->addAftSystem(new Thruster(2, 14, 0, 6, 2));
         $this->addAftSystem(new Thruster(2, 4, 0, 1, 2));
         $this->addAftSystem(new Engine(3, 7, 0, 3, 2));
-        //$this->addAftSystem(new PlasmaTorch(1, 4, 2, 0, 180));
+        $this->addAftSystem(new PlasmaTorch(1, 4, 2, 0, 180));
 
         $this->addLeftSystem(new Thruster(2, 11, 0, 4, 3));
         $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 180, 360));
