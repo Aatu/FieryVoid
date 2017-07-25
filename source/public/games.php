@@ -44,15 +44,15 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 12th of June 2017";
+                    header.innerHTML = "Latest News 15th of July 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Markab ships, courtesy of TKS. ";
+                    news.innerHTML += "- Correction of Plasma bug! (if You thought Your Plasma weapons damage was off, You were probably right ;) ) ";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- colour change in system window (dark blue just killed my eyes with such a small font!)";
+                    news.innerHTML += "- Small Races, courtesy of Wolfgang (will be expanded later)";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
