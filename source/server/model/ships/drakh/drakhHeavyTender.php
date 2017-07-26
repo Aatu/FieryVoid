@@ -40,7 +40,7 @@ class DrakhHeavyTender extends BaseShip{
  		
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
         $this->addFrontSystem(new GraviticThruster(3, 25, 0, 5, 1));
-	$this->addFrontSystem(new AbsorbtionShield(3,8,6,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addFrontSystem(new AbsorbtionShield(3,8,8,3,270,90)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120)); 
 	$this->addFrontSystem(new customLtPolarityPulsar(2, 0, 0, 240, 120));
 	$this->addFrontSystem(new customMedPolarityPulsar(3, 0, 0, 240, 60)); 	
@@ -60,7 +60,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->addAftSystem(new Catapult(4, 4));   
 	    
 	$this->addLeftSystem(new GraviticThruster(3, 28, 0, 7, 3));
-	$this->addLeftSystem(new AbsorbtionShield(3,8,6,3,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new AbsorbtionShield(3,8,8,3,180,0)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addLeftSystem(new CargoBay(3, 30));
         $this->addLeftSystem(new Catapult(4, 4));
         $this->addLeftSystem(new Catapult(4, 4));
@@ -72,7 +72,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->addLeftSystem(new Catapult(4, 4));			
 	    
 	$this->addRightSystem(new GraviticThruster(3, 28, 0, 7, 4));
-	$this->addRightSystem(new AbsorbtionShield(3,8,6,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new AbsorbtionShield(3,8,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
         $this->addRightSystem(new CargoBay(3, 30));
         $this->addRightSystem(new Catapult(4, 4));	
         $this->addRightSystem(new Catapult(4, 4));
