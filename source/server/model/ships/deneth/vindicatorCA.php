@@ -7,7 +7,7 @@ class VindicatorCA extends BaseShip{
         $this->pointCost = 745;
         $this->faction = "Deneth";
         $this->phpclass = "vindicatorca";
-        $this->imagePath = "img/ships/battlewagon.png";
+        $this->imagePath = "img/ships/dragonship.png";
         $this->shipClass = "Vindicator Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);

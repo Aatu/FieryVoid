@@ -59,8 +59,8 @@ class swLancer extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				7 => "Thruster",
-					10 => "AF Medium Laser", 
+        				3 => "Thruster",
+					9 => "AF Medium Laser", 
         				11 => "Hyperdrive",
 					13 => "Scanner",
         				15 => "Engine",
@@ -69,16 +69,16 @@ class swLancer extends MediumShip{
         				20 => "C&C",
         		),
         		1=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
         				11 => "AF Medium Laser",
         				17 => "Structure",
            				20 => "Primary",
         		),
         		2=> array(
-        				6 => "Thruster",
-        				7 => "Ray Shield",
-        				13 => "AF Medium Laser",
+        				3 => "Thruster",
+        				4 => "Ray Shield",
+        				12 => "AF Medium Laser",
         				17 => "Structure",
         				20 => "Primary",
         		),

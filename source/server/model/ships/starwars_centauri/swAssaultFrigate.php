@@ -67,10 +67,10 @@ class swAssaultFrigate extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
         		0=> array(
-					8 => "Structure",
+					10 => "Structure",
         				12 => "Thruster",
 		        		13 => "Hyperdrive",
-					14=> "Hangar",
+					14 => "Hangar",
         				16 => "Scanner",
         				18 => "Engine",
         				19 => "Reactor",
@@ -78,18 +78,18 @@ class swAssaultFrigate extends HeavyCombatVessel{
         		),
             
         		1=> array(
-        				3 => "Thruster",
-        				4 => "Ray Shield",
-        				8 => "Heavy Turbolaser",
- 					12 => "Light Turbolaser",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				7 => "Heavy Turbolaser",
+ 					11 => "Light Turbolaser",
         				18 => "Structure",
         				20 => "Primary",
         		),
             
         		2=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-        				8 => "Heavy Turbolaser",	
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				7 => "Heavy Turbolaser",	
 					10 => "Light Turbolaser",
 		        		13 => "Heavy Laser",
         				18 => "Structure",

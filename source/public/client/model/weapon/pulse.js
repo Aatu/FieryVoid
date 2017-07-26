@@ -85,3 +85,25 @@ var ScatterGun = function(json, ship)
 }
 ScatterGun.prototype = Object.create( Weapon.prototype );
 ScatterGun.prototype.constructor = ScatterGun;
+
+
+var LtBlastCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+LtBlastCannon.prototype = Object.create( Pulse.prototype );
+LtBlastCannon.prototype.constructor = LtBlastCannon;
+
+var MedBlastCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+MedBlastCannon.prototype = Object.create( Pulse.prototype );
+MedBlastCannon.prototype.constructor = MedBlastCannon;
+
+var HvyBlastCannon = function(json, ship)
+{
+    Pulse.call( this, json, ship);
+}
+HvyBlastCannon.prototype = Object.create( Pulse.prototype );
+HvyBlastCannon.prototype.constructor = HvyBlastCannon;

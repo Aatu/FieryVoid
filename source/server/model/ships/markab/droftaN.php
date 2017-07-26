@@ -9,7 +9,7 @@ class DroftaN extends FighterFlight{
         $this->faction = "Markab";
         $this->phpclass = "DroftaN";
         $this->shipClass = "Drofta Medium Fighters";
-        $this->imagePath = "img/ships/deltaV.png";
+        $this->imagePath = "img/ships/MarkabDrofta.png";
 		$this->isd = 2000;
         
         $this->forwardDefense = 6;
@@ -33,8 +33,8 @@ class DroftaN extends FighterFlight{
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("DroftaN", $armour, 10, $this->id);
             $fighter->displayName = "Drofta";
-            $fighter->imagePath = "img/ships/auroraStarfury.png";
-            $fighter->iconPath = "img/ships/auroraStarfury_largei.png";
+            $fighter->imagePath = "img/ships/MarkabDrofta.png";
+            $fighter->iconPath = "img/ships/MarkabDroftaLARGE.png";
 
             $frontGun = new LightScattergun(330, 30); //always a single mount for this weapon
             $fighter->addFrontSystem($frontGun);

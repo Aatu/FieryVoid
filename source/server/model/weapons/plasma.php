@@ -23,11 +23,9 @@ class Plasma extends Weapon{
         }
     	
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex).";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
 		}
 		
 		public function setSystemData($data, $subsystem){
@@ -145,10 +143,7 @@ class MagGun extends Plasma{
         }
 		
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-			//$this->data["<font color='red'>Remark</font>"] = "<br>Ignores half of armor.";
 		}
 	
 		
@@ -254,8 +249,8 @@ class LightPlasma extends Plasma{
 
 
 class PlasmaTorch extends Plasma{
-
-    	public $name = "plasmaTorch";
+    	public $iconPath = "plasmaTorch.png";
+	public $name = "PlasmaTorch";
         public $displayName = "Plasma Torch";
         public $animation = "trail";
         public $animationColor = array(75, 250, 90);
@@ -282,10 +277,8 @@ class PlasmaTorch extends Plasma{
         public function setMaxDamage(){     $this->maxDamage = 30 ;      }
 
 		public function setSystemDataWindow($turn){
-			//$this->data["Weapon type"] = "Plasma";
-            		//$this->data["Damage type"] = "Standard";
 			parent::setSystemDataWindow($turn);
-			$this->data["<font color='red'>Remark</font>"] .= "<br>If fired, Plasma Torch may overheat.";
+			$this->data["Remark"] .= "<br>If fired, Plasma Torch may overheat.";
 		}
 	
         public function fire($gamedata, $fireOrder){
@@ -295,8 +288,7 @@ class PlasmaTorch extends Plasma{
 		
             $roll = Dice::d(20) + $this->getTotalDamage();
             
-            if($roll >= 16){
-                // It has overheated.
+            if($roll >= 16){ // It has overheated.
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
@@ -306,7 +298,8 @@ class PlasmaTorch extends Plasma{
             }
 		
         }
-    }
+	
+    } //end of PlasmaTorch
 
 
 
@@ -406,6 +399,129 @@ class PlasmaGun extends Plasma{
         public function setMinDamage(){     $this->minDamage = 4 ;      }
         public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 
+    }
+
+
+
+class RogolonLtPlasmaGun extends LinkedWeapon{
+	/*weapon of Rogolon fighters - very nasty!*/
+        public $name = "RogolonLtPlasmaGun";
+        public $displayName = "Light Plasma Gun";
+	public $iconPath = "plasmaGun.png";
+	
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 11;
+        public $animationWidth = 4;
+        public $trailLength = 12;
+        public $animationExplosionScale = 0.25;
+
+
+        public $intercept = 0; //no interception for this weapon!
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 1;
+	public $damageBonus = 5;
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $damageBonus=5, $shots = 2){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+	    $this->damageBonus = $damageBonus;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+	/*Plasma - armor ignoring*/
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
+        }
+        
+    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(3) +$this->damageBonus;   }
+        public function setMinDamage(){     $this->minDamage = 1 +$this->damageBonus ;      }
+        public function setMaxDamage(){     $this->maxDamage = 3 +$this->damageBonus ;      }
+    }
+
+
+class RogolonLtPlasmaCannon extends LinkedWeapon{
+	/*dedicated anti-ship weapon of Rogolon fighters - very nasty!*/
+        public $name = "RogolonLtPlasmaCannon";
+        public $displayName = "Light Plasma Cannon";
+	public $iconPath = "mediumPlasma.png";
+	
+        public $animation = "trail";
+        public $animationColor = array(75, 250, 90);
+        public $trailColor = array(75, 250, 90);
+        public $projectilespeed = 10;
+        public $animationWidth = 4;
+        public $trailLength = 13;
+        public $animationExplosionScale = 0.23;
+
+
+        public $intercept = 0; //no interception for this weapon!
+        public $loadingtime = 2;
+        public $shots = 1;
+        public $defaultShots = 1;
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+	/*Plasma - armor ignoring*/
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            $armor = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
+            if (is_numeric($armor)){
+                $toIgnore = ceil($armor /2);
+                $new = $armor - $toIgnore;
+                return $new;
+            }
+            else {
+                return 0;
+            }
+        }
+        
+    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            		$this->data["Remark"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+			$this->data["Remark"] .= "<br>Ignores half of armor.";
+        }
+
+
+        public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
     }
 
 

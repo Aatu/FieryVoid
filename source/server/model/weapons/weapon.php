@@ -1142,8 +1142,13 @@ class Weapon extends ShipSystem{
 	    
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
-            $dis = mathlib::getDistanceHex($pos, $targetPos);
-            $damage -= ($dis * $this->rangeDamagePenalty);
+	    if($pos!=null){
+	    	$sourcePos = $pos;
+	    }else{
+	    	$sourcePos = $shooter->getCoPos();
+	    }
+            $dis = mathlib::getDistanceHex($sourcePos, $targetPos);
+            $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
         }
 	    
 	//for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
