@@ -327,6 +327,7 @@ spl_autoload_register(
                 'dragon' => '/server/model/ships/drazi_old/dragon.php',
                 'egret' => '/server/model/ships/drazi_old/egret.php',
                 'nightowl' => '/server/model/ships/drazi_old/nightowl.php',
+                'nightowlupgr' => '/server/model/ships/drazi_old/nightowlUpgr.php',
                 'shrike' => '/server/model/ships/drazi_old/shrike.php',
                 'skua' => '/server/model/ships/drazi_old/skua.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
