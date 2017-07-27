@@ -61,7 +61,7 @@ class Nightowl extends BaseShipNoAft{
                 8 => "Structure",
                 10 => "Thruster",
                 11 => "Jump Engine",
-                13 => "Scanner",
+                13 => "Elint Scanner",
                 15 => "Engine",
                 17 => "Hangar",
                 19 => "Reactor",
