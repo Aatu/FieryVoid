@@ -52,6 +52,43 @@ class NightowlUpgr extends BaseShipNoAft{
         $this->addLeftSystem(new Structure( 4, 52));
         $this->addRightSystem(new Structure( 4, 52));
         $this->addPrimarySystem(new Structure( 5, 55));
+	    
+	    
+        //d20 hit chart
+        $this->hitChart = array(		
+            0=> array(
+                8 => "Structure",
+                10 => "Thruster",
+                11 => "Jump Engine",
+                13 => "ElintScanner",
+                15 => "Engine",
+                17 => "Hangar",
+                19 => "Reactor",
+                20 => "C&C",
+            ),
+            1=> array(
+                6 => "Thruster",
+                8 => "Standard Particle Beam",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+            3=> array(
+                5 => "Thruster",
+                7 => "Standard Particle Beam",
+                8 => "Repeater Gun",
+                10 => "Cargo",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+            4=> array(
+                5 => "Thruster",
+                7 => "Standard Particle Beam",
+                8 => "Repeater Gun",
+                10 => "Cargo",
+                18 => "Structure",
+                20 => "Primary",
+            ),
+        );
     }
 }
 ?>
