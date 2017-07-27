@@ -826,11 +826,16 @@ class customHeavyPolarityPulsar extends Pulse{
                 case 0: 
                 case 1:
                     return Dice::d(10,2)+2;
+                    break;
                 case 2:
                     return Dice::d(10, 4)+4;
+                    break;
                 case 3:
+		    return Dice::d(10,8)+8;
+                    break;
                 default:
                     return Dice::d(10,8)+8;
+                    break;
             }
 	}
         
@@ -860,6 +865,8 @@ class customHeavyPolarityPulsar extends Pulse{
                     $this->maxDamage = 44 ;  
                     break;
                 case 3:
+                    $this->maxDamage = 88 ;  
+                    break;
                 default:
                     $this->maxDamage = 88 ;  
                     break;
