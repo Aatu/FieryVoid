@@ -58,10 +58,18 @@ class Plasma extends Weapon{
         public $fireControl = array(-4, 1, 3); // fighters, <=mediums, <=capitals 
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-		
+	
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		$this->data["Special"] .= "<br>Can fire accelerated for less damage";  
+		$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
+		$this->data["Special"] .= "<br> - 2 turns: 2d10+8"; 
+		$this->data["Special"] .= "<br> - 3 turns (full): 4d10+12"; 
+	}
 		
 
 	public function getDamage($fireOrder){
@@ -69,47 +77,56 @@ class Plasma extends Weapon{
                 case 0: 
                 case 1:
                     return Dice::d(10)+4;
+			    return;
                 case 2:
                     return Dice::d(10, 2)+8;
+			    return;
                 case 3:
                 default:
                     return Dice::d(10,4)+12;
+			    return;
             }
 	}
         
         public function setMinDamage(){
+		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
-                    $this->minDamage = 5 /* - $this->dp*/;
+                    $this->minDamage = 5 ;
                     $this->animationExplosionScale = 0.15;
                     break;
                 case 2:
                     $this->animationExplosionScale = 0.25;
-                    $this->minDamage = 10 /*- $this->dp*/;  
+                    $this->minDamage = 10 ;  
                     break;
                 case 3:
                 default:
                     $this->animationExplosionScale = 0.35;
-                    $this->minDamage = 16 /*- $this->dp*/;  
+                    $this->minDamage = 16 ;  
                     break;
             }
+	    */
+		$this->minDamage = 16 ;   
 	}
                 
         public function setMaxDamage(){
+		/* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
-                    $this->maxDamage = 14 /*- $this->dp*/;
+                    $this->maxDamage = 14 ;
                     break;
                 case 2:
-                    $this->maxDamage = 28 /*- $this->dp*/;  
+                    $this->maxDamage = 28 ;  
                     break;
                 case 3:
                 default:
-                    $this->maxDamage = 52 /*- $this->dp*/;  
+                    $this->maxDamage = 52 ;  
                     break;
             }
+	    */
+		    $this->maxDamage = 52;
 	}
 
 }//endof class PlasmaAccelerator
