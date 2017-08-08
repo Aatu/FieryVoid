@@ -820,6 +820,15 @@ class customHeavyPolarityPulsar extends Pulse{
         public $fireControl = array(3, 4, 5); // fighters, <=mediums, <=capitals 
 	    public $fireControlArray = array( 1=>array(3, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
 		
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		$this->data["Special"] .= "<br>Can fire accelerated for less damage";  
+		$this->data["Special"] .= "<br> - 1 turn: 2d10+2"; 
+		$this->data["Special"] .= "<br> - 2 turns: 4d10+4"; 
+		$this->data["Special"] .= "<br> - 3 turns (full): 8d10+8"; 
+	}
+	    
 		
 	public function getDamage($fireOrder){
             switch($this->turnsloaded){
@@ -840,6 +849,7 @@ class customHeavyPolarityPulsar extends Pulse{
 	}
         
         public function setMinDamage(){
+	    /* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
@@ -853,9 +863,12 @@ class customHeavyPolarityPulsar extends Pulse{
                     $this->minDamage = 16 ;  
                     break;
             }
+	    */
+		 $this->minDamage = 16 ;  
 	}
                 
         public function setMaxDamage(){
+	    /* sadly this does not work correctly... seting always full load, and leaving comment about accelerated fire!
             switch($this->turnsloaded){
                 case 0:
                 case 1:
@@ -871,6 +884,8 @@ class customHeavyPolarityPulsar extends Pulse{
                     $this->maxDamage = 88 ;  
                     break;
             }
+	    */
+		$this->maxDamage = 88 ;  
 	}
 	    
 	    
