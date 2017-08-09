@@ -148,3 +148,12 @@ var HkControlNode = function(json, ship)
 }
 HkControlNode.prototype = Object.create( ShipSystem.prototype );
 HkControlNode.prototype.constructor = HkControlNode;
+
+
+var DrakhRaiderController = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+DrakhRaiderController.prototype = Object.create( ShipSystem.prototype );
+DrakhRaiderController.prototype.constructor = DrakhRaiderController;
+}
