@@ -503,11 +503,11 @@ class GraviticThruster extends Thruster{
         if (! $this->firstCriticalIgnored)
         {
             $this->firstCriticalIgnored = true;
-            Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
+            //Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
             return null;
         }
         
-        Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
+        //Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
             
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
@@ -557,7 +557,6 @@ class Catapult extends ShipSystem{
 }
 
 class JumpEngine extends ShipSystem{
-
     public $name = "jumpEngine";
     public $displayName = "Jump Engine";
     public $delay = 0;
@@ -570,7 +569,7 @@ class JumpEngine extends ShipSystem{
     }
 	
      public function setSystemDataWindow($turn){
-        $this->data["<font color='red'>Remark</font>"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+        $this->data["Remark"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
 	parent::setSystemDataWindow($turn);     
     }
 }
@@ -587,6 +586,65 @@ class Structure extends ShipSystem{
          
     
     }
+	
+/*custom system - Drakh Raider Controller*/
+class DrakhRaiderController extends ShipSystem {
+    public static $controllerList = array();
+    public $name = "Raider Controller";
+    public $iconPath = "scanner.png";
+    public $maxBoostLevel = 2;
+	
+    public static function addController($controllerShip,$controller){
+	    $newEntry = array($controllerShip,$controller);
+	    DrakhRaiderController::$controllerList[] = $newEntry; //add controller to list
+    }
+	
+    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+	    $iniBonus = 0;
+	    $turn = TacGamedata::$currentTurn-1;
+	    $turn = max(1,$turn);
+	    //strongest system applies
+	    foreach(DrakhRaiderController::$controllerList as $entry){
+		$controllerShip = $entry[0];
+		$controller = $entry[1];
+		if($unit->team == $controllerShip->team){ //only within a team...
+			if ( ($controller->isDestroyed($turn))
+			     || ($controller->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
+		}
+	    }
+	    $iniBonus = max(0,$iniBonus); 
+	    return $iniBonus;
+    }
+	
+    public function getOutputOnTurn($turn){
+	$output = parent::getOutput();
+	foreach ($this->power as $power){
+	    if ($power->turn == $turn && $power->type == 2){
+		$output += $power->amount;
+	    }    
+	}
+	return $output;
+    }
+	
+	
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	DrakhRaiderController::addController($this);
+    }    
+
+	
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Gives indicated Initiative bonus to all friendly Raiders and Heavy Raiders.";	     
+	$this->data["Special"] .= "<BR>Only strongest bonus applies.";	     	     
+	$this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";	
+    }
+} //end of DrakhRaiderController
+	
+	
 
 }
-
+?>
