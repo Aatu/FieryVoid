@@ -823,7 +823,7 @@ class customHeavyPolarityPulsar extends Pulse{
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);   
-		$this->data["Special"] .= "<br>Ignores half of armor.";  		
+		$this->data["Special"] = "Ignores half of armor.";  		
 		$this->data["Special"] .= "<br>Can fire accelerated for less damage";  
 		$this->data["Special"] .= "<br> - 1 turn: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 2 turns: 4d10+4"; 
