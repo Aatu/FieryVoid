@@ -79,7 +79,7 @@ spl_autoload_register(
                 
                 // ***custom Drakh***
                 //weapons and systems
-                'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
+                //'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
                 'customphasedisruptor' => '/server/model/weapons/customs.php',
                 'customltphasedisruptorship' => '/server/model/weapons/customs.php', //ship weapon
