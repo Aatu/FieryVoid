@@ -35,6 +35,8 @@ class ShipSystem{
     protected $structureSystem;
     
     protected $parentSystem = null;
+    protected $unit = null; //unit on which system is mounted
+	
     
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;
@@ -42,7 +44,7 @@ class ShipSystem{
         $this->powerReq = (int)$powerReq;
         $this->output = (int)$output;
     }
-    
+
     public function onConstructed($ship, $turn, $phase){
 	if($ship->getAdvancedArmor()==true){
 		$this->advancedArmor = true;
@@ -50,6 +52,14 @@ class ShipSystem{
         $this->structureSystem = $ship->getStructureSystem($this->location);
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
+    }
+	
+    public function setUnit($unit){
+	$this->unit = $unit;    
+    }
+	
+    public function getUnit($unit){
+	return $this->unit;    
     }
     
     public function getSpecialAbilityList($list)
