@@ -65,7 +65,7 @@ class Plasma extends Weapon{
 	    
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);   
-		$this->data["Special"] .= "<br>Can fire accelerated for less damage";  
+		$this->data["Special"] = "<br>Can fire accelerated for less damage";  
 		$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
 		$this->data["Special"] .= "<br> - 2 turns: 2d10+8"; 
 		$this->data["Special"] .= "<br> - 3 turns (full): 4d10+12"; 
