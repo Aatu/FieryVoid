@@ -588,7 +588,8 @@ class Structure extends ShipSystem{
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
     public static $controllerList = array();
-    public $name = "Raider Controller";
+    public $name = "DrakhRaiderController";
+    public $displayName = "Raider Controller";
     public $iconPath = "scanner.png";
     public $maxBoostLevel = 2;
 	
