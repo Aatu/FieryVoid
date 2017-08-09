@@ -302,8 +302,8 @@ spl_autoload_register(
                 
                 
                 // centauri raiders
-                //'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
-                'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
+                'alzara' => '/server/model/ships/centauri_raiders/alzara.php',
+                //'mogortha' => '/server/model/ships/centauri_raiders/mogortha.php',
                 'dux' => '/server/model/ships/centauri_raiders/dux.php',
                 // drazi and wotc centauro osat
                 'dudromaa' => '/server/model/ships/drazi/dudromaA.php',
