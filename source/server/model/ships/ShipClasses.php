@@ -187,6 +187,7 @@
             $i = sizeof($this->systems);
             $system->setId($i);
             $system->location = $loc;
+		$system->setUnit($this);
 
 
             $this->systems[$i] = $system;
