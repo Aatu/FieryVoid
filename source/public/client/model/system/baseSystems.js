@@ -156,4 +156,4 @@ var DrakhRaiderController = function(json, ship)
 }
 DrakhRaiderController.prototype = Object.create( ShipSystem.prototype );
 DrakhRaiderController.prototype.constructor = DrakhRaiderController;
-}
+
