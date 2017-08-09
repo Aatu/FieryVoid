@@ -158,6 +158,7 @@
 	}
         
         protected function addSystem($fighter, $loc = null){
+		$fighter->setUnit($this);
             $fighter->id = $this->autoid;
             $fighter->location = sizeof($this->systems);
             
