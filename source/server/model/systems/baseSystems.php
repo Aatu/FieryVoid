@@ -576,16 +576,14 @@ class JumpEngine extends ShipSystem{
 
 
 class Structure extends ShipSystem{
-
     public $name = "structure";
     public $displayName = "Structure";
-
     
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
-         
-    
     }
+} //endof Structure	
+	
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
