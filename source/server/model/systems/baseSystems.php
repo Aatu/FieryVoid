@@ -592,9 +592,8 @@ class DrakhRaiderController extends ShipSystem {
     public $iconPath = "scanner.png";
     public $maxBoostLevel = 2;
 	
-    public static function addController($controllerShip,$controller){
-	    $newEntry = array($controllerShip,$controller);
-	    DrakhRaiderController::$controllerList[] = $newEntry; //add controller to list
+    public static function addController($controller){
+	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
     }
 	
     public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
@@ -602,9 +601,8 @@ class DrakhRaiderController extends ShipSystem {
 	    $turn = TacGamedata::$currentTurn-1;
 	    $turn = max(1,$turn);
 	    //strongest system applies
-	    foreach(DrakhRaiderController::$controllerList as $entry){
-		$controllerShip = $entry[0];
-		$controller = $entry[1];
+	    foreach(DrakhRaiderController::$controllerList as $controller){
+		$controllerShip = $controler->getUnit();
 		if($unit->team == $controllerShip->team){ //only within a team...
 			if ( ($controller->isDestroyed($turn))
 			     || ($controller->isOfflineOnTurn($turn))
