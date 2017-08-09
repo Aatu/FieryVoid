@@ -11,7 +11,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->shipClass = "Heavy Tender";
         $this->shipSizeClass = 3;
         $this->limited = 33;
-        $this->fighters = array("Shuttles" => 6, "Raiders" => 24);
+        $this->fighters = array( "Raiders" => 24);
         $this->gravitic = true;	    
 	$this->unofficial = true;
 	$this->advancedArmor = true;   
@@ -94,12 +94,13 @@ class DrakhHeavyTender extends BaseShip{
 	    
         $this->hitChart = array(
             0=> array(
-                    9 => "Structure",
-                    10 => "Tractor Beam",
-                    12 => "Jump Engine",
-                    14 => "Scanner",
-                    16 => "Engine",
-                    17 => "Hangar",
+                    8 => "Structure",
+                    9 => "Tractor Beam",
+                    11 => "Jump Engine",
+                    13 => "Scanner",
+                    15 => "Raider Controller",	
+                    17 => "Engine",
+                    18 => "Hangar",   
                     19 => "Reactor",
                     20 => "C&C",
             ),
