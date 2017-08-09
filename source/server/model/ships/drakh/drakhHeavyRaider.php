@@ -63,5 +63,14 @@ class DrakhHeavyRaider extends MediumShip{
         		
         ); //end of hit chart
     }
+	
+	
+        public function getInitiativebonus($gamedata){
+	    $iniBonus = parent::getInitiativebonus($gamedata);
+            //may be boosted by  Raider Controller...
+	    $iniBonus += DrakhRaiderController::getIniBonus($this);
+            return $iniBonus;
+        }
+	
 }
 ?>
