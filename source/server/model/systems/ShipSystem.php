@@ -58,7 +58,7 @@ class ShipSystem{
 	$this->unit = $unit;    
     }
 	
-    public function getUnit($unit){
+    public function getUnit(){
 	return $this->unit;    
     }
     
