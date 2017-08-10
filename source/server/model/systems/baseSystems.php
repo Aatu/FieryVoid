@@ -612,6 +612,7 @@ class DrakhRaiderController extends ShipSystem {
 	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
 		}
 	    }
+	    $iniBonus = $iniBonus * 5; //d20->d100
 	    $iniBonus = max(0,$iniBonus); 
 	    return $iniBonus;
     }
