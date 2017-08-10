@@ -18,6 +18,7 @@
         public $currentturndelay = 0;
         public $iniative = "N/A";
         public $iniativebonus = 0;
+	    public $iniativeadded = 0; //Initiative bonus difference - compared to base bonus! Just for display to player.
         public $gravitic = false;
         public $phpclass;
         public $forwardDefense, $sideDefense;
@@ -63,6 +64,26 @@
 	    $this->fillLocationsGUI();//so called shots work properly
         }
         
+        public function getCommonIniModifiers(){ //common Initiative modifiers: speed, criticals
+            $mod = 0;
+            $speed = $ship->getSpeed();
+        
+            if ( !($this instanceof OSAT) ){
+                if ($speed < 5){
+                    $mod = (5-$speed)*(-10);
+                }
+                $CnC = $ship->getSystemByName("CnC");
+                if ($CnC){
+			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
+	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
+			}
+	    }
+	    return $mod;
+	}
+	    
         public function getInitiativebonus($gamedata){
             if($this->faction == "Centauri"){
                 return $this->doCentauriInitiativeBonus($gamedata);
@@ -145,13 +166,18 @@
             $this->movement = $movements;
         }
         
+	    
+	    
         public function onConstructed($turn, $phase)
         {
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
-                
                 $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
             }
+	    //fill $this->iniativeadded
+            $modifiedbonus = $this->getInitiativebonus( ) + $this->getCommonIniModifiers( );
+            $modifiedbonus = $modifiedbonus - $this->iniativebonus;
+	    $this->iniativeadded = $modifiedbonus;
         }
         
         public function hasSpecialAbility($ability)
