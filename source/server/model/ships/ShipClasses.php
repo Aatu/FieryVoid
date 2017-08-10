@@ -66,13 +66,13 @@
         
         public function getCommonIniModifiers(){ //common Initiative modifiers: speed, criticals
             $mod = 0;
-            $speed = $ship->getSpeed();
+            $speed = $this->getSpeed();
         
             if ( !($this instanceof OSAT) ){
                 if ($speed < 5){
                     $mod = (5-$speed)*(-10);
                 }
-                $CnC = $ship->getSystemByName("CnC");
+                $CnC = $this->getSystemByName("CnC");
                 if ($CnC){
 			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
 			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
