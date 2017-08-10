@@ -627,7 +627,7 @@ gamedata = {
             if (a.iniative > b.iniative){
                 return 1;
             } else return -1;*/
-	    if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)){
+	    if (shipManager.getIniativeOrder(a) < shipManager.getIniativeOrder(b)){
                 return 1;
             } else return -1;
         })
