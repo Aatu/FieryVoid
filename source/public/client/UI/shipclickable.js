@@ -125,7 +125,9 @@ window.shipClickable = {
             shipClickable.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
             shipClickable.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
             shipClickable.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship) + "    (" + ship.accelcost + ")");
-            shipClickable.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
+            //shipClickable.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
+	    //change displayed values (by Marcin Sawicki)
+	    shipClickable.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + "("+ship.iniative+"): base " + ship.iniativebonus + "; mod "+ ship.iniativeadded );
             shipClickable.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
             shipClickable.addEntryElement(misc, ship.flight != true);
             shipClickable.addEntryElement(flightArmour, ship.flight === true);
