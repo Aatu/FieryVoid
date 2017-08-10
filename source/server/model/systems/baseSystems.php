@@ -605,7 +605,7 @@ class DrakhRaiderController extends ShipSystem {
 	    //strongest system applies
 	    foreach(DrakhRaiderController::$controllerList as $controller){
 		$controllerShip = $controller->getUnit();
-		if($unit->team == $controllerShip->team){ //only within a team...
+		if($unit->userid == $controllerShip->userid){ //only for the same player...
 			if ( ($controller->isDestroyed($turn))
 			     || ($controller->isOfflineOnTurn($turn))
 			    ){ continue; }//if controller system is destroyed or offline, no effect
