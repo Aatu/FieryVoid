@@ -592,6 +592,7 @@ class DrakhRaiderController extends ShipSystem {
     public $displayName = "Raider Controller";
     public $iconPath = "scanner.png";
     public $maxBoostLevel = 2;
+    public $boostable = true;
 	
     public static function addController($controller){
 	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
