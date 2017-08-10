@@ -168,14 +168,14 @@
         
 	    
 	    
-        public function onConstructed($turn, $phase)
+        public function onConstructed($turn, $phase, $gamedata)
         {
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
             }
 	    //fill $this->iniativeadded
-            $modifiedbonus = $this->getInitiativebonus( ) + $this->getCommonIniModifiers( );
+            $modifiedbonus = $this->getInitiativebonus( $gamedata ) + $this->getCommonIniModifiers( );
             $modifiedbonus = $modifiedbonus - $this->iniativebonus;
 	    $this->iniativeadded = $modifiedbonus;
         }
