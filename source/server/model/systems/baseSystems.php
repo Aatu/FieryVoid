@@ -411,7 +411,7 @@ class Thruster extends ShipSystem{
     public $direction;
     public $thrustused;
     public $thrustwasted = 0;
-public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
+    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
     
     public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
     
@@ -591,12 +591,20 @@ class DrakhRaiderController extends ShipSystem {
     public $name = "drakhRaiderController";
     public $displayName = "Raider Controller";
     public $iconPath = "scanner.png";
-    public $maxBoostLevel = 2;
     public $boostable = true;
+    public $maxBoostLevel = 2;
 	
     public static function addController($controller){
 	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
     }
+	
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	DrakhRaiderController::addController($this);
+    }    
+	
 	
     public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
 	    $iniBonus = 0;
@@ -626,13 +634,6 @@ class DrakhRaiderController extends ShipSystem {
 	}
 	return $output;
     }
-	
-	
-    function __construct($armour, $maxhealth, $powerReq, $output ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-        $this->boostEfficiency = $powerReq;
-	DrakhRaiderController::addController($this);
-    }    
 
 	
      public function setSystemDataWindow($turn){
