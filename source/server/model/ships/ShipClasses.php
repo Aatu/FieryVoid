@@ -64,7 +64,7 @@
 	    $this->fillLocationsGUI();//so called shots work properly
         }
         
-        public function getCommonIniModifiers(){ //common Initiative modifiers: speed, criticals
+        public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
             $speed = $this->getSpeed();
         
@@ -175,7 +175,7 @@
                 $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
             }
 	    //fill $this->iniativeadded
-            $modifiedbonus = $this->getInitiativebonus( $gamedata ) + $this->getCommonIniModifiers( );
+            $modifiedbonus = $this->getInitiativebonus( $gamedata ) + $this->getCommonIniModifiers( $gamedata );
             $modifiedbonus = $modifiedbonus - $this->iniativebonus;
 	    $this->iniativeadded = $modifiedbonus;
         }
