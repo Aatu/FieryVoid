@@ -865,7 +865,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 			}
 	    }
 	    */
-	   $mod =  $ship->getCommonIniModifiers( );
+	   $mod =  $ship->getCommonIniModifiers( $gamedata );
 	   $iniBonus =  $ship->getInitiativebonus($gamedata);
 	    
 
