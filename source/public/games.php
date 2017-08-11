@@ -56,7 +56,7 @@
                     news.innerHTML += "<br>";
                     news.innerHTML += "- modification of Initiative display on mouseover";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- did You ever have a ship that's still there, but You want to get rid of it? Now You can - just set reactor to overload!";
+                    news.innerHTML += "<br>- Did You ever have a ship that's still there, but You want to get rid of it? Now You can - just set reactor to overload!<br>";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
