@@ -216,13 +216,15 @@ gamedata = {
             for (var ship in myShips){
                 if (!myShips[ship].flight){
 			
-			//loop at systems for overloading reactor(s)
+			//loop at systems looking for overloading reactor(s)
 			for (var syst in myShips[ship].systems){
-				for (var pow in myShips[ship].systems[syst].power){
-					if ((myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
-						&& (myShips[ship].systems[syst].power[pow].type == 2)
-					    ){
-						selfDestructing.push(myShips[ship]);
+				if(myShips[ship].systems[syst].name == 'reactor'){
+					for (var pow in myShips[ship].systems[syst].power){
+						if ((myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
+							&& (myShips[ship].systems[syst].power[pow].type == 2)
+						    ){
+							selfDestructing.push(myShips[ship]);
+						}
 					}
 				}
 			}
@@ -273,6 +275,7 @@ gamedata = {
 			    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
 			    html += "<br>";
 			}	
+			html += "<br>";
 		}
 		if(hasNoEW.length > 0){
 			html += "You have not assigned any EW for the following ships: ";
