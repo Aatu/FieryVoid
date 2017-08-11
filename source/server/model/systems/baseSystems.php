@@ -263,6 +263,17 @@ class Reactor extends ShipSystem{
 
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
+	
+	
+    public function isOverloading($turn){
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                return true;
+            }
+        }
+        return false;
+    }
+	
 }
 
 class SubReactor extends ShipSystem{
