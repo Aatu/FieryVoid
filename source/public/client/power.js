@@ -536,6 +536,11 @@ shipManager.power = {
 	},
 	
 	canBoost: function(ship, system){
+		
+		//can always boost reactor (to overload)!
+		if (system.name == 'reactor'){
+			return true;
+		}
 
 		var has = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		var need = shipManager.power.countBoostReqPower(ship, system);
@@ -549,10 +554,8 @@ shipManager.power = {
 	},
 	
 	canOverload: function(ship, system){
-        
 		if (!system.overloadable)
 			return false;
-		
 		return (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) >= system.powerReq);
 	},
 	
