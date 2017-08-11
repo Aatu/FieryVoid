@@ -440,7 +440,6 @@ class Firing{
 		foreach($reactorList as $reactorCurr){
 			//is it overloading?...
 			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
-						/*
 				$fireOrder =  new FireOrder(-1, "Reactor overload", $ship->id,  $ship->id, $this->id, -1, 
 					$gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'plasma');
 				$fireOrder->updated = true;
@@ -449,7 +448,6 @@ class Firing{
 					"Reactor overload", "plasma");
 				$damageEntry->updated = true;
 				$reactorCurr->damage[] = $damageEntry;
-		*/
 			}
 		}
 
