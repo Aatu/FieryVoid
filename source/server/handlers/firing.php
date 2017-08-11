@@ -434,13 +434,24 @@ class Firing{
         $fireOrders  = array();
         
         foreach ($gamedata->ships as $ship){
+		
+		/*account for possible reactor overload!*/
+		$reactorList = $ship->getSystemsByName('Reactor');
+		foreach($reactorList as $reactorCurr){
+			//is it overloading?...
+			if(($reactorCurr->getBoostLevel(TacGamedata::$currentTurn)) > 0 ){ //primed for self destruct!
+        			$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, 1, 0, 0, -1, true, "plasma");
+				$damageEntry->updated = true;
+				$reactorCurr->damage[] = $damageEntry;
+			}
+		}
+		
 
             if ($ship instanceof FighterFlight){
                 continue;
             }
 
             foreach($ship->getAllFireOrders() as $fire){
-	    
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
                     continue;
                 }
@@ -450,12 +461,14 @@ class Firing{
          //       debug::log($ship->id."___".$weapon->displayName." fireOrder");
 
                 if ($weapon instanceof Thruster || $weapon instanceof Structure){
+			/*
                     debug::log("DING");
                     debug::log($ship->phpclass);
                     debug::log($weapon->location);
                     debug::log($weapon->displayName);
                     debug::log("DING_2");
-             //       debug::log($weapon->fireOrders[0]);
+                    debug::log($weapon->fireOrders[0]);
+		    */
                     continue;
 
                 }
