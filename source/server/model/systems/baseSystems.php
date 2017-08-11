@@ -222,6 +222,10 @@ class Reactor extends ShipSystem{
     public $displayName = "Reactor";
     public $primary = true;
     public $outputType = "power";
+	
+    public $boostable = true; //for reactor overload feature!
+    public $maxBoostLevel = 1;
+    public $boostEfficiency = 0;
     
     public $possibleCriticals = array(
         11=>"OutputReduced2",
@@ -259,6 +263,22 @@ class Reactor extends ShipSystem{
 
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
+	
+	
+    public function isOverloading($turn){
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                return true;
+            }
+        }
+        return false;
+    }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
+    }
+	
 }
 
 class SubReactor extends ShipSystem{

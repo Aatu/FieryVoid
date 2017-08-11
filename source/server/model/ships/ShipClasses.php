@@ -385,6 +385,20 @@
 	} //end of function getSystemsByNameLoc
 	    
 
+	public function getSystemsByName($name, $acceptDestroyed = false){ /*get list of required systems anywhere on a ship*/
+		/*'destroyed' means either destroyed as of PREVIOUS turn, OR reduced to health 0*/
+		$returnTab = array();
+		foreach ($this->systems as $system){
+			if ( ($system->displayName == $name) ){
+			    if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
+				    $returnTab[] = $system;
+			    }
+			}
+		}
+		return $returnTab;
+	} //end of function getSystemsByName
+	    
+	    
         
         public function getHitChanceMod($shooter, $pos, $turn, $weapon){
             $affectingSystems = array();

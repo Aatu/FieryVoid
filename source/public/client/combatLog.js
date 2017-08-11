@@ -39,6 +39,8 @@ window.combatLog = {
             var fire = orders[a];
             
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
+		
+		
 	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             while(modeIteration > 1){
                 weapon.changeFiringMode();
@@ -218,8 +220,6 @@ window.combatLog = {
 
 
     logSubReactorExplosion: function(ship, system){
-
-
         var html = '<div class="logentry">';
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
             html +=  ' lost parts of its outer structure due to a chain reaction after a reactor exploded.';
