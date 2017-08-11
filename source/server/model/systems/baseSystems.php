@@ -222,6 +222,10 @@ class Reactor extends ShipSystem{
     public $displayName = "Reactor";
     public $primary = true;
     public $outputType = "power";
+	
+    public $boostable = true; //for reactor overload feature!
+    public $maxBoostLevel = 1;
+    public $boostEfficiency = 0;
     
     public $possibleCriticals = array(
         11=>"OutputReduced2",
