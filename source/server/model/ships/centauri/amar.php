@@ -10,7 +10,7 @@ class Amar extends HeavyCombatVessel{
         $this->imagePath = "img/ships/darkner.png";
         $this->shipClass = "Amar Fast Carrier";
         $this->occurence = "uncommon";
-        $this->phpclass = "Darkner Fast Attack Frigate";
+        $this->variantOf = "Darkner Fast Attack Frigate";
         $this->fighters = array("medium"=>12);
 
         $this->forwardDefense = 13;
