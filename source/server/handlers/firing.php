@@ -440,15 +440,16 @@ class Firing{
 		foreach($reactorList as $reactorCurr){
 			//is it overloading?...
 			if( ($reactorCurr->getBoostLevel($gamedata->turn)) > 0 ){ //primed for self destruct!
-//construct fire order? ... plus:
+				/*
 				$fireOrder =  new FireOrder(-1, "Reactor overload", $ship->id,  $ship->id, $this->id, -1, 
 					$gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'plasma');
 				$fireOrder->updated = true;
 				$fireOrder->addToDB = true;
-
-        			$damageEntry = new DamageEntry(-1, $ship->id, $fireOrder->id, $gamedata->turn, $reactorCurr->id, 1, 0, 0, -1, true, "Reactor overload", "plasma");
+        			$damageEntry = new DamageEntry(-1, $ship->id, $fireOrder->id, $gamedata->turn, $reactorCurr->id, 1, 0, 0, -1, true, 
+					"Reactor overload", "plasma");
 				$damageEntry->updated = true;
 				$reactorCurr->damage[] = $damageEntry;
+				*/
 			}
 		}
 		
