@@ -437,10 +437,10 @@ class Firing{
 		
 		/*account for possible reactor overload!*/
 		$reactorList = $ship->getSystemsByName('Reactor');
-		/*
 		foreach($reactorList as $reactorCurr){
 			//is it overloading?...
-			if( ($reactorCurr->getBoostLevel($gamedata->turn)) > 0 ){ //primed for self destruct!
+			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
+						/*
 				$fireOrder =  new FireOrder(-1, "Reactor overload", $ship->id,  $ship->id, $this->id, -1, 
 					$gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'plasma');
 				$fireOrder->updated = true;
@@ -449,9 +449,10 @@ class Firing{
 					"Reactor overload", "plasma");
 				$damageEntry->updated = true;
 				$reactorCurr->damage[] = $damageEntry;
+		*/
 			}
 		}
-		*/
+
 
             if ($ship instanceof FighterFlight){
                 continue;
