@@ -274,6 +274,11 @@ class Reactor extends ShipSystem{
         return false;
     }
 	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
+    }
+	
 }
 
 class SubReactor extends ShipSystem{
