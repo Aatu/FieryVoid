@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 11th of August 2017";
+                    header.innerHTML = "Latest News 12th of August 2017";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -55,6 +55,8 @@
                     news.innerHTML += "- correction of Order of Battle window initiative order - now it won't mislead on ties any longer!";
                     news.innerHTML += "<br>";
                     news.innerHTML += "- modification of Initiative display on mouseover";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- did You ever have a ship that's still there, but You want to get rid of it? Now You can - just set reactor to overload!";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
