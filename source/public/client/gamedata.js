@@ -218,9 +218,9 @@ gamedata = {
 			
 			//loop at systems looking for overloading reactor(s)
 			for (var syst in myShips[ship].systems){
-				if(myShips[ship].systems[syst].name == 'reactor'){
+				if(myShips[ship].systems[syst].name == "reactor"){
 					for (var pow in myShips[ship].systems[syst].power){
-						if ((myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
+						if( (myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
 							&& (myShips[ship].systems[syst].power[pow].type == 2)
 						    ){
 							selfDestructing.push(myShips[ship]);
