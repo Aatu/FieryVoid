@@ -272,7 +272,7 @@ gamedata = {
 			html += "You have ordering following ships to SELF DESTRUCT: ";
 			    html += "<br>";
 			for (var ship in selfDestructing){
-			    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+			    html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
 			    html += "<br>";
 			}	
 			html += "<br>";
