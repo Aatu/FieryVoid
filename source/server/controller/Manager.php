@@ -844,6 +844,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
     
     private static function generateIniative($gamedata){
         foreach ($gamedata->ships as $key=>$ship){
+		/* moved to ship slass itself!
             $mod = 0;
             $speed = $ship->getSpeed();
         
@@ -863,11 +864,13 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	    			$mod += 20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 			}
 	    }
-		
+	    */
+	   $mod =  $ship->getCommonIniModifiers( $gamedata );
+	   $iniBonus =  $ship->getInitiativebonus($gamedata);
 	    
 
 		
-            $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
+            $ship->iniative = Dice::d(100) + $iniBonus + $mod;
            //debug::log("ini submit for: ".$ship->shipClass."---:".$ship->iniative);
 
         }

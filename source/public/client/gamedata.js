@@ -623,7 +623,11 @@ gamedata = {
         }
         
         ships.sort(function(a, b){
+		/* replace with using correct initiative order!
             if (a.iniative > b.iniative){
+                return 1;
+            } else return -1;*/
+	    if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)){
                 return 1;
             } else return -1;
         })

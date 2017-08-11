@@ -44,15 +44,17 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 25th of July 2017";
+                    header.innerHTML = "Latest News 11th of August 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Correction of Plasma bug! (if You thought Your Plasma weapons damage was off, You were probably right ;) ) ";
+                    news.innerHTML += "- correction of Accelerator weapons damage display";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Small Races, courtesy of Wolfgang (will be expanded later)";
+                    news.innerHTML += "- correction of Order of Battle window initiative order - now it won't mislead on ties any longer!";
+                    news.innerHTML += "<br>";
+                    news.innerHTML += "- modification of Initiative display on mouseover";
                     news.innerHTML += "<br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
