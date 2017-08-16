@@ -555,12 +555,12 @@ spl_autoload_register(
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
                 'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
-/*                
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
                 'orestesgamma' => '/server/model/ships/EA/orestesGamma.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
+/*                
                 'tethys' => '/server/model/ships/EA/tethys.php',
                 'tethyslaser' => '/server/model/ships/EA/tethysLaser.php',
                 'tethysmissile' => '/server/model/ships/EA/tethysMissile.php',
