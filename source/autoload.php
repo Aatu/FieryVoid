@@ -520,9 +520,8 @@ spl_autoload_register(
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 
                 //EA from Stock!
-                
                 'orion' => '/server/model/ships/EA/orion.php', //starbase
-                /*
+                
                 'apollo' => '/server/model/ships/EA/apollo.php',
                 'artemisescort' => '/server/model/ships/EA/artemisEscort.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
@@ -546,6 +545,7 @@ spl_autoload_register(
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
+/*                
                  //'nova' => '/server/model/ships/EA/nova.php', //original version
                 'novamlpa' => '/server/model/ships/EA/novaMlpa.php', //version with new MLPAs
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
@@ -568,11 +568,10 @@ spl_autoload_register(
                 'tethyspolice' => '/server/model/ships/EA/tethysPolice.php',
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
-                'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',
-                */                
+                'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',           
                 //'warlock' => '/server/model/ships/EA/warlock.php',//original version
                 'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
-                
+*/                
 
                 
                 //stock 
