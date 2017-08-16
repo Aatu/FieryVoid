@@ -5,7 +5,7 @@ class Laertes extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 325;
-	$this->faction = "EA";
+	$this->faction = "EA defenses";
         $this->phpclass = "Laertes";
         $this->imagePath = "img/ships/laertes.png";
         $this->shipClass = "Laertes Police Corvette";
