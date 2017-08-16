@@ -519,6 +519,8 @@ spl_autoload_register(
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 
+                
+                
                 //EA from Stock!
                 'orion' => '/server/model/ships/EA/orion.php', //starbase
                 
@@ -569,7 +571,7 @@ spl_autoload_register(
                 //'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',           
                 //'warlock' => '/server/model/ships/EA/warlock.php',//original version
-                'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
+                //'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
             
 
                 
