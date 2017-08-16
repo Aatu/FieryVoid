@@ -560,12 +560,12 @@ spl_autoload_register(
                 'orestes' => '/server/model/ships/EA/orestes.php',
                 'orestesgamma' => '/server/model/ships/EA/orestesGamma.php',
                 'sagittarius' => '/server/model/ships/EA/sagittarius.php',
-/*                
                 'tethys' => '/server/model/ships/EA/tethys.php',
                 'tethyslaser' => '/server/model/ships/EA/tethysLaser.php',
                 'tethysmissile' => '/server/model/ships/EA/tethysMissile.php',
                 'tethysplasma' => '/server/model/ships/EA/tethysPlasma.php',
                 'tethyspolice' => '/server/model/ships/EA/tethysPolice.php',
+/*                
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',           
