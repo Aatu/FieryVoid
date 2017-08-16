@@ -569,7 +569,7 @@ spl_autoload_register(
                 'tethyspolice' => '/server/model/ships/EA/tethysPolice.php',
                 //'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 //'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
-                'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',           
+                //'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',           
                 //'warlock' => '/server/model/ships/EA/warlock.php',//original version
                 //'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
             
