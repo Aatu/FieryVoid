@@ -548,7 +548,7 @@ spl_autoload_register(
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
-                .. 'nova' => '/server/model/ships/EA/nova.php', //original version
+                // 'nova' => '/server/model/ships/EA/nova.php', //original version
                 'novamlpa' => '/server/model/ships/EA/novaMlpa.php', //version with new MLPAs
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
                 'novastarfury' => '/server/model/ships/EA/novaStarfury.php',
