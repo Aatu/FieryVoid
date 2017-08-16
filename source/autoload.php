@@ -523,13 +523,11 @@ spl_autoload_register(
                 
                 //EA from Stock!
                 'orion' => '/server/model/ships/EA/orion.php', //starbase
-/*                
                 'apollo' => '/server/model/ships/EA/apollo.php',
                 'artemisescort' => '/server/model/ships/EA/artemisEscort.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
                 'artemisbeta' => '/server/model/ships/EA/artemisBeta.php',
                 'artemisgamma' => '/server/model/ships/EA/artemisGamma.php',
-*/                
                 'aurorastarfury' => '/server/model/ships/EA/auroraStarfury.php',
                 'avenger' => '/server/model/ships/EA/avenger.php',
                 'avengerbeta' => '/server/model/ships/EA/avengerBeta.php',
