@@ -520,9 +520,9 @@ spl_autoload_register(
                 'thorunheavynav' => '/server/model/ships/dilgar/thorunHeavyNav.php',
                 
                 //EA from Stock!
-                /*
-                'orion' => '/server/model/ships/EA/orion.php', //starbase
                 
+                'orion' => '/server/model/ships/EA/orion.php', //starbase
+                /*
                 'apollo' => '/server/model/ships/EA/apollo.php',
                 'artemisescort' => '/server/model/ships/EA/artemisEscort.php',
                 'artemisalpha' => '/server/model/ships/EA/artemisAlpha.php',
@@ -533,6 +533,7 @@ spl_autoload_register(
                 'avengerbeta' => '/server/model/ships/EA/avengerBeta.php',
                 'badgerstarfury' => '/server/model/ships/EA/badgerStarfury.php',
                 'cronos' => '/server/model/ships/EA/cronos.php',
+                'delphi' => '/server/model/ships/EA/delphi.php',
                 'hecatealpha' => '/server/model/ships/EA/hecateAlpha.php',
                 'hector' => '/server/model/ships/EA/hector.php',
                 'hermes' => '/server/model/ships/EA/hermes.php',
@@ -559,6 +560,7 @@ spl_autoload_register(
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
                 'orestesgamma' => '/server/model/ships/EA/orestesGamma.php',
+                'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'tethys' => '/server/model/ships/EA/tethys.php',
                 'tethyslaser' => '/server/model/ships/EA/tethysLaser.php',
                 'tethysmissile' => '/server/model/ships/EA/tethysMissile.php',
@@ -567,10 +569,11 @@ spl_autoload_register(
                 'thunderboltstarfury' => '/server/model/ships/EA/thunderboltStarfury.php',
                 'thunderboltstarfurynav' => '/server/model/ships/EA/thunderboltStarfuryNav.php',
                 'tigerstarfury' => '/server/model/ships/EA/tigerStarfury.php',
+                */                
                 //'warlock' => '/server/model/ships/EA/warlock.php',//original version
                 'warlockmlpa' => '/server/model/ships/EA/warlockMlpa.php',//version with new MLPAs
                 
-                */
+
                 
                 //stock 
                 'acceleratorprimus' => '/server/model/ships/centauri/AcceleratorPrimus.php',
@@ -639,7 +642,6 @@ spl_autoload_register(
                 'deltav' => '/server/model/ships/raiders/deltaV.php',
                 'doublev' => '/server/model/ships/raiders/doubleV.php',
                 'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php',
-                'delphi' => '/server/model/ships/EA/delphi.php',
                 'demos' => '/server/model/ships/centauri/demos.php',
                 'deployment' => '/server/handlers/Deployment.php',
                 'devaskar' => '/server/model/ships/brakiri/devaskar.php',
@@ -868,7 +870,6 @@ spl_autoload_register(
                 'rongoth' => '/server/model/ships/narn/rongoth.php',
                 'rothan' => '/server/model/ships/narn/rothan.php',
                 'rutarian' => '/server/model/ships/centauri/rutarian.php',
-                'sagittarius' => '/server/model/ships/EA/sagittarius.php',
                 'scanner' => '/server/model/systems/baseSystems.php',
                 'scatterpulsar' => '/server/model/weapons/pulse.php',
                 'secundus' => '/server/model/ships/centauri/secundus.php',
