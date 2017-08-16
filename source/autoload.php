@@ -545,7 +545,6 @@ spl_autoload_register(
                 'hyperionpulse' => '/server/model/ships/EA/hyperionPulse.php',
                 'hyperionrail' => '/server/model/ships/EA/hyperionRail.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
-/*                
                  //'nova' => '/server/model/ships/EA/nova.php', //original version
                 'novamlpa' => '/server/model/ships/EA/novaMlpa.php', //version with new MLPAs
                 'novaalpha' => '/server/model/ships/EA/novaAlpha.php',
@@ -556,6 +555,7 @@ spl_autoload_register(
                 'omega' => '/server/model/ships/EA/omega.php',
                 'omegabeta' => '/server/model/ships/EA/omegaBeta.php',
                 'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
+/*                
                 'oracle' => '/server/model/ships/EA/oracle.php',
                 'oraclescout' => '/server/model/ships/EA/oracleScout.php',
                 'orestes' => '/server/model/ships/EA/orestes.php',
