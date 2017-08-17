@@ -27,7 +27,6 @@
 			$names = self::getShipClassnames();
 			$ships = array();
             		$count = 0;
-			$countFaction = 0;$limitFaction = 220; //test - there are problems with EA number of ships
 			foreach ($names as $name){
 				if (class_exists($name)){
                     			$count++;
@@ -42,10 +41,8 @@
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
 					}
-					if($countFaction<$limitFaction){
-						$countFaction++;
-						$ships[$ship->faction][] = $ship;
-					}
+					
+					$ships[$ship->faction][] = $ship;
 				}
 			}
 			
