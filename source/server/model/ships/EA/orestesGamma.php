@@ -5,7 +5,7 @@ class OrestesGamma extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 550;
-		$this->faction = "EA defenses";
+		$this->faction = 'EA';//"EA defenses";
 		$this->phpclass = "OrestesGamma";
 		$this->imagePath = "img/ships/orestes.png";
 		$this->shipClass = "Orestes System Monitor (Gamma)";
