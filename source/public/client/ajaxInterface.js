@@ -12,7 +12,7 @@ window.ajaxInterface = {
             dataType : 'json',
             data: {faction:factionRequest},
             success : getFactionShipsCallback,
-            error : ajaxInterface.errorAjax,
+            error : ajaxInterface.errorAjax
         });
 	},
 
