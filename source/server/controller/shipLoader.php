@@ -40,10 +40,10 @@
 					    }
         
 					if (!isset($ships[$ship->faction])){
-						$countFaction++;
 						$ships[$ship->faction] = array();
 					}
 					if($countFaction<$limitFaction){
+						$countFaction++;
 						$ships[$ship->faction][] = $ship;
 					}
 				}
