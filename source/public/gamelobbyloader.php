@@ -12,8 +12,12 @@
 			$factionRequest = $_GET["faction"]; 
 			$ret = ShipLoader::getAllShips($factionRequest);
 			$retJSON = json_encode($ret, JSON_NUMERIC_CHECK);
-		}else{
-            $retJSON = '{"error":"Omitting required data"}';
+		}elseif(isset($_POST["faction"])){
+			$factionRequest = $_POST["faction"]; 
+			$ret = ShipLoader::getAllShips($factionRequest);
+			$retJSON = json_encode($ret, JSON_NUMERIC_CHECK);
+    		}else{
+            		$retJSON = '{"error":"Omitting required data"}';
 		}
 		
 		print($retJSON);
