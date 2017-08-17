@@ -26,30 +26,30 @@
 		public static function getAllShips($faction){
 			$names = self::getShipClassnames();
 			$ships = array();
-            $count = 0;
+            		$count = 0;
+			$countFaction = 0;$limitFaction = 20; //test - there are problems with EA number of ships
 			foreach ($names as $name){
 				if (class_exists($name)){
-                    $count++;
+                    			$count++;
 					$ship = new $name($count, 0, "", 0, 0, false, false, array());
-					
 					if($ship->faction != $faction){
 						continue;
 					}
-					
-                    foreach ($ship->systems as $system){
-                        $system->beforeTurn($ship, 0, 0);
-                    }
+					    foreach ($ship->systems as $system){
+						$system->beforeTurn($ship, 0, 0);
+					    }
         
 					if (!isset($ships[$ship->faction])){
+						$countFaction++;
 						$ships[$ship->faction] = array();
 					}
-					
-					$ships[$ship->faction][] = $ship;
+					if($countFaction<$limitFaction){
+						$ships[$ship->faction][] = $ship;
+					}
 				}
 			}
 			
 			return $ships;
-		
 		}
 		
 		public static function getAllFactions(){
