@@ -13,7 +13,6 @@ window.ajaxInterface = {
             data: {faction:factionRequest},
             success : getFactionShipsCallback,
             error : ajaxInterface.errorAjax,
-	    timeout : 3000		
         });
 	},
 
