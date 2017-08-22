@@ -1350,7 +1350,6 @@ class DBManager {
                 tac_damage
             WHERE 
                 gameid = ?
-		order by turn descending shipid ascending systemid ascending
             "
         );
         
@@ -1368,9 +1367,10 @@ class DBManager {
             $damageStmt->close();
         }
     }
+	
     private function getDamageForShipsNEW($gamedata)
     {
-	    /*Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed*/
+	    //Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed
         $damageStmt = $this->connection->prepare(
             "SELECT 
                 id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes, damageclass 
