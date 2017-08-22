@@ -1342,6 +1342,7 @@ class DBManager {
         
     }
     
+	/* original version
     private function getDamageForShips($gamedata)
     {
         $damageStmt = $this->connection->prepare(
@@ -1351,6 +1352,7 @@ class DBManager {
                 tac_damage
             WHERE 
                 gameid = ?
+		order by turn descending shipid ascending systemid ascending
             "
         );
         
@@ -1367,8 +1369,71 @@ class DBManager {
             }
             $damageStmt->close();
         }
+    }*/
+    private function getDamageForShips($gamedata)
+    {
+	    /*Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed*/
+        $damageStmt = $this->connection->prepare(
+            "SELECT 
+                id, shipid, gameid, turn, systemid, damage, armour, shields, fireorderid, destroyed, pubnotes, damageclass 
+            FROM
+                tac_damage
+            WHERE 
+                gameid = ?
+		order by destroyed descending shipid ascending systemid descending turn descending 
+            "
+        );
         
-        
+        if ($damageStmt)
+        {
+            $damageStmt->bind_param('i', $gamedata->id);
+            $damageStmt->bind_result($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass );
+            $damageStmt->execute();
+		$waitingEntry = false;
+		    $combinedDamage = 0;
+		    $combinedArmour = 0;
+		    $combinedShields = 0;
+		$prevShip = -1;
+		$prevSystem = -1;
+            while ($damageStmt->fetch())
+            {
+		    $ship = $gamedata->getShipById($shipid);
+		    if($ship->is(destroyed($turn) ){
+			    continue; //don't load further data for a ship that's already determined to be destroyed (that's why killing blows go first)
+		    }
+		       
+		    if( ($turn >= $gamedata->turn -1) || ($destroyed = )){ //recent turn OR killing blow - always load full damage! do not touch Combined data though
+			   $ship->getSystemById($systemid)->setDamage(
+			      new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass )
+			   ); 
+			    continue;
+		    }
+		    
+		    if( ( ($prevShip!=$shipid) || ($prevSystem!=$systemid)  )
+		       && ($prevShip != -1) ) { //current damage is for different system than previous, and previous data exists!
+				$gamedata->getShipById($prevShip)->getSystemById($prevSystem)->setDamage(
+				    new DamageEntry($id, $prevShip, $gameid, $turn, $prevSystem, $combinedDamage, $combinedArmour, $combinedShields, $fireorderid, $destroyed, $pubnotes, $damageclass )
+				);
+			    	//reset sums
+				    $combinedDamage = 0;
+				    $combinedArmour = 0;
+				    $combinedShields = 0;
+		    }
+		    //accumulate damage data with current entry
+		    $prevShip = $shipid;
+		    $prevSystem =  $systemid;
+		    $waitingEntry = true;
+		    $combinedDamage += $damage;
+		    $combinedArmour += $armour;
+		    $combinedShields += $shields;
+            }
+	       if($waitingEntry == true ){ //create any entry that got out of loop - if any!
+			$gamedata->getShipById($prevShip)->getSystemById($prevSystem)->setDamage(
+			    new DamageEntry($id, $prevShip, $gameid, $turn, $prevSystem, $combinedDamage, $combinedArmour, $combinedShields, $fireorderid, $destroyed, $pubnotes, $damageclass )
+			);
+	       }
+            $damageStmt->close();
+        }
     }
     
     private function getCriticalsForShips($gamedata)
@@ -1524,6 +1589,7 @@ class DBManager {
     
     public function getFireOrdersForShips($gamedata)
     {
+	    /* Marcin Sawicki: cut away fire orders other than 2 last turns, as not necessary */
         $stmt = $this->connection->prepare(
             "SELECT 
                 *
@@ -1562,16 +1628,18 @@ class DBManager {
 
             while( $stmt->fetch())
             {
-                $entry = new FireOrder(
-                    $id, $type, $shooterid, $targetid,
-                    $weaponid, $calledid, $turn, $firingMode, $needed, 
-                    $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass
-                );
+		    if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
+			$entry = new FireOrder(
+			    $id, $type, $shooterid, $targetid,
+			    $weaponid, $calledid, $turn, $firingMode, $needed, 
+			    $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass
+			);
 
-                $entry->notes = $notes;
-                $entry->pubnotes = $pubnotes;
-                
-                $gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder( $entry );
+			$entry->notes = $notes;
+			$entry->pubnotes = $pubnotes;
+
+			$gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder( $entry );
+		    }
             }
             $stmt->close();
         }
