@@ -609,9 +609,7 @@ class DBManager {
 
 
     public function submitDamagesForAdaptiveArmour($gameid, $turn, $damages){
-
-        debug::log("___submitDamagesForAdaptiveArmour___");
-
+        //debug::log("___submitDamagesForAdaptiveArmour___");
         $obj = array();
         $id;
 
@@ -629,28 +627,28 @@ class DBManager {
         foreach ($damages as $damage){
             if (isset($id)){
                 if ($id == $damage->fireorderid){
-                    debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
+                    //debug::log("fireorder id ".$damage->fireorderid." == id ".$id.", continue ");
                     continue;
                 }
             }
 
             if (isset($obj[$damage->damageclass])){
                 $obj[$damage->damageclass] += 1;
-                debug::log($obj[$damage->damageclass]." + 1");
+                //debug::log($obj[$damage->damageclass]." + 1");
             } else {                
                 $obj[$damage->damageclass] = 1;
-               debug::log("INIT: ".$obj[$damage->damageclass]." = 1");
+                //debug::log("INIT: ".$obj[$damage->damageclass]." = 1");
             }
 
             $id = $damage->fireorderid;
-              debug::log("setting id to ".$id);
+              //debug::log("setting id to ".$id);
         }
 
 
         foreach ($obj as $key => $value){
             if ($key != "pulse"){
                 if (is_string($key) && strlen($key) > 2){
-                    debug::log($key." => ".$value);
+                    //debug::log($key." => ".$value);
 
                     try {
                         $sql = "
@@ -659,7 +657,7 @@ class DBManager {
                         WHERE gameid = '".$gameid."' 
                         AND shipid ='".$shipid = $damage->shipid."'";
 
-                        debug::log($sql);
+                        //debug::log($sql);
 
                     $this->update($sql);
                     }
@@ -669,7 +667,7 @@ class DBManager {
                 }
             }
             else {
-                debug::log("PULSE");
+                //debug::log("PULSE");
             }
         }
     }
@@ -1628,7 +1626,7 @@ class DBManager {
 
             while( $stmt->fetch())
             {
-		    if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
+		    //if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
 			$entry = new FireOrder(
 			    $id, $type, $shooterid, $targetid,
 			    $weaponid, $calledid, $turn, $firingMode, $needed, 
@@ -1639,7 +1637,7 @@ class DBManager {
 			$entry->pubnotes = $pubnotes;
 
 			$gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder( $entry );
-		    }
+		    //}
             }
             $stmt->close();
         }
