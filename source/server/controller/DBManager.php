@@ -1377,9 +1377,9 @@ class DBManager {
             FROM
                 tac_damage
             WHERE 
-                gameid = ? " /*
-		ORDER BY destroyed DESC shipid  systemid DESC turn DESC
-            "*/
+                gameid = ? 
+		ORDER BY destroyed DESC, shipid ASC, systemid DESC, turn DESC
+            "
         );
         
         if ($damageStmt)
