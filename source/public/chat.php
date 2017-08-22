@@ -118,7 +118,10 @@ if (! isset($chatelement))
                     if (chat.gameid == 0){
                         thisChat = "globalChatTab";
                     }
-
+                    if(!document.getElementById(thisChat)){
+                        return;
+                    }
+                    
                     if(!document.getElementById(thisChat).classList.contains("selected")){
                         document.getElementById(thisChat).classList.add("newMessage");
                     }
