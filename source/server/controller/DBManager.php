@@ -1342,7 +1342,7 @@ class DBManager {
         
     }
     
-	/* original version
+	/* original version */
     private function getDamageForShips($gamedata)
     {
         $damageStmt = $this->connection->prepare(
@@ -1369,8 +1369,8 @@ class DBManager {
             }
             $damageStmt->close();
         }
-    }*/
-    private function getDamageForShips($gamedata)
+    }
+    private function getDamageForShipsNEW($gamedata)
     {
 	    /*Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed*/
         $damageStmt = $this->connection->prepare(
