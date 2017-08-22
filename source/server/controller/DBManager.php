@@ -1398,11 +1398,11 @@ class DBManager {
             while ($damageStmt->fetch())
             {
 		    $ship = $gamedata->getShipById($shipid);
-		    if($ship->is(destroyed($turn) ){
+		    if($ship->isDestroyed($gamedata->turn-2) ){
 			    continue; //don't load further data for a ship that's already determined to be destroyed (that's why killing blows go first)
 		    }
 		       
-		    if( ($turn >= $gamedata->turn -1) || ($destroyed = )){ //recent turn OR killing blow - always load full damage! do not touch Combined data though
+		    if( ($turn >= $gamedata->turn -1) || ($destroyed == true)){ //recent turn OR killing blow - always load full damage! do not touch Combined data though
 			   $ship->getSystemById($systemid)->setDamage(
 			      new DamageEntry($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass )
 			   ); 
