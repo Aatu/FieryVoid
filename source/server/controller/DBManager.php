@@ -1340,7 +1340,7 @@ class DBManager {
         
     }
     
-	/* original version */
+	/* original version */ /*
     private function getDamageForShips($gamedata)
     {
         $damageStmt = $this->connection->prepare(
@@ -1366,9 +1366,9 @@ class DBManager {
             }
             $damageStmt->close();
         }
-    }
+    }*/
 	
-    private function getDamageForShipsNEW($gamedata)
+    private function getDamageForShips($gamedata)
     {
 	    //Marcin Sawicki: combine old damages into one damage entry; ignore damage entries if primary structure is destroyed
         $damageStmt = $this->connection->prepare(
@@ -1378,7 +1378,7 @@ class DBManager {
                 tac_damage
             WHERE 
                 gameid = ?
-		order by destroyed descending shipid ascending systemid descending turn descending 
+		ORDER BY destroyed DESC shipid  systemid DESC turn DESC
             "
         );
         
@@ -1626,7 +1626,7 @@ class DBManager {
 
             while( $stmt->fetch())
             {
-		    //if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
+		    if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
 			$entry = new FireOrder(
 			    $id, $type, $shooterid, $targetid,
 			    $weaponid, $calledid, $turn, $firingMode, $needed, 
@@ -1637,7 +1637,7 @@ class DBManager {
 			$entry->pubnotes = $pubnotes;
 
 			$gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder( $entry );
-		    //}
+		    }
             }
             $stmt->close();
         }
