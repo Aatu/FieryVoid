@@ -53,9 +53,9 @@ class PeregrineCmd extends BaseShipNoAft{
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(5, 50));
-        $this->addLeftSystem(new Structure(4, 45));
+        $this->addLeftSystem(new Structure(4, 44));
         $this->addRightSystem(new Structure(4, 44));
-        $this->addFrontSystem(new Structure(4, 44));
+        $this->addFrontSystem(new Structure(4, 45));
     
     
       	$this->hitChart = array(
