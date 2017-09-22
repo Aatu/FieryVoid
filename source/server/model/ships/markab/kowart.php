@@ -35,12 +35,12 @@ class Kowart extends BaseShip{
         
         $this->addAftSystem(new Thruster(3, 15, 0, 5, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 5, 2));
-		$this->addAftSystem(new CargoBay(3, 16));
-		$this->addAftSystem(new CargoBay(3, 40));
-		$this->addAftSystem(new CargoBay(3, 16));
-		$this->addAftSystem(new ScatterGun(2, 0, 0, 90, 270));
+	$this->addAftSystem(new CargoBay(3, 16));
+	$this->addAftSystem(new CargoBay(3, 40));
+	$this->addAftSystem(new CargoBay(3, 16));
+	$this->addAftSystem(new ScatterGun(2, 0, 0, 90, 270));
 		
-		$this->addLeftSystem(new ScatterGun(2, 0, 0, 240, 60));
+	$this->addLeftSystem(new ScatterGun(2, 0, 0, 180, 60));
         $this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
         
         $this->addRightSystem(new ScatterGun(2, 0, 0, 300, 180));
