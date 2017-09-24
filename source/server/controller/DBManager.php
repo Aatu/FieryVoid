@@ -1590,6 +1590,7 @@ class DBManager {
     public function getFireOrdersForShips($gamedata)
     {
 	    /* Marcin Sawicki: cut away fire orders other than 2 last turns, as not necessary */
+	    /*...well, let's NOT do it for now :( ...*/
         $stmt = $this->connection->prepare(
             "SELECT 
                 *
@@ -1628,7 +1629,7 @@ class DBManager {
 
             while( $stmt->fetch())
             {
-		    if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
+		    //if($turn >= ($gamedata->turn - 1) ){ //ignore old fire orders
 			$entry = new FireOrder(
 			    $id, $type, $shooterid, $targetid,
 			    $weaponid, $calledid, $turn, $firingMode, $needed, 
@@ -1639,7 +1640,7 @@ class DBManager {
 			$entry->pubnotes = $pubnotes;
 
 			$gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder( $entry );
-		    }
+		    //}
             }
             $stmt->close();
         }
