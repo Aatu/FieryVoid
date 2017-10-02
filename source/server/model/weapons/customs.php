@@ -580,7 +580,6 @@ class customLtPhaseDisruptorShip extends Raking{
         public $fireControl = array(4, 4, 4); // fighters, <mediums, <capitals
         public $priority = 8;
 	public $rakes = array();
-	public $firingMode = 'Raking';
 	public $guns = 1;
 	
 	public $firingModes = array(1=>'Concentrated', 2=>'Split');

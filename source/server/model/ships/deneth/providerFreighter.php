@@ -56,13 +56,13 @@ class ProviderFreighter extends MediumShip{
         		),
         		1=> array(
         				5 => "Thruster",
-        				10 => "Cargo",
+        				10 => "Cargo Bay",
         				17 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
         				5 => "Thruster",
-        				10 => "Cargo",
+        				10 => "Cargo Bay",
         				17 => "Structure",
         				20 => "Primary",
         		),

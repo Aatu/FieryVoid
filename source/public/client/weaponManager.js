@@ -490,14 +490,14 @@ window.weaponManager = {
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
-		if (target.draziHCV){
+		//if (target.draziHCV){ //ALWAYS, not just for Drazi HCV layout!
 			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
-				return 1
+				return 1;
 			}
 			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))){
-				return 2
+				return 2;
 			}
-		}
+		//}
 		if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
 					return 3;
 		}

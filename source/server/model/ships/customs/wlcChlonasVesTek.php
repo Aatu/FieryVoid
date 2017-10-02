@@ -32,7 +32,7 @@ class wlcChlonasVesTek extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("wlcChlonasVesTek", $armour, 13, $this->id);
-            $fighter->displayName = "Ves'Tek Assault Fighter";
+            $fighter->displayName = "Ves'Tek";
             $fighter->imagePath = "img/ships/shadras.png";
             $fighter->iconPath = "img/ships/shadras_large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 3));
