@@ -111,6 +111,7 @@ spl_autoload_register(
                 'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
                 'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
                 'swlancer' => '/server/model/ships/starwars_centauri/swLancer.php',
+                'swmoncalmc30c' => '/server/model/ships/starwars_centauri/swMonCalMC30c.php',
                 'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
@@ -125,6 +126,8 @@ spl_autoload_register(
                 'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
+                'swskipray' => '/server/model/ships/starwars_centauri/swSkipray.php',
+                
                 
                 
                 //custom weapons StarWars
