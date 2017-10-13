@@ -42,25 +42,25 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new Thruster(3, 6, 0, 3, 3));
         $this->addLeftSystem(new Thruster(3, 6, 0, 3, 3));
-	$this->addLeftSystem(new SWRayShield(3,12,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addLeftSystem(new SWMediumTLaser(2, 210, 0, 2));
-	$this->addLeftSystem(new SWMediumTLaser(2, 210, 0, 2));
-	$this->addLeftSystem(new SWCapitalConcussion(3, 210, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWCapitalConcussion(3, 210, 0, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWRayShield(3,12,8,3,180,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addLeftSystem(new SWMediumTLaser(2, 210, 360, 2));
+	$this->addLeftSystem(new SWMediumTLaser(2, 210, 360, 2));
+	$this->addLeftSystem(new SWCapitalConcussion(3, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addLeftSystem(new SWCapitalConcussion(3, 210, 360, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWCapitalConcussion(3, 180, 330, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumLaser(3, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addLeftSystem(new SWMediumLaser(3, 180, 0, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
         $this->addRightSystem(new Thruster(3, 6, 0, 3, 4));
 	$this->addRightSystem(new Thruster(3, 6, 0, 3, 4));
-	$this->addRightSystem(new SWRayShield(3,12,8,3,180,360)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
-	$this->addLeftSystem(new SWMediumTLaser(2, 0, 150, 2));
-	$this->addLeftSystem(new SWMediumTLaser(2, 0, 150, 2));
-	$this->addLeftSystem(new SWCapitalConcussion(3, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWCapitalConcussion(3, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWCapitalConcussion(3, 30, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWMediumLaser(3, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
-	$this->addLeftSystem(new SWMediumLaser(3, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWRayShield(3,12,8,3,0,180)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
+	$this->addRightSystem(new SWMediumTLaser(2, 0, 150, 2));
+	$this->addRightSystem(new SWMediumTLaser(2, 0, 150, 2));
+	$this->addRightSystem(new SWCapitalConcussion(3, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalConcussion(3, 0, 150, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWCapitalConcussion(3, 30, 180, 2)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWMediumLaser(3, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
+	$this->addRightSystem(new SWMediumLaser(3, 0, 180, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	    
     
 	    
@@ -106,5 +106,4 @@ class swMonCalMC30c extends HeavyCombatVesselLeftRight{
 	    
     }
 }
-
 ?>
