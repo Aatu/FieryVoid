@@ -431,6 +431,16 @@ class Manager{
                                 }
                             }
                         }
+			else{//Marcin Sawicki: generalized version of ammo initialization for fighters
+			   foreach($ship->systems as $fighter){
+                               foreach($fighter->systems as $weapon){
+                                   if(isset($weapon->ammunition) && ($weapon->ammunition > 0) ){
+                                       self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
+                                   }
+                               }
+                           }
+			}
+			/*Marcin Sawicki: let's generalize this, not limit to Templar!
                         else if ($ship instanceof Templar){
                             foreach($ship->systems as $fighter){
                                foreach($fighter->systems as $weapon){
@@ -440,6 +450,7 @@ class Manager{
                                }
                            }
                         }
+			*/
                     }
                     else{
                         if (isset($ship->adaptiveArmour)){
