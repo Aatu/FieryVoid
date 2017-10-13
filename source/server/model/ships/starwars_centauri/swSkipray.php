@@ -8,7 +8,7 @@ class swSkipray extends SuperHeavyFighter{
         $this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swSkipray";
         $this->shipClass = "Skipray Blastboat";
-        $this->imagePath = "img/ships/skipray.png";
+        $this->imagePath = "img/starwars/skipray.png";
 	
 	//$this->isd = 2218;
         $this->unofficial = true;
