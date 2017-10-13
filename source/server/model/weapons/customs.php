@@ -603,6 +603,8 @@ class customLtPhaseDisruptorShip extends Raking{
         }
 
 	public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1: //damage for concentrated shot
 				$this->rakes = array();
 				$damage = 0;
 				$rake = Dice::d(6, 3);
@@ -612,6 +614,13 @@ class customLtPhaseDisruptorShip extends Raking{
 				$damage+=$rake;
 				$this->rakes[] = $rake;
 				return $damage; 
+				break;
+			case 2:
+				$damage = Dice::d(6, 3); //damage for separate shot
+				$this->rakes = array($damage);
+				return $damage;
+				break;	
+		}
 	}
 	
 	public function getRakeSize(){
