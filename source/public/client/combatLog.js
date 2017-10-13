@@ -42,10 +42,12 @@ window.combatLog = {
 		
 		
 	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-            while(modeIteration > 1){
-                weapon.changeFiringMode();
-                modeIteration--;
-            }
+	    if(modeIteration != weapon.firingMode){
+		    while(modeIteration > 1){
+			weapon.changeFiringMode();
+			modeIteration--;
+		    }
+	    }
 		    
             shots += fire.shots;
             shotshit += fire.shotshit;
