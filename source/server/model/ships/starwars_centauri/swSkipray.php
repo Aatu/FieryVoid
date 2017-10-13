@@ -34,13 +34,15 @@ class swSkipray extends SuperHeavyFighter{
             $fighter->addFrontSystem($roundGun);
            
             //1 forward Proton Torpedo Launcher, 5 shots
-            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(5, 300, 60, 1);//single launcher! like for direct fire
+            $torpedoLauncher = new SWFtrProtonTorpedoLauncher(5, 300, 60, 2);//single launcher! like for direct fire
             $fighter->addFrontSystem($torpedoLauncher);
 
 
-            //2 forward Concussion Missile Launchers, 4 shots each
+            //2 forward Concussion Missile Launchers, 4 shots each - TWO SEPARATE MISSILE SYSTEMS DON"T WORK ON FIGHTER!
+	    /*
             $ConcussionMissileLauncher = new SWFtrConcMissileLauncher(4, 300, 60, 2);//single dual launcher! like for direct fire
             $fighter->addFrontSystem($ConcussionMissileLauncher);    
+	    */
 
 
         //Ray Shield, 2 points
