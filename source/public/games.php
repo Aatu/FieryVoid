@@ -28,7 +28,7 @@
 		<script src="client/player.js"></script>
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
-		<script>
+		<script> 
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($games); ?>);
