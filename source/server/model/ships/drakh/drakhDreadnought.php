@@ -1,12 +1,12 @@
 <?php
-class DrakhDreadnought extends BaseShip{
+class drakhDreadnought extends BaseShip{
 	
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 2200;
 	$this->faction = "Drakh";
-        $this->phpclass = "DrakhDreadnought";
+        $this->phpclass = "drakhDreadnought";
         $this->imagePath = "img/ships/DrakhHeavyTender.png";
         $this->shipClass = "Dreadnought";
         $this->shipSizeClass = 3;
