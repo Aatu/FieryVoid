@@ -24,8 +24,8 @@ class swSkipray extends SuperHeavyFighter{
         $armour = array(3, 3, 3, 2);
         $fighter = new Fighter("swSkipray", $armour, 25, $this->id);
         $fighter->displayName = "Skipray Blastboat";
-        $fighter->imagePath = "img/ships/skipray.png";
-        $fighter->iconPath = "img/ships/skipray_large.png";
+        $fighter->imagePath = "img/starwars/skipray.png";
+        $fighter->iconPath = "img/starwars/skipray_large.png";
 
             $frontGun = new SWFighterIon(300, 60, 2, 3); //fwd triple Ion Cannons
             $fighter->addFrontSystem($frontGun);
