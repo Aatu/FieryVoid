@@ -431,10 +431,10 @@ class Manager{
                                 }
                             }
                         }
-			else{//Marcin Sawicki: generalized version of ammo initialization for fighters
+			else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
 			   foreach($ship->systems as $fighter){
                                foreach($fighter->systems as $weapon){
-                                   if(isset($weapon->ammunition) && ($weapon->ammunition > 0) ){
+                                   if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
                                        self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
                                    }
                                }
