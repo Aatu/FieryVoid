@@ -399,8 +399,32 @@ window.weaponManager = {
 			}
 		}
 	},
+	
+	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
+		var result = false;
+		var shooter = gamedata.getSelectedShip();
+		if (!shooter) return false;		
+		if (target.flight) return true; //experiment - allow called shots at fighters?...
+		
+		var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+		
+		for (i = 0; i < target.outerSections.length; i++) { 
+    			var currSectionData = target.outerSections[i];
+			if(system.location == currSectionData.loc){
+if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing)))
 
-	canCalledshot: function(target, system){
+
+			}
+			//"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
+		}
+		
+		
+
+		return result;
+	}, //endof function canCalledshot
+	
+
+	canCalledshotOld: function(target, system){ /*Marcin Sawicki, October 2017 - let's disable this function, and use new $outerSections-based*/
 		var shooter = gamedata.getSelectedShip();
 
 		if (!shooter)
@@ -523,7 +547,6 @@ window.weaponManager = {
 	},
 
 	isOnWeaponArc: function(shooter, target, weapon){
-
 		var shooterFacing = (shipManager.getShipHeadingAngle(shooter));
 		var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
 
@@ -535,12 +558,9 @@ window.weaponManager = {
 
 		if (weapon.ballistic && oPos.x == tPos.x && oPos.y == tPos.y)
 			return true;
-
 		//console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
 
 		return (mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end));
-
-
 	},
 
 	calculateRangePenalty: function(distance, weapon){
