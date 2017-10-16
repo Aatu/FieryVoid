@@ -9,7 +9,7 @@ class RaiderGunboat extends MediumShip{
         $this->faction = "Raiders";
 	$this->phpclass = "RaiderGunboat";
 	$this->shipClass = "Gunboat";
-	$this->imagePath = "img/ships/jenas.png";
+	$this->imagePath = "img/ships/RaiderLCV.png";
 	$this->canvasSize = 100;
 	$this->agile = true;
 	$this->forwardDefense = 10;

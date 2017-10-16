@@ -89,15 +89,19 @@ spl_autoload_register(
                 'customltphasedisruptor' => '/server/model/weapons/customs.php', //fighter weapon
                 //units
                 'drakhattackship' => '/server/model/ships/drakh/drakhAttackShip.php',
-                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',
+                    'drakhcommandship' => '/server/model/ships/drakh/drakhCommandShip.php',
+                    'drakhsupportship' => '/server/model/ships/drakh/drakhSupportShip.php',
+                'drakhdreadnought' => '/server/model/ships/drakh/drakhDreadnought.php',
+                'drakhheavyraider' => '/server/model/ships/drakh/drakhHeavyRaider.php',                    
+                    'drakhheavyraiderescort' => '/server/model/ships/drakh/drakhHeavyRaiderEscort.php',
                 'drakhheavytender' => '/server/model/ships/drakh/drakhHeavyTender.php',
                 'drakhpatrolship' => '/server/model/ships/drakh/drakhPatrolShip.php',
-                'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
+                    'drakhscoutship' => '/server/model/ships/drakh/drakhScoutShip.php',
                 'drakhtanker' => '/server/model/ships/drakh/drakhTanker.php',
                 'drakhtender' => '/server/model/ships/drakh/drakhTender.php',
                 
                 'drakhraiderflt' => '/server/model/ships/drakh/drakhRaiderFlt.php',
-                'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
+                    'drakhraidershf' => '/server/model/ships/drakh/drakhRaiderSHF.php',
                 'drakhshuttle' => '/server/model/ships/drakh/drakhShuttle.php',
                 
                 
@@ -111,6 +115,7 @@ spl_autoload_register(
                 'swdreadnought' => '/server/model/ships/starwars_centauri/swDreadnought.php',
                 'swimperialsd' => '/server/model/ships/starwars_centauri/swImperialSD.php',  
                 'swlancer' => '/server/model/ships/starwars_centauri/swLancer.php',
+                'swmoncalmc30c' => '/server/model/ships/starwars_centauri/swMonCalMC30c.php',
                 'swmoncalmc80' => '/server/model/ships/starwars_centauri/swMonCalMC80.php', 
                 'swnebulonbfrigate' => '/server/model/ships/starwars_centauri/swNebulonBFrigate.php',  
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
@@ -125,6 +130,8 @@ spl_autoload_register(
                 'zzftrawing' => '/server/model/ships/starwars_centauri/zzftrAWing.php',
                 'zzftrxwing' => '/server/model/ships/starwars_centauri/zzftrXWing.php',
                 'zzftrywing' => '/server/model/ships/starwars_centauri/zzftrYWing.php',
+                'swskipray' => '/server/model/ships/starwars_centauri/swSkipray.php',
+                
                 
                 
                 //custom weapons StarWars

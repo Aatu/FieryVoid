@@ -75,7 +75,7 @@ class Weapon extends ShipSystem{
     public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
-	
+
 
     public $shots = 1;
 	public  $shotsArray = array();
