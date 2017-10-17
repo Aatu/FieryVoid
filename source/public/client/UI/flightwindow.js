@@ -360,6 +360,15 @@ flightWindowManager = {
 		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
 			return;
 			
+		//Macin Sawicki, October 2017 - allow called shots vs fighters!
+		if (gamedata.isEnemy(flight, selectedShip) 
+			&& gamedata.gamephase == 3 
+			&& gamedata.selectedSystems.length > 0 
+			&& weaponManager.canCalledshot(flight, system))
+		{
+			weaponManager.targetShip(flight, fighter);
+		}
+		
 		if (flight.userid != gamedata.thisplayer)
 			return;
 			
@@ -380,16 +389,8 @@ flightWindowManager = {
 			else{
 				weaponManager.selectWeapon(flight, system);
 			}			
-		}
-		
-		//Macin Sawicki, October 2017 - allow called shots vs fighters!
-		if (gamedata.isEnemy(flight, selectedShip) 
-			&& gamedata.gamephase == 3 
-			&& gamedata.selectedSystems.length > 0 
-			&& weaponManager.canCalledshot(flight, system))
-		{
-			weaponManager.targetShip(flight, fighter);
-		}
+		}	
+
 		
 	},
 
