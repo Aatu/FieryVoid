@@ -432,7 +432,7 @@ window.weaponManager = {
 		if(system.isPrimaryTargetable != true) return false; //cannot be targeted under these conditions
 		//check whether it's in arc
 		if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(system.startArc, targetFacing), mathlib.addToDirection(system.endArc, targetFacing))){
-			if(currSectionData.call == true) return true;					
+			return true;					
 		}
 		return false;
 	}, //endof function canCalledshot
