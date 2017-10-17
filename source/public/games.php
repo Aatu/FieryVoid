@@ -44,18 +44,20 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 16th of October 2017";
+                    header.innerHTML = "Latest News 17th of October 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
-                    news.innerHTML += "<br>";
+                    news.innerHTML += "<br><br>";
                     news.innerHTML += "- fixed 'StarFox has unlimited ammo' bug ";
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- enabled called shots at fighters - just target any system. Now Your EP Guns can shine! ";
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- minor fixes and a few new ships (mainly Drakh variants)";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "<br>- Did You ever have a ship that's still there, but You want to get rid of it? Now You can - just set reactor to overload!<br>";
-                    news.innerHTML += "<br>";
+                    news.innerHTML += "- last reminder about Reactor Overload capability!";
+                    news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
                     
