@@ -221,6 +221,7 @@ class Reactor extends ShipSystem{
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
+    public $fixedPower = false; //important for MagGrav reactors, but defined here!
     public $outputType = "power";
 	
     public $boostable = true; //for reactor overload feature!
@@ -295,10 +296,17 @@ class MagGravReactor extends Reactor{
 		29=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations", "ForcedOfflineOneTurn")
 	);
 	
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );    
+		$this->powerTotal = $output;
+		$this->fixedPower = true;
+	}
+	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
 		$this->data["Special"]. = "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";	     
 	}	
+	
 }//endof MagGravReactor		
 
 
