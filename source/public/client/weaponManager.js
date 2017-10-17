@@ -400,6 +400,13 @@ window.weaponManager = {
 		}
 	},
 	
+	canWeaponCall: function(weapon){//is this weapon eleigible for calling precision shot?...
+		//Standard or Pulse, not Ballistic!
+		if(weapon.ballistic || weapon.hextarget) return false;
+		if((weapon.damageType == 'Standard') || (weapon.damageType == 'Pulse')) return true;
+		return false;
+	}
+	
 	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
 		var sectionEligible = false; //section that system is mounted on is eligible for caled shots
 		var shooter = gamedata.getSelectedShip();
