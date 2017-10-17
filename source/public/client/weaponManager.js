@@ -383,7 +383,7 @@ window.weaponManager = {
 					value = weapon.firingModes[value];					
 					if((calledid>0)&&(!weaponManager.canWeaponCall(weapon))){ //called shot, weapon not eligible!
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-					}else
+					}else{
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
 					}
 				}
