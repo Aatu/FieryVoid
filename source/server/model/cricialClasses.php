@@ -5,6 +5,7 @@ class Critical{
     public $id, $shipid, $systemid, $phpclass, $tur, $param;
     public $updated = false;
     public $outputMod = 0;
+    public $outputModPercentage = 0; //if output is percentage-based rather than absolute
     public $description = "";
     public $oneturn = false;
     public $inEffect = true;
@@ -291,7 +292,7 @@ class ArmorReduced extends Critical{
 }
 
 class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be nastier*/
-    public $description = "Vulnerable to critical.";
+    public $description = "Vulnerable to criticals.";
     public $oneturn = true;	
     //public $outputMod = 1; //can't use otputMod as it has effects regardless of a particular crit!
 
@@ -300,6 +301,15 @@ class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be n
     }
 }
 
+
+class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Reactor*/
+    public $description = "Field Fluctuations (-10% Power).";
+    public $outputModPercentage = 10; //output modified by -10%
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
+    }
+}
 
 
 class swtargetheld extends Critical{ /*next turn target is being held by tractor beam!*/
