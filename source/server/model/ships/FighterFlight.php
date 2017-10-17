@@ -250,9 +250,8 @@
         }
         
         public function isDestroyed($turn = false){
-        
             foreach($this->systems as $system){
-                if (!$system->isDestroyed($turn = false) && !$system->isDisengaged($turn)){
+                if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)){
                     return false;
                 }
                 
@@ -268,9 +267,9 @@
         
         public function getHitSystem($shooter, $fire, $weapon, $location = null){
 		$skipStandard=false;
-            $systems = array();
+            	$systems = array();
 		if ($fire->calledid != -1){
-			$system = $this->getFighterBySystem($fire->calledid);
+			$system = $this->getSystemById($fire->calledid);
 			if (!$system->isDestroyed()){ //called shot at particular fighter, which is still living
 				$systems[] = $system;
 				$skipStandard=true;
