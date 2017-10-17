@@ -288,7 +288,6 @@ class MagGravReactor extends Reactor{
 	provides fixed power regardless of systems;
 	techical implementation: count as Power minus power required by all systems enabled
 */	
-	public $powerTotal = 0; //total power provided - power surplus will be calculated each turn
 	public $possibleCriticals = array( //different set of criticals than standard Reactor
 		13=>"FieldFluctuations",
 		17=>array("FieldFluctuations", "FieldFluctuations")),
@@ -298,7 +297,6 @@ class MagGravReactor extends Reactor{
 	
 	function __construct($armour, $maxhealth, $powerReq, $output ){
 		parent::__construct($armour, $maxhealth, $powerReq, $output );    
-		$this->powerTotal = $output;
 		$this->fixedPower = true;
 	}
 	
