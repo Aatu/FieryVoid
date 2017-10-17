@@ -304,7 +304,7 @@ class NastierCrit extends Critical{ /*next critical (or dropout!) roll will be n
 
 class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Reactor*/
     public $description = "Field Fluctuations (-10% Power).";
-    public $outputModPercentage = 10; //output modified by -10%
+    public $outputModPercentage = -10; //output modified by -10%
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
