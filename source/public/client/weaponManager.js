@@ -377,19 +377,15 @@ window.weaponManager = {
 
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
-
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
 				if(weaponManager.checkIsInRange(selectedShip, ship, weapon)){
-
 					var value = weapon.firingMode;
-						value = weapon.firingModes[value];
-/*no special treatment for Piercing!
-					if (value == "Piercing"){
-						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
-					}
-					else {*/
+					value = weapon.firingModes[value];					
+					if((calledid>0)&&(!weaponManager.canWeaponCall(weapon))){ //called shot, weapon not eligible!
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+					}else
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
-					//}
+					}
 				}
 				else{
 					$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
