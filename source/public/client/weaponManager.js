@@ -353,6 +353,7 @@ window.weaponManager = {
 					html += "-STBD.AFT-";
 					break;
 				    default:
+					html += "-OTHER-";
 					break;
 				}
 				/*
@@ -400,12 +401,12 @@ window.weaponManager = {
 		}
 	},
 	
-	canWeaponCall: function(weapon){//is this weapon eleigible for calling precision shot?...
+	canWeaponCall: function(weapon){ //is this weapon eleigible for calling precision shot?...
 		//Standard or Pulse, not Ballistic!
 		if(weapon.ballistic || weapon.hextarget) return false;
 		if((weapon.damageType == 'Standard') || (weapon.damageType == 'Pulse')) return true;
 		return false;
-	}
+	},
 	
 	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
 		var sectionEligible = false; //section that system is mounted on is eligible for caled shots
@@ -437,7 +438,6 @@ window.weaponManager = {
 		if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(system.startArc, targetFacing), mathlib.addToDirection(system.endArc, targetFacing))){
 			if(currSectionData.call == true) return true;					
 		}
-
 		return false;
 	}, //endof function canCalledshot
 	
@@ -922,7 +922,6 @@ window.weaponManager = {
 	},
 
 	getFireControl: function(target, weapon){
-
 		if (target.shipSizeClass > 1){
 			return weapon.fireControl[2];
 		}
@@ -931,8 +930,6 @@ window.weaponManager = {
 		}
 
 		return weapon.fireControl[0];
-
-
 	},
 
 	// 'position' should be in HEX coordinate
@@ -965,7 +962,23 @@ window.weaponManager = {
 
 	},
 
-	getShipHittingSide: function(shooter, target){
+	getShipHittingSide: function(shooter, target){//Marcin Sawicki, October 2017: new approach!
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
+		var targetFacing = (shipManager.getShipHeadingAngle(target));
+		var toReturn = [];
+		
+		for (i = 0; i < target.outerSections.length; i++) { 
+    			var currSectionData = target.outerSections[i];
+			if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))){
+				toReturn.push(currSectionData.loc);
+			}
+			//"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
+		}
+		toReturn.sort();		
+		return toReturn;
+	},
+		
+	getShipHittingSideOld: function(shooter, target){ //Marcin Sawicki, October 2017: change that to new approach!
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
