@@ -26,6 +26,7 @@ spl_autoload_register(
                 'smallstarbasefoursections' => '/server/model/ships/ShipClasses.php',
                 //additional criticals
                 'nastiercrit' => '/server/model/cricialClasses.php',
+                'fieldfluctuations' => '/server/model/cricialClasses.php',
                 
                 //custom ships directory             
                 'wlcoptinehc' => '/server/model/ships/customs/wlcOptineHC.php',               
@@ -305,6 +306,14 @@ spl_autoload_register(
                 //various additional units
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
+                
+                
+                //Ipsha
+                'maggravreactor' => 'server/model/systems/baseSystems.php',
+                
+                //actual units
+                
+                
                 
                 
                 // centauri raiders
