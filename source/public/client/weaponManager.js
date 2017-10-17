@@ -1348,6 +1348,9 @@ window.weaponManager = {
 						var calledid = -1;
 
 						if (system){
+							//check if weapon is eligible for called shot!
+							if(!weaponManager.canWeaponCall(weapon)) continue;
+														
 							// When the system is a subsystem, make all damage go through
 							// the parent.
 							while(system.parentId > 0){
