@@ -352,8 +352,7 @@ flightWindowManager = {
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
 
-        var flight = gamedata.getShip(systemwindow.data("shipid"));
-        
+        	var flight = gamedata.getShip(systemwindow.data("shipid"));        
 		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
 		var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));
 		
@@ -361,6 +360,7 @@ flightWindowManager = {
 			return;
 			
 		//Macin Sawicki, October 2017 - allow called shots vs fighters!
+		var selectedShip = gamedata.getSelectedShip();
 		if (gamedata.isEnemy(flight, selectedShip) 
 			&& gamedata.gamephase == 3 
 			&& gamedata.selectedSystems.length > 0 
