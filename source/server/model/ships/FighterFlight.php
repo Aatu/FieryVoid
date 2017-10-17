@@ -262,18 +262,28 @@
         }
         
         public function isPowerless(){
-        
             return false;
         }
         
         
         public function getHitSystem($shooter, $fire, $weapon, $location = null){
+		$skipStandard=false;
             $systems = array();
-            foreach ($this->systems as $system){
-                if (!$system->isDestroyed()){
-					$systems[] = $system;
-                }                            
-            } 		
+		if ($fire->calledid != -1){
+			$system = $this->getFighterBySystem($fire->calledid);
+			if (!$system->isDestroyed()){ //called shot at particular fighter, which is still living
+				$systems[] = $system;
+				$skipStandard=true;
+			}                            			
+		}
+		
+		if(!$skipStandard){
+		    foreach ($this->systems as $system){
+			if (!$system->isDestroyed()){
+				$systems[] = $system;
+			}                            
+		    } 	
+		}
 		
 		if (sizeof($systems) == 0) return null;
 
