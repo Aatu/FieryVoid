@@ -44,13 +44,15 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 16th of October 2017";
+                    header.innerHTML = "Latest News 17th of October 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br>";
                     news.innerHTML += "- fixed 'StarFox has unlimited ammo' bug ";
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- enabled called shots at fighters - just target any system. Now Your EP Guns can shine! ";
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- minor fixes and a few new ships (mainly Drakh variants)";
                     news.innerHTML += "<br>";
