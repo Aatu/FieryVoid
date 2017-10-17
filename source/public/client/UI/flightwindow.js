@@ -363,8 +363,7 @@ flightWindowManager = {
 		if (flight.userid != gamedata.thisplayer)
 			return;
 			
-		if (system.weapon){
-			
+		if (system.weapon){			
 			if (gamedata.gamephase != 3 && !system.ballistic)
 				return;
 			
@@ -382,6 +381,16 @@ flightWindowManager = {
 				weaponManager.selectWeapon(flight, system);
 			}			
 		}
+		
+		//Macin Sawicki, October 2017 - allow called shots vs fighters!
+		if (gamedata.isEnemy(flight, selectedShip) 
+			&& gamedata.gamephase == 3 
+			&& gamedata.selectedSystems.length > 0 
+			&& weaponManager.canCalledshot(flight, system))
+		{
+			weaponManager.targetShip(flight, fighter);
+		}
+		
 	},
 
 
