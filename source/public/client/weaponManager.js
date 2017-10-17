@@ -279,7 +279,6 @@ window.weaponManager = {
 
 	
 	selectWeapon: function(ship, weapon){
-
 		if(weaponManager.checkOutOfAmmo(ship, weapon)){
 			return
 		}
@@ -305,8 +304,8 @@ window.weaponManager = {
 
 		gamedata.selectedSystems.push(weapon);
 		shipWindowManager.setDataForSystem(ship, weapon);
-
 	},
+	
 
 	isSelectedWeapon: function(weapon){
 		if ($.inArray(weapon, gamedata.selectedSystems) >= 0)
@@ -314,6 +313,7 @@ window.weaponManager = {
 
 		return false;
 	},
+	
 
 	targetingShipTooltip: function(ship, e, calledid){
 		//e.find(".shipname").html(ship.name);
@@ -401,26 +401,37 @@ window.weaponManager = {
 	},
 	
 	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
-		var result = false;
+		var sectionEligible = false; //section that system is mounted on is eligible for caled shots
 		var shooter = gamedata.getSelectedShip();
 		if (!shooter) return false;		
 		if (target.flight) return true; //experiment - allow called shots at fighters?...
 		
-		var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
+		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		
 		for (i = 0; i < target.outerSections.length; i++) { 
     			var currSectionData = target.outerSections[i];
 			if(system.location == currSectionData.loc){
-if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing)))
-
-
+				if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))){
+					if(currSectionData.call == true) return true;					
+				}
+				sectionEligible = currSectionData.call;
 			}
 			//"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
 		}
-		
-		
+		//options here: PRIMARY, incorrect facing of targeted section, section not eligible for called shots (eg. on MCVs)
+		if( (system.location > 0) && (sectionEligible == true) ) {
+			return false; //non-PRIMARY and eligible for called shots, but still here => must be out of arc!	
+		}
+		//option here: section not normally eligible for target shots (PRIMARY or outer section on MCV)
+		//check whether system is PRIMARY-targetable!
+		if(system.isPrimaryTargetable != true) return false; //cannot be targeted under these conditions
+		//check whether it's in arc
+		if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(system.startArc, targetFacing), mathlib.addToDirection(system.endArc, targetFacing))){
+			if(currSectionData.call == true) return true;					
+		}
 
-		return result;
+		return false;
 	}, //endof function canCalledshot
 	
 
