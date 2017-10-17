@@ -302,14 +302,15 @@ class ShipSystem{
         }
         return $crits;         
     }
+	
     
     public function addCritical($shipid, $phpclass, $gamedata){
-
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
         return $crit;
     }
+	
     
     public function hasCritical($type, $turn = false){
         $count = 0;
@@ -339,14 +340,18 @@ class ShipSystem{
     }
     
     
-    public function effectCriticals(){
-           
+    public function effectCriticals(){ 
+	$percentageMod = 0;
         foreach ($this->criticals as $crit){
             $this->outputMod += $crit->outputMod;
+	    $percentageMod += $crit->outputModPercentage;
         }
-    
-    
+	//convert percentage mod to absolute value...
+	if($percentageMod != 0){
+		$this->outputMod += round($percentageMod * $this->output /100 );
+	}    
     }
+	
     
     public function getTotalDamage($turn = false){
         $totalDamage = 0;
