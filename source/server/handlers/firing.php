@@ -3,8 +3,7 @@
         
         public $weapon, $intercepts, $done, $ship;
         
-        function __construct($ship, $weapon, $intercepts ){
-            
+        function __construct($ship, $weapon, $intercepts ){            
             $this->ship = $ship;             
             $this->weapon = $weapon;
             $this->intercepts = $intercepts;
@@ -18,7 +17,6 @@
 
                 $target = $gd->getShipById($fire->targetid);
           //      debug::log("itnercept for ".$target->phpclass);
-
 
                 if ( $target->isDisabled() && $target->shipSizeClass > 0){
                     continue;
@@ -70,20 +68,28 @@
 
 
                 //disable interception of low-threat weapons with medium reload weapons
+		    /*don't! - Marcin Sawicki
                 if ($damage < 10){
                     if ($this->weapon->loadingtime > 1){
                         continue;
                     }
                 }
+		*/
 
             //    debug::log($firingweapon->displayName.", total estimated dmg: ".$damage.", considering armour of:".$armour." and shots: ".(ceil($fire->shots / 2)));
-                $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire); //to calculate degradation
-		if($firingweapon->noInterceptDegradation) $numInter = 0;//target shot can be intercepted without degradation!
                 
+		if($firingweapon->noInterceptDegradation){
+			$numInter = 0;//target shot can be intercepted without degradation!
+		}else{                
+		    $numInter = $firingweapon->getNumberOfIntercepts($gd, $fire); //to calculate degradation
+		}
+		    
+		    
                 $perc = 0;
 		
                 for ($i = 0; $i<$this->weapon->guns;$i++){
-                    $perc += (($this->weapon->getInterceptRating($gd->turn)*5) - (($numInter+$i)*5));
+                        $perc += (($this->weapon->getInterceptRating($gd->turn)*5);
+			if(!$firingweapon->noInterceptDegradation) $perc += -(($numInter+$i)*5));
                 }
                 $perc *= 0.01;
 
@@ -121,14 +127,10 @@
     
     class InterceptCandidate{
         public $fire;
-        public $blocked = 0;
-        
-        function __construct($fire ){
-            
-            $this->fire = $fire;             
-            
-           
-        
+        public $blocked = 0;     
+	    
+        function __construct($fire ){            
+            $this->fire = $fire;  
         }
         
     }
@@ -279,16 +281,12 @@ class Firing{
     }
     
     public static function doIntercept($gd, $ship, $intercepts){
-        
         //returns all valid interceptors as $intercepts
-
         if (sizeof($intercepts) == 0){
         //    debug::log($ship->phpclass." has nothing to intercept.");
             return;
         };
-            
-        usort ( $intercepts , "self::compareIntercepts" );
-        
+        usort ( $intercepts , "self::compareIntercepts" );        
         foreach ($intercepts as $intercept){
             $intercept->chooseTarget($gd);
         }
