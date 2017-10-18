@@ -167,7 +167,6 @@ class Firing{
     }
     
     private static function getFighterIntercepts($gd, $ship){
-
         $intercepts = Array(); 
         foreach($ship->systems as $fighter)
         {
@@ -180,7 +179,7 @@ class Firing{
             // check if fighter is firing weapons that exclude other
             // weapons from firing. (Like IonBolt on a Rutarian.)
             foreach ($fighter->systems as $weapon){
-                if($weapon instanceof Weapon){
+                if(($weapon instanceof Weapon) && ($weapon->ballistic != true)){
                     if($weapon->exclusive && $weapon->firedOnTurn($gd->turn)){
                         $exclusiveWasFired = true;
                         break;
