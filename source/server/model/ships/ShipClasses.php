@@ -9,7 +9,7 @@
         public $fighters = array();
         public $hitChart = array();
         public $notes = '';//notes to be displayed on fleet selection screen
-	    
+		    
         public $occurence = "common";
 	public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
         public $limited = 0;
@@ -30,8 +30,9 @@
         public $minesweeperbonus = 0;
         public $base = false;
         public $smallBase = false;
+	public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 	    
-	public $jinkinglimit = 0; //just in case there will be a ship actually able to jink
+	public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
         
         public $enabledSpecialAbilities = array();
         
