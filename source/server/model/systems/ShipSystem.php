@@ -1,7 +1,6 @@
 <?php
 
 class ShipSystem{
-
     public $jsClass = false;
     public $destroyed = false;
     public $startArc, $endArc;
@@ -23,6 +22,7 @@ class ShipSystem{
     public $critData = array();
     public $destructionAnimated = false;
     public $imagePath, $iconPath;
+    public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
     public $possibleCriticals = array();
 	
@@ -209,9 +209,7 @@ class ShipSystem{
                 $activeAA = $target->armourSettings[$dmgClass][1];
                 $armour += $activeAA;
             }
-        } 
-	    
-	    
+        }    
 	return $armour;
     }
 	
@@ -245,10 +243,10 @@ class ShipSystem{
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
 	//use additional value to critical!
-	$bonusCrit = 0;	
+	$bonusCrit = $this->critRollMod + $ship->critRollMod;	
 	foreach($crits as $key=>$value) {
 	  if($value instanceof NastierCrit){
-		$bonusCrit+= 1;//$value->$outputMod;
+		$bonusCrit+= 1;
 		  //unset($crits[$key]); //no need, it'll go out on its own
 	  }
 	}
@@ -272,17 +270,15 @@ class ShipSystem{
             $crits[] = $crit;
         }
         else */
-		if ($this instanceof SubReactor){
-            debug::log("subreactor, multi damage 0.5");
+	if ($this instanceof SubReactor){
+            //debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
 
-        $roll = Dice::d(20) + floor(($this->getTotalDamage()+$bonusCrit)*$damageMulti) + $add;
+        $roll = Dice::d(20) + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
         $criticalTypes = -1;
 
         foreach ($this->possibleCriticals as $i=>$value){
-        
-            //print("i: $i value: $value");
             if ($roll >= $i){
                 $criticalTypes = $value;
             }
