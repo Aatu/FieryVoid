@@ -611,6 +611,7 @@ class Weapon extends ShipSystem{
 	
     /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
     public function calculateHitBase($gamedata, $fireOrder){
+	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
