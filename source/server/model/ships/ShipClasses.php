@@ -46,6 +46,7 @@
         public $rolled = false;
         public $rolling = false;
         public $team;
+	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
         
         public $slotid;
 
@@ -1157,43 +1158,6 @@
 		
 	} //end of function GetHitSystemByDice
 		
-		
-
-        /* no longer needed, keeping code just in case
-        public function getPiercingDamagePerLoc($damage){
-            return ceil($damage/3);
-        }
-	*/
-        
-	    /* no longer needed, keeping code just in case
-        public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-		$location = $this->getHitSection($shooter, $turn, true); //return location even if destroyed
-            
-            $locs = array();
-            $finallocs = array();
-
-            if ($location == 1 || $location == 2){
-                $locs[] = 1;
-                $locs[] = 0;
-                $locs[] = 2;
-            }else if ($location == 3 || $location == 4){
-                $locs[] = 3;
-                $locs[] = 0;
-                $locs[] = 4;
-            }
-            
-            foreach ($locs as $loc){
-                $structure = $this->getStructureSystem($loc);
-                if ($structure != null && !$structure->isDestroyed()){
-                    $finallocs[] = $loc;
-                }
-            }
-            
-            return $finallocs;
-            
-        }
-	*/
-        
         
         public static function hasBetterIniative($a, $b){
             if ($a->iniative > $b->iniative)
@@ -1229,18 +1193,50 @@
         
         protected function getUndamagedSameSystem($system, $location){
             foreach ($this->systems as $sys){
-                // check if there is another system of the same class
-                // on this location.
-                
+                // check if there is another system of the same class on this location.
                 if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
                     return $sys;
                 }
             }
-
             return null;
         } 
         
-    }
+	/*note expected damage - important for deciding ambiguous shots!*/
+	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
+		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
+		if(!isset($this->expectedDamage[$hitLoc])){
+			$this->expectedDamage[$hitLoc] = 0;
+		}
+		
+		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+		$expectedDamageMax = $weapon->getMaxDamage()-$armour;
+		$expectedDamageMin = $weapon->getMaxDamage()-$armour;
+		$expectedDamageMax = max(0,$expectedDamageMax);
+		$expectedDamageMin = max(0,$expectedDamageMin);
+		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; //halve damage as not all would go to Structure!
+		//reduce damage for non-Standard modes...
+		switch($weapon->damageType) {
+		    case 'Raking': //Raking damage gets reduced multiple times
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		    case 'Piercing': //Piercing does little damage to actual outer section...
+			$expectedDamage = $expectedDamage * 0.4;
+			break;
+		    case 'Pulse': //multiple hits - assume half of max pulses hit!
+			$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+			break;			
+		    default: //something else: can't be as good as Standard!
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		}
+		//multiply by hit chance!
+		$expectedDamage = $expectedDamage * min(100,$hitChance) /100;
+		$this->expectedDamage[$hitLoc] += $expectedDamage;
+	}//endof function setExpectedDamage
+	    
+	    
+    } //endof class BaseShip
     
     class BaseShipNoAft extends BaseShip{
 
@@ -1264,16 +1260,11 @@
 
     
     class HeavyCombatVessel extends BaseShip{
-    
-        public $shipSizeClass = 2;        
-        
+            public $shipSizeClass = 2;    
         
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
-
-
-
         public function getLocations(){         
             $locs = array();
 
@@ -1288,6 +1279,7 @@
         }
 
     }
+
 
     class HeavyCombatVesselLeftRight extends BaseShip{
     
