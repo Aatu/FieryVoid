@@ -321,7 +321,7 @@ window.weaponManager = {
 		var f = $(".targeting", e);
 		f.html("");
 
-		if (calledid == null){
+		if(!(calledid > 0)){ //(calledid == null){
 			var html = "";
 			var section = weaponManager.getShipHittingSide(selectedShip, ship);
 
