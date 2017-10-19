@@ -584,8 +584,187 @@ class Weapon extends ShipSystem{
         return false;
     }
 	
+	/*Marcin Sawicki: is there a chance that defender has choice of target section? */
+	public function isTargetAmbiguous($gamedata, $fireOrder){
+		if($fireOrder->calledid != -1) return false; //no choice for called shot
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		$pos = $shooter->getCoPos();
+		$ambiguous = false;
+
+		if($this->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+			$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+		}else{
+			$launchPos = $pos;
+		}
+		
+		if($this->ballistic){
+			$ambiguous = $target->isHitSectionAmbiguousPos($launchPos, $fireOrder->turn);
+		}else{
+			$ambiguous = $target->isHitSectionAmbiguous($shooter, $fireOrder->turn);
+		}
+		return $ambiguous;
+	}
 	
 	
+    /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
+    public function calculateHitBase($gamedata, $fireOrder){
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
+        $pos = $shooter->getCoPos();
+        $jammermod = 0;
+        $jinkSelf = 0;
+	$jinkTarget = 0;
+        $defence = 0;
+        $mod = 0;
+        $oew = 0;
+
+        $hitLoc;
+        $preProfileGoal;
+	    
+        if($this->ballistic){
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        	$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+        }else{
+		$launchPos = $pos;
+	}
+	    
+	if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
+	{
+		// Target is not in distance range. Auto-miss.
+		$notes = ' Target moved out of range. ';
+		$fireOrder->needed = 0; //auto-miss
+		$fireOrder->notes .= $notes;
+		$fireOrder->updated = true;
+		return;
+	}	    
+	    
+        $rp = $this->calculateRangePenalty($launchPos, $target);
+        $rangePenalty = $rp["rp"];
+        
+	if($shooter instanceof FighterFlight)  $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always  
+
+        if($target instanceof FighterFlight){
+            if ( (!($shooter instanceof FighterFlight)) || $this->ballistic) //non-fighters and ballistics always affected by jinking
+            {
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+            elseif( $jinkSelf > 0 || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 ){ //fighter direct fire unaffected at range 0
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+        }
+
+	$dew = $target->getDEW($gamedata->turn);
+        $bdew = EW::getBlanketDEW($gamedata, $target);
+        $sdew = EW::getSupportedDEW($gamedata, $target);        
+        $dist = EW::getDistruptionEW($gamedata, $shooter);
+        if ($this->useOEW)
+        {
+		$soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+		$oew = $shooter->getOEW($target, $gamedata->turn);
+		$oew -= $dist;
+		if ($oew < 0) $oew = 0;
+        }else{
+		$soew = 0;
+		$oew = 0;
+	}
+
+        if (!($shooter instanceof FighterFlight)){
+            if (Movement::isRolling($shooter, $gamedata->turn) /*&& !$this->ballistic*/){
+                $mod -=3;
+            }
+            if (Movement::hasPivoted($shooter, $gamedata->turn) /*&& !$this->ballistic*/){
+                $mod -=3;
+            }
+        }
+
+	if ($fireOrder->calledid != -1){
+		$mod += $this->getCalledShotMod();
+		if($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
+        }
+
+        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
+            $mod -= 1;
+        }
+
+        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this);
+        $mod += $this->getWeaponHitChanceMod($gamedata->turn);
+
+        $ammo = $this->getAmmo($fireOrder);
+        if ($ammo !== null){
+            $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
+        }
+	    
+        //Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
+	//and use OB instead of OEW
+        if($shooter instanceof FighterFlight) {
+		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
+			$mod -= 1;
+		}
+		if(!$this->ballistic){
+			$dew = 0;
+			$bdew = 0;
+			$sdew = 0;
+			$oew = $shooter->offensivebonus;
+			$soew = 0;
+		}else{ //ballistics use of OB is more complicated
+			$oew = 0;
+			$soew = 0;
+			if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
+				if($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
+					$oew = $shooter->offensivebonus;
+				}else{ // Check if target is in current weapon arc
+					$relativeBearing = $target->getBearingOnUnit($shooter);			
+					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)){
+						// Target is in current launcher arc. Flight benefits from offensive bonus.
+						// Now check if the fighter is not firing any non-ballistic weapons
+						if(!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder))$oew = $shooter->offensivebonus;
+					}
+				}
+        		}
+		}
+        }   
+
+        if ($oew < 1){
+            $rangePenalty = $rangePenalty*2;
+        } elseif($shooter->faction != $target->faction) {
+            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
+	    $jammermod = $rangePenalty*$jammerValue;
+        }
+
+        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
+		$CnC = $shooter->getSystemByName("CnC");
+		$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
+	}
+        $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
+
+	$hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget);
+	$hitBonuses = $oew + $soew + $firecontrol + $mod;
+
+        if($this->ballistic){
+		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		$defence = $target->getHitSectionProfilePos($launchPos);
+        }else{
+		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+		$defence = $target->getHitSectionProfile($shooter);
+	}
+        $goal = $defence + $hitBonuses - $hitPenalties;
+
+        $change = round($goal*5); //d20 to d100: ($goal/20)*100 
+	    $target->setExpectedDamage($hitLoc, $change, $this);
+
+	//range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, 
+        $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+        $fireOrder->needed = $change;
+        $fireOrder->notes = $notes;
+        $fireOrder->updated = true;
+    } //endof calculateHitBase
+	
+	
+	
+	//Marcin Sawicki, October 2017: calculateHit is to be replaced by calculateHitBase! (remake of firing procedure)
+	/*
     public function calculateHit($gamedata, $fireOrder){
         //debug::log("_____________");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -654,12 +833,6 @@ class Weapon extends ShipSystem{
                 $oew = 0;
             }
         }
-
-/*Piercing mode already taken care of in FC
-        if ($this->piercing && $this->firingMode == 2 && $this->firingModes[1] == "Standard"){
-            $mod -= 4;
-        }
-*/	
 
         if (!($shooter instanceof FighterFlight)){
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
@@ -753,13 +926,13 @@ class Weapon extends ShipSystem{
 
         $change = round(($goal/20)*100);
 
-	    /*range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, */
+	    //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, 
         $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
     } //endof calculateHit
-
+*/
 	
 	
     public function getIntercept($gamedata, $fireOrder){
