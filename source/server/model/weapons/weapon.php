@@ -742,6 +742,7 @@ class Weapon extends ShipSystem{
 
 	$hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget);
 	$hitBonuses = $oew + $soew + $firecontrol + $mod;
+	$hitLoc = null;
 
         if($this->ballistic){
 		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn);
@@ -757,6 +758,7 @@ class Weapon extends ShipSystem{
 
 	//range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, 
         $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+	$fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
@@ -1098,30 +1100,6 @@ class Weapon extends ShipSystem{
 	
 	
 
-/* no longer needed, keeping code just in case
-    protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
-    {
-
-        if ($target->isDestroyed())
-            return;
-
-        $damage = $target->getPiercingDamagePerLoc(
-                $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
-            );
-        $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
-
-        foreach ($locs as $loc){
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $loc);
-
-            if (!$system)
-                continue;
-
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $loc);
-        }
-    }
-*/
-	
-	
 	
     protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location=null)  {
 	    /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
