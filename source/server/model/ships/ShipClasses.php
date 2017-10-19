@@ -792,8 +792,8 @@
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
 		    if($locs[$key]["remHealth"]>0){ //else section is destroyed anyway!
-			    if(isset($expectedDamage[$key])){
-			    	$locs[$key]["remHealth"] -= round($expectedDamage[$key]);
+			    if(isset($expectedDamage[$locs[$key]["loc"]])){
+			    	$locs[$key]["remHealth"] -= round($expectedDamage[$locs[$key]["loc"]]);
 				$locs[$key]["remHealth"] = max(1,$locs[$key]["remHealth"]);
 			    }
 		    }
