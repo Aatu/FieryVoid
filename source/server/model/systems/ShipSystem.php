@@ -122,8 +122,18 @@ class ShipSystem{
         $this->power[] = $power;
     }
     
-    public function getFireOrders(){
-        return $this->fireOrders;
+    public function getFireOrders($turn = -1){
+	if($turn>0){
+        	return $this->fireOrders;
+	}else{ //indicated a particular turn
+		$fireOrders = array();
+		foreach($this->fireOrders as $fireOrder){
+			if($fireOrder->turn == $turn){
+				$fireOrders[] = $fireOrder;
+			}
+		}
+		return $fireOrders;
+	}
     }
     
     public function setFireOrder($fireOrder){
