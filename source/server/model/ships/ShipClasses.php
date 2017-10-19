@@ -1190,8 +1190,8 @@
 		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
 		if(!isset($this->expectedDamage[$hitLoc])){
 			$this->expectedDamage[$hitLoc] = 0;
-		}
-		
+		}		
+		$structureSystem = $this->getStructureSystem($hitLoc);
 		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
 		$expectedDamageMax = $weapon->getMaxDamage()-$armour;
 		$expectedDamageMin = $weapon->getMaxDamage()-$armour;
