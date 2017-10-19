@@ -305,6 +305,12 @@
             
             return $orders;
         }
+	    		    
+	    
+	    /*always nothing to do for fighters*/
+	    	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+			return;	
+		}
              
     }
   
