@@ -854,9 +854,9 @@
 		if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
-			$foundProfile = $this->getHitSectionProfilePos($posLaunch, $fireOrder->turn);
+			$foundProfile = $this->getHitSectionProfilePos($posLaunch);
 		}else{
-			$foundProfile = $this->getHitSectionProfile($shooter, $fireOrder->turn);
+			$foundProfile = $this->getHitSectionProfile($shooter);
 		}
 		return $foundProfile;
         }
