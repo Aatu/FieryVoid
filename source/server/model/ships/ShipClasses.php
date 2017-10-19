@@ -735,6 +735,53 @@
         }
 	    
 	    
+        public function isHitSectionAmbiguous($shooter, turn){ //for a shot from indicated unit - would there be choice of target section?
+            $locs = $this->getLocations();
+		$relativeBearing =  $this->getBearingOnUnit($shooter);
+            $valid = array();
+            foreach ($locs as $loc){
+                if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
+                    $valid[] = $loc;
+                }
+            }
+            $valid = $this->fillLocations($valid);
+	    //count non-destroyed locations...
+	    $numValidLocs = 0;
+	    foreach ($valid as $loc){
+		if($loc["remHealth"]>0) $numValidLocs++;
+	    }
+            //ambiguous: if there is more than 1 valid choice
+	    if($numValidLocs>1){
+		return true;    
+	    }else{
+		return false;    
+	    }
+        }
+	    
+        public function isHitSectionAmbiguousPos($pos, turn){ //for a shot from indicated unit - would there be choice of target section?
+            $locs = $this->getLocations();
+		$relativeBearing =  $this->getBearingOnPos($pos);
+            $valid = array();
+            foreach ($locs as $loc){
+                if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
+                    $valid[] = $loc;
+                }
+            }
+            $valid = $this->fillLocations($valid);
+	    //count non-destroyed locations...
+	    $numValidLocs = 0;
+	    foreach ($valid as $loc){
+		if($loc["remHealth"]>0) $numValidLocs++;
+	    }
+            //ambiguous: if there is more than 1 valid choice
+	    if($numValidLocs>1){
+		return true;    
+	    }else{
+		return false;    
+	    }
+        }
+	    
+	    
 	/*outer locations of unit and their arcs, used for GUI called shots*/
 	public function fillLocationsGUI(){    
 	    $call = ($this->shipSizeClass>1); //MCVs are one big PRIMARY
