@@ -726,10 +726,14 @@ class Manager{
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
 
         $starttime = time();
+        Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
+        $endtime = time();
+	    
+	    
+        $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-     //   Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-	
+	    
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
@@ -743,9 +747,8 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 */
 	    
         Criticals::setCriticals($servergamedata);
-		//var_dump($servergamedata->getNewFireOrders());
-		//throw new Exception();
-		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
+	    
+	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
 
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
