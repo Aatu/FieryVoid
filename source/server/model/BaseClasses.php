@@ -231,7 +231,7 @@ class FireOrder{
     public $addToDB = false;
     public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
     public $linkedHit = null; //convenient place to store info about system hit by linked weapons
-    public $chosenLoc = null; //convenient place to store info about section chosen to be hit when determining hit chance
+    public $chosenLocation = null; //convenient place to store info about section chosen to be hit when determining hit chance
     
     function __construct(
         $id,
