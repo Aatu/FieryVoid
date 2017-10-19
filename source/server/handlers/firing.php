@@ -145,8 +145,13 @@ class Firing{
     
     }
     
-    public static function automateIntercept($gd){
-        
+    public static function automateIntercept($gd){ //automate allocation of intercept weapons
+  /*Marcin Sawicki, October 2017: change approach: allocate interception fire before ANY fire is actually resolved!
+  	this allows for auto-intercepting ballistics, too.
+  */
+	    
+	    
+/* original version	    
         foreach ($gd->ships as $ship){
             if (!$ship instanceof FighterFlight){
                 if($ship->unavailable === true || $ship->isDisabled()){
@@ -165,7 +170,7 @@ class Firing{
             
             self::doIntercept($gd, $ship, $intercepts);
         }
-        
+*/
     }
     
     private static function getFighterIntercepts($gd, $ship){
