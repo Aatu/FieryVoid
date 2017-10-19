@@ -587,6 +587,7 @@ class Weapon extends ShipSystem{
 	/*Marcin Sawicki: is there a chance that defender has choice of target section? */
 	public function isTargetAmbiguous($gamedata, $fireOrder){
 		if($fireOrder->calledid != -1) return false; //no choice for called shot
+		if($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		$pos = $shooter->getCoPos();
