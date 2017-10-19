@@ -467,28 +467,6 @@
 			$movement = $move;  
 		}
 		return $movement;
-		
-		
-	    /*original code - returns first move of indicated turn*/
-		/*
-            $movement = null;
-            if (!is_array($this->movement)){
-                return array("x"=>0, "y"=>0);
-            }
-            foreach ($this->movement as $move){
-                if ($move->type == "start")
-                    continue;
-                
-                if ($move->turn == $turn){
-                    if (!$movement)
-                        $movement = $move;
-                    
-                    break;
-                }
-                $movement = $move;
-            }
-            return $movement;
- 		*/
         }
 	    
 	    
@@ -813,6 +791,12 @@
                 $structure = $this->getStructureSystem($locs[$key]["loc"]);
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+		    if($locs[$key]["remHealth"]>0){ //else section is destroyed anyway!
+			    if(isset($expectedDamage[$key])){
+			    	$locs[$key]["remHealth"] -= round($expectedDamage[$key]);
+				$locs[$key]["remHealth"] = max(1,$locs[$key]["remHealth"]);
+			    }
+		    }
                     $locs[$key]["armour"] = $structure->armour;
                 }
                 else {
@@ -824,8 +808,8 @@
 
 
         public function pickLocationForHit($locs){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
-		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
-		foreach ($locs as $loc){
+		$pick = array("loc"=>0, "profile"=>80, "remHealth"=>0, "armour"=>0);
+		foreach ($locs as $loc){	
 			//compare current best pick with current loop iteration, change if new pick is better
 			$toughnessPick = $pick["remHealth"]+round($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
 			$toughnessLoc = $loc["remHealth"]+round($loc["remHealth"]*$loc["armour"]*0.15);//every point of armor increases toughness by 15%
@@ -843,6 +827,7 @@
 				if($toughnessLoc>0)// profile shouldn't cause destroyed section to be chosen
 				  $toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
 			}
+			
 										   
 			if($toughnessLoc>$toughnessPick){ //if new toughness is better, it wins (already takes profile into account)
 				$pick = $loc;
@@ -862,8 +847,6 @@
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 			$foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
-			//$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
-			//debug::log("$toBeLogged"); 
 		}else{
 			$foundLocation = $this->getHitSection($shooter, $fireOrder->turn, $returnDestroyed);
 		}
