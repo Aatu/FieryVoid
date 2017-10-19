@@ -425,13 +425,41 @@ class Firing{
     }
 
 
-    
-    public static function fireWeapons($gamedata){
+    /*Marcin Sawicki: count hit chances for starting fire phase fire*/
+    public static function prepareFiring($gamedata){
+        $currFireOrders  = array();   
+	$ambiguousFireOrders  = array();   
+	foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+		if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+		    continue;
+		}
+		$weapon = $ship->getSystemById($fire->weaponid);
+		if ($weapon instanceof Thruster || $weapon instanceof Structure){
+		    continue;
+		}
+		$fire->priority = $weapon->priority;
+		$currFireOrders[] = $fire;
+	}
+	//calculate hit chances if no ambiguousness exists...
+	foreach($currFireOrders as $fireOrder){
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
+			$ambiguousFireOrders[] = $fireOrder;
+		}else{
+			$weapon->calculateHitBase($gamedata, $fireOrder);			
+		}
+	}
+	//calculate hit chances for ambiguous firing!
+	foreach($ambiguousFireOrders as $fireOrder){
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		$weapon->calculateHitBase($gamedata, $fireOrder);
+	} 
+    }//endof function prepareFiring
 	
+	
+    public static function fireWeapons($gamedata){	
         $fireOrders  = array();
-        
-        foreach ($gamedata->ships as $ship){
-		
+        foreach ($gamedata->ships as $ship){		
 		/*account for possible reactor overload!*/
 		$reactorList = $ship->getSystemsByName('Reactor');
 		foreach($reactorList as $reactorCurr){
@@ -444,22 +472,9 @@ class Firing{
 				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, $armour, 0, -1, true, "", "plasma");
 				$damageEntry->updated = true;
 
-				 $reactorCurr->damage[] = $damageEntry;
-				/*
-				$fireOrder =  new FireOrder(-1, "Reactor overload", $ship->id,  $ship->id, $this->id, -1, 
-					$gamedata->turn, 'flash', 100, 1, 1, 1, 0, null, null, 'plasma');
-				$fireOrder->updated = true;
-				$fireOrder->addToDB = true;
-				*/
-				/*
-        			$damageEntry = new DamageEntry(-1, $ship->id, $fireOrder->id, $gamedata->turn, $reactorCurr->id, 1, 0, 0, -1, true, 
-					"Reactor overload", "plasma");
-				$damageEntry->updated = true;
 				$reactorCurr->damage[] = $damageEntry;
-				*/
 			}
 		}
-
 
             if ($ship instanceof FighterFlight){
                 continue;
@@ -471,20 +486,8 @@ class Firing{
                 }
 
                 $weapon = $ship->getSystemById($fire->weaponid);
-
-         //       debug::log($ship->id."___".$weapon->displayName." fireOrder");
-
                 if ($weapon instanceof Thruster || $weapon instanceof Structure){
-			/*
-                    debug::log("DING");
-                    debug::log($ship->phpclass);
-                    debug::log($weapon->location);
-                    debug::log($weapon->displayName);
-                    debug::log("DING_2");
-                    debug::log($weapon->fireOrders[0]);
-		    */
                     continue;
-
                 }
 
                 $fire->priority = $weapon->priority;
@@ -507,26 +510,7 @@ class Firing{
                 }
             }
         );
-
-
-/*
-        usort($fireOrders, 
-            function($a, $b) use ($gamedata){
-                if ($a->shooterid != $b->shooterid){
-                    return $a->shooterid - $b->shooterid;
-                }
-                else if ($a->targetid !== $b->targetid){
-                    return $a->targetid - $b->targetid;
-                }
-                else {
-                    return $a->priority - $b->priority;
-                }
-            }
-        );
-*/
-
-
-
+	    
 
         foreach ($fireOrders as $fire){
                 $ship = $gamedata->getShipById($fire->shooterid);
@@ -535,8 +519,6 @@ class Firing{
                 // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
         }
-
-
 
         // From here on, only fighter units are left.
         $chosenfires = array();
