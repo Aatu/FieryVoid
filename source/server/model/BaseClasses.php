@@ -222,8 +222,8 @@ class EWentry{
     }
 }
 
-class FireOrder{
-    
+
+class FireOrder{    
     public $id, $type, $shooterid, $targetid, $calledid, $weaponid, $turn, $firingMode, $needed, $rolled, $shots, $shotshit, $intercepted, $x, $y, $damageclass;
     public $notes = "";
     public $pubnotes = "";
@@ -231,6 +231,7 @@ class FireOrder{
     public $addToDB = false;
     public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
     public $linkedHit = null; //convenient place to store info about system hit by linked weapons
+    public $chosenLoc = null; //convenient place to store info about section chosen to be hit when determining hit chance
     
     function __construct(
         $id,
