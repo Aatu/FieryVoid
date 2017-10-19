@@ -780,7 +780,7 @@ window.weaponManager = {
 				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 			}
 		}
-		if (calledid != null){
+		if (calledid > 0){
 			mod += weapon.calledShotMod;
 			if(target.base) mod += weapon.calledShotMod;//double penalty vs bases!
 		}
