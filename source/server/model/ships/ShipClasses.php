@@ -1193,8 +1193,8 @@
 		}		
 		$structureSystem = $this->getStructureSystem($hitLoc);
 		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
-		$expectedDamageMax = $weapon->getMaxDamage()-$armour;
-		$expectedDamageMin = $weapon->getMaxDamage()-$armour;
+		$expectedDamageMax = $weapon->maxDamage-$armour;
+		$expectedDamageMin = $weapon->minDamage-$armour;
 		$expectedDamageMax = max(0,$expectedDamageMax);
 		$expectedDamageMin = max(0,$expectedDamageMin);
 		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; //halve damage as not all would go to Structure!
