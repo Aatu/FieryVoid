@@ -198,7 +198,6 @@ class Firing{
 	
 	
 	/* returns best possible shot to intercept (or null if none is available)
-TODO	
 	*/
 	getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots){
 		$bestInterception = null;
@@ -209,47 +208,63 @@ TODO
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
 			if($currInterceptionMod <= 0)continue; //can't effectively intercept
 			
-			$chanceBefore = 
-			
+			$shooter = $gamedata->getShipById($firingOrder->shooterid);
+			$firingWeapon = $shooter->getSystemById($firingOrder->weaponid);
+		
 			$chosenLoc = $firingOrder->chosenLocation;
 			if(!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
-			$armour = 0; 
 			if($ship instanceof FighterFlight){
-				
+				$armour = 0; //let's simplify here...
 			}else{
 				$structureSystem = $ship->getStructureSystem($chosenLoc);
-				$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+				$armour = $structureSystem->getArmour($this, null, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
 			}
-			$expectedDamageMax = $weapon->maxDamage-$armour;
-			$expectedDamageMin = $weapon->minDamage-$armour;
+			$expectedDamageMax = $firingWeapon->maxDamage-$armour;
+			$expectedDamageMin = $firingWeapon->minDamage-$armour;
 			$expectedDamageMax = max(0,$expectedDamageMax);
 			$expectedDamageMin = max(0,$expectedDamageMin);
 			$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; 
-			if($expectedDamage<1)$expectedDamage = 0.9; //let's assume this will do _some_ damage even if armor indicates differently...
+			//reduce damage for non-Standard modes...
+			switch($firingWeapon->damageType) {
+			    case 'Raking': //Raking damage gets reduced multiple times
+				$expectedDamage = $expectedDamage * 0.9;
+				break;
+			    case 'Piercing': //Piercing does little damage to actual outer section...
+				$expectedDamage = $expectedDamage * 0.4;
+				break;
+			    case 'Pulse': //multiple hits - assume half of max pulses hit!
+				$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+				break;			
+			    default: //something else: can't be as good as Standard!
+				$expectedDamage = $expectedDamage * 0.9;
+				break;
+			}
+			//if weapon does no damage by itself, assume it has other, very relvant effect - comparable to 10 damage!
+			if($weapon->maxDamage == 0 ) $expectedDamage = 10;
+			$expectedDamage = max(0.1,$expectedDamage);//estimate _some_ damage always...
+			//multiply by Shots or Maxpulses...
+			if($firingWeapon->damageType == 'Pulse'){
+				$expectedDamage = $expectedDamage *max(1,$firingWeapon->maxpulses);
+			}else{
+				$expectedDamage = $expectedDamage *max(1,$firingWeapon->shots);
+			}			
 			
+			//how much is actually reduced?
+			$hitChanceBefore = $firingOrder->needed - $firingOrder->totalIntercept;
+			$hitChanceAfter = $hitChanceBefore - $currInterceptionMod;
+			$hitChanceAfter = max(0,$hitChanceAfter);//negative numbers are irrelevant
+			$modifier = min(100,$hitChanceBefore) - $hitChanceAfter;
+			if($modifier <= 0){ //after interception hit chance is still over 100%... let's count as something, but much less - say, multiply by 0.1!
+				$modifier = 0.1 * ($hitChanceBefore - $hitChanceAfter);
+			}
 			
+			//...how much damage is actually stopped?
+			$stoppedDamage = $modifier * $expectedDamage;//to get actual damage statistically stopped, You need to multiply this by 0.01 - but it's completely irrelevant for higher/lower comparision
 			
-		//reduce damage for non-Standard modes...
-		switch($weapon->damageType) {
-		    case 'Raking': //Raking damage gets reduced multiple times
-			$expectedDamage = $expectedDamage * 0.9;
-			break;
-		    case 'Piercing': //Piercing does little damage to actual outer section...
-			$expectedDamage = $expectedDamage * 0.4;
-			break;
-		    case 'Pulse': //multiple hits - assume half of max pulses hit!
-			$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
-			break;			
-		    default: //something else: can't be as good as Standard!
-			$expectedDamage = $expectedDamage * 0.9;
-			break;
-		}
-		//multiply by hit chance!
-		$expectedDamage = $expectedDamage * min(100,$hitChance) /100;
-		$this->expectedDamage[$hitLoc] += $expectedDamage;
-			
-			
-			
+			if($stoppedDamage > $bestInterceptionVal){ //this is best interception candidate found so far!
+				$bestInterception = $firingOrder;
+				$bestInterceptionVal = $stoppedDamage;
+			}
 		}
 		return $bestInterception;
 	}
