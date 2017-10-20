@@ -1197,7 +1197,7 @@
 		$expectedDamageMin = $weapon->minDamage-$armour;
 		$expectedDamageMax = max(0,$expectedDamageMax);
 		$expectedDamageMin = max(0,$expectedDamageMin);
-		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; //halve damage as not all would go to Structure!
+		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/4; //halve damage as not all would go to Structure! - hence /4 and not /2
 		//reduce damage for non-Standard modes...
 		switch($weapon->damageType) {
 		    case 'Raking': //Raking damage gets reduced multiple times
