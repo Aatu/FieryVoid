@@ -145,10 +145,47 @@ class Firing{
     
     }
     
-    public static function automateIntercept($gd){ //automate allocation of intercept weapons
+    //compares weapons' capability as interceptor
+    //if intercept rating is the same, faster-firing weapon would go first
+    public static function compareInterceptAbility($weaponA, $weaponB){	    
+        if ($weaponA->intercept > $weaponB->intercept){
+            return 1;
+        }else if ($weaponA->intercept < $weaponB->intercept){
+            return -1;
+        }else if ($weaponA->loadingtime < $weaponB->loadingtime){
+            return 1;
+        }else if ($weaponA->loadingtime > $weaponB->loadingtime){
+            return -1;
+        }else{
+            return 0;
+        }   
+    } //endof compareInterceptAbility
+	
+    public static function automateIntercept($gamedata){ //automate allocation of intercept weapons
   /*Marcin Sawicki, October 2017: change approach: allocate interception fire before ANY fire is actually resolved!
   	this allows for auto-intercepting ballistics, too.
   */
+	    
+	//prepare list of all potential intercepts
+	$allInterceptWeapons = array();
+	foreach ($gamedata->ships as $ship){
+		if (!$ship instanceof FighterFlight){
+			if($ship->unavailable === true || $ship->isDisabled()) continue;
+		}              
+		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship)
+		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);		
+	}
+	    
+	//sort list of all potential intercepts - most effective first
+	usort($allInterceptWeapons, "self::compareInterceptAbility");
+	    
+	    
+	//prepare list of all incoming fire
+	    
+	    
+	//assign interception
+	    
+	    
 	    
 	    
 /* original version	    
