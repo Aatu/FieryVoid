@@ -197,15 +197,62 @@ class Firing{
     } //endof getUnassignedInterceptors
 	
 	
-	/*Marcin Sawicki: TODO! using $interceptor->getInterceptionMod($gamedata, $intercepted); */
-	getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots)
-		
-		
-		$interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
-                    $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
-                    $interceptFire->addToDB = true;
-                    $interceptor->fireOrders[] = $interceptFire;
-	
+	/* returns best possible shot to intercept (or null if none is available)
+TODO	
+	*/
+	getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots){
+		$bestInterception = null;
+		$bestInterceptionVal = 0;		
+		foreach($incomingShots as $firingOrder){
+			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);
+			if(!$isLegal)continue; //not a legal interception at all for this weapon
+			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
+			if($currInterceptionMod <= 0)continue; //can't effectively intercept
+			
+			$chanceBefore = 
+			
+			$chosenLoc = $firingOrder->chosenLocation;
+			if(!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
+			$armour = 0; 
+			if($ship instanceof FighterFlight){
+				
+			}else{
+				$structureSystem = $ship->getStructureSystem($chosenLoc);
+				$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+			}
+			$expectedDamageMax = $weapon->maxDamage-$armour;
+			$expectedDamageMin = $weapon->minDamage-$armour;
+			$expectedDamageMax = max(0,$expectedDamageMax);
+			$expectedDamageMin = max(0,$expectedDamageMin);
+			$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; 
+			if($expectedDamage<1)$expectedDamage = 0.9; //let's assume this will do _some_ damage even if armor indicates differently...
+			
+			
+			
+		//reduce damage for non-Standard modes...
+		switch($weapon->damageType) {
+		    case 'Raking': //Raking damage gets reduced multiple times
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		    case 'Piercing': //Piercing does little damage to actual outer section...
+			$expectedDamage = $expectedDamage * 0.4;
+			break;
+		    case 'Pulse': //multiple hits - assume half of max pulses hit!
+			$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+			break;			
+		    default: //something else: can't be as good as Standard!
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		}
+		//multiply by hit chance!
+		$expectedDamage = $expectedDamage * min(100,$hitChance) /100;
+		$this->expectedDamage[$hitLoc] += $expectedDamage;
+			
+			
+			
+		}
+		return $bestInterception;
+	}
 	
 		
     /*adds indicated weapon's capabilities to total interception variables
@@ -213,7 +260,7 @@ class Firing{
     */	
     public static function addToInterceptionTotal($gamedata, $intercepted, $interceptor, $prepareOrder = false){
 		//update numbers appropriately	    
-	        $totalIntercept += $interceptor->getInterceptionMod($gamedata, $intercepted);
+	        $totalIntercept -= $interceptor->getInterceptionMod($gamedata, $intercepted);
 	        $intercepted->numInterceptors++;
 	    
 		if($prepareOrder){ //new firing order (intercept) should be prepared?
