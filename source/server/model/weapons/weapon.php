@@ -110,6 +110,7 @@ class Weapon extends ShipSystem{
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
+	public $ballisticIntercept = false; //can intercept, but only ballistics?...
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
@@ -274,6 +275,27 @@ class Weapon extends ShipSystem{
         return $this->turnsloaded;
     }
 
+	/*if this weapon was to be used for interception of indicated shot - how high intercept mod would be?
+		assume that intercept itself is legal
+	*/
+	public function getInterceptionMod($gamedata, $intercepted){
+		$interceptMod = 0;
+		$shooter = $gamedata->getShipById($intercepted->shooterid);
+		$interceptedWeapon = $shooter->getSystemById($intercepted->weaponid);		
+		if($interceptedWeapon->hextarget) return 0;//can't intercept uninterceptable or hextarget weapon!
+		if($this->ballisticIntercept && $interceptedWeapon->ballistic) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
+		
+		$interceptMod = $this->getInterceptRating($gamedata->turn); 
+		if(!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)){//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
+			for($i = 0;$i<$intercepted->numInterceptors;$i++){
+				$interceptMod -= 1; //-1 for each already intercepting weapon
+			}
+		}
+		$interceptMod=max(0,$interceptMod) *5;//*5: d20->d100
+		return $interceptMod;
+	}//endof  getInterceptionMod
+	
+	
     public function firedOnTurn($turn){
         if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
         foreach ($this->fireOrders as $fire){
