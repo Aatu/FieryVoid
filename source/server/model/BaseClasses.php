@@ -8,6 +8,9 @@ class SystemData
     public $systemid, $subsystem, $shipid;
     public $data = Array();
     
+    public $totalIntercept = 0; //total interception assigned
+    public $numInterceptors = 0; //number of intercepting weapons assigned
+    
     public function __construct($systemid, $subsystem, $shipid)
     {
         $this->systemid = $systemid;
