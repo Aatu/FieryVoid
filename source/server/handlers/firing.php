@@ -8,7 +8,7 @@
             $this->weapon = $weapon;
             $this->intercepts = $intercepts;
         }
-        
+        /* Marcin Sawicki, October 2017: ENTIRE CLASS is no longer needed?... leaving for now.
         public function chooseTarget($gd){
             $best = null;
             foreach ($this->intercepts as $candidate){
@@ -68,13 +68,11 @@
 
 
                 //disable interception of low-threat weapons with medium reload weapons
-		    /*don't! - Marcin Sawicki
                 if ($damage < 10){
                     if ($this->weapon->loadingtime > 1){
                         continue;
                     }
                 }
-		*/
 
             //    debug::log($firingweapon->displayName.", total estimated dmg: ".$damage.", considering armour of:".$armour." and shots: ".(ceil($fire->shots / 2)));
                 
@@ -123,8 +121,10 @@
                 }
             }
         }
-    }
+	*/
+    }//endof class Intercept
     
+/* Marcin Sawicki, October 2017: ENTIRE CLASS is no longer needed?... leaving for now.*/
     class InterceptCandidate{
         public $fire;
         public $blocked = 0;     
@@ -164,9 +164,8 @@ class Firing{
 	/*gets all ready intercept-capable weapons that aren't otherwise assigned*/
     public static function getUnassignedInterceptors($gamedata, $ship){	    
 	    $currTurn = $gamedata->turn;
-	    $toReturn = array();
-	    
-	    if($ship instanceof FighterFlight){
+	    $toReturn = array();	    
+	    if($ship instanceof FighterFlight){ //separate procedure for fighters
 		    $exclusiveWasFired = false;
 		    foreach($ship->systems as $fighter){
 			    if ($fighter->isDestroyed()) continue;
@@ -175,8 +174,8 @@ class Firing{
 					    if(($weapon->exclusive) && $weapon->firedOnTurn($currTurn)){
 						    $exclusiveWasFired = true;
 						    continue;
-					    }else if((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0)){//not fired this turn, intercept-capable
-						    if((!isset($weapon->ammunition)) || ($weapon->ammunition > 0)) {//unlimited ammo or still has ammo available
+					    }else if((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) && (self::isValidInterceptor($gamedata, $weapon))){//not fired this turn, intercept-capable, and valid interceptor
+						    if((!isset($weapon->ammunition)) || ($weapon->ammunition > 0)) {//unlimited ammo or still has ammo available							    
 						    	$toReturn[] = $weapon;  
 						    }
 					    }
@@ -185,7 +184,14 @@ class Firing{
 		    }
 		    if($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
 	    }else{ //proper ship
-		    
+		if(!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
+			foreach($ship->systems as $weapon){
+				if((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
+				if((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) && (self::isValidInterceptor($gamedata, $weapon))){//not fired this turn, intercept-capable, and valid interceptor
+					$toReturn[] = $weapon;  
+				}
+			}
+		}
 	    }
 	    return $toReturn;
     } //endof getUnassignedInterceptors
@@ -198,10 +204,7 @@ class Firing{
 	    
 	//prepare list of all potential intercepts
 	$allInterceptWeapons = array();
-	foreach ($gamedata->ships as $ship){
-		if (!$ship instanceof FighterFlight){
-			if($ship->unavailable === true || $ship->isDisabled()) continue;
-		}              
+	foreach ($gamedata->ships as $ship){      
 		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship)
 		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);		
 	}
