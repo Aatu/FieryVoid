@@ -267,7 +267,7 @@ class Firing{
 			}
 		}
 		return $bestInterception;
-	}
+	}//endof getBestInterception
 	
 		
     /*adds indicated weapon's capabilities to total interception variables
@@ -659,6 +659,9 @@ class Firing{
     }//endof function prepareFiring
 	
 	
+	/*actual firing of weapons
+	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
+	*/
     public static function fireWeapons($gamedata){	
         $fireOrders  = array();
         foreach ($gamedata->ships as $ship){		
@@ -701,10 +704,11 @@ class Firing{
 
         usort($fireOrders, 
             function($a, $b) use ($gamedata){
-                if ($a->targetid !== $b->targetid){
+		if ($a->targetid !== $b->targetid){
                     return $a->targetid - $b->targetid;
-                }
-                else if ($a->priority !== $b->priority){
+                }else if($a->calledid!==$b->calledid){ //called shots first!
+                    return $a->targetid - $b->targetid;
+                }else if ($a->priority !== $b->priority){
                     return $a->priority - $b->priority;
                 }
                 else {
