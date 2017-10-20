@@ -138,7 +138,7 @@
 
 class Firing{
     public $gamedata;
-    
+	
 	
     public static function validateFireOrders($fireOrders, $gamedata){
             return true;
@@ -197,29 +197,94 @@ class Firing{
     } //endof getUnassignedInterceptors
 	
 	
+	/*Marcin Sawicki: TODO! using $interceptor->getInterceptionMod($gamedata, $intercepted); */
+	getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots)
+		
+		
+		$interceptFire = new FireOrder(-1, "intercept", $this->ship->id, $best->fire->id, $this->weapon->id, -1, 
+                    $gd->turn, $this->weapon->firingMode, 0, 0, $this->weapon->defaultShots, 0, 0, null, null);
+                    $interceptFire->addToDB = true;
+                    $interceptor->fireOrders[] = $interceptFire;
+	
+	
+		
+    /*adds indicated weapon's capabilities to total interception variables
+    	may create intercept order itself if needed
+    */	
+    public static function addToInterceptionTotal($gamedata, $intercepted, $interceptor, $prepareOrder = false){
+		//update numbers appropriately	    
+	        $totalIntercept += $interceptor->getInterceptionMod($gamedata, $intercepted);
+	        $intercepted->numInterceptors++;
+	    
+		if($prepareOrder){ //new firing order (intercept) should be prepared?
+			$interceptFire = new FireOrder(-1, "intercept", $interceptor->getUnit()->id, $intercepted->id, $interceptor->id, -1, 
+				$gamedata->turn, $interceptor->firingMode, 0, 0, $interceptor->defaultShots, 0, 0, null, null
+			);
+			$interceptFire->addToDB = true;
+			$interceptor->fireOrders[] = $interceptFire;
+		}
+    } //endof addToInterceptionTotal
+
+	
     public static function automateIntercept($gamedata){ //automate allocation of intercept weapons
   /*Marcin Sawicki, October 2017: change approach: allocate interception fire before ANY fire is actually resolved!
   	this allows for auto-intercepting ballistics, too.
   */
 	    
-	//prepare list of all potential intercepts
+	//prepare list of all potential intercepts and all incoming fire
 	$allInterceptWeapons = array();
+	$allIncomingShots = array();
 	foreach ($gamedata->ships as $ship){      
 		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship)
-		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);		
+		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
+		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
+		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
 	    
+	//update intercepion totals!
+	$shotsStillComing = $allIncomingShots;
+	foreach($allIncomingShots as $fireOrder){
+		if(($fireOrder->type != "selfIntercept") && ($fireOrder->type != "intercept")) continue; //manually assigned interception - no others exist at this point
+		//let's find WHAT is being intercepted and update interception totals!
+		foreach($shotsStillComing as $intercepted){
+			if($fireOrder->targetid == $intercepted->id){
+				$shooter = $gamedata->getShipById($fireOrder->shooterid);
+				$firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
+				self::addToInterceptionTotal($gamedata, $intercepted, $firingWeapon);
+				break; //loop
+			}
+		}
+	}
+	    
+	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
+	$shotsStillComing = array();
+	foreach($allIncomingShots as $fireOrder){
+		if(($fireOrder->needed - $fireOrder->totalIntercept) > 0) continue;//no chance of hitting
+		if(($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
+		if($firingWeapon->hextarget) continue;//hex-targeted
+		$shotsStillComing[] = $fireOrder;
+	}
+	$allIncomingShots = $shotsStillComing;
+	$shotsStillComing = null; //just free memory
+	    
 	//sort list of all potential intercepts - most effective first
-	usort($allInterceptWeapons, "self::compareInterceptAbility");
-	    
-	    
-	//prepare list of all incoming fire
-	    
+	usort($allInterceptWeapons, "self::compareInterceptAbility");	    
 	    
 	//assign interception
+	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
+		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
+		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
+			//find shot it would be most profitable to intercept with this weapon, and intercept it!
+			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots)
+			if($shotToIntercept != null){
+				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order
+			}
+		}
+	}    
 	    
-	    
-	    
+	//all possible interceptions have been made!
 	    
 /* original version	    
         foreach ($gd->ships as $ship){
