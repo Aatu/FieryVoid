@@ -1047,10 +1047,6 @@ class Weapon extends ShipSystem{
 		    $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
 		}
 		
-		if(!($this->chosenLocation > 0)){ //location not yet chosen (or PRIMARY, in which case reassignment shouldn't make any change)
-			
-		}
-		
 		$shotsFired = $fireOrder->shots; //number of actual shots fired	
 		if($this->damageType == 'Pulse'){//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
 			$shotsFired = 1;
@@ -1273,12 +1269,17 @@ class Weapon extends ShipSystem{
 	    
         if ($target->isDestroyed()) return;
 	    
+	$tmpLocation = $fireOrder->chosenLocation;	    
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		}
 	}else{
- 		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+ 			$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+		}
 	}
 
 	if(($target->shipSizeClass>1) && ($this->damageType=='Piercing')){ //Piercing damage will be split into 3 parts vs units larger thgan MCVs
