@@ -981,8 +981,8 @@ class Weapon extends ShipSystem{
 
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
                     if (!$interceptWeapon instanceof Weapon){
-                        debug::log("DING. You cant intercept with a non-weapon....");
-                        debug::log($interceptWeapon->displayName);
+                        //debug::log("DING. You cant intercept with a non-weapon....");
+                        //debug::log($interceptWeapon->displayName);
                         continue;
                     }
                     $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
@@ -993,8 +993,7 @@ class Weapon extends ShipSystem{
                         $i = 0;
                      }
 
-                    if ($shooter instanceof FighterFlight)
-						$deg--;
+                    if ($shooter instanceof FighterFlight) $deg--;
 
                     $intercept += $i;
                     $count++;
@@ -1013,17 +1012,14 @@ class Weapon extends ShipSystem{
 	
     public function getNumberOfIntercepts($gamedata, $fireOrder){
         $count = 0;
-
         foreach ($gamedata->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     $count++;
-
                 }
             }
         }
-
         return $count;
     }
 
@@ -1035,7 +1031,81 @@ class Weapon extends ShipSystem{
     }
 	
 	
-    public function fire($gamedata, $fireOrder){
+	/*Marcin Sawicki - October 2017 - new version of firing procedure - assuming all data is already prepared*/
+	public function fire($gamedata, $fireOrder){
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		
+		$fireOrder->needed -= $fireOrder->totalIntercept.
+		$notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed
+		$fireOrder->notes .= $notes;
+		
+		$pos = null; //functions will properly calculate from firing unit, which is important at range 0
+		//$pos = $shooter->getCoPos();
+		if ($this->ballistic){
+		    $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		    $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		}
+		
+		if(!($this->chosenLocation > 0)){ //location not yet chosen (or PRIMARY, in which case reassignment shouldn't make any change)
+			
+		}
+		
+		$shotsFired = $fireOrder->shots; //number of actual shots fired	
+		if($this->damageType == 'Pulse'){//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
+			$shotsFired = 1;
+		}
+		for ($i=0;$i<$shotsFired;$i++){
+			$needed = $fireOrder->needed;
+			if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
+				$needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
+			}
+
+			//for linked shot: further shots will do the same as first!
+			if($i==0){ //clear variables that may be relevant for further shots in line
+				$fireOrder->linkedHit=null;
+			}
+			$rolled = Dice::d(100);
+			if($this->isLinked && $i > 0){ //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
+				$rolled = $fireOrder->rolled;
+			}
+
+			//interception?
+			if ($rolled > $needed && $rolled <= $needed+($fireOrder->totalIntercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
+			    if($this->damageType == 'Pulse'){
+				$fireOrder->intercepted += $this->maxpulses;
+			    }else{
+				$fireOrder->intercepted += 1;
+			    }
+			}
+
+
+			$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+			$fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+
+			//hit?
+			if ($rolled <= $needed){
+				$hitsRemaining=1;
+
+				if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
+				    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+				}
+
+				while($hitsRemaining>0){
+					$hitsRemaining--;
+					$fireOrder->shotshit++;
+					$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
+				}
+			}
+		}
+
+		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	} //endof fire
+	
+	
+	
+	/*Marcin Sawicki - October 2017 - firing procedure is remade; old version not deleted just in case*/
+    public function fireOld($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 	
