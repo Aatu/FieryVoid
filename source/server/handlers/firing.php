@@ -275,7 +275,7 @@ class Firing{
     */	
     public static function addToInterceptionTotal($gamedata, $intercepted, $interceptor, $prepareOrder = false){
 		//update numbers appropriately	    
-	        $totalIntercept -= $interceptor->getInterceptionMod($gamedata, $intercepted);
+	        $intercepted->totalIntercept -= $interceptor->getInterceptionMod($gamedata, $intercepted);
 	        $intercepted->numInterceptors++;
 	    
 		if($prepareOrder){ //new firing order (intercept) should be prepared?
