@@ -28,7 +28,8 @@ class ShipSystem{
 	
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     
-        
+        public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
+	
     public $criticals = array();
 	protected $advancedArmor = false; //indicates that system has advanced armor
     
@@ -167,20 +168,7 @@ class ShipSystem{
         }
     }
     
-	/*old version, kept just in case
-    public function getArmour($target, $shooter, $dmgClass){ //total armour
-        $armour = $this->armour;
-        $activeAA = 0;
-
-        if (isset($target->adaptiveArmour)){
-            if (isset($target->armourSettings[$dmgClass][1])){
-                $activeAA = $target->armourSettings[$dmgClass][1];
-                //      debug::log("hit by: ".$dmgClass.", applying mod: ".$activeAA);
-                $armour += $activeAA;
-            }
-        }
-        return $armour;
-    }*/
+	
 	public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
 		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
 		return $armour;
@@ -405,6 +393,7 @@ class ShipSystem{
 
     
     public function isDamagedOnTurn($turn){
+	if($this->forceCriticalRoll) return true; //allow forced crit roll
         
         foreach ($this->damage as $damage){
             if ($damage->turn == $turn || $damage->turn == -1){
