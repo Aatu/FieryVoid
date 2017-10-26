@@ -170,7 +170,39 @@
 	    }	    
 
 	    
+	public function calculateHitBase($gamedata, $fireOrder){ //auto-miss if restrictions not met
+		$canHit = true;
+		$pubnotes = '';
+		
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		
+		if(!$target->Enormous){	$canHit=false; $pubnotes.= ' Target is not Enormous. '; }
+		if($target->getSpeed()>0){ $canHit=false; $pubnotes.= ' Target speed >0. '; }
+		if($shooter->getSpeed()>0){ $canHit=false; $pubnotes.= ' Shooter speed >0. '; }
+			
+		if($canHit){
+			parent::calculateHitBase($gamedata, $fireOrder);
+		}else{ //accurate targeting with this weapon not possible!
+			$fireOrder->needed = 0;
+        		$fireOrder->notes = 'ACCURATE FIRING CRITERIA NOT MET';
+			$fireOrder->pubnotes .= $pubnotes;   
+        		$fireOrder->updated = true;
+		}
+	}
 	    
+	    
+	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
+		if ($target->isDestroyed()) return;
+		$tmpLocation = $fireOrder->chosenLocation;	
+
+		$system = $target->getStructureSystem($tmpLocation);
+		if ($system == null || $system->isDestroyed()) $system = $target->getStructureSystem(0);//facing Structure nonexistent, go to PRIMARY
+		if ($system == null || $system->isDestroyed()) return; //PRIMARY Structure nonexistent also
+		$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, $tmpLocation);
+	}	    
+	    
+	    /* Marcin Sawicki, October 2017 - fire() and calculateHit() functions changed (new versions above)
 	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
 		if ($target->isDestroyed()) return;
 		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
@@ -201,7 +233,7 @@
         		$fireOrder->updated = true;
 		}
 	}
-	    
+	    */
 	    
 	    
 	    
