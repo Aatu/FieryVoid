@@ -290,8 +290,8 @@ class MagGravReactor extends Reactor{
 */	
 	public $possibleCriticals = array( //different set of criticals than standard Reactor
 		13=>"FieldFluctuations",
-		17=>array("FieldFluctuations", "FieldFluctuations")),
-		21=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations")),
+		17=>array("FieldFluctuations", "FieldFluctuations"),
+		21=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations"),
 		29=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations", "ForcedOfflineOneTurn")
 	);
 	
