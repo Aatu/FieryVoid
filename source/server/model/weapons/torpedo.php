@@ -29,7 +29,6 @@
        
         
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Ballistic";
             parent::setSystemDataWindow($turn);
         }
 
@@ -97,8 +96,7 @@
             
         }
         
-        public function firedOnTurn($turn){
-            
+        public function firedOnTurn($turn){            
             foreach ($this->fireOrders as $fire){
                 if ($fire->weaponid == $this->id && $fire->turn == $turn){
                     return  $fire->shots;
