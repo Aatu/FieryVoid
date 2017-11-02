@@ -17,7 +17,7 @@
 
 
 /*Marcin Sawicki: attempt to remake GravPulsar according with different (more literal!) rules interpretation*/
-    class GravitonPulsarOld extends Pulse
+    class GravitonPulsar extends Pulse
     {
         public $name = "gravitonPulsar";
         public $displayName = "Graviton Pulsar";
