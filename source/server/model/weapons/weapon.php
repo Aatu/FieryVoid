@@ -1037,7 +1037,7 @@ class Weapon extends ShipSystem{
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		
 		$fireOrder->needed -= $fireOrder->totalIntercept.
-		$notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed
+		$notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
 		$fireOrder->notes .= $notes;
 		
 		$pos = null; //functions will properly calculate from firing unit, which is important at range 0
