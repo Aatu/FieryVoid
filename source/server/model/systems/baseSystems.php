@@ -246,7 +246,7 @@ class Reactor extends ShipSystem{
             $ship = $gamedata->getShipById($shipid);
             if (!$ship instanceof StarBase){                
                 foreach($ship->systems as $system){
-                    if(($system->powerReq > 0) || $system.instanceof(Weapon)){
+                    if(($system->powerReq > 0) || $system instanceof Weapon){
                         $system->addCritical($shipid, $phpclass, $gamedata);
                     }
                 }
@@ -254,7 +254,7 @@ class Reactor extends ShipSystem{
             else {
                 foreach($ship->systems as $system){
                     if ($system->location == $this->location){
-                        if(($system->powerReq > 0) || $system.instanceof(Weapon) ){
+                        if(($system->powerReq > 0) || $system instanceof Weapon){
                             $system->addCritical($shipid, $phpclass, $gamedata);
                         }       
                     }
