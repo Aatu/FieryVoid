@@ -291,7 +291,7 @@
 	    
 	    
         
-        public function getAllFireOrders()
+        public function getAllFireOrders($turn = -1)
         {
             $orders = array();
             
@@ -299,7 +299,8 @@
             {
                 foreach ($fighter->systems as $system)
                 {
-                    $orders = array_merge($orders, $system->fireOrders);
+               		$orders = array_merge($orders, $system->getFireOrders($turn));
+                    //$orders = array_merge($orders, $system->fireOrders); //old version
                 }
             }
             
