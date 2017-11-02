@@ -714,7 +714,7 @@
         }
 	    
 	    
-        public function isHitSectionAmbiguous($shooter, turn){ //for a shot from indicated unit - would there be choice of target section?
+        public function isHitSectionAmbiguous($shooter, $turn){ //for a shot from indicated unit - would there be choice of target section?
             $locs = $this->getLocations();
 		$relativeBearing =  $this->getBearingOnUnit($shooter);
             $valid = array();
@@ -737,7 +737,7 @@
 	    }
         }
 	    
-        public function isHitSectionAmbiguousPos($pos, turn){ //for a shot from indicated unit - would there be choice of target section?
+        public function isHitSectionAmbiguousPos($pos, $turn){ //for a shot from indicated unit - would there be choice of target section?
             $locs = $this->getLocations();
 		$relativeBearing =  $this->getBearingOnPos($pos);
             $valid = array();
