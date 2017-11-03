@@ -159,7 +159,7 @@ window.ew = {
 		if (listed > 0) return;
 		*/
 		var dew = (ew.getScannerOutput(ship) - ew.getUsedEW(ship));
-		if(amount:dew < 0){ //DEW should be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
+		if(dew < 0){ //DEW should be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
 			this.removeEW(ship);
 			dew = (ew.getScannerOutput(ship) - ew.getUsedEW(ship));
 		}
