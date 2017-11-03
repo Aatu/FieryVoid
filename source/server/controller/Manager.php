@@ -553,7 +553,6 @@ class Manager{
         }
 
 
-throw new Exception("after WhiteStar?!"); //JUST A TEST
 		
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
@@ -569,6 +568,9 @@ throw new Exception("after WhiteStar?!"); //JUST A TEST
             }
         }
         
+
+throw new Exception("before updatePlayerStatus?!"); //JUST A TEST
+	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
         return true;    
