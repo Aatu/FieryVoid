@@ -531,7 +531,7 @@ class Manager{
         $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
 	    
-throw new Exception("after TacGamedata?!"); //JUST A TEST
+
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
@@ -544,7 +544,9 @@ throw new Exception("after TacGamedata?!"); //JUST A TEST
             }
         }
 		   			
-            
+throw new Exception("after EW?!"); //JUST A TEST            
+	    
+	    
         foreach ($ships as $ship){
             if ($ship instanceof WhiteStar){
                 self::$dbManager->updateAdaptiveArmour($gamedata->id, $ship->id, $ship->armourSettings);
