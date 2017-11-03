@@ -340,7 +340,6 @@ class Manager{
             //print(var_dump($ships));
             
             if ($gdS->phase == 1){
-throw new Exception("handleInit?!"); //JUST A TEST
                  $ret = self::handleInitialActions($ships, $gdS);		    
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
@@ -527,6 +526,9 @@ throw new Exception("handleInit?!"); //JUST A TEST
             self::$dbManager->submitPower($gamedata->id, $gamedata->turn, $powers);
         }
         
+	    
+throw new Exception("after Power?!"); //JUST A TEST
+	    
         $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
         
