@@ -560,6 +560,7 @@ class Manager{
 		
 	echo "validate orders:<bb>";
 	var_dump( $gamedata);
+			exit;
 		echo "<br><br>firing orders:<br><br>";		
 	var_dump( $ship->getAllFireOrders() );
 	exit;
