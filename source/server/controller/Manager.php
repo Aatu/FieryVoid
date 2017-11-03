@@ -555,16 +555,15 @@ class Manager{
         
         
         foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer)  
-                continue;
+            if ($ship->userid != $gamedata->forPlayer) continue;
 		
 
-	echo "validate orders:<bb>";
+	echo "validate orders:<br>";
 		//$ii = $gamedata->forPlayer;
 		//echo "ii: $ii<br>";
-		exit;
+		//exit;
 	//var_dump( $gamedata);
-		throw new Exception("after dump gamedata?!"); //test!!!	
+		throw new Exception("after just echo?!"); //test!!!	
 			exit;
 		echo "<br><br>firing orders:<br><br>";		
 	var_dump( $ship->getAllFireOrders() );
