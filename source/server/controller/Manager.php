@@ -527,10 +527,11 @@ class Manager{
         }
         
 	    
-throw new Exception("after Power?!"); //JUST A TEST
 	    
         $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
+	    
+throw new Exception("after TacGamedata?!"); //JUST A TEST
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
