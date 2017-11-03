@@ -559,14 +559,14 @@ class Manager{
 		
 			
 
-	$fo =  $ship->getAllFireOrders() ;
-throw new Exception("after getAllFireOrders?!"); //test!!!
+
+
 		
 		
 		
-            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){		    
-				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
-//throw new Exception("before submitFireorders?!"); //test!!!		    
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){	
+throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!		    
+		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);    
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
