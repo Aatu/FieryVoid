@@ -558,10 +558,9 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
             
-            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
-throw new Exception("before submitFireorders?!"); //test!!!
-		    
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){		    
 				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
+throw new Exception("before submitFireorders?!"); //test!!!		    
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
@@ -625,8 +624,6 @@ throw new Exception("before submitFireorders?!"); //test!!!
             self::$dbManager->releaseGameSubmitLock($gameid);
             
             $endtime = time();
-            //Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
-            //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
         {
