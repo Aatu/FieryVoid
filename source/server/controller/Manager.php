@@ -557,17 +557,12 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
+			
 
-	//echo "validate orders:<br>";
-		$ii = $gamedata->forPlayer;
-		//echo "ii: $ii<br>";
-		//exit;
-	//var_dump( $gamedata);
-		throw new Exception("after just echo?!"); //test!!!	
-			exit;
-		echo "<br><br>firing orders:<br><br>";		
-	var_dump( $ship->getAllFireOrders() );
-	exit;
+	$fo =  $ship->getAllFireOrders() );
+throw new Exception("after getAllFireOrders?!"); //test!!!
+		
+		
 		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){		    
 				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
