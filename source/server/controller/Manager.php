@@ -340,9 +340,8 @@ class Manager{
             //print(var_dump($ships));
             
             if ($gdS->phase == 1){
-                 $ret = self::handleInitialActions($ships, $gdS);
-		    
 throw new Exception("handleInit?!"); //JUST A TEST
+                 $ret = self::handleInitialActions($ships, $gdS);		    
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
                     $ret = self::handleMovement($ships, $gdS);
@@ -351,9 +350,7 @@ throw new Exception("handleInit?!"); //JUST A TEST
                 }
             }else if ($gdS->phase == 3){
                 $ret = self::handleFiringOrders($ships, $gdS);
-            }else if ($gdS->phase == 4){
-		    
-		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
+            }else if ($gdS->phase == 4){		    
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS, $slotid);
