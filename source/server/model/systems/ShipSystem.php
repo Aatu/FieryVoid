@@ -124,7 +124,7 @@ class ShipSystem{
     }
     
     public function getFireOrders($turn = -1){
-	if($turn>0){
+	if($turn<1){
         	return $this->fireOrders;
 	}else{ //indicated a particular turn
 		$fireOrders = array();
