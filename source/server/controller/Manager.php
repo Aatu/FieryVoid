@@ -560,8 +560,8 @@ class Manager{
 		
 
 	echo "validate orders:<bb>";
-		$ii = $gamedata->forPlayer;
-		echo "ii: $ii<br>";
+		//$ii = $gamedata->forPlayer;
+		//echo "ii: $ii<br>";
 		exit;
 	//var_dump( $gamedata);
 		throw new Exception("after dump gamedata?!"); //test!!!	
