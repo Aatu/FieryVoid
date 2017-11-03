@@ -82,10 +82,10 @@ class DualWeapon extends Weapon{
         } 
     }
     
-    public function getFireOrders(){
+    public function getFireOrders($turn = -1){
         $fires = array();
         foreach ($this->weapons as $weapon){
-            $fires = array_merge($fires, $weapon->getFireOrders());
+            $fires = array_merge($fires, $weapon->getFireOrders($turn));
         } 
         
         return $fires;
