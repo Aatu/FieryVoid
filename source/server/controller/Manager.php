@@ -323,7 +323,6 @@ class Manager{
             
 		
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-throw new Exception("getTacGamedata?!"); //JUST A TEST
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
@@ -342,6 +341,8 @@ throw new Exception("getTacGamedata?!"); //JUST A TEST
             
             if ($gdS->phase == 1){
                  $ret = self::handleInitialActions($ships, $gdS);
+		    
+throw new Exception("handleInit?!"); //JUST A TEST
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
                     $ret = self::handleMovement($ships, $gdS);
