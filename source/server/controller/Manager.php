@@ -542,8 +542,7 @@ class Manager{
             }else{
                 throw new Exception("Failed to validate EW");
             }
-        }
-		   			            
+        }          
 	    
 	    
         foreach ($ships as $ship){
@@ -551,8 +550,6 @@ class Manager{
                 self::$dbManager->updateAdaptiveArmour($gamedata->id, $ship->id, $ship->armourSettings);
             }
         }
-
-
 		
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
@@ -562,14 +559,14 @@ class Manager{
                 continue;
             
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
+throw new Exception("before submitFireorders?!"); //test!!!
+		    
 				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
         
-
-throw new Exception("before updatePlayerStatus?!"); //JUST A TEST
 	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
