@@ -557,10 +557,16 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
-            
+		
+	echo "validate orders:<bb>";
+	var_dump( $gamedata);
+		echo "<br><br>firing orders:<br><br>";		
+	var_dump( $ship->getAllFireOrders() );
+	exit;
+		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){		    
 				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
-throw new Exception("before submitFireorders?!"); //test!!!		    
+//throw new Exception("before submitFireorders?!"); //test!!!		    
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
