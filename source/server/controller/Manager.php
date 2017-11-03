@@ -543,8 +543,7 @@ class Manager{
                 throw new Exception("Failed to validate EW");
             }
         }
-		   			
-throw new Exception("after EW?!"); //JUST A TEST            
+		   			            
 	    
 	    
         foreach ($ships as $ship){
@@ -553,6 +552,8 @@ throw new Exception("after EW?!"); //JUST A TEST
             }
         }
 
+
+throw new Exception("after WhiteStar?!"); //JUST A TEST
 		
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
