@@ -321,8 +321,9 @@ class Manager{
             
             self::$dbManager->startTransaction();
             
+		
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-
+throw new Exception("getTacGamedata?!"); "JUST A TEST
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
