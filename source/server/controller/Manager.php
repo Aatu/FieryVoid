@@ -558,9 +558,10 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer)  
                 continue;
 		
-throw new Exception("in ships loop?!"); //test!!!	
+
 	echo "validate orders:<bb>";
 	var_dump( $gamedata);
+		throw new Exception("after dump gamedata?!"); //test!!!	
 			exit;
 		echo "<br><br>firing orders:<br><br>";		
 	var_dump( $ship->getAllFireOrders() );
