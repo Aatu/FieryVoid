@@ -558,8 +558,8 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
 
-	echo "validate orders:<br>";
-		//$ii = $gamedata->forPlayer;
+	//echo "validate orders:<br>";
+		$ii = $gamedata->forPlayer;
 		//echo "ii: $ii<br>";
 		//exit;
 	//var_dump( $gamedata);
