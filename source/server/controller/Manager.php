@@ -559,7 +559,7 @@ class Manager{
 		
 			
 
-	$fo =  $ship->getAllFireOrders() );
+	$fo =  $ship->getAllFireOrders() ;
 throw new Exception("after getAllFireOrders?!"); //test!!!
 		
 		
