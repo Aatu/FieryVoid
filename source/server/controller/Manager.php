@@ -560,7 +560,8 @@ class Manager{
 			
 
 
-Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata);
+//Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata);
+		Firing::validateFireOrders('abc', $gamedata);
 		throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
 		
 		
