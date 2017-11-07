@@ -8,7 +8,7 @@
             $this->weapon = $weapon;
             $this->intercepts = $intercepts;
         }
-        /* Marcin Sawicki, October 2017: ENTIRE CLASS is no longer needed?... leaving for now.
+        /* Marcin Sawicki, October 2017: ENTIRE CLASS is no longer needed?... leaving for now.*/
         public function chooseTarget($gd){
             $best = null;
             foreach ($this->intercepts as $candidate){
@@ -121,7 +121,6 @@
                 }
             }
         }
-	*/
     }//endof class Intercept
     
 /* Marcin Sawicki, October 2017: ENTIRE CLASS is no longer needed?... leaving for now.*/
