@@ -145,7 +145,6 @@ class Firing{
 	
     public static function firingExists(){	//just a test function
 	return true;    
-	    serious error
     }
     
     //compares weapons' capability as interceptor
