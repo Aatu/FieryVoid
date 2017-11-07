@@ -143,6 +143,9 @@ class Firing{
             return true;
     }
 	
+    public static function firingExists(){	//just a test function
+	return true;    
+    }
     
     //compares weapons' capability as interceptor
     //if intercept rating is the same, faster-firing weapon would go first
