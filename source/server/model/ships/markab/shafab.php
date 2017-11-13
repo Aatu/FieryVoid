@@ -6,7 +6,7 @@ class Shafab extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Shafab";
         $this->isd = 2012;        
-        $this->imagePath = "img/ships/apollo.png"; //needs to be changed
+        $this->imagePath = "img/ships/MarkabCruiser.png"; 
         $this->shipClass = "Shafab Heavy Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;

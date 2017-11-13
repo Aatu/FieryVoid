@@ -1,6 +1,4 @@
 <?php
-
-
     class Particle extends Weapon{
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
@@ -1011,7 +1009,6 @@
 
 
     class ParticleProjector extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "particleProjector";
@@ -1037,6 +1034,48 @@
         public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    }
+
+
+
+    class BAInterceptorMkI extends Particle{
+        /*Belt Alliance version of Mk I Interceptor - identical to EA one, but without EWeb*/
+        public $trailColor = array(30, 170, 255);
+        public $name = "BAInterceptorMkI";
+        public $displayName = "BA Interceptor I";
+        
+        public $animation = "trail";
+        public $iconPath = "interceptor.png";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+        public $priority = 4;
+        public $animationWidth = 1;
+            
+        public $intercept = 3;
+             
+        public $loadingtime = 1;
+  
+        public $rangePenalty = 2;
+        public $fireControl = array(6, null, null); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }	
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+5;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
+        
     }
 
 

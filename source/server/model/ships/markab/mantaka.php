@@ -6,7 +6,7 @@ class Mantaka extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Mantaka";
         $this->isd = 2005;        
-        $this->imagePath = "img/ships/apollo.png"; //needs to be changed
+        $this->imagePath = "img/ships/MarkabAssaultShip.png"; //needs to be changed
         $this->shipClass = "Mantaka Assault Ship";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
@@ -37,7 +37,7 @@ class Mantaka extends BaseShip{
         $this->addAftSystem(new ScatterGun(2, 8, 3, 120, 360));
         $this->addAftSystem(new ScatterGun(2, 8, 3, 0, 240));
         
-		$this->addLeftSystem(new ScatterGun(2, 0, 0, 240, 60));
+	$this->addLeftSystem(new ScatterGun(2, 0, 0, 180, 60));
         $this->addLeftSystem(new Thruster(3, 13, 0, 3, 3));
         
         $this->addRightSystem(new ScatterGun(2, 0, 0, 300, 180));

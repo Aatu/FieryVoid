@@ -352,19 +352,27 @@ flightWindowManager = {
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
 
-        var flight = gamedata.getShip(systemwindow.data("shipid"));
-        
+        	var flight = gamedata.getShip(systemwindow.data("shipid"));        
 		var fighter = shipManager.systems.getSystem(flight, systemwindow.data("fighterid"));
 		var system = shipManager.systems.getSystem(flight, systemwindow.data("id"));
 		
 		if (shipManager.isDestroyed(flight) || shipManager.isDestroyed(flight, system) || shipManager.isDestroyed(flight, fighter) )
 			return;
 			
+		//Macin Sawicki, October 2017 - allow called shots vs fighters!
+		var selectedShip = gamedata.getSelectedShip();
+		if (gamedata.isEnemy(flight, selectedShip) 
+			&& gamedata.gamephase == 3 
+			&& gamedata.selectedSystems.length > 0 
+			&& weaponManager.canCalledshot(flight, system))
+		{
+			weaponManager.targetShip(flight, fighter);
+		}
+		
 		if (flight.userid != gamedata.thisplayer)
 			return;
 			
-		if (system.weapon){
-			
+		if (system.weapon){			
 			if (gamedata.gamephase != 3 && !system.ballistic)
 				return;
 			
@@ -381,7 +389,9 @@ flightWindowManager = {
 			else{
 				weaponManager.selectWeapon(flight, system);
 			}			
-		}
+		}	
+
+		
 	},
 
 

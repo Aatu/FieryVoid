@@ -222,6 +222,10 @@ class Reactor extends ShipSystem{
     public $displayName = "Reactor";
     public $primary = true;
     public $outputType = "power";
+	
+    public $boostable = true; //for reactor overload feature!
+    public $maxBoostLevel = 1;
+    public $boostEfficiency = 0;
     
     public $possibleCriticals = array(
         11=>"OutputReduced2",
@@ -259,6 +263,22 @@ class Reactor extends ShipSystem{
 
         parent::addCritical($shipid, $phpclass, $gamedata);
     }
+	
+	
+    public function isOverloading($turn){
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                return true;
+            }
+        }
+        return false;
+    }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
+    }
+	
 }
 
 class SubReactor extends ShipSystem{
@@ -380,10 +400,11 @@ class CnC extends ShipSystem{
     public $primary = true;
     
     public $possibleCriticals = array(
-    1=>"SensorsDisrupted", 
+    //1=>"SensorsDisrupted", //not implemented! so I take it out for now
+	  1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
     9=>"CommunicationsDisrupted", 
     12=>"PenaltyToHit", 
-    15=>"RestrictedEW",
+    15=>"RestrictedEW", 
     18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
     21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
     24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
@@ -411,7 +432,7 @@ class Thruster extends ShipSystem{
     public $direction;
     public $thrustused;
     public $thrustwasted = 0;
-public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
+    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
     
     public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
     
@@ -503,11 +524,11 @@ class GraviticThruster extends Thruster{
         if (! $this->firstCriticalIgnored)
         {
             $this->firstCriticalIgnored = true;
-            Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
+            //Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
             return null;
         }
         
-        Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
+        //Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
             
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
@@ -557,7 +578,6 @@ class Catapult extends ShipSystem{
 }
 
 class JumpEngine extends ShipSystem{
-
     public $name = "jumpEngine";
     public $displayName = "Jump Engine";
     public $delay = 0;
@@ -570,23 +590,82 @@ class JumpEngine extends ShipSystem{
     }
 	
      public function setSystemDataWindow($turn){
-        $this->data["<font color='red'>Remark</font>"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
+        $this->data["Remark"] = "SHOULD NOT be shut down for power (unless damaged >50% or in desperate circumstances).";
 	parent::setSystemDataWindow($turn);     
     }
 }
 
 
 class Structure extends ShipSystem{
-
     public $name = "structure";
     public $displayName = "Structure";
-
     
     function __construct($armour, $maxhealth){
         parent::__construct($armour, $maxhealth, 0, 0);
-         
-    
+    }
+} //endof Structure	
+	
+	
+/*custom system - Drakh Raider Controller*/
+class DrakhRaiderController extends ShipSystem {
+    public static $controllerList = array();
+    public $name = "drakhRaiderController";
+    public $displayName = "Raider Controller";
+    public $iconPath = "hkControlNode.png";
+    public $boostable = true;
+    public $maxBoostLevel = 2;
+	
+    public static function addController($controller){
+	    DrakhRaiderController::$controllerList[] = $controller; //add controller to list
+    }
+	
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	DrakhRaiderController::addController($this);
+    }    
+	
+	
+    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+	    $iniBonus = 0;
+	    $turn = TacGamedata::$currentTurn-1;
+	    $turn = max(1,$turn);
+	    //strongest system applies
+	    foreach(DrakhRaiderController::$controllerList as $controller){
+		$controllerShip = $controller->getUnit();
+		if($unit->userid == $controllerShip->userid){ //only for the same player...
+			if ( ($controller->isDestroyed($turn))
+			     || ($controller->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
+		}
+	    }
+	    $iniBonus = $iniBonus * 5; //d20->d100
+	    $iniBonus = max(0,$iniBonus); 
+	    return $iniBonus;
+    }
+	
+    public function getOutputOnTurn($turn){
+	$output = parent::getOutput();
+	foreach ($this->power as $power){
+	    if ($power->turn == $turn && $power->type == 2){
+		$output += $power->amount;
+	    }    
+	}
+	return $output;
     }
 
-}
+	
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Gives indicated Initiative bonus to all friendly Raiders and Heavy Raiders.";	     
+	$this->data["Special"] .= "<BR>Only strongest bonus applies.";	     	     
+	$this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";	
+    }
+} //end of DrakhRaiderController
+	
+	
 
+
+?>

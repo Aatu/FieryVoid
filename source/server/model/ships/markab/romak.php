@@ -7,9 +7,9 @@ class Romak extends MediumShip{
 		$this->pointCost = 400;
 		$this->faction = "Markab";
         $this->phpclass = "Romak";
-        $this->imagePath = "img/ships/tethys.png"; //change
+        $this->imagePath = "img/ships/MarkabPoliceShip.png"; //change
         $this->shipClass = "Romak Escort Frigate";
-        $this->canvasSize = 100;
+        //$this->canvasSize = 100;
 	    
 	    $this->isd = 2000;
         

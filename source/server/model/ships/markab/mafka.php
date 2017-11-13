@@ -6,7 +6,7 @@ class Mafka extends BaseShip{
         $this->faction = "Markab";
         $this->phpclass = "Mafka";
         $this->isd = 2000;        
-        $this->imagePath = "img/ships/apollo.png"; //needs to be changed
+        $this->imagePath = "img/ships/MarkabAssaultShip.png"; 
         $this->shipClass = "Mafka Transport Cruiser";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
@@ -38,7 +38,7 @@ class Mafka extends BaseShip{
         $this->addAftSystem(new ScatterGun(2, 8, 3, 0, 240));
         $this->addAftSystem(new CargoBay(3, 24));
         
-		$this->addLeftSystem(new ScatterGun(2, 0, 0, 240, 60));
+		$this->addLeftSystem(new ScatterGun(2, 0, 0, 180, 60));
         $this->addLeftSystem(new Thruster(3, 13, 0, 3, 3));
         
         $this->addRightSystem(new ScatterGun(2, 0, 0, 300, 180));

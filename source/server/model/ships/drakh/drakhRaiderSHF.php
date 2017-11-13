@@ -50,5 +50,13 @@ class DrakhRaiderSHF extends SuperHeavyFighter{
     public function populate(){
         return;
     }
+	
+        public function getInitiativebonus($gamedata){
+	    $iniBonus = parent::getInitiativebonus($gamedata);
+            //may be boosted by  Raider Controller...
+	    $iniBonus += DrakhRaiderController::getIniBonus($this);
+            return $iniBonus;
+        }
+	
 }
 ?>

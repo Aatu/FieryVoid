@@ -245,3 +245,12 @@ EMWaveDisruptor.prototype.initBoostableInfo = function(){
 
     return this;
 }
+
+
+
+var BAInterceptorMkI = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+BAInterceptorMkI.prototype = Object.create( Particle.prototype );
+BAInterceptorMkI.prototype.constructor = BAInterceptorMkI;

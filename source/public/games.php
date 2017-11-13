@@ -1,6 +1,6 @@
 <?php
     include_once 'global.php';
-
+ 
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
 //      return;
@@ -28,7 +28,7 @@
 		<script src="client/player.js"></script>
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
-		<script>
+		<script> 
 			jQuery(function($){
             
 				gamedata.parseServerData(<?php print($games); ?>);
@@ -44,16 +44,20 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 27th of April 2017";
+                    header.innerHTML = "Latest News 17th of October 2017";
                    
 
                 var news = document.getElementById("newsEntry");
                     news.innerHTML += "The latest update includes:";
+                    news.innerHTML += "<br><br>";
+                    news.innerHTML += "- fixed 'StarFox has unlimited ammo' bug ";
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- enabled called shots at fighters - just target any system. Now Your EP Guns can shine! ";
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- minor fixes and a few new ships (mainly Drakh variants)";
                     news.innerHTML += "<br>";
-                    news.innerHTML += "- Drakh ships (custom), courtesy of Wolfgang. ";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "-Please note Advanced Armor present :)";
-                    news.innerHTML += "<br>";
+                    news.innerHTML += "- last reminder about Reactor Overload capability!";
+                    news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
                     

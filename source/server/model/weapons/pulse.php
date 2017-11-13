@@ -628,36 +628,40 @@ class QuadPulsar extends Pulse{
 
 
 
-    class ScatterGun extends Weapon //this is NOT a Pulse weapon, disregard Pulse-specific settings...
+    class ScatterGun extends Pulse
     {
 	    /*should do d6 SEPARATE shots, each of which may only intercept different incoming shot*/
-	    /*due to technical reasons I simplify this heavily - to fixed 3 separate shots with no extra limitations*/
+	    /*due to technical reasons I simplify this - just Pulse shot with d6 pulses*/
         public $name = "scatterGun";
         public $displayName = "Scattergun";
         public $iconPath = "scatterGun.png";
         public $animation = "trail";
         public $trailLength = 13;
         public $animationWidth = 4;
-        public $projectilespeed = 25;
+        public $projectilespeed = 20;
         public $animationExplosionScale = 0.15;
         public $animationColor =  array(175, 225, 175);
         public $trailColor = array(110, 225, 110);
-        //public $rof = 2;
-	    public $guns = 3; //always 3, completely separate (not Pulse!) shots
-        public $maxpulses = 3;
-        public $grouping = 0;
+        public $rof = 2;
+	    
         public $loadingtime = 1;
         public $normalload = 1;
 	    
         public $priority = 3; //very light weapon
 	    
-        public $intercept = 2; //should be towards different shots only, but I shkip this limitation
+        public $intercept = 4; //should be 2 per shot, I change this to flat 4 - much weaker but can strongly combine vs one shot!
 	    
         public $rangePenalty = 2;
         public $fireControl = array(5, 2, 0); // fighters, <mediums, <capitals
 	    
-	    public $damageType = "Standard"; 
+	    public $damageType = "Pulse"; 
 	    public $weaponClass = "Particle"; 
+	
+	//for Pulse mode
+	public $grouping = 2500; //NO GROUPING BONUS
+	public $maxpulses = 6;	
+	protected $useDie = 6; //die used for base number of hits
+	    
 	    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
@@ -686,6 +690,141 @@ class QuadPulsar extends Pulse{
             $this->maxDamage = 13 ;
         }
  
+    }
+
+
+    class BlastCannonFamily extends Pulse{
+	/*core for all Blast Cannon family weapons*/
+        public $animation = "trail";
+	public $trailColor = array(140, 140, 140);
+        public $animationColor = array(140, 140, 140);
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+        public $rof = 3; //used for threat estimation at interception
+	public $intercept = 1;
+	    
+        public $priority = 3;	    
+	public $grouping = 25; //+1/5
+        public $maxpulses = 4;
+	protected $useDie = 3; //die used for base number of hits
+	    
+	public $noOverkill = true;//Matter weapons do not overkill
+    	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+	         
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //Matter ignores armor!
+        }
+	    
+
+    } //end of class BlastCannonFamily
+
+
+    class LtBlastCannon extends BlastCannonFamily{
+	/* Belt Alliance Light Blast Cannon - Matter Pulse weapon*/
+        public $name = "LtBlastCannon";
+        public $displayName = "Light Blast Cannon";
+	    public $iconPath = 'LightBlastCannon.png';
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+
+        public $priority = 3;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 4;
+	protected $useDie = 3; //die used for base number of hits
+        
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(0, 1, 2); // fighters, <mediums, <capitals 
+	    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 4;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 1;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 3;   }
+    }
+
+    class MedBlastCannon extends BlastCannonFamily{
+	/* Belt Alliance Medium Blast Cannon - Matter Pulse weapon*/
+        public $name = "MedBlastCannon";
+        public $displayName = "Medium Blast Cannon";
+	    public $iconPath = 'MediumBlastCannon.png';
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.10;
+
+        public $priority = 4;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 5;
+	protected $useDie = 5; //die used for base number of hits
+        
+        public $loadingtime = 2;
+        
+        public $rangePenalty = 0.5; //-1/2hex
+        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals 
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 5;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 2;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 5;   }
+    }
+
+    class HvyBlastCannon extends BlastCannonFamily{
+	/* Belt Alliance Heavy Blast Cannon - Matter Pulse weapon*/
+        public $name = "HvyBlastCannon";
+        public $displayName = "Heavy Blast Cannon";
+	    public $iconPath = 'HeavyBlastCannon.png';
+        public $trailLength = 20;
+        public $animationWidth = 5;
+        public $projectilespeed = 12;
+        public $animationExplosionScale = 0.15;
+
+        public $priority = 5;
+	    
+        public $grouping = 25; //+1/5
+        public $maxpulses = 6;
+	protected $useDie = 6; //die used for base number of hits
+        
+        public $loadingtime = 3;
+        
+        public $rangePenalty = 0.33; //-1/3hex
+        public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals 
+        
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 6;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 4;
+		}		
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function getDamage($fireOrder){        return 8;   }
     }
 
 

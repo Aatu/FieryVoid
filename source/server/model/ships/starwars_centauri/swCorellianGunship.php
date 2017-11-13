@@ -58,8 +58,8 @@ class swCorellianGunship extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				6 => "Thruster",
-					8 => "Light Laser", 
+        				2 => "Thruster",
+					7 => "Light Laser", 
         				9 => "Hyperdrive",
 					11 => "Scanner",
         				13 => "Engine",
@@ -69,17 +69,17 @@ class swCorellianGunship extends MediumShip{
         				20 => "C&C",
         		),
         		1=> array(
-        				4 => "Thruster",
-        				5 => "Ray Shield",
-					7 => "Capital Concussion Missile",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+					6 => "Capital Concussion Missile",
         				11 => "Medium Turbolaser",
         				17 => "Structure",
            				20 => "Primary",
         		),
         		2=> array(
-        				7 => "Thruster",
-        				8 => "Ray Shield",
-					11 => "Light Laser", 
+        				3 => "Thruster",
+        				4 => "Ray Shield",
+					10 => "Light Laser", 
         				17 => "Structure",
         				20 => "Primary",
         		),

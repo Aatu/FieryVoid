@@ -431,6 +431,16 @@ class Manager{
                                 }
                             }
                         }
+			else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
+			   foreach($ship->systems as $fighter){
+                               foreach($fighter->systems as $weapon){
+                                   if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
+                                       self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
+                                   }
+                               }
+                           }
+			}
+			/*Marcin Sawicki: let's generalize this, not limit to Templar!
                         else if ($ship instanceof Templar){
                             foreach($ship->systems as $fighter){
                                foreach($fighter->systems as $weapon){
@@ -440,6 +450,7 @@ class Manager{
                                }
                            }
                         }
+			*/
                     }
                     else{
                         if (isset($ship->adaptiveArmour)){
@@ -844,6 +855,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
     
     private static function generateIniative($gamedata){
         foreach ($gamedata->ships as $key=>$ship){
+		/* moved to ship slass itself!
             $mod = 0;
             $speed = $ship->getSpeed();
         
@@ -863,11 +875,13 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
 	    			$mod += 20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 			}
 	    }
-		
+	    */
+	   $mod =  $ship->getCommonIniModifiers( $gamedata );
+	   $iniBonus =  $ship->getInitiativebonus($gamedata);
 	    
 
 		
-            $ship->iniative = Dice::d(100) + $ship->getInitiativebonus($gamedata) - $mod;
+            $ship->iniative = Dice::d(100) + $iniBonus + $mod;
            //debug::log("ini submit for: ".$ship->shipClass."---:".$ship->iniative);
 
         }

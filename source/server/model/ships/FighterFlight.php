@@ -158,6 +158,7 @@
 	}
         
         protected function addSystem($fighter, $loc = null){
+		$fighter->setUnit($this);
             $fighter->id = $this->autoid;
             $fighter->location = sizeof($this->systems);
             
@@ -249,9 +250,8 @@
         }
         
         public function isDestroyed($turn = false){
-        
             foreach($this->systems as $system){
-                if (!$system->isDestroyed($turn = false) && !$system->isDisengaged($turn)){
+                if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)){
                     return false;
                 }
                 
@@ -261,18 +261,28 @@
         }
         
         public function isPowerless(){
-        
             return false;
         }
         
         
         public function getHitSystem($shooter, $fire, $weapon, $location = null){
-            $systems = array();
-            foreach ($this->systems as $system){
-                if (!$system->isDestroyed()){
-					$systems[] = $system;
-                }                            
-            } 		
+		$skipStandard=false;
+            	$systems = array();
+		if ($fire->calledid != -1){
+			$system = $this->getSystemById($fire->calledid);
+			if (!$system->isDestroyed()){ //called shot at particular fighter, which is still living
+				$systems[] = $system;
+				$skipStandard=true;
+			}                            			
+		}
+		
+		if(!$skipStandard){
+		    foreach ($this->systems as $system){
+			if (!$system->isDestroyed()){
+				$systems[] = $system;
+			}                            
+		    } 	
+		}
 		
 		if (sizeof($systems) == 0) return null;
 
