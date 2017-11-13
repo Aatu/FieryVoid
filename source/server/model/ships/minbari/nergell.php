@@ -1,5 +1,5 @@
 <?php
-class smallBase extends SmallStarBaseFourSections{
+class Nergell extends SmallStarBaseFourSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);

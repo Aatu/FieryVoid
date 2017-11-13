@@ -1,5 +1,5 @@
 <?php
-class Orion extends StarBaseSixSections{
+class Norgath extends StarBaseSixSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
