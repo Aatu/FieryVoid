@@ -17,6 +17,8 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
+		$this->unofficial = true;
+		$this->isd = 2259;
 
 		$this->forwardDefense = 17;
 		$this->sideDefense = 17;
