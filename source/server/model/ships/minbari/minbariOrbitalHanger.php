@@ -17,6 +17,8 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
+		$this->unofficial = true;
+		$this->isd = 2240;
 
 		$this->forwardDefense = 18;
 		$this->sideDefense = 18;
