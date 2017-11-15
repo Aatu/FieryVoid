@@ -46,5 +46,43 @@ class Ore extends BaseShip{
         $this->addLeftSystem(new Structure( 3, 36));
         $this->addRightSystem(new Structure( 3, 36));
         $this->addPrimarySystem(new Structure( 5, 40));       
+        
+        $this->hitChart = array(
+        		0=> array(
+        				4 => "Structure",
+        				12 => "Cargo Bay",
+        				14 => "Scanner",
+        				16 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		1=> array(
+        				6 => "Thruster",
+        				8 => "Standard Particle Beam",
+        				12 => "0:Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		2=> array(
+        				6 => "Thruster",
+        				8 => "Standard Particle Beam",
+        				12 => "0:Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		3=> array(
+        				6 => "Thruster",
+        				10 => "0:Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				6 => "Thruster",
+        				10 => "0:Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
     }
 }
