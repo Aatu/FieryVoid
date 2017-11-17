@@ -34,5 +34,17 @@ class TGan extends OSAT{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
         $this->addPrimarySystem(new Structure(4, 33));
+	    
+	$this->hitChart = array(
+                0=> array(
+                        9 => "Structure",
+                        11 => "Thruster",
+			13 => "Ion Torpedo",
+                        15 => "Light Pulse Cannon",
+			17 => "Scanner",
+                        19 => "Reactor",
+                        20 => "Energy Mine",
+                ),
+        );
     }
 }
