@@ -11,9 +11,10 @@ class Bashnar extends BaseShip{
         $this->shipClass = "Bashnar Auxiliary Carrier";
         $this->shipSizeClass = 3;
         $this->variantOf = "Brathon Auxiliary Cruiser";
+	$this->isd = 2212;
         
         $this->occurence = "uncommon";
-        $this->fighters = array("light"=>6);
+        $this->fighters = array("light"=>18);
         
         $this->forwardDefense = 15;
         $this->sideDefense = 13;
