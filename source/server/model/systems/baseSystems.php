@@ -325,6 +325,10 @@ class SubReactor extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
+	
+    public function isOverloading($turn){
+        return false;
+    }	
 }
 
 class Engine extends ShipSystem{
