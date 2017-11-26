@@ -76,7 +76,7 @@ class Benevolent extends BaseShip{
                 1=> array(
                         4 => "Thruster",
 			8 => "Heavy Laser Lance",
-			12 = "Rapid Gatling Railgun",
+			12 => "Rapid Gatling Railgun",
                         18 => "Structure",
                         20 => "Primary",
                 ),
