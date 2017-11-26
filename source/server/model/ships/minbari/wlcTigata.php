@@ -8,20 +8,21 @@ class wlcTigata extends BaseShip{
         $this->faction = "Minbari";
         $this->phpclass = "wlcTigata";
         $this->imagePath = "img/ships/tigara.png";
-        $this->shipClass = "wlc Tigata";
+        $this->shipClass = "Tigata";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->fighters = array("normal"=>6, "medium"=>6);
-
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
+        $this->unofficial = true;
+        $this->isd = 1870;
+        $this->variantOf ="Tigara";
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(6, 25, 0, 0));

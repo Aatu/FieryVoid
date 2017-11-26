@@ -11,16 +11,16 @@ class Shantavi extends HeavyCombatVessel{
         $this->shipClass = "Shantavi";
         $this->gravitic = true;
         $this->occurence = "rare";
-
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
+        $this->isd = 2259;
+        $this->variantOf = "Tinashi";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
