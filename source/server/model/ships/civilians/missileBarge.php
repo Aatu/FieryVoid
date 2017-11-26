@@ -5,7 +5,7 @@ class MissileBarge extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 550;
-        $this->faction = "Civilian";
+        $this->faction = "Civilians";
         $this->phpclass = "missilebarge";
         $this->imagePath = "img/ships/battlewagon.png"; //need to change
         $this->shipClass = "Missile Barge";
