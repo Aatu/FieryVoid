@@ -37,7 +37,7 @@ class Brathon extends BaseShip{
    	$t2r = new GraviticThruster(3, 10, 0, 3, 2);
 	
 	$t1r->displayName = "Retro Thrust";
-	$t3r->displayName = "Port/Stb Thrust";
+	$t4r->displayName = "Port/Stb Thrust";
 	$t2r->displayName = "Main Thrust";
 	
 	$this->addLeftSystem($t1l);
