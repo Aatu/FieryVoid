@@ -8,7 +8,8 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 //TECHNICAL UNIT - target drone for various tests
-                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',      		
+                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',  
+            		
                 //bases, weapons, power crit
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
@@ -60,6 +61,7 @@ spl_autoload_register(
                 //custom Brakiri
                 'zzunoffshakaraton' => '/server/model/ships/brakiri/zzunoffShakaraton.php',
                 'zzunofftashkaton' => '/server/model/ships/brakiri/zzunoffTashkaton.php',
+            		
                 
             	//custom Minbari
             	'wlctinshara' => '/server/model/ships/minbari/wlcTinshara.php',
@@ -287,6 +289,9 @@ spl_autoload_register(
                 'ftrleteerumas' => '/server/model/ships/llort/ftrLeteerumAS.php',
                 
                 'graemlar' => '/server/model/ships/llort/graemlar.php',
+            		
+            	'freetrader' => '/server/model/ships/llort/freeTrader.php',
+            		'freetraderpulsar' => '/server/model/ships/llort/freeTraderPulsar.php',
                 
                 
                 
@@ -486,7 +491,6 @@ spl_autoload_register(
                 
                 'sanctuarybase' => '/server/model/ships/raiders/sanctuarybase.php',
                 'tfsfreedombase' => '/server/model/ships/raiders/tfsfreedombase.php',
-                
             		
             	//civilians
             	'ore' => '/server/model/ships/civilians/oreBarge.php',
@@ -496,8 +500,15 @@ spl_autoload_register(
             	'tankerTug' => '/server/model/ships/civilians/tankerTug.php',
             	'piratehunter' => '/server/model/ships/civilians/pirateHunter.php',
             	'qship' => '/server/model/ships/civilians/qship.php',
+            	'bulkfreighter' => '/server/model/ships/civilians/bulkfreighter.php',
+            	'missilebarge' => '/server/model/ships/civilians/missileBarge.php',
+            	'passengerliner' => '/server/model/ships/civilians/passengerLiner.php',
+            	'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
+            	'skylark' => '/server/model/ships/civilians/skylark.php',
             		
-                
+            	//Custom Civilians
+            	'bulkorefreighter' => '/server/model/ships/civilians/bulkOreFreighter.php',	
+
                 //Dilgar moved to one place!                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
