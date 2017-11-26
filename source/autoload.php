@@ -500,7 +500,7 @@ spl_autoload_register(
             	'tankerTug' => '/server/model/ships/civilians/tankerTug.php',
             	'piratehunter' => '/server/model/ships/civilians/pirateHunter.php',
             	'qship' => '/server/model/ships/civilians/qship.php',
-            	'bulkfreighter' => '/server/model/ships/civilians/bulkfreighter.php',
+            	'bulkfreighter' => '/server/model/ships/civilians/bulkFreighter.php',
             	'missilebarge' => '/server/model/ships/civilians/missileBarge.php',
             	'passengerliner' => '/server/model/ships/civilians/passengerLiner.php',
             	'jumpgate' => '/server/model/ships/civilians/jumpgate.php',
