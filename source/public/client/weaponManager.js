@@ -321,7 +321,7 @@ window.weaponManager = {
 		var f = $(".targeting", e);
 		f.html("");
 
-		if (calledid == null){
+		if(!(calledid > 0)){ //(calledid == null){
 			var html = "";
 			var section = weaponManager.getShipHittingSide(selectedShip, ship);
 
@@ -780,7 +780,7 @@ window.weaponManager = {
 				mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
 			}
 		}
-		if (calledid != null){
+		if (calledid > 0){
 			mod += weapon.calledShotMod;
 			if(target.base) mod += weapon.calledShotMod;//double penalty vs bases!
 		}
