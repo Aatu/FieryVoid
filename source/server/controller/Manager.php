@@ -560,6 +560,7 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
 		$v1 = $ship->getAllFireOrders();
+print(var_dump($v1));
 		$val = Firing::validateFireOrders($v1, $gd);
 throw new Exception("Manager debug 561 handleInitialActions");
 		
