@@ -559,8 +559,6 @@ class Manager{
 		
 			
 
-
-//Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata);
 		if(Firing::firingExists()){
 			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
 		}else{
