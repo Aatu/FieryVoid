@@ -554,11 +554,12 @@ class Manager{
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
 	    
-throw new Exception("MyNewException!"); 
+
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 
+throw new Exception("DebugExceptionShip!"); 
 		
 		if(Firing::firingExists()){
 			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
@@ -573,7 +574,7 @@ throw new Exception("MyNewException!");
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
-        
+throw new Exception("DebugExceptionAfter!"); 
 	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
