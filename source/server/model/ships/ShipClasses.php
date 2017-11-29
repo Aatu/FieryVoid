@@ -1165,6 +1165,7 @@
         
         public function getAllFireOrders($turn = -1)
         {
+throw new Exception("ShipClasses 1168 debug getAllFireOrders");		
             $orders = array();
             
             foreach ($this->systems as $system){
