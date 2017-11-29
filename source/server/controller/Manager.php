@@ -559,7 +559,8 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 
-throw new Exception("DebugExceptionShip!"); 
+//throw new Exception("DebugExceptionShip!"); 
+print(dump(Firing));
 		
 		if(Firing::firingExists()){
 			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
