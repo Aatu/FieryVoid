@@ -561,8 +561,11 @@ class Manager{
 		
 		//$v1 = $ship->getAllFireOrders();
 		//$val = Firing::validateFireOrders($v1, $gd);
-		$val = Firing::firingExists();
-throw new Exception("Manager debug 561 handleInitialActions");
+		if (Firing::firingExists()){
+			throw new Exception("Manager debug firingExists handleInitialActions");
+		}else{
+			throw new Exception("Manager debug NOT firingExists handleInitialActions");
+		}
 		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
 throw new Exception("Manager debug 563 handleInitialActions");
