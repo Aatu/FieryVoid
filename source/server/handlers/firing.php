@@ -7,15 +7,12 @@ class Firing{
     public $gamedata;
 	
     public static function validateFireOrders($fireOrders, $gamedata)){
-throw new Exception("firing debug 10 validateFireOrders");
             return true;
     }
 	
     public static function firingExists(){	//just a test function
 	return true;    
     }	
-	
-	
 	
 	
 	
