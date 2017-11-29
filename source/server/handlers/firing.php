@@ -6,7 +6,7 @@
 class Firing{
     public $gamedata;
 	
-    public static function validateFireOrders($fireOrders, $gamedata)){
+    public static function validateFireOrders($fireOrders, $gamedata){
             return true;
     }
 	
