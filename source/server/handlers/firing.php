@@ -134,10 +134,9 @@
         
     }
 
-
+/*Marcin Sawicki problems during debug: copuying Firing class method after method*/
 class Firing{
     public $gamedata;
-	
 	
     public static function validateFireOrders($fireOrders, $gamedata){
             return true;
@@ -146,6 +145,20 @@ class Firing{
     public static function firingExists(){	//just a test function
 	return true;    
     }
+	
+	
+}
+
+
+/*Marcin Sawicki problems with Firing class - old version moved here!*/
+class FiringOld{
+    public $gamedata;
+	
+	
+    public static function validateFireOrders($fireOrders, $gamedata){
+            return true;
+    }
+	
     
     //compares weapons' capability as interceptor
     //if intercept rating is the same, faster-firing weapon would go first
