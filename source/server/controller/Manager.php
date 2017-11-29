@@ -559,8 +559,9 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
-		$v1 = $ship->getAllFireOrders();
-		$val = Firing::validateFireOrders($v1, $gd);
+		//$v1 = $ship->getAllFireOrders();
+		//$val = Firing::validateFireOrders($v1, $gd);
+		$val = Firing::firingExists();
 throw new Exception("Manager debug 561 handleInitialActions");
 		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
