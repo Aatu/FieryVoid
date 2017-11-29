@@ -560,7 +560,7 @@ class Manager{
             if ($ship->userid != $gamedata->forPlayer) continue;
 
 		
-		if(Firing::firingExists()){
+		if (Firing::firingExists()){
 			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
 		}else{
 			throw new Exception("same but neg!!!");
