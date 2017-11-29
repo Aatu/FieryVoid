@@ -553,12 +553,13 @@ class Manager{
 		
 		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
+	    
+throw new Exception("MyNewException!"); 
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
-		
-			
 
+		
 		if(Firing::firingExists()){
 			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
 		}else{
