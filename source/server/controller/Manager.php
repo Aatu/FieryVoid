@@ -558,14 +558,6 @@ class Manager{
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
-
-		
-		if (Firing::firingExists()){
-			throw new Exception("after getAllFireOrders + validateFireOrders?!"); //test!!!
-		}else{
-			throw new Exception("same but neg!!!");
-		}
-		
 		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){	 
 		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);    
