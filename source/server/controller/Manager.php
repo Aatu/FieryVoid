@@ -559,6 +559,12 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
+		$v1 = $ship->getAllFireOrders();
+throw new Exception("v1");
+		
+		$val = Firing::validateFireOrders($v1, $gd);
+throw new Exception("Manager debug 561 handleInitialActions");
+		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
 throw new Exception("Manager debug 563 handleInitialActions");
 		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);    
