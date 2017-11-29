@@ -136,6 +136,7 @@
 
 /*Marcin Sawicki problems during debug: copuying Firing class method after method*/
 /*old version moved to .old file*/
+/*
 class Firing{
     public $gamedata;
 	
@@ -149,7 +150,7 @@ class Firing{
 	
 	
 }
-
+*/
 
 
 
