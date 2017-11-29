@@ -11,6 +11,10 @@ throw new Exception("firing debug 10 validateFireOrders");
             return true;
     }
 	
+    public static function firingExists(){	//just a test function
+	return true;    
+    }	
+	
     //compares weapons' capability as interceptor
     //if intercept rating is the same, faster-firing weapon would go first
     public static function compareInterceptAbility($weaponA, $weaponB){	    
