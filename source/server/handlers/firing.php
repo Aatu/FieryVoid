@@ -316,6 +316,7 @@ class Firing{
         return true;
     }
     
+	
     public static function doIntercept($gd, $ship, $intercepts){
         //returns all valid interceptors as $intercepts
         if (sizeof($intercepts) == 0){
@@ -328,6 +329,7 @@ class Firing{
         }
     }
     
+	
     public static function compareIntercepts($a, $b){
         if (sizeof($a->intercepts)>sizeof($b->intercepts)){
             return -1;
@@ -338,8 +340,9 @@ class Firing{
         }
     }
     
-    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
-        
+	
+	
+    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){        
         $intercepts = array();
         
         foreach($gd->ships as $shooter){
@@ -365,266 +368,6 @@ class Firing{
         return $intercepts;
     }
     
-    public static function isLegalIntercept($gd, $ship, $weapon, $fire){
-        //Debug::log("\n\nIS LEGAL INTERCEPT: ". $ship->name . ' weapon: ' . $weapon->name . '(' .$weapon->id . ")\n");
-        
-        if ($fire->type=="intercept"){
-            //Debug::log("Fire is intercept\n");
-            return false;
-        }
-        if ($fire->type=="selfIntercept"){
-            //Debug::log("Fire is intercept\n");
-            return false;
-        }
-        if ($weapon instanceof DualWeapon)
-            $weapon->getFiringWeapon($fire);
-        
-        if ($weapon->intercept == 0){
-            //Debug::log("Weapon has intercept of zero\n");
-            return false;
-        }
-        
-        $shooter = $gd->getShipById($fire->shooterid);
-        $target = $gd->getShipById($fire->targetid);
-        $firingweapon = $shooter->getSystemById($fire->weaponid);
-    
-        if ($firingweapon->uninterceptable){
-            //Debug::log("Target weapon is uninterceptable\n");
-            return false;
-        }
-                
-        if ($shooter->id == $ship->id){
-            //Debug::log("Fire is my own\n");
-            return false;
-        }
-            
-        if ($shooter->team == $ship->team){
-            //Debug::log("Fire is friendly\n");
-            return false;
-        }
-	    
-	    if($firingweapon->ballistic){
-		$movement = $shooter->getLastTurnMovement($fire->turn);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
-		$relativeBearing = $ship->getBearingOnPos($pos);    
-	    }else{
-		    $pos = $shooter->getCoPos(); //current hex of firing unit
-		$relativeBearing = $ship->getBearingOnUnit($shooter);
-	    }
-      
-        if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
-            //Debug::log("Fire is not on weapon arc\n");
-            return false;
-        }
-        
-        if ($target->id == $ship->id){
-            //Debug::log("Target is this ship\n");
-            //Debug::log("VALID INTERCEPT\n");
-            return true;
-        }else{
-            if (!$weapon->freeintercept){
-                //Debug::log("Target is another ship, and this weapon is not freeintercept \n");
-                return false;
-            }
-            //Debug::log("Target is this another ship\n");
-		
-		/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
-		//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
-		$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
-		$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
-		$targetBearing = $ship->getBearingOnUnit($target);
-		if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
-			//Debug::log("VALID INTERCEPT\n");
-			return true;
-		}
-			
-		/*old approach: target is within 3 hexes of defensive weapon, range to targed is less than range to shooter
-            $distanceShipTarget = mathlib::getDistanceHex($target->getCoPos(), $ship->getCoPos());
-            $distancePosShip = mathlib::getDistance($pos, $ship->getCoPos());
-            $distancePosTarget = (mathlib::getDistance($target->getCoPos(), $pos));
-            
-            //Debug::log("distanceShipTarget: $distanceShipTarget, distancePosShip: $distancePosShip, distancePosTarget: $distancePosTarget \n");
-            
-            if ($distanceShipTarget<=3 &&  ($distancePosShip < $distancePosTarget)){
-                //Debug::log("VALID INTERCEPT\n");
-                return true;
-            }
-	    */
-            
-        }
-         //Debug::log("INVALID INTERCEPT\n");   
-         return false;   
-        
-    }
-    /*Marcin Sawicki: count hit chances for starting fire phase fire*/
-    public static function prepareFiring($gamedata){
-        $currFireOrders  = array();   
-	$ambiguousFireOrders  = array();   
-	foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-		if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
-		    continue;
-		}
-		$weapon = $ship->getSystemById($fire->weaponid);
-		if ($weapon instanceof Thruster || $weapon instanceof Structure){
-		    continue;
-		}
-		$fire->priority = $weapon->priority;
-		$currFireOrders[] = $fire;
-	}
-	//calculate hit chances if no ambiguousness exists...
-	foreach($currFireOrders as $fireOrder){
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
-			$ambiguousFireOrders[] = $fireOrder;
-		}else{
-			$weapon->calculateHitBase($gamedata, $fireOrder);			
-		}
-	}
-	//calculate hit chances for ambiguous firing!
-	foreach($ambiguousFireOrders as $fireOrder){
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		$weapon->calculateHitBase($gamedata, $fireOrder);
-	} 
-    }//endof function prepareFiring
-	
-	
-	/*actual firing of weapons
-	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
-	*/
-    public static function fireWeapons($gamedata){	
-        $fireOrders  = array();
-        foreach ($gamedata->ships as $ship){		
-		/*account for possible reactor overload!*/
-		$reactorList = $ship->getSystemsByName('Reactor');
-		foreach($reactorList as $reactorCurr){
-			//is it overloading?...
-			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
-				$remaining =  $reactorCurr->getRemainingHealth();
-				$armour =  $reactorCurr->armour;
-				$toDo = $remaining + $armour;
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, $armour, 0, -1, true, "", "plasma");
-				$damageEntry->updated = true;
-				$reactorCurr->damage[] = $damageEntry;
-			}
-		}
-            if ($ship instanceof FighterFlight){
-                continue;
-            }
-            foreach($ship->getAllFireOrders() as $fire){
-                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
-                    continue;
-                }
-                $weapon = $ship->getSystemById($fire->weaponid);
-                if ($weapon instanceof Thruster || $weapon instanceof Structure){
-                    continue;
-                }
-                $fire->priority = $weapon->priority;
-                $fireOrders[] = $fire;
-            }
-        }
-        usort($fireOrders, 
-            function($a, $b) use ($gamedata){
-		if ($a->targetid !== $b->targetid){
-                    return $a->targetid - $b->targetid;
-                }else if($a->calledid!==$b->calledid){ //called shots first!
-                    return $a->targetid - $b->targetid;
-                }else if ($a->priority !== $b->priority){
-                    return $a->priority - $b->priority;
-                }
-                else {
-                    return $a->shooterid - $b->shooterid;
-                }
-            }
-        );
-	    
-        foreach ($fireOrders as $fire){
-                $ship = $gamedata->getShipById($fire->shooterid);
-                $wpn = $ship->getSystemById($fire->weaponid);
-                $p = $wpn->priority;
-                // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
-                self::fire($ship, $fire, $gamedata);
-        }
-        // From here on, only fighter units are left.
-        $chosenfires = array();
-        foreach($gamedata->ships as $ship){
-            // Remember: ballistics that have been fired must still be
-            // resolved! So don't continue on destroyed units/fighters.
-            if (!($ship instanceof FighterFlight)){
-                continue;
-            }
-            
-            foreach($ship->getAllFireOrders() as $fire){
-                if ($fire->turn != $gamedata->turn){
-                    continue;
-                }
-                
-                $weapon = $ship->getSystemById($fire->weaponid);
-                if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
-                        && !$weapon->ballistic){
-                    continue;
-                }
-                
-                $chosenfires[] = $fire;
-            }
-        }
-		
-	//FIRE fighters at other fighters
-	foreach ($chosenfires as $fire){
-            $shooter = $gamedata->getShipById($fire->shooterid);
-            $target = $gamedata->getShipById($fire->targetid);
-            
-            if ($target == null || ($target instanceof FighterFlight)){
-                self::fire($shooter, $fire, $gamedata);
-            }
-	}
-		
-	$chosenfires = array();
-        foreach($gamedata->ships as $ship){
-            // Remember: ballistics that have been fired must still be
-            // resolved! So don't continue on destroyed units/fighters.
-            if (!($ship instanceof FighterFlight)){
-                continue;
-            }
-            
-            foreach($ship->getAllFireOrders() as $fire){
-                if ($fire->turn != $gamedata->turn){
-                    continue;
-                }
-		
-                $weapon = $ship->getSystemById($fire->weaponid);
-                if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
-                        && !$weapon->ballistic){
-                    continue;
-                }
-		
-                $chosenfires[] = $fire;
-            }
-	}
-		
-	//FIRE rest of fighters
-	foreach ($chosenfires as $fire){
-            $shooter = $gamedata->getShipById($fire->shooterid);
-            self::fire($shooter, $fire, $gamedata);
-        }
-    }
-    
-    
-    private static function fire($ship, $fire, $gamedata){
-        
-		if ($fire->turn != $gamedata->turn)
-			return;
-			
-		if ($fire->type == "intercept" || $fire->type == "selfIntercept")
-			return;
-			
-		if ($fire->rolled > 0)
-			return;
-		
-		$weapon = $ship->getSystemById($fire->weaponid);
-		
-		$weapon->fire($gamedata, $fire);
-		
-	}
 	
 	
 	
