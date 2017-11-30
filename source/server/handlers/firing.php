@@ -32,7 +32,7 @@ class Firing{
     public static function getUnassignedInterceptors($gamedata, $ship){	    
 	    $currTurn = $gamedata->turn;
 	    $toReturn = array();	    
-	    if($ship instanceof FighterFlight){ //separate procedure for fighters
+	    if ($ship instanceof FighterFlight){ //separate procedure for fighters
 		    $exclusiveWasFired = false;
 		    foreach($ship->systems as $fighter){
 			    if ($fighter->isDestroyed()) continue;
@@ -49,12 +49,12 @@ class Firing{
 				    }
 			    }
 		    }
-		    if($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
+		    if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
 	    }else{ //proper ship
-		if(!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
+		if (!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
 			foreach($ship->systems as $weapon){
-				if((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
-				if((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) && (self::isValidInterceptor($gamedata, $weapon))){//not fired this turn, intercept-capable, and valid interceptor
+				if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
+				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) && (self::isValidInterceptor($gamedata, $weapon))){//not fired this turn, intercept-capable, and valid interceptor
 					$toReturn[] = $weapon;  
 				}
 			}
@@ -73,16 +73,16 @@ class Firing{
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
 			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);
-			if(!$isLegal)continue; //not a legal interception at all for this weapon
+			if (!$isLegal)continue; //not a legal interception at all for this weapon
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
-			if($currInterceptionMod <= 0)continue; //can't effectively intercept
+			if ($currInterceptionMod <= 0)continue; //can't effectively intercept
 			
 			$shooter = $gamedata->getShipById($firingOrder->shooterid);
 			$firingWeapon = $shooter->getSystemById($firingOrder->weaponid);
 		
 			$chosenLoc = $firingOrder->chosenLocation;
-			if(!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
-			if($ship instanceof FighterFlight){
+			if (!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
+			if ($ship instanceof FighterFlight){
 				$armour = 0; //let's simplify here...
 			}else{
 				$structureSystem = $ship->getStructureSystem($chosenLoc);
@@ -109,10 +109,10 @@ class Firing{
 				break;
 			}
 			//if weapon does no damage by itself, assume it has other, very relvant effect - comparable to 10 damage!
-			if($weapon->maxDamage == 0 ) $expectedDamage = 10;
+			if ($weapon->maxDamage == 0 ) $expectedDamage = 10;
 			$expectedDamage = max(0.1,$expectedDamage);//estimate _some_ damage always...
 			//multiply by Shots or Maxpulses...
-			if($firingWeapon->damageType == 'Pulse'){
+			if ($firingWeapon->damageType == 'Pulse'){
 				$expectedDamage = $expectedDamage *max(1,$firingWeapon->maxpulses);
 			}else{
 				$expectedDamage = $expectedDamage *max(1,$firingWeapon->shots);
@@ -123,14 +123,14 @@ class Firing{
 			$hitChanceAfter = $hitChanceBefore - $currInterceptionMod;
 			$hitChanceAfter = max(0,$hitChanceAfter);//negative numbers are irrelevant
 			$modifier = min(100,$hitChanceBefore) - $hitChanceAfter;
-			if($modifier <= 0){ //after interception hit chance is still over 100%... let's count as something, but much less - say, multiply by 0.1!
+			if ($modifier <= 0){ //after interception hit chance is still over 100%... let's count as something, but much less - say, multiply by 0.1!
 				$modifier = 0.1 * ($hitChanceBefore - $hitChanceAfter);
 			}
 			
 			//...how much damage is actually stopped?
 			$stoppedDamage = $modifier * $expectedDamage;//to get actual damage statistically stopped, You need to multiply this by 0.01 - but it's completely irrelevant for higher/lower comparision
 			
-			if($stoppedDamage > $bestInterceptionVal){ //this is best interception candidate found so far!
+			if ($stoppedDamage > $bestInterceptionVal){ //this is best interception candidate found so far!
 				$bestInterception = $firingOrder;
 				$bestInterceptionVal = $stoppedDamage;
 			}
@@ -139,234 +139,6 @@ class Firing{
 	}//endof getBestInterception
 	
 	
-		
-    /*adds indicated weapon's capabilities to total interception variables
-    	may create intercept order itself if needed
-    */	
-    public static function addToInterceptionTotal($gamedata, $intercepted, $interceptor, $prepareOrder = false){
-		//update numbers appropriately	    
-	        $intercepted->totalIntercept -= $interceptor->getInterceptionMod($gamedata, $intercepted);
-	        $intercepted->numInterceptors++;
-	    
-		if($prepareOrder){ //new firing order (intercept) should be prepared?
-			$interceptFire = new FireOrder(-1, "intercept", $interceptor->getUnit()->id, $intercepted->id, $interceptor->id, -1, 
-				$gamedata->turn, $interceptor->firingMode, 0, 0, $interceptor->defaultShots, 0, 0, null, null
-			);
-			$interceptFire->addToDB = true;
-			$interceptor->fireOrders[] = $interceptFire;
-		}
-    } //endof addToInterceptionTotal
-	
-	
-  /*Marcin Sawicki, October 2017: change approach: allocate interception fire before ANY fire is actually resolved!
-  	this allows for auto-intercepting ballistics, too.
-  */
-    public static function automateIntercept($gamedata){ //automate allocation of intercept weapons
-	//prepare list of all potential intercepts and all incoming fire
-	$allInterceptWeapons = array();
-	$allIncomingShots = array();
-	foreach ($gamedata->ships as $ship){      
-		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship)
-		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
-		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
-		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
-	}
-	    
-	//update intercepion totals!
-	$shotsStillComing = $allIncomingShots;
-	foreach($allIncomingShots as $fireOrder){
-		if(($fireOrder->type != "selfIntercept") && ($fireOrder->type != "intercept")) continue; //manually assigned interception - no others exist at this point
-		//let's find WHAT is being intercepted and update interception totals!
-		foreach($shotsStillComing as $intercepted){
-			if($fireOrder->targetid == $intercepted->id){
-				$shooter = $gamedata->getShipById($fireOrder->shooterid);
-				$firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
-				self::addToInterceptionTotal($gamedata, $intercepted, $firingWeapon);
-				break; //loop
-			}
-		}
-	}
-	    
-	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
-	$shotsStillComing = array();
-	foreach($allIncomingShots as $fireOrder){
-		if(($fireOrder->needed - $fireOrder->totalIntercept) > 0) continue;//no chance of hitting
-		if(($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
-		$shooter = $gamedata->getShipById($fireOrder->shooterid);
-		$firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
-		if($firingWeapon->hextarget) continue;//hex-targeted
-		$shotsStillComing[] = $fireOrder;
-	}
-	$allIncomingShots = $shotsStillComing;
-	$shotsStillComing = null; //just free memory
-	    
-	//sort list of all potential intercepts - most effective first
-	usort($allInterceptWeapons, "self::compareInterceptAbility");	    
-	    
-	//assign interception
-	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
-		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
-		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
-			//find shot it would be most profitable to intercept with this weapon, and intercept it!
-			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots)
-			if($shotToIntercept != null){
-				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order
-			}
-		}
-	}    
-	    
-	//all possible interceptions have been made!	    
-    } //endof function automateIntercept
-	
-	
-    
-    private static function getFighterIntercepts($gd, $ship){
-        $intercepts = Array(); 
-        foreach($ship->systems as $fighter)
-        {
-            $exclusiveWasFired = false;
-            
-            if ($fighter->isDestroyed()){
-                continue;
-            }
-            
-            // check if fighter is firing weapons that exclude other
-            // weapons from firing. (Like IonBolt on a Rutarian.)
-            foreach ($fighter->systems as $weapon){
-                if(($weapon instanceof Weapon) && ($weapon->ballistic != true)){
-                    if($weapon->exclusive && $weapon->firedOnTurn($gd->turn)){
-                        $exclusiveWasFired = true;
-                        break;
-                    }
-                }
-            }
-            
-            if($exclusiveWasFired){
-                continue;
-            }
-            
-            foreach ($fighter->systems as $weapon)
-            {
-                if($weapon instanceof PairedGatlingGun && $weapon->ammunition < 1){
-                    continue;
-                }
-                if (self::isValidInterceptor($gd, $weapon) === false){
-                    continue;
-                }
-                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
-                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
-            }
-        }
-        return $intercepts;
-     }
-    
-    private static function getShipIntercepts($gd, $ship)
-    {
-        $intercepts = Array(); 
-        
-        foreach($ship->systems as $weapon)
-        {
-            if (self::isValidInterceptor($gd, $weapon) === false)
-               continue;
-    //    debug::log($weapon->displayName." intercepts");
-            $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
-            $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
-        }
-        return $intercepts;
-    }
-    
-    private static function isValidInterceptor($gd, $weapon)
-    {
-        if (!($weapon instanceof Weapon))
-            return false;
-        $weapon = $weapon->getWeaponForIntercept();
-        
-        if (!$weapon)
-            return false;
-        if(property_exists($weapon, "ballisticIntercept")){
-            return false;
-        }
-        
-        if ($weapon->intercept == 0)
-            return false;
-        if ($weapon->isDestroyed()){
-            //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
-            return false;
-        }
-        if ($weapon->isOfflineOnTurn($gd->turn))
-            return false;
-        if ($weapon->ballistic)
-            return false;
-            // not loaded yet
-        if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
-            return false;
-        }
-        
-        if ($weapon->getLoadingTime() > 1){
-            if (isset($weapon->fireOrders[0])){
-                if ($weapon->fireOrders[0]->type != "selfIntercept"){
-                    return false;
-                }
-            } else return false;
-        }
-        
-        if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)){
-            return false;
-        }
-        return true;
-    }
-    
-	
-    public static function doIntercept($gd, $ship, $intercepts){
-        //returns all valid interceptors as $intercepts
-        if (sizeof($intercepts) == 0){
-        //    debug::log($ship->phpclass." has nothing to intercept.");
-            return;
-        };
-        usort ( $intercepts , "self::compareIntercepts" );        
-        foreach ($intercepts as $intercept){
-            $intercept->chooseTarget($gd);
-        }
-    }
-    
-	
-    public static function compareIntercepts($a, $b){
-        if (sizeof($a->intercepts)>sizeof($b->intercepts)){
-            return -1;
-        }else if (sizeof($b->intercepts)>sizeof($a->intercepts)){
-            return 1;
-        }else{
-            return 0;
-        }
-    }
-    
-	
-	
-    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){        
-        $intercepts = array();
-        
-        foreach($gd->ships as $shooter){
-            if ($shooter->id == $ship->id)
-                continue;
-            
-            if ($shooter->team == $ship->team)
-                continue;
-            
-            $fireOrders = $shooter->getAllFireOrders();
-            foreach($fireOrders as $fire){
-                if ($fire->turn != $turn)
-                    continue;
-                
-                if ($fire->type == "ballistic")
-                    continue;
-                
-                if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
-                    $intercepts[] = new InterceptCandidate($fire);
-                }
-            }
-        }
-        return $intercepts;
-    }
     
 	
 	
