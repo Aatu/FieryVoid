@@ -174,7 +174,7 @@ class Firing{
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-	    
+/*
 	//update intercepion totals!
 	$shotsStillComing = $allIncomingShots;
 	foreach($allIncomingShots as $fireOrder){
@@ -217,7 +217,7 @@ class Firing{
 			}
 		}
 	}    
-	    
+*/
 	//all possible interceptions have been made!	
     } //endof function automateIntercept
 	
