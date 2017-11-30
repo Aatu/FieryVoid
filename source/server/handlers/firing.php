@@ -144,6 +144,7 @@ class Firing{
     /*adds indicated weapon's capabilities to total interception variables
     	may create intercept order itself if needed
     */	
+	/*
     public static function addToInterceptionTotal($gamedata, $intercepted, $interceptor, $prepareOrder = false){
 		//update numbers appropriately	    
 	        $intercepted->totalIntercept -= $interceptor->getInterceptionMod($gamedata, $intercepted);
@@ -157,7 +158,7 @@ class Firing{
 			$interceptor->fireOrders[] = $interceptFire;
 		}
     } //endof addToInterceptionTotal
-	
+	*/
 	
   /*Marcin Sawicki, October 2017: change approach: allocate interception fire before ANY fire is actually resolved!
   	this allows for auto-intercepting ballistics, too.
