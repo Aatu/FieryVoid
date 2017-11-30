@@ -166,16 +166,16 @@ class Firing{
   */
     public static function automateIntercept($gamedata){ //automate allocation of intercept weapons
 	//prepare list of all potential intercepts and all incoming fire
-/*
+
 	$allInterceptWeapons = array();
 	$allIncomingShots = array();
 	foreach($gamedata->ships as $ship){      
-		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship)
+		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
 		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-
+/*
 	//update intercepion totals!
 	$shotsStillComing = $allIncomingShots;
 	foreach($allIncomingShots as $fireOrder){
