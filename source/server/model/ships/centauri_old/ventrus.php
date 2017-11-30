@@ -6,7 +6,7 @@ class Ventrus extends BaseShip{
         
 		$this->pointCost = 560;
         $this->faction = "Centauri (WotCR)";
-        $this->phpclass = "Kendari";
+        $this->phpclass = "Ventrus";
         $this->imagePath = "img/ships/kendari.png";
         $this->shipClass = "Ventrus Light Cruiser";
 	$this->variantOf = "Kendari Fleet Scout";
