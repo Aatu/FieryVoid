@@ -602,6 +602,24 @@ class Firing{
 	
 	
 	
+
+    
+    private static function fire($ship, $fire, $gamedata){
+        	if ($fire->turn != $gamedata->turn)
+			return;
+			
+		if ($fire->type == "intercept" || $fire->type == "selfIntercept")
+			return;
+			
+		if ($fire->rolled > 0)
+			return;
+		
+		$weapon = $ship->getSystemById($fire->weaponid);
+		
+		$weapon->fire($gamedata, $fire);
+		
+	} //endof method fire	
+	
 	
 } //endof class Firing
 
