@@ -221,12 +221,62 @@ class Firing{
     } //endof function automateIntercept
 	
 	
+
+	
+    private static function getFighterIntercepts($gd, $ship){
+        $intercepts = Array(); 
+        foreach($ship->systems as $fighter){
+            $exclusiveWasFired = false;
+            
+            if ($fighter->isDestroyed())  continue;
+            
+            // check if fighter is firing weapons that exclude other
+            // weapons from firing. (Like IonBolt on a Rutarian.)
+            foreach($fighter->systems as $weapon){
+                if (($weapon instanceof Weapon) && ($weapon->ballistic != true)){
+                    if ($weapon->exclusive && $weapon->firedOnTurn($gd->turn)){
+                        $exclusiveWasFired = true;
+                        break;
+                    }
+                }
+            }
+            
+            if ($exclusiveWasFired) continue;
+
+            
+            foreach($fighter->systems as $weapon)
+            {
+                if ($weapon instanceof PairedGatlingGun && $weapon->ammunition < 1){
+                    continue;
+                }
+                if (self::isValidInterceptor($gd, $weapon) === false){
+                    continue;
+                }
+                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
+                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
+            }
+        }
+        return $intercepts;
+     } //endof function getFighterIntercepts
+    
+	
+    private static function getShipIntercepts($gd, $ship)
+    {
+        $intercepts = Array(); 
+        
+        foreach($ship->systems as $weapon)
+        {
+            if (self::isValidInterceptor($gd, $weapon) === false) continue;
+            $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
+            $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
+        }
+        return $intercepts;
+    } //endof function getShipIntercepts
+	
+	
 	
 	
 	
 } //endof class Firing
-
-
-
 
 ?>
