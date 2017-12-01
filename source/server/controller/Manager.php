@@ -525,13 +525,10 @@ class Manager{
         
             self::$dbManager->submitPower($gamedata->id, $gamedata->turn, $powers);
         }
-        
-	    
+        	    
 	    
         $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
-	    
-
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer)  
@@ -551,10 +548,8 @@ class Manager{
             }
         }
 		
-		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
+	$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
         
-	    
-
         
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
@@ -565,7 +560,6 @@ class Manager{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
-throw new Exception("Manager debug 568 handleInitialActions");
 	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
