@@ -342,6 +342,144 @@ class Firing{
 	
 	
 	
+
+    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
+        
+        $intercepts = array();
+        
+        foreach($gd->ships as $shooter){
+            if ($shooter->id == $ship->id)
+                continue;
+            
+            if ($shooter->team == $ship->team)
+                continue;
+            
+            $fireOrders = $shooter->getAllFireOrders();
+            foreach($fireOrders as $fire){
+                if ($fire->turn != $turn)
+                    continue;
+                
+                if ($fire->type == "ballistic")
+                    continue;
+                
+                if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
+                    $intercepts[] = new InterceptCandidate($fire);
+                }
+            }
+        }
+        return $intercepts;
+    }
+    
+	
+	
+	/*would this be a legal interception?...*/
+    public static function isLegalIntercept($gd, $ship, $weapon, $fire){
+        if ($fire->type=="intercept"){
+            //Debug::log("Fire is intercept\n");
+            return false;
+        }
+        if ($fire->type=="selfIntercept"){
+            //Debug::log("Fire is intercept\n");
+            return false;
+        }
+        if ($weapon instanceof DualWeapon)
+            $weapon->getFiringWeapon($fire);
+        
+        if ($weapon->intercept == 0){
+            //Debug::log("Weapon has intercept of zero\n");
+            return false;
+        }
+        
+        $shooter = $gd->getShipById($fire->shooterid);
+        $target = $gd->getShipById($fire->targetid);
+        $firingweapon = $shooter->getSystemById($fire->weaponid);
+    
+        if ($firingweapon->uninterceptable){
+            //Debug::log("Target weapon is uninterceptable\n");
+            return false;
+        }
+                
+        if ($shooter->id == $ship->id){
+            //Debug::log("Fire is my own\n");
+            return false;
+        }
+            
+        if ($shooter->team == $ship->team){
+            //Debug::log("Fire is friendly\n");
+            return false;
+        }
+	    
+	    if($firingweapon->ballistic){
+		$movement = $shooter->getLastTurnMovement($fire->turn);
+		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
+		$relativeBearing = $ship->getBearingOnPos($pos);    
+	    }else{
+		    $pos = $shooter->getCoPos(); //current hex of firing unit
+		$relativeBearing = $ship->getBearingOnUnit($shooter);
+	    }
+      
+        if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
+            //Debug::log("Fire is not on weapon arc\n");
+            return false;
+        }
+        
+        if ($target->id == $ship->id){
+            return true;
+        }else{
+            if (!$weapon->freeintercept){
+                //Debug::log("Target is another ship, and this weapon is not freeintercept \n");
+                return false;
+            }
+            //Debug::log("Target is this another ship\n");
+		
+		/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
+		//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
+		$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
+		$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
+		$targetBearing = $ship->getBearingOnUnit($target);
+		if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
+			//Debug::log("VALID INTERCEPT\n");
+			return true;
+		}
+        }
+         //Debug::log("INVALID INTERCEPT\n");   
+         return false;   
+    } //endof function isLegalIntercept
+	
+	
+	
+    /*Marcin Sawicki: count hit chances for starting fire phase fire*/
+    public static function prepareFiring($gamedata){
+        $currFireOrders  = array();   
+	$ambiguousFireOrders  = array();   
+	foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+		if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+		    continue;
+		}
+		$weapon = $ship->getSystemById($fire->weaponid);
+		if ($weapon instanceof Thruster || $weapon instanceof Structure){
+		    continue;
+		}
+		$fire->priority = $weapon->priority;
+		$currFireOrders[] = $fire;
+	}
+	//calculate hit chances if no ambiguousness exists...
+	foreach($currFireOrders as $fireOrder){
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
+			$ambiguousFireOrders[] = $fireOrder;
+		}else{
+			$weapon->calculateHitBase($gamedata, $fireOrder);			
+		}
+	}
+	//calculate hit chances for ambiguous firing!
+	foreach($ambiguousFireOrders as $fireOrder){
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		$weapon->calculateHitBase($gamedata, $fireOrder);
+	} 
+    }//endof function prepareFiring	
+	
+	
 	
 } //endof class Firing
 
