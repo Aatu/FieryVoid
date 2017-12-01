@@ -1,7 +1,5 @@
 <?php
-
-/*Marcin Sawicki problems during debug: copuying Firing class method after method*/
-/*old version moved to .old file*/
+/*old version of this file moved to .old file*/
 
 class Firing{
     public $gamedata;
@@ -478,6 +476,130 @@ class Firing{
 		$weapon->calculateHitBase($gamedata, $fireOrder);
 	} 
     }//endof function prepareFiring	
+	
+	
+	
+
+	/*actual firing of weapons
+	Marcin Sawicki, October 2017: at this stage, assume all necessary calculations (hit chance, target section), and only raw rolling remains!
+	*/
+    public static function fireWeapons($gamedata){	
+        $fireOrders  = array();
+        foreach ($gamedata->ships as $ship){		
+		/*account for possible reactor overload!*/
+		$reactorList = $ship->getSystemsByName('Reactor');
+		foreach($reactorList as $reactorCurr){
+			//is it overloading?...
+			if( $reactorCurr->isOverloading($gamedata->turn) ){ //primed for self destruct!
+				$remaining =  $reactorCurr->getRemainingHealth();
+				$armour =  $reactorCurr->armour;
+				$toDo = $remaining + $armour;
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $reactorCurr->id, $toDo, $armour, 0, -1, true, "", "plasma");
+				$damageEntry->updated = true;
+				$reactorCurr->damage[] = $damageEntry;
+			}
+		}
+            if ($ship instanceof FighterFlight){
+                continue;
+            }
+            foreach($ship->getAllFireOrders() as $fire){
+                if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+                    continue;
+                }
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if ($weapon instanceof Thruster || $weapon instanceof Structure){
+                    continue;
+                }
+                $fire->priority = $weapon->priority;
+                $fireOrders[] = $fire;
+            }
+        }
+        usort($fireOrders, 
+            function($a, $b) use ($gamedata){
+		if ($a->targetid !== $b->targetid){
+                    return $a->targetid - $b->targetid;
+                }else if($a->calledid!==$b->calledid){ //called shots first!
+                    return $a->targetid - $b->targetid;
+                }else if ($a->priority !== $b->priority){
+                    return $a->priority - $b->priority;
+                }
+                else {
+                    return $a->shooterid - $b->shooterid;
+                }
+            }
+        );
+	    
+        foreach ($fireOrders as $fire){
+                $ship = $gamedata->getShipById($fire->shooterid);
+                $wpn = $ship->getSystemById($fire->weaponid);
+                $p = $wpn->priority;
+                // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
+                self::fire($ship, $fire, $gamedata);
+        }
+        // From here on, only fighter units are left.
+        $chosenfires = array();
+        foreach($gamedata->ships as $ship){
+            // Remember: ballistics that have been fired must still be
+            // resolved! So don't continue on destroyed units/fighters.
+            if (!($ship instanceof FighterFlight)){
+                continue;
+            }
+            
+            foreach($ship->getAllFireOrders() as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+                
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
+                        && !$weapon->ballistic){
+                    continue;
+                }
+                
+                $chosenfires[] = $fire;
+            }
+        }
+		
+	//FIRE fighters at other fighters
+	foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $target = $gamedata->getShipById($fire->targetid);
+            
+            if ($target == null || ($target instanceof FighterFlight)){
+                self::fire($shooter, $fire, $gamedata);
+            }
+	}
+		
+	$chosenfires = array();
+        foreach($gamedata->ships as $ship){
+            // Remember: ballistics that have been fired must still be
+            // resolved! So don't continue on destroyed units/fighters.
+            if (!($ship instanceof FighterFlight)){
+                continue;
+            }
+            
+            foreach($ship->getAllFireOrders() as $fire){
+                if ($fire->turn != $gamedata->turn){
+                    continue;
+                }
+		
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
+                        && !$weapon->ballistic){
+                    continue;
+                }
+		
+                $chosenfires[] = $fire;
+            }
+	}
+		
+	//FIRE rest of fighters
+	foreach ($chosenfires as $fire){
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            self::fire($shooter, $fire, $gamedata);
+        }
+    } //endof method fireWeapons
+	
 	
 	
 	
