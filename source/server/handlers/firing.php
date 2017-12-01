@@ -210,7 +210,7 @@ class Firing{
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
 			//find shot it would be most profitable to intercept with this weapon, and intercept it!
-			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots)
+			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots);
 			if ($shotToIntercept != null){
 				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order
 			}
