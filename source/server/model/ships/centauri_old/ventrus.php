@@ -25,7 +25,7 @@ class Ventrus extends BaseShip{
 		       
         $this->addPrimarySystem(new Reactor(6, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
+        $this->addPrimarySystem(new Scanner(5, 18, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(4, 8));       
 		
