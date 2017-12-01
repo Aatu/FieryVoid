@@ -276,6 +276,72 @@ class Firing{
 	
 	
 	
+
+    private static function isValidInterceptor($gd, $weapon)
+    {
+        if (!($weapon instanceof Weapon))
+            return false;
+        $weapon = $weapon->getWeaponForIntercept();
+        
+        if (!$weapon)
+            return false;
+        if(property_exists($weapon, "ballisticIntercept")){
+            return false;
+        }
+        
+        if ($weapon->intercept == 0)
+            return false;
+        if ($weapon->isDestroyed()){
+            //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
+            return false;
+        }
+        if ($weapon->isOfflineOnTurn($gd->turn))
+            return false;
+        if ($weapon->ballistic)
+            return false;
+            // not loaded yet
+        if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
+            return false;
+        }
+        
+        if ($weapon->getLoadingTime() > 1){
+            if (isset($weapon->fireOrders[0])){
+                if ($weapon->fireOrders[0]->type != "selfIntercept"){
+                    return false;
+                }
+            } else return false;
+        }
+        
+        if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)){
+            return false;
+        }
+        return true;
+    }
+    
+    public static function doIntercept($gd, $ship, $intercepts){
+        //returns all valid interceptors as $intercepts
+        if (sizeof($intercepts) == 0){
+        //    debug::log($ship->phpclass." has nothing to intercept.");
+            return;
+        };
+        usort ( $intercepts , "self::compareIntercepts" );        
+        foreach ($intercepts as $intercept){
+            $intercept->chooseTarget($gd);
+        }
+    }
+    
+    public static function compareIntercepts($a, $b){
+        if (sizeof($a->intercepts)>sizeof($b->intercepts)){
+            return -1;
+        }else if (sizeof($b->intercepts)>sizeof($a->intercepts)){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+	
+	
+	
 	
 } //endof class Firing
 
