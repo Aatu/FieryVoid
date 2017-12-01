@@ -188,7 +188,7 @@ class Firing{
 			}
 		}
 	}
-/*	    
+	    
 	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
 	$shotsStillComing = array();
 	foreach($allIncomingShots as $fireOrder){
@@ -216,7 +216,7 @@ class Firing{
 			}
 		}
 	}    
-*/
+
 	//all possible interceptions have been made!	
     } //endof function automateIntercept
 	
