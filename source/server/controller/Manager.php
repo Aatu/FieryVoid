@@ -559,24 +559,13 @@ class Manager{
         foreach ($ships as $ship){
             if ($ship->userid != $gamedata->forPlayer) continue;
 		
-		//$v1 = $ship->getAllFireOrders();
-		//$val = Firing::validateFireOrders($v1, $gd);
-		/*
-		if (Firing::firingExists()){
-			throw new Exception("Manager debug firingExists handleInitialActions");
-		}else{
-			throw new Exception("Manager debug NOT firingExists handleInitialActions");
-		}
-		*/
-		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
-throw new Exception("Manager debug 563 handleInitialActions");
 		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);    
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
-throw new Exception("Manager debug 569 handleInitialActions");
+throw new Exception("Manager debug 568 handleInitialActions");
 	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
