@@ -173,7 +173,7 @@ class Firing{
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-/*
+
 	//update intercepion totals!
 	$shotsStillComing = $allIncomingShots;
 	foreach($allIncomingShots as $fireOrder){
@@ -188,7 +188,7 @@ class Firing{
 			}
 		}
 	}
-	    
+/*	    
 	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
 	$shotsStillComing = array();
 	foreach($allIncomingShots as $fireOrder){
