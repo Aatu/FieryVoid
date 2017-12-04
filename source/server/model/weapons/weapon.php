@@ -602,16 +602,19 @@ class Weapon extends ShipSystem{
                 return true;
             }
         }
-
+	     
         return false;
-    }
+    } //endof function isFtrFiringNonBallisticWeapons
+	
 	
 	/*Marcin Sawicki: is there a chance that defender has choice of target section? */
 	public function isTargetAmbiguous($gamedata, $fireOrder){
 		if($fireOrder->calledid != -1) return false; //no choice for called shot
-		if($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
+
+		if($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
+		
 		$pos = $shooter->getCoPos();
 		$ambiguous = false;
 
@@ -628,7 +631,7 @@ class Weapon extends ShipSystem{
 			$ambiguous = $target->isHitSectionAmbiguous($shooter, $fireOrder->turn);
 		}
 		return $ambiguous;
-	}
+	} //endof function isTargetAmbiguous
 	
 	
     /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
