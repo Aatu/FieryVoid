@@ -720,20 +720,20 @@ class Manager{
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-
+throw new Exception("DebugException: Manager, startEndPhase, before prepareFiring");	 
         $starttime = time();
         Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         $endtime = time();
-	    
+throw new Exception("DebugException: Manager, startEndPhase, before automateIntercept");	    
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-	    
+throw new Exception("DebugException: Manager, startEndPhase, before fireWeapons");	
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
     //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-	    
+throw new Exception("DebugException: Manager, startEndPhase, before setCriticals");	
         Criticals::setCriticals($servergamedata);
 	    
 	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
@@ -752,7 +752,7 @@ class Manager{
         
         // submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
-throw new Exception("DebugException: Manager, startEndPhase");	    
+throw new Exception("DebugException: Manager, startEndPhase, END");	    
     } //endof function startEndPhase
 
 
