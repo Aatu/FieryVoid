@@ -714,7 +714,6 @@ class Manager{
     private static function startEndPhase($gamedata){
         //print("start end");
 
-throw new Exception("DebugException: Manager, startEndPhase");
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
 
@@ -725,7 +724,6 @@ throw new Exception("DebugException: Manager, startEndPhase");
         $starttime = time();
         Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         $endtime = time();
-	    
 	    
         $starttime = time();
         Firing::automateIntercept($servergamedata);
@@ -754,6 +752,7 @@ throw new Exception("DebugException: Manager, startEndPhase");
         
         // submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+throw new Exception("DebugException: Manager, startEndPhase");	    
     } //endof function startEndPhase
 
 
