@@ -752,7 +752,6 @@ class Manager{
 
 	// submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
-throw new Exception("DebugException: Manager, startEndPhase, END");	    
     } //endof function startEndPhase
 
 
@@ -769,8 +768,8 @@ throw new Exception("DebugException: Manager, startEndPhase, END");
         
     }
     
-    private static function handleMovement( $ships, $gamedata ){
-    
+	
+    private static function handleMovement( $ships, $gamedata ){    
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");
@@ -799,13 +798,11 @@ throw new Exception("DebugException: Manager, startEndPhase, END");
             self::$dbManager->updateGamedata($gamedata);
         }else{
             self::startWeaponAllocation($gamedata);
-            
         }
-        
-        
-        
+	    
         return true;
-    }
+    } //endof function handleMovement
+	
     
     private static function changeTurn($gamedata){
     
