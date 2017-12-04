@@ -749,8 +749,8 @@ class Manager{
             self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
             }
         }
-throw new Exception("DebugException: Manager, startEndPhase, before submitCriticals");
-        // submit criticals
+
+	// submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 throw new Exception("DebugException: Manager, startEndPhase, END");	    
     } //endof function startEndPhase
