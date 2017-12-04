@@ -20,7 +20,7 @@ class Criticals{
              	   }
                 }
 		*/
-                if (/*$ship instanceof StarBase*/ && $system instanceof SubReactor){ //destroying any Subreactor, not just on base!
+                if (/*$ship instanceof StarBase && */ $system instanceof SubReactor){ //destroying any Subreactor, not just on base!
                 	if ($system->wasDestroyedThisTurn($gamedata->turn)){
 	                	//if ($system->location != 0){ ///on any location, PRIMARY too...
 	                		$ship->destroySection($system, $gamedata);
