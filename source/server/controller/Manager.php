@@ -710,9 +710,11 @@ class Manager{
         self::changeTurn($gamedata);
     }
     
+	
     private static function startEndPhase($gamedata){
         //print("start end");
-    
+
+throw new Exception("DebugException: Manager, startEndPhase");
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
 
@@ -733,13 +735,6 @@ class Manager{
         Firing::fireWeapons($servergamedata);
         $endtime = time();
     //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-/*absolutely bad way of debugging
-if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "fireWeapons";
-	var_dump( $gamedata);
-	exit;
-}   
-*/
 	    
         Criticals::setCriticals($servergamedata);
 	    
@@ -756,14 +751,10 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
             self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
             }
         }
-
         
         // submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
-
-
-
-    }
+    } //endof function startEndPhase
 
 
     
