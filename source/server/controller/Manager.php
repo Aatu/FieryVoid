@@ -728,7 +728,7 @@ class Manager{
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-throw new Exception("DebugException: Manager, startEndPhase, before fireWeapons");	
+	
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
