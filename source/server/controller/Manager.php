@@ -724,7 +724,7 @@ class Manager{
         $starttime = time();
         Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         $endtime = time();
-throw new Exception("DebugException: Manager, startEndPhase, before automateIntercept");	    
+	    
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
