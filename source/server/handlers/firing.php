@@ -450,31 +450,33 @@ class Firing{
     public static function prepareFiring($gamedata){
         $currFireOrders  = array();   
 	$ambiguousFireOrders  = array();   
-	foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
-		if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
-		    continue;
+	foreach ($ships as $ship){	    
+		foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
+			if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
+			    continue;
+			}
+			$weapon = $ship->getSystemById($fire->weaponid);
+			if ($weapon instanceof Thruster || $weapon instanceof Structure){
+			    continue;
+			}
+			$fire->priority = $weapon->priority;
+			$currFireOrders[] = $fire;
 		}
-		$weapon = $ship->getSystemById($fire->weaponid);
-		if ($weapon instanceof Thruster || $weapon instanceof Structure){
-		    continue;
+		//calculate hit chances if no ambiguousness exists...
+		foreach($currFireOrders as $fireOrder){
+			$weapon = $ship->getSystemById($fireOrder->weaponid);
+			if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
+				$ambiguousFireOrders[] = $fireOrder;
+			}else{
+				$weapon->calculateHitBase($gamedata, $fireOrder);			
+			}
 		}
-		$fire->priority = $weapon->priority;
-		$currFireOrders[] = $fire;
+		//calculate hit chances for ambiguous firing!
+		foreach($ambiguousFireOrders as $fireOrder){
+			$weapon = $ship->getSystemById($fireOrder->weaponid);
+			$weapon->calculateHitBase($gamedata, $fireOrder);
+		} 
 	}
-	//calculate hit chances if no ambiguousness exists...
-	foreach($currFireOrders as $fireOrder){
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
-			$ambiguousFireOrders[] = $fireOrder;
-		}else{
-			$weapon->calculateHitBase($gamedata, $fireOrder);			
-		}
-	}
-	//calculate hit chances for ambiguous firing!
-	foreach($ambiguousFireOrders as $fireOrder){
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		$weapon->calculateHitBase($gamedata, $fireOrder);
-	} 
     }//endof function prepareFiring	
 	
 	
