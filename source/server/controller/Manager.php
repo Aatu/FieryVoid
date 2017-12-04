@@ -733,12 +733,12 @@ class Manager{
         Firing::fireWeapons($servergamedata);
         $endtime = time();
     //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-throw new Exception("DebugException: Manager, startEndPhase, before setCriticals");	
+	
         Criticals::setCriticals($servergamedata);
 	    
 	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
-
+throw new Exception("DebugException: Manager, startEndPhase, before setSubmitDamages");
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
 
         // check if adaptive Armour events did happen and submit
