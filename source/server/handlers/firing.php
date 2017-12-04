@@ -450,7 +450,7 @@ class Firing{
     public static function prepareFiring($gamedata){
         $currFireOrders  = array();   
 	$ambiguousFireOrders  = array();   
-	foreach ($ships as $ship){	    
+	foreach ($gamedata->ships as $ship){	    
 		foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
 			if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
 			    continue;
