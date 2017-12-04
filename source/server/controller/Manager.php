@@ -738,7 +738,7 @@ class Manager{
 	    
 	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
-throw new Exception("DebugException: Manager, startEndPhase, before setSubmitDamages");
+
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
 
         // check if adaptive Armour events did happen and submit
@@ -749,7 +749,7 @@ throw new Exception("DebugException: Manager, startEndPhase, before setSubmitDam
             self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
             }
         }
-        
+throw new Exception("DebugException: Manager, startEndPhase, before submitCriticals");
         // submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
 throw new Exception("DebugException: Manager, startEndPhase, END");	    
