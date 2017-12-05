@@ -69,7 +69,7 @@ $a4++;
 		}
 	    }
 if(!$ship->isDisabled()){	    
-$aaa = $a1 . "/" . $a2 . "/" . $a3 . "/" . $a4 ;
+$aaa = $ship->phpname . ": " . $a1 . "/" . $a2 . "/" . $a3 . "/" . $a4 ;
 throw new Exception("$aaa - firing getUnassignedInterceptors");
 }	
 	    return $toReturn;
