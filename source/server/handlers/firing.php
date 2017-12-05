@@ -204,7 +204,7 @@ class Firing{
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	   
 	    
 	    
-$aaa = "No of int weapons: " + count($allInterceptWeapons) + " , no of incoming shots: " +count( $incomingShots);
+$aaa = "No of int weapons: " . count($allInterceptWeapons) . " , no of incoming shots: " . count( $incomingShots);
 throw new Exception("$aaa - firing automateIntercept");	    
 
 	//assign interception
