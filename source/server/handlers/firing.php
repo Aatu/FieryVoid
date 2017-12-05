@@ -293,8 +293,6 @@ throw new Exception("$aaa - firing automateIntercept late");
         $weapon = $weapon->getWeaponForIntercept();
         
         if (!$weapon){    
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor NOT A WEAPON");
 		return false;
 	}
 	    
@@ -304,19 +302,13 @@ throw new Exception("$aaa - firing isValidInterceptor NOT A WEAPON");
         }*/
         
         if ($weapon->intercept == 0){
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor NOT INTERCEPT CAPABLE");	
             return false;
 	}
         if ($weapon->isDestroyed()){
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor DESTROYED");
             //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
             return false;
         }
         if ($weapon->isOfflineOnTurn($gd->turn)){
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor OFFLINE");
             return false;
 	}
 	    /* //ballistic weapons can be intercepted, too!
@@ -325,34 +317,23 @@ throw new Exception("$aaa - firing isValidInterceptor OFFLINE");
 	    
             // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor NOT ARMED");
             return false;
         }
         
         if ($weapon->getLoadingTime() > 1){
             if (isset($weapon->fireOrders[0])){
                 if ($weapon->fireOrders[0]->type != "selfIntercept"){
-$aaa = $weapon->phpclass  ;
-throw new Exception("$aaa - firing isValidInterceptor ALREADY FIRING");
                     return false;
                 }
             } else {
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor ELSE?!");
 		    return false;
 	    }
         }
         
         if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)){
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor FIRED CURRENT TURN");
             return false;
         }
-/*	
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor ALL RIGHT");
-*/	    
+    
         return true;
     } //endof function isValidInterceptor
 	
