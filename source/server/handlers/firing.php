@@ -54,12 +54,15 @@ class Firing{
 				if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
 				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) ){
 				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor  
+$aaa = $weapon->displayName  ;
+throw new Exception("$aaa - firing getUnassignedInterceptors IS ALL RIGHT!");
 					$toReturn[] = $weapon; 
 				    }
 				}
 			}
 		}
 	    }	
+	    
 	    return $toReturn;
     } //endof getUnassignedInterceptors
 	
@@ -299,18 +302,18 @@ throw new Exception("$aaa - firing isValidInterceptor NOT A WEAPON");
         }*/
         
         if ($weapon->intercept == 0){
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor NOT INTERCEPT CAPABLE");	
             return false;
 	}
         if ($weapon->isDestroyed()){
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor DESTROYED");
             //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
             return false;
         }
         if ($weapon->isOfflineOnTurn($gd->turn)){
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor OFFLINE");
             return false;
 	}
@@ -320,7 +323,7 @@ throw new Exception("$aaa - firing isValidInterceptor OFFLINE");
 	    
             // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor NOT ARMED");
             return false;
         }
@@ -333,23 +336,25 @@ throw new Exception("$aaa - firing isValidInterceptor ALREADY FIRING");
                     return false;
                 }
             } else {
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor ELSE?!");
 		    return false;
 	    }
         }
         
         if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)){
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor FIRED CURRENT TURN");
             return false;
         }
 	    
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor SHOULD BE CAPABLE");
 	    
         return true;
-    }
+    } //endof function isValidInterceptor
+	
+	
     
     public static function doIntercept($gd, $ship, $intercepts){
         //returns all valid interceptors as $intercepts
@@ -363,6 +368,7 @@ throw new Exception("$aaa - firing isValidInterceptor SHOULD BE CAPABLE");
         }
     }
     
+	
     public static function compareIntercepts($a, $b){
         if (sizeof($a->intercepts)>sizeof($b->intercepts)){
             return -1;
