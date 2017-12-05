@@ -49,9 +49,9 @@ class Firing{
 		    }
 		    if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
 	    }else{ //proper ship
-$a1 = 0;
-$a2 = 0;
-$a3 = 0;		    
+$a1 = $ship->isDisabled();
+$a2 = $ship->unavailable;
+$a3 = $ship->phpclass;		    
 $a4 = 0;		    
 		if (!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
 			foreach($ship->systems as $weapon){
