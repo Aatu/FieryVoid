@@ -167,13 +167,17 @@ class Firing{
 	//prepare list of all potential intercepts and all incoming fire
 	$allInterceptWeapons = array();
 	$allIncomingShots = array();
+$a1 = 0;
 	foreach($gamedata->ships as $ship){      
 		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
 		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
- 
+
+$aaa = count($allInterceptWeapons) . " /but " . $a1 ;
+throw new Exception("$aaa - firing automateIntercept - there should be 8 able interceptors on one Covran...");
+
 	    
 	    
 	//update intercepion totals!
