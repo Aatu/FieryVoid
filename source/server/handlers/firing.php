@@ -202,7 +202,8 @@ class Firing{
 	    
 	//sort list of all potential intercepts - most effective first
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	    
-	    
+print("test whether break works - firing.php line 205<br>");
+break;
 	//assign interception
 	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
