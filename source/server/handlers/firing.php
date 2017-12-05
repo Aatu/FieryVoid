@@ -172,9 +172,9 @@ $a1 = $a1+count($interceptWeapons);
 		$allInterceptWeapons = $allInterceptWeapons + $interceptWeapons;
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 $a2 = $a2+count($incomingShots);
-		$allIncomingShots = $allIncomingShots + $incomingShots;
+		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-$aaa = "No of int weapons: " . $a1 . "/". count($allInterceptWeapons) . " , no of incoming shots: " . count( $incomingShots). "/" . $a2 ;
+$aaa = "No of int weapons: " . $a1 . "/". count($allInterceptWeapons) . " , no of incoming shots: " . count( $allIncomingShots). "/" . $a2 ;
 throw new Exception("$aaa - firing automateIntercept beginning");	 
 	    
 	    
@@ -211,7 +211,7 @@ throw new Exception("$aaa - firing automateIntercept beginning");
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	   
 	    
 	    
-$aaa = "No of int weapons: " . count($allInterceptWeapons) . " , no of incoming shots: " . count( $incomingShots);
+$aaa = "No of int weapons: " . count($allInterceptWeapons) . " , no of incoming shots: " . count( $allIncomingShots);
 throw new Exception("$aaa - firing automateIntercept late");	    
 
 	//assign interception
