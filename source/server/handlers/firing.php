@@ -176,7 +176,7 @@ $a1 = 0;
 	}
 
 $aaa = count($allInterceptWeapons) . " /but " . $a1 ;
-throw new Exception("$aaa - firing automateIntercept - there should be 8 able interceptors on one Covran...");
+throw new Exception("$aaa - firing automateIntercept - there should be 8 able interceptors on one Covran... AND THERE ARE, OK, CONTINUE DEBUG FROM HERE!");
 
 	    
 	    
