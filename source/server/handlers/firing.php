@@ -49,9 +49,9 @@ class Firing{
 		    }
 		    if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
 	    }else{ //proper ship
-$a1 = $ship->isDisabled();
-$a2 = $ship->unavailable;
-$a3 = $ship->phpclass;		    
+$a1 = 0;
+$a2 = 0;
+$a3 = 0;		    
 $a4 = 0;		    
 		if (!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
 			foreach($ship->systems as $weapon){
@@ -68,8 +68,10 @@ $a4++;
 			}
 		}
 	    }
+if(!$ship->isDisabled()){	    
 $aaa = $a1 . "/" . $a2 . "/" . $a3;
 throw new Exception("$aaa - firing getUnassignedInterceptors");
+}	
 	    return $toReturn;
     } //endof getUnassignedInterceptors
 	
