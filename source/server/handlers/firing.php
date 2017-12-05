@@ -348,9 +348,6 @@ throw new Exception("$aaa - firing isValidInterceptor FIRED CURRENT TURN");
             return false;
         }
 	    
-$aaa = $weapon->displayName  ;
-throw new Exception("$aaa - firing isValidInterceptor SHOULD BE CAPABLE");
-	    
         return true;
     } //endof function isValidInterceptor
 	
