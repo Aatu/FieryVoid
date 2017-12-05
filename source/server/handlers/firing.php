@@ -55,6 +55,8 @@ $a1 = 0;
 				if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
 				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) ){
 				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor  
+$aaa = $weapon->displayName ;
+throw new Exception("$aaa - firing getUnassignedInterceptors VALID");					    
 					$toReturn[] = $weapon; 
 $a1++;
 				    }
