@@ -27,7 +27,8 @@ class Firing{
 	
 	
 	/*gets all ready intercept-capable weapons that aren't otherwise assigned*/
-    public static function getUnassignedInterceptors($gamedata, $ship){	    
+    public static function getUnassignedInterceptors($gamedata, $ship){	   
+$a1 = 0;	    
 	    $currTurn = $gamedata->turn;
 	    $toReturn = array();	    
 	    if ($ship instanceof FighterFlight){ //separate procedure for fighters
@@ -55,12 +56,13 @@ class Firing{
 				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) ){
 				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor  
 					$toReturn[] = $weapon; 
+$a1++;
 				    }
 				}
 			}
 		}
 	    }	
-$aaa = count($toReturn)  ;
+$aaa = count($toReturn) . "/but " . $a1 ;
 throw new Exception("$aaa - firing getUnassignedInterceptors ");
 	    return $toReturn;
     } //endof getUnassignedInterceptors
