@@ -350,10 +350,10 @@ $aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor FIRED CURRENT TURN");
             return false;
         }
-	
+/*	
 $aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor ALL RIGHT");
-	    
+*/	    
         return true;
     } //endof function isValidInterceptor
 	
