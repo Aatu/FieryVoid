@@ -8,9 +8,6 @@ class SystemData
     public $systemid, $subsystem, $shipid;
     public $data = Array();
     
-    public $totalIntercept = 0; //total interception assigned
-    public $numInterceptors = 0; //number of intercepting weapons assigned
-    
     public function __construct($systemid, $subsystem, $shipid)
     {
         $this->systemid = $systemid;
@@ -235,6 +232,8 @@ class FireOrder{
     public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
     public $linkedHit = null; //convenient place to store info about system hit by linked weapons
     public $chosenLocation = null; //convenient place to store info about section chosen to be hit when determining hit chance
+    public $totalIntercept = 0; //total interception assigned
+    public $numInterceptors = 0; //number of intercepting weapons assigned
     
     function __construct(
         $id,
