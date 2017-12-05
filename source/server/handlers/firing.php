@@ -169,12 +169,12 @@ $a2 = 0;
 	foreach($gamedata->ships as $ship){      
 		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
 $a1 = $a1+count($interceptWeapons);
-		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
+		$allInterceptWeapons = $allInterceptWeapons + $interceptWeapons;
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 $a2 = $a2+count($incomingShots);
-		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
+		$allIncomingShots = $allIncomingShots + $incomingShots;
 	}
-$aaa = "No of int weapons: " . $a1 . "/". count($allInterceptWeapons) . " , no of incoming shots: " . count( $incomingShots) . $a2 . "/";
+$aaa = "No of int weapons: " . $a1 . "/". count($allInterceptWeapons) . " , no of incoming shots: " . count( $incomingShots). "/" . $a2 ;
 throw new Exception("$aaa - firing automateIntercept beginning");	 
 	    
 	    
