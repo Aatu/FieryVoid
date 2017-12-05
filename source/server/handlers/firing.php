@@ -190,7 +190,7 @@ class Firing{
 	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
 	$shotsStillComing = array();
 	foreach($allIncomingShots as $fireOrder){
-		if (($fireOrder->needed - $fireOrder->totalIntercept) > 0) continue;//no chance of hitting
+		if (($fireOrder->needed - $fireOrder->totalIntercept) <= 0) continue;//no chance of hitting
 		if (($fireOrder->type == "selfIntercept") || ($fireOrder->type == "intercept")) continue; //interception shot
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$firingWeapon = $shooter->getSystemById($fireOrder->weaponid);
