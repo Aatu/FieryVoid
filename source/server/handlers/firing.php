@@ -48,30 +48,18 @@ class Firing{
 			    }
 		    }
 		    if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
-	    }else{ //proper ship
-$a1 = 0;
-$a2 = 0;
-$a3 = 0;		    
-$a4 = 0;		    
+	    }else{ //proper ship	    
 		if (!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
 			foreach($ship->systems as $weapon){
-$a1++;
 				if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
-$a2++;				
 				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) ){
-$a3++;	    
-				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor
-$a4++;					    
+				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor  
 					$toReturn[] = $weapon; 
 				    }
 				}
 			}
 		}
-	    }
-if(!$ship->isDisabled()){	    
-$aaa = $ship->phpclass . ": " . $a1 . "/" . $a2 . "/" . $a3 . "/" . $a4 ;
-throw new Exception("$aaa - firing getUnassignedInterceptors");
-}	
+	    }	
 	    return $toReturn;
     } //endof getUnassignedInterceptors
 	
@@ -296,42 +284,70 @@ throw new Exception("$aaa - firing automateIntercept late");
 
     private static function isValidInterceptor($gd, $weapon)
     {
-        if (!($weapon instanceof Weapon))
-            return false;
+        if (!($weapon instanceof Weapon)) return false;
         $weapon = $weapon->getWeaponForIntercept();
         
-        if (!$weapon)
-            return false;
+        if (!$weapon){    
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor NOT A WEAPON");
+		return false;
+	}
+	    
+	    /* //ballistic weapons can be intercepted, too!
         if(property_exists($weapon, "ballisticIntercept")){
             return false;
-        }
+        }*/
         
-        if ($weapon->intercept == 0)
+        if ($weapon->intercept == 0){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor NOT INTERCEPT CAPABLE");	
             return false;
+	}
         if ($weapon->isDestroyed()){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor DESTROYED");
             //print($weapon->displayName . " is destroyed and cannot intercept " . $weapon->id);
             return false;
         }
-        if ($weapon->isOfflineOnTurn($gd->turn))
+        if ($weapon->isOfflineOnTurn($gd->turn)){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor OFFLINE");
             return false;
-        if ($weapon->ballistic)
-            return false;
+	}
+	    /* //ballistic weapons can be intercepted, too!
+        if ($weapon->ballistic)   return false;
+	*/
+	    
             // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor NOT ARMED");
             return false;
         }
         
         if ($weapon->getLoadingTime() > 1){
             if (isset($weapon->fireOrders[0])){
                 if ($weapon->fireOrders[0]->type != "selfIntercept"){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor ALREADY FIRING");
                     return false;
                 }
-            } else return false;
+            } else {
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor ELSE?!");
+		    return false;
+	    }
         }
         
         if ($weapon->getLoadingTime() == 1 && $weapon->firedOnTurn($gd->turn)){
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor FIRED CURRENT TURN");
             return false;
         }
+	    
+$aaa = $weapon->phpclass  ;
+throw new Exception("$aaa - firing isValidInterceptor SHOULD BE CAPABLE");
+	    
         return true;
     }
     
@@ -376,9 +392,9 @@ throw new Exception("$aaa - firing automateIntercept late");
                 if ($fire->turn != $turn)
                     continue;
                 
-                if ($fire->type == "ballistic")
-                    continue;
-                
+		    //weapon can only intercept ballistics, and this is not ballistic shot
+                if ( ($fire->type != "ballistic") && (property_exists($weapon, "ballisticIntercept")) ) continue; 
+		    
                 if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
                     $intercepts[] = new InterceptCandidate($fire);
                 }
