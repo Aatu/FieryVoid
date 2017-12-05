@@ -64,8 +64,10 @@ $a1++;
 			}
 		}
 	    }	
+	    /*
 $aaa = count($toReturn) . "/but " . $a1 ;
 throw new Exception("$aaa - firing getUnassignedInterceptors ");
+*/
 	    return $toReturn;
     } //endof getUnassignedInterceptors
 	
