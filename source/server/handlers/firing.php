@@ -49,15 +49,27 @@ class Firing{
 		    }
 		    if ($exclusiveWasFired) $toReturn = array(); //exclusive weapon was fired, nothing can intercept!
 	    }else{ //proper ship
+$a1 = 0;
+$a2 = 0;
+$a3 = 0;		    
+$a4 = 0;		    
 		if (!(($ship->unavailable === true) || $ship->isDisabled())){ //ship itself can fight this turn
 			foreach($ship->systems as $weapon){
+$a1++;
 				if ((!($weapon instanceof Weapon)) || ($weapon->ballistic)) continue; //not a weapon, or a ballistic weapon
-				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) && (self::isValidInterceptor($gamedata, $weapon))){//not fired this turn, intercept-capable, and valid interceptor
-					$toReturn[] = $weapon;  
+$a2++;				
+				if ((!$weapon->firedOnTurn($currTurn)) && ($weapon->intercept > 0) ){
+$a3++;	    
+				    if (self::isValidInterceptor($gamedata, $weapon)){//not fired this turn, intercept-capable, and valid interceptor
+$a4++;					    
+					$toReturn[] = $weapon; 
+				    }
 				}
 			}
 		}
 	    }
+$aaa = $a1 . "/" . $a2 . "/" . $a3;
+throw new Exception("$aaa - firing getUnassignedInterceptors");
 	    return $toReturn;
     } //endof getUnassignedInterceptors
 	
@@ -162,21 +174,15 @@ class Firing{
   */
     public static function automateIntercept($gamedata){ //automate allocation of intercept weapons
 	//prepare list of all potential intercepts and all incoming fire
-$a1 = 0;
-$a2 = 0;
 	$allInterceptWeapons = array();
 	$allIncomingShots = array();
 	foreach($gamedata->ships as $ship){      
 		$interceptWeapons = self::getUnassignedInterceptors($gamedata, $ship);
-$a1 = $a1+count($interceptWeapons);
-		$allInterceptWeapons = $allInterceptWeapons + $interceptWeapons;
+		$allInterceptWeapons = array_merge($allInterceptWeapons, $interceptWeapons);
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
-$a2 = $a2+count($incomingShots);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-$aaa = "No of int weapons: " . $a1 . "/". count($allInterceptWeapons) . " , no of incoming shots: " . count( $allIncomingShots). "/" . $a2 ;
-throw new Exception("$aaa - firing automateIntercept beginning");	 
-	    
+ 
 	    
 	    
 	//update intercepion totals!
