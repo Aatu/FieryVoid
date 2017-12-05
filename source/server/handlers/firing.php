@@ -288,7 +288,7 @@ throw new Exception("$aaa - firing automateIntercept late");
         $weapon = $weapon->getWeaponForIntercept();
         
         if (!$weapon){    
-$aaa = $weapon->phpclass  ;
+$aaa = $weapon->displayName  ;
 throw new Exception("$aaa - firing isValidInterceptor NOT A WEAPON");
 		return false;
 	}
