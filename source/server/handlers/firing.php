@@ -208,7 +208,7 @@ class Firing{
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	
 
 	//assign interception
-$a` = 0	 ;   
+$a = 0	 ;   
 	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
