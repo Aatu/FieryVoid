@@ -425,7 +425,7 @@ throw new Exception("$aaa - firing automateIntercept late");
             //Debug::log("Fire is my own\n");
             return false;
         }
-throw new Exception("firing isLegalIntercept - after fireismyown");       
+  
         if ($shooter->team == $ship->team){
             //Debug::log("Fire is friendly\n");
             return false;
