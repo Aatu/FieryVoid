@@ -431,15 +431,12 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
 	    
-/*
-$a = $firingweapon->ballistic;
-$b = $weapon->ballisticIntercept;
-throw new Exception("firing isLegalIntercept - ballistic $a ; $b");  
-*/	    
+    
 	if ( (!($firingweapon->ballistic)) && $weapon->ballisticIntercept ){
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
             return false;
 	}
+	    
 	    
 	    if ($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
@@ -449,12 +446,13 @@ throw new Exception("firing isLegalIntercept - ballistic $a ; $b");
 		$pos = $shooter->getCoPos(); //current hex of firing unit
 		$relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
 	    }
+	    
       
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
-throw new Exception("firing isLegalIntercept - close to end");  
+	    
         if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
