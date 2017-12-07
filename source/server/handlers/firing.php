@@ -234,7 +234,7 @@ throw new Exception("$aaa - firing automateIntercept late");
 	
 	
 
-	
+/* Marcin Sawicki - no longer needed	
     private static function getFighterIntercepts($gd, $ship){
         $intercepts = Array(); 
         foreach($ship->systems as $fighter){
@@ -270,8 +270,10 @@ throw new Exception("$aaa - firing automateIntercept late");
         }
         return $intercepts;
      } //endof function getFighterIntercepts
-    
+*/
 	
+	
+/* Marcin Sawicki - no longer needed	
     private static function getShipIntercepts($gd, $ship)
     {
         $intercepts = Array(); 
@@ -284,7 +286,7 @@ throw new Exception("$aaa - firing automateIntercept late");
         }
         return $intercepts;
     } //endof function getShipIntercepts
-	
+*/
 	
 	
 	
@@ -366,7 +368,7 @@ throw new Exception("$aaa - firing automateIntercept late");
 	
 	
 	
-
+/* Marcin Sawicki - no longer needed	
     public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
         $intercepts = array();
         
@@ -392,7 +394,7 @@ throw new Exception("$aaa - firing automateIntercept late");
         }
         return $intercepts;
     } //endof function getPossibleIntercept
-    
+*/
 	
 	
 	/*would this be a legal interception?...*/
