@@ -385,7 +385,7 @@ throw new Exception("$aaa - firing automateIntercept late");
 		    //weapon can only intercept ballistics, and this is not ballistic shot
                 if ( ($fire->type != "ballistic") && (property_exists($weapon, "ballisticIntercept")) ) continue; 
 		    
-                if (self::isLegalIntercept($gd, $ship, $weapon, $fire)){
+                if (self::isLegalIntercept($gd, $weapon, $fire)){
                     $intercepts[] = new InterceptCandidate($fire);
                 }
             }
@@ -396,7 +396,7 @@ throw new Exception("$aaa - firing automateIntercept late");
 	
 	
 	/*would this be a legal interception?...*/
-    public static function isLegalIntercept($gd, $ship, $weapon, $fire){
+    public static function isLegalIntercept($gd, $weapon, $fire){
         if ($fire->type=="intercept"){
             //Debug::log("Fire is intercept\n");
             return false;
@@ -414,26 +414,22 @@ throw new Exception("$aaa - firing automateIntercept late");
         
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
+	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
+$a = $shooter->phpclass;   
+$b = $target->phpclass;   	    
+$c = $interceptingShip->phpclass;
+throw new Exception("firing isLegalIntercept : shooting $a, target $b, interceptor $c");  	    
+	    
         if ($firingweapon->uninterceptable){
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }
 	    
-        if ($shooter->id == $ship->id){
-            //Debug::log("Fire is my own\n");
-            return false;
-        }
-  
-//$a = $firingweapon->displayName;
-//$b = $weapon->displayName;   
-$a = $shooter->phpclass;	   
-$b = $ship->phpclass;
-$c = $target->phpclass;
-throw new Exception("firing isLegalIntercept - fire deemed friendly?! Shooter: $a interceptor: $b target: $c");  
+ 
 	    
-        if ($shooter->team == $ship->team){
+        if ($shooter->team == $interceptingShip->team){
             //Debug::log("Fire is friendly\n");
             return false;
         }
@@ -451,10 +447,10 @@ throw new Exception("firing isLegalIntercept - ballistic $a ; $b");
 	    if ($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
 		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
-		$relativeBearing = $ship->getBearingOnPos($pos);    
+		$relativeBearing = $interceptingShip->getBearingOnPos($pos);    
 	    }else{
-		    $pos = $shooter->getCoPos(); //current hex of firing unit
-		$relativeBearing = $ship->getBearingOnUnit($shooter);
+		$pos = $shooter->getCoPos(); //current hex of firing unit
+		$relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
 	    }
       
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
@@ -462,9 +458,9 @@ throw new Exception("firing isLegalIntercept - ballistic $a ; $b");
             return false;
         }
         
-        if ($target->id == $ship->id){
+        if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
-        }else{
+        }else{ //fire directed at third party - only particular weapons are able to do so
             if (!$weapon->freeintercept){
                 //Debug::log("Target is another ship, and this weapon is not freeintercept \n");
                 return false;
@@ -475,7 +471,7 @@ throw new Exception("firing isLegalIntercept - ballistic $a ; $b");
 		//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
 		$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
 		$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
-		$targetBearing = $ship->getBearingOnUnit($target);
+		$targetBearing = $interceptingShip->getBearingOnUnit($target);
 		if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
 			//Debug::log("VALID INTERCEPT\n");
 			return true;
