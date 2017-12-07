@@ -208,23 +208,16 @@ class Firing{
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	
 	    
 	//assign interception
-$a = 0	 ; $b = 0;  
 	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
 			//find shot it would be most profitable to intercept with this weapon, and intercept it!
 			$shotToIntercept = self::getBestInterception($gamedata, $currInterceptor, $allIncomingShots);
 			if ($shotToIntercept != null){
-$a++;
 				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order		
 			}
 		}
-	}    
-	    
-
-	    
-$aaa = "Interceptions: $a ; No of int weapons: " . count($allInterceptWeapons) . " , no of incoming shots: " . count( $allIncomingShots);
-throw new Exception("$aaa - firing automateIntercept late");	    
+	}        
 
 	//all possible interceptions have been made!	
     } //endof function automateIntercept
