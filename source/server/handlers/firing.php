@@ -173,7 +173,8 @@ class Firing{
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-	    
+	
+throw new Exception("firing automateIntercept early");	  
 	    
 	//update intercepion totals!
 	$shotsStillComing = $allIncomingShots;
