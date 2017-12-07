@@ -88,7 +88,7 @@ class Firing{
 				$armour = 0; //let's simplify here...
 			}else{
 				$structureSystem = $target->getStructureSystem($chosenLoc);
-				$armour = $structureSystem->getArmour($this, null, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+				$armour = $structureSystem->getArmour($target, $shooter, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
 			}
 			$expectedDamageMax = $firingWeapon->maxDamage-$armour;
 			$expectedDamageMin = $firingWeapon->minDamage-$armour;
