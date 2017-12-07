@@ -76,17 +76,18 @@ class Firing{
 			$isLegal = self::isLegalIntercept($gamedata, $currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
-			if ($currInterceptionMod <= 0)continue; //can't effectively intercept
+			if ($currInterceptionMod <= 0)continue; //can't effectively intercept			
 			
 			$shooter = $gamedata->getShipById($firingOrder->shooterid);
+			$target = $gamedata->getShipById($firingOrder->targetid);
 			$firingWeapon = $shooter->getSystemById($firingOrder->weaponid);
 		
 			$chosenLoc = $firingOrder->chosenLocation;
 			if (!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
-			if ($ship instanceof FighterFlight){
+			if ($target instanceof FighterFlight){
 				$armour = 0; //let's simplify here...
 			}else{
-				$structureSystem = $ship->getStructureSystem($chosenLoc);
+				$structureSystem = $target->getStructureSystem($chosenLoc);
 				$armour = $structureSystem->getArmour($this, null, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
 			}
 			$expectedDamageMax = $firingWeapon->maxDamage-$armour;
@@ -103,14 +104,14 @@ class Firing{
 				$expectedDamage = $expectedDamage * 0.4;
 				break;
 			    case 'Pulse': //multiple hits - assume half of max pulses hit!
-				$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+				$expectedDamage = 0.5 * $expectedDamage * max(2,$firingWeapon->maxpulses);
 				break;			
 			    default: //something else: can't be as good as Standard!
 				$expectedDamage = $expectedDamage * 0.9;
 				break;
 			}
 			//if weapon does no damage by itself, assume it has other, very relvant effect - comparable to 10 damage!
-			if ($weapon->maxDamage == 0 ) $expectedDamage = 10;
+			if ($firingWeapon->maxDamage == 0 ) $expectedDamage = 10;
 			$expectedDamage = max(0.1,$expectedDamage);//estimate _some_ damage always...
 			//multiply by Shots or Maxpulses...
 			if ($firingWeapon->damageType == 'Pulse'){
