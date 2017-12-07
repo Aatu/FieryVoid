@@ -75,6 +75,7 @@ $aaa = count($incomingShots)	;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
 			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);
+throw new Exception("firing getBestInterception - $aaa shots; before determined legal");			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 throw new Exception("firing getBestInterception - $aaa shots; determined legal");	
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
