@@ -217,10 +217,11 @@ throw new Exception("firing automateIntercept too many interceptors");
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
 			//find shot it would be most profitable to intercept with this weapon, and intercept it!
 			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots);
-throw new Exception("firing automateIntercept getBestInterception");	
 			if ($shotToIntercept != null){
 $a++;
+throw new Exception("firing automateIntercept before addToInterceptionTotal");
 				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order
+throw new Exception("firing automateIntercept after addToInterceptionTotal");				
 			}
 		}
 	}    
