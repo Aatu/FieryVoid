@@ -173,9 +173,7 @@ class Firing{
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-	
-throw new Exception("firing automateIntercept early");	  
-	    
+		    
 	//update intercepion totals!
 	$shotsStillComing = $allIncomingShots;
 	foreach($allIncomingShots as $fireOrder){
@@ -210,6 +208,8 @@ throw new Exception("firing automateIntercept usort");
 	//sort list of all potential intercepts - most effective first
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	
 
+throw new Exception("firing automateIntercept AFTER usort");	
+	    
 	//assign interception
 $a = 0	 ;   
 	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
