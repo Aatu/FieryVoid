@@ -211,14 +211,10 @@ throw new Exception("firing getBestInterception - $aaa shots");
 	//assign interception
 $a = 0	 ; $b = 0;  
 	while((count($allInterceptWeapons)>0) ){//weapons can still intercept!
-$b++;
-if($b>10){
-throw new Exception("firing automateIntercept too many interceptors");
-}
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
 			//find shot it would be most profitable to intercept with this weapon, and intercept it!
-			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots);
+			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $allIncomingShots);
 			if ($shotToIntercept != null){
 $a++;
 throw new Exception("firing automateIntercept before addToInterceptionTotal");
