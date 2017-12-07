@@ -415,8 +415,7 @@ throw new Exception("$aaa - firing automateIntercept late");
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
         $firingweapon = $shooter->getSystemById($fire->weaponid);
-	    
-throw new Exception("firing isLegalIntercept - before uninterceptable");     
+	      
         if ($firingweapon->uninterceptable){
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
