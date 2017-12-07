@@ -74,8 +74,7 @@ $aaa = count($incomingShots)	;
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
-			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);
-throw new Exception("firing getBestInterception - $aaa shots; before determined legal");			
+			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 throw new Exception("firing getBestInterception - $aaa shots; determined legal");	
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
@@ -369,7 +368,6 @@ throw new Exception("$aaa - firing automateIntercept late");
 	
 
     public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
-        
         $intercepts = array();
         
         foreach($gd->ships as $shooter){
@@ -393,7 +391,7 @@ throw new Exception("$aaa - firing automateIntercept late");
             }
         }
         return $intercepts;
-    }
+    } //endof function getPossibleIntercept
     
 	
 	
@@ -407,8 +405,7 @@ throw new Exception("$aaa - firing automateIntercept late");
             //Debug::log("Fire is intercept\n");
             return false;
         }
-        if ($weapon instanceof DualWeapon)
-            $weapon->getFiringWeapon($fire);
+        if ($weapon instanceof DualWeapon) $weapon->getFiringWeapon($fire);
         
         if ($weapon->intercept == 0){
             //Debug::log("Weapon has intercept of zero\n");
@@ -424,7 +421,7 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
 	    
-	    
+throw new Exception("firing isLegalIntercept - quite early");  
                 
         if ($shooter->id == $ship->id){
             //Debug::log("Fire is my own\n");
@@ -474,7 +471,8 @@ throw new Exception("$aaa - firing automateIntercept late");
 			return true;
 		}
         }
-         //Debug::log("INVALID INTERCEPT\n");   
+	    
+         //Debug::log("INVALID INTERCEPT\n"); //should not rech here!  
          return false;   
     } //endof function isLegalIntercept
 	
