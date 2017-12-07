@@ -216,7 +216,6 @@ $a = 0	 ; $b = 0;
 			$shotToIntercept = self::getBestInterception($gamedata, $currInterceptor, $allIncomingShots);
 			if ($shotToIntercept != null){
 $a++;
-throw new Exception("firing automateIntercept before addToInterceptionTotal");
 				self::addToInterceptionTotal($gamedata, $shotToIntercept, $currInterceptor, true); //add numbers AND create order
 throw new Exception("firing automateIntercept after addToInterceptionTotal");				
 			}
