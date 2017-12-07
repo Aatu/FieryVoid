@@ -420,7 +420,7 @@ throw new Exception("$aaa - firing automateIntercept late");
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }
-throw new Exception("firing isLegalIntercept - after uninterceptable");      
+	    
         if ($shooter->id == $ship->id){
             //Debug::log("Fire is my own\n");
             return false;
