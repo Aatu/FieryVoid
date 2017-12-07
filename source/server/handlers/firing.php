@@ -70,13 +70,13 @@ class Firing{
 	/* returns best possible shot to intercept (or null if none is available)
 	*/
 	public static function getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots){
-$aaa = count($incomingShots)	;	
-throw new Exception("firing getBestInterception - $aaa shots");			
+$aaa = count($incomingShots)	;			
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
 			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
+throw new Exception("firing getBestInterception - $aaa shots; determined legal");	
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
 			if ($currInterceptionMod <= 0)continue; //can't effectively intercept
 			
@@ -422,6 +422,8 @@ throw new Exception("$aaa - firing automateIntercept late");
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }
+	    
+	    
                 
         if ($shooter->id == $ship->id){
             //Debug::log("Fire is my own\n");
@@ -433,7 +435,12 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
 	    
-	    if($firingweapon->ballistic){
+	if (!($firingweapon->ballistic) && (property_exists($weapon, "ballisticIntercept")) ){
+            //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
+            return false;
+	}
+	    
+	    if ($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
 		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
 		$relativeBearing = $ship->getBearingOnPos($pos);    
