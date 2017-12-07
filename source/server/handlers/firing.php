@@ -173,10 +173,6 @@ class Firing{
 		$incomingShots = $ship->getAllFireOrders($gamedata->turn);
 		$allIncomingShots = array_merge($allIncomingShots, $incomingShots);
 	}
-
-$aaa = "Interceptors:" . count($allInterceptWeapons) . "; shots: " .  count($allIncomingShots) ;
-throw new Exception("$aaa - firing automateIntercept!");
-
 	    
 	    
 	//update intercepion totals!
@@ -193,8 +189,9 @@ throw new Exception("$aaa - firing automateIntercept!");
 			}
 		}
 	}
+	   
 	    
-	//delete fire orders that intercept orders or are hex-targeted or have no chance of hitting
+	//delete fire orders that are intercept orders or are hex-targeted or have no chance of hitting
 	$shotsStillComing = array();
 	foreach($allIncomingShots as $fireOrder){
 		if (($fireOrder->needed - $fireOrder->totalIntercept) <= 0) continue;//no chance of hitting
@@ -206,6 +203,10 @@ throw new Exception("$aaa - firing automateIntercept!");
 	}
 	$allIncomingShots = $shotsStillComing;
 	$shotsStillComing = null; //just free memory
+	    
+$aaa = "Interceptors:" . count($allInterceptWeapons) . "; shots: " .  count($allIncomingShots) ;
+throw new Exception("$aaa - firing automateIntercept!");
+	    
 	    
 	//sort list of all potential intercepts - most effective first
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	   
