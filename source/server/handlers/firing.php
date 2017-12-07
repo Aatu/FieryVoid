@@ -69,12 +69,12 @@ class Firing{
 
 	/* returns best possible shot to intercept (or null if none is available)
 	*/
-	public static function getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots){
+	public static function getBestInterception($gamedata, $currInterceptor, $incomingShots){
 $aaa = count($incomingShots)	;			
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
-			$isLegal = self::isLegalIntercept($gamedata, $ship,$currInterceptor, $firingOrder);			
+			$isLegal = self::isLegalIntercept($gamedata, $currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 throw new Exception("firing getBestInterception - $aaa shots; determined legal");	
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
@@ -214,7 +214,7 @@ $a = 0	 ; $b = 0;
 		$currInterceptor = array_shift($allInterceptWeapons); //most capable interceptor available
 		for($i = 0; $i<$currInterceptor->guns;$i++){ //a single weapon can intercept multiple times...
 			//find shot it would be most profitable to intercept with this weapon, and intercept it!
-			$shotToIntercept = self::getBestInterception($gamedata, $ship, $currInterceptor, $allIncomingShots);
+			$shotToIntercept = self::getBestInterception($gamedata, $currInterceptor, $allIncomingShots);
 			if ($shotToIntercept != null){
 $a++;
 throw new Exception("firing automateIntercept before addToInterceptionTotal");
