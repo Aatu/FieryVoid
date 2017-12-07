@@ -426,9 +426,12 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
   
-$a = $firingweapon->displayName;
-$b = $weapon->displayName;   
-throw new Exception("firing isLegalIntercept - fire deemed friendly?! Shooting: $a intercepting: $b");  
+//$a = $firingweapon->displayName;
+//$b = $weapon->displayName;   
+$a = $shooter->phpclass;	   
+$b = $ship->phpclass;
+$c = $target->phpclass;
+throw new Exception("firing isLegalIntercept - fire deemed friendly?! Shooter: $a interceptor: $b target: $c");  
 	    
         if ($shooter->team == $ship->team){
             //Debug::log("Fire is friendly\n");
