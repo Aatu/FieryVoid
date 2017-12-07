@@ -70,6 +70,8 @@ class Firing{
 	/* returns best possible shot to intercept (or null if none is available)
 	*/
 	public static function getBestInterception($gamedata, $ship, $currInterceptor, $incomingShots){
+$aaa = count($incomingShots)	;	
+throw new Exception("firing getBestInterception - $aaa shots");			
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
