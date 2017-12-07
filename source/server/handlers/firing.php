@@ -420,8 +420,6 @@ throw new Exception("$aaa - firing automateIntercept late");
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }
-	    
-throw new Exception("firing isLegalIntercept - quite early");  
                 
         if ($shooter->id == $ship->id){
             //Debug::log("Fire is my own\n");
@@ -432,6 +430,10 @@ throw new Exception("firing isLegalIntercept - quite early");
             //Debug::log("Fire is friendly\n");
             return false;
         }
+	    
+$a = $firingweapon->ballistic;
+$b = property_exists($weapon, "ballisticIntercept");
+throw new Exception("firing isLegalIntercept - ballistic $a ; $b");  
 	    
 	if (!($firingweapon->ballistic) && (property_exists($weapon, "ballisticIntercept")) ){
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
