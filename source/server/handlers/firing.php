@@ -426,14 +426,14 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
   
-throw new Exception("firing isLegalIntercept - after fireismyown");  
+throw new Exception("firing isLegalIntercept - fire deemed friendly?! line 429 continue");  
 	    
         if ($shooter->team == $ship->team){
             //Debug::log("Fire is friendly\n");
             return false;
         }
 	    
-throw new Exception("firing isLegalIntercept - line 434 problem before 437");  
+throw new Exception("firing isLegalIntercept - after fireisfriendly");  
 $a = $firingweapon->ballistic;
 $b = property_exists($weapon, "ballisticIntercept");
 throw new Exception("firing isLegalIntercept - ballistic $a ; $b");  
