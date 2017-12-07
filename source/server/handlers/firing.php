@@ -414,22 +414,17 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
         
+	    
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
-$a = $shooter->phpclass;   
-$b = $target->phpclass;   	    
-$c = $interceptingShip->phpclass;
-throw new Exception("firing isLegalIntercept : shooting $a, target $b, interceptor $c");  	    
 	    
         if ($firingweapon->uninterceptable){
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
-        }
-	    
- 
+        }    
 	    
         if ($shooter->team == $interceptingShip->team){
             //Debug::log("Fire is friendly\n");
