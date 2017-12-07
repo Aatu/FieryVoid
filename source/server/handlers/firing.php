@@ -433,10 +433,10 @@ throw new Exception("$aaa - firing automateIntercept late");
 	    
 
 $a = $firingweapon->ballistic;
-$b = property_exists($weapon, "ballisticIntercept");
+$b = $weapon->ballisticIntercept;
 throw new Exception("firing isLegalIntercept - ballistic $a ; $b");  
 	    
-	if ( (!($firingweapon->ballistic)) && (property_exists($weapon, "ballisticIntercept")) ){
+	if ( (!($firingweapon->ballistic)) && $weapon->ballisticIntercept ){
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
             return false;
 	}
