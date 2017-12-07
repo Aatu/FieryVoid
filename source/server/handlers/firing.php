@@ -69,14 +69,12 @@ class Firing{
 
 	/* returns best possible shot to intercept (or null if none is available)
 	*/
-	public static function getBestInterception($gamedata, $currInterceptor, $incomingShots){
-$aaa = count($incomingShots)	;			
+	public static function getBestInterception($gamedata, $currInterceptor, $incomingShots){	
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
 			$isLegal = self::isLegalIntercept($gamedata, $currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
-throw new Exception("firing getBestInterception - $aaa shots; determined legal");	
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
 			if ($currInterceptionMod <= 0)continue; //can't effectively intercept
 			
