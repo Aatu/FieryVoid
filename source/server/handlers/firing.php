@@ -431,11 +431,11 @@ throw new Exception("$aaa - firing automateIntercept late");
             return false;
         }
 	    
-throw new Exception("firing isLegalIntercept - after fireisfriendly");  
+/*
 $a = $firingweapon->ballistic;
 $b = property_exists($weapon, "ballisticIntercept");
 throw new Exception("firing isLegalIntercept - ballistic $a ; $b");  
-	    
+*/	    
 	if ( (!($firingweapon->ballistic)) && (property_exists($weapon, "ballisticIntercept")) ){
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
             return false;
@@ -454,7 +454,7 @@ throw new Exception("firing isLegalIntercept - ballistic $a ; $b");
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
-        
+throw new Exception("firing isLegalIntercept - close to end");  
         if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
