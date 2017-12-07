@@ -204,6 +204,8 @@ class Firing{
 	$allIncomingShots = $shotsStillComing;
 	$shotsStillComing = null; //just free memory
 	    
+throw new Exception("firing automateIntercept usort");	
+	    
 	//sort list of all potential intercepts - most effective first
 	usort($allInterceptWeapons, "self::compareInterceptAbility");	
 
