@@ -720,7 +720,7 @@ class Manager{
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-
+throw new Exception("Debug test: Manager startEndPhase line 723");
         $starttime = time();
         Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         $endtime = time();
