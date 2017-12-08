@@ -85,7 +85,9 @@ class Firing{
 			$chosenLoc = $firingOrder->chosenLocation;
 			if (!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
 			if ($target instanceof FighterFlight){
-				$armour = 0; //let's simplify here...
+				$exampleFighter = $target->getFighterBySystem(1);
+				$armour = $exampleFighter->getArmour($target, $shooter, $firingWeapon->damageType);
+				//$armour = 0; //let's simplify here...
 			}else{
 				$structureSystem = $target->getStructureSystem($chosenLoc);
 				$armour = $structureSystem->getArmour($target, $shooter, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
