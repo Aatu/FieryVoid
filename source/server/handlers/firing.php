@@ -363,9 +363,9 @@ class Firing{
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
 		//Debug::log("Target is this another ship\n");
-		if ($interceptingShip instanceof fighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
+		if ($interceptingShip instanceof FighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
 			if ($firingweapon->ballistic){ //only ballistic weapons can be intercepted this way
-				if ($target instanceof fighterFlight){
+				if ($target instanceof FighterFlight){
 					return false; //cannot intercept fire at other fighters
 				}else{//target is ship 
 					$selfPosNow = $interceptingShip->getCoPos();
