@@ -72,8 +72,7 @@ class Firing{
 	public static function getBestInterception($gamedata, $currInterceptor, $incomingShots){	
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
-		foreach($incomingShots as $firingOrder){
-throw new Exception("Debug test: firing syntax (uncommentED!)");			
+		foreach($incomingShots as $firingOrder){			
 			$isLegal = self::isLegalIntercept($gamedata, $currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
