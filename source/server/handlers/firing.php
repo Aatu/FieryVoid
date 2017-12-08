@@ -307,7 +307,6 @@ class Firing{
     public static function isLegalIntercept($gd, $weapon, $fire){
 
 throw new Exception("Debug test: firing syntax");
-/*  
         if ($fire->type=="intercept"){
             //Debug::log("Fire is intercept\n");
             return false;
@@ -329,7 +328,7 @@ throw new Exception("Debug test: firing syntax");
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
-	    
+/*      
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
