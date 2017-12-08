@@ -73,7 +73,7 @@ class Firing{
 		$bestInterception = null;
 		$bestInterceptionVal = 0;		
 		foreach($incomingShots as $firingOrder){
-throw new Exception("Debug test: firing syntax (uncomment!)");			
+throw new Exception("Debug test: firing syntax (uncommentED!)");			
 			$isLegal = self::isLegalIntercept($gamedata, $currInterceptor, $firingOrder);			
 			if (!$isLegal)continue; //not a legal interception at all for this weapon
 			$currInterceptionMod = $currInterceptor->getInterceptionMod($gamedata, $firingOrder);
@@ -335,8 +335,7 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
             return false;
 	}
-	    
-	    
+	    	    
 	    if ($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
 		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
@@ -345,14 +344,13 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
 		$pos = $shooter->getCoPos(); //current hex of firing unit
 		$relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
 	    }
-	    
-      
+	          
         if (!mathlib::isInArc($relativeBearing, $weapon->startArc, $weapon->endArc)){
             //Debug::log("Fire is not on weapon arc\n");
             return false;
         }
 	    
-/*
+
         if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
@@ -400,7 +398,7 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
 			}
 		}
         }
-*/
+
          //Debug::log("INVALID INTERCEPT\n"); //should not rech here!  
          return false;   
     } //endof function isLegalIntercept
