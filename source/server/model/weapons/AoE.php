@@ -28,7 +28,7 @@
 		$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);//at moment of launch!!!	
 		
 		//sometimes player does manage to target ship after all..
-		if($fireOrder->targetid != -1){ 
+		if ($fireOrder->targetid != -1){ 
 			$targetship = $gamedata->getShipById($fireOrder->targetid); 
 			//insert correct target coordinates: last turns' target position
 			$movement = $targetship->getLastTurnMovement($fireOrder->turn);
@@ -47,12 +47,12 @@
 			$fireOrder->pubnotes .= "Charge dissipates. ";  
 		}else{//hit!
 			$fireOrder->shotshit++;
-			if($rolled>75){ //deviation!
+			if ($rolled>75){ //deviation!
 				$maxdis = mathlib::getDistanceHex($posLaunch, mathlib::hexCoToPixel($target["x"], $target["y"]));
 				$dis = Dice::d(6); //deviation distance
 				$dis = min($dis,floor($maxdis));
 				$direction = Dice::d(6); //deviation direction
-				for ($i=0;$i<$dis;$i++){
+				for($i=0;$i<$dis;$i++){
 					$target = mathlib::getHexToDirection($direction, $target["x"], $target["y"]);
 				}
 				$fireOrder->pubnotes .= " deviation from " . $fireOrder->x . ' ' . $fireOrder->y;
