@@ -417,7 +417,7 @@ throw new Exception("Debug test: firing syntax");
 	
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
     public static function prepareFiring($gamedata){
-        $currFireOrders  = array();   
+        //$currFireOrders  = array();   
 	$ambiguousFireOrders  = array();   
 	foreach ($gamedata->ships as $ship){	    
 		foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
@@ -434,23 +434,38 @@ throw new Exception("Debug test: firing syntax");
 				continue;	
 			}
 			$fire->priority = $weapon->priority;
-			$currFireOrders[] = $fire;
-		}
-		//calculate hit chances if no ambiguousness exists...
-		foreach($currFireOrders as $fireOrder){
-			$weapon = $ship->getSystemById($fireOrder->weaponid);
+			
 			if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
 				$ambiguousFireOrders[] = $fireOrder;
 			}else{
 				$weapon->calculateHitBase($gamedata, $fireOrder);			
 			}
+			
+			//$currFireOrders[] = $fire;
 		}
-		//calculate hit chances for ambiguous firing!
-		foreach($ambiguousFireOrders as $fireOrder){
-			$weapon = $ship->getSystemById($fireOrder->weaponid);
-			$weapon->calculateHitBase($gamedata, $fireOrder);
-		} 
 	}
+	    
+/*		
+	//calculate hit chances if no ambiguousness exists...
+	foreach($currFireOrders as $fireOrder){
+		$ship = $gamedata->getShipById($fireOrder->shooterid);
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
+			$ambiguousFireOrders[] = $fireOrder;
+		}else{
+			$weapon->calculateHitBase($gamedata, $fireOrder);			
+		}
+	}
+*/		
+
+		
+	//calculate hit chances for ambiguous firing!
+	foreach($ambiguousFireOrders as $fireOrder){
+		$ship = $gamedata->getShipById($fireOrder->shooterid);
+		$weapon = $ship->getSystemById($fireOrder->weaponid);
+		$weapon->calculateHitBase($gamedata, $fireOrder);
+	} 
+
     }//endof function prepareFiring	
 	
 	
