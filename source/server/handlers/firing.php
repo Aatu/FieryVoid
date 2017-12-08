@@ -364,21 +364,30 @@ class Firing{
         }else{ //fire directed at third party - only particular weapons are able to do so
 		//Debug::log("Target is this another ship\n");
 		if ($interceptingShip instanceof fighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
-			if ($target instanceof fighterFlight){
-				return false; //cannot intercept fire at other fighters
-			}else{//target is ship
-				$selfPosNow = $interceptingShip->getCoPos();
-				$movement = $interceptingShip->getLastTurnMovement($fire->turn);
-				$selfPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn	    
-				$targetPosNow = $target->getCoPos();
-				$movement = $target->getLastTurnMovement($fire->turn);
-				$targetPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
-				
-				if ( ($selfPosNow==$targetPosNow) && ($selfPosPrevious==$targetPosPrevious) ){
-					return true;
-				}else{
-					return false;
+			if ($firingweapon->ballistic){ //only ballistic weapons can be intercepted this way
+				if ($target instanceof fighterFlight){
+					return false; //cannot intercept fire at other fighters
+				}else{//target is ship 
+					$selfPosNow = $interceptingShip->getCoPos();
+					$targetPosNow = $target->getCoPos();
+					if($fire->turn == 1){ //first turn - assume starting positions did match (technical reasons - units cannot start on same hex!)
+						$selfPosPrevious = $selfPosNow;
+						$targetPosPrevious = $targetPosNow;
+					}else{//standard - check actual position at the end of previous turn
+						$movement = $interceptingShip->getLastTurnMovement($fire->turn);
+						$selfPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
+						$movement = $target->getLastTurnMovement($fire->turn);
+						$targetPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
+					}
+
+					if ( ($selfPosNow==$targetPosNow) && ($selfPosPrevious==$targetPosPrevious) ){
+						return true;
+					}else{
+						return false;
+					}
 				}
+			}else{ //incoming weapon is not ballistic
+				return false;
 			}
 		}else{ //ship
 			if (!$weapon->freeintercept){
