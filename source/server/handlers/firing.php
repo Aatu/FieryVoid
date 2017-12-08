@@ -434,10 +434,10 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
 			}
 			$fire->priority = $weapon->priority;
 			
-			if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
-				$ambiguousFireOrders[] = $fireOrder;
+			if($weapon->isTargetAmbiguous($gamedata, $fire)){
+				$ambiguousFireOrders[] = $fire;
 			}else{
-				$weapon->calculateHitBase($gamedata, $fireOrder);			
+				$weapon->calculateHitBase($gamedata, $fire);			
 			}
 			
 			//$currFireOrders[] = $fire;
