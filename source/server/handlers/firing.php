@@ -327,7 +327,7 @@ class Firing{
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
 	    
-        if ($firingweapon->uninterceptable){
+        if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }    
