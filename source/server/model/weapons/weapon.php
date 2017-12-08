@@ -63,13 +63,14 @@ class Weapon extends ShipSystem{
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
-	public $extraoverloadshotsArray = array();	
+    public $extraoverloadshotsArray = array();	
 
     public $uninterceptable = false;
-	public $uninterceptableArray = array();
+    public $uninterceptableArray = array();
+    public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
-    public $intercept = 0;
-    public $freeintercept = false;
+    public $intercept = 0; //intercept rating
+    public $freeintercept = false;  //can intercept fire directed at other unit?
     public $hidetarget = false;
     public $duoWeapon = false;
     public $dualWeapon = false;
@@ -110,7 +111,7 @@ class Weapon extends ShipSystem{
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
-	public $ballisticIntercept = false; //can intercept, but only ballistics?...
+	public $ballisticIntercept = false; //can intercept, but only ballistics
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
