@@ -21,6 +21,8 @@
 	}*/
 	    
 	public function fire($gamedata, $fireOrder){ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
+throw new Exception("DEBUG - AoE fire INSTEAD OF CODE");
+/*		
 		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
            	$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
@@ -79,8 +81,9 @@
 		}
 	    
 		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+*/		
 	} //endof function fire
-	    
+
 
 	public function AOEdamage($target, $shooter, $fireOrder, $sourceHex, $damage, $gamedata){
             if ($target->isDestroyed()) return; //no point allocating
@@ -100,7 +103,7 @@
 		}   
         }
 
-	/*only half damage vs Enormous units...*/
+	//only half damage vs Enormous units...
 	public function getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata){
 		$modifiedDmg = parent::getDamageMod($damage, $shooter, $target, $sourceHex, $gamedata);
 		if($target->Enormous) $modifiedDmg = floor($modifiedDmg/2);
@@ -145,13 +148,13 @@
             $this->data["Weapon type"] = "Ballistic";
         }
         
-	    /*getDamage in itself depends on actually hit ship - this function is meaningless here, really!*/
+	    //getDamage in itself depends on actually hit ship - this function is meaningless here, really!
         public function getDamage($fireOrder){        return 10;   } 
-	    /*these are important, though!*/
+	    //these are important, though!*/
         public function setMinDamage(){     $this->minDamage = 10;      }
         public function setMaxDamage(){     $this->maxDamage = 30;      }
     
-    }
+    } //endof class EnergyMine
 
 
 
