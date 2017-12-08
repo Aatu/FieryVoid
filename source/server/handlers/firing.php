@@ -234,12 +234,7 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
         if (!$weapon){    
 		return false;
 	}
-	    
-	    /* //ballistic weapons can be intercepted, too!
-        if(property_exists($weapon, "ballisticIntercept")){
-            return false;
-        }*/
-        
+	            
         if ($weapon->intercept == 0){
             return false;
 	}
@@ -250,9 +245,6 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
         if ($weapon->isOfflineOnTurn($gd->turn)){
             return false;
 	}
-	    /* //ballistic weapons can be intercepted, too!
-        if ($weapon->ballistic)   return false;
-	*/
 	    
             // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()){
@@ -327,7 +319,7 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
-/*      
+  
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
@@ -360,6 +352,7 @@ throw new Exception("Debug test: firing syntax (uncomment!)");
             return false;
         }
 	    
+/*
         if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
