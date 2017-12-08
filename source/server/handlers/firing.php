@@ -326,12 +326,13 @@ class Firing{
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
-	    
+throw new Exception("Debug test: firing syntax");
+/*	    
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }    
-	    
+*/	    
         if ($shooter->team == $interceptingShip->team){
             //Debug::log("Fire is friendly\n");
             return false;
@@ -363,6 +364,7 @@ class Firing{
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
 		//Debug::log("Target is this another ship\n");
+/*		
 		if ($interceptingShip instanceof FighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
 			if ($firingweapon->ballistic){ //only ballistic weapons can be intercepted this way
 				if ($target instanceof FighterFlight){
@@ -391,11 +393,11 @@ class Firing{
 			}
 		}else{ //ship
 			if (!$weapon->freeintercept){
-			//Debug::log("Target is another ship, and this weapon is not freeintercept \n");
-			return false;
+				//Debug::log("Target is another ship, and this weapon is not freeintercept \n");
+				return false;
 			}
 
-			/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
+			//new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees
 			//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
 			$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
 			$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
@@ -405,6 +407,7 @@ class Firing{
 				return true;
 			}
 		}
+*/		
         }
 	    
          //Debug::log("INVALID INTERCEPT\n"); //should not rech here!  
