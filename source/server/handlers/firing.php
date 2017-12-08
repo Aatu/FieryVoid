@@ -305,6 +305,9 @@ class Firing{
 	
 	/*would this be a legal interception?...*/
     public static function isLegalIntercept($gd, $weapon, $fire){
+
+throw new Exception("Debug test: firing syntax");
+/*  
         if ($fire->type=="intercept"){
             //Debug::log("Fire is intercept\n");
             return false;
@@ -326,13 +329,12 @@ class Firing{
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
 	      
-throw new Exception("Debug test: firing syntax");
-/*	    
+	    
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }    
-*/	    
+	    
         if ($shooter->team == $interceptingShip->team){
             //Debug::log("Fire is friendly\n");
             return false;
@@ -364,7 +366,6 @@ throw new Exception("Debug test: firing syntax");
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
 		//Debug::log("Target is this another ship\n");
-/*		
 		if ($interceptingShip instanceof FighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
 			if ($firingweapon->ballistic){ //only ballistic weapons can be intercepted this way
 				if ($target instanceof FighterFlight){
@@ -407,9 +408,8 @@ throw new Exception("Debug test: firing syntax");
 				return true;
 			}
 		}
-*/		
         }
-	    
+*/
          //Debug::log("INVALID INTERCEPT\n"); //should not rech here!  
          return false;   
     } //endof function isLegalIntercept
