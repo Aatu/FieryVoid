@@ -20,9 +20,7 @@
 		$fireOrder->updated = true;
 	}*/
 	    
-	public function fire($gamedata, $fireOrder){ //sadly here it really has to be completely redefined... or at least I see no option to avoid this
-throw new Exception("DEBUG - AoE fire INSTEAD OF CODE");
-/*		
+	public function fire($gamedata, $fireOrder){ //sadly here it really has to be completely redefined... or at least I see no option to avoid this	
 		$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
            	$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
@@ -80,8 +78,7 @@ throw new Exception("DEBUG - AoE fire INSTEAD OF CODE");
 			}
 		}
 	    
-		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-*/		
+		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!	
 	} //endof function fire
 
 
