@@ -222,63 +222,7 @@ class Firing{
 	//all possible interceptions have been made!	
     } //endof function automateIntercept
 	
-	
-
-/* Marcin Sawicki - no longer needed	
-    private static function getFighterIntercepts($gd, $ship){
-        $intercepts = Array(); 
-        foreach($ship->systems as $fighter){
-            $exclusiveWasFired = false;
-            
-            if ($fighter->isDestroyed())  continue;
-            
-            // check if fighter is firing weapons that exclude other
-            // weapons from firing. (Like IonBolt on a Rutarian.)
-            foreach($fighter->systems as $weapon){
-                if (($weapon instanceof Weapon) && ($weapon->ballistic != true)){
-                    if ($weapon->exclusive && $weapon->firedOnTurn($gd->turn)){
-                        $exclusiveWasFired = true;
-                        break;
-                    }
-                }
-            }
-            
-            if ($exclusiveWasFired) continue;
-
-            
-            foreach($fighter->systems as $weapon)
-            {
-                if ($weapon instanceof PairedGatlingGun && $weapon->ammunition < 1){
-                    continue;
-                }
-                if (self::isValidInterceptor($gd, $weapon) === false){
-                    continue;
-                }
-                $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
-                $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
-            }
-        }
-        return $intercepts;
-     } //endof function getFighterIntercepts
-*/
-	
-	
-/* Marcin Sawicki - no longer needed	
-    private static function getShipIntercepts($gd, $ship)
-    {
-        $intercepts = Array(); 
-        
-        foreach($ship->systems as $weapon)
-        {
-            if (self::isValidInterceptor($gd, $weapon) === false) continue;
-            $possibleIntercepts = self::getPossibleIntercept($gd, $ship, $weapon, $gd->turn);
-            $intercepts[] = new Intercept($ship, $weapon, $possibleIntercepts);
-        }
-        return $intercepts;
-    } //endof function getShipIntercepts
-*/
-	
-	
+		
 	
 
     private static function isValidInterceptor($gd, $weapon)
@@ -358,34 +302,6 @@ class Firing{
 	
 	
 	
-/* Marcin Sawicki - no longer needed	
-    public static function getPossibleIntercept($gd, $ship, $weapon, $turn){
-        $intercepts = array();
-        
-        foreach($gd->ships as $shooter){
-            if ($shooter->id == $ship->id)
-                continue;
-            
-            if ($shooter->team == $ship->team)
-                continue;
-            
-            $fireOrders = $shooter->getAllFireOrders();
-            foreach($fireOrders as $fire){
-                if ($fire->turn != $turn)
-                    continue;
-                
-		    //weapon can only intercept ballistics, and this is not ballistic shot
-                if ( ($fire->type != "ballistic") && (property_exists($weapon, "ballisticIntercept")) ) continue; 
-		    
-                if (self::isLegalIntercept($gd, $weapon, $fire)){
-                    $intercepts[] = new InterceptCandidate($fire);
-                }
-            }
-        }
-        return $intercepts;
-    } //endof function getPossibleIntercept
-*/
-	
 	
 	/*would this be a legal interception?...*/
     public static function isLegalIntercept($gd, $weapon, $fire){
@@ -446,20 +362,39 @@ class Firing{
         if ($interceptingShip->id == $target->id){ //ship intercepting fire directed at it - usual case
             return true;
         }else{ //fire directed at third party - only particular weapons are able to do so
-            if (!$weapon->freeintercept){
-                //Debug::log("Target is another ship, and this weapon is not freeintercept \n");
-                return false;
-            }
-            //Debug::log("Target is this another ship\n");
-		
-		/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
-		//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
-		$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
-		$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
-		$targetBearing = $interceptingShip->getBearingOnUnit($target);
-		if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
-			//Debug::log("VALID INTERCEPT\n");
-			return true;
+		//Debug::log("Target is this another ship\n");
+		if ($interceptingShip instanceof fighterFlight){ //can intercept ballistics IF together with target ship form start of turn 
+			if ($target instanceof fighterFlight){
+				return false; //cannot intercept fire at other fighters
+			}else{//target is ship
+				$selfPosNow = $interceptingShip->getCoPos();
+				$movement = $interceptingShip->getLastTurnMovement($fire->turn);
+				$selfPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn	    
+				$targetPosNow = $target->getCoPos();
+				$movement = $target->getLastTurnMovement($fire->turn);
+				$targetPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
+				
+				if ( ($selfPosNow==$targetPosNow) && ($selfPosPrevious==$targetPosPrevious) ){
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}else{ //ship
+			if (!$weapon->freeintercept){
+			//Debug::log("Target is another ship, and this weapon is not freeintercept \n");
+			return false;
+			}
+
+			/*new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees*/
+			//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
+			$oppositeBearingFrom = mathlib::addToDirection($relativeBearing,120);//bearing exactly opposite to incoming shot, minus 60 degrees
+			$oppositeBearingTo = mathlib::addToDirection($oppositeBearingFrom,120);//bearing exactly opposite to incoming shot, plus 60 degrees
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if( mathlib::isInArc($targetBearing, $oppositeBearingFrom, $oppositeBearingTo)){
+				//Debug::log("VALID INTERCEPT\n");
+				return true;
+			}
 		}
         }
 	    
