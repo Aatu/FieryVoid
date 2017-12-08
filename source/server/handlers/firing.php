@@ -426,8 +426,13 @@ throw new Exception("Debug test: firing syntax");
 			    continue;
 			}
 			$weapon = $ship->getSystemById($fire->weaponid);
+			/*
 			if ($weapon instanceof Thruster || $weapon instanceof Structure){
 			    continue;
+			}
+			*/
+			if (!($weapon instanceof Weapon)){ //this isn't a weapon after all...
+				continue;	
 			}
 			$fire->priority = $weapon->priority;
 			$currFireOrders[] = $fire;
