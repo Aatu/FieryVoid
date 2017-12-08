@@ -165,6 +165,7 @@
             $this->autoid++;
             $fighterSys = array();
             foreach ($fighter->systems as $system){
+		    $system->setUnit($this);
 			$system->id  = $this->autoid;
 			$this->autoid++;
 			$fighterSys[$system->id] = $system;
