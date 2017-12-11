@@ -505,7 +505,9 @@ class Firing{
                     return $a->priority - $b->priority;
                 }
                 else {
-                    return $a->shooterid - $b->shooterid;
+			$val = $a->shooterid - $b->shooterid;
+			if ($val == 0) $val = $a->id - $b->id; //let's use database ID as final sorting element!
+			return $val;
                 }
             }
         );
