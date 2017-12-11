@@ -1333,8 +1333,8 @@ class Weapon extends ShipSystem{
 		if($this->isLinked){ //further linked weapons will hit the exact same system!
 			$fireOrder->linkedHit = $system;
 		}
-$a = $launchPos->x;
-$b = $launchPos->y;		
+$a = $launchPos["x"];
+$b = $launchPos['y'];		
 throw new Exception("DEBUG weapon damage 1327: POS $a , $b !");
         	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 	}
@@ -1438,14 +1438,8 @@ throw new Exception("DEBUG weapon damage 1327: POS $a , $b !");
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
 		$armour = $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
 		$armour += $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos); //this can't be ignored
-if ($pos == null){
-	$a = 'NULL';
-}else{
-	$a = 'NOT NULL';
-}
-throw new Exception("DEBUG weapon doDamage 1446: POS is $a !");
-$a = $pos->x;
-$b = $pos->y;		
+$a = $launchPos["x"];
+$b = $launchPos['y'];		
 throw new Exception("DEBUG weapon doDamage 1438: $armour POS $a , $b !");
 		$modifiedDamage = $damage;
 		$destroyed = false;
