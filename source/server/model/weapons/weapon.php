@@ -614,6 +614,8 @@ class Weapon extends ShipSystem{
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
 
+		
+		if($target == null) return true; //target is a hex rather than unit, probability of ambigousness is relatively high
 		if($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
 		
 		$pos = $shooter->getCoPos();
