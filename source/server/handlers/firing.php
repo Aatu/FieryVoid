@@ -85,7 +85,7 @@ class Firing{
 			$chosenLoc = $firingOrder->chosenLocation;
 			if (!($chosenLoc>0)) $chosenLoc = 0; //just in case it's not set/not a number!
 			if ($target instanceof FighterFlight){
-				$exampleFighter = $target->getFighterBySystem(1);
+				$exampleFighter = $target->getSampleFighter();
 				$armour = $exampleFighter->getArmour($target, $shooter, $firingWeapon->damageType);
 				//$armour = 0; //let's simplify here...
 			}else{
