@@ -85,6 +85,12 @@
             return null;
         }
 	    
+	   
+	    /*returns a sample fighter, if one needs to review example of what's in flight*/
+	    public function getSampleFighter(){
+		    return $this->systems[1];
+	    }
+	    
 	    
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
