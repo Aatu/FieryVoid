@@ -1275,7 +1275,8 @@ class Weapon extends ShipSystem{
 	    
         if ($target->isDestroyed()) return;
 	    
-	$tmpLocation = $fireOrder->chosenLocation;	    
+	$tmpLocation = $fireOrder->chosenLocation;
+	$launchPos = null;
         if ($this->ballistic){
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
@@ -1307,20 +1308,20 @@ class Weapon extends ShipSystem{
 		}
 		//first part: facing structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
-        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, false, $facingLocation);
+        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, $launchPos, $gamedata, false, $facingLocation);
 		//second part: PRIMARY Structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
-		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
+		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, $launchPos, $gamedata, false, 0);
 		//last part: opposite Structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this,  $outLocation);
-		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
+		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
 	}elseif( ($this->damageType=='Raking') && (!($target instanceof FighterFlight)) ){ //Raking hit... but not at fighters - that's effectively Standard shot!
 		//split into rakes; armor will not need to be penetrated twice!
 		$fireOrder->armorIgnored = array();//reset info about pierced armor
 		while($damage>0){
 			$rake=min($damage, $this->getRakeSize());
 			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
-        		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, false, $tmpLocation);
+        		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 			$damage = $damage - $rake;
 		}
 	}else{ //standard mode of dealing damage
@@ -1332,7 +1333,7 @@ class Weapon extends ShipSystem{
 		if($this->isLinked){ //further linked weapons will hit the exact same system!
 			$fireOrder->linkedHit = $system;
 		}
-        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 	}
     }//endof function damage
 
