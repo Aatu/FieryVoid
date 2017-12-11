@@ -282,7 +282,8 @@ window.effects = {
             }/*else if (obj1.firingMode !== obj2.firingMode){
                 return obj1.firingMode-obj2.firingMode; 
             }*/
-            else return obj1.shooterid - obj2.shooterid;
+            else return obj1.id-obj2.id;//database ID - hopefully that'll keep correct display order!          
+            //else return obj1.shooterid - obj2.shooterid;
         });
 
 /*  
