@@ -39,7 +39,7 @@
 		
             	$target = array("x"=>$fireOrder->x, "y"=>$fireOrder->y);
             
-            	$this->calculateHit($gamedata, $fireOrder);
+            	//$this->calculateHit($gamedata, $fireOrder); //already calculated!
 		
 		$rolled = Dice::d(100);
 		$fireOrder->rolled = $rolled;
