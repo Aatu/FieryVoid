@@ -235,9 +235,9 @@
 		$health = $exampleFtr->maxhealth;
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[0]);
-            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
-            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
-            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
+            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
 
             return $locs;
         }
