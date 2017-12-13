@@ -30,18 +30,17 @@ GravitonPulsar.prototype.initBoostableInfo = function(){
         }
     }
 
-/*
     this.intercept = this.getInterceptRating();
     this.data.Intercept = this.getInterceptRating()*(-5);
-*/
+
     return this;
 }
-/*
+
 GravitonPulsar.prototype.getInterceptRating = function()
 {
     return (1 + shipManager.power.getBoost(this));
 }
-*/
+
 
 GravitonPulsar.prototype.clearBoost = function(){
         for (var i in system.power){
@@ -86,18 +85,17 @@ GraviticBolt.prototype.initBoostableInfo = function(){
         }
     }
     
-    /*
     this.intercept = this.getInterceptRating();
     this.data.Intercept = this.getInterceptRating()*(-5);
-*/
+
     return this;
 }
-/*
+
 GraviticBolt.prototype.getInterceptRating = function()
 {
     return (1 + shipManager.power.getBoost(this));
 }
-*/
+
 
 GraviticBolt.prototype.clearBoost = function(){
         for (var i in system.power){
