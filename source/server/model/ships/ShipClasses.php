@@ -702,8 +702,9 @@
         public function doGetHitSectionPos($pos){ //pick section hit from given coordinates; return array with all data!  
             $relativeBearing =  $this->getBearingOnPos($pos);
             $result = $this->doGetHitSectionBearing($relativeBearing);
-		
-throw new Exception("DEBUG shipclasses doGetHitSectionPos: bearing $relativeBearing armor $result.");
+$a = $result['armour'];
+$b = $result['loc'];		
+throw new Exception("DEBUG shipclasses doGetHitSectionPos 702: bearing $relativeBearing armor $a location $b.");
             return $result;
         }
 	    
@@ -741,7 +742,7 @@ throw new Exception("DEBUG shipclasses doGetHitSectionPos: bearing $relativeBear
 	    
         public function isHitSectionAmbiguousPos($pos, $turn){ //for a shot from indicated unit - would there be choice of target section?
             $locs = $this->getLocations();
-		$relativeBearing =  $this->getBearingOnPos($pos);
+	    $relativeBearing =  $this->getBearingOnPos($pos);
             $valid = array();
             foreach ($locs as $loc){
                 if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
