@@ -1356,7 +1356,7 @@ class Weapon extends ShipSystem{
         //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
-	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
+	if( ($pos==null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
@@ -1376,7 +1376,7 @@ class Weapon extends ShipSystem{
         //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
-	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
+	if( ($pos==null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
@@ -1435,9 +1435,6 @@ class Weapon extends ShipSystem{
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
 		$armour = $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
 		$armour += $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos); //this can't be ignored
-$a = $launchPos["x"];
-$b = $launchPos['y'];		
-throw new Exception("DEBUG weapon doDamage 1438: $armour POS $a , $b !");
 		$modifiedDamage = $damage;
 		$destroyed = false;
 		
