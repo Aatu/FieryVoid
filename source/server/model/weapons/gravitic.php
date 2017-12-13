@@ -16,7 +16,8 @@
     } //endof class Gravitic
 
 
-/*Marcin Sawicki: attempt to remake GravPulsar according with different (more literal!) rules interpretation*/
+/*Marcin Sawicki: UNSUCCESSFUL attempt to remake GravPulsar according with different (more literal!) rules interpretation*/
+/*
     class GravitonPulsar extends Pulse
     {
         public $name = "gravitonPulsar";
@@ -59,28 +60,7 @@
 	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
 	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
 	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
-		/*no longer needed?
-            $this->defaultShots = $this->getMaxPulses($turn);
-            $this->normalload = $this->loadingtime;
-		*/
-
-            
-		/* not needed
-            switch($this->getBoostLevel($turn)){
-                case 0:
-                    $this->maxpulses = 3;
-		    $this->loadingtime = 1;
-                    break;
-                case 1:
-                    $this->maxpulses = 4;
-		    $this->loadingtime = 2;
-                    break;
-                case 2:
-                    $this->maxpulses = 5;
-		    $this->loadingtime = 3;
-                    break;
-            }            
-	    */
+		
         }
         
         public function getLoadingTime(){
@@ -176,10 +156,10 @@
         public function setMinDamage(){     $this->minDamage = 10 ;      }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
     } //endof class GravitonPulsar
-
+*/
     
 /*Marcin Sawicki: original GravPulsar*/
-    class GravitonPulsarOld extends Pulse
+    class GravitonPulsar extends Pulse
     {
         public $name = "gravitonPulsar";
         public $displayName = "Graviton Pulsar";
@@ -332,7 +312,8 @@
     } //endof class GravitonPulsar
 
 
-/*Marcin Sawicki: remake using more literal rules interpretation*/
+/*Marcin Sawicki: UNSUCCESSFUL remake using more literal rules interpretation*/
+/*
     class GraviticBolt extends Gravitic
     {
         public $name = "graviticBolt";
@@ -440,11 +421,11 @@
         public function setMinDamage(){  $this->minDamage = $this->curDamage ;      }
         public function setMaxDamage(){  $this->maxDamage = $this->curDamage ;      }
     } //endof GraviticBolt
-
+*/
 
     
 /*Marcin Sawicki: original Gravitic Bolt*/
-class GraviticBoltOld extends Gravitic
+class GraviticBolt extends Gravitic
     {
         public $name = "graviticBolt";
         public $displayName = "Gravitic Bolt";
