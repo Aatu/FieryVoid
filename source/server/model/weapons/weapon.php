@@ -1333,9 +1333,6 @@ class Weapon extends ShipSystem{
 		if($this->isLinked){ //further linked weapons will hit the exact same system!
 			$fireOrder->linkedHit = $system;
 		}
-$a = $launchPos["x"];
-$b = $launchPos['y'];		
-throw new Exception("DEBUG weapon damage 1327: POS $a , $b !");
         	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 	}
     }//endof function damage
