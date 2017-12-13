@@ -702,6 +702,8 @@
         public function doGetHitSectionPos($pos){ //pick section hit from given coordinates; return array with all data!  
             $relativeBearing =  $this->getBearingOnPos($pos);
             $result = $this->doGetHitSectionBearing($relativeBearing);
+		
+throw new Exception("DEBUG shipclasses doGetHitSectionPos: bearing $relativeBearing armor $result.");
             return $result;
         }
 	    
