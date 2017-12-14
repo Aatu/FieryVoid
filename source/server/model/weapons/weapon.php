@@ -284,7 +284,7 @@ class Weapon extends ShipSystem{
 		$shooter = $gamedata->getShipById($intercepted->shooterid);
 		$interceptedWeapon = $shooter->getSystemById($intercepted->weaponid);		
 		if($interceptedWeapon->hextarget) return 0;//can't intercept uninterceptable or hextarget weapon!
-		if($this->ballisticIntercept && $interceptedWeapon->ballistic) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
+		if($this->ballisticIntercept && (!($interceptedWeapon->ballistic))) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
 		
 		$interceptMod = $this->getInterceptRating($gamedata->turn); 
 		if(!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)){//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
