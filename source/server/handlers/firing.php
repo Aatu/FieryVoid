@@ -95,12 +95,12 @@ class Firing{
 			$expectedDamageMax = $firingWeapon->maxDamage;
 			$expectedDamageMin = $firingWeapon->minDamage;
 			$expectedDamage = (($expectedDamageMin+$expectedDamageMax)/2) - $armour; 
-			$expectedDamage = max(0,$expectedDamage);
+			$expectedDamage = max(0.5,$expectedDamage); //assume some damage is always possible!
 			//reduce damage for non-Standard modes...
 			switch($firingWeapon->damageType) {
 			    case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
 				$expectedDamage = $expectedDamage - $armour;
-				$expectedDamage = max(0,$expectedDamage);
+				$expectedDamage = max(0.5,$expectedDamage);
 				break;
 			    case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!
 				$expectedDamage = $expectedDamage * 1.1;
