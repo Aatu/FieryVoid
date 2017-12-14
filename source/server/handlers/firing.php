@@ -92,18 +92,18 @@ class Firing{
 				$structureSystem = $target->getStructureSystem($chosenLoc);
 				$armour = $structureSystem->getArmour($target, $shooter, $firingWeapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
 			}
-			$expectedDamageMax = $firingWeapon->maxDamage-$armour;
-			$expectedDamageMin = $firingWeapon->minDamage-$armour;
-			$expectedDamageMax = max(0,$expectedDamageMax);
-			$expectedDamageMin = max(0,$expectedDamageMin);
-			$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/2; 
+			$expectedDamageMax = $firingWeapon->maxDamage;
+			$expectedDamageMin = $firingWeapon->minDamage;
+			$expectedDamage = (($expectedDamageMin+$expectedDamageMax)/2) - $armour; 
+			$expectedDamage = max(0,$expectedDamage);
 			//reduce damage for non-Standard modes...
 			switch($firingWeapon->damageType) {
-			    case 'Raking': //Raking damage gets reduced multiple times
-				$expectedDamage = $expectedDamage * 0.9;
+			    case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
+				$expectedDamage = $expectedDamage - $armour;
+				$expectedDamage = max(0,$expectedDamage);
 				break;
-			    case 'Piercing': //Piercing does little damage to actual outer section...
-				$expectedDamage = $expectedDamage * 0.4;
+			    case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!
+				$expectedDamage = $expectedDamage * 1.1;
 				break;
 			    case 'Pulse': //multiple hits - assume half of max pulses hit!
 				$expectedDamage = 0.5 * $expectedDamage * max(2,$firingWeapon->maxpulses);
@@ -115,17 +115,13 @@ class Firing{
 			//if weapon does no damage by itself, assume it has other, very relvant effect - comparable to 10 damage!
 			if ($firingWeapon->maxDamage == 0 ) $expectedDamage = 10;
 			$expectedDamage = max(0.1,$expectedDamage);//estimate _some_ damage always...
-			//multiply by Shots or Maxpulses...
-			if ($firingWeapon->damageType == 'Pulse'){
-				$expectedDamage = $expectedDamage *max(1,$firingWeapon->maxpulses);
-			}else{
-				$expectedDamage = $expectedDamage *max(1,$firingWeapon->shots);
-			}			
+			//multiply by Shots...
+			$expectedDamage = $expectedDamage * max(1,$firingWeapon->shots);
 			
 			//how much is actually reduced?
 			$hitChanceBefore = $firingOrder->needed - $firingOrder->totalIntercept;
 			$hitChanceAfter = $hitChanceBefore - $currInterceptionMod;
-			$hitChanceAfter = max(0,$hitChanceAfter);//negative numbers are irrelevant
+			$hitChanceAfter = max(0,$hitChanceAfter);//negative numbers are irrelevant, effectively You can interept to 0
 			$modifier = min(100,$hitChanceBefore) - $hitChanceAfter;
 			if ($modifier <= 0){ //after interception hit chance is still over 100%... let's count as something, but much less - say, multiply by 0.1!
 				$modifier = 0.1 * ($hitChanceBefore - $hitChanceAfter);
