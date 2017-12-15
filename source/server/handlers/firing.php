@@ -99,8 +99,10 @@ class Firing{
 			//reduce damage for non-Standard modes...
 			switch($firingWeapon->damageType) {
 			    case 'Raking': //Raking damage gets reduced multiple times, account for that a bit! - another armour down!
-				$expectedDamage = $expectedDamage - $armour;
-				$expectedDamage = max(0.5,$expectedDamage);
+				if ($expectedDamage > 10){ ///simplified, assuming Raking will be in 10-strong rakes
+					$expectedDamage = $expectedDamage - $armour; //from second rake - let's simplify that two full weights of armor will be deduced from damage
+					$expectedDamage = max(10,$expectedDamage);
+				}
 				break;
 			    case 'Piercing': //Piercing does little damage to actual outer section... but it does PRIMARY damage! very dangerous!
 				$expectedDamage = $expectedDamage * 1.1;
