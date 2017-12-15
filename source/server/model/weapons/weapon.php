@@ -229,37 +229,8 @@ class Weapon extends ShipSystem{
 	    
 	//make sure data from table is transferred to current variables
 	$this->changeFiringMode($this->firingMode);
-		
-		/*original code
-            if ($crit instanceof ReducedRange){
-
-                if ($this->rangePenalty != 0){
-                    if ($this->rangePenalty >= 1){
-                        $this->rangePenalty += 1;
-                    }else{
-                        $this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
-                    }
-
-                }
-
-                if ($this->range != 0){
-                    $this->range = round($this->range *0.75);
-                }
-
-            }
-
-            if ($crit instanceof ReducedDamage){
-                $min = $this->minDamage * 0.2;
-                $max = $this->maxDamage * 0.2;
-                $avg = round(($min+$max)/2);
-                $this->dp = $avg;
-            }
-        }
-        $this->setMinDamage();
-        $this->setMaxDamage();
-*/	
-
-    }
+    } //endof function effectCriticals
+	
 
     public function getNormalLoad(){
         if ($this->normalload == 0){
