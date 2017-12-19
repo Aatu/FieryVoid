@@ -258,6 +258,7 @@
             $this->tohitPenalty = $this->getOutput();
             $this->damagePenalty = 0;
             $this->intercept = $this->getInterceptRating($turn);
+            $this->output = $this->getOutput();
         }
         
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
