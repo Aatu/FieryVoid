@@ -314,7 +314,7 @@
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-    }
+    }//endof class ParticleImpeder
 
 
 
