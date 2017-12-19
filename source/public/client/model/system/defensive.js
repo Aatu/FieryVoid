@@ -132,3 +132,23 @@ Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, 
     Absorbtionshield.prototype.getMaxBoost = function(){
         return this.maxBoostLevel;
     }
+    
+    
+    
+var Particleimpeder = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    this.defensiveType = "Interceptor";
+}
+Particleimpeder.prototype = Object.create( ShipSystem.prototype );
+Particleimpeder.prototype.constructor = Particleimpeder;
+Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+    {
+        return shipManager.systems.getOutput(target, this);
+    }
+    Particleimpeder.prototype.hasMaxBoost = function(){
+        return true;
+    }
+    Particleimpeder.prototype.getMaxBoost = function(){
+        return this.maxBoostLevel;
+    }
