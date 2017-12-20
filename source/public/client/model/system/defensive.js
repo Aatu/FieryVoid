@@ -177,6 +177,7 @@ Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, p
 
         this.intercept = this.getInterceptRating();
         this.data.Intercept = this.getInterceptRating()*(-5);
+        this.data.Boostlevel = shipManager.power.getBoost(this);
 
         return this;
     }
