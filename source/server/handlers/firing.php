@@ -120,6 +120,11 @@ class Firing{
 			//multiply by Shots...
 			$expectedDamage = $expectedDamage * max(1,$firingWeapon->shots);
 			
+			//called shots are more important...
+			if ($firingOrder->calledid != -1){
+				$expectedDamage = $expectedDamage * 1.1;
+			}
+			
 			//how much is actually reduced?
 			$hitChanceBefore = $firingOrder->needed - $firingOrder->totalIntercept;
 			$hitChanceAfter = $hitChanceBefore - $currInterceptionMod;
