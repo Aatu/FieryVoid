@@ -198,6 +198,7 @@
     class ParticleImpeder extends Weapon implements DefensiveSystem{
         /*Abbai defensive system*/
         /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
+/*
         public $name = "ParticleImpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
@@ -305,6 +306,7 @@
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+*/
     }//endof class ParticleImpeder
 
 
