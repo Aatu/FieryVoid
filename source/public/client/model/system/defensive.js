@@ -158,3 +158,29 @@ Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, p
     Particleimpeder.prototype.getMaxBoost = function(){
         return this.maxBoostLevel;
     }
+    Particleimpeder.prototype.initBoostableInfo = function(){
+        // Needed because it can chance during initial phase
+        // because of adding extra power.   
+        if(window.weaponManager.isLoaded(this)){
+/*            
+            this.loadingtime = 1 + shipManager.power.getBoost(this);
+            this.turnsloaded = 1 + shipManager.power.getBoost(this);
+            this.normalload =  1 + shipManager.power.getBoost(this);
+            */
+        }
+        else{
+            var count = shipManager.power.getBoost(this);
+            for(var i = 0; i < count; i++){
+                shipManager.power.unsetBoost(null, this);
+            }
+        }
+
+        this.intercept = this.getInterceptRating();
+        this.data.Intercept = this.getInterceptRating()*(-5);
+
+        return this;
+    }
+    Particleimpeder.prototype.getInterceptRating = function()
+    {
+        return (3 + shipManager.power.getBoost(this));
+    }
