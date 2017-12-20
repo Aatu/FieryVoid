@@ -79,22 +79,7 @@
         
         public $output = 4;
         public $intercept = 4;
-        
-        /*already declared in MkI
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
-                return 0;
-
-            $output = $this->output;
-            $output -= $this->outputMod;
-            return $output;
-        }
-
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-            return 0;
-        }
-        */
-        
+                
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["DEFENSIVE BONUS:"] = "-20 to hit on arc";
@@ -198,7 +183,7 @@
     class ParticleImpeder extends Weapon implements DefensiveSystem{
         /*Abbai defensive system*/
         /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
-/*
+
         public $name = "ParticleImpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
@@ -222,7 +207,7 @@
         
         public $output = 0;
         
-        
+
         public $boostable = true; //can be boosted for additional effect
 	    public $boostEfficiency = 3; //cost to boost by 1
         public $maxBoostLevel = 4; //maximum boost allowed
@@ -236,7 +221,7 @@
      	public $possibleCriticals = array( //different than usual B5Wars weapon
             16=>"ForcedOfflineOneTurn"
 	);
-	    
+/*	    
 	    
         
         public function onConstructed($ship, $turn, $phase){
