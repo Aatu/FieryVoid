@@ -22,7 +22,7 @@ class technicalTargetDrone extends BaseShip{
 		
 		
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
-		//$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 180, 360));
+		$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 180, 360));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
 		$this->addFrontSystem(new Scanner(6, 23, 4, 6));
