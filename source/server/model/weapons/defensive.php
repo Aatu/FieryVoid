@@ -197,19 +197,20 @@
 
     class ParticleImpeder extends Weapon implements DefensiveSystem{
         /*Abbai defensive system*/
-        /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/
-
-        public $trailColor = array(30, 170, 255);
-        
+        /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
         public $name = "ParticleImpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
         public $iconPath = "particleImpeder.png";
+	    
+        public $trailColor = array(30, 170, 255);
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.15;
+	public $animationWidth = 1;
+	    
         public $priority = 1; //will never fire except defensively, purely a defensive system
 
-        public $animationWidth = 1;
+
             
         public $intercept = 3;
              
