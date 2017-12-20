@@ -221,9 +221,25 @@
      	public $possibleCriticals = array( //different than usual B5Wars weapon
             16=>"ForcedOfflineOneTurn"
 	);
-/*	    
+
 	    
-        
+	    
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn) continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }
+	            
+        public function getInterceptRating($turn){
+            $ir = 3 + $this->getBoostLevel($turn);
+            return $ir;
+        }
+	    
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
             $this->tohitPenalty = $this->getOutput();
@@ -231,7 +247,7 @@
             $this->intercept = $this->getInterceptRating($turn);
             $this->output = $this->getOutput();
         }
-*/
+
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if ($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
             
@@ -271,22 +287,8 @@
         private function checkIsFighterUnderShield($target, $shooter){ //no flying under Impeder
             return false;
         }
-        
-        public function getInterceptRating($turn){
-            $ir = 3 + $this->getBoostLevel($turn);
-            return $ir;
-        }
-        
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn) continue;
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
-            return $boostLevel;
-        }
+
+       
         
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
