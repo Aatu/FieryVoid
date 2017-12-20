@@ -279,13 +279,13 @@
         }
         
         
-
+/*     
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ($maxhealth == 0) $maxhealth = 6;
 	    if ($powerReq == 0) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $this->output);
         }
-/*        
+   
         private function checkIsFighterUnderShield($target, $shooter){ //no flying under Impeder
             return false;
         }
