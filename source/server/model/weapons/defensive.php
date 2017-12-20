@@ -206,6 +206,7 @@
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
         
         public $output = 0;
+	
         
 
         public $boostable = true; //can be boosted for additional effect
@@ -271,6 +272,7 @@
 	    
   
         public function setSystemDataWindow($turn){
+	    $this->data["Boostlevel"] = $this->getBoostLevel($turn);
             $this->data["Special"] = "Can intercept uninterceptable weapons.<br>";
             $this->data["Special"] .= "Can be boosted for increased intercept rating (up to +" . $this->maxBoostLevel . ").<br>";
             $this->data["Special"] .= "Additionally, boost itself reduces fighter hit chance.";
