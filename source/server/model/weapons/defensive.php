@@ -180,11 +180,11 @@
 
 
 
-    class ParticleImpeder extends Weapon implements DefensiveSystem{
+    class Particleimpeder extends Weapon implements DefensiveSystem{
         /*Abbai defensive system*/
         /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
 
-        public $name = "ParticleImpeder";
+        public $name = "Particleimpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
         public $iconPath = "particleImpeder.png";
