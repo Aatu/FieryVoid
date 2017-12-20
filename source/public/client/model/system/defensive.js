@@ -135,7 +135,6 @@ Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, 
     
     
     
-    /*
 var Particleimpeder = function(json, ship)
 {
     Weapon.call( this, json, ship);
@@ -143,14 +142,6 @@ var Particleimpeder = function(json, ship)
     this.defensiveType = "Shield";
 }
 Particleimpeder.prototype = Object.create( Weapon.prototype );
-*/
-var Particleimpeder = function(json, ship)
-{
-    ShipSystem.call( this, json, ship);
-    //this.defensiveType = "Interceptor";
-    this.defensiveType = "Shield";
-}
-Particleimpeder.prototype = Object.create( ShipSystem.prototype );
 Particleimpeder.prototype.constructor = Particleimpeder;
 Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
@@ -170,11 +161,6 @@ Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, p
         // Needed because it can chance during initial phase
         // because of adding extra power.   
         if(window.weaponManager.isLoaded(this)){
-/*            
-            this.loadingtime = 1 + shipManager.power.getBoost(this);
-            this.turnsloaded = 1 + shipManager.power.getBoost(this);
-            this.normalload =  1 + shipManager.power.getBoost(this);
-            */
         }
         else{
             var count = shipManager.power.getBoost(this);
