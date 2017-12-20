@@ -10,8 +10,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->imagePath = "img/ships/optine.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
-		$this->forwardDefense = 30;
-		$this->sideDefense = 30;
+		$this->forwardDefense = 20;
+		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
 		$this->turncost = 0.5;
 		$this->turndelaycost = 0.5;
