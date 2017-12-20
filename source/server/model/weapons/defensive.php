@@ -285,7 +285,7 @@
             return false;
         }
         
-        private function getInterceptRating($turn){
+        public function getInterceptRating($turn){
             $ir = 3 + $this->getBoostLevel($turn);
             return $ir;
         }
