@@ -25,10 +25,10 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new Scanner(6, 23, 4, 6));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
-				$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
-				$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
-		$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 0, 180));
-		$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 180, 360));
+		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
+		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
+		//$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 0, 180));
+		//$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 180, 360));
 		
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
