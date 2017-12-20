@@ -109,21 +109,7 @@
         
         public $output = 2;
         public $intercept = 2;
-        
-        /*already declared in MkI
-        public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
-            if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn))
-                return 0;
-
-            $output = $this->output;
-            $output -= $this->outputMod;
-            return $output;
-        }
-
-        public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
-            return 0;
-        }*/
-        
+                
         public function setSystemDataWindow($turn){
             $this->data["DEFENSIVE BONUS:"] = "-10 to hit on arc";
             parent::setSystemDataWindow($turn);
@@ -238,8 +224,6 @@
         public $boostable = true; //can be boosted for additional effect
 	    public $boostEfficiency = 3; //cost to boost by 1
         public $maxBoostLevel = 4; //maximum boost allowed
-        
-        
         public $canInterceptUninterceptable = true; //can intercept weapons that are normally uninterceptable
         
         public $tohitPenalty = 0;
@@ -247,7 +231,13 @@
 
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
-    
+     	public $possibleCriticals = array( //different than usual B5Wars weapon
+            16=>"ForcedOfflineOneTurn"
+	);
+	    
+	    
+	    
+	    
         public function getDefensiveType()
         {
             return "Interceptor";
