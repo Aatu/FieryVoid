@@ -20,7 +20,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->pivotcost = 4;
 
 		
-		$this->addPrimarySystem(new Reactor(6, 35, 20, 0));
+		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
 		$this->addFrontSystem(new Scanner(6, 23, 4, 6));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
