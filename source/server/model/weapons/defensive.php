@@ -183,7 +183,6 @@
     class Particleimpeder extends Weapon implements DefensiveSystem{
         /*Abbai defensive system*/
         /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
-
         public $name = "Particleimpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
@@ -195,8 +194,6 @@
 	public $animationWidth = 1;
 	    
         public $priority = 1; //will never fire except defensively, purely a defensive system
-
-
             
         public $intercept = 3;
              
@@ -208,7 +205,6 @@
         public $output = 0;
 	
         
-
         public $boostable = true; //can be boosted for additional effect
 	    public $boostEfficiency = 3; //cost to boost by 1
         public $maxBoostLevel = 4; //maximum boost allowed
@@ -216,13 +212,11 @@
         
         public $tohitPenalty = 0;
         public $damagePenalty = 0;
-
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
      	public $possibleCriticals = array( //different than usual B5Wars weapon
             16=>"ForcedOfflineOneTurn"
 	);
-
 	    
 	    
         private function getBoostLevel($turn){
@@ -248,17 +242,14 @@
             $this->intercept = $this->getInterceptRating($turn);
             $this->output = $this->getOutput();
         }
-
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if ($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
             
             if (!($shooter instanceof FighterFlight)) return 0;//affects fighters only!
-
             $output = $this->getBoostLevel($turn);
             $output -= $this->outputMod;
             return $output;
         }
-
         public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
             //no effect on actual damage
             return 0;
@@ -275,7 +266,6 @@
             $this->data["Special"] = "Can intercept uninterceptable weapons.<br>";
             $this->data["Special"] .= "Can be boosted for increased intercept rating (up to +" . $this->maxBoostLevel . ").<br>";
             $this->data["Special"] .= "Additionally, boost itself reduces fighter hit chance.";
-
             parent::setSystemDataWindow($turn);
             
             $this->intercept = $this->getInterceptRating($turn);
@@ -295,7 +285,6 @@
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-
     }//endof class ParticleImpeder
 
 
