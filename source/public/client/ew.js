@@ -1,6 +1,4 @@
 window.ew = {
-
-
     getScannerOutput: function(ship){
         var ret = 0;
         
@@ -19,18 +17,19 @@ window.ew = {
             }  
         }
 
-        if (ship.base){
+    
+        /*if (ship.base)*/{
             var primary = shipManager.getPrimaryCnC(ship);
             if (primary && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
                 ret -= 2;
             }
-        }
+        }/* always go for primary C&C...	
         else if (! ship.flight){
             var cnc = shipManager.systems.getSystemByName(ship, "cnC");
             if (cnc && shipManager.criticals.hasCritical(cnc, "RestrictedEW")){
                 ret -= 2;
             }
-        }
+        }*/
 
         return (ret > 0) ? ret : 0;
     },
@@ -155,15 +154,16 @@ window.ew = {
     },
 	
 	convertUnusedToDEW: function(ship){
+		/*
 		var listed = ew.getListedDEW(ship);
-		
-		if (listed > 0)
-			return;
-			
+		if (listed > 0) return;
+		*/
 		var dew = (ew.getScannerOutput(ship) - ew.getUsedEW(ship));
+		if(dew < 0){ //DEW should be negative - reset EW in this case! (most probably Sensors disabled after setting EW)
+			this.removeEW(ship);
+			dew = (ew.getScannerOutput(ship) - ew.getUsedEW(ship));
+		}
 		ship.EW.push({shipid:ship.id, type:"DEW", amount:dew, targetid:-1, turn:gamedata.turn});
-		
-		
 	},
 	
 	getListedDEW: function(ship){

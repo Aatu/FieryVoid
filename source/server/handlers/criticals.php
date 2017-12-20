@@ -20,11 +20,11 @@ class Criticals{
              	   }
                 }
 		*/
-                if ($ship instanceof StarBase && $system instanceof SubReactor){
+                if (/*$ship instanceof StarBase && */ $system instanceof SubReactor){ //destroying any Subreactor, not just on base!
                 	if ($system->wasDestroyedThisTurn($gamedata->turn)){
-	                	if ($system->location != 0){
+	                	//if ($system->location != 0){ ///on any location, PRIMARY too...
 	                		$ship->destroySection($system, $gamedata);
-	                	}		
+	                	//}		
                 	}
                 }
 
@@ -32,24 +32,22 @@ class Criticals{
 					continue;
 				}
 				
-				if ($system instanceof Thruster){
-				
+				if ($system instanceof Thruster){				
 					$chan = Movement::getAmountChanneled($system, $ship, $gamedata->turn);
 					$overthrust = $chan - ($system->output + $system->outputMod );
-					
 					if ($overthrust > 0){
 						$crits = $system->testCritical($ship, $gamedata, $crits, $overthrust);
 					}
 				}
 					
-		    /*not needed
+		    		/*not needed
 				$stru = $ship->getStructureSystem($system->location);
 				if ($stru && $stru->isDestroyed())
 					continue;
 				*/	
 				
 				if ($system->isDamagedOnTurn($gamedata->turn)){       
-							$crits = $system->testCritical($ship, $gamedata, $crits);
+					$crits = $system->testCritical($ship, $gamedata, $crits);
 				}
             }
         }

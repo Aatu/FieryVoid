@@ -101,10 +101,10 @@
 	public function testCritical($ship, $gamedata, $crits, $add = 0){
 		$d = Dice::d(10);
 		
-		$bonusCrit = 0;	//one-time penalty to dropout roll
+		$bonusCrit = $this->critRollMod + $ship->critRollMod;	//one-time penalty to dropout roll
 		foreach($crits as $key=>$value) {
 		  if($value instanceof NastierCrit){
-			$bonusCrit+= 1;//$value->$outputMod;
+			$bonusCrit+= 1;
 			  //unset($crits[$key]); //no need, it'll go out on its own
 		  }
 		}

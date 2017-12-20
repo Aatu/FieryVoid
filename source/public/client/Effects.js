@@ -282,7 +282,12 @@ window.effects = {
             }/*else if (obj1.firingMode !== obj2.firingMode){
                 return obj1.firingMode-obj2.firingMode; 
             }*/
-            else return obj1.shooterid - obj2.shooterid;
+            else {
+                var $val = obj1.shooterid - obj2.shooterid;
+                if ($val == 0) $val = obj1.id - obj2.id;
+                return $val
+            } 
+            //else return obj1.shooterid - obj2.shooterid;
         });
 
 /*  

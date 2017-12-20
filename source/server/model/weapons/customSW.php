@@ -82,14 +82,6 @@ class SWRayShield extends Shield implements DefensiveSystem{
 
 class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launcher, which needs separate ammo
 {
-	/*
-    public $name = "SWFtrProtonTorpedo";
-    public $missileClass = "Torpedo";
-    public $displayName = "Fighter Proton Torpedo";
-    public $iconPath = "lightIonTorpedo.png";
-    public $firingModes = array( 1 => "FtrTorpedo" );
-    public $fireControl = array(-4, -1, 0); // fighters, <mediums, <capitals 
-*/
     public $loadingtime = 1;
     public $rangeMod = 0;
     public $firingMode = 1;
@@ -161,17 +153,6 @@ class SWFtrBallisticLauncher extends FighterMissileRack //this is generic launch
 
 class SWFtrMissile extends MissileFB //generic class; this is AMMO for SWFtrProtonTorpedoLauncher
 {
-	/*
-    public $name = "SWFtrProtonTorpedo";
-    public $missileClass = "FtrTorpedo";
-    public $displayName = "Fighter Proton Torpedo";
-    public $cost = 8;
-    public $damage = 11;
-    public $amount = 0;
-    public $range = 8;
-    public $distanceRange = 16;
-    public $hitChanceMod = 0;
-    */
     public $priority = 4;
 	public $damageType = 'Pulse'; 
     	public $weaponClass = "Ballistic"; 
@@ -437,10 +418,13 @@ class SWIon extends SWDirectWeapon{
 
       while($dmg>0){
 	      $dmg--;
+	      $system->critRollMod++;
+	      /* October 2017: instead of critical effect, let's just increase crit penalty! That will not be saved, but will work on any crits rolled this turn
 	      $crit = new NastierCrit(-1, $ship->id, $system->id, 'NastierCrit', $gamedata->turn); //for ship system and fighter alike
 		$crit->updated = true;
 		$crit->inEffect = true;
 	      $system->criticals[] =  $crit;
+	      */
       }
     }
 

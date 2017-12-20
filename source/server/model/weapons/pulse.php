@@ -18,18 +18,8 @@ class Pulse extends Weapon{
         }
 
         public function setSystemDataWindow($turn){
-		/* 
-            $this->data["Weapon type"] = "Particle";
-            $this->data["Damage type"] = "Standard";
-            $this->data["Firing Mode"] = "Pulse";
-            $this->data["Grouping range"] = $this->grouping + "%";
-            $this->data["Max pulses"] = $this->maxpulses;
-            $this->data["Pulses"] = 'D 5';
-	    */
-		 $this->data["Special"] = 'Pulse mode: D'.$this->useDie.' +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
-
-            $this->defaultShots = $this->maxpulses;
-            
+	    $this->data["Special"] = 'Pulse mode: D'.$this->useDie.' +1/'. $this->grouping."%, max. ".$this->maxpulses." pulses";
+            $this->defaultShots = $this->maxpulses;            
             parent::setSystemDataWindow($turn);
         }
         
@@ -55,71 +45,6 @@ class Pulse extends Weapon{
         public function setMaxDamage(){      $this->maxDamage = $this->getDamage(null);      }
 
 	
-/*no longer needed, code left just in case	
-        public function fire($gamedata, $fireOrder){
-
-            $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            $this->firingMode = $fireOrder->firingMode;
-
-            $pos = $shooter->getCoPos();
-
-            $this->calculateHit($gamedata, $fireOrder);
-            $intercept = $this->getIntercept($gamedata, $fireOrder);
-            $pulses = $this->getPulses($gamedata->turn); 
-
-            $fireOrder->notes .= " pulses: $pulses";
-            $fireOrder->shots = $this->maxpulses;
-            $needed = $fireOrder->needed;
-            $rolled = Dice::d(100);
-            if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
-                //$fireOrder->pubnotes .= "Shot intercepted. ";
-                $fireOrder->intercepted += $pulses;
-            }
-
-            if ($rolled <= $needed){
-                $extra = $this->getExtraPulses($needed, $rolled);
-                $fireOrder->notes .= " extra pulses: $extra";
-                $pulses += $extra;
-                if ($pulses > $this->maxpulses)
-                    $pulses = $this->maxpulses;
-
-                $fireOrder->shotshit = $pulses;
-                for ($i=0;$i<$pulses;$i++){
-                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-                }
-            }
-
-            $fireOrder->rolled = 1;//Marks that fire order has been handled
-        }
-    */
-
-        
-        /*
-        public function damage($target, $shooter, $fireOrder){
-
-            $extra = ($fireOrder->needed - $fireOrder->rolled) % ($this->grouping*5);
-            $pulses = $this->getPulses() + $extra;
-            if ($pulses > $this->maxpulses)
-                $pulses = $this->maxpulses;
-
-            for ($i=0;$i<$pulses;$i++){
-
-                if ($target->isDestroyed())
-                    return;
-
-                $system = $target->getHitSystem($shooter, $fireOrder->turn);
-
-                if ($system == null)
-                    return;
-
-                $this->doDamage($target, $shooter, $system, $this->getFinalDamage($shooter, $target), $fireOrder);
-
-            }
-
-
-        }
-        */
 } //endof class Pulse
 
 
@@ -156,11 +81,6 @@ class EnergyPulsar extends Pulse{
             //$this->data["Pulses"] = 'D 2';
         }
 
-        /*
-        protected function getPulses($turn)
-        {
-            return Dice::d(2);
-        }*/
         
         public function getDamage($fireOrder){        return 10;   }
         //public function setMinDamage(){     $this->minDamage = 10 ;      }
@@ -228,12 +148,8 @@ class QuadPulsar extends Pulse{
             parent::setSystemDataWindow($turn);
             //$this->data["Pulses"] = 'D 3';            
         }
-/*
-        protected function getPulses($turn)
-        {
-            return Dice::d(3);
-        }
-*/
+
+	
         public function getDamage($fireOrder){        return 14;   }
     }
     
@@ -262,10 +178,7 @@ class QuadPulsar extends Pulse{
         }
         
         public function getDamage($fireOrder){        return 8;   }
-/*	    
-        public function setMinDamage(){     $this->minDamage = 8 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 8 - $this->dp;      }
-*/
+
     }
     
     class MediumPulse extends Pulse{
@@ -294,12 +207,9 @@ class QuadPulsar extends Pulse{
         }
         
         public function getDamage($fireOrder){        return 10;   }
-/*	    
-        public function setMinDamage(){     $this->minDamage = 10 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 - $this->dp;      }
-*/
     }
     
+
     class HeavyPulse extends Pulse{
 
         public $name = "heavyPulse";
@@ -322,10 +232,6 @@ class QuadPulsar extends Pulse{
         }
         
         public function getDamage($fireOrder){        return 15;   }
-/*	    
-        public function setMinDamage(){     $this->minDamage = 15 - $this->dp;      }
-        public function setMaxDamage(){     $this->maxDamage = 15 - $this->dp;      }
-*/
     }
     
     
@@ -347,19 +253,14 @@ class QuadPulsar extends Pulse{
         
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
-    public $damageType = "Standard";
-    public $weaponClass = "Particle"; 
+        public $damageType = "Standard";
+        public $weaponClass = "Particle"; 
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
-           
         }
         
         public function setSystemDataWindow($turn){
-/*
-            $this->data["Weapon type"] = "Pulse";
-            $this->data["Damage type"] = "Standard";
-  */          
             parent::setSystemDataWindow($turn);
         }
 
@@ -416,17 +317,7 @@ class QuadPulsar extends Pulse{
 	}
         
         public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-		/*
-            if ($this->turnsloaded == 1){
-                $this->data["Pulses"] = 'D 3';
-                $this->data["Grouping range"] = 'NONE';
-            }
-            else {
-                $this->data["Pulses"] = 'D 5';
-            }
-            $this->data["Weapon type"] = "Molecular";
-            */
+                parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'Pulse mode fully armed: D 5 +1/15 %, max. 7 pulses';
 		$this->data["Special"] .= 'Pulse mode 1 turn: D 3 pulses';
         }
@@ -442,7 +333,6 @@ class QuadPulsar extends Pulse{
             {
                 return Dice::d(5);
             }
-            
         } 
 	    
         protected function getExtraPulses($needed, $rolled)
@@ -458,25 +348,11 @@ class QuadPulsar extends Pulse{
         }
 
         public function getDamage($fireOrder){ return 10; }
- 
-/*
-        public function setMinDamage()
-        {
-            $this->minDamage = 10 - $this->dp;
-        }
-
-        public function setMaxDamage()
-        {
-            $this->maxDamage = 10 - $this->dp;
-        }
-	*/
-        
     }
 
 
 
     class PairedLightBoltCannon extends LinkedWeapon{
-
         public $name = "pairedLightBoltCannon";
         public $displayName = "Light Bolt Cannon";
         public $animation = "trail";
@@ -509,10 +385,6 @@ class QuadPulsar extends Pulse{
         }
 
         public function setSystemDataWindow($turn){
-
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-
             parent::setSystemDataWindow($turn);
         }
 
@@ -560,15 +432,8 @@ class QuadPulsar extends Pulse{
         }
         
 	    
-        public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Particle";
-            //$this->data["Damage type"] = "Standard";
-            
-            parent::setSystemDataWindow($turn);
-            //$this->data["Pulses"] = '3';
-            //unset($this->data["Grouping range"]);
-            //unset($this->data["Max pulses"]);
-		
+        public function setSystemDataWindow($turn){            
+            parent::setSystemDataWindow($turn);		
 		$this->data["Special"] = "Called shot penalty halved";
         }
         
@@ -584,46 +449,6 @@ class QuadPulsar extends Pulse{
         {
             $this->maxDamage = 10 /*- $this->dp*/;
         }
-        
-/* no longer needed
-        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location = null){
-            if ($target->isDestroyed())
-                return;
-            $calledsystem = null;
-            
-            if ($fireOrder->calledid != -1){
-                $calledsystem = $target->getSystemById($fireOrder->calledid);
-            }
-            $system = $target->getHitSystem(null, $shooter, $fireOrder, $this, $location);
-            if ($system == null)
-                return;
-    
-            if ($fireOrder->calledid == -1){
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-                return;
-            }
-            
-            if($system->location == $calledsystem->location && $system === $calledsystem){
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-            }else{
-                // we haven't yet overkilled into another location:
-                // check if there are more of the same type of systems in the same location
-                // if so, target those first. To strip a ship of systems is the main benefit of
-                // the point pulsar. (Implementation differs from official Bab5Wars rules. But
-                // this implementation needs less clicking and user interaction.)
-                foreach($target->systems as $targetSystem){
-                    if(!$targetSystem->isDestroyed()
-                            && $targetSystem->location == $calledsystem->location
-                            && $targetSystem->name == $calledsystem->name){
-                        $fireOrder->calledid = $targetSystem->id;
-                        $this->damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage, $location);
-                        return;
-                    }
-                }
-                $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata);
-            }
-        }
-	*/
     }
 
 

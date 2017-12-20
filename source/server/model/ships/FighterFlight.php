@@ -85,6 +85,12 @@
             return null;
         }
 	    
+	   
+	    /*returns a sample fighter, if one needs to review example of what's in flight*/
+	    public function getSampleFighter(){
+		    return $this->systems[1];
+	    }
+	    
 	    
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
@@ -165,6 +171,7 @@
             $this->autoid++;
             $fighterSys = array();
             foreach ($fighter->systems as $system){
+		    $system->setUnit($this);
 			$system->id  = $this->autoid;
 			$this->autoid++;
 			$fighterSys[$system->id] = $system;
@@ -228,9 +235,9 @@
 		$health = $exampleFtr->maxhealth;
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[0]);
-            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
-            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
-            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
+            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
 
             return $locs;
         }
@@ -291,7 +298,7 @@
 	    
 	    
         
-        public function getAllFireOrders()
+        public function getAllFireOrders($turn = -1)
         {
             $orders = array();
             
@@ -299,12 +306,19 @@
             {
                 foreach ($fighter->systems as $system)
                 {
-                    $orders = array_merge($orders, $system->fireOrders);
+               		$orders = array_merge($orders, $system->getFireOrders($turn));
+                    //$orders = array_merge($orders, $system->fireOrders); //old version
                 }
             }
             
             return $orders;
         }
+	    		    
+	    
+	    /*always nothing to do for fighters*/
+	    	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+			return;	
+		}
              
     }
   

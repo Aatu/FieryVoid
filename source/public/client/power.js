@@ -253,7 +253,7 @@ shipManager.power = {
 	},
 	
 	getReactorPower: function(ship, system){
-
+		var fixedPower = false;
 		var output;
 
 		if (ship.base){
@@ -265,6 +265,7 @@ shipManager.power = {
 				var reactor = reactors[i];
 				if (! reactor.destroyed){
 					output += reactors[i].outputMod;
+					fixedPower = (fixedPower || reactors[i].fixedPower); //assume fixed power if ANY reactor gives fixed power
 
 					if (reactor.criticals.length > 0){
 						for( var j = 0; j < reactor.criticals.length; j++){
@@ -281,32 +282,25 @@ shipManager.power = {
 		else {			
 			var reactor = shipManager.systems.getSystemByName(ship, "reactor");
 				output = reactor.output + reactor.outputMod;
+				fixedPower = reactor.fixedPower;
 		}
 
 
 		for (var s in ship.systems){
 			var system = ship.systems[s];
-                        
-            if(system.parentId > 0){
-                // This is a subsystem of a dual/duo weapon. Ignore
-                continue;
-            }
+			if(system.parentId > 0){ // This is a subsystem of a dual/duo weapon. Ignore
+				continue;
+			}
                         
 			for (var i in system.power){
 				var power = system.power[i];
-				if (power.turn != gamedata.turn)
-					continue;
-
-				if (power.type == 1)
-					output += system.powerReq;
-					
+				if (power.turn != gamedata.turn) continue;
+				//types: 1:offline 2:boost, 3:overload
+				if ((power.type == 1) && (fixedPower!=true)) output += system.powerReq; //MagGrav = do not add power of disabled systems!					
 				if (power.type == 2){
 					output -= shipManager.power.countBoostPowerUsed(ship, system);
-				}
-				
-				if (power.type == 3){
-					output -= system.powerReq;
-				}
+				}				
+				if (power.type == 3) output -= system.powerReq;
 			}
 		}
 		

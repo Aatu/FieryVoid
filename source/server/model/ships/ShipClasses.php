@@ -9,7 +9,7 @@
         public $fighters = array();
         public $hitChart = array();
         public $notes = '';//notes to be displayed on fleet selection screen
-	    
+		    
         public $occurence = "common";
 	public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
         public $limited = 0;
@@ -30,8 +30,9 @@
         public $minesweeperbonus = 0;
         public $base = false;
         public $smallBase = false;
+	public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 	    
-	public $jinkinglimit = 0; //just in case there will be a ship actually able to jink
+	public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
         
         public $enabledSpecialAbilities = array();
         
@@ -45,6 +46,7 @@
         public $rolled = false;
         public $rolling = false;
         public $team;
+	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
         
         public $slotid;
 
@@ -465,28 +467,6 @@
 			$movement = $move;  
 		}
 		return $movement;
-		
-		
-	    /*original code - returns first move of indicated turn*/
-		/*
-            $movement = null;
-            if (!is_array($this->movement)){
-                return array("x"=>0, "y"=>0);
-            }
-            foreach ($this->movement as $move){
-                if ($move->type == "start")
-                    continue;
-                
-                if ($move->turn == $turn){
-                    if (!$movement)
-                        $movement = $move;
-                    
-                    break;
-                }
-                $movement = $move;
-            }
-            return $movement;
- 		*/
         }
 	    
 	    
@@ -734,6 +714,53 @@
         }
 	    
 	    
+        public function isHitSectionAmbiguous($shooter, $turn){ //for a shot from indicated unit - would there be choice of target section?
+            $locs = $this->getLocations();
+		$relativeBearing =  $this->getBearingOnUnit($shooter);
+            $valid = array();
+            foreach ($locs as $loc){
+                if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
+                    $valid[] = $loc;
+                }
+            }
+            $valid = $this->fillLocations($valid);
+	    //count non-destroyed locations...
+	    $numValidLocs = 0;
+	    foreach ($valid as $loc){
+		if($loc["remHealth"]>0) $numValidLocs++;
+	    }
+            //ambiguous: if there is more than 1 valid choice
+	    if($numValidLocs>1){
+		return true;    
+	    }else{
+		return false;    
+	    }
+        }
+	    
+        public function isHitSectionAmbiguousPos($pos, $turn){ //for a shot from indicated unit - would there be choice of target section?
+            $locs = $this->getLocations();
+	    $relativeBearing =  $this->getBearingOnPos($pos);
+            $valid = array();
+            foreach ($locs as $loc){
+                if(mathlib::isInArc($relativeBearing, $loc["min"], $loc["max"])){
+                    $valid[] = $loc;
+                }
+            }
+            $valid = $this->fillLocations($valid);
+	    //count non-destroyed locations...
+	    $numValidLocs = 0;
+	    foreach ($valid as $loc){
+		if($loc["remHealth"]>0) $numValidLocs++;
+	    }
+            //ambiguous: if there is more than 1 valid choice
+	    if($numValidLocs>1){
+		return true;    
+	    }else{
+		return false;    
+	    }
+        }
+	    
+	    
 	/*outer locations of unit and their arcs, used for GUI called shots*/
 	public function fillLocationsGUI(){    
 	    $call = ($this->shipSizeClass>1); //MCVs are one big PRIMARY
@@ -764,6 +791,12 @@
                 $structure = $this->getStructureSystem($locs[$key]["loc"]);
                 if ($structure){
                     $locs[$key]["remHealth"] = $structure->getRemainingHealth();
+		    if($locs[$key]["remHealth"]>0){ //else section is destroyed anyway!
+			    if(isset($expectedDamage[$locs[$key]["loc"]])){
+			    	$locs[$key]["remHealth"] -= round($expectedDamage[$locs[$key]["loc"]]);
+				$locs[$key]["remHealth"] = max(1,$locs[$key]["remHealth"]);
+			    }
+		    }
                     $locs[$key]["armour"] = $structure->armour;
                 }
                 else {
@@ -775,8 +808,8 @@
 
 
         public function pickLocationForHit($locs){   //return array! ONLY OUTER LOCATIONS!!! (unless PRIMARY can be hit directly and is on hit table)        
-		$pick = array("loc"=>0, "profile"=>40, "remHealth"=>0, "armour"=>0);
-		foreach ($locs as $loc){
+		$pick = array("loc"=>0, "profile"=>80, "remHealth"=>0, "armour"=>0);
+		foreach ($locs as $loc){	
 			//compare current best pick with current loop iteration, change if new pick is better
 			$toughnessPick = $pick["remHealth"]+round($pick["remHealth"]*$pick["armour"]*0.15);//toughness: remaining structure toughened by armor
 			$toughnessLoc = $loc["remHealth"]+round($loc["remHealth"]*$loc["armour"]*0.15);//every point of armor increases toughness by 15%
@@ -794,6 +827,7 @@
 				if($toughnessLoc>0)// profile shouldn't cause destroyed section to be chosen
 				  $toughnessLoc = $toughnessLoc + ($profileDiff*$profileImpact);
 			}
+			
 										   
 			if($toughnessLoc>$toughnessPick){ //if new toughness is better, it wins (already takes profile into account)
 				$pick = $loc;
@@ -813,8 +847,6 @@
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
 			$foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
-			//$toBeLogged = $this->name + ' MJS BALLISTIC wpn: ' + $weapon->displayName + '; location: ' $location + '; coord: ' + $fire->x + ' ' + $fire->y;
-			//debug::log("$toBeLogged"); 
 		}else{
 			$foundLocation = $this->getHitSection($shooter, $fireOrder->turn, $returnDestroyed);
 		}
@@ -853,9 +885,9 @@
 		if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
 			$posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
-			$foundProfile = $this->getHitSectionProfilePos($posLaunch, $fireOrder->turn);
+			$foundProfile = $this->getHitSectionProfilePos($posLaunch);
 		}else{
-			$foundProfile = $this->getHitSectionProfile($shooter, $fireOrder->turn);
+			$foundProfile = $this->getHitSectionProfile($shooter);
 		}
 		return $foundProfile;
         }
@@ -1109,43 +1141,6 @@
 		
 	} //end of function GetHitSystemByDice
 		
-		
-
-        /* no longer needed, keeping code just in case
-        public function getPiercingDamagePerLoc($damage){
-            return ceil($damage/3);
-        }
-	*/
-        
-	    /* no longer needed, keeping code just in case
-        public function getPiercingLocations($shooter, $pos, $turn, $weapon){
-		$location = $this->getHitSection($shooter, $turn, true); //return location even if destroyed
-            
-            $locs = array();
-            $finallocs = array();
-
-            if ($location == 1 || $location == 2){
-                $locs[] = 1;
-                $locs[] = 0;
-                $locs[] = 2;
-            }else if ($location == 3 || $location == 4){
-                $locs[] = 3;
-                $locs[] = 0;
-                $locs[] = 4;
-            }
-            
-            foreach ($locs as $loc){
-                $structure = $this->getStructureSystem($loc);
-                if ($structure != null && !$structure->isDestroyed()){
-                    $finallocs[] = $loc;
-                }
-            }
-            
-            return $finallocs;
-            
-        }
-	*/
-        
         
         public static function hasBetterIniative($a, $b){
             if ($a->iniative > $b->iniative)
@@ -1168,12 +1163,12 @@
             return false;
         }
         
-        public function getAllFireOrders()
-        {
+        public function getAllFireOrders($turn = -1)
+        {	
             $orders = array();
             
             foreach ($this->systems as $system){
-                $orders = array_merge($orders, $system->getFireOrders());
+                $orders = array_merge($orders, $system->getFireOrders($turn));
             }
             
             return $orders;
@@ -1181,18 +1176,50 @@
         
         protected function getUndamagedSameSystem($system, $location){
             foreach ($this->systems as $sys){
-                // check if there is another system of the same class
-                // on this location.
-                
+                // check if there is another system of the same class on this location.
                 if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
                     return $sys;
                 }
             }
-
             return null;
         } 
         
-    }
+	/*note expected damage - important for deciding ambiguous shots!*/
+	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
+		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
+		if(!isset($this->expectedDamage[$hitLoc])){
+			$this->expectedDamage[$hitLoc] = 0;
+		}		
+		$structureSystem = $this->getStructureSystem($hitLoc);
+		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+		$expectedDamageMax = $weapon->maxDamage-$armour;
+		$expectedDamageMin = $weapon->minDamage-$armour;
+		$expectedDamageMax = max(0,$expectedDamageMax);
+		$expectedDamageMin = max(0,$expectedDamageMin);
+		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/4; //halve damage as not all would go to Structure! - hence /4 and not /2
+		//reduce damage for non-Standard modes...
+		switch($weapon->damageType) {
+		    case 'Raking': //Raking damage gets reduced multiple times
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		    case 'Piercing': //Piercing does little damage to actual outer section...
+			$expectedDamage = $expectedDamage * 0.4;
+			break;
+		    case 'Pulse': //multiple hits - assume half of max pulses hit!
+			$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+			break;			
+		    default: //something else: can't be as good as Standard!
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		}
+		//multiply by hit chance!
+		$expectedDamage = $expectedDamage * min(100,$hitChance) /100;
+		$this->expectedDamage[$hitLoc] += $expectedDamage;
+	}//endof function setExpectedDamage
+	    
+	    
+    } //endof class BaseShip
     
     class BaseShipNoAft extends BaseShip{
 
@@ -1216,16 +1243,11 @@
 
     
     class HeavyCombatVessel extends BaseShip{
-    
-        public $shipSizeClass = 2;        
-        
+            public $shipSizeClass = 2;    
         
         function __construct($id, $userid, $name, $slot){
             parent::__construct($id, $userid, $name,$slot);
         }
-
-
-
         public function getLocations(){         
             $locs = array();
 
@@ -1240,6 +1262,7 @@
         }
 
     }
+
 
     class HeavyCombatVesselLeftRight extends BaseShip{
     

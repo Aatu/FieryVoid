@@ -321,8 +321,8 @@ class Manager{
             
             self::$dbManager->startTransaction();
             
+		
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
@@ -340,7 +340,7 @@ class Manager{
             //print(var_dump($ships));
             
             if ($gdS->phase == 1){
-                 $ret = self::handleInitialActions($ships, $gdS);
+                 $ret = self::handleInitialActions($ships, $gdS);		    
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
                     $ret = self::handleMovement($ships, $gdS);
@@ -349,9 +349,7 @@ class Manager{
                 }
             }else if ($gdS->phase == 3){
                 $ret = self::handleFiringOrders($ships, $gdS);
-            }else if ($gdS->phase == 4){
-		    
-		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
+            }else if ($gdS->phase == 4){		    
                 $ret = self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -2){
                 $ret = self::handleBuying($ships, $gdS, $slotid);
@@ -527,7 +525,8 @@ class Manager{
         
             self::$dbManager->submitPower($gamedata->id, $gamedata->turn, $powers);
         }
-        
+        	    
+	    
         $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
         
@@ -540,30 +539,28 @@ class Manager{
             }else{
                 throw new Exception("Failed to validate EW");
             }
-        }
-		   			
-            
+        }          
+	    
+	    
         foreach ($ships as $ship){
             if ($ship instanceof WhiteStar){
                 self::$dbManager->updateAdaptiveArmour($gamedata->id, $ship->id, $ship->armourSettings);
             }
         }
-
 		
-		$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
+	$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
         
         
         foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer)  
-                continue;
-            
+            if ($ship->userid != $gamedata->forPlayer) continue;
+		
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
-				 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
+		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);    
             }else{
                 throw new Exception("Failed to validate Ballistic firing orders");
             }
         }
-        
+	    
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
                 
         return true;    
@@ -621,8 +618,6 @@ class Manager{
             self::$dbManager->releaseGameSubmitLock($gameid);
             
             $endtime = time();
-            //Debug::log("ADVANCING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
-            //Debug("GAME: $gameid Gamedata advanced ok");
         }
         catch(Exception $e)
         {
@@ -715,37 +710,32 @@ class Manager{
         self::changeTurn($gamedata);
     }
     
+	
     private static function startEndPhase($gamedata){
         //print("start end");
-    
+
         $gamedata->setPhase(4); 
         $gamedata->setActiveship(-1);
 
         self::$dbManager->updateGamedata($gamedata);
         
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-
+        $starttime = time();
+        Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
+        $endtime = time();
+	    
         $starttime = time();
         Firing::automateIntercept($servergamedata);
         $endtime = time();
-     //   Debug::log("AUTOMATE INTERCEPT - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
 	
         $starttime = time();
         Firing::fireWeapons($servergamedata);
         $endtime = time();
     //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-/*absolutely bad way of debugging
-if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
-	echo "fireWeapons";
-	var_dump( $gamedata);
-	exit;
-}   
-*/
-	    
+	
         Criticals::setCriticals($servergamedata);
-		//var_dump($servergamedata->getNewFireOrders());
-		//throw new Exception();
-		self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
+	    
+	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
         self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
 
         self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
@@ -759,13 +749,9 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
             }
         }
 
-        
-        // submit criticals
+	// submit criticals
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
-
-
-
-    }
+    } //endof function startEndPhase
 
 
     
@@ -781,8 +767,8 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
         
     }
     
-    private static function handleMovement( $ships, $gamedata ){
-    
+	
+    private static function handleMovement( $ships, $gamedata ){    
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");
@@ -811,13 +797,11 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
             self::$dbManager->updateGamedata($gamedata);
         }else{
             self::startWeaponAllocation($gamedata);
-            
         }
-        
-        
-        
+	    
         return true;
-    }
+    } //endof function handleMovement
+	
     
     private static function changeTurn($gamedata){
     

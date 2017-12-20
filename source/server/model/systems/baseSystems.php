@@ -221,6 +221,7 @@ class Reactor extends ShipSystem{
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
+    public $fixedPower = false; //important for MagGrav reactors, but defined here!
     public $outputType = "power";
 	
     public $boostable = true; //for reactor overload feature!
@@ -245,7 +246,7 @@ class Reactor extends ShipSystem{
             $ship = $gamedata->getShipById($shipid);
             if (!$ship instanceof StarBase){                
                 foreach($ship->systems as $system){
-                    if($system->powerReq > 0){
+                    if(($system->powerReq > 0) || $system instanceof Weapon){
                         $system->addCritical($shipid, $phpclass, $gamedata);
                     }
                 }
@@ -253,7 +254,7 @@ class Reactor extends ShipSystem{
             else {
                 foreach($ship->systems as $system){
                     if ($system->location == $this->location){
-                        if($system->powerReq > 0){
+                        if(($system->powerReq > 0) || $system instanceof Weapon){
                             $system->addCritical($shipid, $phpclass, $gamedata);
                         }       
                     }
@@ -278,8 +279,34 @@ class Reactor extends ShipSystem{
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
     }
+} //endof Reactor
+
+
+
+class MagGravReactor extends Reactor{
+/*Mag-Gravitic Reactor, as used by Ipsha (Militaries of the League 2);
+	provides fixed power regardless of systems;
+	techical implementation: count as Power minus power required by all systems enabled
+*/	
+	public $possibleCriticals = array( //different set of criticals than standard Reactor
+		13=>"FieldFluctuations",
+		17=>array("FieldFluctuations", "FieldFluctuations"),
+		21=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations"),
+		29=>array("FieldFluctuations", "FieldFluctuations", "FieldFluctuations", "ForcedOfflineOneTurn")
+	);
 	
-}
+	function __construct($armour, $maxhealth, $powerReq, $output ){
+		parent::__construct($armour, $maxhealth, $powerReq, $output );    
+		$this->fixedPower = true;
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";	     
+	}	
+	
+}//endof MagGravReactor		
+
 
 class SubReactor extends ShipSystem{
 
@@ -301,8 +328,7 @@ class SubReactor extends ShipSystem{
 	
     public function isOverloading($turn){
         return false;
-    }
-	
+    }	
 }
 
 class Engine extends ShipSystem{

@@ -1,7 +1,6 @@
 <?php
 
 class ShipSystem{
-
     public $jsClass = false;
     public $destroyed = false;
     public $startArc, $endArc;
@@ -23,12 +22,14 @@ class ShipSystem{
     public $critData = array();
     public $destructionAnimated = false;
     public $imagePath, $iconPath;
+    public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for this system)
     
     public $possibleCriticals = array();
 	
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     
-        
+        public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
+	
     public $criticals = array();
 	protected $advancedArmor = false; //indicates that system has advanced armor
     
@@ -122,8 +123,18 @@ class ShipSystem{
         $this->power[] = $power;
     }
     
-    public function getFireOrders(){
-        return $this->fireOrders;
+    public function getFireOrders($turn = -1){
+	if($turn<1){
+        	return $this->fireOrders;
+	}else{ //indicated a particular turn
+		$fireOrders = array();
+		foreach($this->fireOrders as $fireOrder){
+			if($fireOrder->turn == $turn){
+				$fireOrders[] = $fireOrder;
+			}
+		}
+		return $fireOrders;
+	}
     }
     
     public function setFireOrder($fireOrder){
@@ -157,20 +168,7 @@ class ShipSystem{
         }
     }
     
-	/*old version, kept just in case
-    public function getArmour($target, $shooter, $dmgClass){ //total armour
-        $armour = $this->armour;
-        $activeAA = 0;
-
-        if (isset($target->adaptiveArmour)){
-            if (isset($target->armourSettings[$dmgClass][1])){
-                $activeAA = $target->armourSettings[$dmgClass][1];
-                //      debug::log("hit by: ".$dmgClass.", applying mod: ".$activeAA);
-                $armour += $activeAA;
-            }
-        }
-        return $armour;
-    }*/
+	
 	public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
 		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
 		return $armour;
@@ -209,9 +207,7 @@ class ShipSystem{
                 $activeAA = $target->armourSettings[$dmgClass][1];
                 $armour += $activeAA;
             }
-        } 
-	    
-	    
+        }    
 	return $armour;
     }
 	
@@ -245,10 +241,10 @@ class ShipSystem{
     
     public function testCritical($ship, $gamedata, $crits, $add = 0){
 	//use additional value to critical!
-	$bonusCrit = 0;	
+	$bonusCrit = $this->critRollMod + $ship->critRollMod;	
 	foreach($crits as $key=>$value) {
 	  if($value instanceof NastierCrit){
-		$bonusCrit+= 1;//$value->$outputMod;
+		$bonusCrit+= 1;
 		  //unset($crits[$key]); //no need, it'll go out on its own
 	  }
 	}
@@ -272,17 +268,15 @@ class ShipSystem{
             $crits[] = $crit;
         }
         else */
-		if ($this instanceof SubReactor){
-            debug::log("subreactor, multi damage 0.5");
+	if ($this instanceof SubReactor){
+            //debug::log("subreactor, multi damage 0.5");
             $damageMulti = 0.5;
         }
 
-        $roll = Dice::d(20) + floor(($this->getTotalDamage()+$bonusCrit)*$damageMulti) + $add;
+        $roll = Dice::d(20) + floor(($this->getTotalDamage())*$damageMulti) + $add +$bonusCrit;
         $criticalTypes = -1;
 
         foreach ($this->possibleCriticals as $i=>$value){
-        
-            //print("i: $i value: $value");
             if ($roll >= $i){
                 $criticalTypes = $value;
             }
@@ -302,14 +296,15 @@ class ShipSystem{
         }
         return $crits;         
     }
+	
     
     public function addCritical($shipid, $phpclass, $gamedata){
-
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
         $this->criticals[] =  $crit;
         return $crit;
     }
+	
     
     public function hasCritical($type, $turn = false){
         $count = 0;
@@ -339,14 +334,18 @@ class ShipSystem{
     }
     
     
-    public function effectCriticals(){
-           
+    public function effectCriticals(){ 
+	$percentageMod = 0;
         foreach ($this->criticals as $crit){
             $this->outputMod += $crit->outputMod;
+	    $percentageMod += $crit->outputModPercentage;
         }
-    
-    
+	//convert percentage mod to absolute value...
+	if($percentageMod != 0){
+		$this->outputMod += round($percentageMod * $this->output /100 );
+	}    
     }
+	
     
     public function getTotalDamage($turn = false){
         $totalDamage = 0;
@@ -394,6 +393,7 @@ class ShipSystem{
 
     
     public function isDamagedOnTurn($turn){
+	if($this->forceCriticalRoll) return true; //allow forced crit roll
         
         foreach ($this->damage as $damage){
             if ($damage->turn == $turn || $damage->turn == -1){
