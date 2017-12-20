@@ -46,8 +46,8 @@ class Navask extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
 
-        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 240, 360));
-        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 0, 240));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 240));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -10,18 +10,18 @@ class Letann extends HeavyCombatVessel{
         $this->imagePath = "img/ships/letann.png";
         $this->shipClass = "Letann Scout";
         $this->gravitic = true;
-        $this->occurence = "rare";
         $this->limited = 33;
-        
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
+        $this->isd = 2020;
+        $this->occurence = "rare";
+        $this->variantOf = "Tinashi";
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 6));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));

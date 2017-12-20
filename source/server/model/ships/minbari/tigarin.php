@@ -12,16 +12,16 @@ class Tigarin extends BaseShip{
             $this->shipSizeClass = 3;
             $this->gravitic = true;
             $this->fighters = array("normal"=>6);
-
             $this->forwardDefense = 15;
             $this->sideDefense = 17;
-
             $this->turncost = 1.0;
             $this->turndelaycost = 1.0;
             $this->accelcost = 4;
             $this->rollcost = 3;
             $this->pivotcost = 4;
             $this->iniativebonus = 5;
+            $this->variantOf ="Tigara";
+            $this->isd = 2059;
 
             // Ship system arguments: armor, health, power req, output
             $this->addPrimarySystem(new Reactor(6, 20, 0, 0));

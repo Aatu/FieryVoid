@@ -4,24 +4,23 @@ class Tradana extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-	$this->pointCost = 575;
-	$this->faction = "Minbari";
+		$this->pointCost = 575;
+		$this->faction = "Minbari";
         $this->phpclass = "Tradana";
         $this->imagePath = "img/ships/tradana.png";
         $this->shipClass = "Tradana";
         $this->gravitic = true;
         $this->occurence = "rare";
-
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
-
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-	$this->iniativebonus = 65;
-
+		$this->iniativebonus = 65;
+		$this->isd = 2266;
+		$this->variantOf = "Torotha";
 
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));

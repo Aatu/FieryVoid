@@ -11,16 +11,15 @@ class Retlata extends HeavyCombatVessel{
         $this->shipClass = "Retlata Transport";
         $this->gravitic = true;
         $this->occurence = "common";
-
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
-
         $this->turncost = 1.33;
         $this->turndelaycost = 1.33;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 15;
+        $this->isd = 2006;
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new CargoBay(3, 35));
