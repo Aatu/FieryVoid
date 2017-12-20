@@ -276,11 +276,9 @@
 
             parent::setSystemDataWindow($turn);
             
-            //$this->intercept = $this->getInterceptRating($turn);
+            $this->intercept = $this->getInterceptRating($turn);
         }
-        
-        
-/*     
+          
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 	    if ($maxhealth == 0) $maxhealth = 6;
 	    if ($powerReq == 0) $powerReq = 2;
@@ -290,13 +288,12 @@
         private function checkIsFighterUnderShield($target, $shooter){ //no flying under Impeder
             return false;
         }
-
-       
+	    
         
         public function getDamage($fireOrder){        return 0;   }
         public function setMinDamage(){     $this->minDamage = 0 ;      }
         public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-*/
+
     }//endof class ParticleImpeder
 
 
