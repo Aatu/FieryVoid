@@ -266,8 +266,8 @@
 	    
         public function getDefensiveType()
         {
-            //return "Interceptor";
-		return "Shield";
+            return "Interceptor";
+		//return "Shield";
         }
 	    
   
