@@ -135,7 +135,7 @@ Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, 
     
     
     
-    
+    /*
 var Particleimpeder = function(json, ship)
 {
     Weapon.call( this, json, ship);
@@ -143,6 +143,14 @@ var Particleimpeder = function(json, ship)
     this.defensiveType = "Shield";
 }
 Particleimpeder.prototype = Object.create( Weapon.prototype );
+*/
+var Particleimpeder = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    //this.defensiveType = "Interceptor";
+    this.defensiveType = "Shield";
+}
+Particleimpeder.prototype = Object.create( ShipSystem.prototype );
 Particleimpeder.prototype.constructor = Particleimpeder;
 Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
