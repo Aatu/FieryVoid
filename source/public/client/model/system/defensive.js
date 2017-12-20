@@ -144,7 +144,11 @@ Particleimpeder.prototype = Object.create( ShipSystem.prototype );
 Particleimpeder.prototype.constructor = Particleimpeder;
 Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
-        return shipManager.systems.getOutput(target, this);
+        if (shooter.flight){ //only affects fighters
+            return shipManager.systems.getOutput(target, this);
+        }else{
+            return 0;
+        }
     }
     Particleimpeder.prototype.hasMaxBoost = function(){
         return true;
