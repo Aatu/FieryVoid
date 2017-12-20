@@ -248,6 +248,10 @@
         public $damageType = "Standard"; 
         public $weaponClass = "Particle";
     
+ 	public $possibleCriticals = array( //different than usual B5Wars weapon
+            16=>"ForcedOfflineOneTurn"
+	);
+	    
         public function getDefensiveType()
         {
             return "Interceptor";
