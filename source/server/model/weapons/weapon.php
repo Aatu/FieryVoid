@@ -689,7 +689,12 @@ class Weapon extends ShipSystem{
             $mod -= 1;
         }
 
-        $mod += $target->getHitChanceMod($shooter, $pos, $gamedata->turn, $this);
+	    if($this->ballistic){ //getHitChanceMod should get explicit position only if it cannot be derived from shooter - otherwise results at rng 0 are incorrect!
+		$posmod = $pos;
+	    }else{
+		$posmod = null;    
+	    }
+        $mod += $target->getHitChanceMod($shooter, $posmod, $gamedata->turn, $this);
         $mod += $this->getWeaponHitChanceMod($gamedata->turn);
 
         $ammo = $this->getAmmo($fireOrder);

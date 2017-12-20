@@ -5,7 +5,7 @@ class DrakhHeavyRaider extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 350;
+	$this->pointCost = 340;
         $this->faction = "Drakh";
 	$this->phpclass = "DrakhHeavyRaider";
 	$this->shipClass = "Heavy Raider";

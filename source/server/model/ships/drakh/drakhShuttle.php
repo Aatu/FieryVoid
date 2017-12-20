@@ -4,7 +4,7 @@ class DrakhShuttle extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 90*6;
+	$this->pointCost = 80*6;
 	$this->faction = "Drakh";
         $this->phpclass = "DrakhShuttle";
         $this->shipClass = "Armed Shuttles";

@@ -226,6 +226,10 @@ spl_autoload_register(
                 'rogolonvostorshf' =>  '/server/model/ships/smallraces/rogolonVostorSHF.php',
                 
                 
+                //Abbai
+                'particleimpeder' => '/server/model/weapons/defensive.php',
+                
+                
                 //Deneth
                 'dencomcarrier' =>  '/server/model/ships/deneth/DenComCarrier.php', 
                 'deliverer' =>  '/server/model/ships/deneth/deliverer.php', 

@@ -137,18 +137,44 @@ Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, 
     
 var Particleimpeder = function(json, ship)
 {
-    ShipSystem.call( this, json, ship);
-    this.defensiveType = "Interceptor";
+    Weapon.call( this, json, ship);
+    this.defensiveType = "Impeder";
 }
-Particleimpeder.prototype = Object.create( ShipSystem.prototype );
+Particleimpeder.prototype = Object.create( Weapon.prototype );
 Particleimpeder.prototype.constructor = Particleimpeder;
 Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
-        return shipManager.systems.getOutput(target, this);
+        if (shooter.flight){ //only affects fighters
+            return shipManager.systems.getOutput(target, this);
+        }else{
+            return 0;
+        }
     }
     Particleimpeder.prototype.hasMaxBoost = function(){
         return true;
     }
     Particleimpeder.prototype.getMaxBoost = function(){
         return this.maxBoostLevel;
+    }
+    Particleimpeder.prototype.initBoostableInfo = function(){
+        // Needed because it can chance during initial phase
+        // because of adding extra power.   
+        if(window.weaponManager.isLoaded(this)){
+        }
+        else{
+            var count = shipManager.power.getBoost(this);
+            for(var i = 0; i < count; i++){
+                shipManager.power.unsetBoost(null, this);
+            }
+        }
+
+        this.intercept = this.getInterceptRating();
+        this.data.Intercept = this.getInterceptRating()*(-5);
+        this.data.Boostlevel = shipManager.power.getBoost(this);
+
+        return this;
+    }
+    Particleimpeder.prototype.getInterceptRating = function()
+    {
+        return (3 + shipManager.power.getBoost(this));
     }

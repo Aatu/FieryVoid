@@ -28,7 +28,8 @@ Ship.prototype =
         {
             var system = this.systems[i];
 
-            if (!this.checkIsValidAffectingSystem(system, shipManager.getShipPosition(shooter)))
+            //if (!this.checkIsValidAffectingSystem(system, shipManager.getShipPosition(shooter)))
+            if (!this.checkIsValidAffectingSystem(system, shooter)) //Marcin Sawicki: change to unit itself...
                 continue;
 
             if(typeof system == 'Shield'
@@ -57,7 +58,10 @@ Ship.prototype =
         return sum;
     },
        
-    checkIsValidAffectingSystem: function(system, pos)
+    //Marcin Sawicki: this should use shooter, not pos - OR insert pos only if necessary!
+    //otherwise serious trouble at range 0
+    //checkIsValidAffectingSystem: function(system, pos)
+    checkIsValidAffectingSystem: function(system, shooter)
     {
         if (!(system.defensiveType))
             return false;
@@ -76,8 +80,12 @@ Ship.prototype =
 
             var tf = shipManager.getShipHeadingAngle(this);
 
+            var heading = 0;
+            
             //get the heading of position, not ship (in case ballistic)
-            var heading = mathlib.getCompassHeadingOfPosition(this, pos);
+            //var heading = mathlib.getCompassHeadingOfPosition(this, pos);
+            //Marcin Sawicki: should be otherwise in this case?...
+            heading = mathlib.getCompassHeadingOfShip(this,shooter);
 
             //if not on arc, continue!
             if (!mathlib.isInArc(

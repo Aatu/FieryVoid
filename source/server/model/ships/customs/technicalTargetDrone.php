@@ -10,8 +10,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->imagePath = "img/ships/optine.png";
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;
-		$this->forwardDefense = 30;
-		$this->sideDefense = 30;
+		$this->forwardDefense = 20;
+		$this->sideDefense = 20;
 		$this->fighters = array("light"=>12);        
 		$this->turncost = 0.5;
 		$this->turndelaycost = 0.5;
@@ -20,13 +20,16 @@ class technicalTargetDrone extends BaseShip{
 		$this->pivotcost = 4;
 
 		
+		
+		$this->addPrimarySystem(new ParticleImpeder(2, 0, 0, 180, 360));
+		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
 		$this->addFrontSystem(new Scanner(6, 23, 4, 6));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
-				$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
-				$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
+		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
+		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
 		
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
@@ -34,11 +37,11 @@ class technicalTargetDrone extends BaseShip{
 		
 		//new weapon showcase
 		
-		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
-		$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
-		$this->addFrontSystem(new ScatterGun(1, 0, 0, 270, 90));
+		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
+		//$this->addFrontSystem(new PlasmaWaveTorpedo(3, 0, 0, 300, 60));
+		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
+		//$this->addFrontSystem(new StunBeam(2, 0, 0, 0, 360));
+		//$this->addFrontSystem(new ScatterGun(1, 0, 0, 270, 90));
 		
 		/*
 		$this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
