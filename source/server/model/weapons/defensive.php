@@ -238,12 +238,6 @@
 	);
 	    
 	    
-	    
-	    
-        public function getDefensiveType()
-        {
-            return "Interceptor";
-        }
         
         public function onConstructed($ship, $turn, $phase){
             parent::onConstructed($ship, $turn, $phase);
@@ -252,7 +246,7 @@
             $this->intercept = $this->getInterceptRating($turn);
             $this->output = $this->getOutput();
         }
-        
+*/
         public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
             if ($this->isDestroyed($turn-1) || $this->isOfflineOnTurn($turn)) return 0;
             
@@ -267,7 +261,13 @@
             //no effect on actual damage
             return 0;
         }
-        
+	    
+        public function getDefensiveType()
+        {
+            return "Interceptor";
+        }
+	    
+/*        
         public function setSystemDataWindow($turn){
             $this->data["Special"] = "Can intercept uninterceptable weapons.<br>";
             $this->data["Special"] .= "Can be boosted for increased intercept rating (up to +" . $this->maxboost . ".<br>";
