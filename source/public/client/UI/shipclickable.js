@@ -72,7 +72,6 @@ window.shipClickable = {
 		$('#shipNameContainer .namecontainer').html("");
 		
 		if (shipSelectList.haveToShowList(ship) && shipClickable.testStacked){
-		
 			var list = shipManager.getShipsInSameHex(ship);
 			for (var i in list){
 				var p = ', ';
@@ -80,18 +79,8 @@ window.shipClickable = {
 					p = "";
 				$('<span class="name value '+fac+'">'+p+list[i].name+'</span>').appendTo('#shipNameContainer .namecontainer');
 			}
-            $(".entry", e).remove();
-            /*
-			$(".rolling.value", e).html("");
-			$(".turndelay.value", e).html("");
-			$(".pivoting.value", e).html("");
-			$(".speed.value", e).html("");
-			$(".iniative.value", e).html("");
-			$(".rolled.value", e).html("");
-            $(".unused.value", e).html("");
-            */
+            		$(".entry", e).remove();
 		}else{
-				
 			$('<span class="name value '+fac+'">'+ship.name+'</span>').appendTo('#shipNameContainer .namecontainer');
 			$(".entry", e).remove();
 
@@ -131,7 +120,22 @@ window.shipClickable = {
             shipClickable.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
             shipClickable.addEntryElement(misc, ship.flight != true);
             shipClickable.addEntryElement(flightArmour, ship.flight === true);
-            
+			
+	    //Marcin Sawicki, December 2017: add info of flight-wide criticals!
+	    if (ship.flight === true){
+		//get first fighter in flight
+		var firstFighter = shipManager.systems.getSystem(ship, 0);
+		var sensorDown = shipManager.criticals.hasCritical(fighter, "tmpsensordown");
+		if (sensorDown > 0){
+	    		shipClickable.addEntryElement("OB temporarily lowered by " + sensorDown );
+		}
+		var iniDown = shipManager.criticals.hasCritical(fighter, "tmpinidown");
+		if (iniDown > 0){
+	    		shipClickable.addEntryElement("Initiative temporarily lowered by " + iniDown );
+		}	
+	    }
+	    
+	    
             var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
             var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
             shipClickable.addEntryElement("Defence (F/S): " + fDef +"("+
@@ -144,7 +148,6 @@ window.shipClickable = {
             if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
                 
                 var dis = (mathlib.getDistanceBetweenShipsInHex(selectedShip, ship)).toFixed(2);
-        //        var dis = (mathlib.getDistanceBetweenShips(selectedShip, ship)).toFixed(2);
                 shipClickable.addEntryElement('DISTANCE: ' + dis);
             }
 		}
