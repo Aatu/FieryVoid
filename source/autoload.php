@@ -228,6 +228,7 @@ spl_autoload_register(
                 
                 //Abbai
                 'particleimpeder' => '/server/model/weapons/defensive.php',
+                'quadarray' => '/server/model/weapons/particle.php',
                 
                 
                 //Deneth
