@@ -10,9 +10,13 @@ spl_autoload_register(
                 //TECHNICAL UNIT - target drone for various tests
                 'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',  
             		
-                //bases, weapons, power crit
+                //new criticals
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
+                'tmpsensordown' => '/server/model/cricialClasses.php',
+                'tmpinidown' => '/server/model/cricialClasses.php',
+                
+                //bases and stuff
                 'kraken' => '/server/model/ships/centauri/kraken.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
                 'koratyl' => '/server/model/ships/dilgar/koratyl.php',
