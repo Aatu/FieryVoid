@@ -82,10 +82,12 @@
 				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
 	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
-				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-4 Ini per crit
+				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 			}
 		    if ($this instanceof FighterFlight){
-			    ///fighter-specific bonuses and penalties are calculated in fighter class
+			    //calculated into fighter flight data!
+			    //$firstFighter = $this->getSampleFighter();
+			    //$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 		    }
 	    }
 	    return $mod;
