@@ -124,7 +124,7 @@ window.shipClickable = {
 	    //Marcin Sawicki, December 2017: add info of flight-wide criticals!
 	    if (ship.flight === true){
 		//get first fighter in flight
-		var firstFighter = shipManager.systems.getSystem(ship, 0);
+		var firstFighter = shipManager.systems.getSystem(ship, 1);
 		var sensorDown = shipManager.criticals.hasCritical(fighter, "tmpsensordown");
 		if (sensorDown > 0){
 	    		shipClickable.addEntryElement("OB temporarily lowered by " + sensorDown );
