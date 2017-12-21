@@ -1086,7 +1086,7 @@
 
         public $name = "quadArray";
         public $displayName = "Quad Array";
-        public $iconPath = "quadArray.png";
+        public $iconPath = "quadParticleBeam.png";//"quadArray.png";
         public $animation = "trail";
         public $animationColor = array(30, 170, 255);
         public $animationExplosionScale = 0.15;
