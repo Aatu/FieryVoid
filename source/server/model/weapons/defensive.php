@@ -186,7 +186,7 @@
         public $name = "Particleimpeder";
         public $displayName = "Particle Impeder";
         public $animation = "trail";
-        public $iconPath = "interceptor.png";//"particleImpeder.png";
+        public $iconPath = "particleImpeder.png";
 	    
         public $trailColor = array(30, 170, 255);
         public $animationColor = array(30, 170, 255);
