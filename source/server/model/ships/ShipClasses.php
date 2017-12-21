@@ -84,6 +84,9 @@
 				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-4 Ini per crit
 			}
+		    if ($this instanceof FighterFlight){
+			    ///fighter-specific bonuses and penalties are calculated in fighter class
+		    }
 	    }
 	    return $mod;
 	}
