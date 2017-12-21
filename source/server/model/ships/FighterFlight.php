@@ -51,7 +51,6 @@
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-
         }
         
         private $autoid = 1;
@@ -62,6 +61,10 @@
             if($this->hasNavigator){
                 $initiativeBonusRet += 5;
             }
+		
+		//Ini crit induced by Abbai weapon...
+		$firstFighter = $this->getSampleFighter(); //whether still alive or not
+		$initiativeBonusRet -= 5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
             
             return $initiativeBonusRet;
         }
