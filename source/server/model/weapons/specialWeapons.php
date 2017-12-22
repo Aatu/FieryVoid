@@ -49,10 +49,12 @@ class PlasmaStream extends Raking{
 	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-		$crit->updated = true;
-		    $crit->inEffect = false;
-		    $system->criticals[] =  $crit;
+		if (!$system->advancedArmor){
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+		}
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
 		
@@ -100,21 +102,23 @@ class ShockCannon extends Weapon{
 	}
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;
+		if (!$system->advancedArmor){
+		    $crit = null;
 
-            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                $crit->updated = true;
-                $crit->inEffect = true;
-                $system->criticals[] =  $crit;
-		$fireOrder->pubnotes .= " DROPOUT! ";
-            }else if ($system instanceof Structure){
-                $reactor = $ship->getSystemByName("Reactor");
-                $outputMod = -round($damage/4);
-                $crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
-                $crit->updated = true;
-                $reactor->criticals[] =  $crit;
-            }
+		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
+		    }else if ($system instanceof Structure){
+			$reactor = $ship->getSystemByName("Reactor");
+			$outputMod = -round($damage/4);
+			$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
+			$crit->updated = true;
+			$reactor->criticals[] =  $crit;
+		    }
+		}
 
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
@@ -159,25 +163,27 @@ class BurstBeam extends Weapon{
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;
-		//debug::log($system->displayName);
-		if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = true;
-			$system->criticals[] =  $crit;
-			$fireOrder->pubnotes .= " DROPOUT! ";
-		}else if ($system instanceof Structure){
-			$reactor = $ship->getSystemByName("Reactor");
-			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-			$crit->updated = true;
-			$reactor->criticals[] =  $crit;
-		}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-		} else { //force critical roll at +4
-			$system->forceCriticalRoll = true;
-			$system->critRollMod += 4;
-		    }
-		}		
+		
+		if (!$system->advancedArmor){
+			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
+			}else if ($system instanceof Structure){
+				$reactor = $ship->getSystemByName("Reactor");
+				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+				$crit->updated = true;
+				$reactor->criticals[] =  $crit;
+			}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			} else { //force critical roll at +4
+				$system->forceCriticalRoll = true;
+				$system->critRollMod += 4;
+			    }
+		}
+	}		
 		
 		public function getDamage($fireOrder){        return 0;   }
 		public function setMinDamage(){     $this->minDamage = 0;      }
@@ -231,26 +237,28 @@ class BurstPulseCannon extends Pulse {
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
 			
-            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			if ($system->advancedArmor) return;
+			
+		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+		    }else if ($system instanceof Structure){
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->criticals[] =  $crit;
+				}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
 				$crit->updated = true;
-               			$crit->inEffect = true;
-				$system->criticals[] =  $crit;
-				$fireOrder->pubnotes .= " DROPOUT! ";
-            }else if ($system instanceof Structure){
-				$reactor = $ship->getSystemByName("Reactor");
-				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-				$crit->updated = true;
-				$reactor->criticals[] =  $crit;
-			}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
-			$crit->updated = true;
-			$system->criticals[] = $crit;
-				}
-		    else {//force critical roll at +4
-				$system->forceCriticalRoll = true;
-				$system->critRollMod += 4;
-		    }
+				$system->criticals[] = $crit;
+					}
+			    else {//force critical roll at +4
+					$system->forceCriticalRoll = true;
+					$system->critRollMod += 4;
+			}
 		}
 		
 		
@@ -288,6 +296,8 @@ class BurstPulseCannon extends Pulse {
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
+		
+		if ($system->advancedArmor) return;
 
             if ($system instanceof Fighter){
                 if (!$ship instanceof SuperHeavyFighter){
@@ -352,8 +362,7 @@ class BurstPulseCannon extends Pulse {
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
-            
-            debug::log($system->displayName);
+            if ($system->advancedArmor) return;
             if ($system instanceof Fighter){
                 if (!$ship instanceof SuperHeavyFighter){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
@@ -439,22 +448,24 @@ class BurstPulseCannon extends Pulse {
             // a ReducedDamage crit, roll a d6 and substract 2 for each
             // ReducedDamage crit. If the result is less than 1, the hit
             // has no effect on the fighter.
-            $crit = null;
-            $affect = Dice::d(6);
+		if (!$system->advancedArmor){
+		    $crit = null;
+		    $affect = Dice::d(6);
 
-            foreach ($this->criticals as $crit){
-                if ($crit instanceof ReducedDamage){
-                    $affect = $affect - 2;
-                }
-            }
+		    foreach ($this->criticals as $crit){
+			if ($crit instanceof ReducedDamage){
+			    $affect = $affect - 2;
+			}
+		    }
 
-            if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
-                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-		$crit->updated = true;
-                $crit->inEffect = true;
-		$system->criticals[] =  $crit;
-		$fireOrder->pubnotes .= " DROPOUT! ";
-            }
+		    if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
+			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
+		    }
+		}
             
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
         }
@@ -509,7 +520,7 @@ class StunBeam extends Weapon{
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
-            		//debug::log($system->displayName);
+            		if ($system->advancedArmor) return;
 			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
