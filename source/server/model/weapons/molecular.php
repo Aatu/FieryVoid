@@ -173,6 +173,7 @@
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
             if(!$this->alreadyReduced){ 
                 $struct = $target->getStructureSystem($location);
+                if ($struct->advancedArmor) return;
                 if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                     $this->alreadyReduced = true; //do this only for first part of shot that actually connects
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
@@ -181,8 +182,7 @@
                     $struct->criticals[] = $crit;
                 }
             }
-        }
-        
+        }       
 
         public function getDamage($fireOrder){        return Dice::d(10, 2) + 30;   }
         public function setMinDamage(){     $this->minDamage = 2+30;      }
@@ -231,7 +231,6 @@
 
 
     class MolecularFlayer extends Molecular{
-
         public $name = "molecularFlayer";
         public $displayName = "Molecular Flayer";
         public $animation = "trail";
@@ -255,9 +254,7 @@
         private $alreadyFlayed = false; //to avoid doing this multiple times
 
         public function setSystemDataWindow($turn){
-
             $this->data["Special"] = "Reduces armor of facing section (structure and all systems).";
-            
             parent::setSystemDataWindow($turn);
         }
 
@@ -275,6 +272,7 @@
             if($this->alreadyFlayed) return;
             $this->alreadyFlayed = true; //avoid doing that multiple times
             foreach ($target->systems as $system){
+                if ($system->advancedArmor) return;
                 if ($target->shipSizeClass<=1 || $system->location === $location){ //MCVs and smaller ships are one huge section technically
                     $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                     $crit->updated = true;
@@ -323,9 +321,6 @@
 
         public function setSystemDataWindow($turn){
             $boost = $this->getExtraDicebyBoostlevel($turn);
-
-            //$this->data["Weapon type"] = "Molecular";
-            //$this->data["Damage type"] = "Raking (6)";
             $this->data["Special"] = 'Raking(6). Treats armor as if it was 1 point lower.';
             $this->data["<font color='red'>Boostlevel</font>"] = $boost;
             parent::setSystemDataWindow($turn);
@@ -447,6 +442,7 @@
                 $this->alreadyReduced = true; 
                 if(LightMolecularDisrupterHandler::checkArmorReduction($target, $shooter)){ //static counting!
                     $struct = $target->getStructureSystem($location);
+                    if ($struct->advancedArmor) return;
                     if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
                         $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                         $crit->updated = true;
