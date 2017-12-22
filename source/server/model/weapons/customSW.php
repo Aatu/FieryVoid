@@ -410,6 +410,7 @@ class SWIon extends SWDirectWeapon{
     }
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+	if ($system->advancedArmor) return;
       $dmg = $damage - $armour;
       if($dmg<=0) return; //no damage was actually done
       SWIonHandler::addDamage($ship, $system, $dmg);//possibly cause power shortage
