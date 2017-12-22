@@ -107,6 +107,7 @@ class ShockCannon extends Weapon{
                 $crit->updated = true;
                 $crit->inEffect = true;
                 $system->criticals[] =  $crit;
+		$fireOrder->pubnotes .= " DROPOUT! ";
             }else if ($system instanceof Structure){
                 $reactor = $ship->getSystemByName("Reactor");
                 $outputMod = -round($damage/4);
@@ -164,6 +165,7 @@ class BurstBeam extends Weapon{
 			$crit->updated = true;
 			$crit->inEffect = true;
 			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
 		}else if ($system instanceof Structure){
 			$reactor = $ship->getSystemByName("Reactor");
 			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
@@ -232,8 +234,9 @@ class BurstPulseCannon extends Pulse {
             if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
-                $crit->inEffect = true;
+               			$crit->inEffect = true;
 				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
             }else if ($system instanceof Structure){
 				$reactor = $ship->getSystemByName("Reactor");
 				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
@@ -292,6 +295,7 @@ class BurstPulseCannon extends Pulse {
                     $crit->updated = true;
                     $crit->inEffect = true;
                     $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
                     $roll = Dice::d(6);
@@ -300,6 +304,7 @@ class BurstPulseCannon extends Pulse {
                         $crit->updated = true;
                         $crit->inEffect = true;
                         $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                     }
                 }
             }
@@ -355,6 +360,7 @@ class BurstPulseCannon extends Pulse {
                     $crit->updated = true;
                     $crit->inEffect = true;
                     $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
                     $roll = Dice::d(6);
@@ -363,6 +369,7 @@ class BurstPulseCannon extends Pulse {
                         $crit->updated = true;
                         $crit->inEffect = true;
                         $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                     }
                 }
             }
@@ -446,6 +453,7 @@ class BurstPulseCannon extends Pulse {
 		$crit->updated = true;
                 $crit->inEffect = true;
 		$system->criticals[] =  $crit;
+		$fireOrder->pubnotes .= " DROPOUT! ";
             }
             
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
@@ -507,6 +515,7 @@ class StunBeam extends Weapon{
 				$crit->updated = true;
                 		$crit->inEffect = true;
 				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
             		}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			}
