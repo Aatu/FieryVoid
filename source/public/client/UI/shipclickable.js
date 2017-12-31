@@ -88,6 +88,21 @@ window.shipClickable = {
             var flightArmour = shipManager.systems.getFlightArmour(ship);
             var misc = shipManager.systems.getMisc(ship);
 
+		//Marcin Sawicki, December 2017: add info of flight-wide criticals!
+	    if (ship.flight === true){
+		//get first fighter in flight
+		var firstFighter = shipManager.systems.getSystem(ship, 1);
+		var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+		if (sensorDown > 0){
+	    		shipClickable.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>" );
+		}
+		var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
+		iniDown = iniDown * 5;
+		if (iniDown > 0){
+	    		shipClickable.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>" );
+		}	
+	    }
+			
             if (ship.base){
             	var direction;
             	var html;
@@ -106,6 +121,8 @@ window.shipClickable = {
             }
 
             
+			
+			
             shipClickable.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
             shipClickable.addEntryElement('Evasion: -' +jinking+ ' to hit', ship.flight === true && jinking > 0);
             shipClickable.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight === true);
@@ -130,21 +147,6 @@ window.shipClickable = {
                     (ship.sideDefense * 5)
                 +")%");
             
-			
-	    //Marcin Sawicki, December 2017: add info of flight-wide criticals!
-	    if (ship.flight === true){
-		//get first fighter in flight
-		var firstFighter = shipManager.systems.getSystem(ship, 1);
-		var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
-		if (sensorDown > 0){
-	    		shipClickable.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>" );
-		}
-		var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
-		iniDown = iniDown * 5;
-		if (iniDown > 0){
-	    		shipClickable.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>" );
-		}	
-	    }
 			
             
             if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
