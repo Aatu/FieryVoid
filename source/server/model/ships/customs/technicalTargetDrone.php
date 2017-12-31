@@ -57,14 +57,14 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
 		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
 		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
-		
+		/*
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));		
 		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
-		
+		*/
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
