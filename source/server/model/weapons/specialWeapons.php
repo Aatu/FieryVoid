@@ -560,8 +560,8 @@ class CommDisruptor extends Weapon{
 	   
 	//let's animate this as a very wide beam...
 	public $animation = "laser";
-        public $animationColor = array(55, 55, 55);
-        public $animationColor2 = array(100, 100, 210);
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(170, 170, 250);
         public $animationExplosionScale = 0.45;
         public $animationWidth = 15;
         public $animationWidth2 = 0.5;
