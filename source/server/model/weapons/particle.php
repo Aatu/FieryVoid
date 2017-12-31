@@ -1105,6 +1105,8 @@
 
         public $firingModes = array(1=>'Quad', 2=>'Triple', 3=>'Dual');
         public $gunsArray = array(1=>4,2=>3,3=>3);
+	    
+	public $firedThisTurn = false; //to avoid re-rolling criticals!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -1131,6 +1133,9 @@
             // Make a crit roll taking into account used firing mode
             parent::fire($gamedata, $fireOrder);
             
+	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
+	    $this->firedThisTurn = true; //to avoid rolling crit for every shot!
+		
             $chance = 0;
             if ($this->firingMode==1){//quad
                 $chance = 3; //75%
