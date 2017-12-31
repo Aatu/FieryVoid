@@ -592,7 +592,7 @@ class CommDisruptor extends Weapon{
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
 		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
 		$effectIni5 = $effectIni * 5;
-		$fireOrder->pubnotes .= " Initiative reduced by $effectIni5, Sensors by $effectSensors.";
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, Sensors by $effectSensors.";
 		
 		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
 			$firstFighter = $ship->getSampleFighter();
