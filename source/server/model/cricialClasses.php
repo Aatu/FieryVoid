@@ -324,7 +324,7 @@ class swtargetheld extends Critical{ /*next turn target is being held by tractor
 
 
 class tmpsensordown extends Critical{ /*next turn target Sensors/OB are down by 1, to a minimum of 0 - place on C&C or FIRST FIGHTER! (may be destroyed)!*/
-    public $description = "-1 Sensor/OB for 1 turn!";
+    public $description = "-1 Sensors/OB.";
     public $oneturn = true;	
 	
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
@@ -333,7 +333,7 @@ class tmpsensordown extends Critical{ /*next turn target Sensors/OB are down by 
 }
 
 class tmpinidown extends Critical{ /*next turn target Initiative is down by 1, to a minimum of 0 - place on C&C or FIRST FIGHTER! (may be destroyed)!*/
-    public $description = "-1 Initiative for 1 turn!";
+    public $description = "-5 Initiative."; //-1 in d20 system
     public $oneturn = true;	
 	
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
