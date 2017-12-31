@@ -85,9 +85,10 @@
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 			}
 		    if ($this instanceof FighterFlight){
-			    //calculated into fighter flight data!
-			    //$firstFighter = $this->getSampleFighter();
-			    //$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
+			    $firstFighter = $this->getSampleFighter();
+			    if ($firstFighter){
+			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);				    
+			    }
 		    }
 	    }
 	    return $mod;
