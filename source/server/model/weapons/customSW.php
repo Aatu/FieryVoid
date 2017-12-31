@@ -1212,7 +1212,7 @@ class SWTractorBeam extends SWDirectWeapon{
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
-		$this->intercept = $nrOfShots;
+		$this->intercept = 0;
 		$this->iconPath = "tractorBeam.png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
