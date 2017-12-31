@@ -553,7 +553,9 @@ class CommDisruptor extends Weapon{
     public $rangePenalty = 0.5; //-1/2 hexes
     public $intercept = 0;
     public $fireControl = array(-1, 2, 3);
-
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
    
 	   
 	//let's animate this as a very wide beam...
