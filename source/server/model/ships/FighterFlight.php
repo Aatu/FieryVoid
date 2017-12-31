@@ -55,19 +55,7 @@
         
         private $autoid = 1;
         
-	    
-	public function onConstructed($turn, $phase, $gamedata)
-        {
-	    parent::onConstructed($turn, $phase, $gamedata);
-		//crits induced by Abbai weapon...
-		$firstFighter = $this->getSampleFighter(); //whether still alive or not
-		$this->iniativebonus -= 5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
-		if ($this->offensivebonus > 0){ //cannot bring below 0 anyway
-			$OBpenalty = $firstFighter->hasCritical("tmpsensordown", $gamedata->turn);
-			$OBpenalty = min($OBpenalty,$this->offensivebonus);
-			$this->offensivebonus -= $OBpenalty;
-		}		
-	} //endof method onConstructed
+	   
 	    
 	    
         public function getInitiativebonus($gamedata){
@@ -75,8 +63,7 @@
             
             if($this->hasNavigator){
                 $initiativeBonusRet += 5;
-            }
-		
+            }		
             
             return $initiativeBonusRet;
         }
