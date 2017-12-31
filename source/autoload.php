@@ -231,6 +231,7 @@ spl_autoload_register(
                 
                 
                 //Abbai
+                'commdisruptor' => '/server/model/weapons/special.php',
                 'particleimpeder' => '/server/model/weapons/defensive.php',
                 'quadarray' => '/server/model/weapons/particle.php',
                 
