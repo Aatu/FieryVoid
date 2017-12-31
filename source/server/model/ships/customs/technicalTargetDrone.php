@@ -25,7 +25,7 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
-		$this->addFrontSystem(new Scanner(6, 23, 4, 6));
+		$this->addFrontSystem(new Scanner(6, 23, 4, 20));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
@@ -51,15 +51,30 @@ class technicalTargetDrone extends BaseShip{
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
 		*/
 		
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		$this->addFrontSystem(new QuadArray(3, 0, 0, 0, 360));
+		
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));		
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));		
+		$this->addAftSystem(new CommDisruptor(3, 0, 0, 0, 360));
+		
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new JumpEngine(5, 20, 3, 20));
+		/*
 		$this->addAftSystem(new AssaultLaser(3, 6, 4, 180, 300));
 		$this->addAftSystem(new AssaultLaser(3, 6, 4, 60, 180));
 		$this->addAftSystem(new TwinArray(2, 16, 2, 120, 0));
 		$this->addAftSystem(new TwinArray(2, 16, 2, 0, 240));
-		
+		*/
 		$this->addLeftSystem(new Thruster(4, 14, 0, 5, 3));
 		$this->addLeftSystem(new ImperialLaser(3, 8, 5, 300, 0));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
