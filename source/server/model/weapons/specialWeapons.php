@@ -585,7 +585,7 @@ class CommDisruptor extends Weapon{
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
-/*
+
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
 		
@@ -624,7 +624,7 @@ class CommDisruptor extends Weapon{
 			}
 		}
 	} //endof function onDamagedSystem
-*/
+
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
