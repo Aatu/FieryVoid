@@ -121,21 +121,7 @@ window.shipClickable = {
             shipClickable.addEntryElement(misc, ship.flight != true);
             shipClickable.addEntryElement(flightArmour, ship.flight === true);
 			
-	    //Marcin Sawicki, December 2017: add info of flight-wide criticals!
-	    if (ship.flight === true){
-		//get first fighter in flight
-		var firstFighter = shipManager.systems.getSystem(ship, 1);
-		var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
-		if (sensorDown > 0){
-	    		shipClickable.addEntryElement("OB temporarily lowered by " + sensorDown );
-		}
-		var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
-		if (iniDown > 0){
-	    		shipClickable.addEntryElement("Initiative temporarily lowered by " + iniDown );
-		}	
-	    }
-	    
-	    
+	    	    
             var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
             var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
             shipClickable.addEntryElement("Defence (F/S): " + fDef +"("+
@@ -144,6 +130,22 @@ window.shipClickable = {
                     (ship.sideDefense * 5)
                 +")%");
             
+			
+	    //Marcin Sawicki, December 2017: add info of flight-wide criticals!
+	    if (ship.flight === true){
+		//get first fighter in flight
+		var firstFighter = shipManager.systems.getSystem(ship, 1);
+		var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+		if (sensorDown > 0){
+	    		shipClickable.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>" );
+		}
+		var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
+		iniDown = iniDown * 5;
+		if (iniDown > 0){
+	    		shipClickable.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>" );
+		}	
+	    }
+			
             
             if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
                 
