@@ -801,7 +801,7 @@ window.weaponManager = {
 //			oew = 0;
 //		}
 
-		if (oew < 1){
+		if ((oew < 1) && (!shooter.flight)){
 			rangePenalty = rangePenalty*2;
 		}
 		else if (shooter.faction != target.faction){
