@@ -712,7 +712,7 @@ class Weapon extends ShipSystem{
 		$effectiveOB = $shooter->offensivebonus;
 		$firstFighter = $shooter->getSampleFighter();
 		$OBcrit = $firstFighter->hasCritical("tmpsensordown");
-		if ($OBCrit > 0){
+		if ($OBcrit > 0){
 	        	$effectiveOB = $shooter->offensivebonus - $OBcrit;
 			$effectiveOB = max(0,$effectiveOB); //cannot bring OB below 0!
 		}
