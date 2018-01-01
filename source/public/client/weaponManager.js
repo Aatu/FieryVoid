@@ -672,7 +672,6 @@ window.weaponManager = {
 
 	
 	calculateBaseHitChange: function(target, base, shooter, weapon){
-
   		var jink = 0;
 		var dew = 0;
 
@@ -735,7 +734,6 @@ window.weaponManager = {
 		{
 			oew = ew.getTargetingEW(shooter, target);
 			oew -= dist;
-
 			if (oew<0)
 				oew = 0;
 		}
@@ -745,7 +743,15 @@ window.weaponManager = {
 		mod -= target.getHitChangeMod(shooter, sPos);
 
 		if (shooter.flight){
-			oew = shooter.offensivebonus;
+			//oew = shooter.offensivebonus;
+			
+			//Abbai critical...
+			//var firstFighter = shipManager.systems.getSystem(shooter, 1); //should be the same as below...
+			var firstFighter = shooter.systems[1];
+			var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+			oew = shooter.offensivebonus - OBcrit;
+			oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
+			
 			mod -= shipManager.movement.getJinking(shooter);
 
 			if (shipManager.movement.hasCombatPivoted(shooter))
@@ -828,8 +834,6 @@ window.weaponManager = {
 	//	console.log(change);
 
 		return change;
-
-
 	},
 
 	
@@ -974,20 +978,12 @@ window.weaponManager = {
 		return toReturn;
 	},
 		
+	/* Marcin Sawicki - no longer needed, but leaving just in case!
 	getShipHittingSideOld: function(shooter, target){ //Marcin Sawicki, October 2017: change that to new approach!
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
 		if (target.base){
- 		/*	if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(60, targetFacing))){
-				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(300, targetFacing), mathlib.addToDirection(360, targetFacing))){
-					return [1, 31]
-				}
-				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(60, targetFacing), mathlib.addToDirection(120, targetFacing))){
-					return [1, 41]
-				}
-				return [1];
-			} */
 			return [1, 41, 42, 2, 31, 32];
 		}
 
@@ -1075,6 +1071,7 @@ window.weaponManager = {
 
 		return 0;
 	},
+	*/
 
 	getShipDefenceValue: function(shooter, target){
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
