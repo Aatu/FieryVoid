@@ -741,7 +741,7 @@ class Weapon extends ShipSystem{
 		}
         }   
 
-        if ($oew < 1){
+        if (($oew < 1) && (!($shooter instanceof FighterFlight))){
             $rangePenalty = $rangePenalty*2;
         } elseif($shooter->faction != $target->faction) {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
