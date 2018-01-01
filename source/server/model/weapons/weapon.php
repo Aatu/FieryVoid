@@ -708,6 +708,9 @@ class Weapon extends ShipSystem{
 		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
 			$mod -= 1;
 		}
+
+throw new Exception("DEBUG weapon 712: before first fighter is found");
+		
 		$firstFighter = $shooter.getSampleFighter();
 		$OBcrit = $firstFighter->hasCritical("tmpsensordown");
 	        $effectiveOB = $shooter->offensivebonus - $OBcrit;
