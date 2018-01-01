@@ -94,11 +94,12 @@ window.shipClickable = {
 		var firstFighter = shipManager.systems.getSystem(ship, 1);
 		var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
 		if (sensorDown > 0){
+			sensorDown = sensorDown * 5;
 	    		shipClickable.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>" );
 		}
 		var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
-		iniDown = iniDown * 5;
 		if (iniDown > 0){
+			iniDown = iniDown * 5;
 	    		shipClickable.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>" );
 		}	
 	    }
