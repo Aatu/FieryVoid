@@ -238,7 +238,8 @@ spl_autoload_register(
                     'sensorspike' => '/server/model/weapons/specialWeapons.php',
                 'particleimpeder' => '/server/model/weapons/defensive.php',
                 'quadarray' => '/server/model/weapons/particle.php',
-                'combatlaser' => '/server/model/weapons/lasers.php',
+                'combatlaser' => '/server/model/weapons/lasers.php',                
+                'lasercutter' => '/server/model/weapons/lasers.php',
                 
                 
                 //Deneth
