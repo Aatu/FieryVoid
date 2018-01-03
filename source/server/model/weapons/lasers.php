@@ -441,7 +441,7 @@
         /*Abbai variant of Battle Laser - always piercing*/
         public $name = "CombatLaser";
         public $displayName = "Combat Laser";        
-	    public $iconPath = "battlelaser.png";
+	    public $iconPath = "battleLaser.png";
         public $animation = "laser";
         public $animationColor = array(255, 11, 115);
         public $animationWidth = 3;
