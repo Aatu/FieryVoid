@@ -853,4 +853,60 @@ class SensorSpike extends SensorSpear{
 
 
 
+
+class EmBolter extends Matter{
+    /*EM Bolter - Ipsha weapon*/
+        public $name = "EmBolter";
+        public $displayName = "EM Bolter";
+	public $iconPath = "EMBolter.png";
+	
+        public $animation = "trail";
+        public $animationColor = array(120, 50, 250);
+        public $projectilespeed = 18;
+        public $animationWidth = 4;
+        public $animationExplosionScale = 0.35;
+        public $priority = 6;
+      
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 0.33; //-1/3 hexes
+        public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
+	
+	private $alreadyResolved = false;
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Cooldown period: 2 turns.";  
+		      $this->data["Special"] .= "<br>+1 to all critical rolls made by target this turn.";  
+	    }	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if ($this->alreadyResolved) return; //effect already applied this turn
+		
+		$this->alreadyResolved = true;
+		$this->critRollMod++; //+1 to all critical rolls made by target this turn - I assume this includes fighter dropout rolls, for entire squadron
+
+	} //endof function onDamagedSystem
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 10;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 9;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function getDamage($fireOrder){        return 21;   }
+        public function setMinDamage(){     $this->minDamage = 21 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 21 ;      }
+} //endof class EmBolter
+
+
+
 ?>
