@@ -890,6 +890,21 @@ class EmBolter extends Matter{
 	} //endof function onDamagedSystem
 	
 	
+        public function fire($gamedata, $fireOrder){
+            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+            parent::fire($gamedata, $fireOrder);
+		
+		$trgtTurn = $gamedata->turn;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+		$trgtTurn = $gamedata->turn +1;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;		
+        } //endof function fire
+	
+	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
