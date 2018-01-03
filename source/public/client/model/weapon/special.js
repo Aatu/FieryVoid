@@ -42,3 +42,13 @@ SensorSpike.prototype = Object.create( Weapon.prototype );
 SensorSpike.prototype.constructor = SensorSpike;
 
 
+var EmBolter = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+EmBolter.prototype = Object.create( Weapon.prototype );
+EmBolter.prototype.constructor = EmBolter;
+
+
+
+
