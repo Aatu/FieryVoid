@@ -23,6 +23,9 @@ window.ew = {
             if (primary && shipManager.criticals.hasCritical(primary, "RestrictedEW")){
                 ret -= 2;
             }
+	    if (primary){
+                ret -= shipManager.criticals.hasCritical(primary, "tmpsensordown"); //Sensors reduced
+            }
         }/* always go for primary C&C...	
         else if (! ship.flight){
             var cnc = shipManager.systems.getSystemByName(ship, "cnC");

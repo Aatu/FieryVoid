@@ -13,6 +13,13 @@ var TwinArray = function(json, ship)
 TwinArray.prototype = Object.create( Particle.prototype );
 TwinArray.prototype.constructor = TwinArray;
 
+var QuadArray = function(json, ship)
+{
+    Particle.call( this, json, ship);
+}
+QuadArray.prototype = Object.create( Particle.prototype );
+QuadArray.prototype.constructor = QuadArray;
+
 var HeavyArray = function(json, ship)
 {
     Particle.call( this, json, ship);

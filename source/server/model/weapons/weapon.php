@@ -704,35 +704,44 @@ class Weapon extends ShipSystem{
 	    
         //Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
 	//and use OB instead of OEW
-        if($shooter instanceof FighterFlight) {
+        if ($shooter instanceof FighterFlight) {
 		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
 			$mod -= 1;
 		}
-		if(!$this->ballistic){
+		
+		$effectiveOB = $shooter->offensivebonus;
+		$firstFighter = $shooter->getSampleFighter();
+		$OBcrit = $firstFighter->hasCritical("tmpsensordown");
+		if ($OBcrit > 0){
+	        	$effectiveOB = $shooter->offensivebonus - $OBcrit;
+			$effectiveOB = max(0,$effectiveOB); //cannot bring OB below 0!
+		}
+		
+		if (!$this->ballistic){
 			$dew = 0;
 			$bdew = 0;
 			$sdew = 0;
-			$oew = $shooter->offensivebonus;
+			$oew = $effectiveOB;
 			$soew = 0;
 		}else{ //ballistics use of OB is more complicated
 			$oew = 0;
 			$soew = 0;
-			if(!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
-				if($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
-					$oew = $shooter->offensivebonus;
+			if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
+				if ($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
+					$oew = $effectiveOB;
 				}else{ // Check if target is in current weapon arc
 					$relativeBearing = $target->getBearingOnUnit($shooter);			
 					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)){
 						// Target is in current launcher arc. Flight benefits from offensive bonus.
 						// Now check if the fighter is not firing any non-ballistic weapons
-						if(!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder))$oew = $shooter->offensivebonus;
+						if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) $oew = $effectiveOB;
 					}
 				}
         		}
 		}
         }   
 
-        if ($oew < 1){
+        if (($oew < 1) && (!($shooter instanceof FighterFlight))){
             $rangePenalty = $rangePenalty*2;
         } elseif($shooter->faction != $target->faction) {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));

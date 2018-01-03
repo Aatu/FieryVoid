@@ -410,6 +410,7 @@ class SWIon extends SWDirectWeapon{
     }
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+	if ($system->advancedArmor) return;
       $dmg = $damage - $armour;
       if($dmg<=0) return; //no damage was actually done
       SWIonHandler::addDamage($ship, $system, $dmg);//possibly cause power shortage
@@ -1211,7 +1212,7 @@ class SWTractorBeam extends SWDirectWeapon{
     }	
     
 	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
-		$this->intercept = $nrOfShots;
+		$this->intercept = 0;
 		$this->iconPath = "tractorBeam.png";
 		
 		parent::__construct($armor, 6, 4, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!

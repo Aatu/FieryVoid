@@ -51,17 +51,19 @@
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-
         }
         
         private $autoid = 1;
         
+	   
+	    
+	    
         public function getInitiativebonus($gamedata){
             $initiativeBonusRet = parent::getInitiativebonus($gamedata);
             
             if($this->hasNavigator){
                 $initiativeBonusRet += 5;
-            }
+            }		
             
             return $initiativeBonusRet;
         }

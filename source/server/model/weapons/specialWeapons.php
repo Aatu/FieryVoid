@@ -49,10 +49,12 @@ class PlasmaStream extends Raking{
 	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-		$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-		$crit->updated = true;
-		    $crit->inEffect = false;
-		    $system->criticals[] =  $crit;
+		if (!$system->advancedArmor){
+			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+			$crit->updated = true;
+			    $crit->inEffect = false;
+			    $system->criticals[] =  $crit;
+		}
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
 		
@@ -100,20 +102,23 @@ class ShockCannon extends Weapon{
 	}
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-            $crit = null;
+		if (!$system->advancedArmor){
+		    $crit = null;
 
-            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-                $crit->updated = true;
-                $crit->inEffect = true;
-                $system->criticals[] =  $crit;
-            }else if ($system instanceof Structure){
-                $reactor = $ship->getSystemByName("Reactor");
-                $outputMod = -round($damage/4);
-                $crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
-                $crit->updated = true;
-                $reactor->criticals[] =  $crit;
-            }
+		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
+		    }else if ($system instanceof Structure){
+			$reactor = $ship->getSystemByName("Reactor");
+			$outputMod = -round($damage/4);
+			$crit = new OutputReduced(-1, $ship->id, $reactor->id, "OutputReduced", $gamedata->turn, $outputMod);
+			$crit->updated = true;
+			$reactor->criticals[] =  $crit;
+		    }
+		}
 
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
@@ -158,24 +163,27 @@ class BurstBeam extends Weapon{
 		
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		$crit = null;
-		//debug::log($system->displayName);
-		if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = true;
-			$system->criticals[] =  $crit;
-		}else if ($system instanceof Structure){
-			$reactor = $ship->getSystemByName("Reactor");
-			$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-			$crit->updated = true;
-			$reactor->criticals[] =  $crit;
-		}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
-		} else { //force critical roll at +4
-			$system->forceCriticalRoll = true;
-			$system->critRollMod += 4;
-		    }
-		}		
+		
+		if (!$system->advancedArmor){
+			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
+			}else if ($system instanceof Structure){
+				$reactor = $ship->getSystemByName("Reactor");
+				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+				$crit->updated = true;
+				$reactor->criticals[] =  $crit;
+			}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+			} else { //force critical roll at +4
+				$system->forceCriticalRoll = true;
+				$system->critRollMod += 4;
+			    }
+		}
+	}		
 		
 		public function getDamage($fireOrder){        return 0;   }
 		public function setMinDamage(){     $this->minDamage = 0;      }
@@ -229,25 +237,28 @@ class BurstPulseCannon extends Pulse {
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
 			
-            if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
-				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			if ($system->advancedArmor) return;
+			
+		    if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+					$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true;
+					$system->criticals[] =  $crit;
+					$fireOrder->pubnotes .= " DROPOUT! ";
+		    }else if ($system instanceof Structure){
+					$reactor = $ship->getSystemByName("Reactor");
+					$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
+					$crit->updated = true;
+					$reactor->criticals[] =  $crit;
+				}else if ($system->powerReq > 0 || $system->canOffLine ){
+				$crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
 				$crit->updated = true;
-                $crit->inEffect = true;
-				$system->criticals[] =  $crit;
-            }else if ($system instanceof Structure){
-				$reactor = $ship->getSystemByName("Reactor");
-				$crit = new OutputReduced1(-1, $ship->id, $reactor->id, "OutputReduced1", $gamedata->turn);
-				$crit->updated = true;
-				$reactor->criticals[] =  $crit;
-			}else if ($system->powerReq > 0 || $system->canOffLine ){
-			$crit = new ForcedOfflineOneTurn (-1, $ship->id, $system->id, "ForcedOfflineOneTurn", $gamedata->turn);
-			$crit->updated = true;
-			$system->criticals[] = $crit;
-				}
-		    else {//force critical roll at +4
-				$system->forceCriticalRoll = true;
-				$system->critRollMod += 4;
-		    }
+				$system->criticals[] = $crit;
+					}
+			    else {//force critical roll at +4
+					$system->forceCriticalRoll = true;
+					$system->critRollMod += 4;
+			}
 		}
 		
 		
@@ -285,6 +296,8 @@ class BurstPulseCannon extends Pulse {
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
+		
+		if ($system->advancedArmor) return;
 
             if ($system instanceof Fighter){
                 if (!$ship instanceof SuperHeavyFighter){
@@ -292,6 +305,7 @@ class BurstPulseCannon extends Pulse {
                     $crit->updated = true;
                     $crit->inEffect = true;
                     $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
                     $roll = Dice::d(6);
@@ -300,6 +314,7 @@ class BurstPulseCannon extends Pulse {
                         $crit->updated = true;
                         $crit->inEffect = true;
                         $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                     }
                 }
             }
@@ -347,14 +362,14 @@ class BurstPulseCannon extends Pulse {
 
         protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
             $crit = null;
-            
-            debug::log($system->displayName);
+            if ($system->advancedArmor) return;
             if ($system instanceof Fighter){
                 if (!$ship instanceof SuperHeavyFighter){
                     $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
                     $crit->updated = true;
                     $crit->inEffect = true;
                     $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                 }
                 else {
                     $roll = Dice::d(6);
@@ -363,6 +378,7 @@ class BurstPulseCannon extends Pulse {
                         $crit->updated = true;
                         $crit->inEffect = true;
                         $system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
                     }
                 }
             }
@@ -432,21 +448,24 @@ class BurstPulseCannon extends Pulse {
             // a ReducedDamage crit, roll a d6 and substract 2 for each
             // ReducedDamage crit. If the result is less than 1, the hit
             // has no effect on the fighter.
-            $crit = null;
-            $affect = Dice::d(6);
+		if (!$system->advancedArmor){
+		    $crit = null;
+		    $affect = Dice::d(6);
 
-            foreach ($this->criticals as $crit){
-                if ($crit instanceof ReducedDamage){
-                    $affect = $affect - 2;
-                }
-            }
+		    foreach ($this->criticals as $crit){
+			if ($crit instanceof ReducedDamage){
+			    $affect = $affect - 2;
+			}
+		    }
 
-            if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
-                $crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
-		$crit->updated = true;
-                $crit->inEffect = true;
-		$system->criticals[] =  $crit;
-            }
+		    if ( ($system instanceof Fighter) && (!($ship instanceof SuperHeavyFighter)) && ($affect > 0)){
+			$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = true;
+			$system->criticals[] =  $crit;
+			$fireOrder->pubnotes .= " DROPOUT! ";
+		    }
+		}
             
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
         }
@@ -501,12 +520,13 @@ class StunBeam extends Weapon{
 		
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			$crit = null;
-            		//debug::log($system->displayName);
+            		if ($system->advancedArmor) return;
 			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
 				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
 				$crit->updated = true;
                 		$crit->inEffect = true;
 				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
             		}else if ($system->powerReq > 0 || $system->canOffLine ){
 				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 			}
@@ -517,6 +537,319 @@ class StunBeam extends Weapon{
 		public function setMinDamage(){     $this->minDamage = 0;      }
 		public function setMaxDamage(){     $this->maxDamage = 0;      }
 }//endof class StunBeam
+
+
+
+
+class CommDisruptor extends Weapon{
+    /*Abbai weapon - does no damage, but limits target's Initiative and Sensors next turn
+    */
+    public $name = "CommDisruptor";
+    public $displayName = "Comm Disruptor";
+	public $iconPath = "commDIsruptor.png";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 3;
+    public $rangePenalty = 0.5; //-1/2 hexes
+    public $intercept = 0;
+    public $fireControl = array(-1, 2, 3);
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+   
+	   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(170, 170, 250);
+        public $animationExplosionScale = 0.45;
+        public $animationWidth = 15;
+        public $animationWidth2 = 0.5;
+	
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"ReducedRange"
+	);
+	
+    public function setSystemDataWindow($turn){
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) and Sensors (-1d6) rating next turn";  
+	      parent::setSystemDataWindow($turn);    
+    }	
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		
+		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
+		$effectIni5 = $effectIni * 5;
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5, Sensors by $effectSensors.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class CommDisruptor
+
+
+
+class CommJammer extends Weapon{
+    /*Abbai weapon - does no damage, but limits target's Initiative  next turn
+    */
+    public $name = "CommJammer";
+    public $displayName = "Comm Jammer";
+	public $iconPath = "commJammer.png";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 3;
+    public $rangePenalty = 1; //-1/hex
+    public $intercept = 0;
+    public $fireControl = array(0, 2, 2);
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+   
+	   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(160, 160, 240);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 10;
+        public $animationWidth2 = 0.5;
+	
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"ReducedRange"
+	);
+	
+    public function setSystemDataWindow($turn){
+	      $this->data["Special"] = "Does no damage, but weakens target's Initiative (-1d6) rating next turn";  
+	      parent::setSystemDataWindow($turn);    
+    }	
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		
+		$effectIni = Dice::d(6,1);//strength of effect: 1d6
+		$effectIni5 = $effectIni * 5;
+		$fireOrder->pubnotes .= "<br> Initiative reduced by $effectIni5.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $firstFighter->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectIni;$i++){
+					$crit = new tmpinidown(-1, $ship->id, $CnC->id, 'tmpinidown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class CommJammer
+
+
+class ImpCommJammer extends CommJammer{
+    /*Abbai weapon - does no damage, but limits target's Initiative and Sensors next turn
+    */
+    public $name = "ImpCommJammer";
+    public $displayName = "Improved Comm Jammer";
+	public $iconPath = "commJammer.png";
+	
+    public $rangePenalty = 0.5; //-1/2 hexes
+} //end of class ImpCommJammer
+
+
+
+
+class SensorSpear extends Weapon{
+    /*Abbai weapon - does no damage, but limits target's Sensors next turn
+    */
+    public $name = "SensorSpear";
+    public $displayName = "Sensor Spear";
+	public $iconPath = "sensorSpike.png";
+	
+    public $priority = 10; //let's fire last, order not all that important here!
+    public $loadingtime = 2;
+    public $rangePenalty = 0.5; //-1/2 hexes
+    public $intercept = 0;
+    public $fireControl = array(-1, 1, 1);
+	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+   
+	   
+	//let's animate this as a very wide beam...
+	public $animation = "laser";
+        public $animationColor = array(150, 150, 220);
+        public $animationColor2 = array(160, 160, 240);
+        public $animationExplosionScale = 0.25;
+        public $animationWidth = 10;
+        public $animationWidth2 = 0.5;
+	
+ 	public $possibleCriticals = array( //no point in damage reduced crit
+            14=>"ReducedRange"
+	);
+	
+    public function setSystemDataWindow($turn){
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d3) rating next turn";  
+	      parent::setSystemDataWindow($turn);    
+    }	
+    
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+
+		$effectSensors = Dice::d(3,1);//strength of effect: 1d3
+		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class SensorSpear
+
+
+class SensorSpike extends SensorSpear{
+    /*Abbai weapon - does no damage, but limits target's Sensors next turn
+    */
+    public $name = "SensorSpike";
+    public $displayName = "Sensor Spike";
+	public $iconPath = "sensorSpike.png";
+	
+
+    public $fireControl = array(-1, 1, 2);
+	
+	
+    public function setSystemDataWindow($turn){
+	      parent::setSystemDataWindow($turn);  
+	      $this->data["Special"] = "Does no damage, but weakens target's Sensors (-1d6) rating next turn";  
+    }	
+    
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+
+		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
+		$fireOrder->pubnotes .= "<br> Sensors reduced by $effectSensors.";
+		
+		if ($ship instanceof FighterFlight){  //place effect on first fighter, even if it's already destroyed!
+			$firstFighter = $ship->getSampleFighter();
+			if($firstFighter){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $firstFighter->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$firstFighter->criticals[] =  $crit;
+				}
+			}
+		}else{ //ship - place effcet on C&C!
+			$CnC = $ship->getSystemByName("CnC");
+			if($CnC){
+				for($i=1; $i<=$effectSensors;$i++){
+					$crit = new tmpsensordown(-1, $ship->id, $CnC->id, 'tmpsensordown', $gamedata->turn); 
+					$crit->updated = true;
+			        	$CnC->criticals[] =  $crit;
+				}
+			}
+		}
+	} //endof function onDamagedSystem
+
+	public function getDamage($fireOrder){ return  0;   }
+	public function setMinDamage(){   $this->minDamage =  0 ;      }
+	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+} //end of class SensorSpike
 
 
 

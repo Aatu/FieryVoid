@@ -1080,5 +1080,86 @@
 
 
 
+    class QuadArray extends Particle{
+        /*Abbai weapon - Twin Array on steroinds and with overheating problems*/
+        
+
+        public $name = "quadArray";
+        public $displayName = "Quad Array";
+        public $iconPath = "quadParticleBeam.png";//"quadArray.png";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+        public $trailColor = array(30, 170, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $guns = 4;
+        public $priority = 4;
+        public $rangePenalty = 2;
+        public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
+
+        public $firingModes = array(1=>'Quad', 2=>'Triple', 3=>'Dual');
+        public $gunsArray = array(1=>4,2=>3,3=>3);
+	    
+	public $firedThisTurn = false; //to avoid re-rolling criticals!
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+            $this->data["Special"] = 'If fired offensively at full power, can overheat and shut down.<br>Can be fired at reduced power to avoid this:';    
+            $this->data["Special"] .= "<br>Quad shot: 75% chance to shut down for a turn"; 
+            $this->data["Special"] .= "<br>Triple shot: 25% chance to shut down for a turn";  
+            $this->data["Special"] .= "<br>Dual shot: always safe"; 
+        }
+
+        public function fire($gamedata, $fireOrder){
+            // If fired, Quad Array might overheat and go in shutdown for 1 turn.
+            // Make a crit roll taking into account used firing mode
+            parent::fire($gamedata, $fireOrder);
+            
+	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
+	    $this->firedThisTurn = true; //to avoid rolling crit for every shot!
+		
+            $chance = 0;
+            if ($this->firingMode==1){//quad
+                $chance = 3; //75%
+            }else if ($this->firingMode==2){//triple
+                $chance = 1; //25%
+            }
+		
+            $roll = Dice::d(4);            
+            if($roll <= $chance){ // It has overheated.
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+            }
+		
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+    } //endof class QuadArray
+
+
+
+
 ?>
 

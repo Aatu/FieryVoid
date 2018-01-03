@@ -425,7 +425,6 @@ class SWScanner extends Scanner {
 
 
 class CnC extends ShipSystem{
-
     public $name = "cnC";
     public $displayName = "C&C";
     public $primary = true;
@@ -442,10 +441,9 @@ class CnC extends ShipSystem{
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
-    
-
     }
-}
+} //endof class CnC
+
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";
@@ -456,8 +454,8 @@ class CargoBay extends ShipSystem{
     }
 }
 
-class Thruster extends ShipSystem{
 
+class Thruster extends ShipSystem{
     public $name = "thruster";
     public $displayName = "Thruster";
     public $direction;
