@@ -232,6 +232,10 @@ spl_autoload_register(
                 
                 //Abbai
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
+                    'commjammer' => '/server/model/weapons/specialWeapons.php',
+                    'impcommjammer' => '/server/model/weapons/specialWeapons.php',
+                    'sensorspear' => '/server/model/weapons/specialWeapons.php',
+                    'sensorspike' => '/server/model/weapons/specialWeapons.php',
                 'particleimpeder' => '/server/model/weapons/defensive.php',
                 'quadarray' => '/server/model/weapons/particle.php',
                 
