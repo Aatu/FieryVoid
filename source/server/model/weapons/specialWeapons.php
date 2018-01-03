@@ -887,6 +887,8 @@ class EmBolter extends Matter{
 	    }	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
 		if ($this->alreadyResolved) return; //effect already applied this turn
 		
