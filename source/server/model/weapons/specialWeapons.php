@@ -872,6 +872,12 @@ class EmBolter extends Matter{
         public $rangePenalty = 0.33; //-1/3 hexes
         public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
 	
+	
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	
 	private $alreadyResolved = false;
 	
 	    public function setSystemDataWindow($turn){
