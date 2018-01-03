@@ -77,11 +77,9 @@
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+12;   }
         public function setMinDamage(){     $this->minDamage = 15 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 42 ;      }
-        
-        
-        
+        public function setMaxDamage(){     $this->maxDamage = 42 ;      }    
     }
+
     
     class LightLaser extends Laser{
         public $name = "lightLaser";
@@ -481,6 +479,43 @@
 
 
 
+
+
+    class LaserCutter extends Laser{
+        /*Abbai weapon*/
+        public $name = "LaserCutter";
+        public $displayName = "Laser Cutter";  
+	    public $iconPath = "graviticCutter.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+        
+        public $loadingtime = 3;
+        
+        public $raking = 6;
+        
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+2;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 42 ;      }
+    } //endof class LaserCutter
 
 
 ?>
