@@ -63,7 +63,8 @@ class technicalTargetDrone extends BaseShip{
 		$this->addAftSystem(new ImpCommJammer(3, 0, 0, 0, 360));
 		$this->addAftSystem(new SensorSpear(3, 0, 0, 0, 360));
 		$this->addAftSystem(new SensorSpike(3, 0, 0, 0, 360));		
-		$this->addAftSystem(new CombatLaser(3, 0, 0, 0, 360));
+		$this->addAftSystem(new CombatLaser(3, 0, 0, 0, 360));	
+		$this->addAftSystem(new LaserCutter(3, 0, 0, 0, 360));
 		
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
