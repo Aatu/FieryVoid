@@ -885,7 +885,9 @@ class EmBolter extends Matter{
 		if ($this->alreadyResolved) return; //effect already applied this turn
 		
 		$this->alreadyResolved = true;
-		$this->critRollMod++; //+1 to all critical rolls made by target this turn - I assume this includes fighter dropout rolls, for entire squadron
+		if (!($ship instanceof FighterFlight)){
+			$this->critRollMod++; //+1 to all critical rolls made by target this turn 
+		}
 
 	} //endof function onDamagedSystem
 	
