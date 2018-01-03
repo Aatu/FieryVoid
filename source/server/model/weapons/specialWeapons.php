@@ -802,7 +802,7 @@ class SensorSpear extends Weapon{
 } //end of class SensorSpear
 
 
-class SensorSpike extends Weapon{
+class SensorSpike extends SensorSpear{
     /*Abbai weapon - does no damage, but limits target's Sensors next turn
     */
     public $name = "SensorSpike";
