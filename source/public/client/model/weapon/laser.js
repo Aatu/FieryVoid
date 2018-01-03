@@ -102,3 +102,11 @@ var ImprovedBlastLaser = function(json, ship)
 }
 ImprovedBlastLaser.prototype = Object.create( Weapon.prototype );
 ImprovedBlastLaser.prototype.constructor = ImprovedBlastLaser;
+
+
+var CombatLaser = function(json, ship)
+{
+    Laser.call( this, json, ship);
+}
+CombatLaser.prototype = Object.create( Laser.prototype );
+CombatLaser.prototype.constructor = CombatLaser;
