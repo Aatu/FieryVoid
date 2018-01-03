@@ -340,6 +340,7 @@ spl_autoload_register(
                 
                 //Ipsha
                 'maggravreactor' => 'server/model/systems/baseSystems.php',
+                'embolter' => '/server/model/weapons/specialWeapons.php',
                 
                 //actual units
                 
