@@ -45,6 +45,8 @@
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
         public $rolling = false;
+	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	    
         public $team;
 	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
         
