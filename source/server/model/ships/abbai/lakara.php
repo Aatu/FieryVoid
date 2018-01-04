@@ -24,9 +24,9 @@ class Lakara extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         
-        $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 17, 0, 10));
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 18, 6, 10));
+        $this->addPrimarySystem(new Scanner(5, 18, 6, 9));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
  	      $this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
