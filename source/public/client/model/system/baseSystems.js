@@ -11,9 +11,9 @@ Reactor.prototype.hasMaxBoost = function(){
 
 var MagGravReactor = function(json, ship)
 {
-    ShipSystem.call( this, json, ship);
+    Reactor.call( this, json, ship);
 }
-MagGravReactor.prototype = Object.create( ShipSystem.prototype );
+MagGravReactor.prototype = Object.create( Reactor.prototype );
 MagGravReactor.prototype.constructor = MagGravReactor;
 MagGravReactor.prototype.hasMaxBoost = function(){
     return true;
