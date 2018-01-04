@@ -292,11 +292,17 @@ shipManager.power = {
 				continue;
 			}
                         
+			/*standard: add power for every system powered off
+			  fixed: subtract power for every system powered on (instead!)
+			*/
+			if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off (accounted for in a moment)
+				output -= system.powerReq;
+			}
 			for (var i in system.power){
 				var power = system.power[i];
 				if (power.turn != gamedata.turn) continue;
 				//types: 1:offline 2:boost, 3:overload
-				if ((power.type == 1) && (fixedPower!=true)) output += system.powerReq; //MagGrav = do not add power of disabled systems!					
+				if (power.type == 1) output += system.powerReq; //power off = increase available power
 				if (power.type == 2){
 					output -= shipManager.power.countBoostPowerUsed(ship, system);
 				}				
