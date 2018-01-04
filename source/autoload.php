@@ -231,6 +231,7 @@ spl_autoload_register(
                 
                 
                 //Abbai
+                //weapons and system
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
                     'commjammer' => '/server/model/weapons/specialWeapons.php',
                     'impcommjammer' => '/server/model/weapons/specialWeapons.php',
@@ -240,6 +241,14 @@ spl_autoload_register(
                 'quadarray' => '/server/model/weapons/particle.php',
                 'combatlaser' => '/server/model/weapons/lasers.php',                
                 'lasercutter' => '/server/model/weapons/lasers.php',
+                
+                //Abbai ships (WoCR era)
+                
+                
+                //Abbai ships (show era)
+                
+                
+                
                 
                 
                 //Deneth
