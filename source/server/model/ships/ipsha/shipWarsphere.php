@@ -45,12 +45,12 @@ class ShipWarsphere extends BaseShip{
       
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 99, 1));
         $this->addFrontSystem(new GraviticThruster(4, 15, 0, 99, 1));
-        $this->addFrontSystem(new EmBolter(4, 0, 0, 300, 60));
+        //$this->addFrontSystem(new EmBolter(4, 0, 0, 300, 60));
 		
 	    
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 99, 2));
         $this->addAftSystem(new GraviticThruster(4, 15, 0, 99, 2));
-        $this->addAftSystem(new EmBolter(4, 0, 0, 120, 240));
+        //$this->addAftSystem(new EmBolter(4, 0, 0, 120, 240));
 	    
 	    
 	$this->addLeftSystem(new GraviticThruster(4, 20, 0, 99, 3));
