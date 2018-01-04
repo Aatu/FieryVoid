@@ -854,7 +854,7 @@ class SensorSpike extends SensorSpear{
 
 
 
-class EmBolter extends Matter{
+class EmBolter extends Weapon{
     /*EM Bolter - Ipsha weapon*/
         public $name = "EmBolter";
         public $displayName = "EM Bolter";
