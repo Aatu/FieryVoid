@@ -37,9 +37,9 @@ class ShipWarsphere extends BaseShip{
         
 	    
 	    
-        $this->addPrimarySystem(new CnC(5, 20, 0, 0));
+        
         $this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
-	    //$this->addPrimarySystem(new Reactor(4, 28, 0, 60));
+	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 20, 6, 8));
         $this->addPrimarySystem(new Engine(4, 33, 0, 8, 6));
         $this->addPrimarySystem(new Hangar(4, 6));
