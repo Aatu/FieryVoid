@@ -82,6 +82,14 @@ class ShipSystem{
         return $list;
     }
     
+	/*function called before firing orders are resolved; weapons with special actions (like auto-fire, combination fire, etc)
+		will have their special before firing logic here (like creating additional fire orders!)
+		In future, other systems may have similar needs
+	*/
+    public function beforeFiringOrderResolution($gamedata)
+    {
+    }
+	
     public function beforeTurn($ship, $turn, $phase){
         $this->setSystemDataWindow($turn);
     }
