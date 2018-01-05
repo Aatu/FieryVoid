@@ -322,6 +322,11 @@ class Firing{
         $target = $gd->getShipById($fire->targetid);
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
+	    
+	if ($firingweapon->doNotIntercept){ //some attacks simply aren't subject to interception - like being in a field, or ramming attacks
+            //Debug::log("Target weapon cannot be intercepted\n");
+            return false;
+        }    
   
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
