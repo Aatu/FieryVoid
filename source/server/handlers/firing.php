@@ -410,6 +410,14 @@ class Firing{
 	
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
     public static function prepareFiring($gamedata){
+	//additional call for weapons needing extra preparation
+	foreach ($gamedata->ships as $ship){
+		foreach ($ship->systems as $system){
+			$system->beforeFiringOrderResolution($gamedata);
+		}
+	}
+	    
+	    
         //$currFireOrders  = array();   
 	$ambiguousFireOrders  = array();   
 	foreach ($gamedata->ships as $ship){	    
@@ -437,20 +445,6 @@ class Firing{
 			//$currFireOrders[] = $fire;
 		}
 	}
-	    
-/*		
-	//calculate hit chances if no ambiguousness exists...
-	foreach($currFireOrders as $fireOrder){
-		$ship = $gamedata->getShipById($fireOrder->shooterid);
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
-			$ambiguousFireOrders[] = $fireOrder;
-		}else{
-			$weapon->calculateHitBase($gamedata, $fireOrder);			
-		}
-	}
-*/		
-
 		
 	//calculate hit chances for ambiguous firing!
 	foreach($ambiguousFireOrders as $fireOrder){
