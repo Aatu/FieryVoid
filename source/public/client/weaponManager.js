@@ -289,6 +289,8 @@ window.weaponManager = {
 
 		if (!weaponManager.isLoaded(weapon))
 			return;
+		
+		if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
 
 		if (ship.shipSizeClass < 0){
 			for (var i = 0; i < ship.systems.length; i++){
