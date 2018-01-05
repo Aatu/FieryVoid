@@ -60,6 +60,7 @@ class Weapon extends ShipSystem{
 
     public $normalload = 0;
     public $alwaysoverloading = false;
+    public $autoFireOnly = false; //ture for weapons that should never be fired manually
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
@@ -146,6 +147,15 @@ class Weapon extends ShipSystem{
 	    }
 	    $this->changeFiringMode(1); //reset mode to basic
     }
+	
+	
+	/*function called before firing orders are resolved; weapons with special actions (like auto-fire, combination fire, etc)
+		will have their special before firing logic here (like creating additional fire orders!)
+	*/
+    public function beforeFiringOrderResolution($gamedata)
+    {
+    }
+	
 
     public function getRange($fireOrder)
     {
