@@ -933,6 +933,54 @@ class EmBolter extends Weapon{
 } //endof class EmBolter
 
 
+
+/*handles creation of firing orders for Spark Fields*/
+class SparkFieldHandler{
+	private static $sparkFields = array();
+	private static $firingDeclared = false;
+	
+	
+	/*should be called by every SparkField on creation!*/
+	public static function addSparkField($weapon){
+		SparkFieldHandler::$sparkFields[] = $weapon;		
+	}
+	
+	/*compares boost levels of fields
+		lowest boost first (will potentially do more damage)
+		owner irrelevant, as weapon will damage everything in range except firing unit itself
+	*/
+	public static function sortByBoost($fieldA, $fieldB){	    
+		if ($fieldA->boostlevel > $fieldB->boostlevel){ //low boost level first
+		    return -1;
+		}else if ($fieldA->boostlevel < $fieldB->boostlevel){
+		    return 1;
+		}else{
+		    return 0;
+		}   
+	} //endof function sortByBoost
+	
+	
+	public static function createFiringOrders($gamedata){
+		if (SparkFieldHandler::$firingDeclared) return; //already done!
+		SparkFieldHandler::$firingDeclared = true;
+		
+		//make sure boost level for all weapons is calculated
+		foreach(SparkFieldHandler::$sparkFields as $field){
+			$field->calculateBoostLevel($gamedata->turn);
+		}
+		
+		//sort all fields by boost
+		usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
+	
+		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
+		
+		
+	}//endof function createFiringOrders
+	
+}
+
+
+
 class SparkField extends Weapon{
     /*Spark Field - Ipsha weapon*/
         public $name = "SparkField";
@@ -963,6 +1011,8 @@ class SparkField extends Weapon{
         
         public $rangePenalty = 0; //no range penalty, but range itself is limited
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+	
+	public $boostlevel = 0;
 	
 	
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -1001,11 +1051,14 @@ class SparkField extends Weapon{
 		$fireOrder->updated = true;
 	}
 	
+	public function calculateBoostLevel($turn){
+		$this->boostlevel = 	$this->getBoostLevel($turn);
+	}
+	
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
-		
-		
+		SparkFieldHandler::createFiringOrders($gamedata);		
 	}
 	
 	
@@ -1025,6 +1078,7 @@ class SparkField extends Weapon{
                 $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	    SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
         }
 	
         protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
@@ -1034,7 +1088,7 @@ class SparkField extends Weapon{
         public function getDamage($fireOrder){        
 		$damageRolled = Dice::d(6, 1)+1;
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
-		$damagerolled -= $boostlevel; //-1 per level of boost
+		$damageRolled -= $boostlevel; //-1 per level of boost
 		$damageRolled = max(0,$damageRolled); //cannot do less than 0
 		return $damageRolled;   
 	}
