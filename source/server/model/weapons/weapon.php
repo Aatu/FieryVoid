@@ -149,13 +149,7 @@ class Weapon extends ShipSystem{
     }
 	
 	
-	/*function called before firing orders are resolved; weapons with special actions (like auto-fire, combination fire, etc)
-		will have their special before firing logic here (like creating additional fire orders!)
-	*/
-    public function beforeFiringOrderResolution($gamedata)
-    {
-    }
-	
+
 
     public function getRange($fireOrder)
     {
