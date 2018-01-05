@@ -1,4 +1,3 @@
-
 <?php
 class Lakara extends BaseShip{
     
@@ -107,3 +106,6 @@ class Lakara extends BaseShip{
 		);
     }
 }
+
+
+?>
