@@ -933,5 +933,120 @@ class EmBolter extends Weapon{
 } //endof class EmBolter
 
 
+class SparkField extends Weapon{
+    /*Spark Field - Ipsha weapon*/
+        public $name = "SparkField";
+        public $displayName = "Spark Field";
+	public $iconPath = "SparkField.png";
+	
+	//let's make animation more or less invisible, and effect very large
+	public $trailColor = array(141, 240, 255);
+        public $animation = "ball";
+        public $animationColor = array(1, 1, 1);
+        public $animationExplosionScale = 1;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(165, 165, 255);
+        public $projectilespeed = 20;
+        public $animationWidth = 1;
+        public $trailLength = 1;
+	
+	public $boostable = true;
+        public $boostEfficiency = 2;
+        public $maxBoostLevel = 5;
+	
+      
+        public $priority = 2; //should attack very early
+	
+        public $loadingtime = 1;
+	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $doNotIntercept = true; //this weapon is a field, "attacks" are just for technical reason
+        
+        public $rangePenalty = 0; //no range penalty, but range itself is limited
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
+	
+	
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	
+
+	
+	    public function setSystemDataWindow($turn){
+		    $boostlevel = $this->getBoostLevel($turn);
+		    $this->minDamage = 1-$boostlevel;
+		    $this->maxDamage = 7-$boostlevel;
+		    $this->minDamage = max(0,$this->minDamage);
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
+		      $this->data["Special"] .= "<br>It should not be fired manually."; 
+		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
+		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
+		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack."; 
+		      $this->data["AoE"] = $this->getAoE($turn);
+	    }	
+	
+	
+	
+	private function $this->getAoE($turn){
+		$boostlevel = $this->getBoostLevel($turn);
+		$aoe = 2+(2*$boostlevel);
+		return $aoe;
+	}
+	
+	
+	public function calculateHitBase($gamedata, $fireOrder){
+		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
+		$fireOrder->updated = true;
+	}
+	
+	
+	//find units in range (other than self), create attacks vs them
+	public function beforeFiringOrderResolution($gamedata){
+		
+		
+	}
+	
+	
+	
+	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
+		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
+		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+	}	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+            return 0; //ignores armor!
+        }
+	
+        public function getDamage($fireOrder){        
+		$damageRolled = Dice::d(6, 1)+1;
+		$boostlevel = $this->getBoostLevel($fireOrder->turn);
+		$damagerolled -= $boostlevel; //-1 per level of boost
+		$damageRolled = max(0,$damageRolled); //cannot do less than 0
+		return $damageRolled;   
+	}
+        public function setMinDamage(){    
+		$this->minDamage = 1 ;	      		
+	}
+        public function setMaxDamage(){   
+		$this->maxDamage = 7 ;	    
+	}
+} //endof class SparkField
+
+
+
 
 ?>
