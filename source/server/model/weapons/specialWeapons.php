@@ -1075,6 +1075,18 @@ class SparkField extends Weapon{
 		$this->boostlevel = 	$this->getBoostLevel($turn);
 	}
 	
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+            return $boostLevel;
+        }	
+	
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
