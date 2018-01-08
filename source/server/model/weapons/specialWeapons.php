@@ -1047,19 +1047,20 @@ class SparkField extends Weapon{
 		    $this->minDamage = max(0,$this->minDamage);
 		    */
 		      parent::setSystemDataWindow($turn);  
+		      $this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
 		      $this->data["Special"] .= "<br>It should not be fired manually."; 
 		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
-		      $this->data["AoE"] = 4;//$this->getAoE($turn);
+
 	    }	
 	
 	
 	
 	public function getAoE($turn){
-		$boostlevel = $this->getBoostLevel($turn);
+		$boostlevel = 1;//$this->getBoostLevel($turn);
 		$aoe = 2+(2*$boostlevel);
 		return $aoe;
 	}
