@@ -992,7 +992,6 @@ class SparkFieldHandler{
 				$fire = new FireOrder(1, 'normal', $shooter->id, $target->id, $fireOrder->weaponid, -1, $fireOrder->turn, 1, 0, 0, 1, 0, 0, 0);
 			}
 		}
-		
 	}//endof function createFiringOrders
 	
 }//endof class SparkFieldHandler
@@ -1048,7 +1047,6 @@ class SparkField extends Weapon{
 		    $this->minDamage = max(0,$this->minDamage);
 		    */
 		      parent::setSystemDataWindow($turn);  
-		    /*
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
 		      $this->data["Special"] .= "<br>It should not be fired manually."; 
 		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
@@ -1056,7 +1054,6 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
 		      $this->data["AoE"] = $this->getAoE($turn);
-		      */
 	    }	
 	
 	
