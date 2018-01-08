@@ -342,6 +342,8 @@ spl_autoload_register(
                 //weapons and systems
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
                 'embolter' => '/server/model/weapons/specialWeapons.php',
+                'sparkfield' => '/server/model/weapons/specialWeapons.php',
+                'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 
                 //Ipsha actual units
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
