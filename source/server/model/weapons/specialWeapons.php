@@ -1088,7 +1088,7 @@ class SparkField extends Weapon{
 	
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
-		//SparkFieldHandler::createFiringOrders($gamedata);		
+		SparkFieldHandler::createFiringOrders($gamedata);		
 	}
 
 	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
@@ -1122,7 +1122,7 @@ class SparkField extends Weapon{
                 $powerReq = 2;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-	    //SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
+	    SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
         }
 	
         protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
