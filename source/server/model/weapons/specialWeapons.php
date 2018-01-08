@@ -1036,7 +1036,9 @@ class SparkField extends Weapon{
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
-	
+ 	public $possibleCriticals = array( //no point in range reduced crit
+            14=>"ReducedDamage"
+	);
 
 	
 	    public function setSystemDataWindow($turn){
