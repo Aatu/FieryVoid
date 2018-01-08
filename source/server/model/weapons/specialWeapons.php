@@ -935,7 +935,6 @@ class EmBolter extends Weapon{
 
 
 /*handles creation of firing orders for Spark Fields*/
-/*
 class SparkFieldHandler{
 	public $name = "sparkFieldHandler";
 	private static $sparkFields = array();
@@ -997,7 +996,7 @@ class SparkFieldHandler{
 	}//endof function createFiringOrders
 	
 }//endof class SparkFieldHandler
-*/
+
 
 
 class SparkField extends Weapon{
