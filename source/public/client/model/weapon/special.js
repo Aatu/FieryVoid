@@ -49,6 +49,11 @@ var EmBolter = function(json, ship)
 EmBolter.prototype = Object.create( Weapon.prototype );
 EmBolter.prototype.constructor = EmBolter;
 
-
+var SparkField = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+SparkField.prototype = Object.create( Weapon.prototype );
+SparkField.prototype.constructor = SparkField;
 
 
