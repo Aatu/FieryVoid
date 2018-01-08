@@ -1042,7 +1042,7 @@ class SparkField extends Weapon{
 	    public function setSystemDataWindow($turn){
 		    /*
 		    $boostlevel = $this->getBoostLevel($turn);
-		    $this->minDamage = 1-$boostlevel;
+		    $this->minDamage = 2-$boostlevel;
 		    $this->maxDamage = 7-$boostlevel;
 		    $this->minDamage = max(0,$this->minDamage);
 		    */
@@ -1053,7 +1053,7 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
-		      //$this->data["AoE"] = $this->getAoE($turn);
+		      $this->data["AoE"] = $this->getAoE($turn);
 	    }	
 	
 	
@@ -1126,7 +1126,7 @@ class SparkField extends Weapon{
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
-		$this->minDamage = 1 ;	      		
+		$this->minDamage = 2 ;	      		
 	}
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
