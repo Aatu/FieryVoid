@@ -1042,11 +1042,14 @@ class SparkField extends Weapon{
 
 	
 	    public function setSystemDataWindow($turn){
+		    /*
 		    $boostlevel = $this->getBoostLevel($turn);
 		    $this->minDamage = 1-$boostlevel;
 		    $this->maxDamage = 7-$boostlevel;
 		    $this->minDamage = max(0,$this->minDamage);
+		    */
 		      parent::setSystemDataWindow($turn);  
+		    /*
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
 		      $this->data["Special"] .= "<br>It should not be fired manually."; 
 		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
@@ -1054,6 +1057,7 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
 		      $this->data["AoE"] = $this->getAoE($turn);
+		      */
 	    }	
 	
 	
@@ -1079,7 +1083,7 @@ class SparkField extends Weapon{
 	public function beforeFiringOrderResolution($gamedata){
 		//SparkFieldHandler::createFiringOrders($gamedata);		
 	}
-	
+/*
 	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
 		if (!($target instanceof FighterFlight)){ //ship - as usual
 			parent::damage($target, $shooter, $fireOrder, $gamedata, $damage);
@@ -1092,14 +1096,14 @@ class SparkField extends Weapon{
 				$this->doDamage($target, $shooter, $fighter, $damageAmount, $fireOrder, null, $gamedata, false);
                     	}
 		}
-	}
-	
+	}//endof function damage
 	
 	
 	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
 		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
+*/
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
