@@ -975,6 +975,9 @@ class SparkFieldHandler{
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		
 		
+		
+		
+		
 	}//endof function createFiringOrders
 	
 }
@@ -1059,6 +1062,20 @@ class SparkField extends Weapon{
 	//find units in range (other than self), create attacks vs them
 	public function beforeFiringOrderResolution($gamedata){
 		SparkFieldHandler::createFiringOrders($gamedata);		
+	}
+	
+	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
+		if (!($target instanceof FighterFlight)){ //ship - as usual
+			parent::damage($target, $shooter, $fireOrder, $gamedata, $damage);
+		}else{ //fighter - damage every fighter in flight! (separate damage roll for each)
+			foreach ($target->systems as $fighter){
+				if ($fighter == null || $fighter->isDestroyed()){
+				    continue;
+				}
+				$damageAmount = $this->getDamage($fireOrder);
+				$this->doDamage($target, $shooter, $fighter, $damageAmount, $fireOrder, null, $gamedata, false);
+                    	}
+		}
 	}
 	
 	
