@@ -935,20 +935,21 @@ class EmBolter extends Weapon{
 
 
 /*handles creation of firing orders for Spark Fields*/
+/*
 class SparkFieldHandler{
+	public $name = "sparkFieldHandler";
 	private static $sparkFields = array();
 	private static $firingDeclared = false;
 	
 	
-	/*should be called by every SparkField on creation!*/
+	//should be called by every SparkField on creation!
 	public static function addSparkField($weapon){
 		SparkFieldHandler::$sparkFields[] = $weapon;		
 	}
 	
-	/*compares boost levels of fields
-		lowest boost first (will potentially do more damage)
-		owner irrelevant, as weapon will damage everything in range except firing unit itself
-	*/
+	//compares boost levels of fields
+	//	lowest boost first (will potentially do more damage)
+	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
 	public static function sortByBoost($fieldA, $fieldB){	    
 		if ($fieldA->boostlevel > $fieldB->boostlevel){ //low boost level first
 		    return -1;
@@ -990,30 +991,13 @@ class SparkFieldHandler{
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				//create appropriate firing order
 				$fire = new FireOrder(1, 'normal', $shooter->id, $target->id, $fireOrder->weaponid, -1, $fireOrder->turn, 1, 0, 0, 1, 0, 0, 0);
-        /*$id,
-        $type, 
-        $shooterid, 
-        $targetid, 
-        $weaponid, 
-        $calledid, 
-        $turn, 
-        $firingmode, 
-        $needed = 0, 
-        $rolled = 0, 
-        $shots = 1, 
-        $shotshit = 0, 
-        $intercepted = 0, 
-        $x, 
-        $y,
-        $damageclass = null		
-	*/
 			}
 		}
 		
 	}//endof function createFiringOrders
 	
 }//endof class SparkFieldHandler
-
+*/
 
 
 class SparkField extends Weapon{
