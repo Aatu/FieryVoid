@@ -1005,13 +1005,14 @@ class SparkFieldHandler{
         $intercepted = 0, 
         $x, 
         $y,
-        $damageclass = null		*/
+        $damageclass = null		
+	*/
 			}
 		}
 		
 	}//endof function createFiringOrders
 	
-}
+}//endof class SparkFieldHandler
 
 
 
@@ -1073,7 +1074,7 @@ class SparkField extends Weapon{
 	
 	
 	
-	public function $this->getAoE($turn){
+	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
 		$aoe = 2+(2*$boostlevel);
 		return $aoe;
