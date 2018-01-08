@@ -49,13 +49,13 @@ class PlasmaStream extends Raking{
 	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		if (!$system->advancedArmor){
 			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 			$crit->updated = true;
 			    $crit->inEffect = false;
 			    $system->criticals[] =  $crit;
 		}
-		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 	}
 		
 		
@@ -972,11 +972,42 @@ class SparkFieldHandler{
 		//sort all fields by boost
 		usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
 	
+		//table of units that are already targeted
+		$alreadyTargeted = array();
+		
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
-		
-		
-		
-		
+		//strongest weapons fire first, and only 1 field affects particular ship
+		foreach(SparkFieldHandler::$sparkFields as $field){
+			$shooter = $gamedata->getShipById($fireOrder->shooterid);
+			$explosionPos = $shooter->getCoPos();
+			$aoe = $field->getAoE($gamedata->turn);
+			$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
+			foreach($inAoE as $target){
+				if ($shooter === $target) continue;//does not threaten self!
+				if ($target->isDestroyed()) continue; //no point allocating
+				if (in_array($target->id,$already_targeted)) continue; //each target only once
+				
+				$alreadyTargeted[] = $target->id; //add to list of already targeted units
+				//create appropriate firing order
+				$fire = new FireOrder(1, 'normal', $shooter->id, $target->id, $fireOrder->weaponid, -1, $fireOrder->turn, 1, 0, 0, 1, 0, 0, 0);
+        /*$id,
+        $type, 
+        $shooterid, 
+        $targetid, 
+        $weaponid, 
+        $calledid, 
+        $turn, 
+        $firingmode, 
+        $needed = 0, 
+        $rolled = 0, 
+        $shots = 1, 
+        $shotshit = 0, 
+        $intercepted = 0, 
+        $x, 
+        $y,
+        $damageclass = null		*/
+			}
+		}
 		
 	}//endof function createFiringOrders
 	
@@ -1036,13 +1067,13 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack."; 
+		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
 		      $this->data["AoE"] = $this->getAoE($turn);
 	    }	
 	
 	
 	
-	private function $this->getAoE($turn){
+	public function $this->getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
 		$aoe = 2+(2*$boostlevel);
 		return $aoe;
