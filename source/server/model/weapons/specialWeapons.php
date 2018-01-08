@@ -1082,7 +1082,7 @@ class SparkField extends Weapon{
 	public function beforeFiringOrderResolution($gamedata){
 		//SparkFieldHandler::createFiringOrders($gamedata);		
 	}
-/*
+
 	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
 		if (!($target instanceof FighterFlight)){ //ship - as usual
 			parent::damage($target, $shooter, $fireOrder, $gamedata, $damage);
@@ -1102,7 +1102,7 @@ class SparkField extends Weapon{
 		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
-*/
+
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
