@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "ubuntu/xenial64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -71,8 +71,11 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
+    config.vm.provision "shell", inline: <<-SHELL
     apt-get -y update
+
+    sudo echo -e "ubuntu\nubuntu" | sudo passwd ubuntu
+
     sudo apt-get install -y software-properties-common python-software-properties
 
     sudo apt-get install -y apache2
@@ -85,15 +88,17 @@ Vagrant.configure("2") do |config|
 
     add-apt-repository ppa:ondrej/php
     apt-get update -y
-    apt-get install -y php5.6 libapache2-mod-php5
-    apt-get install -y php5-mysqlnd
+    apt-get install -y php7.2 libapache2-mod-php7.2
+    apt-get install -y php7.2-mysqlnd
 
     apt-get install -y git
     apt-get install -y zip
 
-    if ! [ -L /var/www ]; then
-      rm -rf /var/www
-      ln -fs /vagrant /var/www
+    mkdir /var/www/html
+
+    if ! [ -L /var/www/html ]; then
+      rm -rf /var/www/html
+      ln -fs /vagrant /var/www/html
     fi
 
     /etc/init.d/apache2 restart
@@ -102,12 +107,11 @@ Vagrant.configure("2") do |config|
 
 
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    php -r "if (hash_file('SHA384', 'composer-setup.php') === 'aa96f26c2b67226a324c27919f1eb05f21c248b987e6195cad9690d5c1ff713d53020a02ac8c217dbf90a7eacc9d141d') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-    php composer-setup.php --install-dir=/vagrant/
+    php composer-setup.php
     php -r "unlink('composer-setup.php');"
 
     cd /vagrant/
-    php composer.phar install
+    php /home/ubuntu/composer.phar install
     ./autoload.sh
 
   SHELL

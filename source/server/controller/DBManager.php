@@ -295,7 +295,7 @@ class DBManager {
                 ?,
                 ?,
                 now(),
-                '0000-00-00 00:00:00',
+                null,
                 ?,
                 ?,
                 ?,
@@ -351,7 +351,7 @@ class DBManager {
                 'LOBBY',
                 ?,
                 ?,
-                '0000-00-00 00:00:00',
+                null,
                 ?
             )
         ");
@@ -1720,7 +1720,7 @@ class DBManager {
                 "UPDATE 
                     tac_game 
                 SET
-                    submitLock = '0000-00-00 00:00:00'
+                    submitLock = null
                 WHERE 
                     id = ?
                 "
@@ -1769,7 +1769,7 @@ class DBManager {
                 "UPDATE 
                     tac_playeringame 
                 SET
-                    submitLock = '0000-00-00 00:00:00'
+                    submitLock = null
                 WHERE 
                     gameid = ?
                 AND
@@ -1802,7 +1802,7 @@ class DBManager {
                 (  
                     DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
                 OR
-                    submitLock = '0000-00-00 00:00:00'
+                    submitLock IS NULL
                 )"
             ))
             {
@@ -1841,7 +1841,7 @@ class DBManager {
                 (  
                     DATE_ADD(submitLock, INTERVAL 15 MINUTE) < NOW()
                 OR
-                    submitLock = '0000-00-00 00:00:00'
+                    submitLock IS NULL
                 )"
             ))
             {
@@ -1868,7 +1868,7 @@ class DBManager {
         try {
             $stmt = $this->connection->prepare(
                 "SELECT 
-                    g.id, g.slots, p.playerid
+                    g.id, g.slots
                 FROM 
                     tac_playeringame p
                 INNER JOIN tac_game g on g.id = p.gameid
@@ -1889,7 +1889,7 @@ class DBManager {
             {
 				$stmt->bind_param('i', $gameid);
 				$stmt->execute();
-                $stmt->bind_result($id, $slots, $playerid);
+                $stmt->bind_result($id, $slots);
 				$stmt->fetch();
 				$stmt->close();
                 

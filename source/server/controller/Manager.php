@@ -11,11 +11,11 @@ set_error_handler(
 
 class Manager{
 
+    /**
+     * @var DBManager null
+     */
     private static $dbManager = null;
 
-    /**
-     *  @return DBManager dbManager
-     */
     private static function initDBManager() {
     	global $database_name;
     	global $database_user;
