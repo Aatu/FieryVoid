@@ -593,7 +593,7 @@ class DBManager {
                 $des = ($damage->destroyed) ? 1 : 0;
 		$fireID = $damage->fireorderid;	
 		    
-		if ($damage->fireorderid == -1){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+		if ($fireID == -1){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
 			//read it from database by source, target and weapon ID
 			try{
 				$targetid = $damage->shipid;
