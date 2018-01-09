@@ -616,11 +616,12 @@ $damage->fireorderid = 7; //TEST
 $damage->fireorderid = 6; //TEST	
 		}
 		   
-
+		$fireID = $damage->fireorderid;
+$fireID = 9;
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
-                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
+                    ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
 
 
                 $this->update($sql);
