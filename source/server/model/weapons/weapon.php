@@ -1444,7 +1444,7 @@ class Weapon extends ShipSystem{
 			$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 		}
 
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass, $shooter->id, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
 		$this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
