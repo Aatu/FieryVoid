@@ -985,8 +985,8 @@ throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
 				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
-/*
 				foreach($inAoE as $targetID=>$target){
+/*
 					$validTarget = true;
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
 					if ($target->isDestroyed()) $validTarget = false; //no point allocating
@@ -999,8 +999,8 @@ throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");
 						$fire->addToDB = true;
 						$field->fireOrders[] = $fire;
 					}
-				}
 */
+				}
 			}
 		} //endof foreach SparkField
 	}//endof function createFiringOrders
