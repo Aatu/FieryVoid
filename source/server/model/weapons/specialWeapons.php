@@ -1152,7 +1152,7 @@ class SparkField extends Weapon{
         public function setMaxDamage(){   
 		$this->maxDamage = 7 ;	    
 	}
-} //endof class SparkField
+} //endof class SparkField 
 
 
 
