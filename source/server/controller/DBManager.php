@@ -604,8 +604,10 @@ class DBManager {
 				";		
 				$result = $this->query($sql1);
 				if ($result == null || sizeof($result) == 0){ //do nothing
+$damage->fireorderid = 8; //TEST					
 				}else{
-					$damage->fireorderid = $result[0]->fireorderid;
+					//$damage->fireorderid = $result[0]->fireorderid;
+$damage->fireorderid = 7; //TEST			
 				}
 			}catch(Exception $e) { //nothing, keep -1 as ID
 			}
