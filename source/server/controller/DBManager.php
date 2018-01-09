@@ -29,9 +29,8 @@ class DBManager {
         $this->close();
     }
        
-    private function query($sql) {
-
-    
+	
+    private function query($sql) {    
         if (!$this->connection)
             throw new Exception("DBManager:query, connection failed");
             
@@ -39,18 +38,16 @@ class DBManager {
             throw new Exception("DBManager:query, SQL error: ".mysql_error($this->connection)."\n sql: $sql error:", mysql_errno($this->connection));
         }
             
-        $result = array();
-				
-		while ($row = mysqli_fetch_object($answer)) {
-			$result[] = $row;
-		}
+        $result = array();				
+	while ($row = mysqli_fetch_object($answer)) {
+		$result[] = $row;
+	}
 		
         return $result;
     }
+	
     
-    private function insert($sql) {
-
-    
+    private function insert($sql) {    
         if (!$this->connection)
             throw new exception("DBManager:insert, connection failed");
             
@@ -77,18 +74,16 @@ class DBManager {
         return null;
     }
     
-    public function update($sql) {
-
-    
+	
+    public function update($sql) {    
         if (!$this->connection)
             throw new exception("DBManager:update, connection failed");
             
         if ( ! $answer = mysqli_query($this->connection, $sql)){
             throw new exception("DBManager:update, SQL error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
-        }
-
-            
+        }            
     }
+	
 	
 	private function found($sql){
 		$result = $this->query($sql);
@@ -98,6 +93,7 @@ class DBManager {
 		
 		return false;
 	}
+	
     
     public function startTransaction(){
 		//mysqlii_query("SET AUTOCOMMIT=0", $this->connection);
@@ -531,6 +527,7 @@ class DBManager {
 
     }
     
+	
     public function updateSystemData($input)
     {
         $this->insertSystemData($input);
@@ -593,21 +590,18 @@ class DBManager {
                 $des = ($damage->destroyed) ? 1 : 0;
 		$fireID = $damage->fireorderid;	
 		    
-		if ($fireID <= 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+		if ($fireID < 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
 			//read it from database by source, target and weapon ID
 			try{
 				$targetid = $damage->shipid;
 				$shooterid = $damage->shooterid; //additional field
-				$shooterid = $damage->weaponid; //additional field
-				$sql1 = "SELECT fireorderid FROM `B5CGM`.`tac_fireorder` 
-					where gameid = $gameid and turn = $turn
-					  and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid
-				";		
+				$weaponid = $damage->weaponid; //additional field
+				$sql1 = "SELECT id FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid";		
 				$result = $this->query($sql1);
 				if ($result == null || sizeof($result) == 0){ //do nothing
 $fireID = 8; //TEST					
 				}else{
-					//$damage->fireorderid = $result[0]->fireorderid;
+					//$damage->fireorderid = $result[0]->id;
 $fireID = 7; //TEST			
 				}
 			}catch(Exception $e) { //nothing, keep -1 as ID
