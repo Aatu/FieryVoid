@@ -983,10 +983,9 @@ class SparkFieldHandler{
 			if ($this->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
 			if ($fieldActive){
 				$shooter = $field->getUnit();
-				$explosionPos = $shooter->getCoPos();
 				$aoe = $field->getAoE($gamedata->turn);
-				$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
-				foreach($inAoE as $target){
+				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe));
+				foreach($inAoE as $targetID=>$target){
 					$validTarget = true;
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
 					if ($target->isDestroyed()) $validTarget = false; //no point allocating
