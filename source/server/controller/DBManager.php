@@ -591,6 +591,7 @@ class DBManager {
             foreach ($damages as $damage){
                                     
                 $des = ($damage->destroyed) ? 1 : 0;
+		$fireID = $damage->fireorderid;	
 		    
 		if ($damage->fireorderid == -1){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
 			//read it from database by source, target and weapon ID
@@ -604,20 +605,14 @@ class DBManager {
 				";		
 				$result = $this->query($sql1);
 				if ($result == null || sizeof($result) == 0){ //do nothing
-$damage->fireorderid = 8; //TEST					
+$fireID = 8; //TEST					
 				}else{
 					//$damage->fireorderid = $result[0]->fireorderid;
-$damage->fireorderid = 7; //TEST			
+$fireID = 7; //TEST			
 				}
 			}catch(Exception $e) { //nothing, keep -1 as ID
-			}
-			
-		}else{
-$damage->fireorderid = 6; //TEST	
+			}			
 		}
-		   
-		$fireID = $damage->fireorderid;
-$fireID = 9;
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
