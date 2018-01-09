@@ -59,7 +59,9 @@ SparkField.prototype.initBoostableInfo = function(){
     // Needed because it can change during initial phase
     // because of adding extra power.   
     if(window.weaponManager.isLoaded(this)){
-        this.data["AoE"] = 2 + 2*shipManager.power.getBoost(this);
+        this.Range = 2 + 2*shipManager.power.getBoost(this);
+        this.data["Range"] = this.Range;
+        //this.data["AoE"] = this.Range;
         this.minDamage = 2 - shipManager.power.getBoost(this);
         this.minDamage = Math.max(0,this.minDamage);
         this.maxDamage =  7 - shipManager.power.getBoost(this);
