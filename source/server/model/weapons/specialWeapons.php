@@ -978,8 +978,8 @@ class SparkFieldHandler{
 		//strongest weapons fire first, and only 1 field affects particular ship		
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$fieldActive = true;
-			if ($this->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
-			if ($this->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
+			if ($field->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
+			if ($field->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
 			if ($fieldActive){
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
