@@ -974,18 +974,18 @@ class SparkFieldHandler{
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
-throw new Exception("DEBUG: specialWeapons line 977: before foreach X");	
+throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");	
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship		
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$fieldActive = true;
 			if ($this->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
 			if ($this->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
-			/*
 			if ($fieldActive){
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
 				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
+/*
 				foreach($inAoE as $targetID=>$target){
 					$validTarget = true;
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
@@ -1000,8 +1000,8 @@ throw new Exception("DEBUG: specialWeapons line 977: before foreach X");
 						$field->fireOrders[] = $fire;
 					}
 				}
+*/
 			}
-			*/
 		} //endof foreach SparkField
 	}//endof function createFiringOrders
 	
