@@ -950,9 +950,9 @@ class SparkFieldHandler{
 	//	lowest boost first (will potentially do more damage)
 	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
 	public static function sortByBoost($fieldA, $fieldB){	    
-		if ($fieldA->boostlevel > $fieldB->boostlevel){ //low boost level first
+		if ($fieldA->boostlevel < $fieldB->boostlevel){ //low boost level first
 		    return -1;
-		}else if ($fieldA->boostlevel < $fieldB->boostlevel){
+		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
 		    return 1;
 		}else{
 		    return 0;
@@ -1032,11 +1032,12 @@ class SparkField extends Weapon{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals ; not relevant really!
 	
 	public $boostlevel = 0;
+		
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+    	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	
 	
-	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
 	
  	public $possibleCriticals = array( //no point in range reduced crit
             14=>"ReducedDamage"
