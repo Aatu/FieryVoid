@@ -593,7 +593,7 @@ class DBManager {
                 $des = ($damage->destroyed) ? 1 : 0;
 		$fireID = $damage->fireorderid;	
 		    
-		if ($fireID == -1){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+		if ($fireID <= 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
 			//read it from database by source, target and weapon ID
 			try{
 				$targetid = $damage->shipid;
@@ -611,7 +611,10 @@ $fireID = 8; //TEST
 $fireID = 7; //TEST			
 				}
 			}catch(Exception $e) { //nothing, keep -1 as ID
+$fireID = 11; //TEST	
 			}			
+		}else{
+$fireID = 6; //TEST		
 		}
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
