@@ -974,7 +974,7 @@ class SparkFieldHandler{
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
-throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");	
+throw new Exception("DEBUG: specialWeapons line 977: before foreach Z");	
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship		
 		foreach(SparkFieldHandler::$sparkFields as $field){
@@ -990,7 +990,6 @@ throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
 					if ($target->isDestroyed()) $validTarget = false; //no point allocating
 					if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
-/*
 					if ($validTarget) {
 						$alreadyTargeted[] = $target->id; //add to list of already targeted units
 						//create appropriate firing order
@@ -998,7 +997,6 @@ throw new Exception("DEBUG: specialWeapons line 977: before foreach Y");
 						$fire->addToDB = true;
 						$field->fireOrders[] = $fire;
 					}
-*/
 				}
 			}
 		} //endof foreach SparkField
