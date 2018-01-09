@@ -1017,7 +1017,7 @@ class SparkField extends Weapon{
 	
 	public $boostable = true;
         public $boostEfficiency = 2;
-        public $maxBoostLevel = 5;
+        public $maxBoostLevel = 4;
 	
       
         public $priority = 2; //should attack very early
