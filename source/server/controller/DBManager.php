@@ -612,7 +612,10 @@ $damage->fireorderid = 7; //TEST
 			}catch(Exception $e) { //nothing, keep -1 as ID
 			}
 			
+		}else{
+$damage->fireorderid = 6; //TEST	
 		}
+		   
 
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
