@@ -1118,7 +1118,7 @@ class SparkField extends Weapon{
 	
 	
 	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
+//TEMP		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
 
@@ -1145,6 +1145,7 @@ class SparkField extends Weapon{
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
 		$damageRolled = max(0,$damageRolled); //cannot do less than 0
+$damageRolled=1;//TEMP		
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
