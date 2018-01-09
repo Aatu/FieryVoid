@@ -984,7 +984,7 @@ class SparkFieldHandler{
 			if ($fieldActive){
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
-				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe));
+				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 				foreach($inAoE as $targetID=>$target){
 					$validTarget = true;
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
