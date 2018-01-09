@@ -1069,13 +1069,14 @@ class SparkField extends Weapon{
 		    
 				$shooter = $this->getUnit();
 				$explosionPos = $shooter->getCoPos();
-				$aoe = $field->getAoE($gamedata->turn);
-				$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));	
+				$aoe = $this->getAoE($turn);
+		    
+			//	$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));	
 		    $this->data["ExtraAoE"] = $aoe;
-		    $this->data["InRng"] = "!";
+		    /*$this->data["InRng"] = "!";
 				foreach($inAoE as $target){
 					$this->data["InRng"] .= $target->id . ", ";
-				}
+				}*/
 	    }	//endof function setSystemDataWindow
 	
 	
