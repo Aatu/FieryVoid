@@ -23,7 +23,11 @@ class Manager{
         if (self::$dbManager == null)
             self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password);
     }
-    
+
+    public static function setDBManager(DBManager $dbManager) {
+        self::$dbManager = $dbManager;
+    }
+
     private static function deleteOldGames()
     {
         try {
@@ -152,7 +156,9 @@ class Manager{
             return $gameid;
         }
         catch(exception $e) {
-            self::$dbManager->endTransaction(true);
+            if (self::$dbManager) {
+                self::$dbManager->endTransaction(true);
+            }
             throw $e;
         }
     
@@ -301,12 +307,11 @@ class Manager{
             
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){
         try {
-        
-            //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
+            //Debug::log($ships);
             self::initDBManager();  
             $starttime = time();
             
-            $ships = self::getShipsFromJSON($ships, $gameid);
+            $ships = self::getShipsFromJSON($ships);
             
             if (sizeof($ships)==0)
 				throw new Exception("Gamedata missing");
@@ -322,7 +327,6 @@ class Manager{
             self::$dbManager->startTransaction();
             
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
@@ -330,6 +334,8 @@ class Manager{
             
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)
                 throw new Exception("Unexpected orders");
+
+            $phase = $gdS->getPhase();
                 
             if ($gdS->hasAlreadySubmitted($userid))
                 throw new Exception("Turn already submitted or wrong user");
@@ -338,25 +344,25 @@ class Manager{
                 throw new Exception("Game is finished");
             
             //print(var_dump($ships));
-            
-            if ($gdS->phase == 1){
-                 $ret = self::handleInitialActions($ships, $gdS);
+
+            if ($phase instanceof BuyingGamePhase){
+                $phase->process($gdS, self::$dbManager, $ships);
+            } else if ($gdS->phase == 1){
+                 self::handleInitialActions($ships, $gdS);
             }else if ($gdS->phase == 2){
                 if ($activeship == $gdS->activeship){
-                    $ret = self::handleMovement($ships, $gdS);
+                    self::handleMovement($ships, $gdS);
                 }else{
                     throw new Exception("phase and active ship does not match");
                 }
             }else if ($gdS->phase == 3){
-                $ret = self::handleFiringOrders($ships, $gdS);
+                self::handleFiringOrders($ships, $gdS);
             }else if ($gdS->phase == 4){
 		    
 		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
-                $ret = self::handleFinalOrders($ships, $gdS);
-            }else if ($gdS->phase == -2){
-                $ret = self::handleBuying($ships, $gdS, $slotid);
+                self::handleFinalOrders($ships, $gdS);
             }else if ($gdS->phase == -1){
-                $ret = self::handleDeployment($ships, $gdS);
+                self::handleDeployment($ships, $gdS);
             }
                         
             self::$dbManager->endTransaction(false);
@@ -378,95 +384,6 @@ class Manager{
        
         
     }
-    
-    private static function handleBuying( $ships, $gamedata, $slotid ){
-    
-        $seenSlots = array();
-        foreach($gamedata->slots as $slot)
-        {
-            if ($gamedata->hasAlreadySubmitted($gamedata->forPlayer, $slot->slot))
-                continue;
-            
-            $points = 0;
-            foreach ($ships as $ship){
-
-                if ($ship->slot != $slot->slot)
-                    continue;
-                
-                $seenSlots[$slot->slot] = true;
-
-                if (!$ship instanceof FighterFlight){
-                    $points += $ship->pointCost;
-                }
-
-
-                else {
-                    $points += ($ship->pointCost / 6) * $ship->flightSize;
-                }
-
-                if ($ship->userid == $gamedata->forPlayer){
-                    $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
-                    
-                    // Check if ship uses variable flight size
-                    if($ship instanceof FighterFlight){
-                        self::$dbManager->submitFlightSize($gamedata->id, $id, $ship->flightSize);
-
-                        $firstFighter = $ship->systems[1];
-                        $ammo = false;
-
-                        foreach ($firstFighter->systems as $weapon){
-                            if(isset($weapon->missileArray)){
-                                $ammo = $weapon->missileArray[1]->amount;
-                                break;
-                            }
-                        }
-
-                        if ($ammo){
-                            foreach($ship->systems as $fighter){
-                                foreach ($fighter->systems as $weapon){
-                                    if(isset($weapon->missileArray)){
-                                        $weapon->missileArray[1]->amount = $ammo;
-                                        self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $ammo);
-                                    }
-                                }
-                            }
-                        }
-                        else if ($ship instanceof Templar){
-                            foreach($ship->systems as $fighter){
-                               foreach($fighter->systems as $weapon){
-                                   if($weapon instanceof PairedGatlingGun){
-                                       self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
-                                   }
-                               }
-                           }
-                        }
-                    }
-                    else{
-                        if (isset($ship->adaptiveArmour)){
-                            self::$dbManager->submitAdaptiveArmour($gamedata->id, $id);
-                        }
-
-                       foreach($ship->systems as $systemIndex=>$system){
-                               if(isset($system->missileArray)){
-                                   // this system has a missileArray. It uses ammo
-                                   foreach($system->missileArray as $firingMode=>$ammo){
-                                       self::$dbManager->submitAmmo($id, $system->id, $gamedata->id, $firingMode, $ammo->amount);
-                               }
-                           }
-                       }  
-                    }
-                }
-            }
-
-            if ($points > $slot->points)
-            throw new Exception("Fleet too expensive.");
-        }
-    
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn, $seenSlots);
-        
-        return true;
-    }
-    
     
     private static function handleFinalOrders(  $ships, $gamedata ){
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
@@ -578,9 +495,12 @@ class Manager{
 		
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
    			
-            $phase = $gamedata->phase;
-            
-            if ($phase == 1){
+            $phase = $gamedata->getPhase();
+
+            if ($phase instanceof BuyingGamePhase){
+                $phase->advance($gamedata, self::$dbManager);
+                self::changeTurn($gamedata);
+            }else if ($phase == 1){
                  self::startMovement($gamedata);
             }else if ($phase == 2){
                 //Because movement does not have simultaenous orders, this is handled in handleMovement
@@ -588,16 +508,11 @@ class Manager{
                    self::startEndPhase($gamedata);
             }else if ($phase == 4){
                 self::changeTurn($gamedata);
-            }else if ($phase == -2){
-                self::startGame($gamedata);
             }else if ($phase == -1){
                 self::startInitialOrders($gamedata);
             }
             
             if (TacGamedata::$currentPhase > 0){
-		    if(TacGamedata::$currentGameID == 3578){ //DEBUG
-			    print('before advancing systems data!');
-		    }
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
                         $system->onAdvancingGamedata($ship);
@@ -653,55 +568,8 @@ class Manager{
     }
     
     private static function startGame($gamedata){
-                    
-        $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        
-        
-        $t1 = 0;
-        $t2 = 0;
-        
-        foreach ($servergamedata->ships as $ship){
-            
-            $y = 0;
-            $t = 0;
-            $h = 3;
-            if ($ship->team == 1){
-                $t1++;
-                $t = $t1;
-                $h = 0;
-            }else{
-                $t2++;
-                $t = $t2;
-            }
-            
-            if ($t % 2 == 0){
-                $y = $t/2;
-            }else{
-                $y = (($t-1)/2)*-1;
-            }
-            
-            $x = -30;
-            
-            if ($ship->team == 2){
-                $x=30;
-            }
-            
-            
-            
-            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0, 0);
-            $ship->movement = array($move);
-            
-            foreach ($ship->systems as $system)
-            {
-                $system->setInitialSystemData($ship);
-            }
-            
-        }
-        
-        self::$dbManager->insertShips($servergamedata->id, $servergamedata->ships);
-        self::$dbManager->insertSystemData(SystemData::$allData);
-        
-        self::changeTurn($gamedata);
+
+
     }
     
     private static function startEndPhase($gamedata){
@@ -808,7 +676,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
         return true;
     }
     
-    private static function changeTurn($gamedata){
+    private static function changeTurn(TacGamedata $gamedata){
     
         $gamedata->setTurn( $gamedata->turn+1 );
         if ($gamedata->turn === 1)
@@ -868,7 +736,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
     }
     
-    private static function getShipsFromJSON($json, $gameid){
+    private static function getShipsFromJSON($json){
 
         $ships = array();
         $array = json_decode($json, true);
@@ -878,43 +746,22 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
         foreach ($array as $value) {
                     
             $movements = array();
-            if (is_array($value["movement"])){
+            if (isset($value["movement"]) && is_array($value["movement"])){
                 foreach($value["movement"] as $i=>$move){
-                    if(isset($move["at_initiative"])){
-                        // For backwards compatibility
-                        $movement = new MovementOrder(
-                                $move["id"],
-                                $move["type"],
-                                $move["x"],
-                                $move["y"],
-                                $move["xOffset"], 
-                                $move["yOffset"], 
-                                $move["speed"], 
-                                $move["heading"], 
-                                $move["facing"], 
-                                $move["preturn"], 
-                                $move["turn"],
-                                $move["value"],
-                                $move["at_initiative"]
-                        );
-                    }
-                    else{
-                        $movement = new MovementOrder(
-                                $move["id"],
-                                $move["type"],
-                                $move["x"],
-                                $move["y"],
-                                $move["xOffset"], 
-                                $move["yOffset"], 
-                                $move["speed"], 
-                                $move["heading"], 
-                                $move["facing"], 
-                                $move["preturn"], 
-                                $move["turn"],
-                                $move["value"],
-                                0
-                        );
-                    }
+                    $movement = new MovementOrder(
+                        $move["id"],
+                        $move["type"],
+                        $move["hex"],
+                        $move["xOffset"],
+                        $move["yOffset"],
+                        $move["speed"],
+                        $move["heading"],
+                        $move["facing"],
+                        $move["preturn"],
+                        $move["turn"],
+                        $move["value"],
+                        $move["at_initiative"]
+                    );
                     $movement->requiredThrust = $move["requiredThrust"];
                     $movement->assignedThrust = $move["assignedThrust"];
                     
@@ -924,7 +771,7 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
             
             $EW = array();
             
-            if (is_array($value["EW"])){
+            if (isset($value["EW"]) && is_array($value["EW"])){
                 foreach($value["EW"] as $i=>$EWdata){
                     $EWentry = new EWentry(-1, $EWdata["shipid"], $EWdata["turn"], $EWdata["type"], $EWdata["amount"], $EWdata["targetid"]);
                     $EW[$i] = $EWentry;
@@ -945,8 +792,8 @@ if(TacGamedata::$currentGameID== 3578) {//       MJSdebug:
                 $ship->armourSettings = $value["armourSettings"];
             }
 
-            
-            foreach($value["systems"] as $i=>$system){
+            $systems = isset($value["systems"]) ? $value["systems"] : [];
+            foreach($systems as $i=>$system){
                 //$sys = $ship->getSystemById($system['id']);
                 $sys = $ship->getSystemById($i);
 

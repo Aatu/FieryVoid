@@ -92,7 +92,7 @@ window.BallisticIconContainer = (function(){
 
         var shooterIcon = iconContainer.getById(ballistic.shooterid);
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn, 'start').position);
-        var targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.FVHex(ballistic.x, ballistic.y));
+        var targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');
         var targetSprite = ballistic.targetid === -1 ? new BallisticSprite(targetPosition, 'hex') : null;
@@ -106,7 +106,7 @@ window.BallisticIconContainer = (function(){
             id: ballistic.id,
             shooterId: ballistic.shooterid,
             targetId: ballistic.targetid,
-            position: new hexagon.FVHex(ballistic.x, ballistic.y),
+            position: new hexagon.Offset(ballistic.x, ballistic.y),
             launchSprite: launchSprite,
             targetSprite: targetSprite,
             used: true

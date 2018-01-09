@@ -106,7 +106,7 @@ class PlayerSlotFromJSON extends PlayerSlot{
 
 class MovementOrder{
 
-    public $id, $type, $x, $y, $xOffset, $yOffset, $facing, $heading, $speed, $value, $at_initiative;
+    public $id, $type, $position, $xOffset, $yOffset, $facing, $heading, $speed, $value, $at_initiative;
     public $animating = false;
     public $animated = true;
     public $animationtics = 0;
@@ -118,10 +118,9 @@ class MovementOrder{
     public $forced = false;
     
     
-    function __construct($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative){
+    function __construct($id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative){
         $this->id = (int)$id;
-        $this->x = (int)$x;
-        $this->y = (int)$y;
+        $this->position = $position;
         $this->type = $type;
         $this->facing = (int)$facing;
         $this->heading = (int)$heading;

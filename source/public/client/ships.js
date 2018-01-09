@@ -89,7 +89,9 @@ window.shipManager = {
         }
     },
 
+    /*
     drawShip: function(ship){
+
         if (shipManager.initiated == 0){
             shipManager.initShips();
             return;
@@ -278,7 +280,7 @@ window.shipManager = {
 
     },
 
-
+*/
     getShipCanvasSize: function(ship){
        return ship.canvasSize;
 
@@ -447,11 +449,7 @@ window.shipManager = {
 
     getShipPosition: function(ship){
         var movement = shipManager.movement.getLastCommitedMove(ship);
-        var x = movement.x;
-        var y = movement.y;
-        var xO = movement.xOffset;
-        var yO = movement.yOffset;
-        return {x:x, y:y, xO:xO, yO:yO};
+        return new hexagon.Offset(movement.position);
     },
 
     getShipPositionInWindowCoWithoutOffset: function(ship){
@@ -876,7 +874,7 @@ window.shipManager = {
             var pos2 = shipManager.getShipPosition(ship2);
 
 
-            if (pos1.x == pos2.x && pos1.y == pos2.y){
+            if (pos1.equals(pos2)){
                 shipsInHex.push(ship2);
             }
         }

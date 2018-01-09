@@ -1,6 +1,7 @@
 window.deployment = {
     initialized: false,
 
+    /*
     drawDeploymentAreas: function(canvas){
         gameInfoManager.prepare();
         deployment.drawDeploymentForSelectedShip(canvas);
@@ -121,7 +122,8 @@ window.deployment = {
             }
         }
     },
-    
+
+    /*
     onHexClicked: function(hexpos){
         var selectedShip = gamedata.getSelectedShip();
         
@@ -138,6 +140,7 @@ window.deployment = {
         }
         
     },
+
     
     validateDeploymentPos: function(ship, hexpos){
         if (!hexpos)
@@ -181,5 +184,5 @@ window.deployment = {
     
         return true;
     }
-    
+  */
 };

@@ -36,8 +36,12 @@ class TacGamedata{
    
     public function setPhase($phase)
     {
-        self::$currentPhase = $phase;
-        $this->phase = $phase;
+        self::$currentPhase = (int) $phase;
+        $this->phase = (int) $phase;
+    }
+
+    public function getPhase(): Phase {
+        return PhaseFactory::get($this->phase);
     }
     
     public function setTurn($turn)

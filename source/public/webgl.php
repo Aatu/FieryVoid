@@ -125,7 +125,6 @@
 
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
-    <script src="client/model/hexagon/FVHex.js"></script>
 
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/hexgrid.js"></script>

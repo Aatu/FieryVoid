@@ -38,7 +38,7 @@ window.coordinateConverter = (function(){
         return window.HexagonMath.getHexHeight() / this.zoom;
     };
 
-    coordinateConverter.prototype.fromGameToHex = function(gameCoordinates, debug)
+    coordinateConverter.prototype.fromGameToHex = function(gameCoordinates)
     {
         var q = (1/3 * Math.sqrt(3) * gameCoordinates.x - 1/3 * gameCoordinates.y) / this.hexlenght;
         var r = 2/3 * gameCoordinates.y / this.hexlenght;
@@ -47,10 +47,7 @@ window.coordinateConverter = (function(){
         var z = r;
         var y = -x - z;
 
-        if (debug)
-            console.log("conversion", new hexagon.Cube(x, y, z).round().toEvenR());
-
-        return new hexagon.Cube(x, y, z).round().toEvenR().toFVHex();
+        return new hexagon.Cube(x, y, z).round().toEvenR(); //.toFVHex();
     };
 
     coordinateConverter.prototype.fromHexToGame = function(offsetHex)
@@ -59,12 +56,8 @@ window.coordinateConverter = (function(){
             offsetHex = offsetHex.toEvenR();
         }
 
-        if (offsetHex instanceof hexagon.FVHex) {
-            offsetHex = offsetHex.toOffset();
-        }
-
         if (!(offsetHex instanceof hexagon.Offset) && typeof offsetHex == "object") {
-            offsetHex = new hexagon.FVHex(offsetHex.x, offsetHex.y).toOffset();
+            offsetHex = new hexagon.Offset(offsetHex.x, offsetHex.y);
         }
 
         var x = this.hexlenght * Math.sqrt(3) * (offsetHex.q - 0.5 * (offsetHex.r&1));

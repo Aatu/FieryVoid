@@ -28,7 +28,7 @@ window.gamedata = {
 		else {
 			var div = document.createElement("div");
 				div.className = "game slot clickable";
-				div.innerHTML = "No Ongoing Fire Phases found";
+				div.innerHTML = "No Ongoing Fire Phase found";
 				
 			target.appendChild(div);
 		}

@@ -1,33 +1,37 @@
 <?php
 
-class TestBase extends PHPUnit_Framework_TestCase
+ini_set('display_errors',1);
+error_reporting(E_ALL);
+require_once dirname(__DIR__) . '/source/autoload.php';
+session_start();
+require_once dirname(__DIR__) . '/source/server/varconfig.php' ;
+
+
+use PHPUnit\Framework\TestCase;
+
+class TestBase extends TestCase
 {
-    protected static function requireSources()
+    private static $dbManager = null;
+
+    protected function getDatabase() {
+        global $database_name;
+        global $database_user;
+        global $database_password;
+        if (self::$dbManager == null)
+            self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password, true);
+
+        return self::$dbManager;
+    }
+
+    public function setUp() {
+        parent::setUp();
+        Manager::setDBManager($this->getDatabase());
+        $this->getDatabase()->startTransaction();
+    }
+
+    public function tearDown()
     {
-        $baseDir = dirname(__DIR__) . '/source/';
-        $currentDir = '';
-        foreach(func_get_args() as $name)
-        {
-            $cleanName = preg_replace('/[^\w.-]+/', '/', $name);
-            if (is_dir("$baseDir/$cleanName"))
-            {
-                $currentDir = "$cleanName/";
-                continue;
-            }
-            if (is_dir("$baseDir/$currentDir/$cleanName"))
-            {
-                $currentDir = "$currentDir/$cleanName/";
-                continue;
-            }
-
-            $fullname = $baseDir . $currentDir . $cleanName;
-
-            if (file_exists("$fullname.php"))
-            {
-                $fullname .= '.php';
-            }
-
-            require_once $fullname;
-        }
+        parent::tearDown();
+        $this->getDatabase()->endTransaction(true);
     }
 }

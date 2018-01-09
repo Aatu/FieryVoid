@@ -4,9 +4,11 @@ mysqli_report(MYSQLI_REPORT_ERROR);
 class DBManager {
 
     private $connection = null;
+    private $testMode = false;
     
-    function __construct($host, $port = 3306, $database, $username, $password) {
+    function __construct($host, $port = 3306, $database, $username, $password, $testMode = false) {
         $this->id = uniqid();
+        $this->testMode = $testMode;
         if ($this->connection !== null)
             return $this->connection;
         
@@ -105,14 +107,14 @@ class DBManager {
         mysqli_autocommit($this->connection, FALSE);
     }
     
-    public function endTransaction($rollback = false){
+    public function endTransaction($rollback = false, $force = false){
         if ($rollback == true){
-            mysqli_rollback($this->connection); 
-        }else{
+            mysqli_rollback($this->connection);
+            mysqli_autocommit($this->connection, TRUE);
+        }else if (! $this->testMode || $force) {
             mysqli_commit($this->connection);
+            mysqli_autocommit($this->connection, TRUE);
         }
-        mysqli_autocommit($this->connection, TRUE);
-        
     }
     
     public function close() {
@@ -818,8 +820,8 @@ class DBManager {
                         $shipid,
                         $gameid,
                         $move->type,
-                        $move->x,
-                        $move->y,
+                        $move->position->q,
+                        $move->position->r,
                         $move->xOffset,
                         $move->yOffset,
                         $move->speed,
@@ -855,7 +857,7 @@ class DBManager {
                 if ($acceptPreturn == false && $preturn)
                     continue;
                 
-                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->x.", ".$movement->y.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, '".$movement->value."', '".$movement->at_initiative ."')";
+                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->hex->q.", ".$movement->hex->r.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, '".$movement->value."', '".$movement->at_initiative ."')";
                 
                 //throw new exception("sql: ".$movement->preturn . var_dump($movement));
                 $this->insert($sql);
@@ -918,7 +920,8 @@ class DBManager {
 		
 		if ($gameid <=0)
 			return null;
-		
+
+		/** @var TacGamedata $gamedata */
         $gamedata = $this->getTacGame($gameid, $playerid);
 		if ($gamedata == null)
 			return null;
@@ -1288,7 +1291,7 @@ class DBManager {
             		$prev_turn = $turn;
 			$prev_type = $type;
             	}
-                $move = new MovementOrder($id, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
+                $move = new MovementOrder($id, $type, new OffsetCoordinate($x, $y), $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
                 

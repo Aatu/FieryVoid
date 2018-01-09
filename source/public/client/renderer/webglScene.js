@@ -328,7 +328,8 @@ window.webglScene = (function(){
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log("click", payload.hex, payload.hex.toOffset());
+        console.log(hexPos);
+        //console.log("click", payload.hex, payload.hex.toOffset());
         /*
         var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );

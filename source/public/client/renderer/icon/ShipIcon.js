@@ -129,13 +129,14 @@ window.ShipIcon = (function (){
 
     ShipIcon.prototype.consumeMovement = function(movements){
         return movements.map(function(movement) {
+            console.log(movement);
             return {
                 id: movement.id,
                 type: movement.type,
                 turn: movement.turn,
                 facing: movement.facing,
                 heading: movement.heading,
-                position: new hexagon.FVHex(movement.x, movement.y),
+                position: new hexagon.Offset(movement.position),
                 offset: {x: movement.xOffset, y: movement.yOffset}
             };
         });

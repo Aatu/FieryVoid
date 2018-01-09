@@ -797,13 +797,15 @@ gamedata = {
             $("#phaseheader .finished").show();
             return;
         }
-        
+
+        /*
         if (gamedata.gamephase == -1){
             if (deployment.validateAllDeployment() && !gamedata.waiting){
                 commit.show();
                 return;
             }
         }
+        */
         
         if (gamedata.gamephase == 4){
             

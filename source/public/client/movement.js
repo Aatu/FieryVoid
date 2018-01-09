@@ -8,8 +8,7 @@ shipManager.movement = {
             var move = {
                 id:-1,
                 type:"deploy",
-                x:pos.x,
-                y:pos.y,
+                position: pos,
                 xOffset:0,
                 yOffset:0,
                 facing:lm.facing,
@@ -31,16 +30,12 @@ shipManager.movement = {
             ship.deploymove = move;
             ship.movement[ship.movement.length] = move;
         }else{
-            ship.deploymove.x = pos.x;
-            ship.deploymove.y = pos.y;
+            ship.deploymove.hex = pos;
         }
 
         if (ship.deploymove && ship.osat || ship.deploymove && ship.base){
     		ship.deploymove.speed = 0;
         }
-        
-        shipManager.drawShip(ship);
-        
     },
 
     doDeploymentTurn: function(ship, right){
@@ -442,7 +437,7 @@ shipManager.movement = {
         var shipX = ship.movement[ship.movement.length-1].x;
         var shipY = ship.movement[ship.movement.length-1].y;
         //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
-        var pos = new hexagon.FVHex(shipX, shipY).getNeighbourAtDirection(lm.heading);
+        var pos = new hexagon.Offset(shipX, shipY).getNeighbourAtDirection(lm.heading);
 		var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
 
 		console.log("moving from", {x:shipX, y:shipY}, "to", pos);
@@ -537,7 +532,7 @@ shipManager.movement = {
         var shipY = ship.movement[ship.movement.length-1].y;
         //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
 
-        var pos = new hexagon.FVHex(shipX, shipY).getNeighbourAtDirection(newheading);
+        var pos = new hexagon.Offset(shipX, shipY).getNeighbourAtDirection(newheading);
 
         console.log("slipping from", {x: shipX, y: shipY}, "to", pos);
 

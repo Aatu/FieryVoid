@@ -81,24 +81,11 @@ window.hexagon.Offset = (function () {
             case Offset.EVEN_R:
                 x = this.q - (this.r + (this.r&1)) / 2;
                 z = this.r;
-                y = -x - z
+                y = -x - z;
                 break;
         }
 
         return new hexagon.Cube(x, y, z).round();
-    };
-
-    Offset.prototype.toFVHex = function () {
-
-        var x = this.q + this.r / 2;
-
-        if (this.r < 0) {
-            x = Math.ceil(x);
-        } else {
-            x = Math.floor(x);
-        }
-
-        return new hexagon.FVHex(x, this.r * -1);
     };
 
     return Offset;

@@ -29,9 +29,11 @@ window.DeploymentPhaseStrategy = (function(){
             return;
         }
 
+        console.log("hi");
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)){
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0){
                 shipManager.movement.deploy(this.selectedShip, hex);
+                console.log("deployed");
                 this.consumeGamedata();
                 this.drawMovementUI(this.selectedShip);
 
@@ -120,6 +122,7 @@ window.DeploymentPhaseStrategy = (function(){
             }
 
             var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
             var offsetPosition = {
                 x: deploymentData.position.x - hexPositionInGame.x,
                 y: deploymentData.position.y - hexPositionInGame.y
@@ -127,6 +130,7 @@ window.DeploymentPhaseStrategy = (function(){
 
             var result = Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width/2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height/2);
 
+            console.log("validation result", result);
             return result;
         }
     }
@@ -138,7 +142,7 @@ window.DeploymentPhaseStrategy = (function(){
             console.log("ONLY BOX DEPLOYMENT TYPE IS SUPPORTED AT THE MOMENT");
         }
 
-        var position = window.coordinateConverter.fromHexToGame(new hexagon.FVHex(slot.depx,slot.depy));
+        var position = window.coordinateConverter.fromHexToGame(new hexagon.Offset(slot.depx,slot.depy));
         var size = {
             width: window.HexagonMath.getHexWidth() * slot.depwidth,
             height: window.HexagonMath.getHexRowHeight() * slot.depheight
@@ -169,7 +173,7 @@ window.DeploymentPhaseStrategy = (function(){
 
     function validateDeploymentPosition(ship, hex, deploymentSprites){
         if (!hex) {
-            hex = new hexagon.FVHex(shipManager.getShipPosition(ship));
+            hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
 
         var icon = getSlotById(ship.slot, deploymentSprites);

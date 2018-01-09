@@ -153,9 +153,5 @@ window.hexagon.Cube = (function(){
         return parseFloat(number.toFixed(hexagon.Cube.PRECISION));
     };
 
-    Cube.prototype.toFVHex = function () {
-        return this.toEvenR().toFVHex();
-    };
-
     return Cube;
 })();

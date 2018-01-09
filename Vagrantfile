@@ -93,6 +93,8 @@ Vagrant.configure("2") do |config|
 
     apt-get install -y git
     apt-get install -y zip
+    apt-get install -y php7.2-dom
+    sudo apt-get install php7.2-mbstring
 
     mkdir /var/www/html
 

@@ -10,3 +10,6 @@
 .project
 composer.phar
 vendor
+doc
+.swp
+nano*

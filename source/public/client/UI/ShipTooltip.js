@@ -115,7 +115,7 @@ window.ShipTooltip = (function(){
     }
 
     function positionElement(element, position){
-        if (position instanceof hexagon.FVHex) {
+        if (position instanceof hexagon.Offset) {
             position = window.coordinateConverter.fromHexToViewport(position);
         }
 
