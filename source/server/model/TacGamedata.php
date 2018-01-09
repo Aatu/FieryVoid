@@ -395,15 +395,15 @@ class TacGamedata{
     }  //endof function getShipsInDistance
 	
 	
-    /*returns all units within desired distance from source ship; distance in hexes
+    /*returns all units within desired distance from source ship; distance in hexes*/
     public function getShipsInDistanceHex($ship, $dis = 0){
 	$shipPos = $ship->getCoPos(); 
 	$ships = $this->getShipsInDistancePosHex($shipPos,$dis);
         return $ships;   
     }  //endof function getShipsInDistanceHex
-    */
+
 	
-    /*returns all units within desired distance from source location; distance in hexes
+    /*returns all units within desired distance from source location; distance in hexes*/
     public function getShipsInDistancePosHex($pos, $dis = 0){
         $ships = array();
         foreach ($this->ships as $ship){
@@ -419,7 +419,7 @@ class TacGamedata{
         
         return $ships;   
     }  //endof function getShipsInDistancePosHex
-		*/		
+			
 				
 				
 				
