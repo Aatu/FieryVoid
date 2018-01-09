@@ -974,7 +974,6 @@ class SparkFieldHandler{
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
-throw new Exception("DEBUG: specialWeapons line 977: before foreach Z");	
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship		
 		foreach(SparkFieldHandler::$sparkFields as $field){
