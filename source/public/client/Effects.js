@@ -338,7 +338,7 @@ window.effects = {
                         
                         if (otherFire.rolled && weapon2.name == weapon.name &&  otherFire.firingMode == fire.firingMode && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
-                            || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y)){
+                            || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y && otherFire.targetid == fire.targetid)){
                                 if (fire.pubnotes == otherFire.pubnotes){
                                     otherFire.animated = true;
                                     fires.push(otherFire);
