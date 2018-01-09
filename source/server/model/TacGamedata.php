@@ -391,11 +391,38 @@ class TacGamedata{
             }
         }
         
-        return $ships;
-             
-             
-    }
+        return $ships;   
+    }  //endof function getShipsInDistance
+	
+	
+    /*returns all units within desired distance from source ship; distance in hexes*/
+    public function getShipsInDistanceHex($ship, $dis = 0){
+	$shipPos = $ship->getCoPos(); 
+	$ships = $this->getShipsInDistancePosHex($shipPos,$dis);
+        return $ships;   
+    }  //endof function getShipsInDistanceHex
     
+	
+    /*returns all units within desired distance from source location; distance in hexes*/
+    public function getShipsInDistancePosHex($pos, $dis = 0){
+        $ships = array();
+        foreach ($this->ships as $ship){
+            if ($ship->unavailable) continue;
+            
+            $shipPos = $ship->getCoPos();
+            $curDis = mathlib::getDistanceHex($pos, $shipPos);
+        
+            if ($curDis <= $dis){
+                $ships[$ship->id] = $ship;
+            }
+        }
+        
+        return $ships;   
+    }  //endof function getShipsInDistancePosHex
+				
+				
+				
+				
     public function prepareForPlayer($turn, $phase, $activeship){
         $this->setWaiting();
         $this->checkChanged($turn, $phase, $activeship);
