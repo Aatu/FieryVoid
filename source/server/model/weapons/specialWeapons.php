@@ -983,7 +983,7 @@ class SparkFieldHandler{
 			$aoe = $field->getAoE($gamedata->turn);
 			$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
 			foreach($inAoE as $target){
-				if ($shooter === $target) continue;//does not threaten self!
+				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating
 				if (in_array($target->id,$alreadyTargeted)) continue; //each target only once
 				
