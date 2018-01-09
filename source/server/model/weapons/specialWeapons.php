@@ -978,7 +978,7 @@ class SparkFieldHandler{
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship
 		foreach(SparkFieldHandler::$sparkFields as $field){
-			$shooter = $gamedata->getShipById($fireOrder->shooterid);
+			$shooter = $field->getUnit();
 			$explosionPos = $shooter->getCoPos();
 			$aoe = $field->getAoE($gamedata->turn);
 			$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
