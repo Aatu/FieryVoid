@@ -591,6 +591,26 @@ class DBManager {
             foreach ($damages as $damage){
                                     
                 $des = ($damage->destroyed) ? 1 : 0;
+		    
+		if ($damage->fireorderid == -1){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+			//read it from database by source, target and weapon ID
+			try{
+				$targetid = $damage->shipid;
+				$shooterid = $damage->shooterid; //additional field
+				$shooterid = $damage->weaponid; //additional field
+				$sql1 = "SELECT fireorderid FROM `B5CGM`.`tac_fireorder` 
+					where gameid = $gameid and turn = $turn
+					  and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid
+				";		
+				$result = $this->query($sql1);
+				if ($result == null || sizeof($result) == 0){ //do nothing
+				}else{
+					$damage->fireorderid = $result[0]->fireorderid;
+				}
+			}catch(Exception $e) { //nothing, keep -1 as ID
+			}
+			
+		}
 
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
