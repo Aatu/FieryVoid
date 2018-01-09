@@ -951,9 +951,9 @@ class SparkFieldHandler{
 	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
 	public static function sortByBoost($fieldA, $fieldB){	    
 		if ($fieldA->boostlevel < $fieldB->boostlevel){ //low boost level first
-		    return -1;
-		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
 		    return 1;
+		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
+		    return -1;
 		}else{
 		    return 0;
 		}   
@@ -978,22 +978,27 @@ class SparkFieldHandler{
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship
 		foreach(SparkFieldHandler::$sparkFields as $field){
-			$shooter = $field->getUnit();
-			$explosionPos = $shooter->getCoPos();
-			$aoe = $field->getAoE($gamedata->turn);
-			$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
-			foreach($inAoE as $target){
-				$validTarget = true;
-				if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
-				if ($target->isDestroyed()) $validTarget = false; //no point allocating
-				if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
-				
-				if ($validTarget) {
-					$alreadyTargeted[] = $target->id; //add to list of already targeted units
-					//create appropriate firing order
-					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0, 0, null);
-					$fire->addToDB = true;
-					$field->fireOrders[] = $fire;
+			$fieldActive = true;
+			if ($this->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
+			if ($this->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
+			if ($fieldActive){
+				$shooter = $field->getUnit();
+				$explosionPos = $shooter->getCoPos();
+				$aoe = $field->getAoE($gamedata->turn);
+				$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
+				foreach($inAoE as $target){
+					$validTarget = true;
+					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
+					if ($target->isDestroyed()) $validTarget = false; //no point allocating
+					if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
+
+					if ($validTarget) {
+						$alreadyTargeted[] = $target->id; //add to list of already targeted units
+						//create appropriate firing order
+						$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0, $aoe, null);
+						$fire->addToDB = true;
+						$field->fireOrders[] = $fire;
+					}
 				}
 			}
 		}
@@ -1042,7 +1047,7 @@ class SparkField extends Weapon{
 	
 	
 	
- 	public $possibleCriticals = array( //no point in range reduced crit
+ 	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
             14=>"ReducedDamage"
 	);
 
@@ -1052,7 +1057,7 @@ class SparkField extends Weapon{
 		    $this->minDamage = 2-$boostlevel;
 		    $this->maxDamage = 7-$boostlevel;
 		    $this->minDamage = max(0,$this->minDamage);
-		    $this->Range = $this->getAoE($turn);
+		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 		      //$this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
@@ -1061,8 +1066,7 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
-
-	    }	
+	    }	//endof function setSystemDataWindow
 	
 	
 	
