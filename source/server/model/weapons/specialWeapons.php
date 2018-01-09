@@ -983,15 +983,18 @@ class SparkFieldHandler{
 			$aoe = $field->getAoE($gamedata->turn);
 			$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));
 			foreach($inAoE as $target){
-				if ($shooter->id == $target->id) continue;//does not threaten self!
-				if ($target->isDestroyed()) continue; //no point allocating
-				if (in_array($target->id,$alreadyTargeted)) continue; //each target only once
+				$validTarget = true;
+				if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
+				if ($target->isDestroyed()) $validTarget = false; //no point allocating
+				if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
 				
-				$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				//create appropriate firing order
-				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0, 0, null);
-				$fire->addToDB = true;
-				$field->fireOrders[] = $fire;
+				if ($validTarget) {
+					$alreadyTargeted[] = $target->id; //add to list of already targeted units
+					//create appropriate firing order
+					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0, 0, null);
+					$fire->addToDB = true;
+					$field->fireOrders[] = $fire;
+				}
 			}
 		}
 	}//endof function createFiringOrders
