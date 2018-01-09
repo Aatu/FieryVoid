@@ -974,9 +974,10 @@ class SparkFieldHandler{
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
-		
+throw new Exception("DEBUG: specialWeapons line 977: before foreach");	
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship
+/*		
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$fieldActive = true;
 			if ($this->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
@@ -984,7 +985,6 @@ class SparkFieldHandler{
 			if ($fieldActive){
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
-throw new Exception("DEBUG: specialWeapons line 987: before getShipsInDistanceHex");			
 				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 				foreach($inAoE as $targetID=>$target){
 					$validTarget = true;
@@ -1002,6 +1002,7 @@ throw new Exception("DEBUG: specialWeapons line 987: before getShipsInDistanceHe
 				}
 			}
 		}
+*/
 	}//endof function createFiringOrders
 	
 }//endof class SparkFieldHandler
@@ -1066,17 +1067,6 @@ class SparkField extends Weapon{
 		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
 		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
 		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
-		    
-				$shooter = $this->getUnit();
-				$explosionPos = $shooter->getCoPos();
-				$aoe = $this->getAoE($turn);
-		    
-			//	$inAoE = $gamedata->getShipsInDistance($explosionPos, (($aoe*mathlib::$hexWidth) + 1));	
-		    $this->data["ExtraAoE"] = $aoe;
-		    /*$this->data["InRng"] = "!";
-				foreach($inAoE as $target){
-					$this->data["InRng"] .= $target->id . ", ";
-				}*/
 	    }	//endof function setSystemDataWindow
 	
 	
