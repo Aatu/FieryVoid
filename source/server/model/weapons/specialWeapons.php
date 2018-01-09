@@ -990,6 +990,8 @@ class SparkFieldHandler{
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				//create appropriate firing order
 				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0, 0, null);
+				$fire->addToDB = true;
+				$field->fireOrders[] = $fire;
 			}
 		}
 	}//endof function createFiringOrders
