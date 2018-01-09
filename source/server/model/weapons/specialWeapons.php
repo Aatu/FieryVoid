@@ -951,9 +951,9 @@ class SparkFieldHandler{
 	//	owner irrelevant, as weapon will damage everything in range except firing unit itself
 	public static function sortByBoost($fieldA, $fieldB){	    
 		if ($fieldA->boostlevel < $fieldB->boostlevel){ //low boost level first
-		    return 1;
-		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
 		    return -1;
+		}else if ($fieldA->boostlevel > $fieldB->boostlevel){
+		    return 1;
 		}else{
 		    return 0;
 		}   
@@ -984,6 +984,7 @@ class SparkFieldHandler{
 			if ($fieldActive){
 				$shooter = $field->getUnit();
 				$aoe = $field->getAoE($gamedata->turn);
+throw new Exception("DEBUG: specialWeapons line 987: before getShipsInDistanceHex");			
 				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 				foreach($inAoE as $targetID=>$target){
 					$validTarget = true;
