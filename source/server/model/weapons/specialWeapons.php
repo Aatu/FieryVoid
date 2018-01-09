@@ -1046,6 +1046,7 @@ class SparkField extends Weapon{
 		    $this->minDamage = 2-$boostlevel;
 		    $this->maxDamage = 7-$boostlevel;
 		    $this->minDamage = max(0,$this->minDamage);
+		    $this->Range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["AoE"] = $this->getAoE($turn);
 		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
