@@ -978,25 +978,21 @@ class SparkFieldHandler{
 		//strongest weapons fire first, and only 1 field affects particular ship	
 $count = count(SparkFieldHandler::$sparkFields);
 		foreach(SparkFieldHandler::$sparkFields as $field){
-			$fieldActive = true;
-			if ($field->isDestroyed($gamedata->turn-1)) $fieldActive = false; //destroyed field does not attack
-			if ($field->isOfflineOnTurn($gamedata->turn)) $fieldActive = false; //disabled field does not attack
-			if ($fieldActive){
-				$shooter = $field->getUnit();
-				$aoe = $field->getAoE($gamedata->turn);
-				$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
-				foreach($inAoE as $targetID=>$target){
-					$validTarget = true;
-					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
-					if ($target->isDestroyed()) $validTarget = false; //no point allocating
+			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
+			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
+			$shooter = $field->getUnit();
+			$aoe = $field->getAoE($gamedata->turn);
+			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
+			foreach($inAoE as $targetID=>$target){
+				if ($shooter->id == $target->id) continue;//does not threaten self!
+				if ($target->isDestroyed()) continue; //no point allocating
 //TEST					if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
-					if ($validTarget) {
-						$alreadyTargeted[] = $target->id; //add to list of already targeted units
-						//create appropriate firing order
-						$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, $count, $aoe, null);
-						$fire->addToDB = true;
-						$field->fireOrders[] = $fire;
-					}
+				if ($validTarget) {
+					$alreadyTargeted[] = $target->id; //add to list of already targeted units
+					//create appropriate firing order
+					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, $aoe,  $count, null);
+					$fire->addToDB = true;
+					$field->fireOrders[] = $fire;
 				}
 			}
 		} //endof foreach SparkField
@@ -1118,7 +1114,7 @@ class SparkField extends Weapon{
 	
 	
 	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-//TEMP		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
+		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
 
@@ -1145,7 +1141,6 @@ class SparkField extends Weapon{
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
 		$damageRolled = max(0,$damageRolled); //cannot do less than 0
-$damageRolled=1;//TEMP		
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
