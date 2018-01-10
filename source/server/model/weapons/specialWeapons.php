@@ -1151,4 +1151,102 @@ class SparkField extends Weapon{
 
 
 
+
+
+
+class SurgeCannon extends Weapon{
+    /*Surge Cannon - Ipsha weapon*/
+        public $name = "SurgeCannon";
+        public $displayName = "Surge Cannon";
+	public $iconPath = "SurgeCannon.png";
+	
+	public $animation = "laser";
+	public $animationColor = array(175, 225, 175);
+	public $animationWidth = 4;
+	public $animationWidth2 = 0.4;
+
+      
+        public $loadingtime = 1;
+	public $intercept = 2; //intercept rating -2
+        
+	
+	
+        public $priority = 8;
+        public $priorityArray = array(1=>9, 2=>8, 3=>8, 4=>7, 5=>7); //weakest mode should go late, more powerful modes early (for Raking weapon)
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Raking",
+                3 => "Raking",
+                4 => "Raking",
+                5 => "Raking"
+            );
+        public $rangePenalty = 2; //-2 hex in single mode
+            public $rangePenaltyArray = array( 1=>2, 2=>array(null,0,1) ); //Raking and Piercing mode
+        public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(1, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+	
+	
+	
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	
+	private $alreadyResolved = false;
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Cooldown period: 2 turns.";  
+		      $this->data["Special"] .= "<br>+1 to all critical rolls made by target this turn.";  
+	    }	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		if ($this->alreadyResolved) return; //effect already applied this turn
+		
+		$this->alreadyResolved = true;
+		if (!($ship instanceof FighterFlight)){
+			$this->critRollMod++; //+1 to all critical rolls made by target this turn 
+		}
+
+	} //endof function onDamagedSystem
+	
+	
+        public function fire($gamedata, $fireOrder){
+            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+            parent::fire($gamedata, $fireOrder);
+		
+		$trgtTurn = $gamedata->turn;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+		$trgtTurn = $gamedata->turn +1;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;		
+        } //endof function fire
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 10;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 9;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function getDamage($fireOrder){        return 21;   }
+        public function setMinDamage(){     $this->minDamage = 21 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 21 ;      }
+} //endof class SurgeCannon
+
+
+
+
 ?>
