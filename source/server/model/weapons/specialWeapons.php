@@ -976,7 +976,6 @@ class SparkFieldHandler{
 		$alreadyTargeted = array();
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship	
-$count = count(SparkFieldHandler::$sparkFields);
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
@@ -984,12 +983,12 @@ $count = count(SparkFieldHandler::$sparkFields);
 			$aoe = $field->getAoE($gamedata->turn);
 			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){
-//TEST				if ($shooter->id == $target->id) continue;//does not threaten self!
-//TEST				if ($target->isDestroyed()) continue; //no point allocating
+				if ($shooter->id == $target->id) continue;//does not threaten self!
+				if ($target->isDestroyed()) continue; //no point allocating
 //TEST					if (in_array($target->id,$alreadyTargeted)) continue; //each target only once
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				//create appropriate firing order
-				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, $aoe,  $count, null);
+				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
 				$fire->addToDB = true;
 				$field->fireOrders[] = $fire;
 			}
