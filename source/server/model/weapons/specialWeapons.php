@@ -989,7 +989,7 @@ $count = count(SparkFieldHandler::$sparkFields);
 					$validTarget = true;
 					if ($shooter->id == $target->id) $validTarget = false;//does not threaten self!
 					if ($target->isDestroyed()) $validTarget = false; //no point allocating
-					if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
+//TEST					if (in_array($target->id,$alreadyTargeted)) $validTarget = false; //each target only once
 					if ($validTarget) {
 						$alreadyTargeted[] = $target->id; //add to list of already targeted units
 						//create appropriate firing order
