@@ -894,7 +894,7 @@ class EmBolter extends Weapon{
 		
 		$this->alreadyResolved = true;
 		if (!($ship instanceof FighterFlight)){
-			$this->critRollMod++; //+1 to all critical rolls made by target this turn 
+			$ship->critRollMod++; //+1 to all critical rolls made by target this turn 
 		}
 
 	} //endof function onDamagedSystem
@@ -1183,7 +1183,7 @@ class SurgeCannon extends Weapon{
         public $rangePenalty = 2; //-2 hex in single mode
             public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
         public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(2, 2, 2), 2=>array(1,3,3), 3=>array(1,3,3), 4=>array(-2,4,4), 5=>array(-4,4,4) ); //Raking and Piercing mode
+            public $fireControlArray = array( 1=>array(2, 2, 2), 2=>array(1,3,3), 3=>array(0,4,4), 4=>array(-2,4,4), 5=>array(-4,4,4) ); //Raking and Piercing mode
 	
 	
 	
@@ -1192,25 +1192,24 @@ class SurgeCannon extends Weapon{
 
 	
 	
-	private $alreadyResolved = false;
-	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Cooldown period: 2 turns.";  
-		      $this->data["Special"] .= "<br>+1 to all critical rolls made by target this turn.";  
+		      $this->data["Special"] = "Can combine multiple Surge Cannons into a single shot with increased range and damage (and cooldown):";  
+		      $this->data["Special"] .= "<br> - 2 SC: 5-23 dmg, -1/hex"; 
+		      $this->data["Special"] .= "<br> - 3 SC: 9-36 dmg, -1/2 hexes"; 
+		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1/3 hexes"; 
+		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1/4 hexes"; 
+		      $this->data["Special"] .= "<br>If You allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in basic mode instead.";  
+		      $this->data["Special"] .= "<br>Cooldown period: 1 less than number of weapons combining.";  
+		      $this->data["Special"] .= "<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
 	    }	
 	
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		
+		//each rake (that causes actual damage!) causes +2 mod on critical roll for hit system! 
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
-		if ($this->alreadyResolved) return; //effect already applied this turn
-		
-		$this->alreadyResolved = true;
-		if (!($ship instanceof FighterFlight)){
-			$this->critRollMod++; //+1 to all critical rolls made by target this turn 
-		}
-
+		$system->critRollMod+=2; 
 	} //endof function onDamagedSystem
 	
 	
@@ -1218,35 +1217,97 @@ class SurgeCannon extends Weapon{
             // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
             parent::fire($gamedata, $fireOrder);
 		
-		$trgtTurn = $gamedata->turn;
+	    for($i = 1; $i<$this->firingMode;$i++){
+		$trgtTurn = $gamedata->turn+$i-1;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
-		$trgtTurn = $gamedata->turn +1;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
-                $this->criticals[] =  $crit;		
+	    }
         } //endof function fire
+	
+	
+	
+	//if fired in higher mode - combine with other weapons that are so fired!
+	public function beforeFiringOrderResolution($gamedata){
+		
+		
+		
+		
+	}//endof function beforeFiringOrderResolution
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 10;
+                $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 9;
+                $powerReq = 3;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
-        public function getDamage($fireOrder){        return 21;   
-					     
-					     
-					     }
-        public function setMinDamage(){     $this->minDamage = 21 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 21 ;      }
+	
+        public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 1)+1; //1 SC
+				break;
+			case 2:
+				return Dice::d(10, 2)+3; //2 SC
+				break;
+			case 3
+				return Dice::d(10, 3)+6; //3 SC
+				break;
+			case 4:
+				return Dice::d(10, 4)+10; //4 SC
+				break;
+			case 5:
+				return Dice::d(10, 5)+15; //5 SC
+				break;
+		}
+	}
+        public function setMinDamage(){    
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 2;
+				break;
+			case 2:
+				$this->minDamage = 5;
+				break;	
+			case 3:
+				$this->minDamage = 9;
+				break;	
+			case 4:
+				$this->minDamage = 14;
+				break;	
+			case 5:
+				$this->minDamage = 20;
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 11;
+				break;
+			case 2:
+				$this->minDamage = 23;
+				break;	
+			case 3:
+				$this->minDamage = 36;
+				break;	
+			case 4:
+				$this->minDamage = 50;
+				break;	
+			case 5:
+				$this->minDamage = 65;
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;  
+	}
 } //endof class SurgeCannon
 
 
