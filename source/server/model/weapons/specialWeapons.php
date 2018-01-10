@@ -1181,9 +1181,9 @@ class SurgeCannon extends Weapon{
                 5 => "Raking"
             );
         public $rangePenalty = 2; //-2 hex in single mode
-            public $rangePenaltyArray = array( 1=>2, 2=>array(null,0,1) ); //Raking and Piercing mode
-        public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(1, 4, 5), 2=>array(null,0,1) ); //Raking and Piercing mode
+            public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
+        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(2, 2, 2), 2=>array(1,3,3), 3=>array(1,3,3), 4=>array(-2,4,4), 5=>array(-4,4,4) ); //Raking and Piercing mode
 	
 	
 	
@@ -1241,7 +1241,10 @@ class SurgeCannon extends Weapon{
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 	
-        public function getDamage($fireOrder){        return 21;   }
+        public function getDamage($fireOrder){        return 21;   
+					     
+					     
+					     }
         public function setMinDamage(){     $this->minDamage = 21 ;      }
         public function setMaxDamage(){     $this->maxDamage = 21 ;      }
 } //endof class SurgeCannon
