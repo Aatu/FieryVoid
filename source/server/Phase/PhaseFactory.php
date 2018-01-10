@@ -12,6 +12,12 @@ class PhaseFactory
         switch($phase) {
             case -2:
                 return new BuyingGamePhase();
+            case -1:
+                return new DeploymentGamePhase();
+            case 1:
+                return new InitialOrdersGamePhase();
+            case 2:
+                return new MovementGamePhase();
             default:
                 throw new Exception("Unrecognized phase '$phase'");
         }

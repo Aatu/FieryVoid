@@ -1463,6 +1463,7 @@ class DBManager {
 
             while( $stmt->fetch())
             {
+                //Debug::log("get ship by id '$shipId'\n");
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData($data, $subsystem);
             }
             $stmt->close();

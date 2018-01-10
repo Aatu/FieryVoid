@@ -121,28 +121,27 @@ window.hexagon.Cube = (function(){
         });
 
         return index;
-    }
+    };
 
-    Cube.prototype.toEvenR = function()
+    Cube.prototype.toOffset = function()
     {
         var q = this.x + (this.z + (this.z & 1)) / 2;
         var r = this.z;
 
         var Offset = hexagon.Offset;
 
-        return new Offset(q, r, Offset.EVEN_R);
-    }
+        return new Offset(q, r); //EVEN_R
+    };
 
-    Cube.prototype.toOddR = function()
+/*
+    Cube.prototype.toOffset = function()
     {
         var q = this.x + (this.z - (this.z & 1)) / 2;
         var r = this.z;
 
-        var Offset = hexagon.Offset;
-
-        return new Offset(q, r, Offset.ODD_R);
-    }
-
+        return new hexagon.Offset(q, r); //ODD_R
+    };
+*/
     Cube.prototype.toString = function()
     {
         return "(" + this.x + "," + this.y + "," + this.z + ")";

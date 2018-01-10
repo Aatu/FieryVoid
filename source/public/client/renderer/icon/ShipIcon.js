@@ -128,8 +128,8 @@ window.ShipIcon = (function (){
     };
 
     ShipIcon.prototype.consumeMovement = function(movements){
+        //console.log(JSON.stringify(movements));
         return movements.map(function(movement) {
-            console.log(movement);
             return {
                 id: movement.id,
                 type: movement.type,

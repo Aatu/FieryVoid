@@ -262,7 +262,8 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function() {
         var ship = gamedata.getFirstFriendlyShip();
-
+        //TODO: Scroll to ship?
+        //TODO: what about active ship?
         if (ship) {
             this.selectShip(ship);
         }

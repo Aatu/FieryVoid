@@ -367,8 +367,6 @@ window.ew = {
         if (entry.amount<1){
             var i = $.inArray(entry, ship.EW);
             ship.EW.splice(i, 1);
-            ew.RemoveEWEffects(ship);
-            ew.adEWindicators(ship);
             e.data("EW", "");
         }
         gamedata.shipStatusChanged(ship);

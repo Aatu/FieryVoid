@@ -10,17 +10,23 @@ class OffsetCoordinate
      * @var integer
      */
     public $r;
-    
-    private const ODD_R = 2;
-    
+
     private const NEIGHBOURS = [
         [
-            ["q"=> 1, "r"=> 0], ["q"=> 0, "r"=> -1], ["q"=> -1, "r"=> -1],
-            ["q"=> -1, "r"=> 0], ["q"=> -1, "r"=> 1], ["q"=> 0, "r"=> 1]
+            ["q"=> 1, "r"=> 0],
+            ["q"=> 1, "r"=> -1],
+            ["q"=> 0, "r"=> -1],
+            ["q"=> -1, "r"=> 0],
+            ["q"=> 0, "r"=> 1],
+            ["q"=> 1, "r"=> 1]
         ],
         [
-            ["q"=> 1, "r"=> 0], ["q"=> 1, "r"=> -1], ["q"=> 0, "r"=> -1],
-            ["q"=> -1, "r"=> 0], ["q"=> 0, "r"=> 1], ["q"=> 1, "r"=> 1]
+            ["q"=> 1, "r"=> 0],
+            ["q"=> 0, "r"=> -1],
+            ["q"=> -1, "r"=> -1],
+            ["q"=> -1, "r"=> 0],
+            ["q"=> -1, "r"=> 1],
+            ["q"=> 0, "r"=> 1]
         ]
     ];
 
@@ -29,7 +35,10 @@ class OffsetCoordinate
         if ($q instanceof OffsetCoordinate) {
             $this->q = $q->q;
             $this->r = $q->r;
-        } else {
+        } else if (isset($q["q"]) && isset($q["r"])) {
+            $this->q = $q["q"];
+            $this->r = $q["r"];
+        }else {
             $this->q = (int)$q;
             $this->r = (int)$r;
         }
@@ -56,9 +65,10 @@ class OffsetCoordinate
 
     public function toCube(): CubeCoordinate
     {
-        $x = $this->q - ($this->r - ($this->r & 1)) / 2;
+        $x = $this->q - ($this->r + ($this->r & 1)) / 2;
         $z = $this->r;
         $y = -$x - $z;
+
         return (new CubeCoordinate($x, $y, $z))->round();
     }
 }

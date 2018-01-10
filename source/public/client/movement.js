@@ -30,7 +30,7 @@ shipManager.movement = {
             ship.deploymove = move;
             ship.movement[ship.movement.length] = move;
         }else{
-            ship.deploymove.hex = pos;
+            ship.deploymove.position = pos;
         }
 
         if (ship.deploymove && ship.osat || ship.deploymove && ship.base){
@@ -63,7 +63,6 @@ shipManager.movement = {
 
         if (newSpeed >= 3 && newSpeed <= 7){
             ship.deploymove.speed += value;
-            shipManager.drawShip(ship);
         }
     },
 
@@ -125,7 +124,6 @@ shipManager.movement = {
             
             var shipwindow = $(".shipwindow_"+ship.id);
             shipWindowManager.cancelAssignThrust(shipwindow);
-            shipManager.drawShip(ship);
             gamedata.shipStatusChanged(ship);
         }
     },
@@ -242,8 +240,7 @@ shipManager.movement = {
 			ship.movement[ship.movement.length] = {
                 id:-1,
 				type:"jink",
-				x:lm.x,
-				y:lm.y,
+                position: lm.position,
 				xOffset:lm.xOffset,
 				yOffset:lm.yOffset,
 				facing:lm.facing,
@@ -312,8 +309,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:"roll",
-            x:lm.x,
-            y:lm.y,
+            position: lm.position,
             xOffset:lm.xOffset,
             yOffset:lm.xOffset,
             facing:lm.facing,
@@ -432,21 +428,17 @@ shipManager.movement = {
             return false;
             
         var lm = ship.movement[ship.movement.length-1];
-        
-        var angle = shipManager.hexFacingToAngle(lm.heading);
-        var shipX = ship.movement[ship.movement.length-1].x;
-        var shipY = ship.movement[ship.movement.length-1].y;
-        //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
-        var pos = new hexagon.Offset(shipX, shipY).getNeighbourAtDirection(lm.heading);
+
+        var lastPosition = ship.movement[ship.movement.length-1].position;
+        var pos = new hexagon.Offset(lastPosition).getNeighbourAtDirection(lm.heading);
 		var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
 
-		console.log("moving from", {x:shipX, y:shipY}, "to", pos);
+		console.log("moving from", lastPosition, "to", pos);
 
         ship.movement[ship.movement.length] = {
             id:-1,
             type:"move",
-            x:pos.x,
-            y:pos.y,
+            position: pos,
             xOffset:off.xO,
             yOffset:off.yO,
             facing:lm.facing,
@@ -621,8 +613,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:name,
-            x:pos.x,
-            y:pos.y,
+            position: pos,
             xOffset:off.xO,
             yOffset:off.yO,
             facing:lm.facing,
@@ -707,8 +698,7 @@ shipManager.movement = {
             ship.movement[ship.movement.length] = {
                 id:-1,
                 type:name,
-                x:lm.x,
-                y:lm.y,
+                position: lm.position,
                 xOffset:lm.xOffset,
                 yOffset:lm.yOffset,
                 facing:facing,
@@ -858,8 +848,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:name,
-            x:lm.x,
-            y:lm.y,
+            position: lm.position,
             xOffset:lm.xOffset,
             yOffset:lm.yOffset,
             facing:newfacing,
@@ -903,8 +892,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:name,
-            x:lm.x,
-            y:lm.y,
+            position: lm.position,
             xOffset:lm.xOffset,
             yOffset:lm.yOffset,
             facing:facing,
@@ -1311,8 +1299,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:"speedchange",
-            x:lm.x,
-            y:lm.y,
+            position: lm.position,
             xOffset:lm.xOffset,
             yOffset:lm.yOffset,
             facing:lm.facing,
@@ -1795,9 +1782,6 @@ shipManager.movement = {
             shipManager.movement.doDeploymentTurn(ship, right);
             return;
         }
-            
-        var commit = false;
-        var assignedThrust = Array();
         
         if (ship.flight){
             if(shipManager.movement.canTurnIntoPivot(ship, right)){
@@ -1854,8 +1838,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:name,
-            x:lastMovement.x,
-            y:lastMovement.y,
+            position: lastMovement.position,
             xOffset:lastMovement.xOffset,
             yOffset:lastMovement.yOffset,
             facing:lastMovement.facing,
@@ -1915,8 +1898,7 @@ shipManager.movement = {
         ship.movement[ship.movement.length] = {
             id:-1,
             type:name,
-            x:lastMovement.x,
-            y:lastMovement.y,
+            position: lastMovement.position,
             xOffset:lastMovement.xOffset,
             yOffset:lastMovement.yOffset,
             facing:newfacing,
@@ -1933,9 +1915,8 @@ shipManager.movement = {
             turn:gamedata.turn,
             forced:false,
             value:0
-        }
+        };
 
-        hexgrid.unSelectHex();
 
         if (!ship.flight){
             shipManager.movement.autoAssignThrust(ship)
@@ -2366,7 +2347,7 @@ shipManager.movement = {
         return reversed;
     },
     
-    
+    /*
     addMove: function(ship, name, x, y, facing, heading, speed, animated, requiredThrust, commit, preturn, forced){
         
         ship.movement[ship.movement.length] = {
@@ -2392,10 +2373,11 @@ shipManager.movement = {
             value:0
         }
     },
+    */
     
 
 	getMovementOffsetPos: function(ship, heading, pos){
-		
+		//TODO: support new renderer
 		if (!hexgrid.isOccupiedPos(pos)){
 			return {xO:0, yO:0};
 		}
@@ -2407,15 +2389,11 @@ shipManager.movement = {
 		
 		
 		return hexgrid.getOffsetPositionInHex(pos, dir, per, true)
-				
-	
-	
 	},
     
     moveToHex: function(ship, hex, hexpos, shippos){
         
         var movedist = Math.round(shipManager.movement.getRemainingMovement(ship)*hexgrid.hexWidth());
-        var drawmore = false;
 
         if (Math.round(mathlib.getDistance(shippos, hexpos)) < movedist){
            movedist = Math.round(mathlib.getDistance(shippos, hexpos));
@@ -2428,6 +2406,7 @@ shipManager.movement = {
 
     },
 
+    /*
     moveStraightForwardHex: function(hex, selected){
         var ship = gamedata.getActiveShip();
         
@@ -2502,7 +2481,7 @@ shipManager.movement = {
         return effect;
     
     },
-
+*/
     getMovementPseudoId: function(move, index) {
         if (index === undefined) {
             index = "";

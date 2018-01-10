@@ -1807,13 +1807,8 @@ setSystemData: function(ship, system, shipwindow){
 			$(".enableAssignThrust").removeClass("enableAssignThrust");
 			$("#botPanel .exists").removeClass("exists");
 			shipWindowManager.setData(ship);
-			shipManager.drawShip(ship);
 			gamedata.shipStatusChanged(ship);
 		}
-		
-		
-		
-		
 	},
 	
 	cancelAssignThrustEvent: function(){

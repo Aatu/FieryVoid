@@ -21,6 +21,7 @@ window.ShipMovementAnimation = (function(){
 
     function buildCurves(startingMove, moves) {
         return moves.map(function(move, i){
+            console.log("build curves");
             var start = i === 0 ? startingMove : moves[i-1];
             var startGuide = projectForward(start.heading, start.position);
             var end = move;

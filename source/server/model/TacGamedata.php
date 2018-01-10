@@ -412,7 +412,7 @@ class TacGamedata{
             $this->ships = array();
         }
         
-        
+        return $this;
     }
     
     private function setPreTurnTasks(){

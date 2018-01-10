@@ -17,6 +17,8 @@ window.InitialPhaseStrategy = (function(){
     InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         console.log("enabled initial phase strategy");
+        infowindow.informPhase(5000, function(){});
+        shipManager.power.repeatLastTurnPower();
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
         return this;
@@ -61,7 +63,6 @@ window.InitialPhaseStrategy = (function(){
     InitialPhaseStrategy.prototype.targetShip = function(ship) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
-        //TODO: Targeting ship with
         addOEW(this.selectedShip, ship);
     };
 

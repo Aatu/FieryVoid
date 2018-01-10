@@ -36,9 +36,6 @@ class GameCreationTest extends TestBase
         return $gamedata;
     }
 
-
-    private $createGameData = '{"gamename":"Test game","background":"3d_space_80.jpg","slots":[{"id":1,"team":1,"name":"BLUE","points":3500,"depx":-21,"depy":0,"deptype":"box","depwidth":10,"depheight":30,"depavailable":0},{"id":2,"team":2,"name":"RED","points":3500,"depx":21,"depy":0,"deptype":"box","depwidth":10,"depheight":30,"depavailable":0}],"gamespace":"-1x-1","flight":""}';
-
     /**
      *  @test
      */
@@ -50,18 +47,6 @@ class GameCreationTest extends TestBase
         //$this->getDatabase()->endTransaction(false, true);
     }
 
-    private $buyShipDataForUser1 = '[
-        {"phpclass": "Gquan", "id": 1, "userid": 1, "name": "test ship 3", "slot": 1},
-        {"phpclass": "frazi", "id": 2, "userid": 1, "name": "test flight", "slot": 1, "flightSize": 5}
-    ]';
-
-    private $buyShipDataForUser2 = '[
-        {"phpclass": "Gquan", "id": 3, "userid": 2, "name": "test ship 1", "slot": 2},
-        {"phpclass": "Gquan", "id": 4, "userid": 2, "name": "test ship 2", "slot": 2}
-    ]';
-
-
-
     /**
      * @test
      * @depends testCreateGame
@@ -71,9 +56,9 @@ class GameCreationTest extends TestBase
         $gameId = Manager::createGame(1, $this->createGameData);
         $gameData = $this->getDatabase()->getTacGamedata(1, $gameId);
         $this->assertNotNull($gameData);
-        $this->assertNotError(Manager::submitTacGamedata($gameId, 1, $gameData->turn, $gameData->phase, $gameData->activeship, $this->buyShipDataForUser1, $gameData->status, 1));
+        $this->assertNotError(Manager::submitTacGamedata($gameId, 1, $gameData->turn, $gameData->phase, $gameData->activeship, json_encode($this->buyShipDataForUser1()), $gameData->status, 1));
         Manager::takeSlot(2, $gameId, 2);
-        $this->assertNotError(Manager::submitTacGamedata($gameId, 2, $gameData->turn, $gameData->phase, $gameData->activeship, $this->buyShipDataForUser2, $gameData->status, 2));
+        $this->assertNotError(Manager::submitTacGamedata($gameId, 2, $gameData->turn, $gameData->phase, $gameData->activeship, json_encode($this->buyShipDataForUser2()), $gameData->status, 2));
 
 
         $gameDataForPlayer1 = $this->getDatabase()->getTacGamedata(1, $gameId);
@@ -89,14 +74,6 @@ class GameCreationTest extends TestBase
         $this->assertTrue( count($gameDataForPlayer1->ships[3]->systems) === 5);
     }
 
-    private function assertNotError($json) {
-        $data = json_decode($json, true);
-        if (isset($data["error"])) {
-            throw new Exception($data["error"]);
-        }
-        $this->assertFalse(isset($data["error"]));
-
-    }
     /*
     public function hitLocation()
     {

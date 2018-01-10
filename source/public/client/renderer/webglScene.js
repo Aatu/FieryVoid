@@ -328,7 +328,7 @@ window.webglScene = (function(){
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log(hexPos);
+        console.log(pos, hexPos);
         //console.log("click", payload.hex, payload.hex.toOffset());
         /*
         var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);

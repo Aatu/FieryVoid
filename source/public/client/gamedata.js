@@ -23,7 +23,7 @@ gamedata = {
     
     mouseOverShipId: -1,
     
-        
+    /*
     selectShip: function(ship, add){
         if (!add){
             for (var i in gamedata.selectedShips){
@@ -47,6 +47,7 @@ gamedata = {
         
         
     },
+
     
     targetShip: function(ship, add){
         if (!add){
@@ -68,7 +69,7 @@ gamedata = {
         } 
         
     },
-    
+    */
     elintShips: Array(),
     
     getElintShips: function(){
@@ -81,7 +82,7 @@ gamedata = {
         }
         return gamedata.elintShips;
     },
-    
+    /*
     unTargetShip: function(ship){
         
     },
@@ -89,10 +90,8 @@ gamedata = {
     unSelectShip: function(ship){
         if (gamedata.gamephase == 3)
             UI.shipMovement.hide();
-        ew.RemoveEWEffectsFromShip(ship);
         gamedata.selectedSystems = Array();
     },
-    
     isTargeted: function(ship){
         if ($.inArray(ship, gamedata.targetedShips) >= 0)
             return true;
@@ -106,7 +105,8 @@ gamedata = {
             
         return false;
     },
-    
+
+    */
     getSelectedShip: function(){
         for (var i in gamedata.selectedShips){
             return gamedata.selectedShips[i];
@@ -509,22 +509,7 @@ gamedata = {
             gamedata.shipStatusChanged(gamedata.ships[i]);
         }
 //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
-        if (gamedata.gamephase == -1){
-            if (gamedata.waiting == false){
-                //TODO: move to new renderer
-                combatLog.onTurnStart();
-                infowindow.informPhase(5000, null);
 
-                for (var i in gamedata.ships){
-                    var ship = gamedata.ships[i];
-                    if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
-                        gamedata.selectShip(ship, false);
-                        scrolling.scrollToShip(ship);
-                        break;
-                    }
-                }
-            }     
-        }
         
         if (gamedata.gamephase == 4){
             if (gamedata.waiting == false){
@@ -573,19 +558,8 @@ gamedata = {
         }
           
         if (gamedata.gamephase == 1 && gamedata.waiting == false){
-            //TODO: move to new renderer
-            shipManager.power.repeatLastTurnPower();
-            infowindow.informPhase(5000, function(){shipWindowManager.prepare()});
-            if (gamedata.waiting == false){
-                for (var i in gamedata.ships){
-                    var ship = gamedata.ships[i];
-                    if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
-                        gamedata.selectShip(ship, false);
-                        scrolling.scrollToShip(ship);
-                        break;
-                    }
-                }
-            }
+
+
         }
         
         if (gamedata.gamephase == 3 && gamedata.waiting == false){

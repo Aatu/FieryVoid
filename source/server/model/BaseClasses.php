@@ -3,7 +3,7 @@
 
 class SystemData
 {
-    public static $allData = Array();
+    private static $allData = Array();
     
     public $systemid, $subsystem, $shipid;
     public $data = Array();
@@ -24,7 +24,13 @@ class SystemData
         $json = "{".implode(",", $this->data)."}";
         return $json;
     }
-    
+
+    public static function getAndPurgeAllSystemData() {
+        $data = self::$allData;
+        self::$allData = [];
+        return $data;
+    }
+
     public static function addDataForSystem($systemid, $subsystem, $shipid, $data)
     {
         // with new dualWeapon implementation: ignore subsystem

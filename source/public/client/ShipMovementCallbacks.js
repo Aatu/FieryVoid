@@ -40,7 +40,7 @@ window.ShipMovementCallbacks = (function(){
 
         shipManager.movement.doRoll(this.ship);
         this.updateCallback();
-    },
+    };
 
     ShipMovementCallbacks.prototype.pivotrightCallback = function(e){
         e.stopPropagation();

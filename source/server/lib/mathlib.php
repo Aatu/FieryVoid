@@ -167,28 +167,12 @@ class Mathlib{
     }
     
     
-    public static function hexCoToPixel($h, $v){
+    public static function hexCoToPixel(OffsetCoordinate $position){
         $hl = 50;
-        $a = $hl*0.5;
-        $b = $hl*0.8660254; //0.86602540378443864676372317075294
-                
-        $x  = 0;
-        $y = 0;
-      
-        if ($v%2 == 0){
-            $x = $h*$b*2;
-        }else{
-            $x = $h*$b*2-$b;
-        }
-        
-        $y = $v*$hl*2-($a*$v);
-        
-        $x -= $b*2;
-        $y -= $hl*1.5;
-                
-        $x += $b;
-        $y += $hl;
-        
+
+        $x = $hl * sqrt(3) * ($position->q - 0.5 * ($position->r & 1));
+        $y = $hl * 3/2 * $position->r;
+
         return array("x"=>$x, "y"=>$y);
     }
     

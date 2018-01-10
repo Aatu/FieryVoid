@@ -1,28 +1,38 @@
 <?php
 
-class Deployment 
+class DeploymentGamePhase implements Phase
 {
-    private static function getValidDeploymentArea($ship)
+    public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
-        if ($ship->team == 1){
-            return array("x" => -30, "y" => 0, "w" => 16, "h" => 50);
-        }else{
-            return array("x" => 30, "y" => 0, "w" => 16, "h" => 50);
-        }
+        $gameData->setPhase(1);
+
+        $dbManager->updateGamedata($gameData);
     }
-    
+
+    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    {
+        $moves = $this->validateDeployment($gameData, $ships);
+        foreach ($moves as $shipid=>$move)
+        {
+            $dbManager->insertMovement($gameData->id, $shipid, $move);
+        }
+
+        $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
+    }
+
     private static function validateDeploymentArea($gamedata, $ship, $move){
-        
+
         $slot = $gamedata->slots[$ship->slot];
-        $hexpos = Mathlib::hexCoToPixel($move->x, $move->y);
-        
-        $deppos = Mathlib::hexCoToPixel($slot->depx, $slot->depy);
-        
+        $hexpos = Mathlib::hexCoToPixel($move->position);
+
+        $deppos = Mathlib::hexCoToPixel(new OffsetCoordinate($slot->depx, $slot->depy));
+
+        //TODO: Test this properly. I have no faith in it.
         if ($slot->deptype == "box"){
             $depw = $slot->depwidth*Mathlib::$hexWidth;
             $deph = $slot->depheight*Mathlib::$hexHeight;
-            if ($hexpos["x"] <= ($deppos["x"]+($depw/2)) && $hexpos["x"] > ($deppos["x"]-($depw/2))){
-                if ($hexpos["y"] <= ($deppos["y"]+($deph/2)) && $hexpos["y"] >= ($deppos["y"]-($deph/2))){
+            if ($hexpos["x"] < ($deppos["x"]+($depw/2)) && $hexpos["x"] > ($deppos["x"]-($depw/2))){
+                if ($hexpos["y"] < ($deppos["y"]+($deph/2)) && $hexpos["y"] > ($deppos["y"]-($deph/2))){
                     return true;
                 }
             }
@@ -37,27 +47,27 @@ class Deployment
                 return true;
             }
         }
-         
-         
+
+
         return false;
-        
+
     }
-    
-    public static function validateDeployment($gamedata, $ships)
+
+    private static function validateDeployment(TacGamedata $gamedata, $ships)
     {
         $shipIdMoves = array();
         foreach ($ships as $ship)
         {
             if ($ship->userid !== $gamedata->forPlayer)
                 continue;
-                
+
             $moves = array();
             $found = false;
             foreach ($ship->movement as $move)
             {
                 if ($found)
                     throw new Exception("Deployment validation failed: Found more than one deployment entry for ship $ship->name.");
-                
+
                 if ($move->type == "deploy")
                 {
                     $found = true;
@@ -67,18 +77,17 @@ class Deployment
                         $moves[] = $move;
                         $servership->movement[] = $move;
                     }else{
-                        throw new Exception("Deployment validation failed: Illegal placement. Ship: " . $ship->name . "(".$move->x .",".$move->y.")");
+                        throw new Exception("Deployment validation failed: Illegal placement. Ship: " . $ship->name . "(".$move->position->q .",".$move->position->r.")");
                     }
                 }
             }
-            
+
             if (!$found)
                 throw new Exception("Deployment validation failed: Entry not found for ship $ship->name.");
-            
+
             $shipIdMoves[$ship->id] = $moves;
         }
-        
+
         return $shipIdMoves;
     }
-    
 }

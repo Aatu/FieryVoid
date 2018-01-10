@@ -48,10 +48,10 @@ class BuyingGamePhase implements Phase
         }
 
         $dbManager->insertShips($servergamedata->id, $servergamedata->ships);
-        $dbManager->insertSystemData(SystemData::$allData);
+        $dbManager->insertSystemData(SystemData::getAndPurgeAllSystemData());
     }
 
-    public function process(TacGamedata $gameData, DBManager $dbManager, $ships)
+    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         $seenSlots = array();
         foreach($gameData->slots as $slot)

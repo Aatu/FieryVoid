@@ -120,7 +120,7 @@ class CubeCoordinate
     }
 
     public function toOffset() {
-        $q = $this->x + ($this->z - ($this->z & 1)) / 2;
+        $q = $this->x + ($this->z + ($this->z & 1)) / 2;
         $r = $this->z;
 
         return new OffsetCoordinate($q, $r);

@@ -12,14 +12,20 @@ window.DeploymentPhaseStrategy = (function(){
     DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
-        console.log(gamedata);
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);
 
+        combatLog.onTurnStart();
+        infowindow.informPhase(5000, null);
         this.selectFirstOwnShipOrActiveShip();
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
 
         return this;
+    };
+
+    DeploymentPhaseStrategy.prototype.deactivate = function () {
+        PhaseStrategy.prototype.deactivate.call(this);
+        this.deploymentSprites.hide();
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function(payload) {
@@ -29,11 +35,9 @@ window.DeploymentPhaseStrategy = (function(){
             return;
         }
 
-        console.log("hi");
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)){
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0){
                 shipManager.movement.deploy(this.selectedShip, hex);
-                console.log("deployed");
                 this.consumeGamedata();
                 this.drawMovementUI(this.selectedShip);
 
@@ -128,10 +132,7 @@ window.DeploymentPhaseStrategy = (function(){
                 y: deploymentData.position.y - hexPositionInGame.y
             };
 
-            var result = Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width/2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height/2);
-
-            console.log("validation result", result);
-            return result;
+            return Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width/2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height/2);
         }
     }
 

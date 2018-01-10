@@ -8,40 +8,31 @@ window.hexagon.Offset = (function () {
             var offset = q;
             this.q = offset.q;
             this.r = offset.r;
-            this.layout = typeof q.layout === 'undefined' ? hexagon.Offset.ODD_R : q.layout;
         } else {
             this.q = q;
             this.r = r;
-            this.layout = typeof layout === 'undefined' ? hexagon.Offset.ODD_R : layout;
         }
     }
 
     Offset.EVEN_R = 1;
     Offset.ODD_R = 2;
 
-    Offset.prototype.neighbours = {};
-
-    Offset.prototype.neighbours[
-        Offset.EVEN_R] = [
+    Offset.prototype.neighbours = [
         [
-            {q: 1, r: 0}, {q: 1, r: -1}, {q: 0, r: -1},
-            {q: -1, r: 0}, {q: 0, r: 1}, {q: 1, r: 1}
+            {q: 1, r: 0},
+            {q: 1, r: -1},
+            {q: 0, r: -1},
+            {q: -1, r: 0},
+            {q: 0, r: 1},
+            {q: 1, r: 1}
         ],
         [
-            {q: 1, r: 0}, {q: 0, r: -1}, {q: -1, r: -1},
-            {q: -1, r: 0}, {q: -1, r: 1}, {q: 0, r: 1}
-        ]
-    ];
-
-    Offset.prototype.neighbours[
-        Offset.ODD_R] = [
-        [
-            {q: 1, r: 0}, {q: 0, r: -1}, {q: -1, r: -1},
-            {q: -1, r: 0}, {q: -1, r: 1}, {q: 0, r: 1}
-        ],
-        [
-            {q: 1, r: 0}, {q: 1, r: -1}, {q: 0, r: -1},
-            {q: -1, r: 0}, {q: 0, r: 1}, {q: 1, r: 1}
+            {q: 1, r: 0},
+            {q: 0, r: -1},
+            {q: -1, r: -1},
+            {q: -1, r: 0},
+            {q: -1, r: 1},
+            {q: 0, r: 1}
         ]
     ];
 
@@ -49,7 +40,7 @@ window.hexagon.Offset = (function () {
     Offset.prototype.getNeighbours = function () {
         var neighbours = [];
 
-        this.neighbours[this.layout][this.r & 1].forEach(function (neighbour) {
+        this.neighbours[this.r & 1].forEach(function (neighbour) {
             neighbours.push(this.add(neighbour));
         }, this);
 
@@ -60,17 +51,28 @@ window.hexagon.Offset = (function () {
         var q = this.q + offset.q;
         var r = this.r + offset.r;
 
-        return new hexagon.Offset(q, r, this.layout);
+        return new hexagon.Offset(q, r);
     };
 
     Offset.prototype.equals = function (offset) {
         return this.q === offset.q &&
-            this.r === offset.r &&
-            this.layout === offset.layout;
+            this.r === offset.r;
+    };
+
+    Offset.prototype.getNeighbourAtDirection = function (direction) {
+      var neighbours = this.getNeighbours();
+
+      console.log("getting neighbour at direction", direction, neighbours[direction], 'q & 1', this.q & 1);
+      return neighbours[direction];
     };
 
     Offset.prototype.toCube = function () {
 
+        var x = this.q - (this.r + (this.r & 1)) / 2;
+        var z = this.r;
+        var y = -x - z;
+
+        /*
         var x, y, z;
         switch (this.layout) {
             case Offset.ODD_R:
@@ -84,6 +86,7 @@ window.hexagon.Offset = (function () {
                 y = -x - z;
                 break;
         }
+        */
 
         return new hexagon.Cube(x, y, z).round();
     };

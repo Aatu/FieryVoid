@@ -47,17 +47,17 @@ window.coordinateConverter = (function(){
         var z = r;
         var y = -x - z;
 
-        return new hexagon.Cube(x, y, z).round().toEvenR(); //.toFVHex();
+        return new hexagon.Cube(x, y, z).round().toOffset(); //.toFVHex();
     };
 
     coordinateConverter.prototype.fromHexToGame = function(offsetHex)
     {
         if (offsetHex instanceof hexagon.Cube) {
-            offsetHex = offsetHex.toEvenR();
+            offsetHex = offsetHex.toOffset();
         }
 
         if (!(offsetHex instanceof hexagon.Offset) && typeof offsetHex == "object") {
-            offsetHex = new hexagon.Offset(offsetHex.x, offsetHex.y);
+            offsetHex = new hexagon.Offset(offsetHex.q, offsetHex.r);
         }
 
         var x = this.hexlenght * Math.sqrt(3) * (offsetHex.q - 0.5 * (offsetHex.r&1));

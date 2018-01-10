@@ -2,19 +2,17 @@
 	class EW{
 	
 	
-		public static function validateEW($EW, $gamedata){
-			
+		public static function validateEW($ship, $gamedata){
+
+		    $EW = $ship->EW;
 			$turn = $gamedata->turn;
 			$used = 0;
-			$ship = null;
 			
 			foreach ($EW as $entry){
 			
 				if ($turn != $entry->turn)
 					continue;
-				
 
-				$ship = $gamedata->getShipById($entry->shipid);
 				$used += $entry->amount;
                 
                 if ($entry->type === "DIST")
@@ -23,17 +21,15 @@
                         throw new Exception("Validation of EW failed: DIST ew not divisable by 3");
                 }
 			}
-			
-			if ($ship == null)
-				return false;
-				
+
 			$available = self::getScannerOutput($ship, $gamedata->turn);
 
 			if ($available >= $used){
 				return true;
 			}
-			
-			return false;
+
+            throw new Exception("EW validation failed: used more than available (shipId: $ship->id). Used $used available $available");
+
 		}
 		
 		public static function getScannerOutput($ship, $turn){
