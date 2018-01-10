@@ -596,11 +596,11 @@ class DBManager {
 				$targetid = $damage->shipid;
 				$shooterid = $damage->shooterid; //additional field
 				$weaponid = $damage->weaponid; //additional field
-				$sql1 = "SELECT id FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid";		
+				$sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid";		
 				$result = $this->query($sql1);
 				if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID			
 				}else{
-					$damage->fireorderid = $result[0]->id;
+					$fireID = $result[0]->id;
 				}
 			}catch(Exception $e) { //nothing, keep -1 as ID
 			}			
