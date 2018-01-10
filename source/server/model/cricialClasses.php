@@ -144,7 +144,7 @@ class PartialBurnout extends Critical{
 class SevereBurnout extends Critical{
 
     public $description = "System non functional";
-    public $outputMod = -100;
+    public $outputMod = -1;
 
     function __construct($id, $shipid, $systemid, $phpclass, $turn){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn);
