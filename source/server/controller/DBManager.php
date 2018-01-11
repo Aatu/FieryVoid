@@ -403,6 +403,7 @@ class DBManager {
             "UPDATE 
                 tac_fireorder  
             SET 
+	    	firingmode = ?,
                 needed = ?,
                 rolled = ?,
                 notes = ?,
@@ -423,6 +424,7 @@ class DBManager {
             {
                 $stmt->bind_param(
                     'iissiiiiii',
+                    $fire->firingMode,
                     $fire->needed,
                     $fire->rolled,
                     $fire->notes,
