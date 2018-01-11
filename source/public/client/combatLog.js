@@ -43,9 +43,8 @@ window.combatLog = {
 		
 	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
 	    if(modeIteration != weapon.firingMode){
-		    while(modeIteration > 1){
-			weapon.changeFiringMode();
-			modeIteration--;
+		    while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+			weapon.changeFiringMode(); 
 		    }
 	    }
 		    
@@ -55,16 +54,13 @@ window.combatLog = {
             weaponManager.getDamagesCausedBy(damages, fire);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-			
-	    if (fire.shots > 0){ //shots = 0 means firing order is a purely technical thing, should not be displayed
-		    if (needed < lowC)
-			lowC = needed;
-		    if (needed >highC)
-			highC = needed;
+	    if (needed < lowC)
+		lowC = needed;
+	    if (needed >highC)
+		highC = needed;
 
-		    if (fire.pubnotes)
-			notes += fire.pubnotes + " ";
-	    }
+	    if (fire.pubnotes)
+		notes += fire.pubnotes + " ";
                         
         }
             
