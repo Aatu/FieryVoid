@@ -33,7 +33,7 @@ window.combatLog = {
         var highC = 0;
         var notes = "";
         
-        for (var a in orders){            
+        for (var a in orders){  
                         
             count++;
             var fire = orders[a];
@@ -55,14 +55,16 @@ window.combatLog = {
             weaponManager.getDamagesCausedBy(damages, fire);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-				
-            if (needed < lowC)
-                lowC = needed;
-            if (needed >highC)
-                highC = needed;
-                
-            if (fire.pubnotes)
-                notes += fire.pubnotes + " ";
+			
+	    if (fire.shots > 0){ //shots = 0 means firing order is a purely technical thing, should not be displayed
+		    if (needed < lowC)
+			lowC = needed;
+		    if (needed >highC)
+			highC = needed;
+
+		    if (fire.pubnotes)
+			notes += fire.pubnotes + " ";
+	    }
                         
         }
             
