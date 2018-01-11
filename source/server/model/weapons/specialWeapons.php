@@ -1173,6 +1173,7 @@ class SurgeCannon extends Weapon{
 	
         public $priority = 8;
         public $priorityArray = array(1=>9, 2=>8, 3=>8, 4=>7, 5=>7); //weakest mode should go late, more powerful modes early (for Raking weapon)
+	public $firingMode = 1;	
             public $firingModes = array(
                 1 => "Single",
                 2 => "2combined",
@@ -1329,22 +1330,22 @@ class SurgeCannon extends Weapon{
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->minDamage = 11;
+				$this->maxDamage = 11;
 				break;
 			case 2:
-				$this->minDamage = 23;
+				$this->maxDamage = 23;
 				break;	
 			case 3:
-				$this->minDamage = 36;
+				$this->maxDamage = 36;
 				break;	
 			case 4:
-				$this->minDamage = 50;
+				$this->maxDamage = 50;
 				break;	
 			case 5:
-				$this->minDamage = 65;
+				$this->maxDamage = 65;
 				break;	
 		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;  
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
 	}
 } //endof class SurgeCannon
 
