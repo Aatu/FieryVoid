@@ -1154,7 +1154,7 @@ class SparkField extends Weapon{
 
 
 
-class SurgeCannon extends Weapon{
+class SurgeCannon extends Raking{
     /*Surge Cannon - Ipsha weapon*/
         public $name = "SurgeCannon";
         public $displayName = "Surge Cannon";
