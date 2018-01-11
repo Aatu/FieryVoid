@@ -91,3 +91,10 @@ SparkField.prototype.getMaxBoost = function(){
     return this.maxBoostLevel;
 }
 
+
+var SurgeCannon = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+SurgeCannon.prototype = Object.create( Weapon.prototype );
+SurgeCannon.prototype.constructor = SurgeCannon;
