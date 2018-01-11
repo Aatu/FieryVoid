@@ -567,7 +567,7 @@ class GraviticThruster extends Thruster{
 }
 
 
-class MagGraviticThruster extends GraviticThruster{ //mag-gravitic thrusters can only get HelfEfficiency crit!
+class MagGraviticThruster extends Thruster{ //mag-gravitic thrusters can only get HalfEfficiency crit! So they don't need fancy GraviticThruster logic
 	public $possibleCriticals = array(20=>"HalfEfficiency");
 }
 
