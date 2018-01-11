@@ -82,7 +82,7 @@ window.mathlib = {
 		return false;
 	},
 	
-	getFacingBetween: function(angle1, angle2, percentage, right){
+	getAngleBetween: function(angle1, angle2, right){
 		//console.log(angle1  + " " + angle2);
 		var total;
 		var difference;
@@ -102,15 +102,7 @@ window.mathlib = {
 		
 		}
 		
-		var step = difference*percentage;
-
-		if (angle1 + step > 360)
-			return angle1 + step - 360;
-		
-		if (angle1 + step < 0)
-			return 360 + angle1 + step;
-		
-		return angle1 + step;
+		return difference;
 	
 	},
 	
@@ -174,7 +166,7 @@ window.mathlib = {
 	},
 	
 	radianToDegree: function(angle){
-			return angle * (180.0 / Math.PI);
+		return angle * (180.0 / Math.PI);
 	},
 	
 	degreeToRadian: function(angle){
@@ -186,25 +178,25 @@ window.mathlib = {
         // should be HEX COORDINATES!!!
 	getCompassHeadingOfPosition: function(observer, position){
             
-            var oPos = shipManager.getShipPosition(observer);
+		var oPos = shipManager.getShipPosition(observer);
 //		var tPos = hexgrid.pixelCoToHex(position.x, position.y);
-            var tPos = position;
+		var tPos = position;
 
-            if( oPos.x > 100 || oPos.y > 100 || tPos.x > 100 || tPos.y > 100 ){
-               console.log("getCompassHeadingOfPosition: pixel coordinate iso hex coordinate?");
-               console.log("oPos: " + oPos.x + "," + oPos.y);
-               console.log("tPos: " + tPos.x + "," + tPos.y);
-            }
+		if( oPos.x > 100 || oPos.y > 100 || tPos.x > 100 || tPos.y > 100 ){
+		   console.log("getCompassHeadingOfPosition: pixel coordinate iso hex coordinate?");
+		   console.log("oPos: " + oPos.x + "," + oPos.y);
+		   console.log("tPos: " + tPos.x + "," + tPos.y);
+		}
 
 
-            if (oPos.x == tPos.x && oPos.y == tPos.y){
-                            oPos =  shipManager.movement.getPreviousLocation(observer);
-            }
+		if (oPos.x == tPos.x && oPos.y == tPos.y){
+						oPos =  shipManager.movement.getPreviousLocation(observer);
+		}
 
-            oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
-            tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
+		oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
+		tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
 
-            return mathlib.getCompassHeadingOfPoint(oPos, tPos);
+		return mathlib.getCompassHeadingOfPoint(oPos, tPos);
 	},
 	
 	getCompassHeadingOfShip: function(observer, target){

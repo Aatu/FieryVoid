@@ -375,6 +375,7 @@ window.shipManager = {
 
     },
 
+    /*
     getShipHeadingAngleForDrawing: function(ship){
 
         var movement = null;
@@ -422,6 +423,7 @@ window.shipManager = {
 
     },
 
+*/
     getShipPositionInTurn: function(ship, turn){
 
         if (turn <= 0)

@@ -3,13 +3,22 @@ window.ShipMovementAnimation = (function(){
     function ShipMovementAnimation(shipIcon, turn) {
         this.shipIcon = shipIcon;
         this.turn = turn;
-        //this.moves = moves;
-        //this.startingMove = startingMove;
         this.hexAnimations = [];
         this.timeElapsed = null;
         this.currentlyAnimated = null;
         this.timePerAnimation = 500;
+
+        this.turnCurve = new THREE.CubicBezierCurve(
+            new THREE.Vector2( 0, 0 ),
+            new THREE.Vector2( 1, 0 ),
+            new THREE.Vector2( 0, 1 ),
+            new THREE.Vector2( 1, 1 )
+        );
+
+        Animation.call(this);
     }
+
+    ShipMovementAnimation.prototype = Object.create(Animation.prototype);
 
     ShipMovementAnimation.prototype.update = function (gameData) {
         this.hexAnimations.forEach(function (animation) {
@@ -26,8 +35,7 @@ window.ShipMovementAnimation = (function(){
     };
 
     ShipMovementAnimation.prototype.render =  function (now, total, last, delta) {
-        //console.log(total, last, delta);
-        if (! this.shipIcon) {
+        if (! this.shipIcon || !this.active) {
             return;
         }
 
@@ -42,8 +50,6 @@ window.ShipMovementAnimation = (function(){
             this.timeElapsed = this.timePerAnimation * this.currentlyAnimated.animated;
         }
 
-
-
         var percentDone = this.currentlyAnimated ? this.timeElapsed / this.timePerAnimation : 0;
 
         if (percentDone > 1) {
@@ -53,43 +59,34 @@ window.ShipMovementAnimation = (function(){
         if (this.currentlyAnimated) {
             this.currentlyAnimated.animated = percentDone;
         }
-        positionAndFaceIcon(this.shipIcon, this.currentlyAnimated, percentDone);
+        positionAndFaceIcon(this.shipIcon, this.currentlyAnimated, percentDone, this.turnCurve);
     };
 
-    function positionAndFaceIcon(shipIcon, animation, percentDone) {
+    function positionAndFaceIcon(shipIcon, animation, percentDone, turnCurve) {
         var position;
-
+        var facing;
         if (!animation) {
             position = window.coordinateConverter.fromHexToGame(shipIcon.getLastMovement().position);
+            facing = shipManager.hexFacingToAngle(shipIcon.getLastMovement().facing);
         } else {
-            position = animation.curve.getPoint(percentDone)
+            var turnPercent = turnCurve.getPoint(percentDone).y;
+            position = animation.curve.getPoint(percentDone);
+            var turnAngle = animation.turnAngle * turnPercent;
+            facing = mathlib.addToDirection(animation.startAngle, turnAngle);
         }
 
-        //var facing = shipManager.hexFacingToAngle(movement.facing);
-
         shipIcon.setPosition(position);
-        //shipIcon.setFacing(-facing);
+        shipIcon.setFacing(-facing);
     }
 
     function getFirstUnAnimated(hexAnimations) {
-        var animation = hexAnimations.find(function (animation) {
+        return hexAnimations.find(function (animation) {
            return animation.animated < 1;
         });
-
-        if (animation) {
-            console.log("found animation with animated: ", animation.animated);
-        }
-        return animation;
     }
 
     function buildCurves(shipIcon, turn, hexAnimations) {
         var moves = shipIcon.getMovements(turn);
-        /*
-        var lastMove = shipIcon.getMovementBefore(moves[0]);
-        if (lastMove) {
-            moves.unshift(lastMove);
-        }
-        */
 
         if (moves.length <= 1) {
             return [];
@@ -103,7 +100,7 @@ window.ShipMovementAnimation = (function(){
             var next = moves[i+1] ? moves[i+1] : null;
             // shipIcon.getMovementAfter(moves[0]) for continuous playback
             var animated = 0;
-            var shouldBuildPath = false;
+            var uncommittedMovement = false;
 
             if (hexAnimations[i] && !newMovesFound && shipIcon.movesEqual(move, hexAnimations[i].move)) {
                 if (hexAnimations[i+1] && moves[i+1] && shipIcon.movesEqual(moves[i+1], hexAnimations[i+1].move)) {
@@ -111,7 +108,7 @@ window.ShipMovementAnimation = (function(){
                 }
 
                 if (moves[i+1]){
-                    shouldBuildPath = true;
+                    uncommittedMovement = true;
                     animated = hexAnimations[i].animated > 0.5 ? 0.5 : hexAnimations[i].animated;
                 } else {
                     animated = hexAnimations[i].animated > 0.5 ? 1 : hexAnimations[i].animated * 2;
@@ -127,7 +124,7 @@ window.ShipMovementAnimation = (function(){
             );
 
             var curve;
-            if (shouldBuildPath) {
+            if (uncommittedMovement) {
                 curve = buildPath(
                     movementPoints.start,
                     movementPoints.end,
@@ -141,10 +138,44 @@ window.ShipMovementAnimation = (function(){
                 );
             }
 
-            return {move: move, curve: curve, animated: animated};
+            var turnData = calculateTurn(start, move);
+
+            if (uncommittedMovement) {
+                turnData.startAngle = turnData.endAngle;
+                turnData.turnAngle = 0;
+            }
+
+            return {move: move, curve: curve, animated: animated, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle};
         }, this);
     }
 
+    function calculateTurn(startMove, endMove) {
+
+        var endFacing = endMove.facing;
+        var angleNew = shipManager.hexFacingToAngle(endFacing);
+
+        if (! startMove) {
+            return {turnAngle: 0, startAngle: angleNew, endAngle: angleNew};
+        }
+
+        var startFacing = startMove.facing;
+        var angleOld = shipManager.hexFacingToAngle(startFacing);
+        var turn = 0;
+
+        if (startFacing === endFacing) {
+            return {turnAngle: turn, startAngle: angleOld, endAngle: angleNew};
+        }
+
+        var lastOldFacing = endMove.oldFacings[endMove.oldFacings.length - 1];
+
+        if (endFacing > lastOldFacing || (endFacing === 0 && lastOldFacing === 5)) {
+            turn = mathlib.getAngleBetween(angleOld, angleNew, true);
+        } else {
+            turn = mathlib.getAngleBetween(angleOld, angleNew, false);
+        }
+
+        return {turnAngle: turn, startAngle: angleOld, endAngle: angleNew};
+    }
 
     function getMovementPoints(currentHex, nextHex, lastHex) {
 

@@ -25,7 +25,11 @@ window.DeploymentPhaseStrategy = (function(){
 
     DeploymentPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
-        this.deploymentSprites.hide();
+        this.deploymentSprites.forEach(function(icon) {
+            icon.ownSprite.hide();
+            icon.enemySprite.hide();
+            icon.allySprite.hide();
+        });
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function(payload) {
@@ -92,6 +96,7 @@ window.DeploymentPhaseStrategy = (function(){
         var icon = getSlotById(ship.slot, deploymentSprites);
         icon.ownSprite.hide();
         icon.enemySprite.hide();
+        icon.allySprite.hide();
     }
 
     function getSlotById(slotId, deploymentSprites) {
@@ -106,13 +111,17 @@ window.DeploymentPhaseStrategy = (function(){
 
             var deploymentData = getDeploymentData(slot);
 
+            var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene);
+            var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene);
+            var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene);
+
             return {
                 slotId: key,
                 team: slot.team,
                 isValidDeploymentPosition: getValidDeploymentCallback(slot, deploymentData),
-                ownSprite: new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene),
-                allySprite: new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene),
-                enemySprite: new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene)
+                ownSprite: ownSprite,
+                allySprite: allySprite,
+                enemySprite: enemySprite
             };
 
         });

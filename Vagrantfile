@@ -84,7 +84,7 @@ Vagrant.configure("2") do |config|
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
     apt-get install -y mysql-server
 
-    mysql -uroot -proot < /vagrant/db/db17112016.sql
+    mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
 
     add-apt-repository ppa:ondrej/php
     apt-get update -y
@@ -95,6 +95,9 @@ Vagrant.configure("2") do |config|
     apt-get install -y zip
     apt-get install -y php7.2-dom
     sudo apt-get install php7.2-mbstring
+
+    touch /tmp/fieryvoid.log
+    chmod a+w /tmp/fieryvoid.log
 
     mkdir /var/www/html
 

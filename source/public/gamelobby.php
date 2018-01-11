@@ -207,7 +207,7 @@
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
 			
-			<span class="clickable leave">LEAVE GAME</a>
+			<span class="clickable leave">LEAVE GAME</span>
 			
 		</div>
 		<div class="panel large buy" style="display:none;">

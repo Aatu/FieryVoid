@@ -226,11 +226,17 @@ window.PhaseStrategy = (function(){
         }
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
-        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px");
+        var facing = -mathlib.addToDirection(this.movementUI.icon.getFacing(), -180);
+        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px").css("transform", "rotate("+facing+"deg)");
     };
 
     PhaseStrategy.prototype.redrawMovementUI = function(){
         if (!this.movementUI) {
+            return;
+        }
+
+        if (this.movementUI.ship.movement.some(function (movement) {return !movement.commit})) {
+            this.hideMovementUI();
             return;
         }
 

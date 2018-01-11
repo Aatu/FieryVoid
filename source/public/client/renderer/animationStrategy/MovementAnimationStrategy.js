@@ -17,7 +17,6 @@ window.MovementAnimationStrategy = (function(){
         AnimationStrategy.prototype.update.call(this, gamedata);
         console.log("Animation startegy update");
 
-        this.positionAndFaceAllIcons();
         buildAnimations.call(this);
 
 
@@ -39,7 +38,9 @@ window.MovementAnimationStrategy = (function(){
                 return;
             }
 
-            this.animations.push(new ShipMovementAnimation(icon, this.turn));
+            var animation = new ShipMovementAnimation(icon, this.turn);
+            animation.start();
+            this.animations.push(animation);
         }, this)
     }
 

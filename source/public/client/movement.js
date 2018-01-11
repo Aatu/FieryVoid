@@ -1319,10 +1319,9 @@ shipManager.movement = {
         ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         
         gamedata.shipStatusChanged(ship);
-        shipManager.drawShip(ship);
 
         if (!ship.flight){
-            shipManager.movement.autoAssignThrust(ship)
+            shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
     },

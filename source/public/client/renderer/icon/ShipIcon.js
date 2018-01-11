@@ -47,6 +47,10 @@ window.ShipIcon = (function (){
         return {x: this.mesh.position.x, y: this.mesh.position.y};
     };
 
+    ShipIcon.prototype.getFacing = function(facing) {
+        return mathlib.radianToDegree(this.mesh.rotation.z);
+    };
+
     ShipIcon.prototype.setFacing = function(facing) {
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
@@ -147,8 +151,19 @@ window.ShipIcon = (function (){
             .forEach(function (movement) {
                 if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]){
                     var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
+
+                    if (saved.heading !== movement.facing) {
+                        saved.oldFacings.push(saved.facing);
+                    }
+
                     saved.facing = movement.facing;
+
+                    if (saved.heading !== movement.heading) {
+                        saved.oldHeadings.push(saved.heading);
+                    }
+
                     saved.heading = movement.heading;
+
                     saved.position = new hexagon.Offset(movement.position);
                     saved.offset = {x: movement.xOffset, y: movement.yOffset};
                 } else {
@@ -159,7 +174,9 @@ window.ShipIcon = (function (){
                         facing: movement.facing,
                         heading: movement.heading,
                         position: new hexagon.Offset(movement.position),
-                        offset: {x: movement.xOffset, y: movement.yOffset}
+                        offset: {x: movement.xOffset, y: movement.yOffset},
+                        oldFacings: [],
+                        oldHeadings: []
                     }
                 }
             });
