@@ -1235,7 +1235,14 @@ class SurgeCannon extends Raking{
 	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
 	public function calculateHitBase($gamedata, $fireOrder){
 		$this->alreadyConsidered = true;
-		if ($this->isCombined) return; //this weapon is being used as subordinate combination weapon! do not do anything, it's already done
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+			$notes = "technical fire order - weapon combined into another shot";
+			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->needed = 0;
+			$fireOrder->notes = $notes;
+			$fireOrder->updated = true;
+			return;
+		}
 		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
 			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
 			$subordinateOrders = array();
@@ -1257,7 +1264,6 @@ class SurgeCannon extends Raking{
 			}						
 			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
 				foreach($subordinateOrders as $subOrder){
-					$subOrder->needed = 0;
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
 					$subWeapon->isCombined = true;
 					$subWeapon->alreadyConsidered = true;
