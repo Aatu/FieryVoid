@@ -394,7 +394,7 @@
                     </td>
                     <td class="col3">
 			<div class="notes"></div> <!-- Marcin Sawicki - here more readable -->
-                        <div class="EW" visibility="hidden"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
+                        <div class="EW" display="none"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
                             <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
                             <div class="EWcontainer">
                                 <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
