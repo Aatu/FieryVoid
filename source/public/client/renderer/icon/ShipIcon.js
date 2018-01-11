@@ -6,6 +6,7 @@ window.ShipIcon = (function (){
         this.shipName = ship.name;
         this.imagePath = ship.imagePath;
         this.movements = null;
+        this.defaultPosition = null;
         this.mesh = null;
         this.size = ship.canvasSize;
         this.mine = gamedata.isMyShip(ship);
@@ -129,40 +130,79 @@ window.ShipIcon = (function (){
 
     ShipIcon.prototype.consumeMovement = function(movements){
         //console.log(JSON.stringify(movements));
-        return movements.map(function(movement) {
-            return {
-                id: movement.id,
-                type: movement.type,
-                turn: movement.turn,
-                facing: movement.facing,
-                heading: movement.heading,
-                position: new hexagon.Offset(movement.position),
-                offset: {x: movement.xOffset, y: movement.yOffset}
-            };
-        });
+
+        var movesByHexAndTurn = {};
+
+        this.defaultPosition = {
+            turn: movements[0].turn,
+            facing: movements[0].facing,
+            heading: movements[0].heading,
+            position: new hexagon.Offset(movements[0].position),
+            offset: {x: movements[0].xOffset, y: movements[0].yOffset}
+        };
+
+        movements
+            .filter(function (movement) {return movement.type !== 'start';})
+            .filter(function (movement) {return movement.commit;})
+            .forEach(function (movement) {
+                if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]){
+                    var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
+                    saved.facing = movement.facing;
+                    saved.heading = movement.heading;
+                    saved.position = new hexagon.Offset(movement.position);
+                    saved.offset = {x: movement.xOffset, y: movement.yOffset};
+                } else {
+                    movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn] = {
+                        //id: movement.id,
+                        //type: movement.type,
+                        turn: movement.turn,
+                        facing: movement.facing,
+                        heading: movement.heading,
+                        position: new hexagon.Offset(movement.position),
+                        offset: {x: movement.xOffset, y: movement.yOffset}
+                    }
+                }
+            });
+
+        return Object.keys(movesByHexAndTurn).map(function (key) {return movesByHexAndTurn[key];});
     };
 
-    ShipIcon.prototype.getMovingMovements = function(turn){
-        var accept = ["move", "slipleft", "slipright", "rotateRight", "rotateLeft", "turnleft", "turnright", "pivotleft", "pivotright"];
-        return this.movements.filter(function (move) {
-            return accept.indexOf(move.type) !== -1 && move.turn == turn;
-        });
+    ShipIcon.prototype.movesEqual = function (move1, move2) {
+        return move1.turn === move2.turn &&
+            move1.position.equals(move2.position);// &&
+            //move1.facing === move2.facing &&
+            //move1.heading === move2.heading &&
+            //move1.offset.x === move2.offset.x &&
+            //move1.offset.y === move2.offset.y;
     };
 
+/*
+    ShipIcon.prototype.getMovingMovements = function(movements){
+        var accept = ["deploy", "move", "slipleft", "slipright", "rotateRight", "rotateLeft", "turnleft", "turnright", "pivotleft", "pivotright"];
+        return movements.filter(function (move) {
+            return accept.indexOf(move.type) !== -1;
+        });
+    };
+*/
     ShipIcon.prototype.getLastMovement = function(){
+        if (this.movements.length === 0) {
+            return this.defaultPosition;
+        }
+
         return this.movements[this.movements.length - 1]
     };
 
+    /*
+    ShipIcon.prototype.getLastCommittedMovement = function(){
+        var moves = this.movements.filter(function (movement) {return movement.commit;});
+        return moves[moves.length - 1];
+    };
+    */
+
     ShipIcon.prototype.getFirstMovementOnTurn = function(turn, ignore){
 
-        if (!ignore) {
-            ignore = [];
-        }
-
-        ignore = [].concat(ignore);
-
         return this.movements.filter(function (move) {
-            return ignore.indexOf(move.type) === -1 && move.turn == turn;
+            return move.turn === turn;
         }).shift();
     };
 
@@ -170,6 +210,19 @@ window.ShipIcon = (function (){
         for (var i in this.movements) {
             if (this.movements[i] === move) {
                 return this.movements[i-1];
+            }
+        }
+
+        return null;
+    };
+
+    ShipIcon.prototype.getMovementAfter = function (move) {
+        for (var i in this.movements) {
+            if (this.movements[i] === move) {
+                if (this.movements[i+1]) {
+                    return this.movements[i+1]
+                }
+                return null;
             }
         }
 

@@ -433,8 +433,6 @@ shipManager.movement = {
         var pos = new hexagon.Offset(lastPosition).getNeighbourAtDirection(lm.heading);
 		var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
 
-		console.log("moving from", lastPosition, "to", pos);
-
         ship.movement[ship.movement.length] = {
             id:-1,
             type:"move",
@@ -2481,7 +2479,7 @@ shipManager.movement = {
         return effect;
     
     },
-*/
+
     getMovementPseudoId: function(move, index) {
         if (index === undefined) {
             index = "";
@@ -2499,4 +2497,5 @@ shipManager.movement = {
         hash += index;
         return hash;
     }
+    */
 };

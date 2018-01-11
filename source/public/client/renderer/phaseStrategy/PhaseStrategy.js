@@ -119,13 +119,11 @@ window.PhaseStrategy = (function(){
         }
         this.selectedShip = ship;
         this.shipIconContainer.getById(ship.id).setSelected(true);
-        this.showShipEW(this.selectedShip);
     };
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
         this.shipIconContainer.getById(ship.id).setSelected(false);
         this.selectedShip = null;
-        this.hideShipEW(ship);
     };
 
     PhaseStrategy.prototype.targetShip = function(ship) {
@@ -191,10 +189,6 @@ window.PhaseStrategy = (function(){
             //TODO: User settings, should this be hidden or not?
             icon.showSideSprite(false);
         }, this);
-
-        if (this.selectedShip) {
-            this.showShipEW(this.selectedShip);
-        }
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function(ships, payload) {

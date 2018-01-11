@@ -1847,7 +1847,6 @@ setSystemData: function(ship, system, shipwindow){
 		ship.movement.splice(ship.movement.length -1, 1);	
 		
 		shipWindowManager.setData(ship);
-		shipManager.drawShip(ship);
 	},
 
         

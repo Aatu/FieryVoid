@@ -35,22 +35,9 @@ $(window).resize(function () {
     //$("#ships").attr("width", gamedata.gamewidth);
     //$("#ships").attr("height", gamedata.gameheight);
     
-    
-    drawEntities();
-    
- }
- 
-function drawEntities(){
 
-    if (!window.webglScene) {
-        hexgrid.drawHexGrid();
-        hexgrid.drawGameSpace();
-        shipManager.drawShips();
-        ballistics.drawBallistics();
-        EWindicators.drawEWindicators()
-    };
-    
-}
+ }
+
  
 jQuery(function(){
     /*

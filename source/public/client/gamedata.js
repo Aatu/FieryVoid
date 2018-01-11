@@ -874,7 +874,6 @@ gamedata = {
             
             
             gamedata.initPhase();
-            drawEntities();
             gamedata.drawIniGUI();
             window.webglScene.receiveGamedata(this);
 

@@ -5,5 +5,11 @@ window.IdleAnimationStrategy = (function(){
 
     IdleAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
 
+    IdleAnimationStrategy.prototype.update = function(gamedata) {
+        AnimationStrategy.prototype.update.call(this, gamedata);
+        this.positionAndFaceAllIcons();
+        return this;
+    };
+
     return IdleAnimationStrategy;
 })();

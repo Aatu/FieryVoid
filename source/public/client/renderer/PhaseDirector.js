@@ -1,6 +1,6 @@
-window.animationDirector = (function() {
+window.phaseDirector = (function() {
 
-    function animationDirector(graphics) {
+    function phaseDirector(graphics) {
         this.graphics = graphics;
         this.shipIconContainer = null;
         this.ewIconContainer = null;
@@ -12,18 +12,18 @@ window.animationDirector = (function() {
         this.coordinateConverter = null;
     }
 
-    animationDirector.prototype.init = function (coordinateConverter, scene) {
+    phaseDirector.prototype.init = function (coordinateConverter, scene) {
         this.coordinateConverter = coordinateConverter;
         this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
         this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene);
         this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
     };
 
-    animationDirector.prototype.receiveGamedata = function (gamedata, webglScene) {
+    phaseDirector.prototype.receiveGamedata = function (gamedata, webglScene) {
         resolvePhaseStrategy.call(this, gamedata, webglScene);
     };
 
-    animationDirector.prototype.relayEvent = function (name, payload) {
+    phaseDirector.prototype.relayEvent = function (name, payload) {
         if (!this.phaseStrategy || this.phaseStrategy.inactive) {
             return;
         }
@@ -33,7 +33,7 @@ window.animationDirector = (function() {
         this.ewIconContainer.onEvent(name, payload);
     };
 
-    animationDirector.prototype.render = function (scene, coordinateConverter) {
+    phaseDirector.prototype.render = function (scene, coordinateConverter) {
         if (!this.phaseStrategy || this.phaseStrategy.inactive) {
             return;
         }
@@ -75,5 +75,5 @@ window.animationDirector = (function() {
     }
 
 
-    return animationDirector;
+    return phaseDirector;
 })();

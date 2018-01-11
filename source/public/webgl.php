@@ -61,7 +61,7 @@
                 '#webgl',
                 jQuery('#pagecontainer'),
                 new window.webglHexGridRenderer(graphics),
-                new window.animationDirector(graphics),
+                new window.phaseDirector(graphics),
                 gamedata,
                 window.coordinateConverter
             );
@@ -82,7 +82,7 @@
     <script src="client/renderer/webglScene.js"></script>
     <script src="client/renderer/webglScrolling.js"></script>
     <script src="client/renderer/webglZooming.js"></script>
-    <script src="client/renderer/AnimationDirector.js"></script>
+    <script src="client/renderer/PhaseDirector.js"></script>
     <script src="client/renderer/Animation.js"></script>
 
     <script src="client/renderer/sprite/webglSprite.js"></script>

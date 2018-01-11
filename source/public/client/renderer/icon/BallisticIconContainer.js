@@ -91,7 +91,7 @@ window.BallisticIconContainer = (function(){
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
 
         var shooterIcon = iconContainer.getById(ballistic.shooterid);
-        var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn, 'start').position);
+        var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
         var targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');

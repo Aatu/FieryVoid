@@ -1,5 +1,5 @@
 window.AnimationStrategy = (function(){
-    function IdleAnimationStrategy(){
+    function AnimationStrategy(){
         this.shipIconContainer = null;
         this.turn = 0;
         this.lastAnimationTime = 0;
@@ -8,34 +8,41 @@ window.AnimationStrategy = (function(){
         this.animations = [];
     }
 
-    IdleAnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
+    AnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
         this.shipIconContainer = shipIcons;
         this.turn = turn;
 
         return this;
     };
 
-    IdleAnimationStrategy.prototype.update = function() {
-        this.positionAndFaceAllIcons();
+    AnimationStrategy.prototype.update = function(gameData) {
+
+        this.animations.forEach(function (animation) {
+           animation.update(gameData);
+        });
+
         return this;
     };
 
-    IdleAnimationStrategy.prototype.deactivate = function(scene) {
+    AnimationStrategy.prototype.deactivate = function(scene) {
         return this;
     };
 
-    IdleAnimationStrategy.prototype.render = function(){
+    AnimationStrategy.prototype.render = function(){
         updateDeltaTime.call(this);
         updateTotalAnimationTime.call(this);
+        this.animations.forEach(function (animation) {
+            animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime)
+        }, this);
     };
 
-    IdleAnimationStrategy.prototype.positionAndFaceAllIcons = function() {
+    AnimationStrategy.prototype.positionAndFaceAllIcons = function() {
         this.shipIconContainer.getArray().forEach(function (icon) {
             this.positionAndFaceIcon(icon);
         }, this);
     };
 
-    IdleAnimationStrategy.prototype.positionAndFaceIcon = function(icon){
+    AnimationStrategy.prototype.positionAndFaceIcon = function(icon){
         var movement = icon.getLastMovement();
         var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
@@ -45,15 +52,17 @@ window.AnimationStrategy = (function(){
         icon.setFacing(-facing);
     };
 
-    IdleAnimationStrategy.prototype.initializeAnimations = function() {
+    /*
+    AnimationStrategy.prototype.initializeAnimations = function() {
         this.animations.forEach(function (animation) {
             animation.initialize();
         })
     };
+    */
 
-    IdleAnimationStrategy.prototype.removeAnimation = function(toRemove) {
+    AnimationStrategy.prototype.removeAnimation = function(toRemove) {
         this.animations = this.animations.filter(function (animation) {
-            return animation != animation;
+            return animation !== animation;
         });
 
         toRemove.deactivate();
@@ -76,5 +85,5 @@ window.AnimationStrategy = (function(){
     }
 
 
-    return IdleAnimationStrategy;
+    return AnimationStrategy;
 })();

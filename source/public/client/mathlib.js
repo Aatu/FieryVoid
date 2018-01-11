@@ -25,7 +25,7 @@ window.mathlib = {
 
 		var ret = 0;
 		if (current + add > 360){
-			ret =  0+(add-(360-current));
+			ret =  add-(360-current);
 				
 		}else if (current + add < 0){
 			ret = 360 + (current + add);

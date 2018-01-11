@@ -62,7 +62,6 @@ window.hexagon.Offset = (function () {
     Offset.prototype.getNeighbourAtDirection = function (direction) {
       var neighbours = this.getNeighbours();
 
-      console.log("getting neighbour at direction", direction, neighbours[direction], 'q & 1', this.q & 1);
       return neighbours[direction];
     };
 

@@ -7,7 +7,7 @@ window.webglScene = (function(){
         this.scene = null;
         this.camera = null;
         this.hexGridRenderer = null;
-        this.animationDirector = null;
+        this.phaseDirector = null;
         this.coordinateConverter = null;
 
         this.element = null;
@@ -28,7 +28,7 @@ window.webglScene = (function(){
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
         this.element = element;
         this.hexGridRenderer = hexGridRenderer;
-        this.animationDirector = animationTimeline;
+        this.phaseDirector = animationTimeline;
         this.coordinateConverter = coordinateConverter;
 
         this.scene = new THREE.Scene();
@@ -36,7 +36,7 @@ window.webglScene = (function(){
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.coordinateConverter.init(this.width, this.height);
-        this.animationDirector.init(this.coordinateConverter, this.scene);
+        this.phaseDirector.init(this.coordinateConverter, this.scene);
 
         this.camera = new THREE.OrthographicCamera(
             this.zoom*this.width / - 2,
@@ -107,16 +107,16 @@ window.webglScene = (function(){
 
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
-        this.animationDirector.receiveGamedata(gamedata, this);
+        this.phaseDirector.receiveGamedata(gamedata, this);
         this.render();
     };
 
     webglScene.prototype.receiveGamedata = function(gamedata) {
-        if (!this.animationDirector) {
+        if (!this.phaseDirector) {
             return;
         }
 
-        this.animationDirector.receiveGamedata(gamedata, this);
+        this.phaseDirector.receiveGamedata(gamedata, this);
     };
 
     webglScene.prototype.moveCamera = function(position) {
@@ -129,7 +129,7 @@ window.webglScene = (function(){
 
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
-        this.animationDirector.relayEvent(
+        this.phaseDirector.relayEvent(
             'ScrollEvent',
             this.camera.position
         );
@@ -144,7 +144,7 @@ window.webglScene = (function(){
         this.camera.position.y = position.y;
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
-        this.animationDirector.relayEvent(
+        this.phaseDirector.relayEvent(
             'ScrollEvent',
             this.camera.position
         );
@@ -167,7 +167,7 @@ window.webglScene = (function(){
 
         this.coordinateConverter.onZoom(this.zoom);
         this.hexGridRenderer.onZoom(this.zoom);
-        this.animationDirector.relayEvent(
+        this.phaseDirector.relayEvent(
             'ZoomEvent',
             {
                 zoom: this.zoom,
@@ -185,7 +185,7 @@ window.webglScene = (function(){
 
     webglScene.prototype.render = function () {
         this.stats.begin();
-        this.animationDirector.render(this.scene, this.coordinateConverter, this.zoom);
+        this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render( this.scene, this.camera);
         animateZoom.call(this);
         this.stats.end();
@@ -285,7 +285,7 @@ window.webglScene = (function(){
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
 
-        this.animationDirector.relayEvent(
+        this.phaseDirector.relayEvent(
             'MouseMoveEvent',
             getPositionObject(pos, gamePos, hexPos)
         );
@@ -341,7 +341,7 @@ window.webglScene = (function(){
         */
 
 
-        this.animationDirector.relayEvent(
+        this.phaseDirector.relayEvent(
             'ClickEvent',
             payload
         );
