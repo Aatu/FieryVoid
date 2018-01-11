@@ -981,19 +981,23 @@ class SparkFieldHandler{
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
 			$shooter = $field->getUnit();
 			$aoe = $field->getAoE($gamedata->turn);
-			//$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
-			$posShooter = $shooter->getCoPos();
-			$inAoE = $gamedata->getShipsInDistance($posShooter, (($aoe*mathlib::$hexWidth) + 1));
+			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating
-				//if (in_array($target->id,$alreadyTargeted,true)) continue; //each target only once
-				$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				//array_push ( $alreadyTargeted , $target->id );
-				//create appropriate firing order
-				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
-				$fire->addToDB = true;
-				$field->fireOrders[] = $fire;
+				//each target only once
+				//if (in_array($target->id,$alreadyTargeted,true)) continue; //why this does not work correctly?!
+				$previouslyTargeted = false; 
+				foreach($alreadyTargeted as $prevTrgtId){ //loop designed to replace in_array above
+					if ($prevTrgtId==$target->id) $previouslyTargeted=true;
+				}
+				if (!$previouslyTargeted){
+					$alreadyTargeted[] = $target->id; //add to list of already targeted units
+					//create appropriate firing order
+					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
+					$fire->addToDB = true;
+					$field->fireOrders[] = $fire;
+				}
 			}
 		} //endof foreach SparkField
 	}//endof function createFiringOrders
