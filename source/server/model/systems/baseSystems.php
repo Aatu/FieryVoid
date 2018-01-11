@@ -566,6 +566,11 @@ class GraviticThruster extends Thruster{
     }
 }
 
+
+class MagGraviticThruster extends GraviticThruster{ //mag-gravitic thrusters can only get HelfEfficiency crit!
+	public $possibleCriticals = array(20=>"HalfEfficiency");
+}
+
 class Hangar extends ShipSystem{
 
     public $name = "hangar";
