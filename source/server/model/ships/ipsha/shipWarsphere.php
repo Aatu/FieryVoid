@@ -48,20 +48,44 @@ class ShipWarsphere extends BaseShip{
 	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));
         
       
-        $this->addFrontSystem(new GraviticThruster(4, 15, 0, 99, 1));
-        $this->addFrontSystem(new GraviticThruster(4, 15, 0, 99, 1));
+        $this->addFrontSystem(new MagGraviticThruster(4, 15, 0, 99, 1));
+        $this->addFrontSystem(new MagGraviticThruster(4, 15, 0, 99, 1));
         $this->addFrontSystem(new EmBolter(4, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
 		
 	    
-        $this->addAftSystem(new GraviticThruster(4, 15, 0, 99, 2));
-        $this->addAftSystem(new GraviticThruster(4, 15, 0, 99, 2));
+        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
+        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
         $this->addAftSystem(new EmBolter(4, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	    
 	    
-	$this->addLeftSystem(new GraviticThruster(4, 20, 0, 99, 3));
+	$this->addLeftSystem(new MagGraviticThruster(4, 20, 0, 99, 3));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 
 		
-        $this->addRightSystem(new GraviticThruster(4, 20, 0, 99, 4));
+        $this->addRightSystem(new MagGraviticThruster(4, 20, 0, 99, 4));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 		
 		
         $this->addFrontSystem(new Structure(4, 60));
