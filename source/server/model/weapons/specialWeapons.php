@@ -1219,6 +1219,7 @@ class SurgeCannon extends Raking{
 	
         public function fire($gamedata, $fireOrder){
             // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
             parent::fire($gamedata, $fireOrder);
 	    for($i = 1; $i<$this->firingMode;$i++){
 		$trgtTurn = $gamedata->turn+$i-1;
@@ -1242,7 +1243,7 @@ class SurgeCannon extends Raking{
 			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
 			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
-				if (($subOrder->shots>0) && ($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
 					//order data fits - is weapon another Surge Cannon?...
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
 					if ($subWeapon instanceof SurgeCannon){
@@ -1256,7 +1257,6 @@ class SurgeCannon extends Raking{
 			}						
 			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
 				foreach($subordinateOrders as $subOrder){
-					$subOrder->shots = 0;
 					$subOrder->rolled = 1;
 					$subOrder->needed = 0;
 					$fireOrder->notes = 'technical firing order, weapon combined with another one';
