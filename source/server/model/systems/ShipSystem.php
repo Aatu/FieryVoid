@@ -338,6 +338,7 @@ class ShipSystem{
         
         $output = $this->output;
         $output -= $this->outputMod;
+	$output = max(0,$output); //don't let output be negative!
         return $output;
     }
     
