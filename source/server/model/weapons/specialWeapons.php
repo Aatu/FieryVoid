@@ -1174,11 +1174,11 @@ class SurgeCannon extends Weapon{
         public $priority = 8;
         public $priorityArray = array(1=>9, 2=>8, 3=>8, 4=>7, 5=>7); //weakest mode should go late, more powerful modes early (for Raking weapon)
             public $firingModes = array(
-                1 => "Raking",
-                2 => "Raking",
-                3 => "Raking",
-                4 => "Raking",
-                5 => "Raking"
+                1 => "Single",
+                2 => "2combined",
+                3 => "3combined",
+                4 => "4combined",
+                5 => "5combined"
             );
         public $rangePenalty = 2; //-2 hex in single mode
             public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
@@ -1242,19 +1242,18 @@ class SurgeCannon extends Weapon{
 			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
 			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
-				if (($subOrder->shots>0) && ){ 
+				if (($subOrder->shots>0) && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingmode == $fireOrder->firingmode) ){ 
 					//order data fits - is weapon another Surge Cannon?...
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
-					if(
-				
+					if ($subWeapon instanceof SurgeCannon){
+						if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
+							$subordinateOrdersNo++;
+							$subordinateOrders[] = $subOrder;
+						}
+					}
 				}
 				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
-			}
-			
-
-			
-		
-		//$this->changeFiringMode($fireOrder->firingMode);			
+			}						
 			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
 				foreach($subordinateOrders as $subOrder){
 					$subOrder->shots = 0;
@@ -1264,6 +1263,7 @@ class SurgeCannon extends Weapon{
 					$fireOrder->updated = true;
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
 					$subWeapon->isCombined = true;
+					$subWeapon->alreadyConsidered = true;
 					$subWeapon->doNotIntercept = true;
 				}
 			}else{//not enough weapons to combine in this mode - set self to single fire
