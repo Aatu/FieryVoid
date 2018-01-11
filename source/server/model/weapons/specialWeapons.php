@@ -1220,13 +1220,19 @@ class SurgeCannon extends Weapon{
         public function fire($gamedata, $fireOrder){
             // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
             parent::fire($gamedata, $fireOrder);
-		
+	    if ($this->firingMode > 1){
+		$crit = new ForcedOfflineForTurns (-1, $fireOrder->shooterid, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $this->firingMode-1);
+                $crit->updated = true;
+                $this->criticals[] =  $crit; 
+	    }
+		/*
 	    for($i = 1; $i<$this->firingMode;$i++){
 		$trgtTurn = $gamedata->turn+$i-1;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
                 $crit->updated = true;
                 $this->criticals[] =  $crit;
 	    }
+	    */
         } //endof function fire
 	
 	
