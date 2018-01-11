@@ -1191,6 +1191,9 @@ class SurgeCannon extends Weapon{
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
 	
+	public $isCombined = false; //is being combined with other weapon
+	public $alreadyConsidered = false; //already considered - either being fired or combined
+	
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
@@ -1228,12 +1231,47 @@ class SurgeCannon extends Weapon{
 	
 	
 	//if fired in higher mode - combine with other weapons that are so fired!
-	public function beforeFiringOrderResolution($gamedata){
+	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
+	public function calculateHitBase($gamedata, $fireOrder){
+		$this->alreadyConsidered = true;
+		if ($this->isCombined) return; //this weapon is being used as subordinate combination weapon! do not do anything, it's already done
+		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
+			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+			$subordinateOrders = array();
+			$subordinateOrdersNo = 0;
+			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
+			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
+			foreach($allOrders as $subOrder) {
+				if (($subOrder->shots>0) && ){ 
+					//order data fits - is weapon another Surge Cannon?...
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					if(
+				
+				}
+				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+			}
+			
+
+			
 		
-		
-		
-		
-	}//endof function beforeFiringOrderResolution
+		//$this->changeFiringMode($fireOrder->firingMode);			
+			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
+				foreach($subordinateOrders as $subOrder){
+					$subOrder->shots = 0;
+					$subOrder->rolled = 1;
+					$subOrder->needed = 0;
+					$fireOrder->notes = 'technical firing order, weapon combined with another one';
+					$fireOrder->updated = true;
+					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
+					$subWeapon->isCombined = true;
+					$subWeapon->doNotIntercept = true;
+				}
+			}else{//not enough weapons to combine in this mode - set self to single fire
+				$fireOrder->firingMode = 1;
+			}
+		}
+		parent::calculateHitBase($gamedata, $fireOrder);
+	}//endof function calculateHitBase
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
