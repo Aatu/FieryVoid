@@ -1242,7 +1242,7 @@ class SurgeCannon extends Raking{
 			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
 			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
 			foreach($allOrders as $subOrder) {
-				if (($subOrder->shots>0) && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
+				if (($subOrder->shots>0) && ($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
 					//order data fits - is weapon another Surge Cannon?...
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
 					if ($subWeapon instanceof SurgeCannon){
