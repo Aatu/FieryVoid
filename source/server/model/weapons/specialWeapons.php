@@ -985,9 +985,9 @@ class SparkFieldHandler{
 			foreach($inAoE as $targetID=>$target){
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating
-				if (in_array($target->id,$alreadyTargeted,true)) continue; //each target only once
-				//$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				array_push ( $alreadyTargeted , $target->id );
+				//if (in_array($target->id,$alreadyTargeted,true)) continue; //each target only once
+				$alreadyTargeted[] = $target->id; //add to list of already targeted units
+				//array_push ( $alreadyTargeted , $target->id );
 				//create appropriate firing order
 				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
 				$fire->addToDB = true;
