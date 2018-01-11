@@ -1070,8 +1070,10 @@ class SparkField extends Weapon{
 	
 	
 	public function calculateHitBase($gamedata, $fireOrder){
+		parent::calculateHitBase($gamedata, $fireOrder);
 		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
-		$fireOrder->updated = true;
+        	$notes = "this weapon simply causes damage, hit is automatic";
+		$fireOrder->notes = $notes;
 	}
 	
 	public function calculateBoostLevel($turn){
@@ -1242,6 +1244,7 @@ class SurgeCannon extends Raking{
 			$fireOrder->needed = 0;
 			$fireOrder->notes = $notes;
 			$fireOrder->updated = true;
+			$this->changeFiringMode($fireOrder->firingMode);
 			return;
 		}
 		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
