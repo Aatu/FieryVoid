@@ -22,6 +22,7 @@ class JashakarN extends MediumShip{
 	$this->iniativebonus = 65;
 
         $this->occurence = "uncommon";
+        $this->variantOf = "Jashakar Frigate";
         $this->minesweeperbonus = 4;
         
         $this->addPrimarySystem(new LightBolter(1, 6, 2, 240, 360));

@@ -167,7 +167,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2)
             return false;
         
-		/*if (!ship.flight) return false; */
+		if (!ship.flight) return false; 
 	
 		if (accel == 0)
 			return true;
@@ -1329,7 +1329,6 @@ shipManager.movement = {
 
             
     getRemainingEngineThrust: function(ship){
-        
         var rem = 0;
         if (ship.flight){
 			rem = ship.freethrust;
@@ -1345,7 +1344,9 @@ shipManager.movement = {
 				if (system.name == "thruster"){
 					rem -= system.thrustwasted;
 				}
-			
+				//tractor beams reduce thrust available!
+				var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
+				rem -= crits;
 			}
 		}
         

@@ -8,8 +8,9 @@ class Darmoti extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Darmoti";
         $this->imagePath = "img/ships/demos.png";
-        $this->shipClass = "Darmoti";
+        $this->shipClass = "Darmoti Escort Warship";
         $this->occurence = "uncommon";
+        $this->variantOf = "Demos Heavy Warship";
         $this->fighters = array("normal"=>6);
         
         $this->forwardDefense = 12;

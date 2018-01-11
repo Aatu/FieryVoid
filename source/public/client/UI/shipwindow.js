@@ -877,7 +877,8 @@ shipWindowManager = {
                         shipWindowManager.setSystemData(ship, system, shipwindow);
                     }
 
-                    if (system.name == "scanner"){
+                    //if (system.name == "scanner"){
+		    if (system.isScanner() ){
                         shipWindowManager.addEW(ship, shipwindow);
                         botPanel.setEW(ship);
                     }

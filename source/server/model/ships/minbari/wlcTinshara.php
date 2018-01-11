@@ -8,19 +8,19 @@ class wlcTinshara extends HeavyCombatVessel{
         $this->faction = "Minbari";
         $this->phpclass = "wlcTinshara";
         $this->imagePath = "img/ships/tinashi.png";
-        $this->shipClass = "wlc Tinshara";
+        $this->shipClass = "Tinshara";
         $this->gravitic = true;
-
-
         $this->forwardDefense = 14;
         $this->sideDefense = 17;
-
         $this->turncost = 1.0;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
         $this->iniativebonus = 35;
+        $this->isd = 1869;
+        $this->variantOf = "Tinashi";
+        $this->unofficial = true;
 
         $this->addPrimarySystem(new Reactor(5, 21, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));

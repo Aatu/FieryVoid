@@ -5,10 +5,11 @@ class eacGemini extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);       
 
 		$this->pointCost = 1025;
-		$this->faction = "Custom Ships";
+		$this->faction = "EA";
 		$this->phpclass = "eacGemini";
 		$this->imagePath = "img/ships/gemini.png";
 		$this->shipClass = "Gemini Fleet Destroyer";
+	    	$this->variantOf = "DO NOT DISPLAY";
 		$this->shipSizeClass = 3;
 		$this->canvasSize = 200;
 
@@ -77,3 +78,5 @@ class eacGemini extends BaseShip{
 
     }
 }
+
+?>

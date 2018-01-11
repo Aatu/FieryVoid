@@ -8,7 +8,7 @@ class Darkner extends HeavyCombatVessel{
         $this->faction = "Centauri";
         $this->phpclass = "Darkner";
         $this->imagePath = "img/ships/darkner.png";
-        $this->shipClass = "Darkner";
+        $this->shipClass = "Darkner Fast Attack Frigate";
         
         
         $this->forwardDefense = 13;

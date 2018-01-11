@@ -20,6 +20,9 @@ ShipSystem.prototype.initBoostableInfo = function(){
 ShipSystem.prototype.hasMaxBoost = function(){
     return false;
 }
+ShipSystem.prototype.isScanner = function(){
+    return false;
+}
 
 var Fighter = function(json, ship)
 {
@@ -133,13 +136,13 @@ Weapon.prototype.changeFiringMode = function()
 	
 	if(!mathlib.arrayIsEmpty(this.uninterceptableArray)) this.uninterceptable = this.uninterceptableArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.shotsArray)) this.shots = this.shotsArray[this.firingMode];
-	if(!mathlib.arrayIsEmpty(this.$damageTypeArray)){
-		this.$damageType = this.$damageTypeArray[this.firingMode];
-		this.data["Damage type"] = this.$damageType;
+	if(!mathlib.arrayIsEmpty(this.damageTypeArray)){
+		this.damageType = this.damageTypeArray[this.firingMode];
+		this.data["Damage type"] = this.damageType;
 	}
-	if(!mathlib.arrayIsEmpty(this.$weaponClassArray)){
-		this.$damageType = this.$weaponClassArray[this.firingMode];
-		this.data["Weapon type"] = this.$weaponClass;
+	if(!mathlib.arrayIsEmpty(this.weaponClassArray)){
+		this.weaponClass = this.weaponClassArray[this.firingMode];
+		this.data["Weapon type"] = this.weaponClass;
 	}
 	if(!mathlib.arrayIsEmpty(this.defaultShotsArray)) this.defaultShots = this.defaultShotsArray[this.firingMode];
 	if(!mathlib.arrayIsEmpty(this.groupingArray)) this.grouping = this.groupingArray[this.firingMode];

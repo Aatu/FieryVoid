@@ -7,10 +7,10 @@ class Dragonship extends BaseShip{
   		$this->pointCost = 540;
   		$this->faction = "Raiders";
         $this->phpclass = "Dragonship";
-        $this->imagePath = "img/ships/battlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/dragonship.png";
         $this->shipClass = "Dragonship";
         $this->shipSizeClass = 3;
-        $this->fighters = array("regular"=>12);
+        $this->fighters = array("heavy"=>12);
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;

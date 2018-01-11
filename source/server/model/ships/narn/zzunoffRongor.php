@@ -9,8 +9,10 @@ class zzunoffRongor extends HeavyCombatVessel{
         $this->phpclass = "zzunoffRongor";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Rongor Bolt Destroyer";
+	    
         
         //$this->limited = 33;
+	    $this->variantOf = "Rongoth Destroyer";
 	$this->occurence = "uncommon";
 	$this->isd = 2233;
 	$this->unofficial = true;

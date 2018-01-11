@@ -11,16 +11,15 @@ class Rolentha extends HeavyCombatVessel{
         $this->shipClass = "Rolentha";
         $this->gravitic = true;
         $this->occurence = "rare";
-
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
-
         $this->turncost = 1.33;
         $this->turndelaycost = 1.33;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 25;
+        $this->isd = 2267;
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));

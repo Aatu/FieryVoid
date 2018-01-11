@@ -9,13 +9,15 @@ class Falassa extends HeavyCombatVessel{
         $this->phpclass = "Falassa";
         $this->imagePath = "img/ships/falenna.png";
         $this->shipClass = "Falassa Escort Carrier";
-
+        
+        $this->variantOf = "Falenna Garrison Ship";
+        $this->occurence = "uncommon";
+        $this->isd = 2003;
         $this->fighters = array("light"=>12);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
 
-        $this->occurence = "uncommon";
         
         $this->turncost = 1;
         $this->turndelaycost = 0.66;
@@ -38,9 +40,9 @@ class Falassa extends HeavyCombatVessel{
         $this->addFrontSystem(new TacLaser(3, 5, 4, 300, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 270, 90));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));

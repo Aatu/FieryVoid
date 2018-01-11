@@ -1,6 +1,4 @@
 <?php
-
-
     class Particle extends Weapon{
         public $damageType = "Standard"; 
         public $weaponClass = "Particle"; 
@@ -702,7 +700,7 @@
                 $damageWasDealt=true; //if structure is already destroyed, no further overkill will happen
                 $struct = $target->getStructureSystem($system->location);
                 //reduce damage by armor of system hit - as it would be (was!) during actual damage-dealing procedure
-                $damage = $damage - $this->getSystemArmourStandard($system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder);
+                $damage = $damage - $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder) - $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder);
                 //reduce armor of system hit
                 $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
                 $crit->updated = true;
@@ -713,7 +711,7 @@
                 }
                 //repeat damage on structure this system is mounted to; instead of ignoring armor, damage is increased by armor of struture
                 //increase damage by armor of structure - to simulate armor-ignoring effect
-                $damage = $damage + $this->getSystemArmourStandard($struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($struct, $gamedata, $fireOrder);
+                $damage = $damage + $this->getSystemArmourStandard($target, $struct, $gamedata, $fireOrder) + $this->getSystemArmourInvulnerable($target, $struct, $gamedata, $fireOrder);
                 parent::doDamage($target, $shooter, $struct, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location); 
             }
         } //endof function doDamage
@@ -1011,7 +1009,6 @@
 
 
     class ParticleProjector extends Particle{
-
         public $trailColor = array(30, 170, 255);
 
         public $name = "particleProjector";
@@ -1038,6 +1035,129 @@
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
     }
+
+
+
+    class BAInterceptorMkI extends Particle{
+        /*Belt Alliance version of Mk I Interceptor - identical to EA one, but without EWeb*/
+        public $trailColor = array(30, 170, 255);
+        public $name = "BAInterceptorMkI";
+        public $displayName = "BA Interceptor I";
+        
+        public $animation = "trail";
+        public $iconPath = "interceptor.png";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+        public $priority = 4;
+        public $animationWidth = 1;
+            
+        public $intercept = 3;
+             
+        public $loadingtime = 1;
+  
+        public $rangePenalty = 2;
+        public $fireControl = array(6, null, null); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Particle";
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 1;
+            }	
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+5;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 ;      }
+        
+    }
+
+
+
+    class QuadArray extends Particle{
+        /*Abbai weapon - Twin Array on steroinds and with overheating problems*/
+        
+
+        public $name = "quadArray";
+        public $displayName = "Quad Array";
+        public $iconPath = "quadParticleBeam.png";//"quadArray.png";
+        public $animation = "trail";
+        public $animationColor = array(30, 170, 255);
+        public $animationExplosionScale = 0.15;
+        public $trailColor = array(30, 170, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 3;
+        public $trailLength = 10;
+
+        public $intercept = 2;
+
+        public $loadingtime = 1;
+        public $guns = 4;
+        public $priority = 4;
+        public $rangePenalty = 2;
+        public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
+
+        public $firingModes = array(1=>'Quad', 2=>'Triple', 3=>'Dual');
+        public $gunsArray = array(1=>4,2=>3,3=>3);
+	    
+	public $firedThisTurn = false; //to avoid re-rolling criticals!
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
+            $this->data["Special"] = 'If fired offensively at full power, can overheat and shut down.<br>Can be fired at reduced power to avoid this:';    
+            $this->data["Special"] .= "<br>Quad shot: 75% chance to shut down for a turn"; 
+            $this->data["Special"] .= "<br>Triple shot: 25% chance to shut down for a turn";  
+            $this->data["Special"] .= "<br>Dual shot: always safe"; 
+        }
+
+        public function fire($gamedata, $fireOrder){
+            // If fired, Quad Array might overheat and go in shutdown for 1 turn.
+            // Make a crit roll taking into account used firing mode
+            parent::fire($gamedata, $fireOrder);
+            
+	    if ($this->firedThisTurn) return; //crit already accounted for (if necessary)
+	    $this->firedThisTurn = true; //to avoid rolling crit for every shot!
+		
+            $chance = 0;
+            if ($this->firingMode==1){//quad
+                $chance = 3; //75%
+            }else if ($this->firingMode==2){//triple
+                $chance = 1; //25%
+            }
+		
+            $roll = Dice::d(4);            
+            if($roll <= $chance){ // It has overheated.
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+            }
+		
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+    } //endof class QuadArray
+
 
 
 

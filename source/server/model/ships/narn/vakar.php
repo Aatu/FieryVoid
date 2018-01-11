@@ -13,6 +13,9 @@ class Vakar extends BaseShip{
         $this->fighters = array("medium"=>6);
         $this->limited = 33;
         $this->occurence = "uncommon";
+        $this->variantOf = "Var'Nic Long Range Destroyer";
+	    $this->isd = 2253;
+	    
         
         $this->forwardDefense = 14;
         $this->sideDefense = 14;

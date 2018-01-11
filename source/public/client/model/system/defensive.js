@@ -107,32 +107,6 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
     {
             return 0; //Ray shield does not affect hit chance
     }
-/* for non-weapons it will be ok?...
-    Swrayshield.prototype.initBoostableInfo = function(){
-        // Needed because it can change during initial phase
-        // because of adding extra power.
-        if(window.weaponManager.isLoaded(this)){
-             this.output = this.baseOutput+shipManager.power.getBoost(this);
-        }
-        else{
-            var count = shipManager.power.getBoost(this);
-            for(var i = 0; i < count; i++){
-                shipManager.power.unsetBoost(null, this);
-            }
-        }
-        return this;
-    }
-    Swrayshield.prototype.clearBoost = function(){
-        for (var i in system.power){
-            var power = system.power[i];
-            if (power.turn != gamedata.turn) continue;
-            if (power.type == 2){
-                system.power.splice(i, 1);
-                return;
-            }
-        }
-    }
-    */
     Swrayshield.prototype.hasMaxBoost = function(){
         return true;
     }
@@ -140,3 +114,67 @@ Swrayshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
         return this.maxBoostLevel;
     }
 
+    
+var Absorbtionshield = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    this.defensiveType = "Shield";
+}
+Absorbtionshield.prototype = Object.create( ShipSystem.prototype );
+Absorbtionshield.prototype.constructor = Absorbtionshield;
+Absorbtionshield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+    {
+            return 0; //absorbtion shield does not affect hit chance
+    }
+    Absorbtionshield.prototype.hasMaxBoost = function(){
+        return true;
+    }
+    Absorbtionshield.prototype.getMaxBoost = function(){
+        return this.maxBoostLevel;
+    }
+    
+    
+    
+var Particleimpeder = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+    this.defensiveType = "Impeder";
+}
+Particleimpeder.prototype = Object.create( Weapon.prototype );
+Particleimpeder.prototype.constructor = Particleimpeder;
+Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+    {
+        if (shooter.flight){ //only affects fighters
+            return shipManager.systems.getOutput(target, this);
+        }else{
+            return 0;
+        }
+    }
+    Particleimpeder.prototype.hasMaxBoost = function(){
+        return true;
+    }
+    Particleimpeder.prototype.getMaxBoost = function(){
+        return this.maxBoostLevel;
+    }
+    Particleimpeder.prototype.initBoostableInfo = function(){
+        // Needed because it can chance during initial phase
+        // because of adding extra power.   
+        if(window.weaponManager.isLoaded(this)){
+        }
+        else{
+            var count = shipManager.power.getBoost(this);
+            for(var i = 0; i < count; i++){
+                shipManager.power.unsetBoost(null, this);
+            }
+        }
+
+        this.intercept = this.getInterceptRating();
+        this.data.Intercept = this.getInterceptRating()*(-5);
+        this.data.Boostlevel = shipManager.power.getBoost(this);
+
+        return this;
+    }
+    Particleimpeder.prototype.getInterceptRating = function()
+    {
+        return (3 + shipManager.power.getBoost(this));
+    }

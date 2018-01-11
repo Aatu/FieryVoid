@@ -4,11 +4,13 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	      $this->pointCost = 204; //34*6
-      	$this->faction = "Custom Ships";
+	      $this->pointCost = 34 *6;
         $this->phpclass = "wlcChlonasSaTrevanFlight";
-        $this->shipClass = "Ch'Lonas Sa'Trevan Light Fighters";
+        $this->shipClass = "Sa'Trevan Light flight";
 	      $this->imagePath = "img/ships/shasi.png";
+	    
+        $this->faction = "Ch'Lonas";
+	$this->unofficial = true;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 7;
@@ -27,7 +29,7 @@ class wlcChlonasSaTrevanFlight extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             	$armour = array(2, 1, 1, 1);
             	$fighter = new Fighter("wlcChlonasSaTrevanFlight", $armour, 7, $this->id);
-            	$fighter->displayName = "Sa'Trevan Light Fighter";
+            	$fighter->displayName = "Sa'Trevan";
 		$fighter->imagePath = "img/ships/shasi.png";
 	        $fighter->iconPath = "img/ships/shasi_large.png";
 		

@@ -10,6 +10,7 @@ class Drikorta extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Drikorta Power Cruiser";
         $this->occurence = "uncommon";
+        $this->variantOf = "Ikorta Light Assault Cruiser";
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

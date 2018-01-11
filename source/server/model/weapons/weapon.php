@@ -63,19 +63,20 @@ class Weapon extends ShipSystem{
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
-	public $extraoverloadshotsArray = array();	
+    public $extraoverloadshotsArray = array();	
 
     public $uninterceptable = false;
-	public $uninterceptableArray = array();
+    public $uninterceptableArray = array();
+    public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
     public $noInterceptDegradation = false; //if true, this weapon will be intercepted without degradation!
-    public $intercept = 0;
-    public $freeintercept = false;
+    public $intercept = 0; //intercept rating
+    public $freeintercept = false;  //can intercept fire directed at other unit?
     public $hidetarget = false;
     public $duoWeapon = false;
     public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
-	
+
 
     public $shots = 1;
 	public  $shotsArray = array();
@@ -110,6 +111,7 @@ class Weapon extends ShipSystem{
 	public $noOverkill = false; //this will let simplify entire Matter line enormously!
 	protected $noOverkillArray = array();
 	public $ballistic = false; //this is a ballictic weapon, not direct fire
+	public $ballisticIntercept = false; //can intercept, but only ballistics
         public $hextarget = false; //this weapon is targeted on hex, not unit
 	public $noPrimaryHits = false; //PRIMARY removed from outer charts if true
 	
@@ -162,6 +164,11 @@ class Weapon extends ShipSystem{
         return 0;
     }
 
+    public function getRakeSize(){
+	return $this->raking;    
+    }
+	
+	
     public function getAvgDamage(){
         $min = $this->minDamage;
         $max = $this->maxDamage;
@@ -222,37 +229,8 @@ class Weapon extends ShipSystem{
 	    
 	//make sure data from table is transferred to current variables
 	$this->changeFiringMode($this->firingMode);
-		
-		/*original code
-            if ($crit instanceof ReducedRange){
-
-                if ($this->rangePenalty != 0){
-                    if ($this->rangePenalty >= 1){
-                        $this->rangePenalty += 1;
-                    }else{
-                        $this->rangePenalty = 1/(round(1/$this->rangePenalty)-1);
-                    }
-
-                }
-
-                if ($this->range != 0){
-                    $this->range = round($this->range *0.75);
-                }
-
-            }
-
-            if ($crit instanceof ReducedDamage){
-                $min = $this->minDamage * 0.2;
-                $max = $this->maxDamage * 0.2;
-                $avg = round(($min+$max)/2);
-                $this->dp = $avg;
-            }
-        }
-        $this->setMinDamage();
-        $this->setMaxDamage();
-*/	
-
-    }
+    } //endof function effectCriticals
+	
 
     public function getNormalLoad(){
         if ($this->normalload == 0){
@@ -269,6 +247,27 @@ class Weapon extends ShipSystem{
         return $this->turnsloaded;
     }
 
+	/*if this weapon was to be used for interception of indicated shot - how high intercept mod would be?
+		assume that intercept itself is legal
+	*/
+	public function getInterceptionMod($gamedata, $intercepted){
+		$interceptMod = 0;
+		$shooter = $gamedata->getShipById($intercepted->shooterid);
+		$interceptedWeapon = $shooter->getSystemById($intercepted->weaponid);		
+		if($interceptedWeapon->hextarget) return 0;//can't intercept uninterceptable or hextarget weapon!
+		if($this->ballisticIntercept && (!($interceptedWeapon->ballistic))) return 0;//can't intercept non-ballistic if weapon can intercept only ballistics!
+		
+		$interceptMod = $this->getInterceptRating($gamedata->turn); 
+		if(!($interceptedWeapon->ballistic || $interceptedWeapon->noInterceptDegradation)){//target is neither ballistic weapon nor has lifted degradation, so apply degradation!
+			for($i = 0;$i<$intercepted->numInterceptors;$i++){
+				$interceptMod -= 1; //-1 for each already intercepting weapon
+			}
+		}
+		$interceptMod=max(0,$interceptMod) *5;//*5: d20->d100
+		return $interceptMod;
+	}//endof  getInterceptionMod
+	
+	
     public function firedOnTurn($turn){
         if ($this instanceof DualWeapon && isset($this->turnsFired[$turn])) return true;
         foreach ($this->fireOrders as $fire){
@@ -575,12 +574,215 @@ class Weapon extends ShipSystem{
                 return true;
             }
         }
-
+	     
         return false;
-    }
+    } //endof function isFtrFiringNonBallisticWeapons
+	
+	
+	/*Marcin Sawicki: is there a chance that defender has choice of target section? */
+	public function isTargetAmbiguous($gamedata, $fireOrder){
+		if($fireOrder->calledid != -1) return false; //no choice for called shot
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+
+		
+		if($target == null) return true; //target is a hex rather than unit, probability of ambigousness is relatively high
+		if($target instanceof FighterFlight) return false; //shot at fighter may be ambiguous, but there's no point in poostponing the decision!
+		
+		$pos = $shooter->getCoPos();
+		$ambiguous = false;
+
+		if($this->ballistic){
+			$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+			$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+		}else{
+			$launchPos = $pos;
+		}
+		
+		if($this->ballistic){
+			$ambiguous = $target->isHitSectionAmbiguousPos($launchPos, $fireOrder->turn);
+		}else{
+			$ambiguous = $target->isHitSectionAmbiguous($shooter, $fireOrder->turn);
+		}
+		return $ambiguous;
+	} //endof function isTargetAmbiguous
+	
+	
+    /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
+    public function calculateHitBase($gamedata, $fireOrder){
+	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $target = $gamedata->getShipById($fireOrder->targetid);
+        $pos = $shooter->getCoPos();
+        $jammermod = 0;
+        $jinkSelf = 0;
+	$jinkTarget = 0;
+        $defence = 0;
+        $mod = 0;
+        $oew = 0;
+
+        $hitLoc;
+        $preProfileGoal;
+	    
+        if($this->ballistic){
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        	$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);		
+        }else{
+		$launchPos = $pos;
+	}
+	    
+	if (!$this->isInDistanceRange($shooter, $target, $fireOrder))
+	{
+		// Target is not in distance range. Auto-miss.
+		$notes = ' Target moved out of range. ';
+		$fireOrder->needed = 0; //auto-miss
+		$fireOrder->notes .= $notes;
+		$fireOrder->updated = true;
+		return;
+	}	    
+	    
+        $rp = $this->calculateRangePenalty($launchPos, $target);
+        $rangePenalty = $rp["rp"];
+        
+	if($shooter instanceof FighterFlight)  $jinkSelf = Movement::getJinking($shooter, $gamedata->turn);  //count own jinking always  
+
+        if($target instanceof FighterFlight){
+            if ( (!($shooter instanceof FighterFlight)) || $this->ballistic) //non-fighters and ballistics always affected by jinking
+            {
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+            elseif( $jinkSelf > 0 || mathlib::getDistance($shooter->getCoPos(),  $target->getCoPos()) > 0 ){ //fighter direct fire unaffected at range 0
+                $jinkTarget = Movement::getJinking($target, $gamedata->turn);
+            }
+        }
+
+	$dew = $target->getDEW($gamedata->turn);
+        $bdew = EW::getBlanketDEW($gamedata, $target);
+        $sdew = EW::getSupportedDEW($gamedata, $target);        
+        $dist = EW::getDistruptionEW($gamedata, $shooter);
+        if ($this->useOEW)
+        {
+		$soew = EW::getSupportedOEW($gamedata, $shooter, $target);
+		$oew = $shooter->getOEW($target, $gamedata->turn);
+		$oew -= $dist;
+		if ($oew < 0) $oew = 0;
+        }else{
+		$soew = 0;
+		$oew = 0;
+	}
+
+        if (!($shooter instanceof FighterFlight)){
+            if (Movement::isRolling($shooter, $gamedata->turn) /*&& !$this->ballistic*/){
+                $mod -=3;
+            }
+            if (Movement::hasPivoted($shooter, $gamedata->turn) /*&& !$this->ballistic*/){
+                $mod -=3;
+            }
+        }
+
+	if ($fireOrder->calledid != -1){
+		$mod += $this->getCalledShotMod();
+		if($target->base) $mod += $this->getCalledShotMod();//called shots vs bases suffer double penalty!
+        }
+
+        if ($shooter instanceof OSAT && Movement::hasTurned($shooter, $gamedata->turn)){
+            $mod -= 1;
+        }
+
+	    if($this->ballistic){ //getHitChanceMod should get explicit position only if it cannot be derived from shooter - otherwise results at rng 0 are incorrect!
+		$posmod = $pos;
+	    }else{
+		$posmod = null;    
+	    }
+        $mod += $target->getHitChanceMod($shooter, $posmod, $gamedata->turn, $this);
+        $mod += $this->getWeaponHitChanceMod($gamedata->turn);
+
+        $ammo = $this->getAmmo($fireOrder);
+        if ($ammo !== null){
+            $mod += $ammo->getWeaponHitChanceMod($gamedata->turn);
+        }
+	    
+        //Fighters direct fire ignore all defensive EW, be it DEW, SDEW or BDEW
+	//and use OB instead of OEW
+        if ($shooter instanceof FighterFlight) {
+		if (Movement::getCombatPivots($shooter, $gamedata->turn)>0){
+			$mod -= 1;
+		}
+		
+		$effectiveOB = $shooter->offensivebonus;
+		$firstFighter = $shooter->getSampleFighter();
+		$OBcrit = $firstFighter->hasCritical("tmpsensordown");
+		if ($OBcrit > 0){
+	        	$effectiveOB = $shooter->offensivebonus - $OBcrit;
+			$effectiveOB = max(0,$effectiveOB); //cannot bring OB below 0!
+		}
+		
+		if (!$this->ballistic){
+			$dew = 0;
+			$bdew = 0;
+			$sdew = 0;
+			$oew = $effectiveOB;
+			$soew = 0;
+		}else{ //ballistics use of OB is more complicated
+			$oew = 0;
+			$soew = 0;
+			if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())){
+				if ($shooter->hasNavigator){// Fighter has navigator. Flight always benefits from offensive bonus.
+					$oew = $effectiveOB;
+				}else{ // Check if target is in current weapon arc
+					$relativeBearing = $target->getBearingOnUnit($shooter);			
+					if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)){
+						// Target is in current launcher arc. Flight benefits from offensive bonus.
+						// Now check if the fighter is not firing any non-ballistic weapons
+						if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) $oew = $effectiveOB;
+					}
+				}
+        		}
+		}
+        }   
+
+        if (($oew < 1) && (!($shooter instanceof FighterFlight))){
+            $rangePenalty = $rangePenalty*2;
+        } elseif($shooter->faction != $target->faction) {
+            $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter"=>$shooter, "target"=>$target));
+	    $jammermod = $rangePenalty*$jammerValue;
+        }
+
+        if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)){
+		$CnC = $shooter->getSystemByName("CnC");
+		$mod -= ($CnC->hasCritical("PenaltyToHit", $gamedata->turn-1));
+	}
+        $firecontrol =  $this->fireControl[$target->getFireControlIndex()];
+
+	$hitPenalties = $dew + $bdew + $sdew + $rangePenalty + $jinkSelf + max($jammermod, $jinkTarget);
+	$hitBonuses = $oew + $soew + $firecontrol + $mod;
+	$hitLoc = null;
+
+        if($this->ballistic){
+		$hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		$defence = $target->getHitSectionProfilePos($launchPos);
+        }else{
+		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+		$defence = $target->getHitSectionProfile($shooter);
+	}
+        $goal = $defence + $hitBonuses - $hitPenalties;
+
+        $change = round($goal*5); //d20 to d100: ($goal/20)*100 
+	    $target->setExpectedDamage($hitLoc, $change, $this);
+
+	//range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, 
+	//interception penalty not yet calculated, will be logged later
+        $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
+	$fireOrder->chosenLocation = $hitLoc;
+        $fireOrder->needed = $change;
+        $fireOrder->notes = $notes;
+        $fireOrder->updated = true;
+    } //endof calculateHitBase
 	
 	
 	
+	//Marcin Sawicki, October 2017: calculateHit is to be replaced by calculateHitBase! (remake of firing procedure)
+	/*
     public function calculateHit($gamedata, $fireOrder){
         //debug::log("_____________");
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -649,12 +851,6 @@ class Weapon extends ShipSystem{
                 $oew = 0;
             }
         }
-
-/*Piercing mode already taken care of in FC
-        if ($this->piercing && $this->firingMode == 2 && $this->firingModes[1] == "Standard"){
-            $mod -= 4;
-        }
-*/	
 
         if (!($shooter instanceof FighterFlight)){
             if (Movement::isRolling($shooter, $gamedata->turn) && !$this->ballistic){
@@ -748,13 +944,13 @@ class Weapon extends ShipSystem{
 
         $change = round(($goal/20)*100);
 
-	    /*range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, */
+	    //range penalty already logged in calculateRangePenalty... rpenalty: $rangePenalty, 
         $notes = $rp["notes"] . ", defence: $defence, DEW: $dew, BDEW: $bdew, SDEW: $sdew, Jammermod: $jammermod, , jink: $jinkSelf/$jinkTarget, intercept: $intercept, OEW: $oew, SOEW: $soew, F/C: $firecontrol, mod: $mod, goal: $goal, chance: $change";
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
         $fireOrder->updated = true;
     } //endof calculateHit
-
+*/
 	
 	
     public function getIntercept($gamedata, $fireOrder){
@@ -776,8 +972,8 @@ class Weapon extends ShipSystem{
 
                     $interceptWeapon = $ship->getSystemById($fire->weaponid);
                     if (!$interceptWeapon instanceof Weapon){
-                        debug::log("DING. You cant intercept with a non-weapon....");
-                        debug::log($interceptWeapon->displayName);
+                        //debug::log("DING. You cant intercept with a non-weapon....");
+                        //debug::log($interceptWeapon->displayName);
                         continue;
                     }
                     $i = $interceptWeapon->getInterceptRating(TacGamedata::$currentTurn) - $deg;
@@ -788,8 +984,7 @@ class Weapon extends ShipSystem{
                         $i = 0;
                      }
 
-                    if ($shooter instanceof FighterFlight)
-						$deg--;
+                    if ($shooter instanceof FighterFlight) $deg--;
 
                     $intercept += $i;
                     $count++;
@@ -808,17 +1003,14 @@ class Weapon extends ShipSystem{
 	
     public function getNumberOfIntercepts($gamedata, $fireOrder){
         $count = 0;
-
         foreach ($gamedata->ships as $ship){
             $fireOrders = $ship->getAllFireOrders();
             foreach ($fireOrders as $fire){
                 if ($fire->type == "intercept" && $fire->targetid == $fireOrder->id){
                     $count++;
-
                 }
             }
         }
-
         return $count;
     }
 
@@ -830,14 +1022,85 @@ class Weapon extends ShipSystem{
     }
 	
 	
-    public function fire($gamedata, $fireOrder){
+	/*Marcin Sawicki - October 2017 - new version of firing procedure - assuming all data is already prepared*/
+	public function fire($gamedata, $fireOrder){
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		
+		$fireOrder->needed -= $fireOrder->totalIntercept.
+		$notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
+		$fireOrder->notes .= $notes;
+		
+		$pos = null; //functions will properly calculate from firing unit, which is important at range 0
+		//$pos = $shooter->getCoPos();
+		if ($this->ballistic){
+		    $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		    $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		}
+		
+		$shotsFired = $fireOrder->shots; //number of actual shots fired	
+		if($this->damageType == 'Pulse'){//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
+			$shotsFired = 1;
+		}
+		for ($i=0;$i<$shotsFired;$i++){
+			$needed = $fireOrder->needed;
+			if($this->damageType != 'Pulse'){//non-Pulse weapons may use $grouping, too!		
+				$needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
+			}
+
+			//for linked shot: further shots will do the same as first!
+			if($i==0){ //clear variables that may be relevant for further shots in line
+				$fireOrder->linkedHit=null;
+			}
+			$rolled = Dice::d(100);
+			if($this->isLinked && $i > 0){ //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
+				$rolled = $fireOrder->rolled;
+			}
+
+			//interception?
+			if ($rolled > $needed && $rolled <= $needed+($fireOrder->totalIntercept*5)){ //$fireOrder->pubnotes .= "Shot intercepted. ";
+			    if($this->damageType == 'Pulse'){
+				$fireOrder->intercepted += $this->maxpulses;
+			    }else{
+				$fireOrder->intercepted += 1;
+			    }
+			}
+
+
+			$fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
+			$fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+
+			//hit?
+			if ($rolled <= $needed){
+				$hitsRemaining=1;
+
+				if($this->damageType == 'Pulse'){ //possibly more than 1 hit from a shot
+				    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
+				}
+
+				while($hitsRemaining>0){
+					$hitsRemaining--;
+					$fireOrder->shotshit++;
+					$this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);	
+				}
+			}
+		}
+
+		$fireOrder->rolled = max(1,$fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	} //endof fire
+	
+	
+	
+	/*Marcin Sawicki - October 2017 - firing procedure is remade; old version not deleted just in case*/
+    public function fireOld($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
 	
         //$this->firingMode = $fireOrder->firingMode;
 	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
 
-        $pos = $shooter->getCoPos();
+        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
+	//$pos = $shooter->getCoPos();
         if ($this->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
@@ -918,30 +1181,6 @@ class Weapon extends ShipSystem{
 	
 	
 
-/* no longer needed, keeping code just in case
-    protected function piercingDamage($target, $shooter, $fireOrder, $pos, $gamedata)
-    {
-
-        if ($target->isDestroyed())
-            return;
-
-        $damage = $target->getPiercingDamagePerLoc(
-                $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
-            );
-        $locs = $target->getPiercingLocations($shooter, $pos, $gamedata->turn, $this);
-
-        foreach ($locs as $loc){
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $loc);
-
-            if (!$system)
-                continue;
-
-            $this->doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $loc);
-        }
-    }
-*/
-	
-	
 	
     protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location=null)  {
 	    /*Location only relevant for Flash damage, which overkills to a new roll on hit table rather than to Structure*/
@@ -1021,12 +1260,18 @@ class Weapon extends ShipSystem{
 	    
         if ($target->isDestroyed()) return;
 	    
+	$tmpLocation = $fireOrder->chosenLocation;
+	$launchPos = null;
         if ($this->ballistic){
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
+		}
 	}else{
- 		$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+ 			$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
+		}
 	}
 
 	if(($target->shipSizeClass>1) && ($this->damageType=='Piercing')){ //Piercing damage will be split into 3 parts vs units larger thgan MCVs
@@ -1048,20 +1293,20 @@ class Weapon extends ShipSystem{
 		}
 		//first part: facing structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, $facingLocation);
-        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, null, $gamedata, false, $facingLocation);
+        	$this->doDamage($target, $shooter, $system, $damageEntry, $fireOrder, $launchPos, $gamedata, false, $facingLocation);
 		//second part: PRIMARY Structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this, 0);
-		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, null, $gamedata, false, 0);
+		$this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, $launchPos, $gamedata, false, 0);
 		//last part: opposite Structure
 		$system = $target->getHitSystem($shooter, $fireOrder, $this,  $outLocation);
-		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, null, $gamedata, false, $outLocation);
+		$this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
 	}elseif( ($this->damageType=='Raking') && (!($target instanceof FighterFlight)) ){ //Raking hit... but not at fighters - that's effectively Standard shot!
 		//split into rakes; armor will not need to be penetrated twice!
 		$fireOrder->armorIgnored = array();//reset info about pierced armor
 		while($damage>0){
-			$rake=min($damage, $this->raking);
+			$rake=min($damage, $this->getRakeSize());
 			$system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
-        		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, false, $tmpLocation);
+        		$this->doDamage($target, $shooter, $system, $rake, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 			$damage = $damage - $rake;
 		}
 	}else{ //standard mode of dealing damage
@@ -1073,7 +1318,7 @@ class Weapon extends ShipSystem{
 		if($this->isLinked){ //further linked weapons will hit the exact same system!
 			$fireOrder->linkedHit = $system;
 		}
-        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
+        	$this->doDamage($target, $shooter, $system, $damage, $fireOrder, $launchPos, $gamedata, false, $tmpLocation);
 	}
     }//endof function damage
 
@@ -1091,12 +1336,12 @@ class Weapon extends ShipSystem{
         return true;
     }
 
-    protected function getSystemArmourStandard($system, $gamedata, $fireOrder, $pos=null){ //standard part of armor
+    protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){ //standard part of armor
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
-	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
+	if( ($pos==null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
@@ -1111,12 +1356,12 @@ class Weapon extends ShipSystem{
     }//endof function getSystemArmourStandard
 	
 	
-    protected function getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos=null){ //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
+    protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){ //only invulnerable portion of armor (one that can't be reduced by, say, damage type)
     	$shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
+        //$target = $gamedata->getShipById($fireOrder->targetid);
 
 	$armor = 0;
-	if( ($pos!=null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
+	if( ($pos==null) && ($this->ballistic))  { //source of attack not explicitly defined, and weapon is ballistic
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
         }
@@ -1136,8 +1381,13 @@ class Weapon extends ShipSystem{
 	    
         if ($this->rangeDamagePenalty > 0){
             $targetPos = $target->getCoPos();
-            $dis = mathlib::getDistanceHex($pos, $targetPos);
-            $damage -= ($dis * $this->rangeDamagePenalty);
+	    if($pos!=null){
+	    	$sourcePos = $pos;
+	    }else{
+	    	$sourcePos = $shooter->getCoPos();
+	    }
+            $dis = mathlib::getDistanceHex($sourcePos, $targetPos);
+            $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
         }
 	    
 	//for Piercing shots at small targets (MCVs and smaller) - reduce damage by ~10% (by rules: -2 per die)
@@ -1168,8 +1418,8 @@ class Weapon extends ShipSystem{
 		$damageWasDealt = true; //actual damage was done! might be relevant for overkill allocation
 		$systemHealth = $system->getRemainingHealth();
 		$damage = floor($damage);//make sure damage is a whole number, without fractions!
-		$armour = $this->getSystemArmourStandard($system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
-		$armour += $this->getSystemArmourInvulnerable($system, $gamedata, $fireOrder, $pos); //this can't be ignored
+		$armour = $this->getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos); //standard part of armor (potentially ignored by weapon)
+		$armour += $this->getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos); //this can't be ignored
 		$modifiedDamage = $damage;
 		$destroyed = false;
 		

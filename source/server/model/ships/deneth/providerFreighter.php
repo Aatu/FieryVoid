@@ -8,7 +8,7 @@ class ProviderFreighter extends MediumShip{
 	$this->faction = "Civilians";
         $this->phpclass = "providerfreighter";
         $this->imagePath = "img/ships/civilianFreighter.png";
-        $this->shipClass = "Provider Freighter";
+        $this->shipClass = "Deneth Provider Freighter";
         $this->canvasSize = 100;
 	    
 	$this->isd = 2210;
@@ -56,13 +56,13 @@ class ProviderFreighter extends MediumShip{
         		),
         		1=> array(
         				5 => "Thruster",
-        				10 => "Cargo",
+        				10 => "Cargo Bay",
         				17 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
         				5 => "Thruster",
-        				10 => "Cargo",
+        				10 => "Cargo Bay",
         				17 => "Structure",
         				20 => "Primary",
         		),

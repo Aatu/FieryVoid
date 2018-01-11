@@ -9,6 +9,7 @@ class Ikorta extends HeavyCombatVesselLeftRight{
         $this->phpclass = "Ikorta";
         $this->imagePath = "img/ships/ikorta.png";
         $this->shipClass = "Ikorta Light Assault Cruiser";
+	    $this->fighters = array("assault shuttles"=>12);
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

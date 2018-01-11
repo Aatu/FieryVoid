@@ -20,6 +20,7 @@ class Nial extends FighterFlight{
         $this->iniativebonus = 85;
         $this->gravitic = true;
         $this->populate();
+        $this->isd = 2050;
     }
 
     public function populate(){

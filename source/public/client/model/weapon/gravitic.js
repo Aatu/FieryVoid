@@ -15,31 +15,7 @@ GravitonPulsar.prototype.constructor = GravitonPulsar;
 
 GravitonPulsar.prototype.initBoostableInfo = function(){
     // Needed because it can chance during initial phase
-    // because of adding extra power.
-    
-    /* no longer necessary information
-    this.data["Weapon type"] ="Gravitic";
-    this.data["Damage type"] ="Standard";
-    this.data["Grouping range"] = "" + this.grouping + "%";
-    this.data["Max pulses"] = shipManager.power.getBoost(this) + 3;
-    */
-
-    /* no longer necessary information
-    switch(shipManager.power.getBoost(this)){
-        case 0:
-            this.data["Pulses"] = 'D2';
-            break;
-        case 1:
-            this.data["Pulses"] = 'D3 +1';
-            break;
-        case 2:
-            this.data["Pulses"] = 'D3 +2';
-            break;
-        default:
-            this.data["Pulses"] = 'D2';
-            break;
-    }
-    */
+    // because of adding extra power.   
 
     if(window.weaponManager.isLoaded(this)){
         this.loadingtime = 1 + shipManager.power.getBoost(this);
@@ -65,15 +41,13 @@ GravitonPulsar.prototype.getInterceptRating = function()
     return (1 + shipManager.power.getBoost(this));
 }
 
+
 GravitonPulsar.prototype.clearBoost = function(){
         for (var i in system.power){
                 var power = system.power[i];
-                if (power.turn != gamedata.turn)
-                        continue;
-
+                if (power.turn != gamedata.turn) continue;
                 if (power.type == 2){
                     system.power.splice(i, 1);
-
                     return;
                 }
         }
@@ -97,27 +71,7 @@ GraviticBolt.prototype.constructor = GraviticBolt;
 GraviticBolt.prototype.initBoostableInfo = function(){
     // Needed because it can chance during initial phase
     // because of adding extra power.
-    
-    /* no longer necessary information
-    this.data["Weapon type"] ="Gravitic";
-    this.data["Damage type"] ="Standard";
 
-    switch(shipManager.power.getBoost(this)){
-        case 0:
-            this.data["Damage"] = '9';
-            break;
-        case 1:
-            this.data["Damage"] = '12';
-            break;
-        case 2:
-            this.data["Damage"] = '15';
-            break;
-        default:
-            this.data["Damage"] = '9';
-            break;
-    }
-    */
-    
     if(window.weaponManager.isLoaded(this)){
         this.loadingtime = 1 + shipManager.power.getBoost(this);
         this.turnsloaded = 1 + shipManager.power.getBoost(this);
@@ -146,12 +100,9 @@ GraviticBolt.prototype.getInterceptRating = function()
 GraviticBolt.prototype.clearBoost = function(){
         for (var i in system.power){
                 var power = system.power[i];
-                if (power.turn != gamedata.turn)
-                        continue;
-
+                if (power.turn != gamedata.turn)  continue;
                 if (power.type == 2){
                     system.power.splice(i, 1);
-
                     return;
                 }
         }

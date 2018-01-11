@@ -5,7 +5,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 550;
+	$this->pointCost = 450;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swNebulonBFrigate";
         $this->imagePath = "img/starwars/nebulonb.png";
@@ -31,7 +31,7 @@ class swNebulonBFrigate extends HeavyCombatVessel{
         
 	$this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 15, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 10, 5, 4));
+        $this->addPrimarySystem(new SWScanner(3, 10, 5, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 5, 3));
 	$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));
@@ -71,28 +71,28 @@ class swNebulonBFrigate extends HeavyCombatVessel{
 	    
         $this->hitChart = array(
         		0=> array(
-					8 => "Structure",
+					10 => "Structure",
         				13 => "Thruster",
-        				16 => "Scanner",
+        				15 => "Scanner",
         				18 => "Engine",
         				19 => "Reactor",
 					20 => "C&C",
         		),
         		1=> array(
-        				3 => "Thruster",
-        				4 => "Ray Shield",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
 					7 => "Hangar",
-        				10 => "Medium Turbolaser",
-        				12 => "Medium Laser",
+        				11 => "Medium Turbolaser",
+        				14 => "Medium Laser",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		2=> array(
-        				9 => "Thruster",
-					11 => "Engine",		
-		        		12 => "Hyperdrive",
+        				4 => "Thruster",
+					6 => "Engine",		
+		        		8 => "Hyperdrive",
+					9 => "Ray Shield",
 					13 => 'Medium Laser',
-        				14 => "Ray Shield",
         				18 => "Structure",
         				20 => "Primary",
         		),

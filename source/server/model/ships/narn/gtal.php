@@ -10,8 +10,9 @@ class Gtal extends BaseShip{
         $this->imagePath = "img/ships/gquan.png";
         $this->shipClass = "G'Tal Command Cruiser";
         $this->occurence = "rare";
-	$this->variantOf = "G'Quan";
+	$this->variantOf = "G'Quan Heavy Cruiser";
         $this->fighters = array("normal"=>12);
+	    $this->isd = 2263;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

@@ -279,7 +279,6 @@ window.weaponManager = {
 
 	
 	selectWeapon: function(ship, weapon){
-		console.log("select weapon");
 		if(weaponManager.checkOutOfAmmo(ship, weapon)){
 			return
 		}
@@ -305,8 +304,8 @@ window.weaponManager = {
 
 		gamedata.selectedSystems.push(weapon);
 		shipWindowManager.setDataForSystem(ship, weapon);
-
 	},
+	
 
 	isSelectedWeapon: function(weapon){
 		if ($.inArray(weapon, gamedata.selectedSystems) >= 0)
@@ -314,6 +313,7 @@ window.weaponManager = {
 
 		return false;
 	},
+	
 
 	targetingShipTooltip: function(ship, e, calledid){
 		//e.find(".shipname").html(ship.name);
@@ -321,7 +321,7 @@ window.weaponManager = {
 		var f = $(".targeting", e);
 		f.html("");
 
-		if (calledid == null){
+		if(!(calledid > 0)){ //(calledid == null){
 			var html = "";
 			var section = weaponManager.getShipHittingSide(selectedShip, ship);
 
@@ -353,6 +353,7 @@ window.weaponManager = {
 					html += "-STBD.AFT-";
 					break;
 				    default:
+					html += "-OTHER-";
 					break;
 				}
 				/*
@@ -376,19 +377,15 @@ window.weaponManager = {
 
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
-
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
 				if(weaponManager.checkIsInRange(selectedShip, ship, weapon)){
-
 					var value = weapon.firingMode;
-						value = weapon.firingModes[value];
-/*no special treatment for Piercing!
-					if (value == "Piercing"){
-						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%  (PIERCING)'  + '</span></div>').appendTo(f);
-					}
-					else {*/
+					value = weapon.firingModes[value];					
+					if((calledid!=null)&&(!weaponManager.canWeaponCall(weapon))){ //called shot, weapon not eligible!
+						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
+					}else{
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> - Approx: '+weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid)+'%</span></div>').appendTo(f);
-					//}
+					}
 				}
 				else{
 					$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
@@ -399,8 +396,49 @@ window.weaponManager = {
 			}
 		}
 	},
+	
+	canWeaponCall: function(weapon){ //is this weapon eleigible for calling precision shot?...
+		//Standard or Pulse, not Ballistic!
+		if(weapon.ballistic || weapon.hextarget) return false;
+		if((weapon.damageType == 'Standard') || (weapon.damageType == 'Pulse')) return true;
+		return false;
+	},
+	
+	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
+		var sectionEligible = false; //section that system is mounted on is eligible for caled shots
+		var shooter = gamedata.getSelectedShip();
+		if (!shooter) return false;		
+		if (target.flight) return true; //experiment - allow called shots at fighters?...
+		
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
+		var targetFacing = (shipManager.getShipHeadingAngle(target));
+		
+		for (i = 0; i < target.outerSections.length; i++) { 
+    			var currSectionData = target.outerSections[i];
+			if(system.location == currSectionData.loc){
+				if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))){
+					if(currSectionData.call == true) return true;					
+				}
+				sectionEligible = currSectionData.call;
+			}
+			//"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
+		}
+		//options here: PRIMARY, incorrect facing of targeted section, section not eligible for called shots (eg. on MCVs)
+		if( (system.location > 0) && (sectionEligible == true) ) {
+			return false; //non-PRIMARY and eligible for called shots, but still here => must be out of arc!	
+		}
+		//option here: section not normally eligible for target shots (PRIMARY or outer section on MCV)
+		//check whether system is PRIMARY-targetable!
+		if(system.isPrimaryTargetable != true) return false; //cannot be targeted under these conditions
+		//check whether it's in arc
+		if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(system.startArc, targetFacing), mathlib.addToDirection(system.endArc, targetFacing))){
+			return true;					
+		}
+		return false;
+	}, //endof function canCalledshot
+	
 
-	canCalledshot: function(target, system){
+	canCalledshotOld: function(target, system){ /*Marcin Sawicki, October 2017 - let's disable this function, and use new $outerSections-based*/
 		var shooter = gamedata.getSelectedShip();
 
 		if (!shooter)
@@ -490,14 +528,14 @@ window.weaponManager = {
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
-		if (target.draziHCV){
+		//if (target.draziHCV){ //ALWAYS, not just for Drazi HCV layout!
 			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(330, targetFacing), mathlib.addToDirection(30, targetFacing))){
-				return 1
+				return 1;
 			}
 			if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(150, targetFacing), mathlib.addToDirection(210, targetFacing))){
-				return 2
+				return 2;
 			}
-		}
+		//}
 		if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(210, targetFacing), mathlib.addToDirection(330, targetFacing))){
 					return 3;
 		}
@@ -523,7 +561,6 @@ window.weaponManager = {
 	},
 
 	isOnWeaponArc: function(shooter, target, weapon){
-
 		var shooterFacing = (shipManager.getShipHeadingAngle(shooter));
 		var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
 
@@ -535,12 +572,9 @@ window.weaponManager = {
 
 		if (weapon.ballistic && oPos.x == tPos.x && oPos.y == tPos.y)
 			return true;
-
 		//console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
 
 		return (mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end));
-
-
 	},
 
 	calculateRangePenalty: function(distance, weapon){
@@ -638,7 +672,6 @@ window.weaponManager = {
 
 	
 	calculateBaseHitChange: function(target, base, shooter, weapon){
-
   		var jink = 0;
 		var dew = 0;
 
@@ -701,7 +734,6 @@ window.weaponManager = {
 		{
 			oew = ew.getTargetingEW(shooter, target);
 			oew -= dist;
-
 			if (oew<0)
 				oew = 0;
 		}
@@ -711,7 +743,15 @@ window.weaponManager = {
 		mod -= target.getHitChangeMod(shooter, sPos);
 
 		if (shooter.flight){
-			oew = shooter.offensivebonus;
+			//oew = shooter.offensivebonus;
+			
+			//Abbai critical...
+			//var firstFighter = shipManager.systems.getSystem(shooter, 1); //should be the same as below...
+			var firstFighter = shooter.systems[1];
+			var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+			oew = shooter.offensivebonus - OBcrit;
+			oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
+			
 			mod -= shipManager.movement.getJinking(shooter);
 
 			if (shipManager.movement.hasCombatPivoted(shooter))
@@ -761,7 +801,7 @@ window.weaponManager = {
 //			oew = 0;
 //		}
 
-		if (oew < 1){
+		if ((oew < 1) && (!shooter.flight)){
 			rangePenalty = rangePenalty*2;
 		}
 		else if (shooter.faction != target.faction){
@@ -794,8 +834,6 @@ window.weaponManager = {
 	//	console.log(change);
 
 		return change;
-
-
 	},
 
 	
@@ -884,7 +922,6 @@ window.weaponManager = {
 	},
 
 	getFireControl: function(target, weapon){
-
 		if (target.shipSizeClass > 1){
 			return weapon.fireControl[2];
 		}
@@ -893,8 +930,6 @@ window.weaponManager = {
 		}
 
 		return weapon.fireControl[0];
-
-
 	},
 
 	// 'position' should be in HEX coordinate
@@ -927,20 +962,28 @@ window.weaponManager = {
 
 	},
 
-	getShipHittingSide: function(shooter, target){
+	getShipHittingSide: function(shooter, target){//Marcin Sawicki, October 2017: new approach!
+		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
+		var targetFacing = (shipManager.getShipHeadingAngle(target));
+		var toReturn = [];
+		
+		for (i = 0; i < target.outerSections.length; i++) { 
+    			var currSectionData = target.outerSections[i];
+			if(mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))){
+				toReturn.push(currSectionData.loc);
+			}
+			//"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
+		}
+		toReturn.sort();		
+		return toReturn;
+	},
+		
+	/* Marcin Sawicki - no longer needed, but leaving just in case!
+	getShipHittingSideOld: function(shooter, target){ //Marcin Sawicki, October 2017: change that to new approach!
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);
 
 		if (target.base){
- 		/*	if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(0, targetFacing), mathlib.addToDirection(60, targetFacing))){
-				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(300, targetFacing), mathlib.addToDirection(360, targetFacing))){
-					return [1, 31]
-				}
-				if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(60, targetFacing), mathlib.addToDirection(120, targetFacing))){
-					return [1, 41]
-				}
-				return [1];
-			} */
 			return [1, 41, 42, 2, 31, 32];
 		}
 
@@ -1028,6 +1071,7 @@ window.weaponManager = {
 
 		return 0;
 	},
+	*/
 
 	getShipDefenceValue: function(shooter, target){
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
@@ -1301,6 +1345,9 @@ window.weaponManager = {
 						var calledid = -1;
 
 						if (system){
+							//check if weapon is eligible for called shot!
+							if(!weaponManager.canWeaponCall(weapon)) continue;
+														
 							// When the system is a subsystem, make all damage go through
 							// the parent.
 							while(system.parentId > 0){
@@ -1390,10 +1437,13 @@ window.weaponManager = {
 		return (distance <= range);
 	},
 
-	targetHex: function(selectedShip, hexpos){
+	targetHex: function(hexpos){
 
+		var selectedShip = gamedata.getSelectedShip();
 		if (shipManager.isDestroyed(selectedShip))
 			return;
+
+
 
 		var toUnselect = Array();
 		for (var i in gamedata.selectedSystems){
@@ -1441,6 +1491,10 @@ window.weaponManager = {
 						shooterid:selectedShip.id,
 						weaponid:weapon.id,
 						shots:fire.shots});
+
+						ballistics.calculateBallisticLocations();
+						ballistics.calculateDrawBallistics();
+						drawEntities();
 					}
 
 					toUnselect.push(weapon);
@@ -1540,25 +1594,6 @@ window.weaponManager = {
 
 		return false;
 
-	},
-
-	getAllFireOrdersForAllShipsForTurn: function(turn, type) {
-		var fires = [];
-		gamedata.ships.forEach(function(ship){
-			fires = fires.concat(weaponManager.getAllFireOrders(ship));
-		});
-
-		fires = fires.filter(function(fireOrder) {
-			return fireOrder.turn == turn;
-		});
-
-		if (type) {
-            fires = fires.filter(function(fireOrder) {
-                return fireOrder.type == type;
-            });
-		}
-
-		return fires;
 	},
 
 	getAllFireOrders: function(ship)
@@ -1685,11 +1720,25 @@ window.weaponManager = {
 	},
 
 	removeArcIndicators: function(){
-		//TODO: add new arc indicator
+
+		for(var i = EWindicators.indicators.length-1; i >= 0; i--){
+			if(EWindicators.indicators[i].type == "Arcs"){
+				EWindicators.indicators.splice(i,1);
+			}
+		}
+
+
 	},
 
 	addArcIndicators: function(ship, weapon){
-        //TODO: add new arc indicator
+		weapon = shipManager.systems.initializeSystem(weapon);
+
+		weaponManager.removeArcIndicators(ship);
+		var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
+
+		if (ind)
+			EWindicators.indicators.push(ind);
+
 	},
 
 	makeWeaponArcindicator: function(ship, weapon){

@@ -8,8 +8,9 @@ class Vorchar extends HeavyCombatVessel{
 		$this->faction = "Centauri";
         $this->phpclass = "Vorchar";
         $this->imagePath = "img/ships/vorchar.png";
-        $this->shipClass = "Vorchar";
+        $this->shipClass = "Vorchar Warscout";
         $this->occurence = "uncommon";
+        $this->variantOf = "Vorchan Warship";
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
@@ -22,7 +23,7 @@ class Vorchar extends HeavyCombatVessel{
 		$this->iniativebonus = 40;
         
          
-        $this->addPrimarySystem(new Reactor(7, 12, 0, 4));
+        $this->addPrimarySystem(new Reactor(7, 12, 0, 6));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(6, 24, 7, 10));
         $this->addPrimarySystem(new Engine(7, 11, 0, 10, 2));

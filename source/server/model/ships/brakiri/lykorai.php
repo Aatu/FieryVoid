@@ -11,7 +11,9 @@ class Lykorai extends BaseShip{
         $this->shipClass = "Lykorai Supercarrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>12, "normal"=>48);
-        $this->occurence = "unique";
+        $this->occurence = "unique"; 
+        $this->variantOf = "Corumai Dreadnought";
+	$this->isd = 2237;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 20;
@@ -64,5 +66,44 @@ class Lykorai extends BaseShip{
         $this->addLeftSystem(new Structure(5, 68));
         $this->addRightSystem(new Structure(5, 68));
         $this->addPrimarySystem(new Structure(5, 65));
+	    
+	$this->hitChart = array(
+                0=> array(
+                        9 => "Structure",
+			11 => "Jump Engine",
+                        13 => "Scanner",
+                        15 => "Engine",
+			16 => "Hangar",
+                        19 => "Reactor",
+                        20 => "C&C",
+                ),
+                1=> array(
+                        5 => "Thruster",
+			8 => "Gravitic Bolt",
+			10 => "Hangar",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                2=> array(
+			6 => "Thruster",
+                        9 => "Gravitic Bolt",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                3=> array(
+                        4 => "Thruster",
+			7 => "Gravitic Bolt",
+                        9 => "Hangar",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+                4=> array(
+                        4 => "Thruster",
+			7 => "Gravitic Bolt",
+                        9 => "Hangar",
+                        18 => "Structure",
+                        20 => "Primary",
+                ),
+        );
     }
 }

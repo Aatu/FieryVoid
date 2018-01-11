@@ -8,6 +8,8 @@ class Rothan extends HeavyCombatVessel{
         $this->phpclass = "Rothan";
         $this->imagePath = "img/ships/rongoth.png";
         $this->shipClass = "Rothan Plasma Destroyer";
+	    $this->variantOf = "Rongoth Destroyer";
+	    $this->isd = 2211;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

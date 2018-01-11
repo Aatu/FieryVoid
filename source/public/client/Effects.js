@@ -282,7 +282,12 @@ window.effects = {
             }/*else if (obj1.firingMode !== obj2.firingMode){
                 return obj1.firingMode-obj2.firingMode; 
             }*/
-            else return obj1.shooterid - obj2.shooterid;
+            else {
+                var $val = obj1.shooterid - obj2.shooterid;
+                if ($val == 0) $val = obj1.id - obj2.id;
+                return $val
+            } 
+            //else return obj1.shooterid - obj2.shooterid;
         });
 
 /*  
@@ -744,9 +749,11 @@ window.effects = {
             var weapon = shipManager.systems.getSystem(shooter, fire.weaponid);
             weapon = weaponManager.getFiringWeapon(weapon, fire);
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-            while(modeIteration > 1){
-                weapon.changeFiringMode();
-                modeIteration--;
+            if(modeIteration != weapon.firingMode){
+                while(modeIteration > 1){
+                    weapon.changeFiringMode();
+                    modeIteration--;
+                }
             }
             
             //sometimes hex-target weapon gets incorrectly drawn to an unit..correct animation!

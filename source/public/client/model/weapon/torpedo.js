@@ -20,3 +20,12 @@ var IonTorpedo = function(json, ship)
 }
 IonTorpedo.prototype = Object.create( Torpedo.prototype );
 IonTorpedo.prototype.constructor = IonTorpedo;
+
+
+
+var PlasmaWaveTorpedo = function(json, ship)
+{
+    Torpedo.call( this, json, ship);
+}
+PlasmaWaveTorpedo.prototype = Object.create( Torpedo.prototype );
+PlasmaWaveTorpedo.prototype.constructor = PlasmaWaveTorpedo;

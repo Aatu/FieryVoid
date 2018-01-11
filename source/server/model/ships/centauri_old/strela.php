@@ -8,8 +8,9 @@ class Strela extends HeavyCombatVessel{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Strela";
         $this->imagePath = "img/ships/strela.png";
-        $this->shipClass = "Strela Light Jumpship";
-        $this->fighters = array("medium"=>6);
+        $this->shipClass = "Strela Light Jump Ship";
+        $this->fighters = array("heavy"=>6);
+	    $this->isd = 2008;
         
         $this->forwardDefense = 14;
         $this->sideDefense = 15;

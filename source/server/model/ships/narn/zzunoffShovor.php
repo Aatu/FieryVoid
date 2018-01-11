@@ -17,6 +17,7 @@ class zzunoffShoVor extends MediumShip{
         $this->sideDefense = 12;
 
         //$this->limited = 33;
+	$this->variantOf = "Sho'Kos Patrol Cutter";
 	$this->occurence = "uncommon";
 	$this->isd = 2234;
 	$this->unofficial = true;

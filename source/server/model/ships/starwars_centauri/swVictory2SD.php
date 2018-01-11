@@ -11,9 +11,10 @@ class swVictory2SD extends BaseShip{
         $this->imagePath = "img/starwars/victory1.png";
         $this->shipClass = "Victory II Star Destroyer";
         $this->variantOf = "Victory Star Destroyer";
+	    $this->occurence = "rare";
         $this->shipSizeClass = 3;
 	    
-	$this->fighters = array("fighter flights"=>8);
+	$this->fighters = array("fighter flights"=>4, "assault flights"=>4);
 
 	    
 	$this->unofficial = true;
@@ -33,9 +34,9 @@ class swVictory2SD extends BaseShip{
      
 	    
 	    
-	$this->addPrimarySystem(new CnC(6, 20, 0, 0));
+	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 28, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 14, 4, 3)); //split to Aft, too
+        $this->addPrimarySystem(new SWScanner(4, 14, 4, 3)); //split to Aft, too
         $this->addPrimarySystem(new Engine(4, 20, 0, 6, 5)); //split to Aft, too
 	$hyperdrive = new JumpEngine(4, 24, 8, 20);
 	$hyperdrive->displayName = 'Hyperdrive';
@@ -57,15 +58,15 @@ class swVictory2SD extends BaseShip{
         $this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
 	$this->addAftSystem(new Thruster(2, 18, 0, 4, 2));
-        $this->addAftSystem(new Scanner(3, 14, 5, 4)); //split to Primary, too
-        $this->addAftSystem(new Engine(4, 15, 0, 4, 5)); //split to Primary, too
+        $this->addAftSystem(new SWScanner(3, 12, 4, 3)); //split to Primary, too
+        $this->addAftSystem(new Engine(4, 20, 0, 6, 5)); //split to Primary, too
 	$this->addAftSystem(new SWRayShield(2,10,5,3,150,210)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyLaser(2, 120, 240, 4)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
 	$this->addAftSystem(new SWHeavyIon(2, 120, 240, 1));
         
 	    
-	$this->addLeftSystem(new Thruster(3, 20, 0, 4, 3));
+	$this->addLeftSystem(new Thruster(3, 22, 0, 5, 3));
 	$this->addLeftSystem(new SWRayShield(3,13,8,3,210,330)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addLeftSystem(new SWHeavyTLaser(3, 270, 30, 2));
 	$this->addLeftSystem(new SWHeavyTLaser(3, 240, 0, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -76,7 +77,7 @@ class swVictory2SD extends BaseShip{
 
 		
 	    
-	$this->addRightSystem(new Thruster(3, 20, 0, 4, 4));
+	$this->addRightSystem(new Thruster(3, 22, 0, 5, 4));
 	$this->addRightSystem(new SWRayShield(3,13,8,3,30,150)); //$armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc
 	$this->addRightSystem(new SWHeavyTLaser(3, 330, 90, 2));
 	$this->addRightSystem(new SWHeavyTLaser(3, 0, 120, 3)); //armor, arc and number of weapon in common housing: structure and power data are calculated!
@@ -88,8 +89,8 @@ class swVictory2SD extends BaseShip{
 	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 55));
-        $this->addAftSystem(new Structure( 3, 85));
+        $this->addFrontSystem(new Structure( 4, 55));
+        $this->addAftSystem(new Structure( 3, 70));
         $this->addLeftSystem(new Structure( 4, 65));
         $this->addRightSystem(new Structure( 4, 65));
         $this->addPrimarySystem(new Structure( 5, 70));
@@ -106,37 +107,37 @@ class swVictory2SD extends BaseShip{
                     20 => "C&C",
             ),
             1=> array(
-                    5 => "Thruster",
-		    6 => "Ray Shield",
-                    9 => "Heavy Turbolaser",
-                    10 => "Heavy Laser",
+                    2 => "Thruster",
+		    3 => "Ray Shield",
+                    7 => "Heavy Turbolaser",
+                    9 => "Heavy Laser",
                     11 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
-                    7 => "Thruster",
-		    8 => "Ray Shield",
-                    9 => "Heavy Laser",
-		    10 => "Heavy Ion Cannon",
-                    12 => "Scanner",
+                    4 => "Thruster",
+		    5 => "Ray Shield",
+                    7 => "Heavy Laser",
+		    9 => "Heavy Ion Cannon",
+                    11 => "Scanner",
                     13 => "Engine",
                     17 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
-                    4 => "Thruster",
-		    5 => "Ray Shield",
-                    10 => "Heavy Turbolaser",
+                    2 => "Thruster",
+		    3 => "Ray Shield",
+                    9 => "Heavy Turbolaser",
                     11 => "Heavy Laser",
                     13 => "Heavy Ion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
-                    4 => "Thruster",
-		    5 => "Ray Shield",
-                    10 => "Heavy Turbolaser",
+                    2 => "Thruster",
+		    3 => "Ray Shield",
+                    9 => "Heavy Turbolaser",
                     11 => "Heavy Laser",
                     13 => "Heavy Ion Cannon",
                     18 => "Structure",

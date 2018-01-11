@@ -5,12 +5,16 @@ class wlcChlonasLoFahraFFA extends MediumShipLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 375;
-	$this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasLoFahraFFA";
         $this->imagePath = "img/ships/sussha.png";
-        $this->shipClass = "Ch'Lonas Lo'Fahra Attack Frigate";
+        $this->shipClass = "Lo'Fahra Attack Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
+	    
+	$this->faction = "Ch'Lonas";
+       // $this->variantOf = "Es'Kashi Destroyer";
+	$this->isd = 2230;
+	$this->unofficial = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

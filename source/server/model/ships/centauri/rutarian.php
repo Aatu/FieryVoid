@@ -7,7 +7,7 @@ class Rutarian extends FighterFlight{
 		$this->pointCost = 450;
 		$this->faction = "Centauri";
         $this->phpclass = "Rutarian";
-        $this->shipClass = "Rutarian flight";
+        $this->shipClass = "Rutarian Strike Fighters";
 		$this->imagePath = "img/ships/rutarian.png";
         
         $this->forwardDefense = 6;
@@ -31,7 +31,7 @@ class Rutarian extends FighterFlight{
 
 			$armour = array(4, 1, 3, 3);
 			$fighter = new Fighter("rutarian", $armour, 11, $this->id);
-			$fighter->displayName = "Rutarian Medium Fighter";
+			$fighter->displayName = "Rutarian Strike Fighter";
 			$fighter->imagePath = "img/ships/rutarian.png";
 			$fighter->iconPath = "img/ships/rutarian_large.png";
 

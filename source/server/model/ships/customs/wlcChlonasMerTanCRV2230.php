@@ -5,12 +5,16 @@ class wlcChlonasMerTanCRV2230 extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 280;
-	$this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasMerTanCRV2230";
         $this->imagePath = "img/ships/essusu.png";
-        $this->shipClass = "Ch'Lonas Mer'Tan Corvette (2230)";
+        $this->shipClass = "Mer'Tan Corvette";
         $this->agile = true;
         $this->canvasSize = 100;
+	    
+	$this->faction = "Ch'Lonas";
+        //$this->variantOf = "Mer'Tan Corvette";
+	$this->isd = 2230;
+	$this->unofficial = true;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

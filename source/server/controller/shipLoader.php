@@ -26,19 +26,17 @@
 		public static function getAllShips($faction){
 			$names = self::getShipClassnames();
 			$ships = array();
-            $count = 0;
+            		$count = 0;
 			foreach ($names as $name){
 				if (class_exists($name)){
-                    $count++;
+                    			$count++;
 					$ship = new $name($count, 0, "", 0, 0, false, false, array());
-					
 					if($ship->faction != $faction){
 						continue;
 					}
-					
-                    foreach ($ship->systems as $system){
-                        $system->beforeTurn($ship, 0, 0);
-                    }
+					    foreach ($ship->systems as $system){
+						$system->beforeTurn($ship, 0, 0);
+					    }
         
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
@@ -49,7 +47,6 @@
 			}
 			
 			return $ships;
-		
 		}
 		
 		public static function getAllFactions(){

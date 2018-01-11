@@ -11,8 +11,10 @@ class GarasochD extends BaseShip{
         $this->imagePath = "img/ships/garasoch.png";
         $this->shipClass = "Garasoch-D Command Carrier";
         $this->shipSizeClass = 3;
-        $this->limited = 0.33;
+        $this->limited = 33;
         $this->occurence = "rare";
+        $this->variantOf = "Garasoch Heavy Carrier";
+        $this->isd = 2232;
         
         $this->fighters = array("normal"=>24);
         

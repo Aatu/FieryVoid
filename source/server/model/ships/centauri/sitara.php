@@ -7,7 +7,10 @@ class Sitara extends FighterFlight{
 		$this->pointCost = 270;
 		$this->faction = "Centauri";
         $this->phpclass = "Sitara";
-        $this->shipClass = "Sitara flight";
+        $this->shipClass = "Sitara Strike Fighters";
+	    $this->occurence = "uncommon";
+	    
+        $this->variantOf = "Sentri Interceptors";
 		$this->imagePath = "img/ships/sentri.png";
         
         $this->forwardDefense = 7;
@@ -31,7 +34,7 @@ class Sitara extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sitara", $armour, 10, $this->id);
-			$fighter->displayName = "Sitara Medium Fighter";
+			$fighter->displayName = "Sitara Strike Fighter";
 			$fighter->imagePath = "img/ships/sitara.png";
 			$fighter->iconPath = "img/ships/sitara_large.png";
 

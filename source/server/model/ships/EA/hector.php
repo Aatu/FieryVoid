@@ -5,7 +5,7 @@ class Hector extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 250;
-		$this->faction = "EA";
+		$this->faction = 'EA';//"EA defenses";
         $this->phpclass = "Hector";
         $this->imagePath = "img/ships/hector.png";
         $this->shipClass = 'Hector Satellite';

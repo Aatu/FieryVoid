@@ -5,12 +5,16 @@ class wlcChlonasNaKashiDDA extends HeavyCombatVesselLeftRight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 385;
-        $this->faction = "Custom Ships";
         $this->phpclass = "wlcChlonasNaKashiDDA";
         $this->imagePath = "img/ships/kraasus.png";
-        $this->shipClass = "Ch'Lonas Na'Kashi Assault Destroyer";
+        $this->shipClass = "Na'Kashi Assault Destroyer";
         $this->occurence = "uncommon";
-        //$this->fighters = array("medium"=>6);
+        $this->fighters = array("assault shuttles"=>6);
+	    
+	$this->faction = "Ch'Lonas";
+        $this->variantOf = "Es'Kashi Destroyer";
+	$this->isd = 2245;
+	$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

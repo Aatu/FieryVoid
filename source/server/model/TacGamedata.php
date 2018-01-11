@@ -104,7 +104,7 @@ class TacGamedata{
             
             }
             $this->markUnavailableShips();
-            $ship->onConstructed($this->turn, $this->phase);
+            $ship->onConstructed($this->turn, $this->phase, $this);
             
         }
     }

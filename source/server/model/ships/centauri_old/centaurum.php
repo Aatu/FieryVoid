@@ -12,6 +12,7 @@ class Centaurum extends BaseShip{
         $this->shipSizeClass = 3;
         $this->limited = 33;
         $this->fighters = array("normal"=>12);
+	    $this->isd = 2005;
 
         $this->forwardDefense = 17;
         $this->sideDefense = 19;

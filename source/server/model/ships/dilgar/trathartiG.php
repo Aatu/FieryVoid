@@ -13,6 +13,7 @@ class TrathartiG extends BaseShip{
         $this->shipSizeClass = 3;
         
         $this->occurence = "rare";
+        $this->variantOf = "Tratharti Gunship";
 
         $this->forwardDefense = 13;
         $this->sideDefense = 15;

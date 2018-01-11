@@ -7,7 +7,7 @@ class wlcTishat1950 extends FighterFlight{
 		$this->pointCost = 390;
 		$this->faction = "Minbari";
 		$this->phpclass = "wlcTishat1950";
-		$this->shipClass = "wlc Early Tishat flight (1950)";
+		$this->shipClass = "Early Tishat flight";
 		$this->imagePath = "img/ships/tishat.png";
 
         $this->forwardDefense = 6;
@@ -19,6 +19,10 @@ class wlcTishat1950 extends FighterFlight{
         $this->iniativebonus = 95;
         $this->gravitic = true;
         $this->populate();
+        $this->isd = 1950;
+        $this->unofficial = true;
+        $this->variantOf = "Tishat flight";
+        
     }
 
     public function populate(){

@@ -51,17 +51,19 @@
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-
         }
         
         private $autoid = 1;
         
+	   
+	    
+	    
         public function getInitiativebonus($gamedata){
             $initiativeBonusRet = parent::getInitiativebonus($gamedata);
             
             if($this->hasNavigator){
                 $initiativeBonusRet += 5;
-            }
+            }		
             
             return $initiativeBonusRet;
         }
@@ -84,6 +86,12 @@
             
             return null;
         }
+	    
+	   
+	    /*returns a sample fighter, if one needs to review example of what's in flight*/
+	    public function getSampleFighter(){
+		    return $this->systems[1];
+	    }
 	    
 	    
 	    /*redefinition - as defensive systems will be on actual fighters*/
@@ -158,12 +166,14 @@
 	}
         
         protected function addSystem($fighter, $loc = null){
+		$fighter->setUnit($this);
             $fighter->id = $this->autoid;
             $fighter->location = sizeof($this->systems);
             
             $this->autoid++;
             $fighterSys = array();
             foreach ($fighter->systems as $system){
+		    $system->setUnit($this);
 			$system->id  = $this->autoid;
 			$this->autoid++;
 			$fighterSys[$system->id] = $system;
@@ -227,9 +237,9 @@
 		$health = $exampleFtr->maxhealth;
 
             $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[0]);
-            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
-            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
-            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[3]);
+            $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[1]);
+            $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense, "remHealth"=>$health,"armour"=> $exampleFtr->armour[2]);
 
             return $locs;
         }
@@ -249,9 +259,8 @@
         }
         
         public function isDestroyed($turn = false){
-        
             foreach($this->systems as $system){
-                if (!$system->isDestroyed($turn = false) && !$system->isDisengaged($turn)){
+                if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)){
                     return false;
                 }
                 
@@ -261,18 +270,28 @@
         }
         
         public function isPowerless(){
-        
             return false;
         }
         
         
         public function getHitSystem($shooter, $fire, $weapon, $location = null){
-            $systems = array();
-            foreach ($this->systems as $system){
-                if (!$system->isDestroyed()){
-					$systems[] = $system;
-                }                            
-            } 		
+		$skipStandard=false;
+            	$systems = array();
+		if ($fire->calledid != -1){
+			$system = $this->getSystemById($fire->calledid);
+			if (!$system->isDestroyed()){ //called shot at particular fighter, which is still living
+				$systems[] = $system;
+				$skipStandard=true;
+			}                            			
+		}
+		
+		if(!$skipStandard){
+		    foreach ($this->systems as $system){
+			if (!$system->isDestroyed()){
+				$systems[] = $system;
+			}                            
+		    } 	
+		}
 		
 		if (sizeof($systems) == 0) return null;
 
@@ -281,7 +300,7 @@
 	    
 	    
         
-        public function getAllFireOrders()
+        public function getAllFireOrders($turn = -1)
         {
             $orders = array();
             
@@ -289,12 +308,19 @@
             {
                 foreach ($fighter->systems as $system)
                 {
-                    $orders = array_merge($orders, $system->fireOrders);
+               		$orders = array_merge($orders, $system->getFireOrders($turn));
+                    //$orders = array_merge($orders, $system->fireOrders); //old version
                 }
             }
             
             return $orders;
         }
+	    		    
+	    
+	    /*always nothing to do for fighters*/
+	    	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+			return;	
+		}
              
     }
   

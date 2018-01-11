@@ -4,7 +4,7 @@ class Sakar extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 485;
+		$this->pointCost = 500;
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Sakar";
         $this->imagePath = "img/ships/sakar.png"; //we'll need this graphic, oh wizard chris :-)
@@ -12,6 +12,7 @@ class Sakar extends BaseShip{
         $this->shipSizeClass = 3;
         $this->limited = 33;
         $this->fighters = array("normal"=>48);
+	    $this->isd = 1980;
 
         $this->forwardDefense = 17;
         $this->sideDefense = 17;

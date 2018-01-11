@@ -12,88 +12,6 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
         
-        /*no longer needed, Raking mode recognized natively
-        public function damage($target, $shooter, $fireOrder, $pos, $gamedata, $damage){
-            
-            $rake = $this->raking;
-            
-            $totalDamage = $damage;
-            
-            if ($this->piercing && $fireOrder->firingMode == 2)
-                $rake = $totalDamage;
-            
-            $this->damages = array();
-            
-            if ($target instanceof FighterFlight)
-            {
-                $system = $target->getHitSystem($shooter, $fireOrder, $this);
-                //$this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
-                $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, null, $gamedata);
-                return;
-            }
-            
-            while(true){
-                                
-                if ($totalDamage <= 0)
-                    break;
-            
-                if ($target->isDestroyed()) return;
-                
-                $trgtLoc = $target->getHitSectionChoice($shooter, $fireOrder, $this);
-                $system = $target->getHitSystem($shooter, $fireOrder, $this, $trgtLoc);
-                
-                if ($system == null)
-                    return;
-                    
-                if ($totalDamage - $this->raking >= 0){
-                    //$this->doDamage($target, $shooter, $system, $rake, $fireOrder, $pos, $gamedata);
-                    $this->doDamage($target, $shooter, $system, $rake, $fireOrder, null, $gamedata, $trgtLoc);
-                    $totalDamage -= $this->raking;
-                }else if ($totalDamage > 0){
-                    //$this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, $pos, $gamedata);
-                    $this->doDamage($target, $shooter, $system, $totalDamage, $fireOrder, null, $gamedata, $trgtLoc);
-                    break;
-                }else{
-                    break;
-                }
-                    
-            }
-        }
-        
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
-            $damage = floor($damage);//make sure damage is a whole number, without fractions!
-            $armour = $this->getSystemArmour($system, $gamedata, $fireOrder, $pos);
-            
-            foreach ($this->damages as $previous){
-                if ($previous->systemid == $system->id)
-                    $armour -= $previous->damage;
-            }
-            
-            $systemHealth = $system->getRemainingHealth();
-            $modifiedDamage = $damage;
-            
-            if ($armour < 0)
-                $armour = 0;
-            
-            $destroyed = false;
-            if ($damage-$armour >= $systemHealth){
-                $destroyed = true;
-                $modifiedDamage = $systemHealth + $armour;
-            }
-
-            
-            $damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
-            $damageEntry->updated = true;
-            $system->damage[] = $damageEntry;
-            $this->damages[] = $damageEntry;
-            $this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
-            if ($damage-$armour > $systemHealth){            
-                $damage = $damage-$modifiedDamage;                 
-                $overkillSystem = $this->getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata, $location);
-                if ($overkillSystem != null)
-                    $this->doDamage($target, $shooter, $overkillSystem, $damage, $fireOrder, $pos, $gamedata, $location);
-            }
-        }*/
         
         
     } //endof class Raking
@@ -159,11 +77,9 @@
         
         public function getDamage($fireOrder){        return Dice::d(10, 3)+12;   }
         public function setMinDamage(){     $this->minDamage = 15 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 42 ;      }
-        
-        
-        
+        public function setMaxDamage(){     $this->maxDamage = 42 ;      }    
     }
+
     
     class LightLaser extends Laser{
         public $name = "lightLaser";
@@ -514,7 +430,92 @@
         public function setMinDamage(){ $this->minDamage = 17 ; }
         public function setMaxDamage(){ $this->maxDamage = 44 ; }
 
-    }
+    } //endof class ImprovedBlastLaser
+
+
+
+
+    class CombatLaser extends Laser{
+        /*Abbai variant of Battle Laser - always piercing*/
+        public $name = "CombatLaser";
+        public $displayName = "Combat Laser";        
+	    public $iconPath = "battleLaser.png";
+        public $animation = "laser";
+        public $animationColor = array(255, 11, 115);
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.2;
+        
+        public $loadingtime = 3;
+
+        public $raking = 10;
+        public $priority = 2; //Piercing shots go early, to do damage while sections aren't detroyed yet!
+        
+        public $firingModes = array(
+            1 => "Piercing"
+        );
+        public $damageType = 'Piercing';
+        public $weaponClass = "Laser"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+        
+                
+        public $rangePenalty = 0.33; //-1/3 hexes
+        public $fireControl = array(-2, 3, 3); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 7;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 7;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+20;   }
+        public function setMinDamage(){     $this->minDamage = 23 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 50 ;      }
+        
+    } //endof class CombatLaser
+
+
+
+
+
+    class LaserCutter extends Laser{
+        /*Abbai weapon*/
+        public $name = "LaserCutter";
+        public $displayName = "Laser Cutter";  
+	    public $iconPath = "graviticCutter.png";
+	    
+        public $animation = "laser";
+        public $animationColor = array(255, 91, 91);
+        public $animationExplosionScale = 0.16;
+        public $animationWidth = 3;
+        public $animationWidth2 = 0.3;
+        public $priority = 8;
+        
+        public $loadingtime = 3;
+        
+        public $raking = 6;
+        
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(-2, 1, 2); // fighters, <mediums, <capitals 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+	    //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 4;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+2;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 42 ;      }
+    } //endof class LaserCutter
 
 
 ?>

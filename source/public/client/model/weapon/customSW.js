@@ -15,12 +15,11 @@ SWFighterIon.prototype.constructor = SWFighterIon;
 var SWFtrProtonTorpedo = function(json, ship)
 {
     Ammo.call( this, json, ship);
-    this.range = 15;
+    //this.range = 8;
     this.hitChanceMod = 0;
 }
 SWFtrProtonTorpedo.prototype = Object.create( Ammo.prototype );
 SWFtrProtonTorpedo.prototype.constructor = SWFtrProtonTorpedo;
-
 
 var SWFtrProtonTorpedoLauncher = function(json, ship)
 {
@@ -28,6 +27,30 @@ var SWFtrProtonTorpedoLauncher = function(json, ship)
 }
 SWFtrProtonTorpedoLauncher.prototype = Object.create( FighterMissileRack.prototype );
 SWFtrProtonTorpedoLauncher.prototype.constructor = SWFtrProtonTorpedoLauncher;
+
+
+
+
+var SWFtrConcMissile = function(json, ship)
+{
+    Ammo.call( this, json, ship);
+    //this.range = 6;
+    this.hitChanceMod = 0;
+}
+SWFtrConcMissile.prototype = Object.create( Ammo.prototype );
+SWFtrConcMissile.prototype.constructor = SWFtrConcMissile;
+
+var SWFtrConcMissileLauncher = function(json, ship)
+{
+    FighterMissileRack.call( this, json, ship);
+}
+SWFtrConcMissileLauncher.prototype = Object.create( FighterMissileRack.prototype );
+SWFtrConcMissileLauncher.prototype.constructor = SWFtrConcMissileLauncher;
+
+
+
+
+
 
 
 var SWLightLaser = function(json, ship){
@@ -69,6 +92,56 @@ SWHeavyTLaser.prototype.constructor = SWHeavyTLaser;
 
 
 
+
+
+var SWLightLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWLightLaserE.prototype = Object.create( Weapon.prototype );
+SWLightLaserE.prototype.constructor = SWLightLaserE;
+
+var SWMediumLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumLaserE.prototype = Object.create( Weapon.prototype );
+SWMediumLaserE.prototype.constructor = SWMediumLaserE;
+
+var SWHeavyLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWHeavyLaserE.prototype = Object.create( Weapon.prototype );
+SWHeavyLaserE.prototype.constructor = SWHeavyLaserE;
+
+
+var SWLightTLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWLightTLaserE.prototype = Object.create( Weapon.prototype );
+SWLightTLaserE.prototype.constructor = SWLightTLaserE;
+
+var SWMediumTLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumTLaserE.prototype = Object.create( Weapon.prototype );
+SWMediumTLaserE.prototype.constructor = SWMediumTLaserE;
+
+var SWHeavyTLaserE = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWHeavyTLaserE.prototype = Object.create( Weapon.prototype );
+SWHeavyTLaserE.prototype.constructor = SWHeavyTLaserE;
+
+
+
+var SWMediumLaserAF = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWMediumLaserAF.prototype = Object.create( Weapon.prototype );
+SWMediumLaserAF.prototype.constructor = SWMediumLaserAF;
+
+
+
+
 var SWLightIon = function(json, ship){
     Weapon.call( this, json, ship);
 }
@@ -98,3 +171,11 @@ var SWCapitalProton = function(json, ship){
 }
 SWCapitalProton.prototype = Object.create( Torpedo.prototype );
 SWCapitalProton.prototype.constructor = SWCapitalProton;
+
+
+
+var SWTractorBeam = function(json, ship){
+    Weapon.call( this, json, ship);
+}
+SWTractorBeam.prototype = Object.create( Weapon.prototype );
+SWTractorBeam.prototype.constructor = SWTractorBeam;

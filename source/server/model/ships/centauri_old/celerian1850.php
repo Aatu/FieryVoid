@@ -9,9 +9,10 @@ class Celerian1850 extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Celerian1850";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Celerian Warcruiser (ISD 1850)";
+        $this->shipClass = "Celerian Warcruiser";
         $this->shipSizeClass = 3;
-    //    $this->fighters = array("normal"=>12);
+        $this->variantOf = "Celerian Warcruiser";
+	    $this->isd = 1850;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -20,7 +21,8 @@ class Celerian1850 extends BaseShip{
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
-        $this->pivotcost = 3;       
+        $this->pivotcost = 3;    
+        $this->iniativebonus = 5;   //+1 Ini!   
          
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));

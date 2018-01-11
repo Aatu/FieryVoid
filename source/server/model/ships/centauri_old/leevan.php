@@ -21,7 +21,7 @@ class Leevan extends HeavyCombatVessel{
         $this->iniativebonus = 30;
 
         $this->occurence = "uncommon";
-        
+        $this->variantOf = "Navask Escort Destroyer";
          
         $this->addPrimarySystem(new Reactor(5, 15, 0, 0));
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
@@ -35,8 +35,8 @@ class Leevan extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
         
 
-        $this->addFrontSystem(new LightParticleBeamShip(2, 6, 1, 240, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 6, 1, 240, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 240, 60));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 300, 120));
@@ -44,8 +44,8 @@ class Leevan extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 9, 0, 3, 2));
-        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 120, 360));
-        $this->addAftSystem(new LightParticleBeamShip(2, 6, 1, 0, 240));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 240));
         
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

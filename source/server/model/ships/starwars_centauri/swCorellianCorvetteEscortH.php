@@ -5,7 +5,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 410;
+	$this->pointCost = 300;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliancorvetteescorth";
         $this->imagePath = "img/starwars/cr90.png";
@@ -29,7 +29,7 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	$this->iniativebonus = 12 *5; 
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
+        $this->addPrimarySystem(new SWScanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
 	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
@@ -68,27 +68,28 @@ class swCorellianCorvetteEscortH extends MediumShip{
 	    
         $this->hitChart = array(
         		0=> array(
-        				6 => "Thruster",
-        				10 => "Cargo Bay",
-        				13 => "Medium Turbolaser",
-        				15 => "Scanner",
-        				17 => "Engine",
-        				18 => "Hangar",
-        				19 => "Hyperdrive",
+        				2 => "Thruster",
+        				11 => "Cargo Bay",
+        				13 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				18 => "Hyperdrive",
         				20 => "Reactor",
         		),
         		1=> array(
-        				4 => "Thruster",
-					7 => 'Light Turbolaser',
-        				8 => "Ray Shield",
+        				2 => "Thruster",
+					3 => "Ray Shield",
+					6 => 'Light Turbolaser',
+        				9 => "0:Medium Turbolaser",
         				16 => "Structure",
         				17 => "C&C",
         				20 => "Primary",
         		),
         		2=> array(
-        				8 => "Thruster",
-					10 => 'Light Turbolaser',
-        				11 => "Ray Shield",
+        				4 => "Thruster",
+					5 => "Ray Shield",
+					9 => 'Light Turbolaser',
+        				12 => "0:Medium Turbolaser",	
         				17 => "Structure",
         				20 => "Primary",
         		),

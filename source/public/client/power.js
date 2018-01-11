@@ -117,7 +117,8 @@ shipManager.power = {
             var boost = shipManager.power.getBoost(system);
 
             if (system.boostable && !boost){
-                if(system.name == "scanner" || system.name == "elintScanner"){
+                //if(system.name == "scanner" || system.name == "elintScanner"){
+		if(system.isScanner()){
                     if(system.id == shipManager.power.getHighestSensorsId(ship)){
                         // You can only boost the highest sensor rating
                         // if multiple sensors are present on one ship
@@ -144,7 +145,8 @@ shipManager.power = {
             for(var i in ship.systems){
                 var system = ship.systems[i];
                 
-                if(system.name == "scanner" || system.name == "elintScanner"){
+                //if(system.name == "scanner" || system.name == "elintScanner"){
+		if(system.isScanner()){
                     if(!shipManager.power.isOffline(ship, system)){
                         var rating = shipManager.systems.getOutput(ship, system);
                         if(rating > highestRating){
@@ -251,7 +253,7 @@ shipManager.power = {
 	},
 	
 	getReactorPower: function(ship, system){
-
+		var fixedPower = false;
 		var output;
 
 		if (ship.base){
@@ -263,6 +265,7 @@ shipManager.power = {
 				var reactor = reactors[i];
 				if (! reactor.destroyed){
 					output += reactors[i].outputMod;
+					fixedPower = (fixedPower || reactors[i].fixedPower); //assume fixed power if ANY reactor gives fixed power
 
 					if (reactor.criticals.length > 0){
 						for( var j = 0; j < reactor.criticals.length; j++){
@@ -279,32 +282,25 @@ shipManager.power = {
 		else {			
 			var reactor = shipManager.systems.getSystemByName(ship, "reactor");
 				output = reactor.output + reactor.outputMod;
+				fixedPower = reactor.fixedPower;
 		}
 
 
 		for (var s in ship.systems){
 			var system = ship.systems[s];
-                        
-            if(system.parentId > 0){
-                // This is a subsystem of a dual/duo weapon. Ignore
-                continue;
-            }
+			if(system.parentId > 0){ // This is a subsystem of a dual/duo weapon. Ignore
+				continue;
+			}
                         
 			for (var i in system.power){
 				var power = system.power[i];
-				if (power.turn != gamedata.turn)
-					continue;
-
-				if (power.type == 1)
-					output += system.powerReq;
-					
+				if (power.turn != gamedata.turn) continue;
+				//types: 1:offline 2:boost, 3:overload
+				if ((power.type == 1) && (fixedPower!=true)) output += system.powerReq; //MagGrav = do not add power of disabled systems!					
 				if (power.type == 2){
 					output -= shipManager.power.countBoostPowerUsed(ship, system);
-				}
-				
-				if (power.type == 3){
-					output -= system.powerReq;
-				}
+				}				
+				if (power.type == 3) output -= system.powerReq;
 			}
 		}
 		
@@ -432,7 +428,8 @@ shipManager.power = {
 		for (var i = 0; i < ship.systems.length; i++){
 			var sys = ship.systems[i];
 
-			if (sys.name == "scanner" || sys.name == "elintScanner"){
+			//if (sys.name == "scanner" || sys.name == "elintScanner"){
+			if(sys.isScanner()){
 				var online = true;	
 				for (var j in sys.power){
 					var power = sys.power[j];
@@ -533,6 +530,11 @@ shipManager.power = {
 	},
 	
 	canBoost: function(ship, system){
+		
+		//can always boost reactor (to overload)!
+		if (system.name == 'reactor'){
+			return true;
+		}
 
 		var has = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		var need = shipManager.power.countBoostReqPower(ship, system);
@@ -546,10 +548,8 @@ shipManager.power = {
 	},
 	
 	canOverload: function(ship, system){
-        
 		if (!system.overloadable)
 			return false;
-		
 		return (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) >= system.powerReq);
 	},
 	
@@ -643,7 +643,8 @@ shipManager.power = {
 	},
 	
 	clickPlus: function(ship, system){
-            if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+            //if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+	    if (system.isScanner() &&  ew.getUsedEW(ship) > 0){
                 confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
                 return;
             }
@@ -662,7 +663,8 @@ shipManager.power = {
 	
 	clickMinus: function(ship, system){
 		
-		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		if (system.isScanner() &&  ew.getUsedEW(ship) > 0){
 			
             confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             
@@ -754,7 +756,9 @@ shipManager.power = {
 		
         system.power.push({id:null, shipid:ship.id, systemid:system.id, type:1, turn:gamedata.turn, amount:0});
 		
-		if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+		if (system.isScanner() &&  ew.getUsedEW(ship) > 0){	
+			
 			
             confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
             

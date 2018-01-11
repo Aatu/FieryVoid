@@ -8,9 +8,12 @@ class Nalor extends BaseShip{
         $this->faction = "Centauri (WotCR)";
         $this->phpclass = "Celerian";
         $this->imagePath = "img/ships/celerian.png";
-        $this->shipClass = "Nalor Armored cruiser";
+        $this->shipClass = "Nalor Armored Cruiser";
         $this->shipSizeClass = 3;
     //    $this->fighters = array("normal"=>12);
+	    
+        $this->variantOf = "Celerian Warcruiser";
+	    $this->isd = 1975;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
@@ -22,7 +25,7 @@ class Nalor extends BaseShip{
         $this->pivotcost = 3;
         $this->occurence = "uncommon";    
          
-        $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
+        $this->addPrimarySystem(new Reactor(6, 16, 0, 3));
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 9, 3));

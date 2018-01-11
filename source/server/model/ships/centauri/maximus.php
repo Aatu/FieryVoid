@@ -8,7 +8,7 @@ class Maximus extends MediumShip{
 		$this->faction = "Centauri";
         $this->phpclass = "Maximus";
         $this->imagePath = "img/ships/maximus.png";
-        $this->shipClass = "Maximus";
+        $this->shipClass = "Maximus Defense Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
         

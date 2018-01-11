@@ -227,9 +227,24 @@ gamedata = {
 
 
             var hasNoEW = [];
+	    var selfDestructing = []
 
             for (var ship in myShips){
                 if (!myShips[ship].flight){
+			
+			//loop at systems looking for overloading reactor(s)
+			for (var syst in myShips[ship].systems){
+				if(myShips[ship].systems[syst].name == "reactor"){
+					for (var pow in myShips[ship].systems[syst].power){
+						if( (myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
+							&& (myShips[ship].systems[syst].power[pow].type == 2)
+						    ){
+							selfDestructing.push(myShips[ship]);
+						}
+					}
+				}
+			}
+			
                     if (shipManager.isDisabled(myShips[ship])){
                         continue;
                     }
@@ -254,6 +269,7 @@ gamedata = {
                 }
             }
 
+		/*
             if (hasNoEW.length == 0){
                 confirm.confirm("Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
             }
@@ -266,6 +282,26 @@ gamedata = {
                 }
                 confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
             }
+	    */
+		var html = '';
+		if(selfDestructing.length > 0){
+			html += "You have ordering following ships to SELF DESTRUCT: ";
+			    html += "<br>";
+			for (var ship in selfDestructing){
+			    html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
+			    html += "<br>";
+			}	
+			html += "<br>";
+		}
+		if(hasNoEW.length > 0){
+			html += "You have not assigned any EW for the following ships: ";
+			    html += "<br>";
+			for (var ship in hasNoEW){
+			    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+			    html += "<br>";
+			}	
+		}
+		confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
         }
         
 
@@ -622,7 +658,11 @@ gamedata = {
         }
         
         ships.sort(function(a, b){
+		/* replace with using correct initiative order!
             if (a.iniative > b.iniative){
+                return 1;
+            } else return -1;*/
+	    if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)){
                 return 1;
             } else return -1;
         })

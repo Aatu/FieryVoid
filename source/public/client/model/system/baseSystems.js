@@ -4,6 +4,20 @@ var Reactor = function(json, ship)
 }
 Reactor.prototype = Object.create( ShipSystem.prototype );
 Reactor.prototype.constructor = Reactor;
+Reactor.prototype.hasMaxBoost = function(){
+    return true;
+}
+
+
+var MagGravReactor = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+MagGravReactor.prototype = Object.create( ShipSystem.prototype );
+MagGravReactor.prototype.constructor = MagGravReactor;
+MagGravReactor.prototype.hasMaxBoost = function(){
+    return true;
+}
 
 
 var Scanner = function(json, ship)
@@ -12,7 +26,19 @@ var Scanner = function(json, ship)
 }
 Scanner.prototype = Object.create( ShipSystem.prototype );
 Scanner.prototype.constructor = Scanner;
+Scanner.prototype.isScanner = function(){
+    return true;
+}
 
+var SWScanner = function(json, ship)
+{
+    Scanner.call( this, json, ship);
+}
+SWScanner.prototype = Object.create( Scanner.prototype );
+SWScanner.prototype.constructor = SWScanner;
+SWScanner.prototype.hasMaxBoost = function(){
+    return true;
+}
 
 var ElintScanner = function(json, ship)
 {
@@ -136,3 +162,14 @@ var HkControlNode = function(json, ship)
 }
 HkControlNode.prototype = Object.create( ShipSystem.prototype );
 HkControlNode.prototype.constructor = HkControlNode;
+
+
+var DrakhRaiderController = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+DrakhRaiderController.prototype = Object.create( ShipSystem.prototype );
+DrakhRaiderController.prototype.constructor = DrakhRaiderController;
+DrakhRaiderController.prototype.hasMaxBoost = function(){
+    return true;
+}

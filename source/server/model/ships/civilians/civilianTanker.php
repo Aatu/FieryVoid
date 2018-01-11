@@ -82,7 +82,7 @@ class CivilianTanker extends MediumShip{
         				10 => "Cargo Bay F",
         				11 => "Standard Particle Beam",
         				12 => "Engine",
-        				13 => "Hanger",
+        				13 => "Hangar",
         				17 => "Structure",
         				20 => "Primary",
         		),

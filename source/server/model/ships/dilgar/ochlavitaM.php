@@ -21,6 +21,7 @@ class OchlavitaM extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         
         $this->occurence = "rare";
+        $this->variantOf = "Ochlavita Destroyer";
 
 	$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));

@@ -7,7 +7,7 @@ window.ajaxInterface = {
 
 	getShipsForFaction: function(factionRequest, getFactionShipsCallback){
 		$.ajax({
-            type : 'GET',
+            type : 'POST',
             url : 'gamelobbyloader.php',
             dataType : 'json',
             data: {faction:factionRequest},

@@ -5,13 +5,14 @@ class wlcChlonasWyLeraA extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 190;
-        $this->faction = "Custom Ships";
+        $this->faction = "Ch'Lonas";
         $this->phpclass = "wlcChlonasWyLeraA";
         $this->imagePath = "img/ships/legion.png";
-        $this->shipClass = "Ch'Lonas Wy'Lera A OSAT";
+        $this->shipClass = "Wy'Lera A OSAT";
         
         $this->forwardDefense = 10;
         $this->sideDefense = 11;
+	$this->unofficial = true;
         
         $this->turncost = 0;
         $this->turndelaycost = 0;

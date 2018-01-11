@@ -8,11 +8,12 @@ class Bintak extends BaseShip{
 		$this->faction = "Narn";
         $this->phpclass = "Bintak";
         $this->imagePath = "img/ships/bintak.png";
-        $this->shipClass = "Bin'Tak";
+        $this->shipClass = "Bin'Tak Dreadnought";
         $this->shipSizeClass = 3;
         $this->canvasSize = 280;
         $this->limited = 10;
         $this->fighters = array("normal"=>18);
+	    $this->isd = 2245;
 		
         $this->forwardDefense = 16;
         $this->sideDefense = 18;

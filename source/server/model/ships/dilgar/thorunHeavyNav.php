@@ -10,6 +10,7 @@ class ThorunHeavyNav extends FighterFlight{
         $this->shipClass = "Thorun Heavy Dartfighters (with navigator)";
         $this->imagePath = "img/ships/thorun.png";
         $this->hasNavigator = true;
+        $this->variantOf = "Thorun Dartfighters";
 
         $this->forwardDefense = 8;
         $this->sideDefense = 7;

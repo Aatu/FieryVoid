@@ -8,9 +8,13 @@ class Secundus extends BaseShip{
 		$this->faction = "Centauri";
         $this->phpclass = "Secundus";
         $this->imagePath = "img/ships/primus.png";
-        $this->shipClass = "Secundus";
+        $this->shipClass = "Secundus Assault Cruiser";
         $this->shipSizeClass = 3;
         $this->occurence = "rare";
+        $this->isd = 2248;
+        $this->variantOf = "Primus Battlecruiser";
+	    
+        $this->fighters = array("assault shuttles"=>12);
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

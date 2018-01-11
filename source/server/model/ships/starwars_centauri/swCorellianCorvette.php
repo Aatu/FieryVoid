@@ -4,7 +4,7 @@ class swCorellianCorvette extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 330;
+	$this->pointCost = 240;
 	$this->faction = "StarWars Galactic Empire";
         $this->phpclass = "swcorelliancorvette";
         $this->imagePath = "img/starwars/cr90.png";
@@ -26,13 +26,13 @@ class swCorellianCorvette extends MediumShip{
 	$this->iniativebonus = 9 *5; //as semi-civilian ship, initiative isn't what it would be for a true warship
         
         $this->addPrimarySystem(new Reactor(3, 10, 0, 3));
-        $this->addPrimarySystem(new Scanner(3, 8, 3, 3));
+        $this->addPrimarySystem(new SWScanner(3, 8, 3, 3));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 3));
 	$this->addPrimarySystem(new Hangar(1, 2));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
-	$this->addPrimarySystem(new CargoBay(1, 30));
-	$this->addPrimarySystem(new CargoBay(1, 30));
+	$this->addPrimarySystem(new CargoBay(1, 35));
+	$this->addPrimarySystem(new CargoBay(1, 35));
 	    
 	$hyperdrive = new JumpEngine(3, 8, 4, 10);
 	$hyperdrive->displayName = 'Hyperdrive';
@@ -58,9 +58,8 @@ class swCorellianCorvette extends MediumShip{
 
         $this->hitChart = array(
         		0=> array(
-        				5 => "Thruster",
-        				10 => "Cargo Bay",
-        				13 => "Medium Turbolaser",
+        				2 => "Thruster",
+        				13 => "Cargo Bay",
         				15 => "Scanner",
         				17 => "Engine",
         				18 => "Hangar",
@@ -68,15 +67,17 @@ class swCorellianCorvette extends MediumShip{
         				20 => "Reactor",
         		),
         		1=> array(
-        				5 => "Thruster",
-        				7 => "Ray Shield",
+        				2 => "Thruster",
+        				3 => "Ray Shield",
+        				7 => "0:Medium Turbolaser",
         				16 => "Structure",
         				17 => "C&C",
         				20 => "Primary",
         		),
         		2=> array(
-        				9 => "Thruster",
-        				11 => "Ray Shield",
+        				4 => "Thruster",
+        				5 => "Ray Shield",
+        				9 => "0:Medium Turbolaser",
         				17 => "Structure",
         				20 => "Primary",
         		),
