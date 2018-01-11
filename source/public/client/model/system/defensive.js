@@ -178,3 +178,11 @@ Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, p
     {
         return (3 + shipManager.power.getBoost(this));
     }
+    
+    
+FtrShield.prototype = Object.create( ShipSystem.prototype );
+FtrShield.prototype.constructor = FtrShield;
+FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+    {
+        return shipManager.systems.getOutput(target, this);
+    }
