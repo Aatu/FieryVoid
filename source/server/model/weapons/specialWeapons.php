@@ -1257,10 +1257,7 @@ class SurgeCannon extends Raking{
 			}						
 			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
 				foreach($subordinateOrders as $subOrder){
-					$subOrder->rolled = 1;
 					$subOrder->needed = 0;
-					$fireOrder->notes = 'technical firing order, weapon combined with another one';
-					$fireOrder->updated = true;
 					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
 					$subWeapon->isCombined = true;
 					$subWeapon->alreadyConsidered = true;
