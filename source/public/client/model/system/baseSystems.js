@@ -87,6 +87,13 @@ var GraviticThruster = function(json, ship)
 GraviticThruster.prototype = Object.create( Thruster.prototype );
 GraviticThruster.prototype.constructor = GraviticThruster;
 
+var MagGraviticThruster = function(json, ship)
+{
+    Thruster.call( this, json, ship);
+}
+MagGraviticThruster.prototype = Object.create( Thruster.prototype );
+MagGraviticThruster.prototype.constructor = MagGraviticThruster;
+
 
 var Hangar = function(json, ship)
 {
