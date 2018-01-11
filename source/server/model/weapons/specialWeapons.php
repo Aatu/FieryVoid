@@ -1204,14 +1204,14 @@ class SurgeCannon extends Raking{
 		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1/3 hexes"; 
 		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1/4 hexes"; 
 		      $this->data["Special"] .= "<br>If You allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in basic mode instead.";  
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in single mode instead.";  
 		      $this->data["Special"] .= "<br>Cooldown period: 1 less than number of weapons combining.";  
 		      $this->data["Special"] .= "<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
 	    }	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-		//each rake (that causes actual damage!) causes +2 mod on critical roll for hit system! 
+		//each rake causes +2 mod on critical roll for hit system! 
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
 		$system->critRollMod+=2; 
 	} //endof function onDamagedSystem
