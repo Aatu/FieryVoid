@@ -405,19 +405,8 @@ class TacGamedata{
 	
     /*returns all units within desired distance from source location; distance in hexes*/
     public function getShipsInDistancePosHex($pos, $dis = 0){
-        $ships = array();
-        foreach ($this->ships as $ship){
-            if ($ship->unavailable) continue;
-            
-            $shipPos = $ship->getCoPos();
-            $curDis = mathlib::getDistanceHex($pos, $shipPos);
-        
-            if ($curDis <= $dis){
-                $ships[$ship->id] = $ship;
-            }
-        }
-        
-        return $ships;   
+	$ships = $gamedata->getShipsInDistance($pos, (($dis*mathlib::$hexWidth) + 1));
+	return $ships;   
     }  //endof function getShipsInDistancePosHex
 			
 				
