@@ -1295,7 +1295,7 @@ class SurgeCannon extends Weapon{
 			case 2:
 				return Dice::d(10, 2)+3; //2 SC
 				break;
-			case 3
+			case 3:
 				return Dice::d(10, 3)+6; //3 SC
 				break;
 			case 4:
