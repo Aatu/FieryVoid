@@ -987,7 +987,7 @@ class SparkFieldHandler{
 				if ($shooter->id == $target->id) $doNotTarget = true;//does not threaten self!
 				if ($target->isDestroyed()) $doNotTarget = true; //no point allocating
 				//each target only once
-				if (in_array($target->id,$alreadyTargeted,true)) $doNotTarget = true; 
+				//if (in_array($target->id,$alreadyTargeted,true)) $doNotTarget = true; 
 				/*
 				foreach($alreadyTargeted as $prevTrgtId){ //loop designed to replace in_array above
 					if ($prevTrgtId==$target->id) $doNotTarget = true;
