@@ -1001,7 +1001,7 @@ $ti = "" . $target->id . "";
 $at2[] = $ti;					
 $cnt = count($alreadyTargeted)	;		
 $cnt2 = count($at2);
-$dt = "cnt2";					
+$dt = "$cnt2";					
 //if (in_array($target->id,$alreadyTargeted,true)) $dt = "PREVIOUSLY TARGETED";					
 				
 					
