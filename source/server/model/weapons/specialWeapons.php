@@ -1004,9 +1004,7 @@ class SparkFieldHandler{
 				if (in_array($target->id,$alreadyTargeted,true)) continue; 
 					//create appropriate firing order
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				
 $cnt = count($alreadyTargeted);
-$cnt = count(SparkFieldHandler::$sparkFields);	
 $dt = "";					
 foreach($alreadyTargeted as $t1){
 	$lastDigit = $t1->id - 32370;
