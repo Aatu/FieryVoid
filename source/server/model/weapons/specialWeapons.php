@@ -940,6 +940,7 @@ class SparkFieldHandler{
 	private static $sparkFields = array();
 	private static $firingDeclared = false;
 	
+$dt = count(SparkFieldHandler::$sparkFields);
 	
 	//should be called by every SparkField on creation!
 	public static function addSparkField($weapon){
@@ -999,16 +1000,18 @@ class SparkFieldHandler{
 				
 //$cnt = count($alreadyTargeted);
 $cnt = count(SparkFieldHandler::$sparkFields);			
-$dt = '';
+//$dt = '';
 /*
 if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
 if($cnt > 0) $cnt = 	$alreadyTargeted[$cnt-1];
 */
+/*					
 foreach(SparkFieldHandler::$sparkFields as $f1){
 $s1 = $f1->getUnit();
 	$lastDigit = $s1->id-32370;
 	$dt .= "$lastDigit" . $f1->id . ";";
 }
+*/
 					
 
 //if (in_array($target->id,$alreadyTargeted,true)) $dt = "PREVIOUSLY TARGETED";					
