@@ -377,28 +377,24 @@ class DBManager {
 	}
     
     public function submitCriticals($gameid, $criticals, $turn){        
-        try {
-            
+        try {            
             //print(var_dump($criticals));
             foreach ($criticals as $critical){
-                if ($critical->turn != $turn)
+                if ( (!$critical->newCrit) && ($critical->turn != $turn)) //new criticals accepted out of turn too!
                     continue;
                 
                 $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $turn, '".$critical->param."')";
     
                 $this->update($sql);
-            }
-                
-            
+            }     
         }
         catch(Exception $e) {
             throw $e;
         }
+    } //endof function submitCriticals
+	
     
-    }
-    
-    public function updateFireOrders($fireOrders){
-        
+    public function updateFireOrders($fireOrders){        
         $stmt = $this->connection->prepare(
             "UPDATE 
                 tac_fireorder  
@@ -440,9 +436,9 @@ class DBManager {
             }
             $stmt->close();
 
-        }
-    
-    }
+        }    
+    } //endof function updateFireOrders
+	
         
     public function submitFireorders($gameid, $fireOrders, $turn, $phase){
 
