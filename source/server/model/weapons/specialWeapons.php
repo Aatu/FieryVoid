@@ -1009,7 +1009,7 @@ $cnt = count($alreadyTargeted);
 $cnt = count(SparkFieldHandler::$sparkFields);	
 $dt = "";					
 foreach($alreadyTargeted as $t1){
-	$lastDigit = $t1->id-32370;
+	$lastDigit = $t1->id - 32370;
 	$dt .= "$lastDigit";
 }
 
