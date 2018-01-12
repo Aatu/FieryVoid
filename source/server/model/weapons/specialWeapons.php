@@ -997,8 +997,9 @@ class SparkFieldHandler{
 					//create appropriate firing order
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				
-$cnt = count($alreadyTargeted)	;
-$dt = '';			
+//$cnt = count($alreadyTargeted);
+$cnt = count(SparkFieldHandler::$sparkFields);			
+$dt = '';
 /*
 if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
 if($cnt > 0) $cnt = 	$alreadyTargeted[$cnt-1];
