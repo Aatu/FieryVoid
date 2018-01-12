@@ -907,10 +907,12 @@ class EmBolter extends Weapon{
 		$trgtTurn = $gamedata->turn;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
                 $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 		$trgtTurn = $gamedata->turn +1;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
                 $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;		
         } //endof function fire
 	
@@ -1246,6 +1248,7 @@ class SurgeCannon extends Raking{
 		$trgtTurn = $gamedata->turn+$i-1;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
                 $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
 	    }
         } //endof function fire
