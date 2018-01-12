@@ -9,6 +9,7 @@ class Critical{
     public $description = "";
     public $oneturn = false;
     public $inEffect = true;
+    public $newCrit = false; //true forces database insert even out of current turn!
 		
     public function __construct($id, $shipid, $systemid, $phpclass, $turn, $param = null){
         $this->id = (int)$id;
