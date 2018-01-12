@@ -988,9 +988,11 @@ class SparkFieldHandler{
 				if ($target->isDestroyed()) $doNotTarget = true; //no point allocating
 				//each target only once
 				//if (in_array($target->id,$alreadyTargeted,true)) continue; //why this does not work correctly?!
+				/*
 				foreach($alreadyTargeted as $prevTrgtId){ //loop designed to replace in_array above
 					if ($prevTrgtId==$target->id) $doNotTarget = true;
 				}
+				*/
 				if (!$doNotTarget){
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 					//create appropriate firing order
@@ -1078,7 +1080,11 @@ class SparkField extends Weapon{
 	public function calculateHitBase($gamedata, $fireOrder){
 		parent::calculateHitBase($gamedata, $fireOrder);
 		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
-        	$notes = "this weapon simply causes damage, hit is automatic";
+	}
+	
+	public function fire($gamedata, $fireOrder){
+		parent::fire($gamedata, $fireOrder);
+        	$notes = "this weapon simply causes damage, hit is automatic"; //replace usual note
 		$fireOrder->notes = $notes;
 	}
 	
