@@ -997,7 +997,9 @@ class SparkFieldHandler{
 					//create appropriate firing order
 $cnt = count($alreadyTargeted)	;		
 if (!($cnt>0)) $cnt = -10;
-$dt = "dt: $cnt";					
+$dt = "no targeting info found";					
+if (in_array($target->id,$alreadyTargeted,true)) $dt = "PREVIOUSLY TARGETED";					
+				
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  $cnt, $dt);
 					$fire->addToDB = true;
