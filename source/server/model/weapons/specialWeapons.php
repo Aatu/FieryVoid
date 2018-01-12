@@ -973,7 +973,7 @@ class SparkFieldHandler{
 		usort(SparkFieldHandler::$sparkFields, "self::sortByBoost");	
 	
 		//table of units that are already targeted
-		$alreadyTargeted = array();
+		$alreadyTargeted = array(1,2);
 		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
 		//strongest weapons fire first, and only 1 field affects particular ship	
 		foreach(SparkFieldHandler::$sparkFields as $field){
@@ -994,9 +994,10 @@ class SparkFieldHandler{
 				}
 				*/
 				if (!$doNotTarget){
-					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 					//create appropriate firing order
-$cnt = count($alreadyTargeted)	;				
+$cnt = count($alreadyTargeted)	;		
+if (!($cnt>0)) $cnt = -10;
+					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, $cnt,  0, null);
 					$fire->addToDB = true;
 					$field->fireOrders[] = $fire;
