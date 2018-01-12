@@ -1004,9 +1004,10 @@ $dt = '';
 if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
 if($cnt > 0) $cnt = 	$alreadyTargeted[$cnt-1];
 */
-foreach($alreadyTargeted as $at){
-	$lastDigit = $at-32370;
-	$dt .= "$lastDigit";
+foreach(SparkFieldHandler::$sparkFields as $f1){
+$s1 = $f1->getUnit();
+	$lastDigit = $s1->id-32370;
+	$dt .= "$lastDigit" . $f1->id . ";";
 }
 					
 
