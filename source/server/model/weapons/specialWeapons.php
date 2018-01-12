@@ -1005,7 +1005,7 @@ class SparkFieldHandler{
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//create appropriate firing order
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
+				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, $field->weaponClass);
 				$fire->addToDB = true;
 				$field->fireOrders[] = $fire;
 			}
