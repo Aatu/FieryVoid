@@ -383,7 +383,7 @@ class DBManager {
                 if ( (!$critical->newCrit) && ($critical->turn != $turn)) //new criticals accepted out of turn too!
                     continue;
                 
-                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $turn, '".$critical->param."')";
+                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $critical->turn, '".$critical->param."')";
     
                 $this->update($sql);
             }     
