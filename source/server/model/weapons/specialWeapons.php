@@ -940,7 +940,6 @@ class SparkFieldHandler{
 	private static $sparkFields = array();
 	private static $firingDeclared = false;
 	
-$dt = count(SparkFieldHandler::$sparkFields);
 	
 	//should be called by every SparkField on creation!
 	public static function addSparkField($weapon){
@@ -964,6 +963,8 @@ $dt = count(SparkFieldHandler::$sparkFields);
 	public static function createFiringOrders($gamedata){
 		if (SparkFieldHandler::$firingDeclared) return; //already done!
 		SparkFieldHandler::$firingDeclared = true;
+		
+$dt = count(SparkFieldHandler::$sparkFields);	
 		
 		//make sure boost level for all weapons is calculated
 		foreach(SparkFieldHandler::$sparkFields as $field){
@@ -999,7 +1000,8 @@ $dt = count(SparkFieldHandler::$sparkFields);
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				
 //$cnt = count($alreadyTargeted);
-$cnt = count(SparkFieldHandler::$sparkFields);			
+$cnt = count(SparkFieldHandler::$sparkFields);	
+$dt = "$dt";					
 //$dt = '';
 /*
 if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
