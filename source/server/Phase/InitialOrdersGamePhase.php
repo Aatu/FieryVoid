@@ -12,6 +12,7 @@ class InitialOrdersGamePhase implements Phase
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
+
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer)
                 continue;
@@ -25,14 +26,18 @@ class InitialOrdersGamePhase implements Phase
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }
 
+
         $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+
 
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer)
                 continue;
 
-            if (EW::validateEW($ship, $gd)){
+            if (EW::validateEW($ship->EW, $gd)){
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
+            }else{
+                throw new Exception("Failed to validate EW");
             }
         }
 
@@ -43,11 +48,11 @@ class InitialOrdersGamePhase implements Phase
             }
         }
 
-        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+        $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
+
 
         foreach ($ships as $ship){
-            if ($ship->userid != $gameData->forPlayer)
-                continue;
+            if ($ship->userid != $gameData->forPlayer) continue;
 
             if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
@@ -57,7 +62,5 @@ class InitialOrdersGamePhase implements Phase
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
-
-        return true;
     }
 }

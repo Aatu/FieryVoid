@@ -1437,13 +1437,10 @@ window.weaponManager = {
 		return (distance <= range);
 	},
 
-	targetHex: function(hexpos){
+	targetHex: function(selectedShip, hexpos){
 
-		var selectedShip = gamedata.getSelectedShip();
 		if (shipManager.isDestroyed(selectedShip))
 			return;
-
-
 
 		var toUnselect = Array();
 		for (var i in gamedata.selectedSystems){
@@ -1836,13 +1833,27 @@ window.weaponManager = {
                 console.log("na");
             }
         });
+    },
+
+
+    getAllFireOrdersForAllShipsForTurn: function(turn, type) {
+        var fires = [];
+        gamedata.ships.forEach(function(ship){
+            fires = fires.concat(weaponManager.getAllFireOrders(ship));
+        });
+
+        fires = fires.filter(function(fireOrder) {
+            return fireOrder.turn == turn;
+        });
+
+        if (type) {
+            fires = fires.filter(function(fireOrder) {
+                return fireOrder.type == type;
+            });
+        }
+
+        return fires;
     }
-
-
-
-
-
-
 }
 
 

@@ -53,6 +53,7 @@ class BuyingGamePhase implements Phase
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
+
         $seenSlots = array();
         foreach($gameData->slots as $slot)
         {
@@ -103,15 +104,26 @@ class BuyingGamePhase implements Phase
                                 }
                             }
                         }
-                        else if ($ship instanceof Templar){
+                        else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
                             foreach($ship->systems as $fighter){
                                 foreach($fighter->systems as $weapon){
-                                    if($weapon instanceof PairedGatlingGun){
+                                    if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
                                         $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $weapon->ammunition);
                                     }
                                 }
                             }
                         }
+                        /*Marcin Sawicki: let's generalize this, not limit to Templar!
+                                    else if ($ship instanceof Templar){
+                                        foreach($ship->systems as $fighter){
+                                           foreach($fighter->systems as $weapon){
+                                               if($weapon instanceof PairedGatlingGun){
+                                                   $dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
+                                               }
+                                           }
+                                       }
+                                    }
+                        */
                     }
                     else{
                         if (isset($ship->adaptiveArmour)){

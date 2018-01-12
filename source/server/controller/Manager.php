@@ -387,106 +387,6 @@ class Manager{
         
     }
     
-    private static function handleBuying( $ships, $gamedata, $slotid ){
-    
-        $seenSlots = array();
-        foreach($gamedata->slots as $slot)
-        {
-            if ($gamedata->hasAlreadySubmitted($gamedata->forPlayer, $slot->slot))
-                continue;
-            
-            $points = 0;
-            foreach ($ships as $ship){
-
-                if ($ship->slot != $slot->slot)
-                    continue;
-                
-                $seenSlots[$slot->slot] = true;
-
-                if (!$ship instanceof FighterFlight){
-                    $points += $ship->pointCost;
-                }
-
-
-                else {
-                    $points += ($ship->pointCost / 6) * $ship->flightSize;
-                }
-
-                if ($ship->userid == $gamedata->forPlayer){
-                    $id = self::$dbManager->submitShip($gamedata->id, $ship, $gamedata->forPlayer);
-                    
-                    // Check if ship uses variable flight size
-                    if($ship instanceof FighterFlight){
-                        self::$dbManager->submitFlightSize($gamedata->id, $id, $ship->flightSize);
-
-                        $firstFighter = $ship->systems[1];
-                        $ammo = false;
-
-                        foreach ($firstFighter->systems as $weapon){
-                            if(isset($weapon->missileArray)){
-                                $ammo = $weapon->missileArray[1]->amount;
-                                break;
-                            }
-                        }
-
-                        if ($ammo){
-                            foreach($ship->systems as $fighter){
-                                foreach ($fighter->systems as $weapon){
-                                    if(isset($weapon->missileArray)){
-                                        $weapon->missileArray[1]->amount = $ammo;
-                                        self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $ammo);
-                                    }
-                                }
-                            }
-                        }
-			else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
-			   foreach($ship->systems as $fighter){
-                               foreach($fighter->systems as $weapon){
-                                   if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
-                                       self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
-                                   }
-                               }
-                           }
-			}
-			/*Marcin Sawicki: let's generalize this, not limit to Templar!
-                        else if ($ship instanceof Templar){
-                            foreach($ship->systems as $fighter){
-                               foreach($fighter->systems as $weapon){
-                                   if($weapon instanceof PairedGatlingGun){
-                                       self::$dbManager->submitAmmo($id, $weapon->id, $gamedata->id, $weapon->firingMode, $weapon->ammunition);
-                                   }
-                               }
-                           }
-                        }
-			*/
-                    }
-                    else{
-                        if (isset($ship->adaptiveArmour)){
-                            self::$dbManager->submitAdaptiveArmour($gamedata->id, $id);
-                        }
-
-                       foreach($ship->systems as $systemIndex=>$system){
-                               if(isset($system->missileArray)){
-                                   // this system has a missileArray. It uses ammo
-                                   foreach($system->missileArray as $firingMode=>$ammo){
-                                       self::$dbManager->submitAmmo($id, $system->id, $gamedata->id, $firingMode, $ammo->amount);
-                               }
-                           }
-                       }  
-                    }
-                }
-            }
-
-            if ($points > $slot->points)
-            throw new Exception("Fleet too expensive.");
-        }
-    
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn, $seenSlots);
-        
-        return true;
-    }
-    
-    
     private static function handleFinalOrders(  $ships, $gamedata ){
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
        
@@ -520,63 +420,7 @@ class Manager{
         return true;
     
     }
-    
-    private static function handleInitialActions( $ships, $gamedata ){
-    
-        foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer)  
-                continue;
-                
-            $powers = array();
-            
-            foreach ($ship->systems as $system){
-                $powers = array_merge($powers, $system->power);
-            }
-        
-            self::$dbManager->submitPower($gamedata->id, $gamedata->turn, $powers);
-        }
 
-
-        $gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-
-
-        foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer)
-                continue;
-
-            if (EW::validateEW($ship->EW, $gd)){
-                self::$dbManager->submitEW($gamedata->id, $ship->id, $ship->EW, $gamedata->turn);
-            }else{
-                throw new Exception("Failed to validate EW");
-            }
-        }
-
-
-        foreach ($ships as $ship){
-            if ($ship instanceof WhiteStar){
-                self::$dbManager->updateAdaptiveArmour($gamedata->id, $ship->id, $ship->armourSettings);
-            }
-        }
-
-	$gd = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id); //MJS: is it really necessary? $gd is created a few lines above in the same manner... leaving for now
-
-
-        foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer) continue;
-
-            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gd)){
-		 self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
-            }else{
-                throw new Exception("Failed to validate Ballistic firing orders");
-            }
-        }
-
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-                
-        return true;    
-    
-    }
-    
     public static function advanceGameState($playerid, $gameid){
         try{
             if (!self::$dbManager->checkIfPhaseReady($gameid))
@@ -634,90 +478,12 @@ class Manager{
             throw $e;
         }
     }
-    
-    private static function startInitialOrders($gamedata){
-    
-        $gamedata->setPhase(1); 
-        
-        self::$dbManager->updateGamedata($gamedata);
-    
-    }
-    
-    private static function startMovement($gamedata){
-        $gamedata->setPhase(2); 
 
-        $ship = $gamedata->getFirstShip();
-
-        if ($ship instanceof StarBase){
-            if ($gamedata->turn > 1){
-                $moves = sizeof($ship->movement);
-                debug::log($ship->movement[$moves-1]->type);
-            }
-        }
-
-        $gamedata->setActiveship($gamedata->getFirstShip()->id);
-        self::$dbManager->updateGamedata($gamedata);
-    
-    }
-    
     private static function startWeaponAllocation($gamedata){
         $gamedata->setPhase(3); 
         $gamedata->setActiveship(-1);
         self::$dbManager->updateGamedata($gamedata);
     }
-    
-    private static function startGame($gamedata){
-                    
-        $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        
-        
-        $t1 = 0;
-        $t2 = 0;
-        
-        foreach ($servergamedata->ships as $ship){
-            
-            $y = 0;
-            $t = 0;
-            $h = 3;
-            if ($ship->team == 1){
-                $t1++;
-                $t = $t1;
-                $h = 0;
-            }else{
-                $t2++;
-                $t = $t2;
-            }
-            
-            if ($t % 2 == 0){
-                $y = $t/2;
-            }else{
-                $y = (($t-1)/2)*-1;
-            }
-            
-            $x = -30;
-            
-            if ($ship->team == 2){
-                $x=30;
-            }
-            
-            
-            
-            $move = new MovementOrder(-1, "start", $x, $y, 0, 0, 5, $h, $h, true, 1, 0, 0);
-            $ship->movement = array($move);
-            
-            foreach ($ship->systems as $system)
-            {
-                $system->setInitialSystemData($ship);
-            }
-            
-        }
-        
-        self::$dbManager->insertShips($servergamedata->id, $servergamedata->ships);
-        self::$dbManager->insertSystemData(SystemData::$allData);
-        
-        self::changeTurn($gamedata);
-    }
-
 
     private static function startEndPhase($gamedata){
         //print("start end");
@@ -761,56 +527,6 @@ class Manager{
         self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
     } //endof function startEndPhase
 
-
-    
-    private static function handleDeployment( $ships, $gamedata)
-    {
-        $moves = Deployment::validateDeployment($gamedata, $ships);
-        foreach ($moves as $shipid=>$move)
-        {
-            self::$dbManager->insertMovement($gamedata->id, $shipid, $move);
-        }
-        
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-    }
-    
-
-    private static function handleMovement( $ships, $gamedata ){
-        $turn = $gamedata->getActiveship()->getLastTurnMoved();
-        if ($gamedata->turn <= $turn)
-            throw new Exception("The ship has already moved");
-
-        self::$dbManager->submitMovement($gamedata->id, $ships[$gamedata->activeship]->id, $gamedata->turn, $ships[$gamedata->activeship]->movement);
-
-        $next = false;
-        $nextshipid = -1;
-        $firstship = null;
-        foreach ($gamedata->ships as $ship){
-
-            if ($firstship == null)
-                $firstship = $ship;
-
-            if ($next && !$ship->isDestroyed() && !$ship->unavailable){
-                $nextshipid = $ship->id;
-                break;
-            }
-
-            if ($ship->id == $gamedata->activeship)
-                $next = true;
-        }
-
-        if ($nextshipid > -1){
-            $gamedata->setActiveship($nextshipid);
-            self::$dbManager->updateGamedata($gamedata);
-        }else{
-            self::startWeaponAllocation($gamedata);
-        }
-
-        return true;
-    } //endof function handleMovement
-
-    
     private static function changeTurn($gamedata){
     
         $gamedata->setTurn( $gamedata->turn+1 );

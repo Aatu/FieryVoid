@@ -13,3 +13,4 @@ vendor
 doc
 .swp
 nano*
+*.log
