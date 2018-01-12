@@ -311,6 +311,7 @@ class PlasmaTorch extends Plasma{
                 $this->criticals[] =  $crit;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
                 $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
             }
 		
