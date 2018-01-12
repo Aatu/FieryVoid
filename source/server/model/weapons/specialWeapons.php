@@ -998,10 +998,16 @@ class SparkFieldHandler{
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				
 $cnt = count($alreadyTargeted)	;
-$dt = 'n/a!';					
+$dt = '';			
+/*
 if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
 if($cnt > 0) $cnt = 	$alreadyTargeted[$cnt-1];
-				
+*/
+foreach($alreadyTargeted as $at){
+	$lastDigit = $at-32370;
+	$dt .= "$lastDigit";
+}
+					
 
 //if (in_array($target->id,$alreadyTargeted,true)) $dt = "PREVIOUSLY TARGETED";					
 				
