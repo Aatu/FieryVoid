@@ -966,6 +966,21 @@ class SparkFieldHandler{
 		
 $dt = count(SparkFieldHandler::$sparkFields);	
 		
+//apparently ships may be loaded multiple times... make sure current ship belongs to current gamedata!
+$tmpFields = array();
+foreach(SparkFieldHandler::$sparkFields as $field){
+	$shooter = $field->getUnit();
+	//is this unit defined in current gamedata? (particular instance!)
+	foreach($gamedata->ships as $shp){
+		if ($shp===$shooter){ //active instance!
+			$tmpFields[] = $field;
+			break; //foreach ship
+		}
+	}
+}
+SparkFieldHandler::$sparkFields = $tmpFields;
+		
+		
 		//make sure boost level for all weapons is calculated
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$field->calculateBoostLevel($gamedata->turn);
