@@ -987,14 +987,14 @@ class SparkFieldHandler{
 				if ($shooter->id == $target->id) $doNotTarget = true;//does not threaten self!
 				if ($target->isDestroyed()) $doNotTarget = true; //no point allocating
 				//each target only once
-				//if (in_array($target->id,$alreadyTargeted,true)) continue; //why this does not work correctly?!
+				if (in_array($target->id,$alreadyTargeted,true)) $doNotTarget = true; 
 				/*
 				foreach($alreadyTargeted as $prevTrgtId){ //loop designed to replace in_array above
 					if ($prevTrgtId==$target->id) $doNotTarget = true;
 				}
 				*/
 				if (!$doNotTarget){
-					$alreadyTargeted[] = $target->id; //add to list of already targeted units
+					$alreadyTargeted[$target->id] = $target->id; //add to list of already targeted units
 					//create appropriate firing order
 					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, null);
 					$fire->addToDB = true;
