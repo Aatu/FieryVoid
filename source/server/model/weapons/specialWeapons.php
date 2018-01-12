@@ -964,21 +964,19 @@ class SparkFieldHandler{
 		if (SparkFieldHandler::$firingDeclared) return; //already done!
 		SparkFieldHandler::$firingDeclared = true;
 		
-$dt = count(SparkFieldHandler::$sparkFields);	
-		
-//apparently ships may be loaded multiple times... make sure current ship belongs to current gamedata!
-$tmpFields = array();
-foreach(SparkFieldHandler::$sparkFields as $field){
-	$shooter = $field->getUnit();
-	//is this unit defined in current gamedata? (particular instance!)
-	foreach($gamedata->ships as $shp){
-		if ($shp===$shooter){ //active instance!
-			$tmpFields[] = $field;
-			break; //foreach ship
+		//apparently ships may be loaded multiple times... make sure fields in array belong to current gamedata!
+		$tmpFields = array();
+		foreach(SparkFieldHandler::$sparkFields as $field){
+			$shooter = $field->getUnit();
+			//is this unit defined in current gamedata? (particular instance!)
+			foreach($gamedata->ships as $shp){
+				if ($shp===$shooter){ //active instance!
+					$tmpFields[] = $field;
+					break; //foreach ship
+				}
+			}
 		}
-	}
-}
-SparkFieldHandler::$sparkFields = $tmpFields;
+		SparkFieldHandler::$sparkFields = $tmpFields;
 		
 		
 		//make sure boost level for all weapons is calculated
@@ -999,36 +997,22 @@ SparkFieldHandler::$sparkFields = $tmpFields;
 			$shooter = $field->getUnit();
 			$aoe = $field->getAoE($gamedata->turn);
 			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
-			foreach($inAoE as $targetID=>$target){
-				$doNotTarget = false;				
-				if ($shooter->id == $target->id) $doNotTarget = true;//does not threaten self!
-				if ($target->isDestroyed()) $doNotTarget = true; //no point allocating
+			foreach($inAoE as $targetID=>$target){		
+				if ($shooter->id == $target->id) continue;//does not threaten self!
+				if ($target->isDestroyed()) continue; //no point allocating
 				//each target only once
-				//if (in_array($target->id,$alreadyTargeted,true)) $doNotTarget = true; 
-				/*
-				foreach($alreadyTargeted as $prevTrgtId){ //loop designed to replace in_array above
-					if ($prevTrgtId==$target->id) $doNotTarget = true;
-				}
-				*/
-				if (!$doNotTarget){
+				if (in_array($target->id,$alreadyTargeted,true)) continue; 
 					//create appropriate firing order
 					$alreadyTargeted[] = $target->id; //add to list of already targeted units
 				
-//$cnt = count($alreadyTargeted);
+$cnt = count($alreadyTargeted);
 $cnt = count(SparkFieldHandler::$sparkFields);	
-$dt = "$dt";					
-//$dt = '';
-/*
-if($cnt > 1) $dt = $alreadyTargeted[$cnt-2];	
-if($cnt > 0) $cnt = 	$alreadyTargeted[$cnt-1];
-*/
-/*					
-foreach(SparkFieldHandler::$sparkFields as $f1){
-$s1 = $f1->getUnit();
-	$lastDigit = $s1->id-32370;
-	$dt .= "$lastDigit" . $f1->id . ";";
+$dt = "";					
+foreach($alreadyTargeted as $t1){
+	$lastDigit = $t1->id-32370;
+	$dt .= "$lastDigit";
 }
-*/
+
 					
 
 //if (in_array($target->id,$alreadyTargeted,true)) $dt = "PREVIOUSLY TARGETED";					
@@ -1037,7 +1021,6 @@ $s1 = $f1->getUnit();
 					$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  $cnt, $dt);
 					$fire->addToDB = true;
 					$field->fireOrders[] = $fire;
-				}
 			}
 		} //endof foreach SparkField
 	}//endof function createFiringOrders
