@@ -1007,7 +1007,7 @@ class SparkFieldHandler{
 $cnt = count($alreadyTargeted);
 $dt = "";					
 foreach($alreadyTargeted as $t1){
-	$lastDigit = $t1->id - 32370;
+	$lastDigit = $t1 - 32370;
 	$dt .= "$lastDigit";
 }
 
