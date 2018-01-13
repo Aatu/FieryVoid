@@ -248,6 +248,7 @@ spl_autoload_register(
                 
                 //Abbai ships (show era)
                 'lakara' =>  '/server/model/ships/abbai/lakara.php',
+                'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
                 
                 
