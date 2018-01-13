@@ -244,10 +244,16 @@ spl_autoload_register(
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 
                 //Abbai ships (WoCR era)
-                
+                'benota' =>  '/server/model/ships/abbai_old/benota.php',
+                'kastona' =>  '/server/model/ships/abbai_old/kastona.php',
+                'kostina' =>  '/server/model/ships/abbai_old/kostina.php',
+                'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
+                               
+                'wimuk' =>  '/server/model/ships/abbai_old/wimuk.php',
                 
                 //Abbai ships (show era)
                 'lakara' =>  '/server/model/ships/abbai/lakara.php',
+                
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
                 
