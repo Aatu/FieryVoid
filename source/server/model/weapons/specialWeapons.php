@@ -1055,7 +1055,7 @@ class SparkField extends Weapon{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	
-	protected $targetList = aray(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
+	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
 	
  	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
