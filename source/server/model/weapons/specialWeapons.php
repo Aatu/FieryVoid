@@ -997,8 +997,9 @@ class SparkFieldHandler{
 		foreach(SparkFieldHandler::$sparkFields as $field){			
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
-			$shooter = $field->getUnit();
-			$fire = new FireOrder(-1, 'normal', $shooter->id, $shooter->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, $field->weaponClass);
+			$shooter = $field->getUnit();      
+			$targetPos = $shooter->getCoPos();
+			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, $targetPos->x,  $targetPos->y, $field->weaponClass);
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			
 			$aoe = $field->getAoE($gamedata->turn);			
@@ -1054,6 +1055,7 @@ class SparkField extends Weapon{
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
+	public $hextarget = true;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
@@ -1157,7 +1159,7 @@ class SparkField extends Weapon{
 
 	
 	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-//TEST		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
+		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
 
@@ -1183,8 +1185,7 @@ class SparkField extends Weapon{
 		$damageRolled = Dice::d(6, 1)+1;
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
-		$damageRolled = max(0,$damageRolled); //cannot do less than 0
-$damageRolled = 4;//TEST!!!		
+		$damageRolled = max(0,$damageRolled); //cannot do less than 0	
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
