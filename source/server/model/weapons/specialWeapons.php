@@ -991,23 +991,25 @@ class SparkFieldHandler{
 	
 		//table of units that are already targeted
 		$alreadyTargeted = array();
-		//now for each weapon find possible targets and create firing orders (unless they are already fired at)
+		//create firing order for each weapon (target self)
+		//for each weapon find possible targets and add them to weapons' target list
 		//strongest weapons fire first, and only 1 field affects particular ship	
-		foreach(SparkFieldHandler::$sparkFields as $field){
+		foreach(SparkFieldHandler::$sparkFields as $field){			
 			if ($field->isDestroyed($gamedata->turn-1)) continue; //destroyed field does not attack
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
 			$shooter = $field->getUnit();
-			$aoe = $field->getAoE($gamedata->turn);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, $shooter->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, $field->weaponClass);
+			$fire->addToDB = true;
+			$field->fireOrders[] = $fire;			
+			$aoe = $field->getAoE($gamedata->turn);			
 			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating				
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
-				//create appropriate firing order
+				//add to target list
 				$alreadyTargeted[] = $target->id; //add to list of already targeted units
-				$fire = new FireOrder(-1, 'normal', $shooter->id, $target->id, $field->id, -1, $gamedata->turn, 1, 0, 0, 1, 0, 0,  0, $field->weaponClass);
-				$fire->addToDB = true;
-				$field->fireOrders[] = $fire;
+				$field->addTarget($target);
 			}
 		} //endof foreach SparkField
 	}//endof function createFiringOrders
@@ -1053,11 +1055,18 @@ class SparkField extends Weapon{
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
     	public $firingModes = array( 1 => "Field"); //just a convenient name for firing mode
 	
+	protected $targetList = aray(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
 	
 	
  	public $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
             14=>"ReducedDamage"
 	);
+	
+	
+	
+	public function addTarget($newTarget){
+		$this->targetList[] = $newTarget;
+	}
 
 	
 	    public function setSystemDataWindow($turn){
@@ -1091,13 +1100,22 @@ class SparkField extends Weapon{
 	}
 	
 	public function fire($gamedata, $fireOrder){
-		parent::fire($gamedata, $fireOrder);
+		//parent::fire($gamedata, $fireOrder);
+		//actually fire at units from target list - and fill fire order data appropriately
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$fireOrder->rolled = 1; //just to mark that there was a roll!
+		$fireOrder->shotshit = 1; //always hit, technically
+		
+		//actual damage dealing...
+		foreach($this->targetList as $target){
+			$this->beforeDamage($target, $shooter, $fireOrder, null, $gamedata);			
+		}
         	$notes = "this weapon simply causes damage, hit is automatic"; //replace usual note
 		$fireOrder->notes = $notes;
 	}
 	
 	public function calculateBoostLevel($turn){
-		$this->boostlevel = 	$this->getBoostLevel($turn);
+		$this->boostlevel = $this->getBoostLevel($turn);
 	}
 	
         private function getBoostLevel($turn){
@@ -1117,24 +1135,26 @@ class SparkField extends Weapon{
 	public function beforeFiringOrderResolution($gamedata){
 		SparkFieldHandler::createFiringOrders($gamedata);		
 	}
-
-	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
+	
+	
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		if (!($target instanceof FighterFlight)){ //ship - as usual
-			parent::damage($target, $shooter, $fireOrder, $gamedata, $damage);
-		}else{ //fighter - damage every fighter in flight! (separate damage roll for each)
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+		}else{//fighter flight - separate hit on each fighter!
 			foreach ($target->systems as $fighter){
 				if ($fighter == null || $fighter->isDestroyed()){
 				    continue;
 				}
-				$damageAmount = $this->getDamage($fireOrder);
-				$this->doDamage($target, $shooter, $fighter, $damageAmount, $fireOrder, null, $gamedata, false);
+				$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+				$this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
                     	}
 		}
-	}//endof function damage
-	
+	}	
+
 	
 	protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
+//TEST		if ($system instanceof Structure) $damage = 0; //will not harm Structure!
 		parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 	}	
 
@@ -1161,6 +1181,7 @@ class SparkField extends Weapon{
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
 		$damageRolled = max(0,$damageRolled); //cannot do less than 0
+$damageRolled = 4;//TEST!!!		
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
