@@ -1028,7 +1028,7 @@ class SparkField extends Weapon{
 	public $trailColor = array(141, 240, 255);
         public $animation = "ball";
         public $animationColor = array(1, 1, 1);
-        public $animationExplosionScale = 1;
+        public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
         public $explosionColor = array(165, 165, 255);
         public $projectilespeed = 20;
@@ -1074,6 +1074,7 @@ class SparkField extends Weapon{
 		    $this->minDamage = 2-$boostlevel;
 		    $this->maxDamage = 7-$boostlevel;
 		    $this->minDamage = max(0,$this->minDamage);
+		    $this->animationExplosionScale = $this->getAoE($turn);
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 		      //$this->data["AoE"] = $this->getAoE($turn);
