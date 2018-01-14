@@ -1096,7 +1096,9 @@ class SparkField extends Weapon{
 	
 	
 	public function calculateHitBase($gamedata, $fireOrder){
-		parent::calculateHitBase($gamedata, $fireOrder);
+		//parent::calculateHitBase($gamedata, $fireOrder);
+	        $fireOrder->updated = true;
+		$fireOrder->chosenLocation = 0;//so it's recalculated later every time! - as location chosen here is completely incorrect for target 
 		$fireOrder->needed = 100; //this weapon simply causes damage, hit is automatic
 	}
 	
