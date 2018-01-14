@@ -594,7 +594,8 @@ class DBManager {
 				$targetid = $damage->shipid;
 				$shooterid = $damage->shooterid; //additional field
 				$weaponid = $damage->weaponid; //additional field
-				$sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and targetid = $targetid and weaponid = $weaponid";		
+				//targetid = -1 if weapon is hex targeted!
+				$sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid";		
 				$result = $this->query($sql1);
 				if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID			
 				}else{
