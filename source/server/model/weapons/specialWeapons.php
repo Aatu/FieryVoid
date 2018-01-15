@@ -1002,9 +1002,10 @@ class SparkFieldHandler{
 			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
 				1, 0, 0, 1, 0, 0, $targetPos["x"],  $targetPos["y"], $field->weaponClass
 			);
+$movementThisTurn = $shooter->getLastTurnMovement($fireOrder->turn+1);
 $fire->damageclass = "" . $fire->x . ";" . $fire->y;
-$fire->x = $targetPos["x"];
-$fire->y = $targetPos["y"];
+$fire->x = $movementThisTurn->x;
+$fire->y = $movementThisTurn->y;
 			
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			
