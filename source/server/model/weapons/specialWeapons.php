@@ -999,14 +999,10 @@ class SparkFieldHandler{
 			if ($field->isOfflineOnTurn($gamedata->turn)) continue; //disabled field does not attack
 			$shooter = $field->getUnit();      
 			$targetPos = $shooter->getCoPos();
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
 			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
-				1, 0, 0, 1, 0, 0, $targetPos["x"],  $targetPos["y"], $field->weaponClass
+				1, 0, 0, 1, 0, 0, $movementThisTurn->x,  $movementThisTurn->y, $field->weaponClass
 			);
-$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-$fire->damageclass = "" . $fire->x . ";" . $fire->y;
-$fire->x = $movementThisTurn->x;
-$fire->y = $movementThisTurn->y;
-			
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			
 			$aoe = $field->getAoE($gamedata->turn);			
