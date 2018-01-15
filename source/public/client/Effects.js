@@ -1472,9 +1472,8 @@ window.effects = {
         effects.backAnimations.push(animation);
     },
     
+    
     makeBallAnimation: function(sPos, tPos, weapon, hit, currentlocation){
-                
-                        
         var animation = {
             tics:0,
             totalTics:500,
@@ -1482,8 +1481,7 @@ window.effects = {
             sPos: sPos,
             tPos: tPos,
             hit: hit,
-            draw: function(self){
-            
+            draw: function(self){            
                 var canvas = effects.getCanvas();
                 var sPos = self.sPos;
                 var tPos = self.tPos;
@@ -1528,9 +1526,6 @@ window.effects = {
                 }               
                 
                 self.tics++;
-                
-                
-            
             },
             callback: effects.doneDisplayingWeaponFire
         };
@@ -1538,8 +1533,8 @@ window.effects = {
         effects.backAnimations.push(animation);
     },
     
-    makeTorpedoAnimation: function(sPos, tPos, weapon, hit, currentlocation){
-        
+    
+    makeTorpedoAnimation: function(sPos, tPos, weapon, hit, currentlocation){        
         var cones = Array();
         var conecount = Math.floor((Math.random()*3)+6);
         //var conecount = 0;
