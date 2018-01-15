@@ -751,9 +751,8 @@ window.effects = {
             weapon = weaponManager.getFiringWeapon(weapon, fire);
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             if(modeIteration != weapon.firingMode){
-                while(modeIteration > 1){
+                while(modeIteration != weapon.firingMode){
                     weapon.changeFiringMode();
-                    modeIteration--;
                 }
             }
             
@@ -900,9 +899,8 @@ window.effects = {
         var hitSystem = fire.hitSystem;
         
         var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-        while(modeIteration > 1){
+        while(modeIteration != weapon.firingMode){
             weapon.changeFiringMode();
-            modeIteration--;
         }
 
         var animation = {
