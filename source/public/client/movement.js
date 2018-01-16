@@ -152,7 +152,6 @@ shipManager.movement = {
                 
                 var shipwindow = $(".shipwindow_"+ship.id);
                 shipWindowManager.cancelAssignThrust(shipwindow);
-                shipManager.drawShip(ship);
                 gamedata.shipStatusChanged(ship);
 
                 return true;
@@ -261,9 +260,11 @@ shipManager.movement = {
 			
 			gamedata.shipStatusChanged(ship);
 			shipManager.drawShip(ship);
-			if (!ship.flight)
-				shipWindowManager.assignThrust(ship);
-        
+			if (!ship.flight) {
+                shipWindowManager.assignThrust(ship);
+            } else {
+                gamedata.shipStatusChanged(ship);
+            }
 		}
 		
 	},
@@ -327,9 +328,7 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-        
-        hexgrid.unSelectHex();
-        shipManager.drawShip(ship);
+
         shipWindowManager.assignThrust(ship);
 
         ship.rolling = true;
@@ -454,7 +453,8 @@ shipManager.movement = {
             forced:false,
             value:0
         };
-        //gamedata.shipStatusChanged(ship);
+
+        gamedata.shipStatusChanged(ship);
     },
     
     canSlip: function(ship, right){
@@ -516,15 +516,12 @@ shipManager.movement = {
             
         var name= (right) ? "slipright" : "slipleft";
         var lm = ship.movement[ship.movement.length-1];
-        var newheading = (right) ? mathlib.addToHexFacing(lm.heading, 1) : mathlib.addToHexFacing(lm.heading, -1)
-        var angle = shipManager.hexFacingToAngle(newheading);
-        var shipX = ship.movement[ship.movement.length-1].x;
-        var shipY = ship.movement[ship.movement.length-1].y;
-        //var pos = hexgrid.getHexToDirection(angle, shipX, shipY);
+        var newheading = (right) ? mathlib.addToHexFacing(lm.heading, 1) : mathlib.addToHexFacing(lm.heading, -1);
+        var angle = mathlib.hexFacingToAngle(newheading);
 
-        var pos = new hexagon.Offset(shipX, shipY).getNeighbourAtDirection(newheading);
+        var pos = new hexagon.Offset(lm.position).getNeighbourAtDirection(newheading);
 
-        console.log("slipping from", {x: shipX, y: shipY}, "to", pos);
+        console.log("slipping from", lm.position, "to", pos);
 
 		var isPivoting = shipManager.movement.isPivoting(ship);
 
@@ -633,6 +630,8 @@ shipManager.movement = {
         if (!ship.flight){
             shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
+        } else {
+            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -716,8 +715,7 @@ shipManager.movement = {
             } 
         }
 
-        shipManager.drawShip(ship);
-
+        gamedata.shipStatusChanged(ship);
     },
     
     isEndingPivot: function(ship, right){
@@ -864,11 +862,12 @@ shipManager.movement = {
             forced:false,
             value:value
         }
-        
-        hexgrid.unSelectHex();
-        shipManager.drawShip(ship);
-        if (!ship.flight)
-			shipWindowManager.assignThrust(ship);
+
+        if (!ship.flight) {
+            shipWindowManager.assignThrust(ship);
+        } else {
+            gamedata.shipStatusChanged(ship);
+        }
     },
     
     doForcedPivot: function(ship){
@@ -908,6 +907,8 @@ shipManager.movement = {
             forced:true,
             value:0
         };
+
+        gamedata.shipStatusChanged(ship);
     },
     
     isPivoting: function(ship){
@@ -1323,6 +1324,8 @@ shipManager.movement = {
         if (!ship.flight){
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
+        } else {
+            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -1824,7 +1827,8 @@ shipManager.movement = {
             step = -1;
             name = "turnleft";
         }
-        
+
+        //TODO: support new hex coordinate system?
         newfacing = mathlib.addToHexFacing(lastMovement.facing, step);
         newheading = mathlib.addToHexFacing(lastMovement.heading, step);
 
@@ -1853,12 +1857,14 @@ shipManager.movement = {
             turn:gamedata.turn,
             forced:false,
             value:0
-        }
+        };
 
         hexgrid.unSelectHex();        
 
         if(!ship.flight){
             shipWindowManager.assignThrust(ship);
+        } else {
+            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -1919,6 +1925,8 @@ shipManager.movement = {
         if (!ship.flight){
             shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
+        } else {
+            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -2380,122 +2388,12 @@ shipManager.movement = {
 			return {xO:0, yO:0};
 		}
 		
-		var dir = shipManager.hexFacingToAngle(mathlib.addToHexFacing(heading, 3));
+		var dir = mathlib.hexFacingToAngle(mathlib.addToHexFacing(heading, 3));
 		var per = 0.2;
 		if (ship.shipSizeClass<0)
 			per *= 2;
 		
 		
 		return hexgrid.getOffsetPositionInHex(pos, dir, per, true)
-	},
-    
-    moveToHex: function(ship, hex, hexpos, shippos){
-        
-        var movedist = Math.round(shipManager.movement.getRemainingMovement(ship)*hexgrid.hexWidth());
-
-        if (Math.round(mathlib.getDistance(shippos, hexpos)) < movedist){
-           movedist = Math.round(mathlib.getDistance(shippos, hexpos));
-        }
-        
-        var moves = Math.round(movedist/hexgrid.hexWidth());
-        
-        for (var i = 0;i<moves;i++)
-            shipManager.movement.doMove(ship);
-
-    },
-
-    /*
-    moveStraightForwardHex: function(hex, selected){
-        var ship = gamedata.getActiveShip();
-        
-        if (!shipManager.movement.canMove(ship))
-            return;
-        
-        var pos = shipManager.getShipPosition(ship);
-        pos = hexgrid.hexCoToPixel(pos.x, pos.y);
-        
-        var tpos = hexgrid.hexCoToPixel(hex.x, hex.y);
-        
-        var a = mathlib.getCompassHeadingOfPoint(pos, tpos);
-        
-        if (a !== shipManager.getShipDoMAngle(ship))
-            return;
-        
-        if (selected){
-            shipManager.movement.moveToHex(ship, hex, tpos, pos);
-            
-
-        }else{
-            shipManager.movement.adMovementIndicators(ship, hex);
-        }
-        
-    },
-
-    makeMovementIndicator: function(ship, hex){
-       
-        var effect = {};
-            
-         
-        effect.ship = ship;
-        effect.type = "movement";
-        effect.hex = hex;
-        //console.log(ball.launchPos + " " + ball.targetPos );
-        effect.draw = function(self){
-            var ship = self.ship;
-            var start = shipManager.getShipPosition(ship);
-            start = hexgrid.hexCoToPixel(start.x, start.y);
-            
-            var end = hexgrid.hexCoToPixel(self.hex.x, self.hex.y);
-            var linestart = mathlib.getPointInDistanceBetween(start, end, 38*gamedata.zoom);
-           
-            var posmove = null;
-            var movedist = Math.round(shipManager.movement.getRemainingMovement(ship)*hexgrid.hexWidth());
-            var drawmore = false;
-            
-            if (Math.round(mathlib.getDistance(start, end)) > movedist){
-                posmove = mathlib.getPointInDistanceBetween(start, end, movedist);
-                drawmore = true;
-            }else{
-                posmove = end;
-            }
-            
-            var canvas = EWindicators.getEwCanvas();
-
-            
-            
-            if (drawmore){
-                canvas.strokeStyle = "rgba(229,87,38,0.40)";
-				canvas.fillStyle = "rgba(179,65,25,0.40)";
-                graphics.drawLine(canvas, posmove.x, posmove.y, end.x, end.y, 4*gamedata.zoom);            
-                graphics.drawCircleAndFill(canvas, end.x, end.y, 5*gamedata.zoom, 0 );
-            }
-            
-            canvas.strokeStyle = "rgba(86,200,45,0.40)";
-            canvas.fillStyle = "rgba(50,122,24,0.40)";
-            graphics.drawLine(canvas, linestart.x, linestart.y, posmove.x, posmove.y, 4*gamedata.zoom);            
-            graphics.drawCircleAndFill(canvas, posmove.x, posmove.y, 5*gamedata.zoom, 0 );
-        };
-        
-        return effect;
-    
-    },
-
-    getMovementPseudoId: function(move, index) {
-        if (index === undefined) {
-            index = "";
-        }
-        var hash = "";
-        Object.keys(move).forEach(function (key) {
-            var entry = move[key];
-            if (typeof entry === "object") {
-                hash += shipManager.movement.getMovementPseudoId(entry);
-            } else {
-                hash += move[key];
-            }
-        });
-
-        hash += index;
-        return hash;
-    }
-    */
+	}
 };

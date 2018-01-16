@@ -2,7 +2,7 @@ window.MovementPhaseStrategy = (function(){
 
     function MovementPhaseStrategy(coordinateConverter){
         PhaseStrategy.call(this, coordinateConverter);
-        this.animationStrategy = new window.MovementAnimationStrategy();
+        this.animationStrategy = new window.IdleAnimationStrategy();
     }
 
     MovementPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -10,7 +10,12 @@ window.MovementPhaseStrategy = (function(){
     MovementPhaseStrategy.prototype.update = function (gamedata) {
         PhaseStrategy.prototype.update.call(this, gamedata);
         this.selectActiveShip();
-        //doForcedMovementForActiveShip();
+
+        if (isMovementReady(gamedata)) {
+            gamedata.showCommitButton();
+        } else {
+            gamedata.hideCommitButton();
+        }
     };
 
     MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
@@ -66,12 +71,20 @@ window.MovementPhaseStrategy = (function(){
     MovementPhaseStrategy.prototype.targetShip = function(ship) {
     };
 
+    function isMovementReady(gamedata) {
+        var ship = gamedata.getActiveShip();
+        console.log("movement ready", shipManager.movement.isMovementReady(ship), gamedata.isMyShip(ship));
+        return shipManager.movement.isMovementReady(ship) && gamedata.isMyShip(ship);
+    }
+
     function doForcedMovementForActiveShip(){
         var ship = gamedata.getActiveShip();
 
         if (!ship || !gamedata.isMyShip(ship)) {
             return
         }
+        //TODO: what about rolling?
+        //TODO: maybe check that this is not yet done during this turn
         shipManager.movement.doForcedPivot(ship);
 
         if (ship.base){

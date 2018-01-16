@@ -28,6 +28,7 @@
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
+    <link href="styles/replay.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -106,6 +107,7 @@
     <script src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/MovementAnimationStrategy.js"></script>
+    <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
 
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
@@ -115,6 +117,7 @@
     <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
+    <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
 
 
     <script src="client/renderer/texture/HexagonTexture.js"></script>
@@ -128,6 +131,7 @@
     <script src="client/model/hexagon/Offset.js"></script>
 
 	<script src="client/UI/botPanel.js"></script>
+    <script src="client/UI/replayUI.js"></script>
     <script src="client/hexgrid.js"></script>
     <script src="client/gamedata.js"></script>
     <script src="client/windowevents.js"></script>
@@ -200,6 +204,11 @@
     </table>
 </div>
 
+<div id="replayUI" class="inactive">
+    <button id="activateReplay">Replay</button>
+    <button id="deactivateReplay">Resume</button>
+    <button id="forward">▶</button>
+</div>
 
 <div id="backDiv" style="">
 </div>

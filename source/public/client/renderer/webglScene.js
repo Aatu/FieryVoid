@@ -59,38 +59,6 @@ window.webglScene = (function(){
         this.scene.add(sprite.mesh);
          */
 
-        var curve = new THREE.CubicBezierCurve(
-            new THREE.Vector3( 0, 0, 0 ), // start
-            new THREE.Vector3( 50, 0, 0 ), // projected from start forward
-            new THREE.Vector3( 0, 75, 0 ), // projected from end behind
-            new THREE.Vector3( 50, 75, 0 )  //end
-        );
-
-        var path = new THREE.Path( curve.getPoints( 50 ) );
-
-        var geometry = path.createPointsGeometry( 50 );
-        var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-
-        // Create the final Object3d to add to the scene
-        var curveObject = new THREE.Line( geometry, material );
-        this.scene.add(curveObject);
-
-        var curve = new THREE.CubicBezierCurve(
-            new THREE.Vector3( 50, 75, 0 ), // start
-            new THREE.Vector3( 50, 75, 0 ), // projected from start forward
-            new THREE.Vector3( 100, 75, 0 ),
-            new THREE.Vector3( 100, 75, 0 )  //end
-        );
-
-        var path = new THREE.Path( curve.getPoints( 50 ) );
-
-        var geometry = path.createPointsGeometry( 50 );
-        var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-
-        // Create the final Object3d to add to the scene
-        var curveObject = new THREE.Line( geometry, material );
-        this.scene.add(curveObject);
-
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize( this.width, this.height );
@@ -117,6 +85,17 @@ window.webglScene = (function(){
         }
 
         this.phaseDirector.receiveGamedata(gamedata, this);
+    };
+
+    webglScene.prototype.customEvent = function(name, payload) {
+        if (!this.initialized) {
+            return;
+        }
+
+        this.phaseDirector.relayEvent(
+            name,
+            payload
+        );
     };
 
     webglScene.prototype.moveCamera = function(position) {

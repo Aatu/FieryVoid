@@ -2,7 +2,6 @@ window.MovementAnimationStrategy = (function(){
 
     function MovementAnimationStrategy(){
         AnimationStrategy.call(this);
-        this.animatedMovements = {};
     }
 
     MovementAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);

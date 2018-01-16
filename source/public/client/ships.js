@@ -351,30 +351,6 @@ window.shipManager = {
 
     },
 
-    hexFacingToAngle: function(d){
-
-        if (d == 0){
-            return 0;
-        }
-        if (d == 1){
-            return 60;
-        }
-        if (d == 2){
-            return 120;
-        }
-        if (d == 3){
-            return 180;
-        }
-        if (d == 4){
-            return 240;
-        }
-        if (d == 5){
-            return 300;
-        }
-
-
-    },
-
     /*
     getShipHeadingAngleForDrawing: function(ship){
 
@@ -389,8 +365,8 @@ window.shipManager = {
                 if (!last)
                     return shipManager.getShipHeadingAngle(ship);
 
-                var lastheading = shipManager.hexFacingToAngle(last.facing);
-                var destination = shipManager.hexFacingToAngle(movement.facing);
+                var lastheading = mathlib.hexFacingToAngle(last.facing);
+                var destination = mathlib.hexFacingToAngle(movement.facing);
                 var perc = movement.animationtics / animation.turningspeed;
 
                 var right = (movement.type=="turnright");
@@ -404,8 +380,8 @@ window.shipManager = {
                 if (!last)
                     return shipManager.getShipHeadingAngle(ship);
 
-                var lastheading = shipManager.hexFacingToAngle(last.facing);
-                var destination = shipManager.hexFacingToAngle(movement.facing);
+                var lastheading = mathlib.hexFacingToAngle(last.facing);
+                var destination = mathlib.hexFacingToAngle(movement.facing);
                 var perc = movement.animationtics / animation.turningspeed;
 
                 var right = (movement.type=="pivotright");

@@ -191,7 +191,7 @@ window.UI = {
             
                     
             UI.shipMovement.initMoveUI();
-            var shipHeading = shipManager.getShipDoMAngle(ship);
+            var shipHeading = 0; //shipManager.getShipDoMAngle(ship);
             var angle = shipHeading;
             var dis = 80; //hexgrid.hexHeight();
             

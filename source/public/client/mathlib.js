@@ -276,7 +276,25 @@ window.mathlib = {
 		heading = mathlib.addToDirection(Math.round(heading), -90);
 
 		return heading;
-	}
+	},
 
 
-}
+    hexFacingToAngle: function(d){
+		switch (d) {
+			case 0:
+				return 0;
+			case 1:
+				return 60;
+			case 2:
+				return 120;
+			case 3:
+				return 180;
+			case 4:
+				return 240;
+			default:
+				return 300;
+		}
+    }
+
+
+};

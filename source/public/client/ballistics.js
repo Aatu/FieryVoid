@@ -37,7 +37,7 @@ window.ballistics = {
     
     calculateBallisticLocation: function(ball){
         if (!ball.launchPos){
-            var angle = shipManager.hexFacingToAngle(ball.facing);
+            var angle = mathlib.hexFacingToAngle(ball.facing);
             ball.launchPos = hexgrid.getOffsetPositionInHex(ball.position, angle, 0.3, false);
         }
         

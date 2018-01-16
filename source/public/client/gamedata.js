@@ -20,6 +20,7 @@ gamedata = {
     subphase: 0,
     selectedSlot:null,
     gamespace: null,
+    replay: false,
     
     mouseOverShipId: -1,
     
@@ -442,7 +443,6 @@ gamedata = {
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
                 combatLog.logMoves(ship);
-                shipManager.movement.RemoveMovementIndicators();
                 ajaxInterface.submitGamedata();
             }else{
                 return false;

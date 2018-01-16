@@ -19,6 +19,8 @@ window.PhaseStrategy = (function(){
 
 
         this.movementUI = null;
+
+        this.onDoneCallback = null;
     }
 
     PhaseStrategy.prototype.consumeGamedata = function() {
@@ -41,7 +43,7 @@ window.PhaseStrategy = (function(){
         this.ballisticIconContainer.show();
     };
 
-    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, doneCallback) {
         this.shipIconContainer = shipIcons;
         this.ewIconContainer = ewIconContainer;
         this.ballisticIconContainer = ballisticIconContainer;
@@ -50,11 +52,13 @@ window.PhaseStrategy = (function(){
         this.animationStrategy.activate(shipIcons, gamedata.turn, webglScene.scene);
         this.consumeGamedata();
         this.ballisticIconContainer.show();
+        this.onDoneCallback = doneCallback;
         return this;
     };
 
     PhaseStrategy.prototype.deactivate = function () {
         this.inactive = true;
+        this.animationStrategy.deactivate();
         return this;
     };
 
@@ -226,8 +230,8 @@ window.PhaseStrategy = (function(){
         }
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
-        var facing = -mathlib.addToDirection(this.movementUI.icon.getFacing(), -180);
-        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px").css("transform", "rotate("+facing+"deg)");
+        var heading = mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
+        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px").css("transform", "rotate("+heading+"deg)");
     };
 
     PhaseStrategy.prototype.redrawMovementUI = function(){
@@ -274,6 +278,12 @@ window.PhaseStrategy = (function(){
 
         if (ship && gamedata.isMyShip(ship)) {
             this.selectShip(ship);
+        }
+    };
+
+    PhaseStrategy.prototype.done = function() {
+        if (this.onDoneCallback) {
+            this.onDoneCallback();
         }
     };
 

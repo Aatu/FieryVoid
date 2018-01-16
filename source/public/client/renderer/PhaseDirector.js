@@ -42,26 +42,27 @@ window.phaseDirector = (function() {
     };
 
     function resolvePhaseStrategy(gamedata, scene) {
+        if (gamedata.replay) {
+            return activatePhaseStrategy.call(this, window.ReplayPhaseStrategy, gamedata, scene);
+        }
+
         if (gamedata.waiting) {
             return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
         }
 
-        if (gamedata.gamephase === -1) {
-            return activatePhaseStrategy.call(this, window.DeploymentPhaseStrategy, gamedata, scene);
+        switch (gamedata.gamephase) {
+            case -1:
+                return activatePhaseStrategy.call(this, window.DeploymentPhaseStrategy, gamedata, scene);
+            case 1:
+                return activatePhaseStrategy.call(this, window.InitialPhaseStrategy, gamedata, scene);
+            case 2:
+                return activatePhaseStrategy.call(this, window.MovementPhaseStrategy, gamedata, scene);
+            default:
+                return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
         }
-
-        if (gamedata.gamephase === 1) {
-            return activatePhaseStrategy.call(this, window.InitialPhaseStrategy, gamedata, scene);
-        }
-
-        if (gamedata.gamephase ===2) {
-            return activatePhaseStrategy.call(this, window.MovementPhaseStrategy, gamedata, scene);
-        }
-
-        return activatePhaseStrategy.call(this, window.WaitingPhaseStrategy, gamedata, scene);
     }
 
-    function activatePhaseStrategy(phaseStrategy, gamedata, scene) {
+    function activatePhaseStrategy(phaseStrategy, gamedata, scene, onDoneCallback) {
         if (this.phaseStrategy && this.phaseStrategy instanceof phaseStrategy) {
             this.phaseStrategy.update(gamedata);
             return;
@@ -71,9 +72,8 @@ window.phaseDirector = (function() {
             this.phaseStrategy.deactivate();
         }
 
-        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene);
+        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, onDoneCallback);
     }
-
 
     return phaseDirector;
 })();

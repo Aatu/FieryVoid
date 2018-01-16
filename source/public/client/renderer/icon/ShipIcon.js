@@ -152,7 +152,7 @@ window.ShipIcon = (function (){
                 if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]){
                     var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
 
-                    if (saved.heading !== movement.facing) {
+                    if (saved.facing !== movement.facing) {
                         saved.oldFacings.push(saved.facing);
                     }
 

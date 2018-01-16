@@ -1,11 +1,12 @@
 window.AnimationStrategy = (function(){
-    function AnimationStrategy(){
+    function AnimationStrategy(onDoneCallback){
         this.shipIconContainer = null;
         this.turn = 0;
         this.lastAnimationTime = 0;
         this.totalAnimationTime = 0;
         this.currentDeltaTime = 0;
         this.animations = [];
+        this.onDoneCallback = onDoneCallback;
     }
 
     AnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
@@ -46,7 +47,7 @@ window.AnimationStrategy = (function(){
         var movement = icon.getLastMovement();
         var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
-        var facing = shipManager.hexFacingToAngle(movement.facing);
+        var facing = mathlib.hexFacingToAngle(movement.facing);
 
         icon.setPosition(gamePosition);
         icon.setFacing(-facing);
@@ -83,6 +84,12 @@ window.AnimationStrategy = (function(){
         this.currentDeltaTime = now - this.lastAnimationTime;
         this.lastAnimationTime = now;
     }
+
+    AnimationStrategy.prototype.done = function() {
+        if (this.onDoneCallback) {
+            this.onDoneCallback();
+        }
+    };
 
 
     return AnimationStrategy;

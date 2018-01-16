@@ -812,7 +812,10 @@ class DBManager {
                     $preturn = ($move->preturn) ? 1 : 0;
                     $reqThrust = $move->getReqThrustJSON();
                     $assThrust = $move->getAssThrustJSON();
-                    
+
+                    $xOffset = (int)$move->xOffset;
+                    $yOffset = (int)$move->yOffset;
+
                     $stmt->bind_param(
                         'iisiiiiiiiissiii',
                         $shipid,
@@ -820,8 +823,8 @@ class DBManager {
                         $move->type,
                         $move->position->q,
                         $move->position->r,
-                        $move->xOffset,
-                        $move->yOffset,
+                        $xOffset,
+                        $yOffset,
                         $move->speed,
                         $move->heading,
                         $move->facing,
@@ -854,11 +857,7 @@ class DBManager {
         
                 if ($acceptPreturn == false && $preturn)
                     continue;
-                
-                $sql = "Insert into `B5CGM`.`tac_shipmovement` values (null, $shipid, $gameid, '".$movement->type."', ".$movement->hex->q.", ".$movement->hex->r.", ".$movement->xOffset.", ".$movement->yOffset.", ".$movement->speed.", ".$movement->heading.", ".$movement->facing.", $preturn, '".$movement->getReqThrustJSON()."', '".$movement->getAssThrustJSON()."', $turn, '".$movement->value."', '".$movement->at_initiative ."')";
-                
-                //throw new exception("sql: ".$movement->preturn . var_dump($movement));
-                $this->insert($sql);
+                $this->insertMovement($gameid, $shipid, $movement);
             }
     
         }

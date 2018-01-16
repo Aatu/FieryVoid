@@ -1,0 +1,39 @@
+#replayUI {
+    z-index:10000;
+    border:1px solid #496791;
+    color:#deebff;
+    background-color:#0a3340;
+    position:absolute;
+    top:-3px;
+    left:710px;
+    height:35px;
+    width:auto;
+    opacity:0.85;
+    box-shadow: 5px 5px 10px black;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+#replayUI button {
+    margin: 0 5px;
+    background-color: transparent;
+    border: none;
+    color: #deebff;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display:none;
+}
+
+#replayUI.inactive #activateReplay {
+    display: block;
+}
+
+#replayUI.active #forward, #replayUI.active #deactivateReplay {
+    display: block;
+}
+
+
+#replayUI button:focus { outline: none; }
