@@ -743,6 +743,7 @@ window.effects = {
     
         for (var i in fires){
             var fire = fires[i];
+            if (fire.shots == 0) { continue; } //do not animate technical shots
     
             var target = gamedata.getShip(fire.targetid);
             var shooter = gamedata.getShip(fire.shooterid);
