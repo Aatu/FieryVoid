@@ -1407,6 +1407,56 @@ class SurgeCannon extends Raking{
 } //endof class SurgeCannon
 
 
+   class LtSurgeBlaster extends LinkedWeapon{
+	   /*Ipsha fighter weapon*/
+        public $trailColor = array(50, 50, 200);
+        public $name = "LtSurgeBlaster";
+        public $displayName = "Light Surge Blaster";
+	   public  $iconPath = "lightParticleBeam.png";
+        public $animation = "trail";
+        public $animationColor = array(100, 100, 255);
+        public $animationExplosionScale = 0.10;
+        public $projectilespeed = 10;
+        public $animationWidth = 2;
+        public $trailLength = 10;
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $shots = 2;
+        public $defaultShots = 2;
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+	    public $priority = 5;
+        
+        public $damageType = "Standard"; 
+        public $weaponClass = "Electromagnetic"; 
+	    
+        
+     function __construct($startArc, $endArc, $nrOfShots = 2){
+            $this->defaultShots = $nrOfShots;
+            $this->shots = $nrOfShots;
+            $this->intercept = $nrOfShots;
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+	
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "+1 to Crit/Dropout rolls per hit.";
+        }
+	   
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		//each hit causes +1 mod on critical roll for hit system! 
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		$system->critRollMod+=1; 
+	} //endof function onDamagedSystem
+	    
+        public function getDamage($fireOrder){        return Dice::d(6,2)-1;   }
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+    } //endof class LtSurgeBlaster
+
+
 
 
 ?>
