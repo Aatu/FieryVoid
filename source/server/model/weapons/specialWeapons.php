@@ -861,10 +861,10 @@ class EmBolter extends Weapon{
 	public $iconPath = "EMBolter.png";
 	
         public $animation = "trail";
-        public $animationColor = array(120, 50, 250);
-        public $projectilespeed = 18;
-        public $animationWidth = 4;
-        public $animationExplosionScale = 0.35;
+        public $animationColor = array(100, 100, 250);
+        public $projectilespeed = 14;
+        public $animationWidth = 5;
+        public $animationExplosionScale = 0.45;
         public $priority = 6;
       
         public $loadingtime = 1;
@@ -1031,7 +1031,7 @@ class SparkField extends Weapon{
 	//let's make animation more or less invisible, and effect very large
 	public $trailColor = array(141, 240, 255);
         public $animation = "ball";
-        public $animationColor = array(1, 1, 1);
+        public $animationColor = array(1, 1, 255);
         public $animationExplosionScale = 2;
         public $animationExplosionType = "AoE";
         public $explosionColor = array(165, 165, 255);
@@ -1212,9 +1212,11 @@ class SurgeCannon extends Raking{
 	public $iconPath = "SurgeCannon.png";
 	
 	public $animation = "laser";
-	public $animationColor = array(175, 225, 175);
-	public $animationWidth = 4;
+	public $animationColor = array(165, 165, 255);
+	public $animationWidth = 2;
+	public $animationWidthArray = array(1=>2, 2=>3, 3=>4, 4=>5, 5=>6);
 	public $animationWidth2 = 0.4;
+	public $animationExplosionScaleArray = array(1=>0.1, 2=>0.2, 3=>0.3, 4=>0.5, 5=>0.6);
 
       
         public $loadingtime = 1;
