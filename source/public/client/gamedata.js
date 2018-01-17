@@ -599,24 +599,7 @@ gamedata = {
         }
         
         if (gamedata.gamephase == 3 && gamedata.waiting == false){
-            UI.shipMovement.hide();
-            ew.RemoveEWEffects();
-            animation.setAnimating(animation.animateShipMoves, function(){
-                infowindow.informPhase(5000, null);
-                                
-                if (gamedata.waiting == false){
-                    for (var i in gamedata.ships){
-                        var ship = gamedata.ships[i];
-                        if (ship.userid == gamedata.thisplayer && !shipManager.isDestroyed(ship)){
-                            gamedata.selectShip(ship, false);
-                            scrolling.scrollToShip(ship);
-                            break;
-                        }
-                    }
-                }
-                
-        
-            });
+
 
             
         }

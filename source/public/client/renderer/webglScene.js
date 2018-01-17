@@ -59,6 +59,7 @@ window.webglScene = (function(){
         this.scene.add(sprite.mesh);
          */
 
+
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize( this.width, this.height );

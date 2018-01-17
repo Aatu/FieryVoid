@@ -158,7 +158,6 @@ window.weaponManager = {
 		weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
 		systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
 
-		drawEntities();
 	},
 
 	doWeaponMouseout: function(){
@@ -172,7 +171,6 @@ window.weaponManager = {
 		weaponManager.mouseoverSystem = null;
 
 		weaponManager.removeArcIndicators();
-		drawEntities();
 
 	},
 
@@ -1717,25 +1715,12 @@ window.weaponManager = {
 	},
 
 	removeArcIndicators: function(){
-
-		for(var i = EWindicators.indicators.length-1; i >= 0; i--){
-			if(EWindicators.indicators[i].type == "Arcs"){
-				EWindicators.indicators.splice(i,1);
-			}
-		}
-
-
+        webglScene.customEvent('WeaponMouseOut');
 	},
 
 	addArcIndicators: function(ship, weapon){
 		weapon = shipManager.systems.initializeSystem(weapon);
-
-		weaponManager.removeArcIndicators(ship);
-		var ind = weaponManager.makeWeaponArcindicator(ship, weapon);
-
-		if (ind)
-			EWindicators.indicators.push(ind);
-
+		webglScene.customEvent('WeaponMouseOver', {ship: ship, weapon: weapon});
 	},
 
 	makeWeaponArcindicator: function(ship, weapon){

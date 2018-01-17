@@ -127,8 +127,8 @@ window.mathlib = {
 		
 		return {x:Math.round(x), y:Math.round(y)};
     },
-	
-	getSizeArc: function(start, end){
+
+    getArcLength: function(start, end){
 		a = 0;
 		if (start > end){
 			a = 360 - start + end;
@@ -201,6 +201,8 @@ window.mathlib = {
 	
 	getCompassHeadingOfShip: function(observer, target){
 	
+
+		throw new Error("Old, won't work");
 
 		var oPos = shipManager.getShipPosition(observer);
 		var tPos = shipManager.getShipPosition(target);

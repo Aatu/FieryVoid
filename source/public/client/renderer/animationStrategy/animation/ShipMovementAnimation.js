@@ -40,9 +40,9 @@ window.ShipMovementAnimation = (function(){
         this.currentlyAnimated = null;
     };
 
-    ShipMovementAnimation.prototype.cleanUp = function (scene) {
+    ShipMovementAnimation.prototype.cleanUp = function () {
         this.hexAnimations.forEach(function (animation) {
-            scene.remove(animation.debugCurve);
+            webglScene.scene.remove(animation.debugCurve);
         });
     };
 
@@ -233,7 +233,7 @@ window.ShipMovementAnimation = (function(){
         //var path = new THREE.Path( curve.getPoints( 50 ) );
 
         //var geometry = path.createPointsGeometry( 50 );
-        var geometry = new THREE.Geometry().setFromPoints( curve.getPoints( 50 ) )
+        var geometry = new THREE.Geometry().setFromPoints( curve.getPoints( 50 ) );
         var material = new THREE.LineBasicMaterial( { color : 0xffffff, opacity: 0.5} );
 
 

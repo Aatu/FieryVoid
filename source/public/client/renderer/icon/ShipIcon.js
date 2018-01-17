@@ -15,6 +15,7 @@ window.ShipIcon = (function (){
         this.shipEWSprite = null;
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
+        this.weaponArcs = [];
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
@@ -244,6 +245,33 @@ window.ShipIcon = (function (){
         }
 
         return null;
+    };
+
+    ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+
+        var dis = weapon.rangePenalty === 0 ? 50*weapon.range : 1000/weapon.rangePenalty;
+        var arcs = shipManager.systems.getArcs(ship, weapon);
+
+        var arcLenght = arcs.start === arcs.length ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcStart = mathlib.addToDirection(0, arcLenght * -0.5);
+        var arcFacing = mathlib.addToDirection(arcs.end, arcLenght * -0.5);
+        console.log(arcs.start, arcs.end, arcStart, arcLenght);
+
+        var geometry = new THREE.CircleGeometry( dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLenght) );
+        var material = new THREE.MeshBasicMaterial( { color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true} );
+        var circle = new THREE.Mesh( geometry, material );
+        circle.rotation.z = mathlib.degreeToRadian(-arcFacing);
+        circle.position.z = -1;
+        this.mesh.add( circle );
+        this.weaponArcs.push(circle);
+
+        return null;
+    };
+
+    ShipIcon.prototype.hideWeaponArcs = function () {
+        this.weaponArcs.forEach(function(arc) {
+            this.mesh.remove(arc);
+        }, this)
     };
 
 

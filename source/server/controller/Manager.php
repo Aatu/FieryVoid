@@ -359,8 +359,8 @@ class Manager{
                 $phase->process($gdS, self::$dbManager, $ships);
             }else if ($phase instanceof MovementGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships, $activeship);
-            }else if ($gdS->phase == 3){
-                self::handleFiringOrders($ships, $gdS);
+            }else if ($phase instanceof FireGamePhase){
+                $phase->process($gdS, self::$dbManager, $ships);
             }else if ($gdS->phase == 4){
 
 		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
@@ -391,34 +391,6 @@ class Manager{
         self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
        
         return true;
-    }
-    
-    private static function handleFiringOrders( $ships, $gamedata ){
-    
-        foreach ($ships as $ship){
-            if ($ship->userid != $gamedata->forPlayer)  
-                continue;
-            
-            if ($ship->isDestroyed())
-                continue;
-            
-            if (Movement::validateMovement($gamedata, $ship)){
-                if (count($ship->movement)>0)   
-                    self::$dbManager->submitMovement($gamedata->id, $ship->id, $gamedata->turn, $ship->movement);
-            }
-            
-            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gamedata)){
-                self::$dbManager->submitFireorders($gamedata->id, $ship->getAllFireOrders(), $gamedata->turn, $gamedata->phase);
-            }
-            
-        }
-        
-        
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-        
-        //print("firing");
-        return true;
-    
     }
 
     public static function advanceGameState($playerid, $gameid){
@@ -451,8 +423,8 @@ class Manager{
                 $phase->advance($gamedata, self::$dbManager);
             }else if ($phase instanceof MovementGamePhase){
                 $phase->advance($gamedata, self::$dbManager);
-            }else if ($phase == 3){
-                   self::startEndPhase($gamedata);
+            }else if ($phase instanceof FireGamePhase){
+                $phase->advance($gamedata, self::$dbManager);
             }else if ($phase == 4){
                 self::changeTurn($gamedata);
             }
@@ -478,54 +450,6 @@ class Manager{
             throw $e;
         }
     }
-
-    private static function startWeaponAllocation($gamedata){
-        $gamedata->setPhase(3); 
-        $gamedata->setActiveship(-1);
-        self::$dbManager->updateGamedata($gamedata);
-    }
-
-    private static function startEndPhase($gamedata){
-        //print("start end");
-
-        $gamedata->setPhase(4); 
-        $gamedata->setActiveship(-1);
-
-        self::$dbManager->updateGamedata($gamedata);
-        
-        $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        $starttime = time();
-        Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
-        $endtime = time();
-
-        $starttime = time();
-        Firing::automateIntercept($servergamedata);
-        $endtime = time();
-	
-        $starttime = time();
-        Firing::fireWeapons($servergamedata);
-        $endtime = time();
-    //    Debug::log("RESOLVING FIRE - GAME: ".$gamedata->id." Time: " . ($endtime - $starttime) . " seconds.");
-
-        Criticals::setCriticals($servergamedata);
-
-	self::$dbManager->submitFireorders($servergamedata->id, $servergamedata->getNewFireOrders(), $servergamedata->turn, 3);
-        self::$dbManager->updateFireOrders($servergamedata->getUpdatedFireOrders());
-
-        self::$dbManager->submitDamages($servergamedata->id, $servergamedata->turn, $servergamedata->getNewDamages());
-
-        // check if adaptive Armour events did happen and submit
-        $damagesAA = $servergamedata->getNewDamagesForAA();
-
-        if ($damagesAA){
-            foreach ($damagesAA as $entry){
-            self::$dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
-            }
-        }
-
-	// submit criticals
-        self::$dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
-    } //endof function startEndPhase
 
     private static function changeTurn($gamedata){
     
