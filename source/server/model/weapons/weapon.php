@@ -2,7 +2,7 @@
 
 
 class Weapon extends ShipSystem{
-
+ 
 	/*all (or almost all) variables will come in array form too - so they can change with mode changes*/
 	/*array should be either empty (attribute does not change) or filled for all firing modes*/
     public $weapon = true;
