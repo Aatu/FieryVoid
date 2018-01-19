@@ -114,3 +114,11 @@ var EmPulsar = function(json, ship)
 }
 EmPulsar.prototype = Object.create( Weapon.prototype );
 EmPulsar.prototype.constructor = EmPulsar;
+
+
+var ResonanceGenerator = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+ResonanceGenerator.prototype = Object.create( Weapon.prototype );
+ResonanceGenerator.prototype.constructor = ResonanceGenerator;
