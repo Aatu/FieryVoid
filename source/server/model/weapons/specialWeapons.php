@@ -1458,5 +1458,31 @@ class SurgeCannon extends Raking{
 
 
 
+ class EmPulsar extends Pulse{
+        public $name = "EmPulsar";
+        public $displayName = "EM Pulsar";
+	public $iconPath = "EmPulsar.png";
+        public $animation = "trail";
+        public $animationWidth = 3;
+        public $projectilespeed = 10;
+        public $animationExplosionScale = 0.15;
+        public $rof = 2;
+        public $trailLength = 10;
+        
+        public $loadingtime = 1;
+        public $priority = 3;
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
+        
+        public $intercept = 2;
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return 8;   }
+    }//endof class EmPulsar
+
+
 
 ?>
