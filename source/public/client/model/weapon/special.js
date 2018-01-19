@@ -106,3 +106,11 @@ var LtSurgeBlaster = function(json, ship)
 }
 LtSurgeBlaster.prototype = Object.create( Weapon.prototype );
 LtSurgeBlaster.prototype.constructor = LtSurgeBlaster;
+
+
+var EmPulsar = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+EmPulsar.prototype = Object.create( Weapon.prototype );
+EmPulsar.prototype.constructor = EmPulsar;
