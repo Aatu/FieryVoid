@@ -121,7 +121,7 @@ class ShockCannon extends Weapon{
 		}
 
             parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
-	}
+	}//endof function onDamagedSystem
 
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 /*- $this->dp*/;      }
@@ -1524,6 +1524,113 @@ class SurgeCannon extends Raking{
         
         public function getDamage($fireOrder){        return 9;   }
     }//endof class EmPulsar
+
+
+
+class ResonanceGenerator extends Weapon{
+    /*Resonance Generator - Ipsha weapon*/
+        public $name = "ResonanceGenerator";
+        public $displayName = "Resonance Generator";
+	public $iconPath = "ResonanceGenerator.png";
+	
+	public $animation = "laser"; //described as beam in nature, standard damage is resonance effect and not direct
+	public $animationColor = array(125, 125, 230);
+	public $animationWidth = 10;
+	public $animationWidth2 = 0.4;
+	public $animationExplosionScaleArray = array(1=>0.1);
+      
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 1; //-1/hex
+        public $fireControl = array(null, 2, 2); // fighters, <mediums, <capitals 
+	
+	public $intercept = 0;
+	public $priority = 1;// as it attacks every section, should go first!
+	
+	public $noPrimaryHits = true; //outer section hit will NOT be able to roll PRIMARY result!
+	
+	private $cooldown = 2;
+	
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 8;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 6;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Cooldown period: 2 turns.";  
+		      $this->data["Special"] .= "<br>Attacks all sections (so a capital ship will sufer 5 attacks, while MCV only 1).";  //MCV should suffer 2, but for technical reasons I opted for going for Section = Structure block		    
+		      $this->data["Special"] .= "<br>Ignores all standard and half advanced armor."; //should take full Adaptive armor, but it's easier to treat Adaptive as Advanced here
+	    }	
+	
+	
+	
+        public function fire($gamedata, $fireOrder){
+            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+            parent::fire($gamedata, $fireOrder);
+		for($i = 1; $i<$cooldown;$i++){		
+			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+		}
+        } //endof function fire
+	
+	
+	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
+		return 0; //standard armor is ignored
+        }
+	
+	protected function getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos=null){
+		//half of advanced armor is ignored
+		$armour = parent::getSystemArmourInvulnerable($target, $system, $gamedata, $fireOrder, $pos);
+		    if (is_numeric($armour)){
+			$toIgnore = ceil($armour /2);
+			$new = $armour - $toIgnore;
+			return $new;
+		    }
+		    else {
+			return 0;
+		    }
+        }//endof function getSystemArmourInvulnerable
+	
+	
+	public function isTargetAmbiguous($gamedata, $fireOrder){//targat always ambiguous - just so enveloping weapon is not used to decide target section!
+		return true;
+	}
+	
+	
+	/*attacks every not destroyed (as of NOW!) ship section*/
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		//fighters are untargetable, so we know it's a ship
+		$activeStructures = $target->getSystemsByName('Structure',false);//list of non-destroyed Structure blocks
+		foreach($struct in $activeStructures){
+			$fireOrder->location = $struct->location;			
+			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
+		}
+	}//endof function beforeDamage
+	
+		
+        public function getDamage($fireOrder){       return Dice::d(10,1);   }
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+} //endof class ResonanceGenerator
+
 
 
 
