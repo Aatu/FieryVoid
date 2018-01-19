@@ -10,6 +10,7 @@ class Sitara extends FighterFlight{
         $this->shipClass = "Sitara Strike Fighters";
 	    $this->occurence = "uncommon";
 	    
+	    $this->isd = 2257;
         $this->variantOf = "Sentri Interceptors";
 		$this->imagePath = "img/ships/sentri.png";
         
@@ -34,7 +35,7 @@ class Sitara extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 			$armour = array(3, 2, 3, 3);
 			$fighter = new Fighter("sitara", $armour, 10, $this->id);
-			$fighter->displayName = "Sitara Strike Fighter";
+			$fighter->displayName = "Sitara";
 			$fighter->imagePath = "img/ships/sitara.png";
 			$fighter->iconPath = "img/ships/sitara_large.png";
 
