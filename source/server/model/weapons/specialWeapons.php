@@ -1619,14 +1619,11 @@ class ResonanceGenerator extends Weapon{
 		//fighters are untargetable, so we know it's a ship
 		if ($target->isDestroyed()) return; //no point allocating
 		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
-		foreach($struct in $activeStructures){
-		/*
+		foreach($activeStructures as $struct){
 			$fireOrder->location = $struct->location;			
 			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
-		*/
 		}
-
 	}//endof function beforeDamage
 	
 		
