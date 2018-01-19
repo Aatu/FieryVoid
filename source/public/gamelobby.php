@@ -529,6 +529,9 @@
                     <td class="fightercontainer 3"></td>
                     <td class="fightercontainer 4"></td>
                     <td class="fightercontainer 5"></td>        -->
+			<td>
+				<div class="notes"></div>
+			</td>
                 </tr>
             </table>
         </div>
