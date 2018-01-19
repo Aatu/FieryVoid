@@ -1581,7 +1581,7 @@ class ResonanceGenerator extends Weapon{
         public function fire($gamedata, $fireOrder){
             // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
             parent::fire($gamedata, $fireOrder);
-		for($i = 1; $i<$cooldown;$i++){		
+		for($i = 1; $i<$this->cooldown;$i++){		
 			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
 			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
 			$crit->updated = true;
