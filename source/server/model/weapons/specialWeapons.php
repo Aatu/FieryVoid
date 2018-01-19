@@ -1537,7 +1537,7 @@ class ResonanceGenerator extends Weapon{
 	public $animationColor = array(125, 125, 230);
 	public $animationWidth = 10;
 	public $animationWidth2 = 0.4;
-	public $animationExplosionScaleArray = array(1=>0.1);
+	public $animationExplosionScaleArray = array(1=>0.25);
       
         public $loadingtime = 1;
         
