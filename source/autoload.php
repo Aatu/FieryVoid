@@ -349,7 +349,8 @@ spl_autoload_register(
                 'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 
                 //Ipsha actual units
-                'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',
+                'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',                
+                'shipbattleglobe' => '/server/model/ships/ipsha/shipBattleglobe.php',
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
                 
                 
