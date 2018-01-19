@@ -1254,7 +1254,8 @@ class Weapon extends ShipSystem{
     }//endof function doCollateralDamage
 	
 
-    public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
+	/*forcePrimary = true means PRIMARY indication is not rechecked*/
+    public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ 
 	    /*find details of shot, proceed to doDamage*/
 	    
         if($this->damageType=='Flash'){ //damage units other than base target
@@ -1270,11 +1271,11 @@ class Weapon extends ShipSystem{
         if ($this->ballistic){
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+		if((!($tmpLocation > 0)) || $forcePrimary){ //location not yet found or PRIMARY (reassignment causes no problem)
 			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
 		}
 	}else{
-		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+		if((!($tmpLocation > 0)) || $forcePrimary){ //location not yet found or PRIMARY (reassignment causes no problem)
  			$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 		}
 	}
