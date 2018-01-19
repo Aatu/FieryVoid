@@ -1459,28 +1459,70 @@ class SurgeCannon extends Raking{
 
 
  class EmPulsar extends Pulse{
+	 /*Ipsha weapon*/
         public $name = "EmPulsar";
         public $displayName = "EM Pulsar";
 	public $iconPath = "EmPulsar.png";
+        public $animationColor = array(100, 100, 255);
         public $animation = "trail";
         public $animationWidth = 3;
         public $projectilespeed = 10;
         public $animationExplosionScale = 0.15;
-        public $rof = 2;
         public $trailLength = 10;
         
         public $loadingtime = 1;
         public $priority = 3;
         
-        public $rangePenalty = 2;
-        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals 
+	public $intercept = 2;
+        public $rangePenalty = 1; //-1/hex
+        public $grouping = 25; //+1 pulse hit per 1 below target number on d20
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+	 
+	 public $weaponClass = "Electromagnetic"; 
         
-        public $intercept = 2;
+	 
+	 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }		
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+	 
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+	    $this->data["Special"] .= "<br>-1 per hit to crit rolls, -2 on dropout rolls.";
+            $this->data["Special"] .= "<br>Cooldown period: 1 turn.";  
+        }
+	 
+	 
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		
+		//+1 to crit roll, +2 to dropout roll
+		$mod = 1;
+		if ($ship instanceof FighterFlight) $mod++;		
+		$system->critRollMod += $mod; 
+	} //endof function onDamagedSystem
+	
+	
+        public function fire($gamedata, $fireOrder){
+            // If fired, this weapon needs 1 turn cooldown period (=forced shutdown)
+            parent::fire($gamedata, $fireOrder);		
+		$trgtTurn = $gamedata->turn;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;	
+        } //endof function fire
+	 
         
-        public function getDamage($fireOrder){        return 8;   }
+        public function getDamage($fireOrder){        return 9;   }
     }//endof class EmPulsar
 
 
