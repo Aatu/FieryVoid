@@ -20,7 +20,7 @@ class Sentri extends FighterFlight{
 		$this->turncost = 0.33;
         
 		$this->iniativebonus = 90;
-        $	this->populate();
+        	$this->populate();
     }
 
     public function populate(){
