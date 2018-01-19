@@ -117,6 +117,7 @@ class CustomPulsarLaser extends Pulse{
         public $rangePenalty = 0.33;
         public $fireControl = array(-1, 3, 3); // fighters, <mediums, <capitals 
         
+	public $weaponClass = "Laser"; 
    
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
         {
