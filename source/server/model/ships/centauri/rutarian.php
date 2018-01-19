@@ -17,7 +17,10 @@ class Rutarian extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         
-		$this->iniativebonus = 90;
+        $this->isd = 2258;
+        $this->notes = 'Needs specially outfitted hangars to handle.';	    
+	    
+	$this->iniativebonus = 18 *5;
         $this->populate();
     }
 
@@ -31,7 +34,7 @@ class Rutarian extends FighterFlight{
 
 			$armour = array(4, 1, 3, 3);
 			$fighter = new Fighter("rutarian", $armour, 11, $this->id);
-			$fighter->displayName = "Rutarian Strike Fighter";
+			$fighter->displayName = "Rutarian";
 			$fighter->imagePath = "img/ships/rutarian.png";
 			$fighter->iconPath = "img/ships/rutarian_large.png";
 
