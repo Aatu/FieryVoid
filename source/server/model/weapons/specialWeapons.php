@@ -1617,7 +1617,8 @@ class ResonanceGenerator extends Weapon{
 	/*attacks every not destroyed (as of NOW!) ship section*/
 	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
 		//fighters are untargetable, so we know it's a ship
-		$activeStructures = $target->getSystemsByName('Structure',false);//list of non-destroyed Structure blocks
+		if ($target->isDestroyed()) return; //no point allocating
+		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
 		foreach($struct in $activeStructures){
 			$fireOrder->location = $struct->location;			
 			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
