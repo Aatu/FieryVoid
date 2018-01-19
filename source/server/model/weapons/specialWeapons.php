@@ -1620,7 +1620,7 @@ class ResonanceGenerator extends Weapon{
 		if ($target->isDestroyed()) return; //no point allocating
 		$activeStructures = $target->getSystemsByName("Structure",false);//list of non-destroyed Structure blocks
 		foreach($activeStructures as $struct){
-			$fireOrder->location = $struct->location;			
+			$fireOrder->chosenLocation = $struct->location;			
 			$damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage, true);//force PRIMARY location!
 		}
