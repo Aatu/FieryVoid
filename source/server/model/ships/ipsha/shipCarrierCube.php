@@ -49,18 +49,18 @@ class ShipCarrierCube extends BaseShip{
       
         $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
         $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
-	//$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 270, 360));
+	$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 270, 360));
         $this->addFrontSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addFrontSystem(new EmPulsar(3, 0, 0, 270, 90));
-	//$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 0, 90));
+	$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 0, 90));
 		
 	    
         $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
         $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
-	//$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 180, 270));
+	$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 180, 270));
         $this->addAftSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addAftSystem(new EmPulsar(3, 0, 0, 270, 90));
-	//$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 90, 180));
+	$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 90, 180));
 	    
 	    
 	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
