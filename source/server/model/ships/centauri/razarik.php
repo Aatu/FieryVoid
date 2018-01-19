@@ -12,6 +12,8 @@ class Razarik extends FighterFlight{
         $this->variantOf = "Razik Light Fighters";
 	$this->occurence = "rare";
 	$this->imagePath = "img/ships/razik.png";
+	    
+	$this->isd = 2105;
         
         $this->forwardDefense = 6;
         $this->sideDefense = 5;
