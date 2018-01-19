@@ -36,7 +36,7 @@ class Razarik extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 2, 2);
             $fighter = new Fighter("razarik", $armour, 8, $this->id);
-            $fighter->displayName = "Razarik Torpedo Fighter";
+            $fighter->displayName = "Razarik";
             $fighter->imagePath = "img/ships/razik.png";
             $fighter->iconPath = "img/ships/razik_large.png";
 
