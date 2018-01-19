@@ -192,7 +192,7 @@
 	}
 	    
 	    
-	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
+	public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ //always hit Structure...
 		if ($target->isDestroyed()) return;
 		$tmpLocation = $fireOrder->chosenLocation;	
 
