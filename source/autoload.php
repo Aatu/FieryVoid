@@ -342,7 +342,8 @@ spl_autoload_register(
                 //weapons and systems
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
                 'maggraviticthruster' => '/server/model/systems/baseSystems.php',
-                'embolter' => '/server/model/weapons/specialWeapons.php',                
+                'embolter' => '/server/model/weapons/specialWeapons.php',  
+                'empulsar' => '/server/model/weapons/specialWeapons.php',                          
                 'ltsurgeblaster' => '/server/model/weapons/specialWeapons.php',
                 'surgecannon' => '/server/model/weapons/specialWeapons.php',
                 'sparkfield' => '/server/model/weapons/specialWeapons.php',
