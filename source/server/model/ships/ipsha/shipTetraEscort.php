@@ -52,15 +52,15 @@ class ShipTetraEscort extends MediumShipLeftRight{
         $this->addPrimarySystem(new MagGraviticThruster(3, 10, 0, 99, 2));
         $this->addPrimarySystem(new MagGraviticThruster(3, 10, 0, 99, 2));	    
 	    
+	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
+	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
+	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
 	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
-	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
-	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
-	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
 		
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
         $this->addRightSystem(new MagGraviticThruster(3, 13, 0, 99, 4));
-	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
-	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
-	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
 		
 		
         $this->addPrimarySystem(new Structure(3, 42));
