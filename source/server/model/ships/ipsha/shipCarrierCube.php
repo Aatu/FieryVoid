@@ -48,35 +48,38 @@ class ShipCarrierCube extends BaseShip{
 	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));
         
       
-        $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
-        $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
+
 	$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 270, 360));
         $this->addFrontSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addFrontSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addFrontSystem(new ResonanceGenerator(4, 0, 0, 0, 90));
+        $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
+        $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
 		
 	    
-        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
-        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
 	$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 180, 270));
         $this->addAftSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addAftSystem(new EmPulsar(3, 0, 0, 270, 90));
 	$this->addAftSystem(new ResonanceGenerator(4, 0, 0, 90, 180));
+        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2));
+        $this->addAftSystem(new MagGraviticThruster(4, 15, 0, 99, 2)); 
 	    
 	    
-	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
 	$this->addLeftSystem(new Hangar(4, 12));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
+	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
 		
-        $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
+	    
 	$this->addRightSystem(new Hangar(4, 12));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
+        $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
+	    
 		
 		
         $this->addFrontSystem(new Structure(4, 45));
