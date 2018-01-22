@@ -361,6 +361,7 @@ spl_autoload_register(
                 'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php', 
                     'shipresohex' => '/server/model/ships/ipsha/shipResohex.php',
                 'shipcarriercube' => '/server/model/ships/ipsha/shipCarrierCube.php', 
+                    'shipcarriercubehvy' => '/server/model/ships/ipsha/shipCarrierCubeHvy.php', 
                 'shiprhombusescort' => '/server/model/ships/ipsha/shipRhombusEscort.php',
                 'shipscoutwheel' => '/server/model/ships/ipsha/shipScoutWheel.php',
                 'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
