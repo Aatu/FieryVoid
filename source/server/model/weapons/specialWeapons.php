@@ -1641,14 +1641,14 @@ class SurgeBlaster extends Weapon{
         public $animation = "trail";
         public $animationColor =  array(165, 165, 255);
         public $projectilespeed = 14;
-        public $animationWidth = 5;
+        public $animationWidth = 4;
         public $animationExplosionScale = 0.4;
         public $priority = 6;
       
         public $loadingtime = 1;
         
-        public $rangePenalty = 0.33; //-1/3 hexes
-        public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
+        public $rangePenalty = 0.5; //-1/2 hexes
+        public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
 	
 	
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
@@ -1694,7 +1694,7 @@ class SurgeBlaster extends Weapon{
                 $maxhealth = 6;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 3;
+                $powerReq = 6;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
