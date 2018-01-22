@@ -93,6 +93,7 @@
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
+        public $priority = 2;
 
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -102,6 +103,9 @@
             $this->shots = $shots;
             $this->defaultShots = $shots;
             $this->intercept = $shots;
+            if ($damagebonus > 2) $this->priority++;            
+            if ($damagebonus > 4) $this->priority++;                      
+            if ($damagebonus > 6) $this->priority++;
             
             $this->iconPath = "lightfusionCannon$shots.png";
             parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -418,7 +422,7 @@
         public $loadingtime = 3;
         public $raking = 10;
         public $exclusive = true;
-        public $priority = 7;
+        public $priority = 5;
         
         public $rangePenalty = 1;
         public $fireControl = array(-4, 0, 3); // fighters, <mediums, <capitals 
