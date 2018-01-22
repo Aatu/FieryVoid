@@ -352,6 +352,7 @@ spl_autoload_register(
                     'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 
                 //Ipsha actual units
+                'ftranemone' => '/server/model/ships/ipsha/ftrAnemone.php', 
                 'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',                
                 'shipbattleglobe' => '/server/model/ships/ipsha/shipBattleglobe.php',  
                 'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php',
