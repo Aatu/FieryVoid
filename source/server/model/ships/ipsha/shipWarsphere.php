@@ -4,7 +4,8 @@ class ShipWarsphere extends BaseShip{
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
      - remind player of the above in comments in fleet selection phase!
-     - SIngularity Drive replaced by standard engine
+     - Singularity Drive replaced by standard engine
+     - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
     */
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -39,7 +40,7 @@ class ShipWarsphere extends BaseShip{
 	    
         
         //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
-	$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
+	$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60+6));
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 20, 6, 8));
         $this->addPrimarySystem(new Engine(4, 33, 0, 8, 6));
