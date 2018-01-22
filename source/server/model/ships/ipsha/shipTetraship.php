@@ -1,5 +1,5 @@
 <?php
-class ShipBattleglobe extends HeavyCombatVesselLeftRight{
+class ShipTetraship extendsMediumShipLeftRight{
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
@@ -9,96 +9,77 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 700;
+        $this->pointCost = 350;
         $this->faction = "Ipsha";
-        $this->phpclass = "ShipBattleglobe";
-        $this->imagePath = "img/ships/IpshaBattleglobe.png";
-        $this->shipClass = "Battleglobe";    
+        $this->phpclass = "ShipTetraship";
+        $this->imagePath = "img/ships/Ipshaetra.png";
+        $this->shipClass = "Tetraship";    
 	    	    
-        $this->shipSizeClass = 3;
+        $this->shipSizeClass = 1;
         //$this->fighters = array("heavy"=>6);
 	        
 	//$this->limited = 33;
-	$this->isd = 2202;
+	$this->isd = 2230;
 	$this->notes = 'EM hardened';	  
 	$this->notes .= '<br>-1 critical roll bonus';
 	$this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	$this->critRollMod = -1; //generalbonus to critical rolls!
 		
-        $this->forwardDefense = 18;
-        $this->sideDefense = 14;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 12;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
-        $this->accelcost = 1;
+        $this->turncost = 0.33;
+        $this->turndelaycost = 0.22;
+        $this->accelcost = 1; //1accel/2 decel bu original SCS; I made the single Retro flimsier instead
         $this->rollcost = 0;
-        $this->pivotcost = 2;
+        $this->pivotcost = 1;
 	$this->gravitic = true;
         
+	$this->iniativebonus = 12 *5;
 	    
 	    
         
-        //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
-	$this->addPrimarySystem(new MagGravReactor(4, 25, 0, 42));
-	$this->addPrimarySystem(new CnC(4, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 16, 5, 7));
-        $this->addPrimarySystem(new Engine(4, 30, 0, 4, 4));
-        //$this->addPrimarySystem(new Hangar(4, 6));
-	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 1));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 1));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 2));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 13, 0, 99, 2));	    
+
+	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12));
+	$this->addPrimarySystem(new CnC(3, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
+        $this->addPrimarySystem(new Engine(4, 16, 0, 3, 2));
+        //$this->addPrimarySystem(new Hangar(4, 6));	
+	$this->addPrimarySystem(new SurgeBlaster(3, 0, 0, 300, 60));
+        $this->addPrimarySystem(new MagGraviticThruster(4, 12, 0, 99, 1)); //original 15 Structure - but 2 decel cost; I made it 1 decel cost and only 12 Structure
+        $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));
+        $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));	    
 	    
-	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
+	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
+	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
 		
-        $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
-	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
+        $this->addRightSystem(new MagGraviticThruster(3, 13, 0, 99, 4));
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
 		
 		
-        $this->addLeftSystem(new Structure(4, 60));
-        $this->addRightSystem(new Structure(4, 60));
-        $this->addPrimarySystem(new Structure(4, 52));
+        $this->addPrimarySystem(new Structure(3, 42));
 		
 		
 		$this->hitChart = array(
 			0=> array(
-				8 => "Structure",
-				10 => "Thruster",
-				12 => "Spark Field",
-				14 => "Scanner",
-				16 => "Engine",
+				6 => "Thruster",
+				9 => "Surge Blaster",
+				12 => "Scanner",
+				15 => "Engine",
 				18 => "Reactor",
 				20 => "C&C",
 			),
 			3=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				7 => "EM Pulsar",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				7 => "EM Pulsar",
 				18 => "Structure",
 				20 => "Primary",
 			),
