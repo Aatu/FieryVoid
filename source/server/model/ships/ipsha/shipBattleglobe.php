@@ -5,6 +5,7 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{ //technically a Capita
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
      - remind player of the above in comments in fleet selection phase!
      - Singularity Drive replaced by standard engine
+     - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
     */
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -40,7 +41,7 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{ //technically a Capita
 	    
         
         //$this->addPrimarySystem(new MagGravReactor(4, 28, 0, 60));
-	$this->addPrimarySystem(new MagGravReactor(4, 25, 0, 42));
+	$this->addPrimarySystem(new MagGravReactor(4, 25, 0, 42+5));
 	$this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 7));
         $this->addPrimarySystem(new Engine(4, 30, 0, 4, 4));
