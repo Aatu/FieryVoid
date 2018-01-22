@@ -13,7 +13,7 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
         $this->pointCost = 385;
         $this->faction = "Ipsha";
         $this->phpclass = "RhombusEscort";
-        $this->imagePath = "img/ships/Rhombus.png";
+        $this->imagePath = "img/ships/IpshaRhombus.png";
         $this->shipClass = "Rhombus Escort Cruiser";    
 	    	    
         $this->unofficial = true;
