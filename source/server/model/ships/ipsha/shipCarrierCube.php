@@ -35,6 +35,7 @@ class ShipCarrierCube extends BaseShip{
         $this->pivotcost = 1;
 	$this->gravitic = true;
         
+	$this->iniativebonus = 0 *5;
 	    
 	    
        
