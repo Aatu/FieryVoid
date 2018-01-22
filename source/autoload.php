@@ -354,7 +354,9 @@ spl_autoload_register(
                 //Ipsha actual units
                 'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',                
                 'shipbattleglobe' => '/server/model/ships/ipsha/shipBattleglobe.php',  
+                'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php',
                 'shipcarriercube' => '/server/model/ships/ipsha/shipCarrierCube.php',
+                'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
                 
                 
