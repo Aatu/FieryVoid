@@ -1421,7 +1421,7 @@ class SurgeCannon extends Raking{
         public $defaultShots = 2;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 5;
+	    public $priority = 4; 
         
         public $damageType = "Standard"; 
         public $weaponClass = "Electromagnetic"; 
