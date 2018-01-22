@@ -31,7 +31,7 @@ class ShipTetraship extendsMediumShipLeftRight{
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.22;
-        $this->accelcost = 1; //1accel/2 decel bu original SCS; I made the single Retro flimsier instead
+        $this->accelcost = 1; //1accel/2 decel by original SCS; I gave it just 1 (same as larger Battlehex with similar thruster arrangement)
         $this->rollcost = 0;
         $this->pivotcost = 1;
 	$this->gravitic = true;
@@ -47,7 +47,7 @@ class ShipTetraship extendsMediumShipLeftRight{
         $this->addPrimarySystem(new Engine(4, 16, 0, 3, 2));
         //$this->addPrimarySystem(new Hangar(4, 6));	
 	$this->addPrimarySystem(new SurgeBlaster(3, 0, 0, 300, 60));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 12, 0, 99, 1)); //original 15 Structure - but 2 decel cost; I made it 1 decel cost and only 12 Structure
+        $this->addPrimarySystem(new MagGraviticThruster(4, 15, 0, 99, 1)); 
         $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));
         $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));	    
 	    
