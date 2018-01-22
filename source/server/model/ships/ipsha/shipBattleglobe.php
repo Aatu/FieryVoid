@@ -1,5 +1,5 @@
 <?php
-class ShipBattleglobe extends HeavyCombatVesselLeftRight{
+class ShipBattleglobe extends HeavyCombatVesselLeftRight{ //technically a Capital ship with HCV hull arrangement
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
@@ -35,6 +35,7 @@ class ShipBattleglobe extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 2;
 	$this->gravitic = true;
         
+	$this->iniativebonus = 0 *5; //THIS IS A CAPITAL SHIP, despite HCV arrangement!
 	    
 	    
         
