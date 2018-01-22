@@ -48,8 +48,8 @@ class ShipTetraship extends MediumShipLeftRight{
         //$this->addPrimarySystem(new Hangar(4, 6));	
 	$this->addPrimarySystem(new SurgeBlaster(3, 0, 0, 300, 60));
         $this->addPrimarySystem(new MagGraviticThruster(4, 15, 0, 99, 1)); 
-        $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));
-        $this->addPrimarySystem(new MagGraviticThruster(4, 10, 0, 99, 2));	    
+        $this->addPrimarySystem(new MagGraviticThruster(3, 10, 0, 99, 2));
+        $this->addPrimarySystem(new MagGraviticThruster(3, 10, 0, 99, 2));	    
 	    
 	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
 	$this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
