@@ -635,6 +635,7 @@ class GraviticBolt extends Gravitic
 
 
 
+/*fighter weapon*/
     class LightGraviticBolt extends LinkedWeapon{
 
         public $trailColor = array(99, 255, 00);
@@ -658,7 +659,7 @@ class GraviticBolt extends Gravitic
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
         
-        public $priority = 7;
+        public $priority = 3;
 
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
@@ -703,7 +704,7 @@ class GraviticBolt extends Gravitic
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
         
-        public $priority = 6;
+        public $priority = 2;
 
 	public $damageType = 'Standard'; 
     	public $weaponClass = "Gravitic"; 
@@ -724,6 +725,7 @@ class GraviticBolt extends Gravitic
     }
 
 
+/*heavy fighter weapon*/
     class LightGravitonBeam extends Weapon{
         public $name = "lightGravitonBeam";
         public $displayName = "Light Graviton Beam";
@@ -735,7 +737,7 @@ class GraviticBolt extends Gravitic
         public $loadingtime = 3;
         public $raking = 10;
         public $exclusive = true;
-        public $priority = 9;
+        public $priority = 5;
         
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals 
