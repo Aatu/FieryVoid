@@ -44,7 +44,7 @@ class ShipTetraship extends MediumShipLeftRight{
 	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12));
 	$this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
-        $this->addPrimarySystem(new Engine(4, 16, 0, 3, 2));
+        $this->addPrimarySystem(new Engine(3, 16, 0, 3, 2));
         //$this->addPrimarySystem(new Hangar(4, 6));	
 	$this->addPrimarySystem(new SurgeBlaster(3, 0, 0, 300, 60));
         $this->addPrimarySystem(new MagGraviticThruster(4, 15, 0, 99, 1)); 
