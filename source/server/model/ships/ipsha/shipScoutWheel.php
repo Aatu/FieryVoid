@@ -49,9 +49,9 @@ class ShipScoutWheel extends BaseShip{
       
         $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
         $this->addFrontSystem(new MagGraviticThruster(4, 13, 0, 99, 1));
-	$this->addAftSystem(new SurgeCannon(3, 0, 0, 300, 60));
-        $this->addAftSystem(new EmPulsar(3, 0, 0, 270, 90));
-	$this->addAftSystem(new SurgeCannon(3, 0, 0, 300, 60));
+	$this->addFrontSSystem(new SurgeCannon(3, 0, 0, 300, 60));
+        $this->addFrontSSystem(new EmPulsar(3, 0, 0, 270, 90));
+	$this->addFrontSSystem(new SurgeCannon(3, 0, 0, 300, 60));
 		
 	    
         $this->addAftSystem(new MagGraviticThruster(4, 13, 0, 99, 2));
@@ -62,14 +62,14 @@ class ShipScoutWheel extends BaseShip{
 	    
 	    
 	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
-        $this->addAftSystem(new EmPulsar(3, 0, 0, 180, 360));
+        $this->addLeftSystem(new EmPulsar(3, 0, 0, 180, 360));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 		
         $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
-	$this->addAftSystem(new EmPulsar(3, 0, 0, 0, 180));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 30, 150));
-	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 30, 150));
+	$this->addRightSystem(new EmPulsar(3, 0, 0, 0, 180));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 		
 		
         $this->addFrontSystem(new Structure(4, 45));
