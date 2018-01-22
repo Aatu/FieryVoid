@@ -5,6 +5,7 @@ class ShipTetraship extends MediumShipLeftRight{
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
      - remind player of the above in comments in fleet selection phase!
      - Singularity Drive replaced by standard engine
+     - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
     */
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -41,7 +42,7 @@ class ShipTetraship extends MediumShipLeftRight{
 	    
         
 
-	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12));
+	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12+4));
 	$this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
         $this->addPrimarySystem(new Engine(3, 16, 0, 3, 2));
