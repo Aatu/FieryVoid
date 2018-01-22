@@ -1,5 +1,5 @@
 <?php
-class ShipWarsphere extends BaseShip{
+class ShipSurgesphere extends BaseShip{
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
@@ -10,18 +10,20 @@ class ShipWarsphere extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 1000;
+	$this->pointCost = 1050;
 	$this->faction = "Ipsha";
-        $this->phpclass = "ShipWarsphere";
+        $this->phpclass = "ShipSurgesphere";
         $this->imagePath = "img/ships/IpshaWarsphere.png";
-        $this->shipClass = "Warsphere";    
+	$this->shipClass = "Surgesphere";
+        $this->variantOf = "Warsphere";    
 	    	    
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>6);
 	        
 	    $this->limited = 33;
 	    $this->isd = 2230;
-	    $this->notes = 'EM hardened';	  
+	    $this->notes .= 'Essan Barony only!';	
+	    $this->notes .= '<br>EM hardened';	  
 	    $this->notes .= '<br>-1 critical roll bonus';
 	    $this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	    $this->critRollMod = -1; //generalbonus to critical rolls!
@@ -49,7 +51,7 @@ class ShipWarsphere extends BaseShip{
 	$this->addPrimarySystem(new SparkField(4, 0, 0, 0, 360));
         
       
-        $this->addFrontSystem(new EmBolter(4, 0, 0, 300, 60));
+	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addFrontSystem(new SurgeCannon(3, 0, 0, 300, 60));
@@ -60,7 +62,7 @@ class ShipWarsphere extends BaseShip{
         $this->addFrontSystem(new MagGraviticThruster(4, 15, 0, 99, 1));
 		
 	    
-        $this->addAftSystem(new EmBolter(4, 0, 0, 120, 240));
+	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	$this->addAftSystem(new SurgeCannon(3, 0, 0, 120, 240));
@@ -73,6 +75,8 @@ class ShipWarsphere extends BaseShip{
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 240, 360));
+	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 180, 300));	    
@@ -81,6 +85,8 @@ class ShipWarsphere extends BaseShip{
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 0, 120));
+	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 60, 180));
@@ -106,27 +112,25 @@ class ShipWarsphere extends BaseShip{
 			),
 			1=> array(
 				4 => "Thruster",
-				5 => "EM Bolter",
 				12 => "Surge Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			2=> array(
 				4 => "Thruster",
-				5 => "EM Bolter",
 				12 => "Surge Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			3=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				12 => "Surge Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				12 => "Surge Cannon",
 				18 => "Structure",
 				20 => "Primary",
 			),
