@@ -49,20 +49,20 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new MagGraviticThruster(3, 15, 0, 99, 1));
         $this->addPrimarySystem(new MagGraviticThruster(3, 15, 0, 99, 2));	    
 	    
-	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
 	$this->addLeftSystem(new BurstBeam(2, 6, 3, 180, 360));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 120, 240));
+	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
 	    
 		
-        $this->addRightSystem(new MagGraviticThruster(3, 13, 0, 99, 4));
 	$this->addRightSystem(new BurstBeam(2, 6, 3, 0, 180));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 300, 60));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
+        $this->addRightSystem(new MagGraviticThruster(3, 13, 0, 99, 4));
 		
 		
         $this->addLeftSystem(new Structure(4, 40));
