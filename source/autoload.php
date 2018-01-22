@@ -365,6 +365,7 @@ spl_autoload_register(
                 'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
                     'shiptetraescort' => '/server/model/ships/ipsha/shipTetraEscort.php',
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
+                    'shipsurgesphere' => '/server/model/ships/ipsha/shipSurgesphere.php',
                 
                 
                 
