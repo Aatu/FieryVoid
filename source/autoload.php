@@ -345,10 +345,11 @@ spl_autoload_register(
                 'embolter' => '/server/model/weapons/specialWeapons.php',  
                 'empulsar' => '/server/model/weapons/specialWeapons.php',                          
                 'ltsurgeblaster' => '/server/model/weapons/specialWeapons.php',                 
-                'resonancegenerator' => '/server/model/weapons/specialWeapons.php',                
+                'resonancegenerator' => '/server/model/weapons/specialWeapons.php',   
+                'surgeblaster' => '/server/model/weapons/specialWeapons.php',
                 'surgecannon' => '/server/model/weapons/specialWeapons.php',
                 'sparkfield' => '/server/model/weapons/specialWeapons.php',
-                'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
+                    'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 
                 //Ipsha actual units
                 'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',                
