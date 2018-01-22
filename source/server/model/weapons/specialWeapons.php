@@ -1636,7 +1636,7 @@ class SurgeBlaster extends Weapon{
     /*Surge Blaster - Ipsha weapon*/
         public $name = "SurgeBlaster";
         public $displayName = "Surge Blaster";
-	public $iconPath = SurgeBlaster.png";
+	public $iconPath = "SurgeBlaster.png";
 	
         public $animation = "trail";
         public $animationColor =  array(165, 165, 255);
