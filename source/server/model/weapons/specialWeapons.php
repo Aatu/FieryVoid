@@ -876,7 +876,7 @@ class EmBolter extends Weapon{
 	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-	
+	private $cooldown = 2;
 	
 	private $alreadyResolved = false;
 	
@@ -903,17 +903,13 @@ class EmBolter extends Weapon{
         public function fire($gamedata, $fireOrder){
             // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
             parent::fire($gamedata, $fireOrder);
-		
-		$trgtTurn = $gamedata->turn;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-		$trgtTurn = $gamedata->turn +1;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;		
+		for($i = 1; $i<=$this->cooldown;$i++){		
+			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+		}	
         } //endof function fire
 	
 	
@@ -1414,7 +1410,7 @@ class SurgeCannon extends Raking{
         public $displayName = "Light Surge Blaster";
 	   public  $iconPath = "lightParticleBeam.png";
         public $animation = "trail";
-        public $animationColor = array(100, 100, 255);
+        public $animationColor =  array(145, 145, 245);
         public $animationExplosionScale = 0.10;
         public $projectilespeed = 10;
         public $animationWidth = 2;
@@ -1631,6 +1627,82 @@ class ResonanceGenerator extends Weapon{
         public function setMinDamage(){     $this->minDamage = 1 ;      }
         public function setMaxDamage(){     $this->maxDamage = 10 ;      }
 } //endof class ResonanceGenerator
+
+
+
+
+
+class SurgeBlaster extends Weapon{
+    /*Surge Blaster - Ipsha weapon*/
+        public $name = "SurgeBlaster";
+        public $displayName = "Surge Blaster";
+	public $iconPath = SurgeBlaster.png";
+	
+        public $animation = "trail";
+        public $animationColor =  array(165, 165, 255);
+        public $projectilespeed = 14;
+        public $animationWidth = 5;
+        public $animationExplosionScale = 0.4;
+        public $priority = 6;
+      
+        public $loadingtime = 1;
+        
+        public $rangePenalty = 0.33; //-1/3 hexes
+        public $fireControl = array(0, 3, 3); // fighters, <mediums, <capitals 
+	
+	
+	    public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	
+	private $cooldown = 1;
+	
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Cooldown period: " . $this->cooldown . " turns.";  
+		      $this->data["Special"] .= "<br>+4 to all critical/dropout rolls made by system hit this turn.";  
+	    }	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+
+		$system->critRollMod+=4; //+4 to all critical/dropout rolls on system hit this turn
+
+	} //endof function onDamagedSystem
+	
+	
+        public function fire($gamedata, $fireOrder){
+            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
+            parent::fire($gamedata, $fireOrder);
+		for($i = 1; $i<=$this->cooldown;$i++){		
+			$trgtTurn = $gamedata->turn+$i-1;//start on current turn rather than next!
+			$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
+			$crit->updated = true;
+			$crit->newCrit = true; //force save even if crit is not for current turn
+			$this->criticals[] =  $crit;
+		}
+        } //endof function fire
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function getDamage($fireOrder){        return Dice::d(10,4);   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+} //endof class SurgeBlaster
 
 
 
