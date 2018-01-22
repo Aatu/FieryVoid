@@ -17,7 +17,7 @@ class ShipCarrierCube extends BaseShip{
         $this->shipClass = "Carrier Cube";    
 	    	    
         $this->shipSizeClass = 3;
-        $this->fighters = array("heavy"=>24);
+        $this->fighters = array("heavy"=>12+12);
 	        
 	    //$this->limited = 33;
 	    $this->isd = 2230;
