@@ -1646,6 +1646,7 @@ class SurgeBlaster extends Weapon{
         public $priority = 6;
       
         public $loadingtime = 1;
+	public $intercept = 1;
         
         public $rangePenalty = 0.5; //-1/2 hexes
         public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
