@@ -483,7 +483,7 @@ class SWFighterLaser extends SWDirectWeapon{
     public $name = "SWFighterLaser";
     public $displayName = "Fighter Laser";
 	
-    public $priority = 4;
+    public $priority = 2;
     public $loadingtime = 1;
     public $rangePenalty = 2;
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -499,6 +499,11 @@ class SWFighterLaser extends SWDirectWeapon{
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/swFighter".$nr.".png";
+		
+		if($damagebonus > 2) $this->priority++;
+		if($damagebonus > 4) $this->priority++;		
+		if($damagebonus > 6) $this->priority = 8;
+		
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
@@ -524,6 +529,7 @@ class SWFighterIon extends SWIon{
 
     public $exclusive = false; //can be always overridden in particular fighter!
     public $isLinked = true; //indicates that this is linked weapon
+    public $priority = 8;	
     protected $damagebonus = 0;     	
 	
 	function __construct($startArc, $endArc, $damagebonus, $nrOfShots){
@@ -533,6 +539,10 @@ class SWFighterIon extends SWIon{
 		//appropriate icon (number of barrels)...
 		$nr = min(4, $nrOfShots); //images are not unlimited
 		$this->iconPath = "starwars/mjsIonFtr".$nr.".png";
+		
+		
+		if($damagebonus > 2) $this->priority++;
+		if($damagebonus > 4) $this->priority++;	
 
 		parent::__construct(0, 1, 0, $startArc, $endArc, $nrOfShots);
 	}    
