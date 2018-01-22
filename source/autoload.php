@@ -358,7 +358,8 @@ spl_autoload_register(
                 'osatstarsphere' => '/server/model/ships/ipsha/osatStarsphere.php',     
                 
                 'shipbattleglobe' => '/server/model/ships/ipsha/shipBattleglobe.php',  
-                'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php',
+                'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php', 
+                    'shipresohex' => '/server/model/ships/ipsha/shipResohex.php',
                 'shipcarriercube' => '/server/model/ships/ipsha/shipCarrierCube.php', 
                 'shiprhombusescort' => '/server/model/ships/ipsha/shipRhombusEscort.php',
                 'shipscoutwheel' => '/server/model/ships/ipsha/shipScoutWheel.php',
