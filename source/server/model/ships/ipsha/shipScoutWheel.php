@@ -40,7 +40,7 @@ class ShipScoutWheel extends BaseShip{
         
 	    
 	    
-	$this->addPrimarySystem(new MagGravReactor(5, 25, 0, 42+9));
+	$this->addPrimarySystem(new MagGravReactor(5, 25, 0, 42+9+4));//+Sensor+Jump Drive power
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 26, 9, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 6, 4));
