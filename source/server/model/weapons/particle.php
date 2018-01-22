@@ -312,7 +312,6 @@
 
 
     class ParticleCutter extends Raking{
-
         public $trailColor = array(252, 252, 252);
 
         public $name = "particleCutter";
@@ -363,7 +362,6 @@
 
 
     class ParticleRepeater extends Particle{
-
         public $trailColor = array(252, 252, 252);
 
         public $name = "particleRepeater";
@@ -448,62 +446,7 @@
             $fireOrder->shots = $this->getMaxShots($gamedata->turn);
             parent::fire($gamedata, $fireOrder);
         }
-        
-        /*old version - full redefine of fire()
-        public function fire($gamedata, $fireOrder){ 
-            $shooter = $gamedata->getShipById($fireOrder->shooterid);
-            $target = $gamedata->getShipById($fireOrder->targetid);
-            $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-            
-            $this->setTimes();
-            $fireOrder->shots = $this->getMaxShots($gamedata->turn);
-
-            $pos = $shooter->getCoPos();
-
-            for ($i=0;$i<$fireOrder->shots;$i++){
-                $this->setHitChanceMod($i+1);
-                $this->calculateHit($gamedata, $fireOrder);
-                $intercept = $this->getIntercept($gamedata, $fireOrder);
-
-                $needed = $fireOrder->needed - ($this->grouping*$i);
-                $rolled = Dice::d(100);
-                if ($rolled > $needed && $rolled <= $needed+($intercept*5)){
-                    $fireOrder->intercepted += 1;
-                }
-
-                $fireOrder->notes .= " FIRING SHOT ". ($i+1) .": rolled: $rolled, needed: $needed\n";
-                if ($rolled <= $needed){
-                    $fireOrder->shotshit++;
-                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-                }
-                else{
-                    // a repeater shot missed. No need to roll for the rest.
-                    break;
-                }
-            }
-
-            $fireOrder->rolled = 1;//Marks that fire order has been handled
-        }
-        */
-        
-        
-        /*
-        protected function setHitChanceMod($shotNumber){
-            switch($shotNumber){
-                case 1:
-                    $this->hitChanceMod = 0;
-                    break;
-                case 2:
-                    $this->hitChanceMod = -1;
-                    break;
-                default:
-                    $this->hitChanceMod = -1 - 2*floor($shotNumber-2);
-                    break;
-            }
-        }
-        */
-        
-        
+               
         
         
         /*if previous shot missed, next one misses automatically*/
@@ -618,6 +561,7 @@
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
+	public $priority = 2;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -633,6 +577,11 @@
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
             $this->intercept = $nrOfShots;
+		
+
+            if ($damagebonus > 2) $this->priority++;            
+            if ($damagebonus > 4) $this->priority++;                      
+            if ($damagebonus > 6) $this->priority++;
 
             if($nrOfShots === 1){
                 $this->iconPath = "particleGun.png";
@@ -717,62 +666,6 @@
         } //endof function doDamage
         
         
-        /*old version, kept just in case
-        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location = null){
-
-            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $location);
-
-            // Lower armor on the system that was hit.
-            $crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
-            $crit->updated = true;
-            $crit->inEffect = false;
-
-            if ( $system != null ){
-                $system->criticals[] = $crit;
-                $system->criticals[] = $crit;
-            }
-            
-            // Get the target system to apply the melting damage
-            $structTarget = null;
-
-            if($system instanceof Structure){
-                // The system that was hit is structure
-                $structTarget = $system;
-                if($structTarget->isDestroyed()){
-                    return;
-                }
-            }
-            else{
-                // The system is not structure. Get the structure of this system.
-                if ( $target instanceof MediumShip ){
-                    $structTarget = $target->getStructureSystem(0);
-                }
-                else{
-                    $structTarget = $target->getStructureSystem($system->location);
-                }
-            }
-
-            // Make a new damage entry for the structure.
-            $structArmour = 0; // the melt damage ignores armour
-            $systemHealth = $structTarget->getRemainingHealth();
-            $armour = $this->getSystemArmour($system, $gamedata, $fireOrder );
-            $structDamage = $damage - $armour; // Only give the amount of damage that came through
-            
-            if($structDamage < 0){
-                $structDamage = 0;
-            }
-
-            $destroyed = false;
-            if ($damage >= $systemHealth){
-                $destroyed = true;
-                $structDamage = $systemHealth;
-            }
-
-            $damageEntry = new DamageEntry(-1, $target->id, -1, $gamedata->turn, $structTarget->id, $structDamage, $structArmour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
-            $damageEntry->updated = true;
-            $structTarget->damage[] = $damageEntry;
-        }
-        */
         
         public function getDamage($fireOrder){        return Dice::d(5)+12;   }
         public function setMinDamage(){     $this->minDamage = 13 ;      }
@@ -800,6 +693,7 @@
         public $loadingtime = 1;
         public $shots = 2;
         public $defaultShots = 2;
+	public $priority = 2;
 
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
@@ -813,7 +707,11 @@
             $this->damagebonus = $damagebonus;
             $this->defaultShots = $nrOfShots;
             $this->shots = $nrOfShots;
-            $this->intercept = $nrOfShots;
+            $this->intercept = $nrOfShots;		
+
+            if ($damagebonus > 4) $this->priority++;            
+            if ($damagebonus > 6) $this->priority++;                      
+            if ($damagebonus > 7) $this->priority++;
 
             if($nrOfShots === 3){
                 $this->iconPath = "pairedParticleGun3.png";
@@ -977,6 +875,7 @@
         public function setMaxDamage(){     $this->maxDamage = 12 ;      }
     }
     
+
     class LightParticleBeamShip extends StdParticleBeam{
 
         public $trailColor = array(30, 170, 255);
