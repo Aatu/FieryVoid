@@ -30,7 +30,7 @@ class ShipTetraship extends MediumShipLeftRight{
         $this->sideDefense = 12;
         
         $this->turncost = 0.33;
-        $this->turndelaycost = 0.22;
+        $this->turndelaycost = 0.33;
         $this->accelcost = 1; //1accel/2 decel by original SCS; I gave it just 1 (same as larger Battlehex with similar thruster arrangement)
         $this->rollcost = 0;
         $this->pivotcost = 1;
