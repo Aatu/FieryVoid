@@ -16,7 +16,7 @@ class ShipTetraship extends MediumShipLeftRight{
         	$this->canvasSize = 100;
         $this->shipClass = "Tetraship";    
 	    	    
-        $this->shipSizeClass = 1;
+        //$this->shipSizeClass = 1;
         //$this->fighters = array("heavy"=>6);
 	        
 	//$this->limited = 33;
