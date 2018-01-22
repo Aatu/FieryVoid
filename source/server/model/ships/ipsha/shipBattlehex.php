@@ -66,9 +66,9 @@ class ShipBattlehex extends HeavyCombatVesselLeftRight{
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 120, 240));
 		
 		
-        $this->addLeftSystem(new Structure(4, 60));
+        $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(3, 45));
-        $this->addPrimarySystem(new Structure(3, 45));
+        $this->addPrimarySystem(new Structure(3, 50));
 		
 		
 		$this->hitChart = array(
