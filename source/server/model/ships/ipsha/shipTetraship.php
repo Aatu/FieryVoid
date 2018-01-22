@@ -1,5 +1,5 @@
 <?php
-class ShipTetraship extendsMediumShipLeftRight{
+class ShipTetraship extends MediumShipLeftRight{
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
@@ -87,4 +87,5 @@ class ShipTetraship extendsMediumShipLeftRight{
 		);
     }
 }
+
 ?>
