@@ -6,6 +6,7 @@ class OsatStarsphere extends OSAT{
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
      - remind player of the above in comments in fleet selection phase!
      - Singularity Drive replaced by standard engine
+     - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
     */
   
     function __construct($id, $userid, $name,  $slot){
@@ -36,7 +37,7 @@ class OsatStarsphere extends OSAT{
       
         
     
-	$this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14));
+	$this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14+2));
 	$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
 	$this->addPrimarySystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
 	$this->addPrimarySystem(new SparkField(2, 0, 0, 0, 360));   
