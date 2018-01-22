@@ -33,7 +33,7 @@ class PlasmaStream extends Raking{
 	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";			
             parent::setSystemDataWindow($turn);
 	}
-		
+		 
 	
 	protected function getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos=null){
 		$armour = parent::getSystemArmourStandard($target, $system, $gamedata, $fireOrder, $pos);
