@@ -41,7 +41,7 @@ class CustomLightMatterCannonF extends Matter {
         public $projectilespeed = 18;
         public $animationWidth = 2;
         public $animationExplosionScale = 0.10;
-        public $priority = 8;
+        public $priority = 9;
         
         public $loadingtime = 3;
         public $exclusive = false; //this is not an exclusive weapon!
@@ -930,7 +930,7 @@ class customHeavyPolarityPulsar extends Pulse{
 
 
 
-
+/*Drakh fighter weapon*/
     class customLtPhaseDisruptor extends Weapon{
         public $trailColor = array(255, 170, 10);
         public $name = "customLtPhaseDisruptor";
@@ -949,7 +949,7 @@ class customHeavyPolarityPulsar extends Pulse{
         public $defaultShots = 1;
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-	    public $priority = 5;
+	    public $priority = 3;
         
         public $damageType = "Standard"; 
         public $weaponClass = "Molecular"; 
@@ -1001,6 +1001,8 @@ class LightScattergun extends Pulse{
 	public $intercept = 2;
 	
         public $rangePenalty = 2;
+	
+	public $priority = 3;
 
 	
     
