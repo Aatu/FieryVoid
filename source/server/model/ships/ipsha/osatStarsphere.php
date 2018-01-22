@@ -34,23 +34,16 @@ class OsatStarsphere extends OSAT{
         $this->pivotcost = 0;	
         $this->iniativebonus = 60;
       
-        $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 6, 3, 6)); 
-        $this->addPrimarySystem(new Thruster(3, 4, 0, 0, 2)); 
-        $this->addPrimarySystem(new TacLaser(3, 5, 4, 270, 90));
-        $this->addPrimarySystem(new TacLaser(3, 5, 4, 270, 90));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         
     
-	      $this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14));
-        $this->addPrimarySystem(new Scanner(4, 7, 2, 5));
-        $this->addPrimarySystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
-	      $this->addPrimarySystem(new SparkField(2, 0, 0, 0, 360));   
-	      $this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	      $this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	      $this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
-	      $this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addPrimarySystem(new MagGravReactor(4, 12, 0, 14));
+	$this->addPrimarySystem(new Scanner(4, 7, 2, 5));
+	$this->addPrimarySystem(new MagGraviticThruster(3, 6, 0, 99, 2));    
+	$this->addPrimarySystem(new SparkField(2, 0, 0, 0, 360));   
+	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
+	$this->addPrimarySystem(new SurgeCannon(3, 0, 0, 300, 60)); 
 	    
       
       
