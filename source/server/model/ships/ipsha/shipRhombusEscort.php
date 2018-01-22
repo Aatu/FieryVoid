@@ -71,10 +71,10 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
 		
 		
 		$this->hitChart = array(
-			0=> array(
+			0=> array( //kept in line with Ipsha standard instead of original SCS (more C&C, less weapon)
 				8 => "Structure",
 				10 => "Thruster",
-				12 => "Resonance Generator",
+				12 => "Spark Field",
 				14 => "Scanner",
 				16 => "Engine",
 				18 => "Reactor",
@@ -82,13 +82,15 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
 			),
 			3=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				8 => "Surge Cannon",
+				10 => "Burst Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
 			4=> array(
 				4 => "Thruster",
-				11 => "Surge Cannon",
+				8 => "Surge Cannon",
+				10 => "Burst Beam",
 				18 => "Structure",
 				20 => "Primary",
 			),
