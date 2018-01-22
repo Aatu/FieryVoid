@@ -15,7 +15,7 @@ class ShipBattlehex extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/IpshaHex.png";
         $this->shipClass = "Battlehex";    
 	    	    
-        $this->shipSizeClass = 3;
+        //$this->shipSizeClass = 3;
         //$this->fighters = array("heavy"=>6);
 	        
 	//$this->limited = 33;
