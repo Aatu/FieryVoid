@@ -122,3 +122,11 @@ var ResonanceGenerator = function(json, ship)
 }
 ResonanceGenerator.prototype = Object.create( Weapon.prototype );
 ResonanceGenerator.prototype.constructor = ResonanceGenerator;
+
+
+var SurgeBlaster = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+SurgeBlaster.prototype = Object.create( Weapon.prototype );
+SurgeBlaster.prototype.constructor = SurgeBlaster;
