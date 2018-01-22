@@ -12,7 +12,7 @@ class FtrAnemone extends FighterFlight{
         $this->imagePath = "img/ships/IpshaUrchin.png";
         $this->isd = 2165;
         
-        $this-unofficial = true;
+        $this->unofficial = true;
         
         $this->notes = 'EM hardened';	  
         $this->notes .= '<br>-2 critical roll bonus'; //Anemone should have -1, and additional -1 replaces bonus vs EM weapons for all Ipsha
