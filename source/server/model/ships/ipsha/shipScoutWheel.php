@@ -1,10 +1,12 @@
 <?php
 class ShipScoutWheel extends BaseShip{
+	/*Showdowns-7*/
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
      - remind player of the above in comments in fleet selection phase!
-     - SIngularity Drive replaced by standard engine
+     - Singularity Drive replaced by standard engine
+     - add Sensor power demand to Reactor output (it's considered 'baseline' for tabletop!)
     */
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
@@ -38,7 +40,7 @@ class ShipScoutWheel extends BaseShip{
         
 	    
 	    
-	$this->addPrimarySystem(new MagGravReactor(5, 25, 0, 42));
+	$this->addPrimarySystem(new MagGravReactor(5, 25, 0, 42+9));
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 26, 9, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 6, 4));
