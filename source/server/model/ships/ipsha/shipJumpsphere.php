@@ -16,8 +16,10 @@ class ShipJumpsphere extends BaseShip{
         $this->phpclass = "ShipJumpsphere";
         $this->imagePath = "img/ships/IpshaWarsphere.png";
         $this->shipClass = "Jumpsphere";   
-        $this->variantOf = "Warsphere";     
-	$this->occurence = 'rare'; 
+		$this->variantOf = "Warsphere";     
+		$this->occurence = 'rare'; 
+	    
+	    $this->unofficial = true;
 	    	    
         $this->shipSizeClass = 3;
         //$this->fighters = array("heavy"=>6);
