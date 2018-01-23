@@ -42,6 +42,7 @@ class CustomLightMatterCannonF extends Matter {
         public $animationWidth = 2;
         public $animationExplosionScale = 0.10;
         public $priority = 9;
+	public $iconPath = "customLightMatterCannon.png";
         
         public $loadingtime = 3;
         public $exclusive = false; //this is not an exclusive weapon!
