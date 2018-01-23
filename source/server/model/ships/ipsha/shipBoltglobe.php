@@ -25,7 +25,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
 	//$this->limited = 33;
 	$this->isd = 2252;
 	$this->notes = 'Eethan Barony only';	 
-	$this->notes .= 'EM hardened';	  
+	$this->notes .= '<br>EM hardened';	  
 	$this->notes .= '<br>+3 critical roll penalty';
 	$this->EMHardened = true; //EM Hardening - some weapons would check for this value!
 	$this->critRollMod = -1+4; //generalbonus to critical rolls!
