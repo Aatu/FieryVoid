@@ -301,8 +301,9 @@ class MagGravReactor extends Reactor{
 	}
 	
 	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";	     
+		$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
 	}	
 	
 }//endof MagGravReactor		
