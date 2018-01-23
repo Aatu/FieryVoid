@@ -61,10 +61,10 @@ class ShipResohex extends HeavyCombatVesselLeftRight{
 	$this->addLeftSystem(new MagGraviticThruster(3, 13, 0, 99, 3));
 		
 
-	$this->addLeftSystem(new ResonanceGenerator(3, 0, 0, 300, 60));
-	$this->addLeftSystem(new ResonanceGenerator(3, 0, 0, 300, 60));	    
-	$this->addLeftSystem(new ResonanceGenerator(3, 0, 0, 120, 240)); 
-	$this->addLeftSystem(new ResonanceGenerator(3, 0, 0, 120, 240));
+	$this->addRightSystem(new ResonanceGenerator(3, 0, 0, 300, 60));
+	$this->addRightSystem(new ResonanceGenerator(3, 0, 0, 300, 60));	    
+	$this->addRightSystem(new ResonanceGenerator(3, 0, 0, 120, 240)); 
+	$this->addRightSystem(new ResonanceGenerator(3, 0, 0, 120, 240));
         $this->addRightSystem(new MagGraviticThruster(3, 13, 0, 99, 4));
 		
 		
