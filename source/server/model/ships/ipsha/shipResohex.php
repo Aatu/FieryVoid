@@ -16,7 +16,7 @@ class ShipResohex extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/IpshaHex.png";
 	$this->shipClass = "Resohex";
         $this->variantOf = "Battlehex";  
-	$this->availability = 'uncommon';  
+	$this->occurence = 'uncommon';  
 	    	    
         //$this->shipSizeClass = 3;
         //$this->fighters = array("heavy"=>6);
