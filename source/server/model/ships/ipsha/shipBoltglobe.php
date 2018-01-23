@@ -23,7 +23,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
         //$this->fighters = array("heavy"=>6);
 	        
 	//$this->limited = 33;
-	$this->isd = 2202;
+	$this->isd = 2252;
 	$this->notes = 'Eethan Barony only';	 
 	$this->notes .= 'EM hardened';	  
 	$this->notes .= '<br>+3 critical roll penalty';
