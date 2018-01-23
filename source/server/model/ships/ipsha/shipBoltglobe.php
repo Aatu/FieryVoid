@@ -17,7 +17,7 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
         $this->imagePath = "img/ships/IpshaBattleglobe.png";
         $this->shipClass = "Boltglobe";    
         	$this->variantOf = "Battleglobe";    
-	    	$this->availability = 'rare';
+	    	$this->occurence = 'rare';
 	    	    
         $this->shipSizeClass = 3;
         //$this->fighters = array("heavy"=>6);
