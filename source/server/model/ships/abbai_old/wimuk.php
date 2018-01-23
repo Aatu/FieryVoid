@@ -10,7 +10,7 @@ class Wimuk extends FighterFlight{
         $this->shipClass = "Wimuk Light Fighters";
     	$this->imagePath = "img/ships/AbbaiWimuk.png";
 
-        $this->isd = 2209; 
+        $this->isd = 2009; 
        
         $this->forwardDefense = 6;
         $this->sideDefense = 6;
