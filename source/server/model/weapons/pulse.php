@@ -250,6 +250,7 @@ class QuadPulsar extends Pulse{
         public $intercept = 2;
         
         public $loadingtime = 1;
+	public $priority = 5;//this has firepower of a heavy weapon
         
         public $rangePenalty = 2;
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
