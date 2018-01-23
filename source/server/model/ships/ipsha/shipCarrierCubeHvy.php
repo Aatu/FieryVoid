@@ -16,7 +16,7 @@ class ShipCarrierCubeHvy extends BaseShip{
         $this->imagePath = "img/ships/IpshaCube.png";
         $this->shipClass = "Heavy Carrier Cube";    
           $this->variantOf = "Carrier Cube";    
-	    $this->availability = 'common';   
+	    $this->occurence = 'common';   
 	    	    
         $this->shipSizeClass = 3;
         $this->fighters = array("heavy"=>18+18);
