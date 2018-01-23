@@ -164,10 +164,10 @@
 
 	    public function setSystemDataWindow($turn){ 
 		parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special])) {
+		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
-			$this->data["Special] .= '<br>';
+			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Weapon misses automatically except vs speed 0 Enormous units. "     
 		."<br>Weapon misses automatically if launching unit speed is > 0. "  
