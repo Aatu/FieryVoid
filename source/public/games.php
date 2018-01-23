@@ -44,25 +44,19 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 21st of December 2017";
+                    header.innerHTML = "Latest News 30th of January 2018";
                    
 
                 var news = document.getElementById("newsEntry");
+		    /*
                     news.innerHTML += "<big><b>Merry Christmas and a Happy New Year 2018</b></big>!<br>May our little world be still here for 2019.";
                     news.innerHTML += "<br><br>";
+		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- fixed some elusive targeting-related bugs (primarily concerning range 0)";
+                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha feature a different approach to power management, and should be a different experience to play. Warning: heavy power micromanagement involved!";
 		    news.innerHTML += "<br>";
-                    news.innerHTML += "- large update regarding split section choice and interception routines - highlights below; interception should be much more reliable now!";
-		    news.innerHTML += "<br>";
-                    news.innerHTML += "-- multi-weapon housings (eg. Twin Array) may now intercept independently for each barrel ";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "-- ballistic weapons may now be automatically intercepted (although manual interception is still available)";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "-- improved selection algorithms - now Your defensive grid should be better at recognizing threats; still nothing like human, of course";  
-		    news.innerHTML += "<br>";
-                    news.innerHTML += "-- last but not least - brand new collection of BUGS!";
+                    news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 
