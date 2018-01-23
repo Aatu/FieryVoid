@@ -19,7 +19,7 @@ class ShipTetraEscort extends MediumShipLeftRight{
         $this->shipClass = "Tetra Escort";    
 	    
         $this->variantOf = "Tetraship";    
-	$this->availability = 'uncommon';	        
+	$this->occurence = 'uncommon';	        
 	//$this->limited = 33;
 	$this->isd = 2235;
 	    
