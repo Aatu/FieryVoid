@@ -370,10 +370,10 @@ class PairedPlasmaBlaster extends LinkedWeapon{
     
         public function setSystemDataWindow($turn){    
             parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special])) {
+		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
-			$this->data["Special] .= '<br>';
+			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
 		$this->data["Special"] .= "<br>Ignores half of armor.";
