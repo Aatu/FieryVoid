@@ -1,6 +1,6 @@
 <?php
 class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital ship with HCV hull arrangement
-	/*Variants-5*/
+	/*Variants-5; by fluff this ship has serious problems due to being overburdened and overpowered and overall unstable*/
     /*Ipsha general:
      - remember about EM hardening!
      - instead of -2 bonus to dropout/crit when caused by Ion weapon, just add -1 overall crit/dropout bonus
@@ -26,9 +26,11 @@ class ShipBoltglobe extends HeavyCombatVesselLeftRight{ //technically a Capital 
 	$this->isd = 2202;
 	$this->notes = 'Eethan Barony only';	 
 	$this->notes .= 'EM hardened';	  
-	$this->notes .= '<br>-1 critical roll bonus';
+	$this->notes .= '<br>+3 critical roll penalty';
 	$this->EMHardened = true; //EM Hardening - some weapons would check for this value!
-	$this->critRollMod = -1; //generalbonus to critical rolls!
+	$this->critRollMod = -1+4; //generalbonus to critical rolls!
+	    //this ship has some serious problems by fluff - I try to show this by ading serious shipwide vulnerability to criticals
+	    //so +4 to criticals (on top of usual Ipsha -1 , giving +3 total :) )
 		
         $this->forwardDefense = 18;
         $this->sideDefense = 14;
