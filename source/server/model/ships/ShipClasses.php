@@ -1237,11 +1237,12 @@
 		$activeStructures = $this->getSystemsByName("Structure",true);//list of all Structure blocks (check for being destroyed will come later)
 		foreach($activeStructures as $struct){			
 			if (!$struct->isDestroyed($prevturn)){ //if structure is not destroyed AS OF PREVIOUS TURN
-				$structuretotal += $thismaxhealth;
+				$structuretotal += $struct->maxhealth;
 			}
 		}
-		
-		$dmg = ceil($structuretotal * 1.1);
+		$multiplier = 1.1;
+		if ($this->size == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
+		$dmg = ceil($structuretotal * $multiplier);
 		return $dmg;
 	} //endof function getRammingFactor
 	    
