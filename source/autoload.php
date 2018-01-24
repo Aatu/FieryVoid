@@ -520,7 +520,7 @@ spl_autoload_register(
                 'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 
                 //various
-                'hkflight' => '/server/model/ships/HK.php',
+                //'hkflight' => '/server/model/ships/HK.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
