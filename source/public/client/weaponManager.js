@@ -752,7 +752,7 @@ window.weaponManager = {
 		hitChance += weaponManager.getFireControl(target, weapon);		
 		
 		hitChance = hitChance * 5; //convert d20->d100
-		return hitChance
+		return hitChance;
 	}, //endof calculateRamChance
 	
 	
