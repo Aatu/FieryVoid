@@ -717,6 +717,7 @@ window.weaponManager = {
 	/*also, it would be a bit different (simplified) from B5Wars original*/
 	calculateRamChance: function(shooter, target, weapon, calledid){
 		if (calledid > 0) return 0;//can't call ramming attack!
+		if ((!shooter.flight) && (target.flight)) return 0;//ship has no chance to ram a fighter!
 		var hitChance = 8; //base: 40%
 		
 		if (target.Enormous) hitChance+=6;//+6 vs Enormous units
