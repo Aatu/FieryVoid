@@ -25,6 +25,8 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype.onHexClicked = function(payload) {
         var hex = payload.hex;
 
+        console.log("target hex");
+
         if (!this.selectedShip) {
             return;
         }
@@ -38,7 +40,15 @@ window.FirePhaseStrategy = (function(){
         PhaseStrategy.prototype.deselectShip.call(this, ship);
     };
 
-    FirePhaseStrategy.prototype.targetShip = function(ship) {};
+    FirePhaseStrategy.prototype.targetShip = function(ship) {
+
+        if (!this.selectedShip) {
+            return;
+        }
+
+        console.log("target ship");
+        weaponManager.targetShip(this.selectedShip, ship);
+    };
 
     FirePhaseStrategy.prototype.untargetShip = function(ship) {};
 
@@ -55,6 +65,16 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype.onWeaponMouseOut = function() {
         console.log("weapon mouseout");
         this.shipIconContainer.getArray().forEach(function (icon){ icon.hideWeaponArcs();});
+    };
+
+    FirePhaseStrategy.prototype.onWeaponSelected = function(payload) {
+        var ship = payload.ship;
+        var weapon = payload.weapon;
+
+        console.log("weapon selected");
+
+        this.selectShip(ship);
+
     };
 
 

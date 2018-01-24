@@ -1,8 +1,6 @@
 shipManager.systems = {
 
-	selectedShipHasSelectedWeapons: function(ballistic){
-		var selectedShip = gamedata.getSelectedShip();
-		
+	selectedShipHasSelectedWeapons: function(ship, ballistic){
 		for (var i in gamedata.selectedSystems){
 			var system = gamedata.selectedSystems[i];
 			if (!ballistic && system.weapon)
@@ -10,8 +8,8 @@ shipManager.systems = {
 			if (ballistic && system.weapon && system.ballistic)
 				return true;
 		}
-		
-		
+
+		return false;
 	},
 	
 
@@ -318,12 +316,12 @@ shipManager.systems = {
     },
     
     getStructureSystem: function(ship, location){
-        
         if (ship.flight){
             return null;
         }
-        else if (!ship.structures[location])
+        else if (!ship.structures[location]) {
             return null;
+        }
 			
         return shipManager.systems.getSystem(ship, ship.structures[location]);
     },

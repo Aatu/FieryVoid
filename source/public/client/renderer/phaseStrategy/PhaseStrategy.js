@@ -218,7 +218,7 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.showShipTooltip = function(ships, payload) {
         ships = [].concat(ships);
-        var shipTooltip = new window.ShipTooltip(ships, payload.hex);
+        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, payload.hex, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip));
         this.onMouseOutCallbacks.push(function(){ shipTooltip.destroy(); });
         this.onZoomCallbacks.push(function(){ shipTooltip.reposition(); });
         this.onScrollCallbacks.push(function(){shipTooltip.reposition();});

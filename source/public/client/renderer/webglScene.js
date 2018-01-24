@@ -309,22 +309,20 @@ window.webglScene = (function(){
         payload.button = event.button;
 
         console.log(pos, hexPos);
-        //console.log("click", payload.hex, payload.hex.toOffset());
-        /*
-        var geometry = new THREE.PlaneGeometry( 10, 10, 1, 1);
-        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-        var cube = new THREE.Mesh( geometry, material );
-        this.scene.add( cube );
-        var pos = this.coordinateConverter.fromHexToGame(hexPos);
-        cube.position.x = pos.x;
-        cube.position.y = pos.y;
-        */
+        if (this.lastPositionClicked) {
+            console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
+        }
 
 
         this.phaseDirector.relayEvent(
             'ClickEvent',
             payload
         );
+
+        if (! this.lastPositionClicked) {
+            console.log("set last position clicked");
+            this.lastPositionClicked = hexPos;
+        }
     };
 
     webglScene.prototype.fireEvent = function(eventName, payload)

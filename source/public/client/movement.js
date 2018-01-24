@@ -1409,8 +1409,9 @@ shipManager.movement = {
             if (!first)
                 first = ship.movement[i];
             
-            if (ship.movement[i].commit==true && ship.movement[i].animated == true)
+            if (ship.movement[i].commit==true) {
                 lm = ship.movement[i];
+            }
            
         }
         
@@ -1429,13 +1430,11 @@ shipManager.movement = {
 	
 	getPreviousLocation: function(ship){
 		var oPos = shipManager.getShipPosition(ship);
-		//console.log("cur loc: "  + oPos.x + ","+oPos.y);
 		for (var i = ship.movement.length -1; i >= 0; i--){
 			var move = ship.movement[i];
-			
-			//console.log("prev loc: "  + move.x + ","+move.y);
-			if (move.x != oPos.x || move.y != oPos.y)
-				return  {x:move.x, y:move.y};
+
+			if (! new hexagon.Offset(move.position).equals(new hexagon.Offset(move.position)))
+				return  move.position;
 							
 		}
 		

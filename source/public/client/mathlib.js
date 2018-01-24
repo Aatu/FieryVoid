@@ -48,18 +48,11 @@ window.mathlib = {
 		console.trace();
 		mathlib.distance(start, end);
 	},
-    
-    getDistanceBetweenShips: function(s1, s2){
-        var start = shipManager.getShipPositionInWindowCoWithoutOffset(s1);
-        var end = shipManager.getShipPositionInWindowCoWithoutOffset(s2);
-        var dis = Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
-        
-        return dis;
-    },
-    
+
     getDistanceBetweenShipsInHex: function(s1, s2){
-        var dis = mathlib.getDistanceBetweenShips(s1, s2);
-        return (dis / hexgrid.hexWidth());
+        var start = shipManager.getShipPosition(s1);
+        var end = shipManager.getShipPosition(s2);
+		return start.distanceTo(end);
     },
     
 	getDistanceHex: function(start, end){
@@ -144,8 +137,6 @@ window.mathlib = {
 	},
 	
 	isInArc: function(direction, start, end){
-		//console.log("direction: "+direction + " start: " + start + " end: " + end);
-		
 		//direction: 300 start: 360 end: 240
 		if (start == end)
 			return true;
@@ -177,9 +168,9 @@ window.mathlib = {
         // IMPORTANT: Both the 'observer' and 'position' parameters
         // should be HEX COORDINATES!!!
 	getCompassHeadingOfPosition: function(observer, position){
-            
+
+		throw new Error("convert to hex coordinates");
 		var oPos = shipManager.getShipPosition(observer);
-//		var tPos = hexgrid.pixelCoToHex(position.x, position.y);
 		var tPos = position;
 
 		if( oPos.x > 100 || oPos.y > 100 || tPos.x > 100 || tPos.y > 100 ){
@@ -200,35 +191,46 @@ window.mathlib = {
 	},
 	
 	getCompassHeadingOfShip: function(observer, target){
-	
-
-		throw new Error("Old, won't work");
 
 		var oPos = shipManager.getShipPosition(observer);
 		var tPos = shipManager.getShipPosition(target);
 
-		if (oPos.x == tPos.x && oPos.y == tPos.y){
+		if (oPos.equals(tPos)){
 			if (shipManager.hasBetterInitive(observer, target)){
 				oPos =  shipManager.movement.getPreviousLocation(observer);
-				
 			}else{
 				tPos =  shipManager.movement.getPreviousLocation(target);
-				
 			}
 		
 		}
 
-		
-		oPos = hexgrid.hexCoToPixel(oPos.x, oPos.y);
-		tPos = hexgrid.hexCoToPixel(tPos.x, tPos.y);
-		
-		
-		
+		oPos = window.coordinateConverter.fromHexToGame(oPos);
+		tPos = window.coordinateConverter.fromHexToGame(tPos);
+
 		return mathlib.getCompassHeadingOfPoint(oPos, tPos);
-		
 	},
 	
 	getCompassHeadingOfPoint: function(observer, target){
+
+		if (observer instanceof hexagon.Offset) {
+			observer = coordinateConverter.fromHexToGame(observer);
+		}
+
+        if (target instanceof hexagon.Offset) {
+            target = coordinateConverter.fromHexToGame(target);
+        }
+
+        var heading = mathlib.radianToDegree(Math.atan2(target.y - observer.y, target.x - observer.x));
+
+        if (heading > 0) {
+        	heading = 360 - heading;
+		} else {
+        	heading = Math.abs(heading);
+		}
+
+        return heading;
+
+		/*
 		var dX = target.x - observer.x;
 		var dY = target.y - observer.y;
 		var heading = 0.0;
@@ -274,10 +276,11 @@ window.mathlib = {
 			console.log("h:4");
 			heading = mathlib.radianToDegree(Math.atan(dY/Math.abs(dX))) + 270;
 		}
-		*/
 		heading = mathlib.addToDirection(Math.round(heading), -90);
 
 		return heading;
+
+		*/
 	},
 
 

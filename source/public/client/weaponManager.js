@@ -149,14 +149,15 @@ window.weaponManager = {
 		}
 
 		systemInfo.hideSystemInfo();
-		weaponManager.removeArcIndicators();
 
 		if( weaponManager.mouseoverSystem == null){
 			return;
 		}
 
-		weaponManager.addArcIndicators(weaponManager.currentShip, weaponManager.currentSystem);
 		systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
+
+        var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
+        webglScene.customEvent('WeaponMouseOver', {ship: weaponManager.currentShip, weapon: weapon});
 
 	},
 
@@ -167,10 +168,8 @@ window.weaponManager = {
 		}
 
 		systemInfo.hideSystemInfo();
-
 		weaponManager.mouseoverSystem = null;
-
-		weaponManager.removeArcIndicators();
+        webglScene.customEvent('WeaponMouseOut');
 
 	},
 
@@ -192,6 +191,7 @@ window.weaponManager = {
 			}
 		}
 
+        webglScene.customEvent('WeaponUnSelected', {ship: ship, weapon: weapon});
 		shipWindowManager.setDataForSystem(ship, weapon);
 
 	},
@@ -293,6 +293,7 @@ window.weaponManager = {
 				for (var b = 0; i < ship.systems.systems; b++){
 					if (ship.systems[i].systems[b].weapon){
 						gamedata.selectedSystems.push(ship.systems[i].systems[b].weapon);
+                        webglScene.customEvent('WeaponSelected', {ship: ship, weapon: ship.systems[i].systems[b].weapon});
 						shipWindowManager.setDataForSystem(ship, ship.systems[i].systems[b].weapon);
 					}
 				}
@@ -300,6 +301,8 @@ window.weaponManager = {
 
 		}
 
+
+        webglScene.customEvent('WeaponSelected', {ship: ship, weapon: weapon});
 		gamedata.selectedSystems.push(weapon);
 		shipWindowManager.setDataForSystem(ship, weapon);
 	},
@@ -311,11 +314,10 @@ window.weaponManager = {
 
 		return false;
 	},
-	
 
-	targetingShipTooltip: function(ship, e, calledid){
+
+	targetingShipTooltip: function(selectedShip, ship, e, calledid){
 		//e.find(".shipname").html(ship.name);
-		var selectedShip = gamedata.getSelectedShip();
 		var f = $(".targeting", e);
 		f.html("");
 
@@ -378,7 +380,7 @@ window.weaponManager = {
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
 				if(weaponManager.checkIsInRange(selectedShip, ship, weapon)){
 					var value = weapon.firingMode;
-					value = weapon.firingModes[value];					
+					value = weapon.firingModes[value];
 					if((calledid!=null)&&(!weaponManager.canWeaponCall(weapon))){ //called shot, weapon not eligible!
 						$('<div><span class="weapon">'+weapon.displayName+':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
 					}else{
@@ -568,10 +570,11 @@ window.weaponManager = {
 		var oPos = shipManager.getShipPosition(shooter);
 		var tPos = shipManager.getShipPosition(target);
 
-		if (weapon.ballistic && oPos.x == tPos.x && oPos.y == tPos.y)
+		if (weapon.ballistic && oPos.equals(tPos))
 			return true;
 		//console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
 
+		console.log("is on weapon arc");
 		return (mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end));
 	},
 
@@ -1286,9 +1289,11 @@ window.weaponManager = {
 	},
 
 	//system is for called shot!
-	targetShip: function(ship, system){
+	targetShip: function(selectedShip, ship, system){
+		var debug = true;
 
-		var selectedShip = gamedata.getSelectedShip();
+		debug && console.log("weaponManager target ship", ship, system);
+
 		if (shipManager.isDestroyed(selectedShip))
 			return;
 
@@ -1296,21 +1301,30 @@ window.weaponManager = {
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
 
-			if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
-				continue;
+			if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) {
+                debug && console.log("Weapon destroyed or not loaded");
+                continue;
+            }
 
 
 			if (weapon.ballistic && gamedata.gamephase != 1){
+                debug && console.log("trying to fire in wrong phase for ballistic weapon");
 				continue;
 			}
 			if (!weapon.ballistic && gamedata.gamephase != 3){
+                debug && console.log("trying to fire in wrong phase for normal weapon");
 				continue;
 			}
 
-			if (weapon.ballistic && system)
-				continue;
+			if (weapon.ballistic && system) {
+                debug && console.log("trying to call shot with ballistic");
+                continue;
+            }
 
 			if (weaponManager.checkConflictingFireOrder(selectedShip, weapon, true)){
+
+                debug && console.log("has conflicting fire orders");
+
 				for(var j = gamedata.selectedSystems.length - 1; j>= 0; j--){
 					var sel_weapon = gamedata.selectedSystems[j];
 
@@ -1321,14 +1335,20 @@ window.weaponManager = {
 				return;
 			}
 
-			if (ship.flight && weapon.fireControl[0] === null)
-				continue;
+			if (ship.flight && weapon.fireControl[0] === null) {
+                debug && console.log("cant fire flight");
+                continue;
+            }
 
-			if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null)
-				continue;
+			if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null) {
+                debug && console.log("can't fire small ships");
+                continue;
+            }
 
-			if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null)
-				continue;
+			if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null) {
+                debug && console.log("can't fire big ships");
+                continue;
+            }
 
 			var type = 'normal';
 			if (weapon.ballistic){
@@ -1336,7 +1356,9 @@ window.weaponManager = {
 			}
 
 			if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)){
+                debug && console.log("is on arc");
 				if (weaponManager.checkIsInRange(selectedShip, ship, weapon)){
+                    debug && console.log("is in range");
 					weaponManager.removeFiringOrder(selectedShip, weapon);
 					for (var s=0;s<weapon.guns;s++){
 						var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
@@ -1361,6 +1383,7 @@ window.weaponManager = {
 						var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
 
 						if (chance < 1){
+                            debug && console.log("Can't fire, change < 0");
 							continue;
 						}
 						
@@ -1524,11 +1547,6 @@ window.weaponManager = {
 				system.fireOrders.splice(i,1);
 			}
 		}
-		ballistics.calculateBallisticLocations();
-		ballistics.calculateDrawBallistics();
-		drawEntities();
-
-
 	},
 
 
@@ -1712,15 +1730,6 @@ window.weaponManager = {
 
 
 
-	},
-
-	removeArcIndicators: function(){
-        webglScene.customEvent('WeaponMouseOut');
-	},
-
-	addArcIndicators: function(ship, weapon){
-		weapon = shipManager.systems.initializeSystem(weapon);
-		webglScene.customEvent('WeaponMouseOver', {ship: ship, weapon: weapon});
 	},
 
 	makeWeaponArcindicator: function(ship, weapon){

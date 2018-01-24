@@ -164,12 +164,8 @@ gamedata = {
     },
     
     isEnemy: function(target, shooter){
-		if (!shooter && gamedata.getSelectedShip()){
-			shooter = gamedata.getSelectedShip();
-		}else if(!shooter){
-			//console.log("isEnemy called. shooter is null and no ship selected");
-			//console.trace();
-			return false;
+		if (!shooter){
+		    throw new Error("You need to give shooter for this one");
 		}
 		
 		

@@ -7,10 +7,12 @@ window.ShipTooltip = (function(){
         + '</div>';
 
 
-    function ShipTooltip(ships, position){
+    function ShipTooltip(selectedShip, ships, position, showTargeting){
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
         this.position = position;
+        this.selectedShip = selectedShip;
+        this.showTargeting = showTargeting;
 
         this.element.on('mousedown', function(e){e.preventDefault();});
         this.element.on('mouseup', function(e){e.preventDefault();});
@@ -54,7 +56,6 @@ window.ShipTooltip = (function(){
     };
 
     function createForSingleShip(ship){
-        var selectedShip = gamedata.getSelectedShip();
 
         jQuery('<span class="name value '+ getAllyClass(ship) +'">'+ship.name+'</span>').appendTo(this.element.find('.namecontainer'));
 
@@ -102,12 +103,21 @@ window.ShipTooltip = (function(){
             +")%");
 
 
-        if (!gamedata.waiting && selectedShip && selectedShip != ship && gamedata.isMyShip(selectedShip)){
+        if (this.selectedShip && this.selectedShip !== ship){
 
-            var dis = (mathlib.getDistanceBetweenShipsInHex(selectedShip, ship)).toFixed(2);
-            //        var dis = (mathlib.getDistanceBetweenShips(selectedShip, ship)).toFixed(2);
+            var dis = (mathlib.getDistanceBetweenShipsInHex(this.selectedShip, ship));
             this.addEntryElement('DISTANCE: ' + dis);
         }
+
+
+        console.log("show targeting", gamedata.isEnemy(ship, this.selectedShip), this.showTargeting);
+        if (gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting){
+            weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
+            $(".fire", this.element).show();
+        }else{
+            $(".fire", this.element).hide();
+        }
+
     }
 
     function createForMultipleShips(element, ships){
@@ -137,10 +147,8 @@ window.ShipTooltip = (function(){
             return 'neutral';
         }
 
-        return (ship.userid != gamedata.thisplayer) ? 'enemy' : 'ally';
+        return (ship.userid !== gamedata.thisplayer) ? 'enemy' : 'ally';
     }
-
-
 
     return ShipTooltip;
 })();
