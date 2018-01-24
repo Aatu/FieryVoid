@@ -78,7 +78,7 @@ class Weapon extends ShipSystem{
     public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
-
+	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
 
     public $shots = 1;
 	public  $shotsArray = array();
@@ -613,9 +613,54 @@ class Weapon extends ShipSystem{
 	} //endof function isTargetAmbiguous
 	
 	
+	/*calculate base chance to hit for ramming attack*/
+	public function calculateHitBaseRam($gamedata, $fireOrder){
+		if ($fireOrder->calledid != -1) return 0;//can't call ramming attack!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) return 0;//ship has no chance to ram a fighter!
+		$hitChance = 8; //base: 40%
+		
+		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
+		if ($shooter->Enormous) $hitChance+=6;//+6 if ramming unit is Enormous
+		if (($target->size >= 3) && ($shooter->size <3)) $hitChance += 2;//+2 if target is Capital and ramming unit is not
+		if (($shooter->size >= 3) && ($target->size <3)) $hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $hitChance += 4;//+4 for fighter trying to ram a ship
+		$targetSpeed = abs($target->getSpeed()); //I think speed cannot be negative, but just in case ;)
+		switch($targetSpeed) {
+		    case 0: //+5 if the target is not moving.
+			$hitChance += 5;
+			break;
+		    case 1://+3 if the target is moving speed 1.
+			$hitChance += 3;
+			break;
+		    case 2://+2 if the target is moving speed 2 or 3.
+		    case 3:
+			$hitChance += 2;
+			break;
+		    case 4://+1 if the target is moving speed 4 or 5.
+		    case 5:
+			$hitChance += 1;
+			break;
+		    default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
+			$hitChance += ceil(($targetSpeed-5)/5);
+		}
+		//‐1 for every level of jinking the ramming or target unit is using
+		$hitChance -= Movement::getJinking($shooter, $gamedata->turn);
+		$hitChance -= Movement::getJinking($target, $gamedata->turn);
+		//fire control: usually 0, but units specifically designed for ramming may have some bonus!
+		$hitChance += $this->fireControl[$target->getFireControlIndex()];		
+		
+		$hitChance = $hitChance * 5; //convert d20->d100
+		return $hitChance;
+	}//endof function calculateHitBaseRam
+	
+	
+	
     /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
     public function calculateHitBase($gamedata, $fireOrder){
 	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+	if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
