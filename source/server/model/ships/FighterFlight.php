@@ -321,8 +321,21 @@
 	    	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
 			return;	
 		}
+	    
+	    
+	    /*returns calculated ramming factor for fighter (so will never use explosive charge if, say, Delegor or HK is rammed instead of ramming itself!*/
+	    /*approximate raming factor as Structure + all Armors of example fighter (so always full ramming factor is used, not reduced by damage received) */
+	public function getRammingFactor(){
+		$dmg = 0;
+		$ftr = $this->getSampleFighter();
+		$dmg += = $ftr->maxhealth;
+		foreach($ftr->armour as $armorvalue){
+			$dmg+=$armorvalue;
+		}
+		return $dmg;
+	} //endof function getRammingFactor
              
-    }
+    }//endof class FighterFlight
   
     class SuperHeavyFighter extends FighterFlight{
         public $superheavy = true;
