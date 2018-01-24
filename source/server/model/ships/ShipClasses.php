@@ -1229,6 +1229,22 @@
 	}//endof function setExpectedDamage
 	    
 	    
+	    /*returns calculated ramming factor for ship (so will never use explosive charge if, say, Delegor or HK is rammed instead of ramming itself!*/
+	    /*approximate raming factor as full Structure of undestroyed sections *110% */
+	public function getRammingFactor(){
+		$structuretotal = 0;
+		$prevturn = max(0,TacGamedata::$currentTurn-1);
+		$activeStructures = $this->getSystemsByName("Structure",true);//list of all Structure blocks (check for being destroyed will come later)
+		foreach($activeStructures as $struct){			
+			if (!$struct->isDestroyed($prevturn)){ //if structure is not destroyed AS OF PREVIOUS TURN
+				$structuretotal += $thismaxhealth;
+			}
+		}
+		
+		$dmg = ceil($structuretotal * 1.1);
+		return $dmg;
+	} //endof function getRammingFactor
+	    
     } //endof class BaseShip
     
     class BaseShipNoAft extends BaseShip{
