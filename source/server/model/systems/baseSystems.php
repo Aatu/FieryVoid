@@ -72,7 +72,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     //args for Jammer ability are array("shooter", "target")
     public function getSpecialAbilityValue($args)
     {
-        Debug::log("calling stealth getSpecialAbilityValue");
+        //Debug::log("calling stealth getSpecialAbilityValue");
         if (!isset($args["shooter"]) || !isset($args["target"]))
             throw new InvalidArgumentException("Missing arguments for Stealth getSpecialAbilityValue");
         
@@ -310,7 +310,6 @@ class MagGravReactor extends Reactor{
 
 
 class SubReactor extends ShipSystem{
-
     public $name = "reactor";
     public $displayName = "Reactor";
     public $outputType = "power";
@@ -326,6 +325,11 @@ class SubReactor extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] .= "<br>Secondary reactor: destruction will only destroy a section, not entire ship.";
+	}	
 	
     public function isOverloading($turn){
         return false;
@@ -418,9 +422,13 @@ class SWScanner extends Scanner {
 
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
-	$boostability = $this->maxBoostLevel;
-        //$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability."."; //does this prevent criticals from showing?...
-	$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";	     
+	$boostability = $this->maxBoostLevel;		
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+	$this->data["Special"] .= "Boostability limited to +".$boostability.".";	     
     }
 } //end of swScanner
 
@@ -431,14 +439,15 @@ class CnC extends ShipSystem{
     public $primary = true;
     
     public $possibleCriticals = array(
-    //1=>"SensorsDisrupted", //not implemented! so I take it out for now
-	  1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
-    9=>"CommunicationsDisrupted", 
-    12=>"PenaltyToHit", 
-    15=>"RestrictedEW", 
-    18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-    21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-    24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out for now
+	1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
+	9=>"CommunicationsDisrupted", 
+	12=>"PenaltyToHit", 
+	15=>"RestrictedEW", 
+	18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+	21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+	24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+    );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
