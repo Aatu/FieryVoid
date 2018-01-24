@@ -1706,6 +1706,140 @@ class SurgeBlaster extends Weapon{
 } //endof class SurgeBlaster
 
 
+class RammingAttack extends Weapon{
+    /*option to ram target will be implemented as an actual weapon*/
+        public $name = "RammingAttack";
+        public $displayName = "Ramming Attack";
+	public $iconPath = "RammingAttack.png";
+	
+	//animation irrelevant really (range 0), but needs to be fast!
+        public $animation = "trail";
+        public $animationColor =  array(1, 1, 1);
+        public $projectilespeed = 24;
+        public $animationWidth = 1;
+        public $animationExplosionScale = 0.4;
+        public $priority = 1;
+	
+	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
+      
+        public $loadingtime = 1;
+	public $intercept = 0;
+        
+        public $rangePenalty = 0; //no range penalty
+	public $range = 0; //attacks units on same hex only
+	
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+	public $raking = 10; //size of rake
+	
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
+	
+	private $designedToRam = false;
+	private $designDamage = 0;
+	private $damageModRolled = 0;
+	
+	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+	
+	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
+	
+	
+	//fill gamedata variable, which might otherwise be left out!
+	public function beforeFiringOrderResolution($gamedata){
+		$this->gamedata = $gamedata;
+	}
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
+		      if(!$this->designedToRam) $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
+		      $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
+		      $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
+		      $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
+		      $this->data["Special"] .= "<br>Ramming attacks will be done in ship firing phase (even attacks by fighters) and cannot be intercepted.";
+	    }	
+	
+	
+	public function fire($gamedata, $fireOrder){
+		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
+		parent::fire($gamedata, $fireOrder);
+		if($fireorder->shotshit > 0){
+			$pos = null;
+			$shooter = $gamedata->getShipById($fireOrder->targetid);
+			$target = $this->unit;
+			$fireOrder->chosenLocation = 0;//to be redetermined!
+			$damage = $this->getReturnDamage($fireOrder);
+        		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+		}
+	}//endof function beforeDamage  
+	    }
+        } //endof function fire
+
+	
+        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            $maxhealth = 1;
+            $powerReq = 0;
+		if ($fc != 0){
+			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);	
+		}
+		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
+			$this->designDamage = 	$designDamage;
+		}
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	private function getRammingFactor(){
+		$dmg = 0;
+		if ($this->designDamage > 0){
+			$dmg = 	$this->designDamage;
+		}else{
+			$rammingShip = $this->unit;
+			$dmg = $rammingShip->getRammingFactor();
+		}
+		return $dmg;
+	}
+        public function getDamage($fireOrder){        
+		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
+		$modifier = 0;
+		$shooter = $this->unit;
+		$target = $this->gamedata->getShipById($fireOrder->targetid);
+		if ($shooter->iniative > $target->iniative) $modifier++;
+		$bearing = abs($shooter->getBearingOnUnit($target));
+		if($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		$bearing = abs($target->getBearingOnUnit($shooter));
+		if($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
+		
+		//roll and consult table
+		$roll = Dice::d(20,1)+$modifier;
+		$this->damageModRolled = 0.25; //baseline: 25% damage
+		if ($roll >= 17){
+			$this->damageModRolled = 1; //100%, perfect hit!
+		}else if ($roll >= 13){
+			$this->damageModRolled = 0.75;
+		}else if ($roll >= 7){
+			$this->damageModRolled = 0.5;
+		}//if lower, stays 0.25
+		$damage = ceil($this->damageModRolled * $this->getRammingFactor());	
+		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+		return $damage;					     
+	}//endof function getDamage
+        public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
+		$target = $this->gamedata->getShipById($fireOrder->targetid);
+		$damage = ceil($this->damageModRolled * $target->getRammingFactor());	
+		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+		return $damage;					     
+	}
+	
+        public function setMinDamage(){     
+		$this->minDamage = ceil($this->getRammingFactor()/4);				      
+	}
+        public function setMaxDamage(){     
+		$this->maxDamage = $this->getRammingFactor();				      
+	}
+} //endof class RammingAttack
 
 ?>
