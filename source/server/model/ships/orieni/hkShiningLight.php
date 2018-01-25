@@ -48,7 +48,7 @@ class HkShiningLight extends FighterFlight{
     public function getInitiativebonus($gamedata){
         $iniBonus = parent::getInitiativebonus($gamedata);
         //may be boosted by  Raider Controller...
-        $iniBonus += HkControlNode::getIniMod($this,$gamedata);
+        $iniBonus += HkControlNode::getIniMod($this->userid,$gamedata);
         return $iniBonus;
     }	
     
