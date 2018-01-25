@@ -717,7 +717,8 @@ class DrakhRaiderController extends ShipSystem {
 every 1 point of output of such systems allows for controlling 1 flight (here: 6 HKs)
 if not enough nodes are active, HKs suffer many penalties
 here penalties will be proportional (instead of, say, one flight controlled and one not, there will be 2 hal-controlled flights)
-also, instead of multitude of different penalties, there will be just Initiative penalty - but a big one
+Also, instead of multitude of different penalties, there will be just Initiative penalty - but a big one.
+Also, by rules HK link is vulnerable to ElInt activities - which is not modelled here.
 */
 class HkControlNode extends ShipSystem{
     public $name = "hkControlNode";
