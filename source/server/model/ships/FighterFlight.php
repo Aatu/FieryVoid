@@ -328,7 +328,7 @@
 	public function getRammingFactor(){
 		$dmg = 0;
 		$ftr = $this->getSampleFighter();
-		$dmg += = $ftr->maxhealth;
+		$dmg += $ftr->maxhealth;
 		foreach($ftr->armour as $armorvalue){
 			$dmg+=$armorvalue;
 		}
