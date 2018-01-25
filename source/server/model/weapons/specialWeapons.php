@@ -967,12 +967,10 @@ class SparkFieldHandler{
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$shooter = $field->getUnit();
 			//is this unit defined in current gamedata? (particular instance!)
-			foreach($gamedata->ships as $shp){
-				if ($shp===$shooter){ //active instance!
-					$tmpFields[] = $field;
-					break; //foreach ship
-				}
-			}
+			$belongs = $gamedata->shipBelongs($shooter);
+			if ($belongs){
+				$tmpFields[] = $field;
+			}			
 		}
 		SparkFieldHandler::$sparkFields = $tmpFields;
 		
