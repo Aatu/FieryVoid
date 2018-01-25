@@ -1773,7 +1773,7 @@ class RammingAttack extends Weapon{
 		}
         } //endof function fire
 
-	
+
         function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             $maxhealth = 1;
