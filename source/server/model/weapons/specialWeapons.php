@@ -1771,7 +1771,6 @@ class RammingAttack extends Weapon{
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 		}
-	    }
         } //endof function fire
 
 	
@@ -1789,8 +1788,7 @@ class RammingAttack extends Weapon{
 		$this->designedToRam = $designedToRam;
         }
 	
-	//private function getRammingFactor(){
-	public function getRammingFactor(){
+	private function getRammingFactor(){
 		$dmg = 0;
 		if ($this->designDamage > 0){
 			$dmg = 	$this->designDamage;
