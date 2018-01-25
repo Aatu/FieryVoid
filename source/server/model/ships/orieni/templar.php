@@ -8,7 +8,7 @@ class Templar extends FighterFlight{
         $this->pointCost = 180;
         $this->faction = "Orieni";
         $this->phpclass = "Templar";
-        $this->shipClass = "Templar Light flight";
+        $this->shipClass = "Templar Interceptor flight";
         $this->imagePath = "img/ships/templar.png";
         
         $this->isd = 1827;
