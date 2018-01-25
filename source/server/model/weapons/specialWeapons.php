@@ -1778,8 +1778,7 @@ class RammingAttack extends Weapon{
         } //endof function fire
 
 	
-        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0)
-        {
+        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             $maxhealth = 1;
             $powerReq = 0;
@@ -1790,6 +1789,7 @@ class RammingAttack extends Weapon{
 			$this->designDamage = 	$designDamage;
 		}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->designedToRam = $designedToRam;
         }
 	
 	private function getRammingFactor(){
