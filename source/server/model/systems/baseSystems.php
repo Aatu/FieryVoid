@@ -407,6 +407,21 @@ class ElintScanner extends Scanner implements SpecialAbility{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
     
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$boostability = $this->maxBoostLevel;		
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+	$this->data["Special"] .= "Allows additional Sensor operations:";
+	$this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus.";		     
+	$this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated).";		     
+	$this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
+	$this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
+    }
+	
     public function getSpecialAbilityValue($args)
     {
         return true;
@@ -595,18 +610,6 @@ class Hangar extends ShipSystem{
 }
 
 
-class HkControlNode extends ShipSystem{
-
-    public $name = "hkControlNode";
-    public $displayName = "HK-Control Node";
-    public $primary = true;
-    
-
-    function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
- 
-    }
-}
 
 class Catapult extends ShipSystem{
 
@@ -709,7 +712,84 @@ class DrakhRaiderController extends ShipSystem {
     }
 } //end of DrakhRaiderController
 	
+
+/*Orieni Hunter-Killer Control Node
+every 1 point of output of such systems allows for controlling 1 flight (here: 6 HKs)
+if not enough nodes are active, HKs suffer many penalties
+here penalties will be proportional (instead of, say, one flight controlled and one not, there will be 2 hal-controlled flights)
+also, instead of multitude of different penalties, there will be just Initiative penalty - but a big one
+*/
+class HkControlNode extends ShipSystem{
+    public $name = "hkControlNode";
+    public $displayName = "HK Control Node";
+    public $primary = true;
+    private $fullPenalty = -10 *5; //-10, times 5 d20->d100
 	
+	public static $nodeList = array(); //format: [playerID][shipID][nodeid]=[nodeoutput]
+	public static $hkList = array(); //format: [playerID][shipID]=number of fighters
+    
+    public $possibleCriticals = array( //simplified from B5Wars!
+        15=>"OutputReduced1",
+        21=>"OutputReduced2",
+    );	
+
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); 
+    }
+	
+	
+    public function onConstructed($ship, $turn, $phase){
+	parent::onConstructed($ship, $turn, $phase);
+	HkControlNode::$nodeList[$ship=>userid][$ship->id][$this->id] = $this->getOutputOnTurn($turn);
+    }
+	
+	/*to be called by every HK flight after creation*/
+    public function addHKFlight($playerID,$flightID,$numberOfCraft){
+	HkControlNode::$hkList[$playerID][$flightID] = $numberOfCraft;
+    }
+	
+	/*Initiative modifier for hunter-killers (penalty for being uncontrolled
+		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
+	*/
+	public function getIniMod($playerID,$turn){
+		$totalNodeOutput = 0; //output of all active HK control nodes!
+		if (isset(HkControlNode::$nodeList[$playerID]){
+			foreach(HkControlNode::$nodeList[$playerID] as $shipID=>$nodeArray)
+				foreach($nodeArray as $nodeID=>$nodeOutput){
+					$totalNodeOutput += max(0,$nodeOutput);
+				}
+		}
+		$totalNodeOutput = $totalNodeOutput*6;//translate to number of controled craft - 6 per standard-sized flight
+		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
+		if (isset(HkControlNode::$hkList[$playerID]){
+			foreach(HkControlNode::$hkList[$playerID] as $shipID=>$noOfCraft){
+					$totalHKs += $noOfCraft;
+				}
+		}
+		$iniModifier = $this->fullPenalty;
+		if ($totalHKs > 0){ //should be! but just in case
+			$howPartial = $totalNodeOutput / $totalHKs;
+			$howPartial = min(1, $howPartial); //can't exercise more than 100% control ;)
+			$iniModifier = $this->fullPenalty * (1-$howPartial);//0 for full control
+		}
+		    
+		if($turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
+			$iniModifier+=$this->fullPenalty;
+		}
+		    
+		return $iniModifier;
+	}//endof function getIniMod
+	
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
+	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . $this->fullPenalty . " due to (semi-)autonomous operation.";	     	     
+	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs reorient themselves.";	
+    }	    
+		    
+} //endof class HkControlNode
+
+
 
 
 ?>
