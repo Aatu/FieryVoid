@@ -724,7 +724,7 @@ class HkControlNode extends ShipSystem{
     public $name = "hkControlNode";
     public $displayName = "HK Control Node";
     public $primary = true;
-    private $fullPenalty = -10 *5; //-10, times 5 d20->d100
+    private $fullPenalty = -10*5; //-10, times 5 d20->d100
 	
 	public static $nodeList = array(); //array of nodes in game
 	public static $hkList = array(); // array of HK flights in game
