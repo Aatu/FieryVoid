@@ -726,8 +726,8 @@ class HkControlNode extends ShipSystem{
     public $primary = true;
     private $fullPenalty = -10 *5; //-10, times 5 d20->d100
 	
-	public static $nodeList = array(); //format: [playerID][shipID][nodeid]=[nodeoutput]
-	public static $hkList = array(); //format: [playerID][shipID]=number of fighters
+	public static $nodeList = array(); //array of nodes in game
+	public static $hkList = array(); // array of HK flights in game
     
     public $possibleCriticals = array( //simplified from B5Wars!
         15=>"OutputReduced1",
@@ -736,23 +736,21 @@ class HkControlNode extends ShipSystem{
 
     function __construct($armour, $maxhealth, $powerReq, $output){
         parent::__construct($armour, $maxhealth, $powerReq, $output ); 
+	HkControlNode::$nodeList[] = $this;
     }
 	
 	
-    public function onConstructed($ship, $turn, $phase){
-	parent::onConstructed($ship, $turn, $phase);
-	HkControlNode::$nodeList[$ship=>userid][$ship->id][$this->id] = $this->getOutputOnTurn($turn);
-    }
 	
 	/*to be called by every HK flight after creation*/
-    public function addHKFlight($playerID,$flightID,$numberOfCraft){
-	HkControlNode::$hkList[$playerID][$flightID] = $numberOfCraft;
+    public function addHKFlight($HKflight){
+	HkControlNode::$hkList[] = $HKflight;
     }
 	
 	/*Initiative modifier for hunter-killers (penalty for being uncontrolled
 		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
-	public function getIniMod($playerID,$turn){
+	public function getIniMod($playerID,$gamedata){
+		//REDO!
 		$totalNodeOutput = 0; //output of all active HK control nodes!
 		if (isset(HkControlNode::$nodeList[$playerID]){
 			foreach(HkControlNode::$nodeList[$playerID] as $shipID=>$nodeArray)
