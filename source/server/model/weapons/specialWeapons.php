@@ -1750,7 +1750,11 @@ class RammingAttack extends Weapon{
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
-		      if(!$this->designedToRam) $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
+		      if($this->designedToRam) {
+			      $this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
+		      }else{
+			      $this->data["Special"] .= "<br>ALLOWED ONLY IN SPECIAL CIRCUMSTANCES, LIKE HOMEWORLD DEFENSE!";
+		      }
 		      $this->data["Special"] .= "<br>Profiles and EW do not matter for hit chance - but unit size and target speed does.";  
 		      $this->data["Special"] .= "<br>	(it's generally easier to ram slow targets and targets larger than ramming units itself)";  
 		      $this->data["Special"] .= "<br>Ramming damage is also influenced by conditions - moving head on with initiative slightly increases chance of high damage.";
@@ -1769,7 +1773,13 @@ class RammingAttack extends Weapon{
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			if($target instanceof FighterFlight){ //allocate exactly to firing fighter!
+				$ftr = $target->getFighterBySystem($this->id);
+				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
+				$fireorder->calledid = $ftr->id;
+			}
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+			$fireorder->calledid = -1; //just in case!
 		}
         } //endof function fire
 
