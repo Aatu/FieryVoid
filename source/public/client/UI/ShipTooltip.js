@@ -110,8 +110,7 @@ window.ShipTooltip = (function(){
         }
 
 
-        console.log("show targeting", gamedata.isEnemy(ship, this.selectedShip), this.showTargeting);
-        if (gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting){
+        if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting){
             weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
             $(".fire", this.element).show();
         }else{

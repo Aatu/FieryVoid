@@ -17,9 +17,11 @@ window.LineSprite = (function(){
 
     LineSprite.prototype.setStartAndEnd = function (start, end) {
         var width = mathlib.distance(start, end);
+        var position = mathlib.getPointBetween(start, end, 0.5);
+        this.mesh.position.x = position.x;
+        this.mesh.position.y = position.y;
         this.mesh.scale.x = width;
-        //this.setPosition(mathlib.getPointBetween(start, end, 0.5));
-        //this.setFacing(mathlib.getCompassHeadingOfPoint(start, end));
+        this.mesh.rotation.z = -mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
     };
 
     LineSprite.prototype.setLineWidth = function (lineWidth) {
@@ -48,7 +50,7 @@ window.LineSprite = (function(){
             this.material
         );
 
-        mesh.rotation.z = mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
+        mesh.rotation.z = -mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
         mesh.position.z = this.z;
         var position = mathlib.getPointBetween(start, end, 0.5);
         mesh.position.x = position.x;

@@ -229,58 +229,6 @@ window.mathlib = {
 		}
 
         return heading;
-
-		/*
-		var dX = target.x - observer.x;
-		var dY = target.y - observer.y;
-		var heading = 0.0;
-		//console.log("dX: " +dX+ " dY: " + dY);				
-		if (dX == 0){
-			if (dY>0){
-				heading = 180.0;
-			}else{
-				heading = 0.0;
-			}
-			
-		}else if (dY == 0){
-			if (dX>0){
-				heading = 90.0;
-			}else{
-				heading = 270.0;
-
-			}
-		}else if (dX>0 && dY<0 ){
-			//console.log("h:1");
-			heading = mathlib.radianToDegree(Math.atan(dX/Math.abs(dY)));
-		}else if (dX>0 && dY>0 ){
-			//console.log("h:2");
-			heading = mathlib.radianToDegree(Math.atan(dY/dX)) + 90;
-		}else if (dX<0 && dY>0){
-			//console.log("h:3");
-			heading = mathlib.radianToDegree(Math.atan(Math.abs(dX)/dY)) + 180;
-		}else if (dX<0 && dY<0){
-			//console.log("h:4");
-			heading = mathlib.radianToDegree(Math.atan(dY/dX)) + 270;
-		}
-		/*
-		}else if (dX>0 && dY>0 ){
-			console.log("h:1");
-			heading = mathlib.radianToDegree(Math.atan(dX/dY));
-		}else if (dX>0 && dY<0 ){
-			console.log("h:2");
-			heading = mathlib.radianToDegree(Math.atan(Math.abs(dY)/dX)) + 90;
-		}else if (dX<0 && dY<0){
-			console.log("h:3");
-			heading = mathlib.radianToDegree(Math.atan(dX/dY)) + 180;
-		}else if (dX<0 && dY>0){
-			console.log("h:4");
-			heading = mathlib.radianToDegree(Math.atan(dY/Math.abs(dX))) + 270;
-		}
-		heading = mathlib.addToDirection(Math.round(heading), -90);
-
-		return heading;
-
-		*/
 	},
 
 

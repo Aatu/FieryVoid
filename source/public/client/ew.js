@@ -347,7 +347,6 @@ window.ew = {
             entry.amount++;
         }
         gamedata.shipStatusChanged(ship);
-        drawEntities();
     },
     
     buttonDeassignEW: function(e){

@@ -1,12 +1,12 @@
 window.systemInfo = {
 
 
-	showSystemInfo: function(t, system, ship){
+	showSystemInfo: function(element, system, ship, selectedShip){
         system = shipManager.systems.initializeSystem(system);
         
-        $('.UI', t).addClass("active");
+        $('.UI', element).addClass("active");
 		var w = $("#systemInfo");
-		var offs = t.offset();
+		var offs = element.offset();
 
 		w.css("left", offs.left + "px");
 		w.css("top", offs.top +35+ "px");
@@ -55,13 +55,13 @@ window.systemInfo = {
 		$(".datacontainer", w).html(h);
 		
 		
-		if (!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0){
-			if (weaponManager.canCalledshot(ship, system)){
+		if (!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip){
+			if (weaponManager.canCalledshot(ship, system, selectedShip)){
 							
 				e = $('<div class="calledtargeting"><span>CALLED SHOT</span></div><div class="targeting"></div>');
 				var datac = $(".datacontainer", w);
 				datac.append(e);
-				weaponManager.targetingShipTooltip(ship, datac, system.id);
+				weaponManager.targetingShipTooltip(selectedShip, ship, datac, system.id);
 			}else{
 				e = $('<div class="calledtargeting"><span>CANNOT TARGET</span>');
 				$(".datacontainer", w).append(e);

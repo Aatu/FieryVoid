@@ -79,36 +79,17 @@ class Mathlib{
     }
         
     public static function getCompassHeadingOfPoint($observer, $target){
-        $dX = $target["x"] - $observer["x"];
-        $dY = $target["y"] - $observer["y"];
-        $heading = 0.0;
-                    
-        if ($dX == 0){
-            if ($dY>0){
-                $heading = 180.0;
-            }else{
-                $heading = 0.0;
-            }
-            
-        }else if ($dY == 0){
-            if ($dX>0){
-                $heading = 90.0;
-            }else{
-                $heading = 270.0;
 
-            }
-        }else if ($dX>0 && $dY<0 ){
-            $heading = Mathlib::radianToDegree(atan($dX/abs($dY)));
-        }else if ($dX>0 && $dY>0 ){
-            $heading = Mathlib::radianToDegree(atan($dY/$dX)) + 90;
-        }else if ($dX<0 && $dY>0){
-            $heading = Mathlib::radianToDegree(atan(abs($dX)/$dY)) + 180;
-        }else if ($dX<0 && $dY<0){
-            $heading = Mathlib::radianToDegree(atan($dY/$dX)) + 270;
+        $heading = self::radianToDegree(atan2($target["y"] - $observer["y"], $target["x"] - $observer["x"]));
+
+        if ($heading > 0) {
+            $heading = 360 - $heading;
+        } else {
+            $heading = abs($heading);
         }
-        
-        
-        return Mathlib::addToDirection(round($heading), -90);
+
+        return $heading;
+
     }
     
     public static function radianToDegree($angle){
@@ -158,7 +139,8 @@ class Mathlib{
     }
     
     public static function getHexToDirection($d, $x, $y){
-        
+
+        throw new Exception("Update to offset cordinates");
         $pos = self::hexCoToPixel($x, $y);
         $pos2 = self::getPointInDirection(self::$hexHeight, $d, $pos["x"], $pos["y"]);
         return self::pixelCoToHex($pos2["x"], $pos2["y"]);
@@ -168,10 +150,9 @@ class Mathlib{
     
     
     public static function hexCoToPixel(OffsetCoordinate $position){
-        $hl = 50;
 
-        $x = $hl * sqrt(3) * ($position->q - 0.5 * ($position->r & 1));
-        $y = $hl * 3/2 * $position->r;
+        $x = sqrt(3) * ($position->q - 0.5 * ($position->r & 1));
+        $y = 3/2 * $position->r;
 
         return array("x"=>$x, "y"=>$y);
     }

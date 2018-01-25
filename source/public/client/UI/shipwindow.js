@@ -1692,6 +1692,8 @@ setSystemData: function(ship, system, shipwindow){
 	},
 	
 	clickSystem: function(e){
+
+    	//TODO: Move to phase strategy
 		e.stopPropagation();
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);

@@ -248,37 +248,44 @@ class Manager{
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
     
-	if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
-                return null;
+	    if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
+            return null;
         
         $gamedata = null;
-        
-        self::initDBManager();
 
-        if ($turn === -1)
-            self::deleteOldGames ();
+        try {
+            self::initDBManager();
+            self::$dbManager->startTransaction();
 
-        //Todo: this should propably happen after submit game data...
-        self::advanceGameState($userid, $gameid);
+            if ($turn === -1)
+                self::deleteOldGames ();
 
-        if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
-            //Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
-            $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
-            if ($gamedata == null)
+            //Todo: this should propably happen after submit game data...
+            self::advanceGameState($userid, $gameid);
+
+            if (self::$dbManager->isNewGamedata($gameid, $turn, $phase, $activeship)){
+                //Debug::log("GAME: $gameid Player: $userid requesting gamedata, new found.");
+                $gamedata = self::$dbManager->getTacGamedata($userid, $gameid);
+                if ($gamedata == null)
+                    return null;
+                //print(var_dump($gamedata));
+                $gamedata->prepareForPlayer($turn, $phase, $activeship);
+            }else{
                 return null;
-            //print(var_dump($gamedata));
-            $gamedata->prepareForPlayer($turn, $phase, $activeship);
-        }else{
-            return null;
+            }
+
+            self::$dbManager->endTransaction(false);
+            return $gamedata;
+        }catch(exception $e) {
+            self::$dbManager->endTransaction(true);
+            $logid = Debug::error($e);
+            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
-        
-        return $gamedata;
     }
     
     public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
         self::$dbManager->updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount);
     }
-
     
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship){
         
@@ -287,6 +294,11 @@ class Manager{
 
             if (!$gdS)
                 return "{}";
+
+            //getTacGameData trying to return error string
+            if (gettype($gdS) == "string") {
+                return $gdS;
+            }
 
             if ($gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
@@ -361,10 +373,6 @@ class Manager{
                 $phase->process($gdS, self::$dbManager, $ships, $activeship);
             }else if ($phase instanceof FireGamePhase){
                 $phase->process($gdS, self::$dbManager, $ships);
-            }else if ($gdS->phase == 4){
-
-		    //if($userid = 61) throw new Exception("BEFORE handling FINAL orders");
-                self::handleFinalOrders($ships, $gdS);
             }
                         
             self::$dbManager->endTransaction(false);
@@ -385,12 +393,6 @@ class Manager{
         }
        
         
-    }
-    
-    private static function handleFinalOrders(  $ships, $gamedata ){
-        self::$dbManager->updatePlayerStatus($gamedata->id, $gamedata->forPlayer, $gamedata->phase, $gamedata->turn);
-       
-        return true;
     }
 
     public static function advanceGameState($playerid, $gameid){
@@ -425,7 +427,6 @@ class Manager{
                 $phase->advance($gamedata, self::$dbManager);
             }else if ($phase instanceof FireGamePhase){
                 $phase->advance($gamedata, self::$dbManager);
-            }else if ($phase == 4){
                 self::changeTurn($gamedata);
             }
             
@@ -440,8 +441,6 @@ class Manager{
             }
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
-            
-            $endtime = time();
         }
         catch(Exception $e)
         {
@@ -484,37 +483,14 @@ class Manager{
             self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
         }
     }
-    
+
     private static function generateIniative($gamedata){
         foreach ($gamedata->ships as $key=>$ship){
-		/* moved to ship slass itself!
-            $mod = 0;
-            $speed = $ship->getSpeed();
-        
-            if ( !($ship instanceof OSAT) ){
-           //     debug::log("speed check for: ".$ship->shipClass);
-                if ($speed < 5){
-                    $mod = (5-$speed)*10;
-                }
 
-                $CnC = $ship->getSystemByName("CnC");
-
-                if ($CnC){
-			    $mod += 5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
-			    $mod += 10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-			    $mod += 10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
-				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-	    			$mod += 20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
-			}
-	    }
-	    */
-	   $mod =  $ship->getCommonIniModifiers( $gamedata );
-	   $iniBonus =  $ship->getInitiativebonus($gamedata);
-
-
+            $mod =  $ship->getCommonIniModifiers( $gamedata );
+            $iniBonus =  $ship->getInitiativebonus($gamedata);
 
             $ship->iniative = Dice::d(100) + $iniBonus + $mod;
-           //debug::log("ini submit for: ".$ship->shipClass."---:".$ship->iniative);
 
         }
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);

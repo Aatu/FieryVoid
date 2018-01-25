@@ -35,6 +35,7 @@
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
+    <script src="client/lib/THREE.MeshLine.js"></script>
     <script src="client/lib/stats.min.js"></script>
     <script>
         window.Config = {
@@ -108,9 +109,14 @@
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/MovementAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
-
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
+
+    <script src="client/renderer/particleEffects/BaseParticle.js"></script>
+    <script src="client/renderer/particleEffects/ParticleEmitter.js"></script>
+    <script src="client/renderer/particleEffects/ParticleEffect.js"></script>
+    <script src="client/renderer/particleEffects/EffectParticleEmitter.js"></script>
+    <script src="client/renderer/particleEffects/effects/ParticleEffectExplosion.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
@@ -138,6 +144,7 @@
     <script src="client/windowevents.js"></script>
     <script src="client/mousewheel.js"></script>
     <script src="client/mathlib.js"></script>
+    <script src="client/lib/seedRandom.js"></script>
     <script src="client/debug.js"></script>
     <script src="client/ajaxInterface.js"></script>
     <script src="client/ew.js"></script>

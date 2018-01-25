@@ -1,10 +1,13 @@
 window.ReplayAnimationStrategy = (function(){
 
-    function ReplayAnimationStrategy(onDoneCallback, gameData, shipIcons, turn){
+    function ReplayAnimationStrategy(onDoneCallback, gameData, shipIcons, scene){
         AnimationStrategy.call(this, onDoneCallback);
         this.shipIconContainer = shipIcons;
         this.turn = gameData.turn;
         buildAnimations.call(this, gamedata);
+        this.particleEmitter = new EffectParticleEmitter(scene);
+        this.animations.push(this.particleEmitter);
+        this.particleEmitter.start();
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);

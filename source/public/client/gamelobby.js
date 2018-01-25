@@ -340,7 +340,7 @@ window.gamedata = {
 		gamedata.status = serverdata.status;
 
 		if (gamedata.status == "ACTIVE"){
-			window.location = "hex.php?gameid="+gamedata.gameid;
+			window.location = "game.php?gameid="+gamedata.gameid;
 		}
 
 

@@ -34,7 +34,7 @@ class InitialOrdersGamePhase implements Phase
             if ($ship->userid != $gameData->forPlayer)
                 continue;
 
-            if (EW::validateEW($ship->EW, $gd)){
+            if (EW::validateEW($ship, $gd)){
                 $dbManager->submitEW($gameData->id, $ship->id, $ship->EW, $gameData->turn);
             }else{
                 throw new Exception("Failed to validate EW");

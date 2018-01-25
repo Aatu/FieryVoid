@@ -15,7 +15,7 @@ window.ReplayPhaseStrategy = (function(){
         this.gamedata = gamedata;
         this.webglScene = webglScene;
         this.inactive = false;
-        this.animationStrategy = new ReplayAnimationStrategy(null, gamedata, this.shipIconContainer);
+        this.animationStrategy = new ReplayAnimationStrategy(null, gamedata, this.shipIconContainer, webglScene.scene);
         this.animationStrategy.activate();
         this.consumeGamedata();
         console.log("enabled replay phase strategy");

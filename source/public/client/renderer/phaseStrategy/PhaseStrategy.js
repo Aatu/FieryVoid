@@ -105,7 +105,9 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function(ship) {
-        this.onShipClicked(ship);
+        if (this.gamedata.isMyShip(ship)) {
+            this.selectShip(ship);
+        }
         shipWindowManager.open(ship);
     };
 
@@ -285,6 +287,21 @@ window.PhaseStrategy = (function(){
         if (this.onDoneCallback) {
             this.onDoneCallback();
         }
+    };
+
+    PhaseStrategy.prototype.onWeaponMouseOver = function(payload) {
+        var ship = payload.ship;
+        var weapon = payload.weapon;
+        var element = payload.element;
+        systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
+
+        this.shipIconContainer.getArray().forEach(function (icon){ icon.hideWeaponArcs();});
+        var icon = this.shipIconContainer.getByShip(ship);
+        icon.showWeaponArc(ship, weapon);
+    };
+
+    PhaseStrategy.prototype.onWeaponMouseOut = function() {
+        this.shipIconContainer.getArray().forEach(function (icon){ icon.hideWeaponArcs();});
     };
 
     function getInterestingStuffInPosition(payload){

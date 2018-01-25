@@ -159,7 +159,7 @@ class MovementOrder{
     }
     
     public function getCoPos(){
-        return mathlib::hexCoToPixel($this->x, $this->y);
+        return mathlib::hexCoToPixel($this->position);
     }
     
     public function getFacingAngle(){

@@ -1026,8 +1026,8 @@ class Weapon extends ShipSystem{
 	public function fire($gamedata, $fireOrder){
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
-		
-		$fireOrder->needed -= $fireOrder->totalIntercept.
+
+		$fireOrder->needed -= $fireOrder->totalIntercept;
 		$notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
 		$fireOrder->notes .= $notes;
 		

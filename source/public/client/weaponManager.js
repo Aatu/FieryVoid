@@ -17,6 +17,7 @@ window.weaponManager = {
 
 	onModeClicked: function(shipwindow, systemwindow, ship, system)
 	{
+	    throw new Error("Route trough phase strategy to get selected ship");
 		if (!system)
 			return;
 
@@ -52,7 +53,7 @@ window.weaponManager = {
 				clearTimeout(weaponManager.mouseoverTimer);
 				weaponManager.mouseOutTimer = null;
 				weaponManager.mouseoverTimer = null;
-				systemInfo.showSystemInfo(parentwindow, newSystem, ship);
+				systemInfo.showSystemInfo(parentwindow, newSystem, ship, selectedship);
 			}else{
 				system.changeFiringMode();
 				shipWindowManager.setDataForSystem(ship, system);
@@ -97,30 +98,30 @@ window.weaponManager = {
 		shipWindowManager.setDataForSystem(ship, system);
 	},
 
-	onWeaponMouseover: function(e){
-		if (weaponManager.mouseOutTimer != null){
-			clearTimeout(weaponManager.mouseOutTimer);
-			weaponManager.mouseOutTimer = null;
-		}
+    onWeaponMouseover: function(e){
+        if (weaponManager.mouseOutTimer != null){
+            clearTimeout(weaponManager.mouseOutTimer);
+            weaponManager.mouseOutTimer = null;
+        }
 
-		if (weaponManager.mouseoverTimer != null)
-			return;
+        if (weaponManager.mouseoverTimer != null)
+            return;
 
-		var id = $(this).data("shipid");
-		weaponManager.currentShip = gamedata.getShip(id);
+        var id = $(this).data("shipid");
+        weaponManager.currentShip = gamedata.getShip(id);
 
-		if ($(this).hasClass("fightersystem")){
-			weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
-	}else{
-			weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
-		}
+        if ($(this).hasClass("fightersystem")){
+            weaponManager.currentSystem = shipManager.systems.getFighterSystem(weaponManager.currentShip, $(this).data("fighterid"), $(this).data("id"));
+        }else{
+            weaponManager.currentSystem = shipManager.systems.getSystem(weaponManager.currentShip, $(this).data("id"));
+        }
 
-		var targetElement = $(this);
+        var targetElement = $(this);
 
-			weaponManager.mouseoverSystem = targetElement;
+        weaponManager.mouseoverSystem = targetElement;
 
-		weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
-	},
+        weaponManager.mouseoverTimer = setTimeout(weaponManager.doWeaponMouseOver, 150);
+    },
 
 	onWeaponMouseoverDuoSystem: function(e){
 		// ignore this. We've already entered the parent of this duosystem
@@ -154,10 +155,8 @@ window.weaponManager = {
 			return;
 		}
 
-		systemInfo.showSystemInfo(weaponManager.mouseoverSystem, weaponManager.currentSystem, weaponManager.currentShip);
-
         var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
-        webglScene.customEvent('WeaponMouseOver', {ship: weaponManager.currentShip, weapon: weapon});
+        webglScene.customEvent('WeaponMouseOver', {ship: weaponManager.currentShip, weapon: weapon, element: weaponManager.mouseoverSystem});
 
 	},
 
@@ -404,10 +403,10 @@ window.weaponManager = {
 		return false;
 	},
 	
-	canCalledshot: function(target, system){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
+	canCalledshot: function(target, system, shooter){ /*Marcin Sawicki, new version $outerSections-based - October 2017*/
 		var sectionEligible = false; //section that system is mounted on is eligible for caled shots
-		var shooter = gamedata.getSelectedShip();
-		if (!shooter) return false;		
+		if (!shooter) return false;
+
 		if (target.flight) return true; //experiment - allow called shots at fighters?...
 		
 		var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target,shooter);

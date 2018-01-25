@@ -18,6 +18,8 @@ class PhaseFactory
                 return new InitialOrdersGamePhase();
             case 2:
                 return new MovementGamePhase();
+            case 3:
+                return new FireGamePhase();
             default:
                 throw new Exception("Unrecognized phase '$phase'");
         }

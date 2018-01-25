@@ -16,7 +16,7 @@ window.gamedata = {
 					div.className = "game slot clickable"
 
 				var link = document.createElement("a");
-					link.setAttribute("href", "http://fieryvoid.net/hex.php?gameid=" + id);
+					link.setAttribute("href", "http://fieryvoid.net/game.php?gameid=" + id);
 					//link.innerHTML = "Anonymous Match" + " @ Turn " + data[i].turn;
 					link.innerHTML = data[i].name + " @ Turn " + data[i].turn;
 
@@ -152,7 +152,7 @@ window.gamedata = {
 	
 	clickActiveGame: function(e){
 		var id = $(this).data().gameid;
-		window.location = "hex.php?gameid="+id;
+		window.location = "game.php?gameid="+id;
 	},
 	
 	clickLobbyGame: function(e){

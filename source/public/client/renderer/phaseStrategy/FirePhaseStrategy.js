@@ -15,6 +15,7 @@ window.FirePhaseStrategy = (function(){
         infowindow.informPhase(5000, null);
         this.selectFirstOwnShipOrActiveShip();
 
+        gamedata.showCommitButton();
         return this;
     };
 
@@ -51,21 +52,6 @@ window.FirePhaseStrategy = (function(){
     };
 
     FirePhaseStrategy.prototype.untargetShip = function(ship) {};
-
-    FirePhaseStrategy.prototype.onWeaponMouseOver = function(payload) {
-        var ship = payload.ship;
-        var weapon = payload.weapon;
-
-        console.log("weapon mouseover");
-
-        var icon = this.shipIconContainer.getByShip(ship);
-        icon.showWeaponArc(ship, weapon);
-    };
-
-    FirePhaseStrategy.prototype.onWeaponMouseOut = function() {
-        console.log("weapon mouseout");
-        this.shipIconContainer.getArray().forEach(function (icon){ icon.hideWeaponArcs();});
-    };
 
     FirePhaseStrategy.prototype.onWeaponSelected = function(payload) {
         var ship = payload.ship;
