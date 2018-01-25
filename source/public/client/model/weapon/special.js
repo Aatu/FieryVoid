@@ -130,3 +130,11 @@ var SurgeBlaster = function(json, ship)
 }
 SurgeBlaster.prototype = Object.create( Weapon.prototype );
 SurgeBlaster.prototype.constructor = SurgeBlaster;
+
+
+var RammingAttack = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+RammingAttack.prototype = Object.create( Weapon.prototype );
+RammingAttack.prototype.constructor = RammingAttack;
