@@ -1773,7 +1773,6 @@ class RammingAttack extends Weapon{
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 		}
-	}//endof function beforeDamage  
 	    }
         } //endof function fire
 
