@@ -726,6 +726,7 @@ class HkControlNode extends ShipSystem{
     public $primary = true;
     private $fullPenalty = -50; //-10, times 5 d20->d100
 	
+    public static $alreadyCleared = false;	
 	public static $nodeList = array(); //array of nodes in game
 	public static $hkList = array(); // array of HK flights in game
     
@@ -746,6 +747,32 @@ class HkControlNode extends ShipSystem{
 	HkControlNode::$hkList[] = $HKflight;
     }
 	
+	//inactive entries (from other gamedata) might have slipped by... clear them out!
+	public static function clearLists($gamedata){
+		HkControlNode::$alreadyCleared = true;
+		$tmpArray = array();
+		foreach(HkControlNode::$nodeList as $curr){
+			$shp = $curr->getUnit();
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($shp);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		HkControlNode::$nodeList = $tmpArray;
+		$tmpArray = array();
+		foreach(HkControlNode::$hkList as $curr){
+			$shp = $curr->getUnit();
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($shp);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		HkControlNode::$hkList = $tmpArray;
+	}//endof function clearLists
+	
+	
 	/*Initiative modifier for hunter-killers (penalty for being uncontrolled
 		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
@@ -753,27 +780,21 @@ class HkControlNode extends ShipSystem{
 		//REDO!
 		$iniModifier = $this->fullPenalty;
 		$totalNodeOutput = 0; //output of all active HK control nodes!
+		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
+		
+		if(!HkControlNode::$alreadyCleared) HkControlNode::clearLists($gamedata); //in case some inactive entries slipped in
+		
 		foreach(HkControlNode::$nodeList as $currNode){
-			//is it form active game even?... it may happen that it's not!
-			
-			
-		}
-		
-		
-		/*
-		if (isset(HkControlNode::$nodeList[$playerID]){
-			foreach(HkControlNode::$nodeList[$playerID] as $shipID=>$nodeArray)
-				foreach($nodeArray as $nodeID=>$nodeOutput){
-					$totalNodeOutput += max(0,$nodeOutput);
-				}
+			if ($currNode->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
 		}
 		$totalNodeOutput = $totalNodeOutput*6;//translate to number of controled craft - 6 per standard-sized flight
-		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
-		if (isset(HkControlNode::$hkList[$playerID]){
-			foreach(HkControlNode::$hkList[$playerID] as $shipID=>$noOfCraft){
-					$totalHKs += $noOfCraft;
-				}
+		
+		foreach(HkControlNode::$hkList as $hkFlight){
+			if ($hkFlight->userid == $playerID) {
+				$totalHKs += $hkFlight->countActiveCraft();
+			}
 		}
+		
 		if ($totalHKs > 0){ //should be! but just in case
 			$howPartial = $totalNodeOutput / $totalHKs;
 			$howPartial = min(1, $howPartial); //can't exercise more than 100% control ;)
@@ -783,7 +804,9 @@ class HkControlNode extends ShipSystem{
 		if($turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=$this->fullPenalty;
 		}
-		    */
+		
+		
+		$iniModifier = floor($iniModifier);
 		return $iniModifier;
 	}//endof function getIniMod
 	
