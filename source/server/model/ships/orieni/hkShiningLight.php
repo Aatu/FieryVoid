@@ -5,34 +5,39 @@ class HkShiningLight extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 180;
+        $this->pointCost = 32*6;
         $this->faction = "Orieni";
-        $this->phpclass = "Templar";
-        $this->shipClass = "Templar Interceptor flight";
-        $this->imagePath = "img/ships/templar.png";
+        $this->phpclass = "HkShiningLight";
+        $this->shipClass = "Shining Light Hunter-Killer flight";
+        $this->imagePath = "img/ships/OrieniHK.png";
         
-        $this->isd = 1827;
-        $this->forwardDefense = 7;
-        $this->sideDefense = 6;
-        $this->freethrust = 12;
-        $this->offensivebonus = 4;
-        $this->jinkinglimit = 10;
+        $this->isd = 1778;
+        $this->forwardDefense = 8;
+        $this->sideDefense = 8;
+        $this->freethrust = 9;
+        $this->offensivebonus = 0;
+        $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
-    	$this->iniativebonus = 100;
+    	$this->iniativebonus = 6 *5;//no mistake, this is semi-autonomous unit without pilo - so its Ini is really low!
         $this->populate();        
     }
+    
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){   
-            $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter("templar", $armour, 9, $this->id);
-            $fighter->displayName = "Templar";
-            $fighter->imagePath = "img/ships/templar.png";
-            $fighter->iconPath = "img/ships/templar_large.png";
-            $fighter->addFrontSystem(new PairedGatlingGun(330, 30));
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter("HkShiningLight", $armour, 9, $this->id);
+            $fighter->displayName = "Shining Light";
+            $fighter->imagePath = "img/ships/OrieniHK.png";
+            $fighter->iconPath = "img/ships/OrieniHK_large.png";
+            
+            //$armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false
+            //HK should by rules get a penalty of -1 per 2 speed at the moment of ram; I change it to a flat -3, regardless of circumstances
+            $fighter->addFrontSystem(new RammingAttack(0, 0, 360, 60, -3, true));
+            
             $this->addSystem($fighter);
         }
     }
