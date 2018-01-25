@@ -93,6 +93,15 @@
 		    return $this->systems[1];
 	    }
 	    
+	    /*returns number of still active craft in flight*/
+	    public function countActiveCraft(){
+		    $countActive = 0;
+		    foreach($this->systems as $ftr){
+			    if(!$ftr->isDestroyed()) $countActive++;
+		    }
+		    return $countActive;
+	    }//endof function countActiveCraft
+	    
 	    
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
