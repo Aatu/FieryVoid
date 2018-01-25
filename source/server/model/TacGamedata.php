@@ -494,12 +494,6 @@ class TacGamedata{
                 }
             }
         }
-        
-        
-        
-        
-        
-        
     }
     
     private function calculateTurndelays(){
@@ -641,4 +635,20 @@ class TacGamedata{
 
         return false;
     }
+	
+	/*check whether indicated ship belongs to this game - as it may happen that it does not!*/
+	public function shipBelongs($shipToCheck){
+		foreach($this->ships as $shp){
+			if ($shp===$shipToCheck){ //yes!
+				return true;
+			}
+		}
+		return false; //this ship was not found
+	}//endof function shipBelongs
+	
+	
 }
+
+
+
+?>
