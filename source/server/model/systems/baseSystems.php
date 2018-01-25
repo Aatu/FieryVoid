@@ -751,7 +751,16 @@ class HkControlNode extends ShipSystem{
 	*/
 	public function getIniMod($playerID,$gamedata){
 		//REDO!
+		$iniModifier = $this->fullPenalty;
 		$totalNodeOutput = 0; //output of all active HK control nodes!
+		foreach(HkControlNode::$nodeList as $currNode){
+			//is it form active game even?... it may happen that it's not!
+			
+			
+		}
+		
+		
+		/*
 		if (isset(HkControlNode::$nodeList[$playerID]){
 			foreach(HkControlNode::$nodeList[$playerID] as $shipID=>$nodeArray)
 				foreach($nodeArray as $nodeID=>$nodeOutput){
@@ -765,7 +774,6 @@ class HkControlNode extends ShipSystem{
 					$totalHKs += $noOfCraft;
 				}
 		}
-		$iniModifier = $this->fullPenalty;
 		if ($totalHKs > 0){ //should be! but just in case
 			$howPartial = $totalNodeOutput / $totalHKs;
 			$howPartial = min(1, $howPartial); //can't exercise more than 100% control ;)
@@ -775,7 +783,7 @@ class HkControlNode extends ShipSystem{
 		if($turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=$this->fullPenalty;
 		}
-		    
+		    */
 		return $iniModifier;
 	}//endof function getIniMod
 	
