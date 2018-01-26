@@ -571,15 +571,19 @@ shipWindowManager = {
 				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
 			}
 			else if (group.length == 2){
-
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
 				else {
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
-				}				
+				}		
 			}			
 			else if (group.length == 3){	
+
+				if ( (location ==3) || (location == 4) ){ //for sides do use single columns here!
+					col2 = 1;
+				}
+				
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
 						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
@@ -589,6 +593,7 @@ shipWindowManager = {
 						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
 						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
 				}
+				col2 = 2; //return usual value				
 			}				
 			else if (group.length == 4){	
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
