@@ -540,8 +540,8 @@ shipWindowManager = {
 	
 		var arrangement;
 		var col2 = 2;
+		var col3 = 2; //for columns that may be equal or wider to col2
 		var col4 = 4;
-		var isSide = false;
 		if (location == 0){
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
 		}
@@ -552,8 +552,8 @@ shipWindowManager = {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
 		}
 		else{
-			isSide = true;
 			col2 = 1; //single column here
+			col3 = 2; //double column even here!
 			col4 = 3;
 			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
 			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
@@ -564,18 +564,18 @@ shipWindowManager = {
 		for (var i in arrangement){
 			var group = arrangement[i];
 			var row;
-			if ((group.length == 1) && (!isSide)){
+			if (group.length == 1){
 				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
 			}
-			else if ((group.length == 2) && (!isSide)){
+			else if (group.length == 2){
 				if (location == 4){//reverse order for Stbd!
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
 				else {
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
 				}		
 			}			
-			else if ((group.length == 3) || isSide){					
+			else if (group.length == 3) {					
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
 						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
