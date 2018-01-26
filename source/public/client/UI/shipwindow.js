@@ -558,7 +558,9 @@ shipWindowManager = {
 		else{
 			col2 = 1;
 			col4 = 2;
-			arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
+			arrangement = shipWindowManager.getFinalArrangementThree(ship, systems, structure, location);
 		}
 		
 		var index = 0;
