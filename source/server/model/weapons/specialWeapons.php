@@ -1767,7 +1767,7 @@ class RammingAttack extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
 		parent::fire($gamedata, $fireOrder);
-		if($fireorder->shotshit > 0){
+		if($fireOrder->shotshit > 0){
 			$pos = null;
 			$shooter = $gamedata->getShipById($fireOrder->targetid);
 			$target = $this->unit;
@@ -1781,7 +1781,7 @@ class RammingAttack extends Weapon{
 				$fireorder->calledid = $ftr->id;
 			}
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
-			$fireorder->calledid = -1; //just in case!
+			$fireOrder->calledid = -1; //just in case!
 		}
         } //endof function fire
 
