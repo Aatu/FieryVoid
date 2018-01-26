@@ -9,7 +9,8 @@ class FtrAnemone extends FighterFlight{
         $this->faction = "Ipsha";
         $this->phpclass = "FtrAnemone";
         $this->shipClass = "Anemone Medium flight";
-        $this->imagePath = "img/ships/IpshaUrchin.png";
+        //$this->imagePath = "img/ships/IpshaUrchin.png";
+        $this->imagePath = "img/ships/IpshaBorgUrchin.png";
         $this->isd = 2165;
         
         $this->unofficial = true;
@@ -38,8 +39,12 @@ class FtrAnemone extends FighterFlight{
             $armour = array(2, 2, 1, 1);
             $fighter = new Fighter("FtrAnemone", $armour, 11, $this->id);
             $fighter->displayName = "Anemone";
+            /*
             $fighter->imagePath = "img/ships/IpshaUrchin.png";
             $fighter->iconPath = "img/ships/IpshaUrchin_large.png";
+            */
+            $fighter->imagePath = "img/ships/IpshaBorgUrchin.png";
+            $fighter->iconPath = "img/ships/IpshaBorgUrchin_large.png";
             $frontGun = new LtSurgeBlaster(330, 30, 1); //1 gun - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);
