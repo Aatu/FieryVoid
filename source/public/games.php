@@ -54,7 +54,9 @@
 		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha feature a different approach to power management, and should be a different experience to play. Warning: heavy power micromanagement involved!";
+                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha feature a different approach to power management, and should be a different experience to play. Warning: heavy micromanagement involved!";
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
