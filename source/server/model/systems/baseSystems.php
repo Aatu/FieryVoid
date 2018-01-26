@@ -776,8 +776,7 @@ class HkControlNode extends ShipSystem{
 	/*Initiative modifier for hunter-killers (penalty for being uncontrolled
 		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
-	public function getIniMod($playerID,$gamedata){
-		//REDO!
+	public static function getIniMod($playerID,$gamedata){
 		$iniModifier = $this->fullPenalty;
 		$totalNodeOutput = 0; //output of all active HK control nodes!
 		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
