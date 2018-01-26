@@ -552,7 +552,7 @@ shipWindowManager = {
 		}
 		else{
 			col2 = 1;
-			col4 = 2;
+			col4 = 3;
 			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
 			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
 			arrangement = shipWindowManager.getFinalArrangementThree(ship, systems, structure, location);
@@ -573,12 +573,7 @@ shipWindowManager = {
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
 				}		
 			}			
-			else if (group.length == 3){	
-
-				if ( (location ==3) || (location == 4) ){ //for sides do use single columns here!
-					col2 = 1;
-				}
-				
+			else if (group.length == 3){					
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
 						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
@@ -587,8 +582,7 @@ shipWindowManager = {
 					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
 						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
 						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
-				}
-				col2 = 2; //return usual value				
+				}		
 			}				
 			else if (group.length == 4){	
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
