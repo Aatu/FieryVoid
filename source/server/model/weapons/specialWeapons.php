@@ -1850,4 +1850,6 @@ class RammingAttack extends Weapon{
 	}
 } //endof class RammingAttack
 
+	
+
 ?>
