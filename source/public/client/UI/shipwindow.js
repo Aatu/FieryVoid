@@ -610,6 +610,7 @@ shipWindowManager = {
         }
 	},
 	
+	
 	getFinalArrangementTwo: function(ship, systems, structure, location){
 		
 		var structDone = false;
@@ -636,6 +637,44 @@ shipWindowManager = {
 					list = Array();
 				}
 			}
+			
+		}
+
+		if (!structDone){
+			grouped.push(Array(structure));
+		}
+		
+		return grouped;
+			
+	},
+	
+	
+	//Marcin Sawicki: i think there's enough room for 3 icons on the sides, and it will help when many systems are present
+	getFinalArrangementThree: function(ship, systems, structure, location){
+		var structDone = false;
+		var grouped = Array();		
+		var list = Array();
+
+		if (structure){
+			if (location == 32 || location == 42){	
+				grouped.push(Array(structure));
+				structDone = true;
+			}
+		}
+		
+		for (var i= 0;i<systems.length;i++){
+			var system = systems[i];
+			/* let's try with top-heavy arrangement (orphan on the bottom instead of on top)
+			if (systems.length % 2 == 1 && i == 0){
+				grouped.push(Array(system));
+			}*/
+			//else {
+				list.push(system);
+				if (list.length == 3){
+					grouped.push(list);
+					list = Array();
+				}
+			//}
 			
 		}
 
