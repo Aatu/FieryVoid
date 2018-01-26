@@ -255,31 +255,47 @@
 }
 
 .shipwindow .base #shipSection_4{
-    position:absolute;
-    width:70px;
+    position:absolute;	
     top:200px;
+	/*leave room for 3rd column
+    width:70px;
     right:62px;
+	*/
+    width:105px;
+    right:27px;
 }
 
 .shipwindow .base #shipSection_3{
     position:absolute;
-    width:70px;
     top:200px;
-    left:55px;
+	/*leave room for 3rd column
+    width:70px;
+    left:55px; 
+	*/
+    width:105px;
+    left:20px;
 }
 
 .shipwindow #shipSection_4{
     position:absolute;
-    width:70px;
     top:225px;
+	/*leave room for 3rd column
+    width:70px;
     right:62px;
+	*/
+    width:105px;
+    right:27px;
 }
 
 .shipwindow #shipSection_3{
     position:absolute;
-    width:70px;
     top:225px;
+	/*leave room for 3rd column
+    width:70px;
     left:55px;
+	*/
+    width:105px;
+    left:20px;
 }
 
 .shipwindow.rolled #shipSection_3{
