@@ -569,7 +569,7 @@ shipWindowManager = {
 			}
 			else if (group.length == 2){
 				if (location == 4){//reverse order for Stbd!
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index)+'"></td></tr>');
+					row = $('<tr><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
 				else {
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
