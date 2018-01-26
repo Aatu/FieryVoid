@@ -13,7 +13,8 @@ class ShipResohex extends HeavyCombatVesselLeftRight{
         $this->pointCost = 600;
         $this->faction = "Ipsha";
         $this->phpclass = "ShipResohex";
-        $this->imagePath = "img/ships/IpshaHex.png";
+        //$this->imagePath = "img/ships/IpshaHex.png";    
+        $this->imagePath = "img/ships/IpshaBorgHex.png";
 	$this->shipClass = "Resohex";
         $this->variantOf = "Battlehex";  
 	$this->occurence = 'uncommon';  
