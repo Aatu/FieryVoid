@@ -91,7 +91,7 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
-/*impact test...      
+  
                 // ***custom Drakh***
                 //weapons and systems
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
@@ -188,7 +188,7 @@ spl_autoload_register(
                 'swheavyion' => '/server/model/weapons/customSW.php',
                 'swcapitalconcussion' => '/server/model/weapons/customSW.php',
                 'swcapitalproton' => '/server/model/weapons/customSW.php',
-*/
+
                 
                 
                 
@@ -588,6 +588,7 @@ spl_autoload_register(
                 'ochlavitad' => '/server/model/ships/dilgar/ochlavitaD.php',
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
+/*impact test 
                 'orgolest' => '/server/model/ships/dilgar/orgolest.php',
                 'protra' => '/server/model/ships/dilgar/protra.php',
                 'protrai' => '/server/model/ships/dilgar/protraI.php',
@@ -597,7 +598,7 @@ spl_autoload_register(
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
                 'tratharti' => '/server/model/ships/dilgar/tratharti.php',
                 'trathartig' => '/server/model/ships/dilgar/trathartiG.php',
-                
+*/                
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',
