@@ -91,7 +91,7 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
-                
+/*impact test...      
                 // ***custom Drakh***
                 //weapons and systems
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
@@ -188,6 +188,8 @@ spl_autoload_register(
                 'swheavyion' => '/server/model/weapons/customSW.php',
                 'swcapitalconcussion' => '/server/model/weapons/customSW.php',
                 'swcapitalproton' => '/server/model/weapons/customSW.php',
+*/
+                
                 
                 
                 //custom guns
@@ -337,7 +339,7 @@ spl_autoload_register(
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
                 
-/*impact test...
+
                 //Ipsha
                 //weapons and systems
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
@@ -370,7 +372,7 @@ spl_autoload_register(
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
                     'shipjumpsphere' => '/server/model/ships/ipsha/shipJumpsphere.php',
                     'shipsurgesphere' => '/server/model/ships/ipsha/shipSurgesphere.php',
-*/
+
                 
                 
                 // centauri raiders
@@ -412,14 +414,17 @@ spl_autoload_register(
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
                 //Streib guns
+/* not used anywahere?...                
                 'dualburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'mediumburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'heavyburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'burstpulsecannon' => '/server/model/weapons/specialWeapons.php',
                 'improvedblastlaser' => '/server/model/weapons/lasers.php',
                 'emwavedisruptor' => '/server/model/weapons/defensive.php',
+                
                 //new crit
                 'forcedofflineturns' => '/server/model/cricialClasses.php',
+*/                
                 // Yolu ships
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',
