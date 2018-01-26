@@ -437,6 +437,7 @@ spl_autoload_register(
                 'ulana' => '/server/model/ships/yolu/ulana.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
+                
                 //orieni ships
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
                 'faithful' => '/server/model/ships/orieni/faithful.php',
@@ -454,10 +455,7 @@ spl_autoload_register(
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
-                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
-                
-                'templar' => '/server/model/ships/orieni/templar.php',
-                'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',                
                 'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
                 'pariah' => '/server/model/ships/orieni/pariah.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
@@ -470,6 +468,11 @@ spl_autoload_register(
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
                 'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
                 'righteous' => '/server/model/ships/orieni/righteous.php',
+                
+                'templar' => '/server/model/ships/orieni/templar.php',
+                'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+                'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
+                
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
             	'orienigatlingrg' => '/server/model/weapons/matter.php',	
@@ -478,6 +481,8 @@ spl_autoload_register(
                 'laserlance' => '/server/model/weapons/lasers.php',
                 'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
+                
+                
                 //WoCR Centauri
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
