@@ -19,7 +19,6 @@ spl_autoload_register(
                 //bases and stuff
                 'kraken' => '/server/model/ships/centauri/kraken.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
-                'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
             		
@@ -566,7 +565,11 @@ spl_autoload_register(
             	//Custom Civilians
             	'bulkorefreighter' => '/server/model/ships/civilians/bulkOreFreighter.php',	
 
-                //Dilgar moved to one place!                
+                //Dilgar moved to one place!  
+/*impact test
+                'koratyl' => '/server/model/ships/dilgar/koratyl.php',     
+                'orgolest' => '/server/model/ships/dilgar/orgolest.php',           
+*/                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
@@ -589,7 +592,6 @@ spl_autoload_register(
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
 /*impact test 
-                'orgolest' => '/server/model/ships/dilgar/orgolest.php',
                 'protra' => '/server/model/ships/dilgar/protra.php',
                 'protrai' => '/server/model/ships/dilgar/protraI.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
