@@ -7,9 +7,9 @@ window.BaseParticle = (function(){
     }
 
     BaseParticle.prototype.texture = {
-        "gas": 0,
-        "bolt": 1,
-        "glow": 2
+        gas: 0,
+        bolt: 1,
+        glow: 2
     };
 
     BaseParticle.prototype.create = function(index)
@@ -20,12 +20,12 @@ window.BaseParticle = (function(){
 
     BaseParticle.prototype.setInitialValues = function()
     {
-        this.setPosition({x:this.index * 10, y: 0});
-        this.setColor(new THREE.Color(1, 0, 0));
-        this.setOpacity(1.0);
+        this.setPosition({x:0, y: 0});
+        this.setColor(new THREE.Color(0, 0, 0));
+        this.setOpacity(0.0);
         this.setFadeIn(0.0, 0.0);
         this.setFadeOut(0.0, 0.0);
-        this.setSize(160.0);
+        this.setSize(0.0);
         this.setSizeChange(0.0);
         this.setAngle(0.0);
         this.setAngleChange(0.0);
@@ -53,7 +53,7 @@ window.BaseParticle = (function(){
 
     BaseParticle.prototype.setSizeChange = function(size)
     {
-        changeAttribute(this.geometry, this.index, 'sizeChange', size / 1000);
+        changeAttribute(this.geometry, this.index, 'sizeChange', size);
         return this;
     };
 
@@ -71,7 +71,7 @@ window.BaseParticle = (function(){
 
     BaseParticle.prototype.setFadeIn = function(time, speed)
     {
-        if ( ! speed)
+        if ( ! typeof speed === "undefined")
             speed = 1000;
 
         changeAttribute(this.geometry, this.index, 'fadeInTime', time);
@@ -81,7 +81,7 @@ window.BaseParticle = (function(){
 
     BaseParticle.prototype.setFadeOut = function(time, speed)
     {
-        if ( ! speed)
+        if ( ! typeof speed === "undefined")
             speed = 1000;
 
         changeAttribute(this.geometry, this.index, 'fadeOutTime', time);

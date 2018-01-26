@@ -7,11 +7,13 @@ window.AnimationStrategy = (function(){
         this.currentDeltaTime = 0;
         this.animations = [];
         this.onDoneCallback = onDoneCallback;
+        this.paused = true;
     }
 
     AnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
         this.shipIconContainer = shipIcons;
         this.turn = turn;
+        this.start();
 
         return this;
     };
@@ -25,15 +27,36 @@ window.AnimationStrategy = (function(){
         return this;
     };
 
+    AnimationStrategy.prototype.stop = function(gameData) {
+
+        this.lastAnimationTime = 0;
+        this.totalAnimationTime = 0;
+        this.currentDeltaTime = 0;
+        this.pause();
+    };
+
+    AnimationStrategy.prototype.start = function() {
+       this.paused = false;
+    };
+
+    AnimationStrategy.prototype.pause = function() {
+
+        this.paused = true;
+    };
+
     AnimationStrategy.prototype.deactivate = function(scene) {
         return this;
     };
 
-    AnimationStrategy.prototype.render = function(){
+    AnimationStrategy.prototype.render = function(coordinateConverter, scene, zoom){
+        if (this.paused) {
+            return;
+        }
+
         updateDeltaTime.call(this);
         updateTotalAnimationTime.call(this);
         this.animations.forEach(function (animation) {
-            animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime)
+            animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom)
         }, this);
     };
 

@@ -112,11 +112,12 @@
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
 
-    <script src="client/renderer/particleEffects/BaseParticle.js"></script>
-    <script src="client/renderer/particleEffects/ParticleEmitter.js"></script>
-    <script src="client/renderer/particleEffects/ParticleEffect.js"></script>
-    <script src="client/renderer/particleEffects/EffectParticleEmitter.js"></script>
-    <script src="client/renderer/particleEffects/effects/ParticleEffectExplosion.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
+    <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

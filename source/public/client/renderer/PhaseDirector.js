@@ -33,12 +33,12 @@ window.phaseDirector = (function() {
         this.ewIconContainer.onEvent(name, payload);
     };
 
-    phaseDirector.prototype.render = function (scene, coordinateConverter) {
+    phaseDirector.prototype.render = function (scene, coordinateConverter, zoom) {
         if (!this.phaseStrategy || this.phaseStrategy.inactive) {
             return;
         }
 
-        this.phaseStrategy.render(coordinateConverter, scene);
+        this.phaseStrategy.render(coordinateConverter, scene, zoom);
     };
 
     function resolvePhaseStrategy(gamedata, scene) {

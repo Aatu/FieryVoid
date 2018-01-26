@@ -31,8 +31,8 @@ window.PhaseStrategy = (function(){
         this.redrawMovementUI();
     };
 
-    PhaseStrategy.prototype.render = function(coordinateConverter, scene){
-        this.animationStrategy.render(coordinateConverter, scene);
+    PhaseStrategy.prototype.render = function(coordinateConverter, scene, zoom){
+        this.animationStrategy.render(coordinateConverter, scene, zoom);
         this.positionMovementUI();
     };
 
