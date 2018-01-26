@@ -522,7 +522,7 @@ class Firing{
                 $fireOrders[] = $fire;
             }
         }
-        usort($fireOrders, "self:compareFiringOrders");
+        usort($fireOrders, "self::compareFiringOrders");
 	      /* moved to separate function
             function($a, $b) use ($gamedata){
 		if ($a->targetid !== $b->targetid){
@@ -576,7 +576,7 @@ class Firing{
             }
         }
 	    
-        usort($chosenfires, "self:compareFiringOrders");
+        usort($chosenfires, "self::compareFiringOrders");
 		
 	//FIRE fighters at other fighters
 	foreach ($chosenfires as $fire){
@@ -611,7 +611,7 @@ class Firing{
             }
 	}
 	
-        usort($chosenfires, "self:compareFiringOrders");	    
+        usort($chosenfires, "self::compareFiringOrders");	    
 	    
 	//FIRE rest of fighters
 	foreach ($chosenfires as $fire){
