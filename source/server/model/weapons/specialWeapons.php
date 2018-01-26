@@ -1732,10 +1732,12 @@ class RammingAttack extends Weapon{
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-	
+
+	public $isRammingAttack = true;	
 	private $designedToRam = false;
 	private $designDamage = 0;
 	private $damageModRolled = 0;
+	
 	
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
