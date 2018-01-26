@@ -776,13 +776,19 @@ class HkControlNode extends ShipSystem{
 		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
 	public static function getIniMod($playerID,$gamedata){
+	    $turn = TacGamedata::$currentTurn-1; //Ini based on Controllers from PREVIOUS turn!
+	    $turn = max(1,$turn);	
 		$iniModifier = HkControlNode::$fullPenalty;
 		$totalNodeOutput = 0; //output of all active HK control nodes!
 		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
 		
+		
 		if(!HkControlNode::$alreadyCleared) HkControlNode::clearLists($gamedata); //in case some inactive entries slipped in
 		
 		foreach(HkControlNode::$nodeList as $currNode){
+			if ( ($currNode->isDestroyed($turn))
+			     || ($currNode->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect (or rather - was last turn)			
 			$shp = $currNode->getUnit();
 			if ($shp->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
 		}
@@ -790,7 +796,7 @@ class HkControlNode extends ShipSystem{
 		
 		foreach(HkControlNode::$hkList as $hkFlight){
 			if ($hkFlight->userid == $playerID) {
-				$totalHKs += $hkFlight->countActiveCraft();
+				$totalHKs += $hkFlight->countActiveCraft($turn);
 			}
 		}
 		
@@ -812,7 +818,8 @@ class HkControlNode extends ShipSystem{
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
 	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullPenalty . " due to (semi-)autonomous operation.";	     	     
-	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs reorient themselves.";	
+	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs reorient themselves.";	  	     
+	$this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";
     }	    
 		    
 } //endof class HkControlNode
