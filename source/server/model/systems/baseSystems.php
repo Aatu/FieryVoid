@@ -762,9 +762,8 @@ class HkControlNode extends ShipSystem{
 		HkControlNode::$nodeList = $tmpArray;
 		$tmpArray = array();
 		foreach(HkControlNode::$hkList as $curr){
-			$shp = $curr->getUnit();
 			//is this unit defined in current gamedata? (particular instance!)
-			$belongs = $gamedata->shipBelongs($shp);
+			$belongs = $gamedata->shipBelongs($curr);
 			if ($belongs){
 				$tmpArray[] = $curr;
 			}			
