@@ -801,8 +801,7 @@ class HkControlNode extends ShipSystem{
 		    
 		if($turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=$this->fullPenalty;
-		}
-		
+		}		
 		
 		$iniModifier = floor($iniModifier);
 		return $iniModifier;
@@ -811,7 +810,7 @@ class HkControlNode extends ShipSystem{
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
-	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . $this->fullPenalty . " due to (semi-)autonomous operation.";	     	     
+	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullPenalty . " due to (semi-)autonomous operation.";	     	     
 	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs reorient themselves.";	
     }	    
 		    
