@@ -8,7 +8,8 @@ class FtrUrchin extends FighterFlight{
         $this->faction = "Ipsha";
         $this->phpclass = "FtrUrchin";
         $this->shipClass = "Urchin Heavy flight";
-        $this->imagePath = "img/ships/IpshaUrchin.png";
+        //$this->imagePath = "img/ships/IpshaUrchin.png";
+        $this->imagePath = "img/ships/IpshaBorgUrchin.png";
         $this->isd = 2215;
         
         $this->notes = 'EM hardened';	  
@@ -35,8 +36,12 @@ class FtrUrchin extends FighterFlight{
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("FtrUrchin", $armour, 13, $this->id);
             $fighter->displayName = "Urchin";
+            /*
             $fighter->imagePath = "img/ships/IpshaUrchin.png";
             $fighter->iconPath = "img/ships/IpshaUrchin_large.png";
+            */
+            $fighter->imagePath = "img/ships/IpshaBorgUrchin.png";
+            $fighter->iconPath = "img/ships/IpshaBorgUrchin_large.png";
             $frontGun = new LtSurgeBlaster(330, 30, 2); //2 guns - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);
             $this->addSystem($fighter);
