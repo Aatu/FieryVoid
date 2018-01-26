@@ -783,7 +783,8 @@ class HkControlNode extends ShipSystem{
 		if(!HkControlNode::$alreadyCleared) HkControlNode::clearLists($gamedata); //in case some inactive entries slipped in
 		
 		foreach(HkControlNode::$nodeList as $currNode){
-			if ($currNode->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
+			$shp = $currNode->getUnit();
+			if ($shp->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
 		}
 		$totalNodeOutput = $totalNodeOutput*6;//translate to number of controled craft - 6 per standard-sized flight
 		
