@@ -1813,6 +1813,8 @@ class RammingAttack extends Weapon{
 		return $dmg;
 	}
         public function getDamage($fireOrder){        
+$damage = 60;		
+/*TEST		
 		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 		$modifier = 0;
 		$shooter = $this->unit;
@@ -1835,6 +1837,7 @@ class RammingAttack extends Weapon{
 		}//if lower, stays 0.25
 		$damage = ceil($this->damageModRolled * $this->getRammingFactor());	
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+*/		
 		return $damage;					     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
