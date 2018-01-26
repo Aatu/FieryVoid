@@ -541,6 +541,7 @@ shipWindowManager = {
 		var arrangement;
 		var col2 = 2;
 		var col4 = 4;
+		var isSide = false;
 		if (location == 0){
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
 		}
@@ -551,7 +552,8 @@ shipWindowManager = {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
 		}
 		else{
-			col2 = 1;
+			isSide = true;
+			col2 = 1; //single column here
 			col4 = 3;
 			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
 			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
@@ -562,10 +564,10 @@ shipWindowManager = {
 		for (var i in arrangement){
 			var group = arrangement[i];
 			var row;
-			if (group.length == 1){
+			if ((group.length == 1) && (!isSide)){
 				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
 			}
-			else if (group.length == 2){
+			else if ((group.length == 2) && (!isSide)){
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
@@ -573,14 +575,14 @@ shipWindowManager = {
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
 				}		
 			}			
-			else if (group.length == 3){					
+			else if ((group.length == 3) || isSide){					
 				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
-						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
 						+'<td class="systemcontainer_'+(index)+'"></td></tr>').appendTo(destination);
 				}else{
 					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
-						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
 						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
 				}		
 			}				
