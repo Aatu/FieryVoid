@@ -743,7 +743,7 @@ class HkControlNode extends ShipSystem{
 	
 	
 	/*to be called by every HK flight after creation*/
-    public function addHKFlight($HKflight){
+    public static function addHKFlight($HKflight){
 	HkControlNode::$hkList[] = $HKflight;
     }
 	
