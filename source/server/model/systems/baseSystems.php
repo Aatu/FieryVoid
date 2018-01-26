@@ -800,7 +800,7 @@ class HkControlNode extends ShipSystem{
 			$iniModifier = HkControlNode::$fullPenalty * (1-$howPartial);//0 for full control
 		}
 		    
-		if($turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
+		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=HkControlNode::$fullPenalty;
 		}		
 		
