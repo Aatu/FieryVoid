@@ -676,8 +676,12 @@ shipWindowManager = {
 					grouped.push(list);
 					list = Array();
 				}
-			//}
-			
+			//}			
+		}
+		
+		if (list.length > 0){ //something was left over!
+					grouped.push(list);
+					list = Array();
 		}
 
 		if (!structDone){
