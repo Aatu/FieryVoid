@@ -1790,7 +1790,7 @@ class RammingAttack extends Weapon{
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             $maxhealth = 1;
             $powerReq = 0;
-		if ($fc != 0){
+		if ($fcbonus != 0){
 			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);	
 		}
 		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
