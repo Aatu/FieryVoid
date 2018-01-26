@@ -252,7 +252,6 @@ window.effects = {
             }
         }
 
-
         var shipFire = [];
         var fighterFire = [];
 
@@ -263,12 +262,15 @@ window.effects = {
 
 
             for (var y in fires){
-                if (ship.shipSizeClass === -1){
+                var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);              
+                fires[y].priority = weapon.priority;                
+                if (weapon.isRammingAttack){                 
+                    shipFire.push(fires[y]); //even if it's attack done by fighter
+                }
+                elseif (ship.shipSizeClass === -1){
                     fighterFire.push(fires[y]);
                 }
-                else {
-                    var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);
-                    fires[y].priority = weapon.priority;
+                else {                    
                     shipFire.push(fires[y]);
                 }       
             }   
