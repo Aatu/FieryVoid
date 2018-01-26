@@ -13,7 +13,8 @@ class ShipCarrierCube extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Ipsha";
         $this->phpclass = "ShipCarrierCube";
-        $this->imagePath = "img/ships/IpshaCube.png";
+        //$this->imagePath = "img/ships/IpshaCube.png";    
+        $this->imagePath = "img/ships/IpshaBorgCube.png";
         $this->shipClass = "Carrier Cube";    
 	    	    
         $this->shipSizeClass = 3;
