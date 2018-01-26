@@ -337,7 +337,7 @@ spl_autoload_register(
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
                 
-                
+/*impact test...
                 //Ipsha
                 //weapons and systems
                 'maggravreactor' => '/server/model/systems/baseSystems.php',
@@ -370,7 +370,7 @@ spl_autoload_register(
                 'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
                     'shipjumpsphere' => '/server/model/ships/ipsha/shipJumpsphere.php',
                     'shipsurgesphere' => '/server/model/ships/ipsha/shipSurgesphere.php',
-                
+*/
                 
                 
                 // centauri raiders
