@@ -601,6 +601,9 @@ class Firing{
                     continue;
                 }
 		
+		//ramming attacks are already allocated!
+		if ($weapon->isRammingAttack) continue; 
+		    
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
                         && !$weapon->ballistic){
