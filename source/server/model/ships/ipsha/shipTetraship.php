@@ -13,7 +13,8 @@ class ShipTetraship extends MediumShipLeftRight{
         $this->pointCost = 350;
         $this->faction = "Ipsha";
         $this->phpclass = "ShipTetraship";
-        $this->imagePath = "img/ships/IpshaTetra.png";
+        //$this->imagePath = "img/ships/IpshaTetra.png";    
+        $this->imagePath = "img/ships/IpshaBorgTetra.png";
         	$this->canvasSize = 100;
         $this->shipClass = "Tetraship";    
 	    	    
