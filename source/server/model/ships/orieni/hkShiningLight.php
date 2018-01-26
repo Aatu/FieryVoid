@@ -48,9 +48,7 @@ class HkShiningLight extends FighterFlight{
     
     public function getInitiativebonus($gamedata){
         $iniBonus = parent::getInitiativebonus($gamedata);
-		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
-			$iniModifier-=50; //-10 Ini (*5 for d20->d100)
-		}	
+	$iniBonus += HkControlNode::getIniMod($this->userid,$gamedata);
         return $iniBonus;
     }	
     
