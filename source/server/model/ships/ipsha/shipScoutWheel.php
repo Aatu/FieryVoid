@@ -14,7 +14,8 @@ class ShipScoutWheel extends BaseShip{
 	$this->pointCost = 800;
 	$this->faction = "Ipsha";
         $this->phpclass = "ShipScoutWheel";
-        $this->imagePath = "img/ships/IpshaFancy.png"; //silhouette suggests ship is laid out horizontally, I have no fitting graphics
+        //$this->imagePath = "img/ships/IpshaFancy.png"; //silhouette suggests ship is laid out horizontally, I have no fitting graphics
+	$this->imagePath = "img/ships/IpshaBorgWheel.png";
 	    //but I do have a fancy graphics for a scout ship, which I give in instead! at least it both fits the fleet and stands out from other designs, even if suggests vertial layout
         $this->shipClass = "Scout Wheel";    
 	    	    
