@@ -8,8 +8,8 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 //TECHNICAL UNIT - target drone for various tests
-                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',  
-            		
+                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',    
+                
                 //new criticals
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
@@ -481,7 +481,7 @@ spl_autoload_register(
                 'laserlance' => '/server/model/weapons/lasers.php',
                 'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
-                
+                'rammingattack' => '/server/model/weapons/specialWeapons.php', //designed for Orieni, but everyone will use it
                 
                 //WoCR Centauri
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
