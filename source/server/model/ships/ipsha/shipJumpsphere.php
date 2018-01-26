@@ -14,7 +14,8 @@ class ShipJumpsphere extends BaseShip{
 	$this->pointCost = 1000;
 	$this->faction = "Ipsha";
         $this->phpclass = "ShipJumpsphere";
-        $this->imagePath = "img/ships/IpshaWarsphere.png";
+        //$this->imagePath = "img/ships/IpshaWarsphere.png";    
+        $this->imagePath = "img/ships/IpshaBorgSphere.png";
         $this->shipClass = "Jumpsphere";   
 		$this->variantOf = "Warsphere";     
 		$this->occurence = 'rare'; 
