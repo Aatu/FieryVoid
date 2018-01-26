@@ -328,7 +328,7 @@ class SubReactor extends ShipSystem{
 	
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] .= "<br>Secondary reactor: destruction will only destroy a section, not entire ship.";
+		$this->data["Special"] = "Secondary reactor: destruction will only destroy a section, not entire ship.";
 	}	
 	
     public function isOverloading($turn){
