@@ -28,21 +28,16 @@ shipWindowManager = {
 	},	
 	
 	open: function(ship){
-	
-		
 		var old;
 		if (ship.userid == gamedata.thisplayer){
 			old = $(".shipwindow.owned:visible");
 		}else{
 			old = $(".shipwindow.enemy:visible");
-		}
-		
-		
+		}		
 		
 		var n = ship.shipStatusWindow;
 		
-		if (!n)
-			return;
+		if (!n) return;
 			
 		if (n.css("display") == "block")
 			return;
