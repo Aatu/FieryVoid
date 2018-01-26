@@ -94,10 +94,10 @@
 	    }
 	    
 	    /*returns number of still active craft in flight*/
-	    public function countActiveCraft(){
+	    public function countActiveCraft($turn){
 		    $countActive = 0;
 		    foreach($this->systems as $ftr){
-			    if(!$ftr->isDestroyed()) $countActive++;
+			    if(!$ftr->isDestroyed($turn)) $countActive++;
 		    }
 		    return $countActive;
 	    }//endof function countActiveCraft
