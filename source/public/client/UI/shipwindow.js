@@ -572,16 +572,23 @@ shipWindowManager = {
 			}
 			else if (group.length == 2){
 
-				if (location == 4){
+				if (location == 4){//reverse order for Stbd!
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
 				else {
 					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
 				}				
 			}			
-			else if (group.length == 3){				
-				row = $('<tr><td class="systemcontainer_'+index+'"></td><td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
-				+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+			else if (group.length == 3){	
+				if (location == 4){//reverse order for Stbd!
+					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
+						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index)+'"></td></tr>').appendTo(destination);
+				}else{
+					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
+						+'<td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+				}
 			}				
 			else if (group.length == 4){	
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
