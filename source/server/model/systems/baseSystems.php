@@ -724,7 +724,7 @@ class HkControlNode extends ShipSystem{
     public $name = "hkControlNode";
     public $displayName = "HK Control Node";
     public $primary = true;
-    private $fullPenalty = -50; //-10, times 5 d20->d100
+    private static $fullPenalty = -50; //-10, times 5 d20->d100
 	
     public static $alreadyCleared = false;	
 	public static $nodeList = array(); //array of nodes in game
@@ -777,7 +777,7 @@ class HkControlNode extends ShipSystem{
 		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
 	public static function getIniMod($playerID,$gamedata){
-		$iniModifier = $this->fullPenalty;
+		$iniModifier = HkControlNode::fullPenalty;
 		$totalNodeOutput = 0; //output of all active HK control nodes!
 		$totalHKs = 0; //number of all Hunter-Killer craft in operation!
 		
