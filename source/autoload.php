@@ -566,9 +566,7 @@ spl_autoload_register(
             	'bulkorefreighter' => '/server/model/ships/civilians/bulkOreFreighter.php',	
 
                 //Dilgar moved to one place!  
-/*impact test
                 'koratyl' => '/server/model/ships/dilgar/koratyl.php',     
-*/    
                 'orgolest' => '/server/model/ships/dilgar/orgolest.php',           
             
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
