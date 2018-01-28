@@ -51,10 +51,14 @@ window.Explosion = (function(){
         //if ( this.ring)
         //	this.createRing(this.size, emitter);
 
-        this.createMainGlow(Math.ceil(this.size/8), this.size);
+        var amount = 3;
+
+        this.createMainGlow(amount, this.size);
         this.createCore(this.size, BaseParticle.prototype.texture.glow);
-        this.createCore(this.size, BaseParticle.prototype.texture.glow);
-        this.createCore(this.size, BaseParticle.prototype.texture.glow);
+        //this.createCore(this.size, BaseParticle.prototype.texture.glow);
+        //this.createCore(this.size, BaseParticle.prototype.texture.glow);
+        this.createWhiteCenter(this.size*2, 1.0);
+        this.createWhiteCenter(this.size*1, 1.0);
     };
 
 
@@ -76,7 +80,8 @@ window.Explosion = (function(){
         this.createCore(this.size/2, BaseParticle.prototype.texture.glow);
         this.createCore(this.size/4, BaseParticle.prototype.texture.glow);
         this.createMain(amount, this.size);
-        //this.createCore(this.size, BaseParticle.prototype.texture.gas);
+        this.createWhiteCenter(this.size*2);
+        this.createCore(this.size, BaseParticle.prototype.texture.gas);
     };
 
     Explosion.prototype.createPillar = function()
@@ -96,7 +101,8 @@ window.Explosion = (function(){
         this.createCore(this.size, BaseParticle.prototype.texture.glow);
         this.createCore(this.size/2, BaseParticle.prototype.texture.glow);
         this.createCore(this.size/4, BaseParticle.prototype.texture.glow);
-        this.createMain(amount, this.size);
+        //this.createMain(amount, this.size);
+        this.createWhiteCenter(this.size*4);
         //this.createCore(this.size, BaseParticle.prototype.texture.gas);
     };
 
@@ -111,9 +117,10 @@ window.Explosion = (function(){
         }
 
         //this.createShootOffs(Math.ceil(Math.random()*this.size/8 + this.size/8), this.size);
-        this.createMainGlow(Math.ceil(amount/2), this.size);
-        //this.createMain(amount, this.size);
-        this.createCore(this.size, BaseParticle.prototype.texture.gas);
+        this.createEmpGlow(Math.ceil(amount/2), this.size);
+        this.createWhiteCenter(this.size*2);
+        //this.createMainGlow(1, this.size/10);
+        this.createEmpCore(this.size, BaseParticle.prototype.texture.gas);
     };
 
     Explosion.prototype.createRing = function(size)
@@ -149,6 +156,33 @@ window.Explosion = (function(){
         }
     };
 
+    Explosion.prototype.createWhiteCenter = function(size, opacity)
+    {
+
+        if (!opacity) {
+            opacity = 1.0;
+        }
+
+        var activation = this.time;
+        var fadeInSpeed = 100;
+        var fadeOutAt = activation + fadeInSpeed;
+        //amount = 1;
+
+
+        this.emitterContainer.getParticle(this)
+            .setSize(size / 4)
+            //.setSizeChange(128)
+            .setOpacity(opacity)
+            .setFadeIn(activation, fadeInSpeed)
+            .setFadeOut(fadeOutAt, 500)
+            .setColor({r:1, g:1, b:1})
+            .setPosition({x:this.position.x, y:this.position.y})
+            .setTexture(BaseParticle.prototype.texture.glow)
+            .setActivationTime(activation);
+
+
+    };
+
     Explosion.prototype.createShootOffs = function(amount, radius, args)
     {
         while (amount--) {
@@ -163,18 +197,20 @@ window.Explosion = (function(){
         }
 
         var size = radius;
+/*
         if (size < 40) {
             size = 40;
         }
-        //amount = 1;
+
+  */      //amount = 1;
 
         var particle = this.emitterContainer.getParticle(this);
         var activationTime = this.time + Math.floor(Math.random()*30/this.speed);
         var fadeInSpeed = args.fadeInSpeed || Math.random()*50 + 25;
         var fadeOutAt = args.fadeOutAt || activationTime + Math.floor(Math.random()*50/this.speed);
-        var fadeOutSpeed =  args.fadeOutSpeed || Math.random()*500/this.speed + 250/this.speed;
+        var fadeOutSpeed =  args.fadeOutSpeed || (Math.random()*500/this.speed + 250/this.speed);
         var angle = args.angle || Math.floor(Math.random()*360);
-        var speed = (Math.random()*0.2 + 0.1) * this.speed;
+        var speed = (Math.random()*0.2 + 0.1) * this.speed * this.size * 0.01;
 
         var target = args.target || mathlib.getPointInDirection(speed, angle, 0, 0, true);
         var position = args.position || mathlib.getPointInDirection(size/2, angle, this.position.x, this.position.y, true);
@@ -269,7 +305,7 @@ window.Explosion = (function(){
             .setSize(Math.floor(Math.random()*size) + size/2)
             .setOpacity(Math.random() * 0.2 + 0.6)
             .setFadeIn(activationTime, Math.random()*0.005 + 0.0025)
-            //.setFadeOut(fadeOutAt, Math.random()*0.05/this.speed + 0.025/this.speed)
+            .setFadeOut(fadeOutAt, Math.random()*0.05/this.speed + 0.025/this.speed)
             .setColor(getCoreColor())
             .setPosition({
                 x: this.position.x, // + Math.floor(Math.random()*radius/10)-radius/5,
@@ -280,6 +316,60 @@ window.Explosion = (function(){
             .setVelocity(this.movement)
             .setAngle(Math.floor(Math.random()*360))
             .setAngleChange(Math.floor(Math.random()*20*this.speed)-10*this.speed)
+            .setActivationTime(activationTime);
+
+
+    };
+
+
+    Explosion.prototype.createEmpGlow = function(amount, radius)
+    {
+        var size = radius*2;
+        while (amount--)
+        {
+            var particle = this.emitterContainer.getParticle(this);
+            var activationTime = this.time;
+            var fadeOutAt = activationTime;
+
+            particle
+                .setSize(size)
+                .setSizeChange(0.004 * this.size)
+                .setOpacity(Math.random() * 0.1 + 0.2)
+                .setFadeIn(activationTime, Math.random()*0.005 + 0.0025)
+                .setFadeOut(fadeOutAt, (Math.random()*200 + 800) / this.speed)
+                .setColor({r:122/255, g:221/255, b:255/255})
+                .setVelocity(this.movement)
+                .setPosition({x:this.position.x, y:this.position.y})
+                .setTexture(BaseParticle.prototype.texture.glow)
+                .setActivationTime(activationTime);
+
+        }
+    };
+
+    Explosion.prototype.createEmpCore = function(radius, texture)
+    {
+        var size = radius;
+
+        var particle = this.emitterContainer.getParticle(this);
+        var activationTime = this.time;
+        var fadeOutAt = activationTime;
+
+        particle
+            .setSize(size * 0.9)
+            .setSizeChange(0.0039 * this.size)
+            .setOpacity(Math.random() * 0.2 + 0.6)
+            .setFadeIn(activationTime, 0.1)
+            .setFadeOut(fadeOutAt, (Math.random()*200 + 800) / this.speed)
+            .setColor(getCoreColor())
+            .setPosition({
+                x: this.position.x, // + Math.floor(Math.random()*radius/10)-radius/5,
+                y: this.position.y // + Math.floor(Math.random()*radius/10)-radius/5,
+            })
+            .setAngle(45)
+            .setTexture(texture)
+            .setVelocity(this.movement)
+            .setAngle(Math.floor(Math.random()*360))
+            .setAngleChange(5*this.speed)
             .setActivationTime(activationTime);
 
 
@@ -302,8 +392,8 @@ window.Explosion = (function(){
                 .setFadeOut(fadeOutAt, Math.random()*500/this.speed + 250/this.speed)
                 .setColor(this.getRandomColor())
                 .setPosition({
-                    x: this.position.x + (Math.floor(Math.random()*radius)-radius)/4,
-                    y: this.position.y + (Math.floor(Math.random()*radius)-radius)/4,
+                    x: this.position.x + (Math.floor(Math.random()*radius)-radius)/8,
+                    y: this.position.y + (Math.floor(Math.random()*radius)-radius)/8,
                 })
                 .setVelocity(this.movement)
                 .setAngle(Math.floor(Math.random()*360))

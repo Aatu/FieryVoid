@@ -104,6 +104,9 @@
         if ( currentOpacity > 0.0 && elapsedTime >= 0.0)
         {
             vColor = vec4( color, currentOpacity );
+            if (zoomLevel < 0.2) {
+                vColor = vec4( vec3(1.0, 1.0, 1.0), currentOpacity );
+            }
         } else {
             vColor = vec4(0.0, 0.0, 0.0, 0.0);
         }

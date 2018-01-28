@@ -9,6 +9,7 @@ window.ReplayAnimationStrategy = (function(){
         this.animations.push(this.emitterContainer);
         this.emitterContainer.start();
 
+        /*
         var particle = this.emitterContainer.getParticle(this);
         particle
             .setOpacity(1.0)
@@ -35,19 +36,37 @@ window.ReplayAnimationStrategy = (function(){
             .setAngle(45)
             //.setAngleChange(-0.01)
             //.setAcceleration({x:0.0001, y:0.0001})
+            */
+/*
+        new Explosion(this.emitterContainer, {size: 20});
 
-        //new Explosion(this.emitterContainer, {size: 20});
-
-        //new Explosion(this.emitterContainer, {size: 200, position: {x:400, y:0}});
-
-
-        //new Explosion(this.emitterContainer, {size: 200, position: {x:400, y:0}, type: "glow"});
+        new Explosion(this.emitterContainer, {size: 20, position: {x:400, y:0}});
 
 
-        //new Explosion(this.emitterContainer, {size: 200, position: {x:800, y:0}, type: "emp"});
+        new Explosion(this.emitterContainer, {size: 20, position: {x:400, y:400}, type: "glow"});
 
 
-        //new Explosion(this.emitterContainer, {size: 200, position: {x:0, y:200}, type: "pillar"});
+        new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:0}, type: "emp"});
+
+        new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:400}, type: "emp"});
+
+
+        new Explosion(this.emitterContainer, {size: 20, position: {x:0, y:200}, type: "pillar"});
+
+
+        new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}, type: "pillar"});
+        new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}});
+*/
+        var amount = 1000;
+
+        while (amount--) {
+            new Explosion(this.emitterContainer, {
+                time: Math.random()*10000,
+                size: Math.random()*300 + 10,
+                position: {x:Math.random()*4000 - 2000, y:Math.random()*4000 - 2000},
+                type: ["glow", /*"emp"*/, "pillar", "gas"][Math.floor(Math.random()*4)]
+            });
+        }
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);

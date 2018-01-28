@@ -11,7 +11,7 @@ window.ParticleEmitter = (function(){
             blending = THREE.NormalBlending;
 
         if (! particleCount) {
-            particleCount = 1000;
+            particleCount = 100000;
         }
 
         this.scene = scene;
