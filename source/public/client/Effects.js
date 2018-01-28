@@ -266,11 +266,9 @@ window.effects = {
                 fires[y].priority = weapon.priority;                
                 if (weapon.isRammingAttack){                 
                     shipFire.push(fires[y]); //even if it's attack done by fighter
-                }
-                elseif (ship.shipSizeClass === -1){
+                } else if (ship.shipSizeClass === -1){
                     fighterFire.push(fires[y]);
-                }
-                else {                    
+                } else {                    
                     shipFire.push(fires[y]);
                 }       
             }   
