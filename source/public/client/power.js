@@ -295,7 +295,7 @@ shipManager.power = {
 			/*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off (accounted for in a moment)
+			if ((fixedPower==true) && (!system.destroyed)){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
 				output -= system.powerReq;
 			}
 			for (var i in system.power){
