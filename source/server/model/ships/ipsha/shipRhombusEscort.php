@@ -69,9 +69,9 @@ class ShipRhombusEscort extends HeavyCombatVesselLeftRight{
 	    
 		
 		
-        $this->addLeftSystem(new Structure(4, 40));
+        $this->addLeftSystem(new Structure(3, 40));
         $this->addRightSystem(new Structure(3, 40));
-        $this->addPrimarySystem(new Structure(3, 40));
+        $this->addPrimarySystem(new Structure(4, 40));
 		
 		
 		$this->hitChart = array(
