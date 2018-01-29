@@ -57,16 +57,51 @@ window.ReplayAnimationStrategy = (function(){
         new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}, type: "pillar"});
         new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}});
 */
-        var amount = 1000;
+        var amount = 100;
 
         while (amount--) {
             new Explosion(this.emitterContainer, {
-                time: Math.random()*10000,
-                size: Math.random()*300 + 10,
-                position: {x:Math.random()*4000 - 2000, y:Math.random()*4000 - 2000},
-                type: ["glow", /*"emp"*/, "pillar", "gas"][Math.floor(Math.random()*4)]
+                time: 0,
+                size: 30,
+                position: {x:1000 - amount * 60, y:0},
+                type: ["gas"][Math.floor(Math.random()*4)]
             });
         }
+
+        amount = 100;
+
+        while (amount--) {
+            new Explosion(this.emitterContainer, {
+                time: 0,
+                size: 30,
+                position: {x:1000 - amount * 60, y:100},
+                type: ["glow"][Math.floor(Math.random()*4)]
+            });
+        }
+
+        amount = 100;
+
+        while (amount--) {
+            new Explosion(this.emitterContainer, {
+                time: 0,
+                size: 30,
+                position: {x:1000 - amount * 60, y:200},
+                type: ["pillar"][Math.floor(Math.random()*4)]
+            });
+        }
+
+        amount = 100;
+
+        while (amount--) {
+            new Explosion(this.emitterContainer, {
+                time: 0,
+                size: 30,
+                position: {x:1000 - amount * 60, y:300},
+                type: ["emp"][Math.floor(Math.random()*4)]
+            });
+        }
+
+        console.log(this.emitterContainer.count());
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);

@@ -11,7 +11,7 @@ window.ParticleEmitter = (function(){
             blending = THREE.NormalBlending;
 
         if (! particleCount) {
-            particleCount = 100000;
+            particleCount = 1000;
         }
 
         this.scene = scene;
@@ -136,6 +136,10 @@ window.ParticleEmitter = (function(){
 
     ParticleEmitter.prototype.getFreeParticle = function()
     {
+        if (this.free.length === 0) {
+            return false;
+        }
+
         var i = this.free.pop();
 
         return this.flyParticle.create(i);

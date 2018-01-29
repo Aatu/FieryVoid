@@ -247,7 +247,7 @@
         
         }
         
-        public function getAllFireOrders()
+        public function getAllFireOrders($turn = -1)
         {
             $orders = array();
             

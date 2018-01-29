@@ -6,9 +6,11 @@ window.ParticleEmitterContainer = (function(){
         Animation.call(this);
     }
 
+    var p = 0;
     ParticleEmitterContainer.prototype = Object.create(Animation.prototype);
 
     ParticleEmitterContainer.prototype.getParticle = function(animation) {
+        p++;
 
         var particle;
         var emitter = null;
@@ -28,6 +30,10 @@ window.ParticleEmitterContainer = (function(){
         var reservation = getReservation(emitter.reservations, animation, true);
         reservation.indexes.push(particle.index);
         return particle;
+    };
+
+    ParticleEmitterContainer.prototype.count = function() {
+        return p;
     };
 
     ParticleEmitterContainer.prototype.cleanUp = function () {

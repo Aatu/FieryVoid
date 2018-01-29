@@ -111,12 +111,9 @@ Vagrant.configure("2") do |config|
     apt-get install -y curl
 
 
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    php composer-setup.php
-    php -r "unlink('composer-setup.php');"
 
     cd /vagrant/
-    php /home/ubuntu/composer.phar install
+    php composer.phar install
     ./autoload.sh
 
   SHELL

@@ -79,12 +79,19 @@
     varying float textureN;
     void main()
     {
+        float elapsedTime = gameTime - activationGameTime;
+
+        if (elapsedTime < 0.0 || gameTime - (fadeOutTime + fadeOutSpeed) > 0.0) {
+            gl_PointSize = 0.0;
+            gl_Position = vec4( 0.0, 0.0, 0.0, 1.0 );
+            vColor = vec4(0.0, 0.0, 0.0, 0.0);
+            return;
+        }
+
         float currentOpacity = 0.0;
         if (fadeInSpeed == 0.0) {
             currentOpacity = opacity;
         }
-
-        float elapsedTime = gameTime - activationGameTime;
 
 
         if (fadeInSpeed > 0.0 && gameTime > fadeInTime)

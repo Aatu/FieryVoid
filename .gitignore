@@ -8,7 +8,6 @@
 .settings
 .vagrant
 .project
-composer.phar
 vendor
 doc
 .swp
