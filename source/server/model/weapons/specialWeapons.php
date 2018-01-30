@@ -966,6 +966,7 @@ class SparkFieldHandler{
 		$tmpFields = array();
 		foreach(SparkFieldHandler::$sparkFields as $field){
 			$shooter = $field->getUnit();
+			if($field->isDestroyed($gamedata->turn-1)) continue; //destroyed weapons can be safely left out
 			//is this unit defined in current gamedata? (particular instance!)
 			$belongs = $gamedata->shipBelongs($shooter);
 			if ($belongs){
