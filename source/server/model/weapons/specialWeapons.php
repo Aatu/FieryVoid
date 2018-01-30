@@ -1738,7 +1738,6 @@ class RammingAttack extends Weapon{
 	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
 	private $designDamage = 0;
 	private $damageModRolled = 0;
-	private $fcbase = array(0,0,0);
 	
 	
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
@@ -1792,21 +1791,12 @@ class RammingAttack extends Weapon{
         } //endof function fire
 
 	
-	public function calculateHitBase($gamedata, $fireOrder){ //update firing control first!
-		$FCpenalty = HkControlNode::getFCMod($this->unit->userid,$gamedata);
-		foreach($this->fireControl as $fckey=>$fcval){
-			$this->fireControl[$fckey] = $this->FCbase[$fckey]+$FCpenalty;
-		}
-		parent::calculateHitBase($gamedata, $fireOrder);
-	}
-
         function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestroy = 0){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             $maxhealth = 1;
             $powerReq = 0;
 		if ($fcbonus != 0){
-			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);			
-			$this->fcbase = array($fcbonus, $fcbonus, $fcbonus);	
+			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);
 		}
 		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
 			$this->designDamage = 	$designDamage;
