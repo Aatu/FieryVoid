@@ -619,6 +619,7 @@ class Weapon extends ShipSystem{
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$target = $gamedata->getShipById($fireOrder->targetid);
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) return 0;//ship has no chance to ram a fighter!
+		
 		$hitChance = 8; //base: 40%
 		
 		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
@@ -652,7 +653,17 @@ class Weapon extends ShipSystem{
 		$hitChance += $this->fireControl[$target->getFireControlIndex()];		
 		
 		$hitChance = $hitChance * 5; //convert d20->d100
-		return $hitChance;
+		
+		$hitLoc = null;
+		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+	    	$target->setExpectedDamage($hitLoc, $hitChance, $this);
+		
+		
+		$notes = $rp["notes"] . "RAMMING, final hit chance: $hitChance";
+		$fireOrder->chosenLocation = $hitLoc;
+		$fireOrder->needed = $hitChance;
+		$fireOrder->notes = $notes;
+		$fireOrder->updated = true;
 	}//endof function calculateHitBaseRam
 	
 	
