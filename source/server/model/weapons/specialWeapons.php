@@ -1781,7 +1781,7 @@ class RammingAttack extends Weapon{
 			if($target instanceof FighterFlight){ //allocate exactly to firing fighter!
 				$ftr = $target->getFighterBySystem($this->id);
 				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
-				$fireorder->calledid = $ftr->id;
+				$fireOrder->calledid = $ftr->id;
 			}
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			$fireOrder->calledid = -1; //just in case!
