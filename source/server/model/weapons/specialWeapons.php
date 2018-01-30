@@ -1751,10 +1751,6 @@ class RammingAttack extends Weapon{
 	}
 	
 	    public function setSystemDataWindow($turn){
-			$FCpenalty = HkControlNode::getFCMod($this->unit->userid,$gamedata);
-			foreach($this->fireControl as $fckey=>$fcval){
-				$this->fireControl[$fckey] = $this->FCbase[$fckey]+$FCpenalty;
-			}		    
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
 		      if($this->designedToRam) {
