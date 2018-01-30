@@ -1829,7 +1829,7 @@ class RammingAttack extends Weapon{
 		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
 		
 		//roll and consult table
-		$rfactor = $this->getRammingFactor());
+		$rfactor = $this->getRammingFactor();
 		$roll = Dice::d(20,1)+$modifier;
 		$this->damageModRolled = 0.25; //baseline: 25% damage
 		if ($roll >= 17){
