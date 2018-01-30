@@ -1829,6 +1829,7 @@ class RammingAttack extends Weapon{
 		if ($bearing < 10) $modifier++;//should be 0, but at rage 0 there may be a few degrees off...
 		
 		//roll and consult table
+		$rfactor = $this->getRammingFactor());
 		$roll = Dice::d(20,1)+$modifier;
 		$this->damageModRolled = 0.25; //baseline: 25% damage
 		if ($roll >= 17){
@@ -1838,16 +1839,20 @@ class RammingAttack extends Weapon{
 		}else if ($roll >= 7){
 			$this->damageModRolled = 0.5;
 		}//if lower, stays 0.25
-		$damage = ceil($this->damageModRolled * $this->getRammingFactor());
-		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+		$damage = ceil($this->damageModRolled * $rfactor);
+		$fireorder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor" ;
+		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage += 1000;  //fighter colliding with ship will always be destroyed
+		$fireorder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
 		return $damage;			     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
 		$target = $gd->getShipById($fireOrder->targetid);
-		$damage = ceil($this->damageModRolled * $target->getRammingFactor());	
+		$rfactor =  $target->getRammingFactor();
+		$damage = ceil($this->damageModRolled * $rfactor);			
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
 		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack
+		$fireorder->notes .= "; return rammingfactor: $rfactor damage: $damage" ;
 		return $damage;					     
 	}
 	
