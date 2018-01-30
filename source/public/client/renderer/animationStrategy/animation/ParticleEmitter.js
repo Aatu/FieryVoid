@@ -8,7 +8,7 @@ window.ParticleEmitter = (function(){
         Animation.call(this);
 
         if ( ! blending )
-            blending = THREE.NormalBlending;
+            blending = THREE.AdditiveBlending;
 
         if (! particleCount) {
             particleCount = 1000;

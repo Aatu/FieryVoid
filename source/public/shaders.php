@@ -85,6 +85,7 @@
             gl_PointSize = 0.0;
             gl_Position = vec4( 0.0, 0.0, 0.0, 1.0 );
             vColor = vec4(0.0, 0.0, 0.0, 0.0);
+            textureN = textureNumber;
             return;
         }
 

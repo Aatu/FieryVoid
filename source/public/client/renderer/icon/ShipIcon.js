@@ -255,7 +255,6 @@ window.ShipIcon = (function (){
         var arcLenght = arcs.start === arcs.length ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
         var arcStart = mathlib.addToDirection(0, arcLenght * -0.5);
         var arcFacing = mathlib.addToDirection(arcs.end, arcLenght * -0.5);
-        console.log(arcs.start, arcs.end, arcStart, arcLenght);
 
         var geometry = new THREE.CircleGeometry( dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLenght) );
         var material = new THREE.MeshBasicMaterial( { color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true} );

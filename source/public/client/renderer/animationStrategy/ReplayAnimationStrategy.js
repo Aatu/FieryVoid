@@ -9,6 +9,13 @@ window.ReplayAnimationStrategy = (function(){
         this.animations.push(this.emitterContainer);
         this.emitterContainer.start();
 
+
+        var amount = 10;
+
+        while (amount--){
+            this.animations.push(new LaserEffect(this.shipIconContainer.getArray()[0], {x: Math.random()*400 - 200, y: Math.random()*400 - 200}, scene, {color: new THREE.Color(255/255, 79/255, 15/255)}));
+        }
+
         /*
         var particle = this.emitterContainer.getParticle(this);
         particle
@@ -57,6 +64,7 @@ window.ReplayAnimationStrategy = (function(){
         new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}, type: "pillar"});
         new Explosion(this.emitterContainer, {size: 20, position: {x:800, y:800}});
 */
+/*
         var amount = 100;
 
         while (amount--) {
@@ -64,7 +72,7 @@ window.ReplayAnimationStrategy = (function(){
                 time: 0,
                 size: 30,
                 position: {x:1000 - amount * 60, y:0},
-                type: ["gas"][Math.floor(Math.random()*4)]
+                type: "gas"
             });
         }
 
@@ -75,7 +83,7 @@ window.ReplayAnimationStrategy = (function(){
                 time: 0,
                 size: 30,
                 position: {x:1000 - amount * 60, y:100},
-                type: ["glow"][Math.floor(Math.random()*4)]
+                type: "glow"
             });
         }
 
@@ -86,7 +94,7 @@ window.ReplayAnimationStrategy = (function(){
                 time: 0,
                 size: 30,
                 position: {x:1000 - amount * 60, y:200},
-                type: ["pillar"][Math.floor(Math.random()*4)]
+                type: "pillar"
             });
         }
 
@@ -97,9 +105,24 @@ window.ReplayAnimationStrategy = (function(){
                 time: 0,
                 size: 30,
                 position: {x:1000 - amount * 60, y:300},
-                type: ["emp"][Math.floor(Math.random()*4)]
+                type: "emp"
             });
         }
+
+
+*/
+/*
+        var amount = 1000;
+
+        while (amount--) {
+            new Explosion(this.emitterContainer, {
+                time: Math.random()*10000,
+                size: Math.random()*300 + 10,
+                position: {x:Math.random()*4000 - 2000, y:Math.random()*4000 - 2000},
+                type: ["glow", "emp", "pillar", "gas"][Math.floor(Math.random()*4)]
+            });
+        }
+*/
 
         console.log(this.emitterContainer.count());
     }

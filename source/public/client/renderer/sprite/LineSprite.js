@@ -1,7 +1,11 @@
 window.LineSprite = (function(){
 
-    function LineSprite(start, end, lineWidth, z, color, opacity)
+    function LineSprite(start, end, lineWidth, z, color, opacity, args)
     {
+        if (! args) {
+           args = {}; 
+        }
+        
         this.z = z || 0;
         this.mesh = null;
         this.start = start;
@@ -10,7 +14,7 @@ window.LineSprite = (function(){
         this.color = color;
         this.opacity = opacity;
 
-        this.mesh = create.call(this, start, end, lineWidth);
+        this.mesh = create.call(this, start, end, lineWidth, args);
     }
 
     LineSprite.prototype = Object.create(webglSprite.prototype);
@@ -22,6 +26,10 @@ window.LineSprite = (function(){
         this.mesh.position.y = position.y;
         this.mesh.scale.x = width;
         this.mesh.rotation.z = -mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
+    };
+
+    LineSprite.prototype.multiplyOpacity = function(m) {
+        this.material.opacity = this.opacity * m;
     };
 
     LineSprite.prototype.setLineWidth = function (lineWidth) {
@@ -38,12 +46,20 @@ window.LineSprite = (function(){
         geometry.faces.push( new THREE.Face3( 2, 3 , 1) );
     }
 
-    function create(start, end, lineWidth)
+    function create(start, end, lineWidth, args)
     {
         var width = mathlib.distance(start, end);
 
         var geometry = new THREE.PlaneGeometry( 1, 1, 1, 1 );
-        this.material = new THREE.MeshBasicMaterial( { color: this.color, transparent: true, opacity: this.opacity } );
+        this.material = new THREE.MeshBasicMaterial(
+            {
+                color: this.color,
+                transparent: true,
+                opacity: this.opacity,
+                map: args.texture || undefined,
+                blending: args.blending || undefined
+            }
+        );
 
         var mesh = new THREE.Mesh(
             geometry,
@@ -52,7 +68,7 @@ window.LineSprite = (function(){
 
         mesh.rotation.z = -mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
         mesh.position.z = this.z;
-        var position = mathlib.getPointBetween(start, end, 0.5);
+        var position = mathlib.getPointBetween(start, end, 0.5, true);
         mesh.position.x = position.x;
         mesh.position.y = position.y;
         mesh.scale.x = width;

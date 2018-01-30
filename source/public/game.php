@@ -118,6 +118,7 @@
     <script src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

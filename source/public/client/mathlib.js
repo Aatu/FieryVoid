@@ -36,11 +36,15 @@ window.mathlib = {
 		return ret;
 	},
 	
-	getPointBetween: function(start, end, percentage){
-		var x = Math.floor(start.x + percentage * (end.x - start.x));
-		var y = Math.floor(start.y + percentage * (end.y - start.y));
-	
-		return {x:x, y:y};
+	getPointBetween: function(start, end, percentage, noRound){
+		var x = start.x + percentage * (end.x - start.x);
+		var y = start.y + percentage * (end.y - start.y);
+
+		if (noRound) {
+            return {x:x, y:y};
+		}
+
+		return {x:Math.floor(x), y:Math.floor(y)};
 	},
 	
 	getDistance: function(start, end){
