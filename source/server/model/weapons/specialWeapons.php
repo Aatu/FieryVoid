@@ -1735,8 +1735,10 @@ class RammingAttack extends Weapon{
 
 	public $isRammingAttack = true;	
 	private $designedToRam = false;
+	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
 	private $designDamage = 0;
 	private $damageModRolled = 0;
+	private $fcbase = array(0,0,0);
 	
 	
 	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
@@ -1750,6 +1752,10 @@ class RammingAttack extends Weapon{
 	}
 	
 	    public function setSystemDataWindow($turn){
+			$FCpenalty = HkControlNode::getFCMod($this->unit->userid,$gamedata);
+			foreach($this->fireControl as $fckey=>$fcval){
+				$this->fireControl[$fckey] = $this->FCbase[$fckey]+$FCpenalty;
+			}		    
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
 		      if($this->designedToRam) {
@@ -1767,7 +1773,6 @@ class RammingAttack extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
 		parent::fire($gamedata, $fireOrder);
-/*TEST		
 		if($fireOrder->shotshit > 0){
 			$pos = null;
 			$shooter = $gamedata->getShipById($fireOrder->targetid);
@@ -1784,23 +1789,34 @@ class RammingAttack extends Weapon{
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
 			$fireOrder->calledid = -1; //just in case!
 		}
-*/		
         } //endof function fire
 
+	
+	public function calculateHitBase($gamedata, $fireOrder){ //update firing control first!
+		$FCpenalty = HkControlNode::getFCMod($this->unit->userid,$gamedata);
+		foreach($this->fireControl as $fckey=>$fcval){
+			$this->fireControl[$fckey] = $this->FCbase[$fckey]+$FCpenalty;
+		}
+		parent::calculateHitBase($gamedata, $fireOrder);
+	}
 
-        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false){
+        function __construct($armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestroy = 0){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             $maxhealth = 1;
             $powerReq = 0;
 		if ($fcbonus != 0){
-			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);	
+			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);			
+			$this->fcbase = array($fcbonus, $fcbonus, $fcbonus);	
 		}
 		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
 			$this->designDamage = 	$designDamage;
 		}
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		$this->designedToRam = $designedToRam;
+		$this->selfDestroy = $selfDestroy;
         }
+	
+
 	
 	private function getRammingFactor(){
 		$dmg = 0;
@@ -1812,9 +1828,7 @@ class RammingAttack extends Weapon{
 		}
 		return $dmg;
 	}
-        public function getDamage($fireOrder){        
-$damage = 60;		
-/*TEST		
+        public function getDamage($fireOrder){  	
 		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 		$modifier = 0;
 		$shooter = $this->unit;
@@ -1837,13 +1851,13 @@ $damage = 60;
 		}//if lower, stays 0.25
 		$damage = ceil($this->damageModRolled * $this->getRammingFactor());	
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
-*/		
 		return $damage;					     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$target = $this->gamedata->getShipById($fireOrder->targetid);
 		$damage = ceil($this->damageModRolled * $target->getRammingFactor());	
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack
 		return $damage;					     
 	}
 	
