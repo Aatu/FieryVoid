@@ -1241,7 +1241,7 @@
 			}
 		}
 		$multiplier = 1.1;
-		if ($this->size == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
+		if ($this->shipSizeClass == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
 		$dmg = ceil($structuretotal * $multiplier);
 		return $dmg;
 	} //endof function getRammingFactor
