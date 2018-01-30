@@ -123,18 +123,7 @@ window.ParticleEmitter = (function(){
         }
     };
 
-    ParticleEmitter.prototype.register = function()
-    {
-        this.effects++;
-    };
-
-    ParticleEmitter.prototype.unregister = function(effect)
-    {
-        this.freeParticles(effect.particles);
-        this.effects--;
-    };
-
-    ParticleEmitter.prototype.getFreeParticle = function()
+    ParticleEmitter.prototype.getParticle = function()
     {
         if (this.free.length === 0) {
             return false;

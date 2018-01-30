@@ -16,7 +16,7 @@ window.ParticleEmitterContainer = (function(){
         var emitter = null;
 
         for (var i in this.emitters) {
-            particle = this.emitters[i].emitter.getFreeParticle();
+            particle = this.emitters[i].emitter.getParticle();
             if (particle) {
                 emitter = this.emitters[i];
             }

@@ -5,16 +5,37 @@ window.ReplayAnimationStrategy = (function(){
         this.shipIconContainer = shipIcons;
         this.turn = gameData.turn;
         buildAnimations.call(this, gamedata);
+        /*
         this.emitterContainer = new ParticleEmitterContainer(scene);
         this.animations.push(this.emitterContainer);
         this.emitterContainer.start();
+        */
+
+        //this.animations.push(new LaserEffect(this.shipIconContainer.getArray()[0], {x: Math.random()*400 - 200, y: Math.random()*400 - 200}, scene, {color: new THREE.Color(255/255, 79/255, 15/255)}));
 
 
-        var amount = 10;
+        this.animations.push(new LaserEffect(
+            this.shipIconContainer.getArray()[0],
+            this.shipIconContainer.getArray()[2],
+            scene,
+            {
+                color: new THREE.Color(255/255, 79/255, 15/255),
+                hit: true
+            }
+            )
+        );
 
-        while (amount--){
-            this.animations.push(new LaserEffect(this.shipIconContainer.getArray()[0], {x: Math.random()*400 - 200, y: Math.random()*400 - 200}, scene, {color: new THREE.Color(255/255, 79/255, 15/255)}));
-        }
+        this.animations.push(new LaserEffect(
+            this.shipIconContainer.getArray()[0],
+            this.shipIconContainer.getArray()[2],
+            scene,
+            {
+                color: new THREE.Color(255/255, 79/255, 15/255),
+                hit: false,
+                time:700
+            }
+            )
+        );
 
         /*
         var particle = this.emitterContainer.getParticle(this);
@@ -123,8 +144,6 @@ window.ReplayAnimationStrategy = (function(){
             });
         }
 */
-
-        console.log(this.emitterContainer.count());
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
