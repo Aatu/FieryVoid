@@ -824,7 +824,7 @@ class HkControlNode extends ShipSystem{
 	/*FC modifier for hunter-killers (penalty for being uncontrolled)
 		originally increased penalty for movement, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
 	*/
-	public static function getIniMod($playerID,$gamedata){
+	public static function getFCMod($playerID,$gamedata){
 		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
 		$FCModifier = HkControlNode::$fullFCPenalty*$howPartial;		    	
 		
