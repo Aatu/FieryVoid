@@ -725,7 +725,6 @@ class HkControlNode extends ShipSystem{
     public $displayName = "HK Control Node";
     public $primary = true;
     private static $fullIniPenalty = -50; //-10, times 5 d20->d100
-    private static $fullFCPenalty = -4; //-4, not translated to d100
 	
     public static $alreadyCleared = false;	
 	public static $nodeList = array(); //array of nodes in game
@@ -821,24 +820,14 @@ class HkControlNode extends ShipSystem{
 		return $iniModifier;
 	}//endof function getIniMod
 	
-	/*FC modifier for hunter-killers (penalty for being uncontrolled)
-		originally increased penalty for movement, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
-	*/
-	public static function getFCMod($playerID,$gamedata){
-		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
-		$FCModifier = HkControlNode::$fullFCPenalty*$howPartial;		    	
-		
-		$FCModifier = floor($FCModifier);
-		return $FCModifier;
-	}//endof function getIniMod
 	
 	
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
 	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
-	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullIniPenalty . " and FC by up to " . HkControlNode::$fullFCPenalty . " due to (semi-)autonomous operation.";	     	     
+	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullIniPenalty . " due to (semi-)autonomous operation.";	     	     
 	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs orient themselves.";	  	     
-	$this->data["Special"] .= "<BR>Any Initiative changes are effective on NEXT TURN, while FC changes are effective on CURRENT TURN.";
+	$this->data["Special"] .= "<BR>Any Initiative changes are effective on NEXT TURN.";
     }	    
 		    
 } //endof class HkControlNode
