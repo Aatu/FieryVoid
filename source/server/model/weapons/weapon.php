@@ -659,7 +659,7 @@ class Weapon extends ShipSystem{
 	    	$target->setExpectedDamage($hitLoc, $hitChance, $this);
 		
 		
-		$notes = $rp["notes"] . "RAMMING, final hit chance: $hitChance";
+		$notes = $fireOrder->notes . "RAMMING, final hit chance: $hitChance";
 		$fireOrder->chosenLocation = $hitLoc;
 		$fireOrder->needed = $hitChance;
 		$fireOrder->notes = $notes;
