@@ -1818,7 +1818,8 @@ class RammingAttack extends Weapon{
 		//modifier: +1 if greater Ini than target, +1 if head on, +1 if target is head on also
 		$modifier = 0;
 		$shooter = $this->unit;
-		$target = $this->gamedata->getShipById($fireOrder->targetid);
+		$gd = $this->gamedata;
+		$target = $gd->getShipById($fireOrder->targetid);
 		if ($shooter->iniative > $target->iniative) $modifier++;
 		$bearing = abs($shooter->getBearingOnUnit($target));
 		if ($bearing < 10) {$modifier=200;}else{$modifier=-200;}//$modifier++;//should be 0, but at rage 0 there may be a few degrees off...
@@ -1840,7 +1841,8 @@ class RammingAttack extends Weapon{
 		return $damage;					     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
-		$target = $this->gamedata->getShipById($fireOrder->targetid);
+		$gd = $this->gamedata;
+		$target = $gd->getShipById($fireOrder->targetid);
 		$damage = ceil($this->damageModRolled * $target->getRammingFactor());	
 		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
 		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack
