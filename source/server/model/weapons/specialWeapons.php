@@ -1741,7 +1741,7 @@ class RammingAttack extends Weapon{
 	private $damageModRolled = 0;
 	
 	
-	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+	private static $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
