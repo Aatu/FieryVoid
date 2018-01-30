@@ -1741,7 +1741,7 @@ class RammingAttack extends Weapon{
 	private $damageModRolled = 0;
 	
 	
-	private static $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
 	
 	 public $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
 	
@@ -1768,6 +1768,7 @@ class RammingAttack extends Weapon{
 	
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on raming factor of target)!
+		$this->gamedata = $gamedata;
 		parent::fire($gamedata, $fireOrder);
 		if($fireOrder->shotshit > 0){
 			$pos = null;
@@ -1837,9 +1838,9 @@ class RammingAttack extends Weapon{
 		}else if ($roll >= 7){
 			$this->damageModRolled = 0.5;
 		}//if lower, stays 0.25
-		$damage = ceil($this->damageModRolled * $this->getRammingFactor());	
+		$damage = ceil($this->damageModRolled * $this->getRammingFactor());
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
-		return $damage;					     
+		return $damage;			     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
