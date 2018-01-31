@@ -181,6 +181,22 @@
             
             $this->autoid++;
             $fighterSys = array();
+		
+		//add ramming attack
+		//check whether game id is safe (can be safely be deleted lin May 2018) or so)
+		if (TacGamedata::$currentGameID >= TacGamedata::$safeGameID){
+			//check if ramming attack is already added	
+			$alreadyRamming = false;
+			foreach ($fighter->systems as $system){
+				if ($system instanceof RammingAttack) $alreadyRamming = true;
+			}
+			if(!$alreadyRamming){			
+				$fighter->addAftSystem(new new RammingAttack(0, 0, 360, 0, 0));
+			}
+		}
+			
+		
+		
             foreach ($fighter->systems as $system){
 		    $system->setUnit($this);
 			$system->id  = $this->autoid;
