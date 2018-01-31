@@ -1,16 +1,15 @@
 window.ParticleEmitterContainer = (function(){
 
-    function ParticleEmitterContainer(scene){
+    function ParticleEmitterContainer(scene, defaultParticleAmount){
         this.emitters = [];
         this.scene = scene;
+        this.defaultParticleAmount = defaultParticleAmount;
         Animation.call(this);
     }
 
-    var p = 0;
     ParticleEmitterContainer.prototype = Object.create(Animation.prototype);
 
     ParticleEmitterContainer.prototype.getParticle = function(animation) {
-        p++;
 
         var particle;
         var emitter = null;
@@ -23,17 +22,13 @@ window.ParticleEmitterContainer = (function(){
         }
 
         if (! particle) {
-            this.emitters.push({emitter: new ParticleEmitter(this.scene), reservations: []});
+            this.emitters.push({emitter: new ParticleEmitter(this.scene, this.defaultParticleAmount), reservations: []});
             return this.getParticle(animation);
         }
 
         var reservation = getReservation(emitter.reservations, animation, true);
         reservation.indexes.push(particle.index);
         return particle;
-    };
-
-    ParticleEmitterContainer.prototype.count = function() {
-        return p;
     };
 
     ParticleEmitterContainer.prototype.cleanUp = function () {
@@ -46,6 +41,13 @@ window.ParticleEmitterContainer = (function(){
     ParticleEmitterContainer.prototype.cleanUpAnimation = function (animation) {
         this.emitters.forEach(function (emitter) {
            cleanUpAnimationFromEmitter(animation, emitter);
+        });
+    };
+
+    ParticleEmitterContainer.prototype.setPosition = function (pos) {
+        this.emitters.forEach(function(emitter){
+            emitter.emitter.mesh.position.x = pos.x;
+            emitter.emitter.mesh.position.y = pos.y;
         });
     };
 

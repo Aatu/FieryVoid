@@ -11,6 +11,9 @@ window.Explosion = (function(){
         this.size = args.size || 16;
         this.speed = args.speed || 1;
         this.ring = args.ring || false;
+        this.duration = args.duration;
+        this.color = args.color;
+
         this.movement = args.movement || {x:0, y:0};
 
         ParticleAnimation.call(this, emitterContainer, args.seed);
@@ -363,7 +366,7 @@ window.Explosion = (function(){
         {
             var particle = this.emitterContainer.getParticle(this);
             var activationTime = this.time + Math.floor(Math.random()*0.03/this.speed);
-            var fadeOutAt = activationTime + Math.floor(Math.random()*0.05/this.speed);
+            var fadeOutAt = this.duration ? activationTime + this.duration : activationTime + Math.floor(Math.random()*0.05/this.speed);
 
             particle
                 .setSize(Math.floor(Math.random()*size) + size/2)

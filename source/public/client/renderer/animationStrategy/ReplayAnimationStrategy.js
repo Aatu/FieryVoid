@@ -5,37 +5,50 @@ window.ReplayAnimationStrategy = (function(){
         this.shipIconContainer = shipIcons;
         this.turn = gameData.turn;
         buildAnimations.call(this, gamedata);
-        /*
         this.emitterContainer = new ParticleEmitterContainer(scene);
         this.animations.push(this.emitterContainer);
         this.emitterContainer.start();
-        */
+
 
         //this.animations.push(new LaserEffect(this.shipIconContainer.getArray()[0], {x: Math.random()*400 - 200, y: Math.random()*400 - 200}, scene, {color: new THREE.Color(255/255, 79/255, 15/255)}));
 
 
-        this.animations.push(new LaserEffect(
-            this.shipIconContainer.getArray()[0],
-            this.shipIconContainer.getArray()[2],
-            scene,
-            {
-                color: new THREE.Color(255/255, 79/255, 15/255),
-                hit: true
-            }
-            )
-        );
+        var amount = 5;
 
-        this.animations.push(new LaserEffect(
-            this.shipIconContainer.getArray()[0],
-            this.shipIconContainer.getArray()[2],
-            scene,
-            {
-                color: new THREE.Color(255/255, 79/255, 15/255),
-                hit: false,
-                time:700
-            }
-            )
-        );
+        while (amount--) {
+            this.animations.push(new BoltEffect(
+                this.emitterContainer,
+                {
+                    size: 40,
+                    origin: this.shipIconContainer.getArray()[0].getPosition(),
+                    target: this.shipIconContainer.getArray()[2].getPosition(),
+                    color: new THREE.Color(119/255, 225/255, 255/255),
+                    hit: Math.round(Math.random()),
+                    time: Math.random() * 1000
+                })
+            );
+        }
+
+
+        var lamount = 0;
+        while (lamount--) {
+            this.animations.push(new LaserEffect(
+                this.shipIconContainer.getArray()[0],
+                this.shipIconContainer.getArray()[2],
+                scene,
+                {
+                    color: new THREE.Color(255 / 255, 79 / 255, 15 / 255),
+                    hit: Math.round(Math.random()),
+                    time: Math.random() * 1000
+                }
+                )
+            );
+        }
+
+
+
+
+        //new Explosion(this.emitterContainer, {size: 20, position: {x:400, y:0}});
 
         /*
         var particle = this.emitterContainer.getParticle(this);

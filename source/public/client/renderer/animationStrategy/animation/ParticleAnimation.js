@@ -13,17 +13,12 @@ window.ParticleAnimation = (function(){
         Math.seedrandom(this.seed);
     };
 
-    ParticleAnimation.prototype.getColor = function(r,g,b)
-    {
-        return new THREE.Color().setRGB(
-            r / 255,
-            g / 255,
-            b / 255
-        );
-    };
-
     ParticleAnimation.prototype.getRandomColor = function()
     {
+        if (this.color) {
+            return this.color;
+        }
+
         return new THREE.Color().setRGB(
             1,
             (255 - Math.floor(Math.random()*255)) / 255,

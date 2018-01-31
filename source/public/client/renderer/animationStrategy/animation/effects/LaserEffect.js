@@ -12,6 +12,11 @@ window.LaserEffect = (function() {
 
         this.color = args.color || new THREE.Color(0, 0, 0);
         this.shooter = shooter;
+        this.startOffset = {
+            x: Math.random() * 30 - 15,
+            y: Math.random() * 30 - 15
+        };
+
         this.target = target;
         if (!this.hit) {
             var targetPosition = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
@@ -39,20 +44,33 @@ window.LaserEffect = (function() {
         }, this);
 
 
-        this.particleEmitter = new ParticleEmitterContainer(scene);
 
-        new Explosion(this.particleEmitter, {
-            size: 20, type: "glow"
-        });
+        this.particleEmitter = new ParticleEmitterContainer(scene, 200);
 
         if (this.hit) {
             new Explosion(this.particleEmitter, {
-                size: 200,
+                size: 16,
                 position: {x:0, y:0},
                 type: "glow",
-                time: this.time
+                color: args.color,
+                time: this.time,
+                duration: this.duration
             });
+
+            var amount = Math.round(Math.random()*3) + 1;
+
+
+            while (amount--) {
+                new Explosion(this.particleEmitter, {
+                    size: 16,
+                    position: {x:0, y:0},
+                    type: ["gas", "pillar"][Math.round(Math.random()*2)],
+                    time: this.time + Math.random() * this.duration
+                });
+            }
         }
+
+
     }
 
     LaserEffect.prototype = Object.create(Animation.prototype);
@@ -66,9 +84,9 @@ window.LaserEffect = (function() {
         this.particleEmitter.cleanUp();
     };
 
-    LaserEffect.prototype.render = function (now, total, last, delta) {
+    LaserEffect.prototype.render = function (now, total, last, delta, zoom) {
 
-        this.particleEmitter.render(now, total, last, delta);
+        this.particleEmitter.render(now, total, last, delta, zoom);
         if (total < this.time || total > this.time + this.duration + this.fadeOutSpeed) {
             this.lasers.forEach(function (laser) {
                 laser.multiplyOpacity(0);
@@ -99,6 +117,9 @@ window.LaserEffect = (function() {
         var elapsedTime = total - this.time;
 
         var startAndEnd = getStartAndEnd.call(this, {x: this.offsetVelocity.x * elapsedTime, y: this.offsetVelocity.x * elapsedTime});
+
+        this.particleEmitter.setPosition(startAndEnd.end);
+
         this.lasers.forEach(function (laser) {
             laser.multiplyOpacity(opacity);
             laser.setStartAndEnd(startAndEnd.start, startAndEnd.end);
@@ -129,6 +150,8 @@ window.LaserEffect = (function() {
 
         var endPosition = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
         var start = this.shooter.getPosition();
+        start.x += this.startOffset.x;
+        start.y += this.startOffset.y;
         var end =  {x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y};
         return {start: start, end: end}
     }
