@@ -191,7 +191,7 @@
 				if ($system instanceof RammingAttack) $alreadyRamming = true;
 			}
 			if(!$alreadyRamming){			
-				$fighter->addAftSystem(new new RammingAttack(0, 0, 360, 0, 0));
+				$fighter->addAftSystem(new RammingAttack(0, 0, 360, 0, 0));
 			}
 		}
 			
