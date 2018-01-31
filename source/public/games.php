@@ -58,6 +58,10 @@
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
 		    news.innerHTML += "<br>";
+                    news.innerHTML += "- ship window during fleet selection contains a few more core informations (Initiative, fighter armor)";		    
+		    news.innerHTML += "<br>";
+                    news.innerHTML += "- SDEW between factions corrected";		    
+		    news.innerHTML += "<br>";
                     news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
