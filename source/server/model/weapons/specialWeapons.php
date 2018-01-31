@@ -1842,7 +1842,7 @@ class RammingAttack extends Weapon{
 		$damage = ceil($this->damageModRolled * $rfactor);
 		if ($fireOrder->notes != '') $fireOrder->notes .= "; ";
 		$fireOrder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor" ;
-		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage += 1000;  //fighter colliding with ship will always be destroyed
+		if ((!($shooter instanceof FighterFlight)) && ($target instanceof FighterFlight)) $damage += 1000;  //fighter colliding with ship will always be destroyed
 		$fireOrder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
 		return $damage;			     
 	}//endof function getDamage
