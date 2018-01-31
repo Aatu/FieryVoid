@@ -1840,9 +1840,10 @@ class RammingAttack extends Weapon{
 			$this->damageModRolled = 0.5;
 		}//if lower, stays 0.25
 		$damage = ceil($this->damageModRolled * $rfactor);
+		if (!isset($fireorder->notes)) $fireorder->notes = ''; else $fireorder->notes .= "; ";
 		$fireorder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor" ;
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $damage += 1000;  //fighter colliding with ship will always be destroyed
-		$fireorder->notes .= "; mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
+		$fireorder->notes .= "mod = " . $this->damageModRolled . " rammingfactor: $rfactor damage: $damage" ;		
 		return $damage;			     
 	}//endof function getDamage
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
