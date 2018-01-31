@@ -434,7 +434,7 @@ shipWindowManager = {
 	    
 	if(ship.flight){
 		var flightArmour = shipManager.systems.getFlightArmour(ship);	
-		abilities.push("&nbsp;Armor (F/S/A): " + flightArmour);
+		abilities.push("&nbsp;" + flightArmour);
 		abilities.push("&nbsp;Thrust: " + ship.freethrust);		
 	}
 
