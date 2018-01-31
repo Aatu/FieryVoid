@@ -797,7 +797,7 @@ class HkControlNode extends ShipSystem{
 		
 		$howPartial = 1;
 		if ($totalHKs > 0){ //should be! but just in case
-			$howPartial = $totalNodeOutput / $totalHKs;
+			$howPartial = 1-($totalNodeOutput / $totalHKs); //coverage of 100% means no penalty, no covewrage means 100% penalty
 			$howPartial = min(1, $howPartial); //can't exercise more than 100% control ;)
 		}
 		
