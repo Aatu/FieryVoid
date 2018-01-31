@@ -129,9 +129,11 @@
                 if ($elint->id === $ship->id)
                     continue;
                 
+		    /* faction should not affect it!
                 if($elint->faction != $ship->faction)
                     continue;
-                
+                */
+		    
                 if (!$elint->isElint())
                     continue;
                 
