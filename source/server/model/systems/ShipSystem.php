@@ -221,6 +221,10 @@ class ShipSystem{
 	
     
     public function setSystemDataWindow($turn){
+	if($this->startArc !== null){
+		$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
+	}
+	    
 	if($this->advancedArmor == true){
 		$this->data["Others"] = "Advanced Armor";
 	}
