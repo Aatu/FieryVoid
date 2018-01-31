@@ -66,6 +66,15 @@
             $this->name = $name;
             $this->slot = $slot;
 	    $this->fillLocationsGUI();//so called shots work properly
+		
+		//add ramming attack
+		//check whether game id is safe (can be safely be deleted lin May 2018 or so)
+		if (TacGamedata::$currentGameID >= TacGamedata::$safeGameID){
+			//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.	
+			if(!($this instanceof FighterFlight)){
+				$this->addPrimarySystem(new new RammingAttack(0, 0, 360, 0, 0));
+			}
+		}
         }
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
