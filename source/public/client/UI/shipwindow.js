@@ -429,8 +429,12 @@ shipWindowManager = {
 		}
 	    
         if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost);
-        }
+            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost + " Ini: " + ship.iniativebonus );
+        }else{
+		var flightArmour = shipManager.systems.getFlightArmour(ship);	
+		abilities.push("&nbsp;Armor (F/S/A): " + flightArmour);
+		abilities.push("&nbsp;Thrust: " + ship.freethrust);		
+	}
 
         if(ship.agile){
             abilities.push("&nbsp;Agile ship");
