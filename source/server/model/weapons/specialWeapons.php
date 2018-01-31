@@ -21,7 +21,10 @@ class PlasmaStream extends Raking{
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-
+            public $firingModes = array(
+                1 => "Raking"
+            );
+	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -1730,6 +1733,10 @@ class RammingAttack extends Weapon{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
 	public $raking = 10; //size of rake
 	
+	
+            public $firingModes = array(
+                1 => "Ramming"
+            );	
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Ramming"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
