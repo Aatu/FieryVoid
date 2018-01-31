@@ -1849,9 +1849,10 @@ class RammingAttack extends Weapon{
         public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
 		$gd = $this->gamedata;
 		$target = $gd->getShipById($fireOrder->targetid);
+		$shooter = $this->unit;
 		$rfactor =  $target->getRammingFactor();
 		$damage = ceil($this->damageModRolled * $rfactor);			
-		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) $damage = 1000;  //fighter colliding with ship will always be destroyed
+		if ((!($target instanceof FighterFlight)) && ($shooter instanceof FighterFlight)) $damage = 1000;  //fighter colliding with ship will always be destroyed
 		$damage += $this->selfDestroy;//unit will suffer additional damage on a successful attack
 		$fireOrder->notes .= "; return rammingfactor: $rfactor damage: $damage" ;
 		return $damage;					     
