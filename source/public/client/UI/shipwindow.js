@@ -430,7 +430,9 @@ shipWindowManager = {
 	    
         if(!ship.fighter){
             abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost + " Ini: " + ship.iniativebonus );
-        }else{
+        }
+	    
+	if(ship.flight){
 		var flightArmour = shipManager.systems.getFlightArmour(ship);	
 		abilities.push("&nbsp;Armor (F/S/A): " + flightArmour);
 		abilities.push("&nbsp;Thrust: " + ship.freethrust);		
