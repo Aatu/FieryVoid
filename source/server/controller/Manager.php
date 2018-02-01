@@ -305,11 +305,11 @@ class Manager{
             //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
             $starttime = time();
-throw new Exception("Manager.php submitTacGamedata before getShipsFromJSON");
             $ships = self::getShipsFromJSON($ships, $gameid);
-            
-            if (sizeof($ships)==0)
-				throw new Exception("Gamedata missing");
+
+throw new Exception("Manager.php submitTacGamedata after getShipsFromJSON");
+		
+            if (sizeof($ships)==0) throw new Exception("Gamedata missing");
             //print(var_dump($ships));
             //$gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
             //$gamedata->ships = $ships;
