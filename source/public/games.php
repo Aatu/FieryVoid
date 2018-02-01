@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 30th of January 2018";
+                    header.innerHTML = "Latest News 6th of February 2018";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -60,6 +60,10 @@
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- ship window during fleet selection contains a few more core informations (Initiative, fighter armor)";		    
 		    news.innerHTML += "<br>";
+                    news.innerHTML += "- <b>Ramming</b> feature added - look for new weapon on PRIMARY sections of Your ships (and Afts of fighters)! Just remember that ramming is a feature to be used in desperate circumstances only, NOT allowed in pickup battles.";
+		    news.innerHTML += "<br>";		    
+                    news.innerHTML += "- ...unless You have unit specifically designed for this purpose. Like, say, Orieni Hunter-Killer. Enjoy :) .";	
+		    news.innerHTML += "<br>";		    
                     news.innerHTML += "- SDEW between factions corrected";		    
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- a few minor bugs fixed";
