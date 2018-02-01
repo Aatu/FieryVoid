@@ -50,6 +50,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
 
      public function setSystemDataWindow($turn){
         $this->data["Ability:"] = "Denies a hostile OEW-lock versus this ship.";
+	$this->data["Special"] = "Disabled Jammer won't affect enemy missile launches on NEXT turn!";	     
     }
 
 }
