@@ -371,7 +371,7 @@ shipManager.power = {
 	
 	
 	isOffline: function(ship, system){
-		return isOfflineOnTurn(ship, system, gamedata.turn);
+		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 		/*
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;		
