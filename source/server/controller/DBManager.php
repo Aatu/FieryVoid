@@ -674,7 +674,8 @@ class DBManager {
                     $this->update($sql);
                     }
                     catch(Exception $e) {
-                        throw $e;
+			    //Marcin Sawicki: this may return exception all right - for new damage classes. Only predefined damage classes can be handled.
+                        //throw $e;
                     }
                 }
             }
