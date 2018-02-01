@@ -305,9 +305,8 @@ class Manager{
             //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
             $starttime = time();
+	    $gdS = self::$dbManager->getTacGamedata($userid, $gameid); //Marcin Sawicki: moving so TacGamedata is available when ships from JSON are loaded!
             $ships = self::getShipsFromJSON($ships, $gameid);
-
-throw new Exception("Manager.php submitTacGamedata after getShipsFromJSON");
 		
             if (sizeof($ships)==0) throw new Exception("Gamedata missing");
             //print(var_dump($ships));
@@ -321,8 +320,8 @@ throw new Exception("Manager.php submitTacGamedata after getShipsFromJSON");
             
             self::$dbManager->startTransaction();
             
-		
-            $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
+	    //Marcin Sawicki: let's try to mpove this earlier!	
+            //$gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
