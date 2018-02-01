@@ -460,7 +460,18 @@ class TacGamedata{
                     $ship->EW = Array();
                     
                     foreach($ship->systems as $system){
-                        $system->power = array();
+			//Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
+			if($system instanceof Jammer){
+				$power2 = array();
+				foreach($system->power as $powentry){
+					if($powentry->turn < $this->turn){
+						$power2[] = $powentry;	
+					}
+				}
+				$system->power = $power2;
+			}else{
+                        	$system->power = array();
+			}
                     }
                 }
             }
