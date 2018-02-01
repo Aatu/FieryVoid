@@ -348,8 +348,31 @@ shipManager.power = {
 	
 	},
 	
-	isOffline: function(ship, system){
+	isOfflineOnTurn: function(ship, system, turn){
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			return true;		
+		}
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
+			return true;		
+		}
 	
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
+			return true;
+		}
+	
+		for (var i in system.power){
+			var power = system.power[i];
+			if (power.turn != turn) continue;				
+			if (power.type == 1) return true;
+		}
+		
+		return false;
+	},
+	
+	
+	isOffline: function(ship, system){
+		return isOfflineOnTurn(ship, system, gamedata.turn);
+		/*
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;		
 		}
@@ -376,6 +399,7 @@ shipManager.power = {
 		}
 		
 		return false;
+		*/
 	},
 	
 	setOnline: function(ship, system){
