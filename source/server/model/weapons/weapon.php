@@ -644,7 +644,7 @@ class Weapon extends ShipSystem{
 			$hitChance += 1;
 			break;
 		    default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
-			$hitChance += ceil(($targetSpeed-5)/5);
+			$hitChance -= ceil(($targetSpeed-5)/5);
 		}
 		//‐1 for every level of jinking the ramming or target unit is using
 		$hitChance -= Movement::getJinking($shooter, $gamedata->turn);
