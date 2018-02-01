@@ -37,7 +37,7 @@ class HkShiningLight extends FighterFlight{
             $fighter->iconPath = "img/ships/OrieniHK_large.png";
             
             //$armour, $startArc, $endArc, $designDamage = 0, $fcbonus = 0, $designedToRam = false, $selfDestruct = 0
-            //HK should by rules get a penalty of -1 per 2 speed at the moment of ram; I change it to a flat -3, regardless of circumstances
+            //Shining Light should by rules get a penalty of -1 per 2 speed at the moment of ram, and flat +1 bonus; I change it to a flat -3, regardless of circumstances
 	    $hitPenalty = -3;
             $fighter->addFrontSystem(new RammingAttack(0, 0, 360, 60, $hitPenalty, true, 60));
             
