@@ -305,7 +305,7 @@ class Manager{
             //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
             $starttime = time();
-            
+throw new Exception("Manager.php submitTacGamedata before getShipsFromJSON");
             $ships = self::getShipsFromJSON($ships, $gameid);
             
             if (sizeof($ships)==0)
