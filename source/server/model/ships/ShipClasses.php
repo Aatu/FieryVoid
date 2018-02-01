@@ -182,15 +182,6 @@
 	    
         public function onConstructed($turn, $phase, $gamedata)
         {
-		//add ramming attack
-		//check whether game id is safe (can be safely be deleted lin May 2018 or so)
-		if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-			//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.	
-			if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
-				$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
-			}
-		}
-		
             foreach ($this->systems as $system){
                 $system->onConstructed($this, $turn, $phase);
                 $this->enabledSpecialAbilities = $system->getSpecialAbilityList($this->enabledSpecialAbilities);
@@ -251,7 +242,27 @@
             $this->addSystem($system, 2);
         }
         protected function addPrimarySystem($system){
+		//if system is Structure - first add Ramming Attack! assume we're nearing the end...
+	   if($system instanceof Structure){
+		//check whether ramming attack already exists (do not add another)
+		$rammingExists = false;
+		foreach($this->systems as $sys)  if ($sys instanceof RammingAttack){
+			$rammingExists = true;
+		}
+		if(!$rammingExists){
+			//add ramming attack
+			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
+			if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
+				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.	
+				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
+					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
+				}
+			}	
+		}
+	   }
             $this->addSystem($system, 0);
+		
+		
         }
         protected function addLeftSystem($system){
             $this->addSystem($system, 3);
