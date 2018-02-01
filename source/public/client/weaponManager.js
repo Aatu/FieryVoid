@@ -1482,7 +1482,7 @@ window.weaponManager = {
 		if (jammer)
 		{
 			//check whether it was enabled last turn... if so, allow missile launch :)
-			if (isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
 				range = range / (shipManager.systems.getOutput(target, jammer)+1);
 			}
 		}
