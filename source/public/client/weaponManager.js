@@ -1463,7 +1463,6 @@ window.weaponManager = {
 	},
 
 	checkIsInRange: function(shooter, target, weapon){
-
 		var range = weapon.range;
 		var shooterPos = shipManager.getShipPositionInWindowCoWithoutOffset(shooter);
 		var targetPos = shipManager.getShipPositionInWindowCoWithoutOffset(target)
@@ -1482,7 +1481,10 @@ window.weaponManager = {
 
 		if (jammer)
 		{
-			range = range / (shipManager.systems.getOutput(target, jammer)+1);
+			//check whether it was enabled last turn... if so, allow missile launch :)
+			if (isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+				range = range / (shipManager.systems.getOutput(target, jammer)+1);
+			}
 		}
 
 		return (distance <= range);
