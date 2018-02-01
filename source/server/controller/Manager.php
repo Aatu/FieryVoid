@@ -769,6 +769,8 @@ class Manager{
     
 	
     private static function handleMovement( $ships, $gamedata ){    
+//TEST
+ throw new Exception("Manager.php handleMovement: before getActiveship");	    
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");
