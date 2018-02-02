@@ -54,7 +54,7 @@
 		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha are quite different form usual races - details on FB.";
+                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha are quite different from usual races - details on FB.";
 		    news.innerHTML += "<br><br>";
                     news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
 		    news.innerHTML += "<br>";
