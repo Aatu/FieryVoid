@@ -1819,7 +1819,7 @@ class RammingAttack extends Weapon{
 			$dmg = 	$this->designDamage;
 		}else{
 			$rammingShip = $this->unit;
-			if ($rammingShip) {
+			if (isset($rammingShip)) {
 				$dmg = $rammingShip->getRammingFactor();
 $dmg+=5; //TEST!				
 			}else{
