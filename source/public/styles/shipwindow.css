@@ -273,13 +273,14 @@
 .shipwindow #shipSection_4{
     position:absolute;
     top:225px;
-	/*leave room for 3rd column
+	
     width:70px;
     right:62px;
-	*/
+	
+	/*
     width:105px;
-    /*right:27px;	*/
-	right: 97px;
+    right:27px;
+	*/
 	background-color:#11FF11; /*TEST*/
 }
 
