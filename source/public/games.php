@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 6th of February 2018";
+                    header.innerHTML = "Latest News 5th of February 2018";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -54,8 +54,8 @@
 		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha feature a different approach to power management, and should be a different experience to play. Warning: heavy micromanagement involved!";
-		    news.innerHTML += "<br>";
+                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha are quite different form usual races - details on FB.";
+		    news.innerHTML += "<br><br>";
                     news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- ship window during fleet selection contains a few more core informations (Initiative, fighter armor)";		    
@@ -64,7 +64,7 @@
 		    news.innerHTML += "<br>";		    
                     news.innerHTML += "- ...unless You have unit specifically designed for this purpose. Like, say, Orieni Hunter-Killer. Enjoy :) .";	
 		    news.innerHTML += "<br>";		    
-                    news.innerHTML += "- SDEW between factions corrected";		    
+                    news.innerHTML += "- Jammer modified - now if You turn it off, it won't block missile launches NEXT turn. Anyone wishing to shower Minbari with missiles should appreciate ;) .";		    
 		    news.innerHTML += "<br>";
                     news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
