@@ -1759,6 +1759,8 @@ class RammingAttack extends Weapon{
 	}
 	
 	    public function setSystemDataWindow($turn){
+			$this->setMinDamage(); //just in case it's not set correctly in the beginning!
+        		$this->setMaxDamage();
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Ramming attack - if cucccessful, ramming unit itself will take damage too (determined by targets' ramming factor).";  
 		      if($this->designedToRam) {
