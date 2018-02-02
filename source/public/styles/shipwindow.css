@@ -259,7 +259,6 @@
     top:200px;
     width:70px;
     right:62px;
-	background-color:#111111; /*TEST*/
 }
 
 .shipwindow .base #shipSection_3{
@@ -267,21 +266,13 @@
     top:200px;
     width:70px;
     left:55px; 
-	background-color:#1111FF; /*TEST*/
 }
 
 .shipwindow #shipSection_4{
     position:absolute;
-    top:225px;
-	
+    top:225px;	
     width:70px;
     right:62px;
-	
-	/*
-    width:105px;
-    right:27px;
-	*/
-	background-color:#11FF11; /*TEST*/
 }
 
 .shipwindow #shipSection_3{
@@ -293,7 +284,6 @@
 	*/
     width:105px;
     left:20px;
-	background-color:#FF1111; /*TEST*/
 }
 
 .shipwindow.rolled #shipSection_3{
