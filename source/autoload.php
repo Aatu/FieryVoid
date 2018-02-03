@@ -249,7 +249,8 @@ spl_autoload_register(
                 'kostina' =>  '/server/model/ships/abbai_old/kostina.php',
                 'lystala' =>  '/server/model/ships/abbai_old/lystala.php',               
                 'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
-                               
+
+                'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
                 'wimuk' =>  '/server/model/ships/abbai_old/wimuk.php',
                 
                 //Abbai ships (show era)
