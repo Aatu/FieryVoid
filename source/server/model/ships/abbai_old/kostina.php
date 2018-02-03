@@ -42,9 +42,9 @@ class Kostina extends BaseShip{
 
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addAftSystem(new Thruster(3, 16, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
  	$this->addAftSystem(new Hangar(3, 14));
-        $this->addAftSystem(new Thruster(3, 16, 0, 5, 2));
+        $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 180, 300));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 60, 180));
 
