@@ -247,6 +247,7 @@ spl_autoload_register(
                 'benota' =>  '/server/model/ships/abbai_old/benota.php',
                 'kastona' =>  '/server/model/ships/abbai_old/kastona.php',
                 'kostina' =>  '/server/model/ships/abbai_old/kostina.php',
+                'lystala' =>  '/server/model/ships/abbai_old/lystala.php',               
                 'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
                                
                 'wimuk' =>  '/server/model/ships/abbai_old/wimuk.php',
