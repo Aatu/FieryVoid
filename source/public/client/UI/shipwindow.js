@@ -429,7 +429,8 @@ shipWindowManager = {
 		}
 	    
         if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost + " Ini: " + ship.iniativebonus );
+            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
+		abilities.push("&nbsp;Profile (F/S): " + ship.forwardDefense + "/" + ship.sideDefense + "; Ini: " + ship.iniativebonus );
         }
 	    
 	if(ship.flight){
