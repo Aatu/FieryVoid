@@ -470,8 +470,9 @@ spl_autoload_register(
                 'righteous' => '/server/model/ships/orieni/righteous.php',
                 
                 'templar' => '/server/model/ships/orieni/templar.php',
-                'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+                    'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
                 'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
+                'hkshiningstar' => '/server/model/ships/orieni/hkShiningStar.php',
                 
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
