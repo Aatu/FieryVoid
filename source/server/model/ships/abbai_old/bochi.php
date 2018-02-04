@@ -25,7 +25,7 @@ class Bochi extends OSAT{
         $this->addPrimarySystem(new Reactor(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 6, 2, 5)); 
         $this->addPrimarySystem(new Thruster(4, 5, 0, 0, 2)); 
-        $this->addPrimarySystem(new AssaultLaser(6, 6, 4, 270, 90)); 
+        $this->addPrimarySystem(new AssaultLaser(3, 6, 4, 270, 90)); 
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 4, 2));
