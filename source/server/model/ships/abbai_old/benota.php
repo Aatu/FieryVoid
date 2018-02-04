@@ -5,7 +5,7 @@ class Benota extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 400;
-	$this->faction = "Abbai";
+	$this->faction = "Abbai_old";
         $this->phpclass = "Benota";
         $this->imagePath = "img/ships/AbbaiBenota.png";
         $this->shipClass = "Benota Fast Frigate";
