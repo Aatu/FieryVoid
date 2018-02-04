@@ -251,6 +251,7 @@ spl_autoload_register(
                 'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
 
                 'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
+                'kirva' =>  '/server/model/ships/abbai_old/kirva.php'
                 'wimuk' =>  '/server/model/ships/abbai_old/wimuk.php',
                 
                 //Abbai ships (show era)
