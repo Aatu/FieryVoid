@@ -5,7 +5,7 @@ class Wimuk extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 144;
-        $this->faction = "Abbai";
+        $this->faction = "Abbai_old";
         $this->phpclass = "Wimuk";
         $this->shipClass = "Wimuk Light Fighters";
     	$this->imagePath = "img/ships/AbbaiWimuk.png";
