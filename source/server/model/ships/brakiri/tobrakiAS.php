@@ -32,7 +32,7 @@ class TobrakiAS extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("tobraki", $armour, 10, $this->id);
-            $fighter->displayName = "Tobraki Assault Shuttle";
+            $fighter->displayName = "Tobraki";
             $fighter->imagePath = "img/ships/falkosi.png";
             $fighter->iconPath = "img/ships/falkosi_large.png";
             $fighter->addFrontSystem(new LightGraviticBolt(330, 30, 0, 1));

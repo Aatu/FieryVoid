@@ -44,25 +44,29 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 21st of December 2017";
+                    header.innerHTML = "Latest News 5th of February 2018";
                    
 
                 var news = document.getElementById("newsEntry");
+		    /*
                     news.innerHTML += "<big><b>Merry Christmas and a Happy New Year 2018</b></big>!<br>May our little world be still here for 2019.";
                     news.innerHTML += "<br><br>";
+		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- fixed some elusive targeting-related bugs (primarily concerning range 0)";
+                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha are quite different from usual races - details on FB.";
+		    news.innerHTML += "<br><br>";
+                    news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
 		    news.innerHTML += "<br>";
-                    news.innerHTML += "- large update regarding split section choice and interception routines - highlights below; interception should be much more reliable now!";
+                    news.innerHTML += "- ship window during fleet selection contains a few more core informations (Initiative, fighter armor)";		    
 		    news.innerHTML += "<br>";
-                    news.innerHTML += "-- multi-weapon housings (eg. Twin Array) may now intercept independently for each barrel ";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "-- ballistic weapons may now be automatically intercepted (although manual interception is still available)";
-                    news.innerHTML += "<br>";
-                    news.innerHTML += "-- improved selection algorithms - now Your defensive grid should be better at recognizing threats; still nothing like human, of course";  
+                    news.innerHTML += "- <b>Ramming</b> feature added - look for new weapon on PRIMARY sections of Your ships (and Afts of fighters)! Just remember that ramming is a feature to be used in desperate circumstances only, NOT allowed in pickup battles.";
+		    news.innerHTML += "<br>";		    
+                    news.innerHTML += "- ...unless You have unit specifically designed for this purpose. Like, say, Orieni Hunter-Killer. Enjoy :) .";	
+		    news.innerHTML += "<br>";		    
+                    news.innerHTML += "- Jammer modified - now if You turn it off, it won't block missile launches NEXT turn. Anyone wishing to shower Minbari with missiles should appreciate ;) .";		    
 		    news.innerHTML += "<br>";
-                    news.innerHTML += "-- last but not least - brand new collection of BUGS!";
+                    news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";
 

@@ -6,6 +6,7 @@ class TacGamedata{
     public static $currentPhase;
     public static $currentGameID;
     public static $currentActiveship;
+    public static $safeGameID = 4086; //gameID that is safe for adding new features
     
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
     public $ships = array();
@@ -391,11 +392,27 @@ class TacGamedata{
             }
         }
         
-        return $ships;
-             
-             
-    }
-    
+        return $ships;   
+    }  //endof function getShipsInDistance
+	
+	
+    /*returns all units within desired distance from source ship; distance in hexes*/
+    public function getShipsInDistanceHex($ship, $dis = 0){
+	$shipPos = $ship->getCoPos(); 
+	$ships = $this->getShipsInDistancePosHex($shipPos,$dis);
+        return $ships;   
+    }  //endof function getShipsInDistanceHex
+
+	
+    /*returns all units within desired distance from source location; distance in hexes*/
+    public function getShipsInDistancePosHex($pos, $dis = 0){
+	$ships = $this->getShipsInDistance($pos, (($dis*mathlib::$hexWidth) + 1));
+	return $ships;   
+    }  //endof function getShipsInDistancePosHex
+			
+				
+				
+				
     public function prepareForPlayer($turn, $phase, $activeship){
         $this->setWaiting();
         $this->checkChanged($turn, $phase, $activeship);
@@ -443,7 +460,18 @@ class TacGamedata{
                     $ship->EW = Array();
                     
                     foreach($ship->systems as $system){
-                        $system->power = array();
+			//Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
+			if($system instanceof Jammer){
+				$power2 = array();
+				foreach($system->power as $powentry){
+					if($powentry->turn < $this->turn){
+						$power2[] = $powentry;	
+					}
+				}
+				$system->power = $power2;
+			}else{
+                        	$system->power = array();
+			}
                     }
                 }
             }
@@ -478,12 +506,6 @@ class TacGamedata{
                 }
             }
         }
-        
-        
-        
-        
-        
-        
     }
     
     private function calculateTurndelays(){
@@ -625,4 +647,20 @@ class TacGamedata{
 
         return false;
     }
+	
+	/*check whether indicated ship belongs to this game - as it may happen that it does not!*/
+	public function shipBelongs($shipToCheck){
+		foreach($this->ships as $shp){
+			if ($shp===$shipToCheck){ //yes!
+				return true;
+			}
+		}
+		return false; //this ship was not found
+	}//endof function shipBelongs
+	
+	
 }
+
+
+
+?>

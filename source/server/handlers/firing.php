@@ -322,6 +322,11 @@ class Firing{
         $target = $gd->getShipById($fire->targetid);
 	$interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);
+	    
+	if ($firingweapon->doNotIntercept){ //some attacks simply aren't subject to interception - like being in a field, or ramming attacks
+            //Debug::log("Target weapon cannot be intercepted\n");
+            return false;
+        }    
   
         if (($firingweapon->uninterceptable) && (!($weapon->canInterceptUninterceptable))){ //some weapons can intercept normally unintereptable shots
             //Debug::log("Target weapon is uninterceptable\n");
@@ -410,6 +415,14 @@ class Firing{
 	
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
     public static function prepareFiring($gamedata){
+	//additional call for weapons needing extra preparation
+	foreach ($gamedata->ships as $ship){
+		foreach ($ship->systems as $system){
+			$system->beforeFiringOrderResolution($gamedata);
+		}
+	}
+	    
+	    
         //$currFireOrders  = array();   
 	$ambiguousFireOrders  = array();   
 	foreach ($gamedata->ships as $ship){	    
@@ -437,20 +450,6 @@ class Firing{
 			//$currFireOrders[] = $fire;
 		}
 	}
-	    
-/*		
-	//calculate hit chances if no ambiguousness exists...
-	foreach($currFireOrders as $fireOrder){
-		$ship = $gamedata->getShipById($fireOrder->shooterid);
-		$weapon = $ship->getSystemById($fireOrder->weaponid);
-		if($weapon->isTargetAmbiguous($gamedata, $fireOrder)){
-			$ambiguousFireOrders[] = $fireOrder;
-		}else{
-			$weapon->calculateHitBase($gamedata, $fireOrder);			
-		}
-	}
-*/		
-
 		
 	//calculate hit chances for ambiguous firing!
 	foreach($ambiguousFireOrders as $fireOrder){
@@ -461,6 +460,23 @@ class Firing{
 
     }//endof function prepareFiring	
 	
+	
+	
+    /* sorts firing orders*/
+    public static function compareFiringOrders($a, $b){	
+	if ($a->targetid !== $b->targetid){
+	    return $a->targetid - $b->targetid;
+	}else if($a->calledid!==$b->calledid){ //called shots first!
+	    return $a->targetid - $b->targetid;
+	}else if ($a->priority !== $b->priority){
+	    return $a->priority - $b->priority;
+	}
+	else {
+		$val = $a->shooterid - $b->shooterid;
+		if ($val == 0) $val = $a->id - $b->id; //let's use database ID as final sorting element!
+		return $val;
+	}
+    } //endof function compareFiringOrders
 	
 	
 
@@ -483,22 +499,31 @@ class Firing{
 				$reactorCurr->damage[] = $damageEntry;
 			}
 		}
+	    /* fighter attacks are taken into account here, but only ramming attacks!
             if ($ship instanceof FighterFlight){
                 continue;
-            }
-            foreach($ship->getAllFireOrders() as $fire){
+            }*/
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
                 if ($fire->type === "intercept" || $fire->type === "selfIntercept"){
                     continue;
                 }
+	    
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if ($weapon instanceof Thruster || $weapon instanceof Structure){
                     continue;
                 }
+		 
+		//fighter attack: only if ramming
+		if ($ship instanceof FighterFlight){
+			if (!$weapon->isRammingAttack) continue;
+		}
+		    
                 $fire->priority = $weapon->priority;
                 $fireOrders[] = $fire;
             }
         }
-        usort($fireOrders, 
+        usort($fireOrders, "self::compareFiringOrders");
+	      /* moved to separate function
             function($a, $b) use ($gamedata){
 		if ($a->targetid !== $b->targetid){
                     return $a->targetid - $b->targetid;
@@ -513,7 +538,7 @@ class Firing{
 			return $val;
                 }
             }
-        );
+        );*/
 	    
         foreach ($fireOrders as $fire){
                 $ship = $gamedata->getShipById($fire->shooterid);
@@ -522,6 +547,7 @@ class Firing{
                 // debug::log("resolve --- Ship: ".$ship->shipClass.", id: ".$fire->shooterid." wpn: ".$wpn->displayName.", priority: ".$p." versus: ".$fire->targetid);
                 self::fire($ship, $fire, $gamedata);
         }
+	    
         // From here on, only fighter units are left.
         $chosenfires = array();
         foreach($gamedata->ships as $ship){
@@ -530,13 +556,17 @@ class Firing{
             if (!($ship instanceof FighterFlight)){
                 continue;
             }
-            
-            foreach($ship->getAllFireOrders() as $fire){
+		
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
                 if ($fire->turn != $gamedata->turn){
                     continue;
                 }
                 
                 $weapon = $ship->getSystemById($fire->weaponid);
+		    
+		//ramming attacks are already allocated!
+		if ($weapon->isRammingAttack) continue;
+		    
                 if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
                         && !$weapon->ballistic){
                     continue;
@@ -545,6 +575,8 @@ class Firing{
                 $chosenfires[] = $fire;
             }
         }
+	    
+        usort($chosenfires, "self::compareFiringOrders");
 		
 	//FIRE fighters at other fighters
 	foreach ($chosenfires as $fire){
@@ -564,11 +596,14 @@ class Firing{
                 continue;
             }
             
-            foreach($ship->getAllFireOrders() as $fire){
+            foreach($ship->getAllFireOrders($gamedata->turn) as $fire){
                 if ($fire->turn != $gamedata->turn){
                     continue;
                 }
 		
+		//ramming attacks are already allocated!
+		if ($weapon->isRammingAttack) continue; 
+		    
                 $weapon = $ship->getSystemById($fire->weaponid);
                 if (($ship->getFighterBySystem($weapon->id)->isDestroyed() || $ship->isDestroyed() )
                         && !$weapon->ballistic){
@@ -578,7 +613,9 @@ class Firing{
                 $chosenfires[] = $fire;
             }
 	}
-		
+	
+        usort($chosenfires, "self::compareFiringOrders");	    
+	    
 	//FIRE rest of fighters
 	foreach ($chosenfires as $fire){
             $shooter = $gamedata->getShipById($fire->shooterid);

@@ -305,11 +305,10 @@ class Manager{
             //    file_put_contents('/tmp/fierylog', "Gameid: $gameid submitTacGamedata ships:". var_export($ships, true) ."\n\n", FILE_APPEND);
             self::initDBManager();  
             $starttime = time();
-            
+	    $gdS = self::$dbManager->getTacGamedata($userid, $gameid); //Marcin Sawicki: moving so TacGamedata is available when ships from JSON are loaded!
             $ships = self::getShipsFromJSON($ships, $gameid);
-            
-            if (sizeof($ships)==0)
-				throw new Exception("Gamedata missing");
+		
+            if (sizeof($ships)==0) throw new Exception("Gamedata missing");
             //print(var_dump($ships));
             //$gamedata = new TacGamedata($gameid, $turn, $phase, $activeship, $userid, "", "", 0, "", 0);
             //$gamedata->ships = $ships;
@@ -321,8 +320,8 @@ class Manager{
             
             self::$dbManager->startTransaction();
             
-		
-            $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
+	    //Marcin Sawicki: let's try to mpove this earlier!	
+            //$gdS = self::$dbManager->getTacGamedata($userid, $gameid);
             
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
@@ -768,7 +767,7 @@ class Manager{
     }
     
 	
-    private static function handleMovement( $ships, $gamedata ){    
+    private static function handleMovement( $ships, $gamedata ){        
         $turn = $gamedata->getActiveship()->getLastTurnMoved();
         if ($gamedata->turn <= $turn)
             throw new Exception("The ship has already moved");

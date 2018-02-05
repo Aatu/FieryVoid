@@ -8,8 +8,8 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 //TECHNICAL UNIT - target drone for various tests
-                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',  
-            		
+                'technicaltargetdrone' => '/server/model/ships/customs/technicalTargetDrone.php',    
+                
                 //new criticals
                 'outputreducedoneturn' => '/server/model/cricialClasses.php',
                 'swtargetheld' => '/server/model/cricialClasses.php', //target held by tractor beam - cumulative penalties
@@ -19,7 +19,6 @@ spl_autoload_register(
                 //bases and stuff
                 'kraken' => '/server/model/ships/centauri/kraken.php',
                 'jastat' => '/server/model/ships/narn/jastat.php',
-                'koratyl' => '/server/model/ships/dilgar/koratyl.php',
                 'quadparticlebeam' => '/server/model/weapons/particle.php',
                 'bmissilerack' => '/server/model/weapons/missile.php',
             		
@@ -91,7 +90,7 @@ spl_autoload_register(
             	'zzunofftshonstealth' => '/server/model/ships/narn/zzunoffTshonStealth.php',
             	'zzunofftvoth' => '/server/model/ships/narn/zzunoffTvoth.php',
                 
-                
+  
                 // ***custom Drakh***
                 //weapons and systems
                 'drakhraidercontroller' => '/server/model/systems/baseSystems.php',
@@ -188,6 +187,8 @@ spl_autoload_register(
                 'swheavyion' => '/server/model/weapons/customSW.php',
                 'swcapitalconcussion' => '/server/model/weapons/customSW.php',
                 'swcapitalproton' => '/server/model/weapons/customSW.php',
+
+                
                 
                 
                 //custom guns
@@ -337,13 +338,40 @@ spl_autoload_register(
                 'tkharas' => '/server/model/ships/narn/tkharAS.php',
                 'trakhabp' => '/server/model/ships/narn/trakhabp.php',
                 
-                
+
                 //Ipsha
-                'maggravreactor' => 'server/model/systems/baseSystems.php',
+                //weapons and systems
+                'maggravreactor' => '/server/model/systems/baseSystems.php',
+                'maggraviticthruster' => '/server/model/systems/baseSystems.php',
+                'embolter' => '/server/model/weapons/specialWeapons.php',  
+                'empulsar' => '/server/model/weapons/specialWeapons.php',                          
+                'ltsurgeblaster' => '/server/model/weapons/specialWeapons.php',                 
+                'resonancegenerator' => '/server/model/weapons/specialWeapons.php',   
+                'surgeblaster' => '/server/model/weapons/specialWeapons.php',
+                'surgecannon' => '/server/model/weapons/specialWeapons.php',
+                'sparkfield' => '/server/model/weapons/specialWeapons.php',
+                    'sparkfieldhandler' => '/server/model/weapons/specialWeapons.php',
                 
-                //actual units
+                //Ipsha actual units
+                'ftranemone' => '/server/model/ships/ipsha/ftrAnemone.php', 
+                'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',                      
                 
+                'osatstarsphere' => '/server/model/ships/ipsha/osatStarsphere.php',     
                 
+                'shipbattleglobe' => '/server/model/ships/ipsha/shipBattleglobe.php',  
+                    'shipboltglobe' => '/server/model/ships/ipsha/shipBoltglobe.php',  
+                'shipbattlehex' => '/server/model/ships/ipsha/shipBattlehex.php', 
+                    'shipresohex' => '/server/model/ships/ipsha/shipResohex.php',
+                'shipcarriercube' => '/server/model/ships/ipsha/shipCarrierCube.php', 
+                    'shipcarriercubehvy' => '/server/model/ships/ipsha/shipCarrierCubeHvy.php', 
+                'shiprhombusescort' => '/server/model/ships/ipsha/shipRhombusEscort.php',
+                'shipscoutwheel' => '/server/model/ships/ipsha/shipScoutWheel.php',
+                'shiptetraship' => '/server/model/ships/ipsha/shipTetraship.php',
+                    'shiptetraescort' => '/server/model/ships/ipsha/shipTetraEscort.php',
+                'shipwarsphere' => '/server/model/ships/ipsha/shipWarsphere.php',
+                    'shipjumpsphere' => '/server/model/ships/ipsha/shipJumpsphere.php',
+                    'shipsurgesphere' => '/server/model/ships/ipsha/shipSurgesphere.php',
+
                 
                 
                 // centauri raiders
@@ -385,14 +413,17 @@ spl_autoload_register(
                 //Streib
  //               'collector' => '/server/model/ships/streib/collector.php',
                 //Streib guns
+/* not used anywahere?...                
                 'dualburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'mediumburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'heavyburstbeam' => '/server/model/weapons/specialWeapons.php',
                 'burstpulsecannon' => '/server/model/weapons/specialWeapons.php',
                 'improvedblastlaser' => '/server/model/weapons/lasers.php',
                 'emwavedisruptor' => '/server/model/weapons/defensive.php',
+                
                 //new crit
                 'forcedofflineturns' => '/server/model/cricialClasses.php',
+*/                
                 // Yolu ships
                 'aluin' => '/server/model/ships/yolu/aluin.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',
@@ -406,6 +437,7 @@ spl_autoload_register(
                 'ulana' => '/server/model/ships/yolu/ulana.php',
                 'utan' => '/server/model/ships/yolu/utan.php',
                 'yuan' => '/server/model/ships/yolu/yuan.php',
+                
                 //orieni ships
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
                 'faithful' => '/server/model/ships/orieni/faithful.php',
@@ -423,10 +455,7 @@ spl_autoload_register(
                 'virtue' => '/server/model/ships/orieni/virtue.php',
                 'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
-                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',
-                
-                'templar' => '/server/model/ships/orieni/templar.php',
-                'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+                'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',                
                 'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
                 'pariah' => '/server/model/ships/orieni/pariah.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
@@ -439,6 +468,12 @@ spl_autoload_register(
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
                 'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
                 'righteous' => '/server/model/ships/orieni/righteous.php',
+                
+                'templar' => '/server/model/ships/orieni/templar.php',
+                    'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
+                'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
+                'hkshiningstar' => '/server/model/ships/orieni/hkShiningStar.php',
+                
                 //orieni systems
                 'rapidgatling' => '/server/model/weapons/matter.php',
             	'orienigatlingrg' => '/server/model/weapons/matter.php',	
@@ -447,6 +482,8 @@ spl_autoload_register(
                 'laserlance' => '/server/model/weapons/lasers.php',
                 'heavylaserlance' => '/server/model/weapons/lasers.php',
                 'pairedgatlinggun' => '/server/model/weapons/matter.php',
+                'rammingattack' => '/server/model/weapons/specialWeapons.php', //designed for Orieni, but everyone will use it
+                
                 //WoCR Centauri
                 'balciron' => '/server/model/ships/centauri_old/balciron.php',
                 'balcirax' => '/server/model/ships/centauri_old/balcirax.php',
@@ -493,7 +530,7 @@ spl_autoload_register(
                 'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 
                 //various
-                'hkflight' => '/server/model/ships/HK.php',
+                //'hkflight' => '/server/model/ships/HK.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
                 // ammo crit
                 'ammoexplosion' => '/server/model/cricialClasses.php',
@@ -534,7 +571,10 @@ spl_autoload_register(
             	//Custom Civilians
             	'bulkorefreighter' => '/server/model/ships/civilians/bulkOreFreighter.php',	
 
-                //Dilgar moved to one place!                
+                //Dilgar moved to one place!  
+                'koratyl' => '/server/model/ships/dilgar/koratyl.php',     
+                'orgolest' => '/server/model/ships/dilgar/orgolest.php',           
+            
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'athraskala' => '/server/model/ships/dilgar/athraskala.php',
@@ -556,7 +596,6 @@ spl_autoload_register(
                 'ochlavitad' => '/server/model/ships/dilgar/ochlavitaD.php',
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
-                'orgolest' => '/server/model/ships/dilgar/orgolest.php',
                 'protra' => '/server/model/ships/dilgar/protra.php',
                 'protrai' => '/server/model/ships/dilgar/protraI.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
@@ -565,7 +604,7 @@ spl_autoload_register(
                 'targathc' => '/server/model/ships/dilgar/targathC.php',
                 'tratharti' => '/server/model/ships/dilgar/tratharti.php',
                 'trathartig' => '/server/model/ships/dilgar/trathartiG.php',
-                
+         
                 'thorun' => '/server/model/ships/dilgar/thorun.php',
                 'thorunearly' => '/server/model/ships/dilgar/thorunEarly.php',
                 'thorunheavy' => '/server/model/ships/dilgar/thorunHeavy.php',

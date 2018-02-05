@@ -292,15 +292,23 @@ shipManager.power = {
 				continue;
 			}
                         
-			for (var i in system.power){
-				var power = system.power[i];
-				if (power.turn != gamedata.turn) continue;
-				//types: 1:offline 2:boost, 3:overload
-				if ((power.type == 1) && (fixedPower!=true)) output += system.powerReq; //MagGrav = do not add power of disabled systems!					
-				if (power.type == 2){
-					output -= shipManager.power.countBoostPowerUsed(ship, system);
-				}				
-				if (power.type == 3) output -= system.powerReq;
+			/*standard: add power for every system powered off
+			  fixed: subtract power for every system powered on (instead!)
+			*/
+			if (!system.destroyed){ //destroyed system gets no power either way...
+				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
+					output -= system.powerReq;
+				}
+				for (var i in system.power){
+					var power = system.power[i];
+					if (power.turn != gamedata.turn) continue;
+					//types: 1:offline 2:boost, 3:overload
+					if (power.type == 1) output += system.powerReq; //power off = increase available power
+					if (power.type == 2){
+						output -= shipManager.power.countBoostPowerUsed(ship, system);
+					}				
+					if (power.type == 3) output -= system.powerReq;
+				}
 			}
 		}
 		
@@ -340,8 +348,31 @@ shipManager.power = {
 	
 	},
 	
-	isOffline: function(ship, system){
+	isOfflineOnTurn: function(ship, system, turn){
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			return true;		
+		}
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
+			return true;		
+		}
 	
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
+			return true;
+		}
+	
+		for (var i in system.power){
+			var power = system.power[i];
+			if (power.turn != turn) continue;				
+			if (power.type == 1) return true;
+		}
+		
+		return false;
+	},
+	
+	
+	isOffline: function(ship, system){
+		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
+		/*
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;		
 		}
@@ -368,6 +399,7 @@ shipManager.power = {
 		}
 		
 		return false;
+		*/
 	},
 	
 	setOnline: function(ship, system){

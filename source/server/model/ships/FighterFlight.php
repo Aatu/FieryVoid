@@ -93,6 +93,15 @@
 		    return $this->systems[1];
 	    }
 	    
+	    /*returns number of still active craft in flight*/
+	    public function countActiveCraft($turn){
+		    $countActive = 0;
+		    foreach($this->systems as $ftr){
+			    if(!$ftr->isDestroyed($turn)) $countActive++;
+		    }
+		    return $countActive;
+	    }//endof function countActiveCraft
+	    
 	    
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
@@ -172,6 +181,20 @@
             
             $this->autoid++;
             $fighterSys = array();
+		
+		//add ramming attack
+		//check whether game id is safe (can be safely be deleted lin May 2018) or so)
+		if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID < 1)){
+			//check if ramming attack is already added	
+			$alreadyRamming = false;
+			foreach ($fighter->systems as $system){
+				if ($system instanceof RammingAttack) $alreadyRamming = true;
+			}
+			if(!$alreadyRamming){			
+				$fighter->addAftSystem(new RammingAttack(0, 0, 360, 0, 0));
+			}
+		}		
+		
             foreach ($fighter->systems as $system){
 		    $system->setUnit($this);
 			$system->id  = $this->autoid;
@@ -321,8 +344,21 @@
 	    	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
 			return;	
 		}
+	    
+	    
+	    /*returns calculated ramming factor for fighter (so will never use explosive charge if, say, Delegor or HK is rammed instead of ramming itself!*/
+	    /*approximate raming factor as Structure + all Armors of example fighter (so always full ramming factor is used, not reduced by damage received) */
+	public function getRammingFactor(){
+		$dmg = 0;
+		$ftr = $this->getSampleFighter();
+		$dmg += $ftr->maxhealth;
+		foreach($ftr->armour as $armorvalue){
+			$dmg+=$armorvalue;
+		}
+		return $dmg;
+	} //endof function getRammingFactor
              
-    }
+    }//endof class FighterFlight
   
     class SuperHeavyFighter extends FighterFlight{
         public $superheavy = true;

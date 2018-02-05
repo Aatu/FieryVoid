@@ -1,0 +1,31 @@
+This file contains guidelines to assigning weapons resolution priority.
+
+General remarks:
+ - it is desirable that priority of firing at fighters is different than priority of firing at ships
+ - it is not implemented (yet) though
+ - so weapon priority should be appropriate for anti-ship fire (unless weapon is capable of anti-fighter fire ONLY)!
+ - priority should be in 1-10 range
+ - if weapon causes multiple but otherwise separate hits, single hit should be considered when assigning priority (example: Pulse hit is the same as a few separate hits of power comparable to single pulse)
+  - damage mode as well as special properties should be taken into consideration (eg. armor-ignoring weapons should in general go late, as should Raking weapons)
+  
+Ship weapon priority:
+1: mostly special weapons that should be fired ASAP (eg. area-affecting weapons) (eg. AM Converter, EMine)
+2: special weapons requiring to be fired early, but not so much as priority 1 (eg. Plasma Stream)
+3: very light weapons (average damage 8 and less) (eg. Scatter Pulsar, Ligh Pulse Cannon)
+4: light weapons (average damage 11 and less) (eg. Light/Standard Particle Beam, Medium Pulse Cannon)
+5: medium weapons (average damage less than 14) (eg. Light Bolter)
+6: heavy weapons (aferage damage 14 and more)(eg. Medium Bolter, Fusion Cannon, Heavy Pulse Cannon...)
+7: large Raking weapons (average damage output >28) (eg. Heavy Laser, Battle Laser...)
+8: non-large Raking weapons (average damage output <=28) (eg. Medium Laser and lighter)
+9: Matter weapons (note: light matter weapons may often be treated just as right weapons instead!(GatlingRailgun)!) (example: Matter Cannon, Railgun)
+10: mostly special weapons that affect systems hit and therefore should be fired late (as their effects are none if hit systems are later destroyed) (eg. Burst Beam)
+
+
+Fighter weapon priority:
+1: mostly special weapons that should be fired ASAP
+2: light weapons (d6+2 and smaller)
+3: typical fighter weapons (d6+3 - d6+4)
+4: large fighter weapons (d6+5, d6+6)
+5: very large fighter weapons (Ion Bolt, Light Graviton Beam)
+9: fighter Matter weapons
+10: mostly special weapons that should be fired late

@@ -80,7 +80,8 @@ shipManager.systems = {
 			return 0;
 		
 		var output = system.output + system.outputMod + shipManager.power.getBoost(system);
-        
+        	output = Math.max(0,output); //output cannot be negative!
+	    
         return output;
     },
     

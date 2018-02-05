@@ -28,21 +28,16 @@ shipWindowManager = {
 	},	
 	
 	open: function(ship){
-	
-		
 		var old;
 		if (ship.userid == gamedata.thisplayer){
 			old = $(".shipwindow.owned:visible");
 		}else{
 			old = $(".shipwindow.enemy:visible");
-		}
-		
-		
+		}		
 		
 		var n = ship.shipStatusWindow;
 		
-		if (!n)
-			return;
+		if (!n) return;
 			
 		if (n.css("display") == "block")
 			return;
@@ -434,8 +429,15 @@ shipWindowManager = {
 		}
 	    
         if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost);
+            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
+		abilities.push("&nbsp;Profile (F/S): " + ship.forwardDefense + "/" + ship.sideDefense + "; Ini: " + ship.iniativebonus );
         }
+	    
+	if(ship.flight){
+		var flightArmour = shipManager.systems.getFlightArmour(ship);	
+		abilities.push("&nbsp;" + flightArmour);
+		abilities.push("&nbsp;Thrust: " + ship.freethrust);		
+	}
 
         if(ship.agile){
             abilities.push("&nbsp;Agile ship");
@@ -545,6 +547,7 @@ shipWindowManager = {
 	
 		var arrangement;
 		var col2 = 2;
+		var col3 = 2; //for columns that may be equal or wider to col2
 		var col4 = 4;
 		if (location == 0){
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
@@ -556,9 +559,12 @@ shipWindowManager = {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
 		}
 		else{
-			col2 = 1;
-			col4 = 2;
-			arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+			col2 = 1; //single column here
+			col3 = 2; //double column even here!
+			col4 = 3;
+			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
+			arrangement = shipWindowManager.getFinalArrangementThree(ship, systems, structure, location);
 		}
 		
 		var index = 0;
@@ -569,17 +575,23 @@ shipWindowManager = {
 				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
 			}
 			else if (group.length == 2){
-
-				if (location == 4){
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
+				if (location == 4){//reverse order for Stbd!
+					row = $('<tr><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
 				else {
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
-				}				
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+				}		
 			}			
-			else if (group.length == 3){				
-				row = $('<tr><td class="systemcontainer_'+index+'"></td><td colspan="2" class="systemcontainer_'+(index+1)+'"></td>'
-				+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+			else if (group.length == 3) {					
+				if (location == 4){//reverse order for Stbd!
+					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index)+'"></td></tr>').appendTo(destination);
+				}else{
+					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+				}		
 			}				
 			else if (group.length == 4){	
 				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
@@ -610,6 +622,7 @@ shipWindowManager = {
         }
 	},
 	
+	
 	getFinalArrangementTwo: function(ship, systems, structure, location){
 		
 		var structDone = false;
@@ -637,6 +650,48 @@ shipWindowManager = {
 				}
 			}
 			
+		}
+
+		if (!structDone){
+			grouped.push(Array(structure));
+		}
+		
+		return grouped;
+			
+	},
+	
+	
+	//Marcin Sawicki: i think there's enough room for 3 icons on the sides, and it will help when many systems are present
+	getFinalArrangementThree: function(ship, systems, structure, location){
+		var structDone = false;
+		var grouped = Array();		
+		var list = Array();
+
+		if (structure){
+			if (location == 32 || location == 42){	
+				grouped.push(Array(structure));
+				structDone = true;
+			}
+		}
+		
+		for (var i= 0;i<systems.length;i++){
+			var system = systems[i];
+			/* let's try with top-heavy arrangement (orphan on the bottom instead of on top)
+			if (systems.length % 2 == 1 && i == 0){
+				grouped.push(Array(system));
+			}*/
+			//else {
+				list.push(system);
+				if (list.length == 3){
+					grouped.push(list);
+					list = Array();
+				}
+			//}			
+		}
+		
+		if (list.length > 0){ //something was left over!
+					grouped.push(list);
+					list = Array();
 		}
 
 		if (!structDone){

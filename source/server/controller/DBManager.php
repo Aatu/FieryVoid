@@ -29,9 +29,8 @@ class DBManager {
         $this->close();
     }
        
-    private function query($sql) {
-
-    
+	
+    private function query($sql) {    
         if (!$this->connection)
             throw new Exception("DBManager:query, connection failed");
             
@@ -39,18 +38,16 @@ class DBManager {
             throw new Exception("DBManager:query, SQL error: ".mysql_error($this->connection)."\n sql: $sql error:", mysql_errno($this->connection));
         }
             
-        $result = array();
-				
-		while ($row = mysqli_fetch_object($answer)) {
-			$result[] = $row;
-		}
+        $result = array();				
+	while ($row = mysqli_fetch_object($answer)) {
+		$result[] = $row;
+	}
 		
         return $result;
     }
+	
     
-    private function insert($sql) {
-
-    
+    private function insert($sql) {    
         if (!$this->connection)
             throw new exception("DBManager:insert, connection failed");
             
@@ -77,18 +74,16 @@ class DBManager {
         return null;
     }
     
-    public function update($sql) {
-
-    
+	
+    public function update($sql) {    
         if (!$this->connection)
             throw new exception("DBManager:update, connection failed");
             
         if ( ! $answer = mysqli_query($this->connection, $sql)){
             throw new exception("DBManager:update, SQL error: ".mysqli_error($this->connection)."\n sql: $sql", mysqli_errno($this->connection));
-        }
-
-            
+        }            
     }
+	
 	
 	private function found($sql){
 		$result = $this->query($sql);
@@ -98,6 +93,7 @@ class DBManager {
 		
 		return false;
 	}
+	
     
     public function startTransaction(){
 		//mysqlii_query("SET AUTOCOMMIT=0", $this->connection);
@@ -381,32 +377,29 @@ class DBManager {
 	}
     
     public function submitCriticals($gameid, $criticals, $turn){        
-        try {
-            
+        try {            
             //print(var_dump($criticals));
             foreach ($criticals as $critical){
-                if ($critical->turn != $turn)
+                if ( (!$critical->newCrit) && ($critical->turn != $turn)) //new criticals accepted out of turn too!
                     continue;
                 
-                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $turn, '".$critical->param."')";
+                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, ".$critical->shipid.", ".$critical->systemid.",'".$critical->phpclass."', $critical->turn, '".$critical->param."')";
     
                 $this->update($sql);
-            }
-                
-            
+            }     
         }
         catch(Exception $e) {
             throw $e;
         }
+    } //endof function submitCriticals
+	
     
-    }
-    
-    public function updateFireOrders($fireOrders){
-        
+    public function updateFireOrders($fireOrders){        
         $stmt = $this->connection->prepare(
             "UPDATE 
                 tac_fireorder  
             SET 
+	    	firingmode = ?,
                 needed = ?,
                 rolled = ?,
                 notes = ?,
@@ -426,7 +419,8 @@ class DBManager {
             foreach ($fireOrders as $fire)
             {
                 $stmt->bind_param(
-                    'iissiiiiii',
+                    'iiissiiiiii',
+                    $fire->firingMode,
                     $fire->needed,
                     $fire->rolled,
                     $fire->notes,
@@ -442,9 +436,9 @@ class DBManager {
             }
             $stmt->close();
 
-        }
-    
-    }
+        }    
+    } //endof function updateFireOrders
+	
         
     public function submitFireorders($gameid, $fireOrders, $turn, $phase){
 
@@ -531,6 +525,7 @@ class DBManager {
 
     }
     
+	
     public function updateSystemData($input)
     {
         $this->insertSystemData($input);
@@ -591,11 +586,28 @@ class DBManager {
             foreach ($damages as $damage){
                                     
                 $des = ($damage->destroyed) ? 1 : 0;
-
+		$fireID = $damage->fireorderid;	
+		    
+		if ($fireID < 0){ //Marcin Sawicki: fire order ID not known at the moment of dealing damage!
+			//read it from database by source, target and weapon ID
+			try{
+				$targetid = $damage->shipid;
+				$shooterid = $damage->shooterid; //additional field
+				$weaponid = $damage->weaponid; //additional field
+				//targetid = -1 if weapon is hex targeted!
+				$sql1 = "SELECT * FROM `B5CGM`.`tac_fireorder` where gameid = $gameid and turn = $turn and shooterid = $shooterid and (targetid = $targetid or targetid = -1) and weaponid = $weaponid";		
+				$result = $this->query($sql1);
+				if ($result == null || sizeof($result) == 0){  //nothing, keep -1 as ID			
+				}else{
+					$fireID = $result[0]->id;
+				}
+			}catch(Exception $e) { //nothing, keep -1 as ID
+			}			
+		}
                 
                 //$id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields;
                 $sql = "INSERT INTO `B5CGM`.`tac_damage` VALUES( null, ".$damage->shipid.", ".$gameid.", ".$damage->systemid.", ".$turn.", ".$damage->damage.
-                    ", ".$damage->armour. ", ".$damage->shields.", ".$damage->fireorderid .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
+                    ", ".$damage->armour. ", ".$damage->shields.", ".$fireID .", ".$des.", '".$damage->pubnotes."', '".$damage->damageclass."')";
 
 
                 $this->update($sql);
@@ -662,7 +674,8 @@ class DBManager {
                     $this->update($sql);
                     }
                     catch(Exception $e) {
-                        throw $e;
+			    //Marcin Sawicki: this may return exception all right - for new damage classes. Only predefined damage classes can be handled.
+                        //throw $e;
                     }
                 }
             }

@@ -63,8 +63,10 @@ window.mathlib = {
 	
 	getPointInDistanceBetween: function(start, end, distance){
 		var totalDist = mathlib.getDistance(start, end);
-		var perc = distance / totalDist;
-		
+		var perc = 1;
+		if (totalDist != 0){
+			perc = distance / totalDist;
+		}		
 			
 		return mathlib.getPointBetween(start, end, perc);
 	},

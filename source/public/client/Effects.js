@@ -252,7 +252,6 @@ window.effects = {
             }
         }
 
-
         var shipFire = [];
         var fighterFire = [];
 
@@ -263,12 +262,13 @@ window.effects = {
 
 
             for (var y in fires){
-                if (ship.shipSizeClass === -1){
+                var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);              
+                fires[y].priority = weapon.priority;                
+                if (weapon.isRammingAttack){                 
+                    shipFire.push(fires[y]); //even if it's attack done by fighter
+                } else if (ship.shipSizeClass === -1){
                     fighterFire.push(fires[y]);
-                }
-                else {
-                    var weapon = shipManager.systems.getSystem(ship, fires[y].weaponid);
-                    fires[y].priority = weapon.priority;
+                } else {                    
                     shipFire.push(fires[y]);
                 }       
             }   
@@ -338,7 +338,8 @@ window.effects = {
                         
                         if (otherFire.rolled && weapon2.name == weapon.name &&  otherFire.firingMode == fire.firingMode && !otherFire.animated && otherFire.turn == gamedata.turn){
                             if ((otherFire.targetid != -1 && fire.targetid != -1 && otherFire.targetid == fire.targetid)
-                            || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y)){
+                          //  || (fire.x !== 0 && otherFire.x == fire.x && fire.y !== 0 && otherFire.y == fire.y && otherFire.targetid == fire.targetid) //let's NOT merge hextarget attacks!
+                               ){
                                 if (fire.pubnotes == otherFire.pubnotes){
                                     otherFire.animated = true;
                                     fires.push(otherFire);
@@ -742,6 +743,7 @@ window.effects = {
     
         for (var i in fires){
             var fire = fires[i];
+            if (fire.shots == 0) { continue; } //do not animate technical shots
     
             var target = gamedata.getShip(fire.targetid);
             var shooter = gamedata.getShip(fire.shooterid);
@@ -750,9 +752,8 @@ window.effects = {
             weapon = weaponManager.getFiringWeapon(weapon, fire);
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
             if(modeIteration != weapon.firingMode){
-                while(modeIteration > 1){
+                while(modeIteration != weapon.firingMode){
                     weapon.changeFiringMode();
-                    modeIteration--;
                 }
             }
             
@@ -899,9 +900,8 @@ window.effects = {
         var hitSystem = fire.hitSystem;
         
         var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-        while(modeIteration > 1){
+        while(modeIteration != weapon.firingMode){
             weapon.changeFiringMode();
-            modeIteration--;
         }
 
         var animation = {
@@ -1473,9 +1473,8 @@ window.effects = {
         effects.backAnimations.push(animation);
     },
     
+    
     makeBallAnimation: function(sPos, tPos, weapon, hit, currentlocation){
-                
-                        
         var animation = {
             tics:0,
             totalTics:500,
@@ -1483,8 +1482,7 @@ window.effects = {
             sPos: sPos,
             tPos: tPos,
             hit: hit,
-            draw: function(self){
-            
+            draw: function(self){            
                 var canvas = effects.getCanvas();
                 var sPos = self.sPos;
                 var tPos = self.tPos;
@@ -1529,9 +1527,6 @@ window.effects = {
                 }               
                 
                 self.tics++;
-                
-                
-            
             },
             callback: effects.doneDisplayingWeaponFire
         };
@@ -1539,8 +1534,8 @@ window.effects = {
         effects.backAnimations.push(animation);
     },
     
-    makeTorpedoAnimation: function(sPos, tPos, weapon, hit, currentlocation){
-        
+    
+    makeTorpedoAnimation: function(sPos, tPos, weapon, hit, currentlocation){        
         var cones = Array();
         var conecount = Math.floor((Math.random()*3)+6);
         //var conecount = 0;

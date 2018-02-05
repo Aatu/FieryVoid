@@ -11,9 +11,9 @@ Reactor.prototype.hasMaxBoost = function(){
 
 var MagGravReactor = function(json, ship)
 {
-    ShipSystem.call( this, json, ship);
+    Reactor.call( this, json, ship);
 }
-MagGravReactor.prototype = Object.create( ShipSystem.prototype );
+MagGravReactor.prototype = Object.create( Reactor.prototype );
 MagGravReactor.prototype.constructor = MagGravReactor;
 MagGravReactor.prototype.hasMaxBoost = function(){
     return true;
@@ -86,6 +86,13 @@ var GraviticThruster = function(json, ship)
 }
 GraviticThruster.prototype = Object.create( Thruster.prototype );
 GraviticThruster.prototype.constructor = GraviticThruster;
+
+var MagGraviticThruster = function(json, ship)
+{
+    Thruster.call( this, json, ship);
+}
+MagGraviticThruster.prototype = Object.create( Thruster.prototype );
+MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 
 
 var Hangar = function(json, ship)

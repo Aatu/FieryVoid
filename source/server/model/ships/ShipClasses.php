@@ -45,6 +45,8 @@
         public $id, $userid, $name, $campaignX, $campaignY;
         public $rolled = false;
         public $rolling = false;
+	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
+	    
         public $team;
 	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
         
@@ -63,7 +65,7 @@
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-	    $this->fillLocationsGUI();//so called shots work properly
+	    $this->fillLocationsGUI();//so called shots work properly		
         }
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
@@ -240,7 +242,27 @@
             $this->addSystem($system, 2);
         }
         protected function addPrimarySystem($system){
+		//if system is Structure - first add Ramming Attack! assume we're nearing the end...
+	   if($system instanceof Structure){
+		//check whether ramming attack already exists (do not add another)
+		$rammingExists = false;
+		foreach($this->systems as $sys)  if ($sys instanceof RammingAttack){
+			$rammingExists = true;
+		}
+		if(!$rammingExists){
+			//add ramming attack
+			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
+			if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
+				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.	
+				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
+					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
+				}
+			}	
+		}
+	   }
             $this->addSystem($system, 0);
+		
+		
         }
         protected function addLeftSystem($system){
             $this->addSystem($system, 3);
@@ -1226,6 +1248,23 @@
 		$this->expectedDamage[$hitLoc] += $expectedDamage;
 	}//endof function setExpectedDamage
 	    
+	    
+	    /*returns calculated ramming factor for ship (so will never use explosive charge if, say, Delegor or HK is rammed instead of ramming itself!*/
+	    /*approximate raming factor as full Structure of undestroyed sections *110% */
+	public function getRammingFactor(){
+		$structuretotal = 0;
+		$prevturn = max(0,TacGamedata::$currentTurn-1);
+		$activeStructures = $this->getSystemsByName("Structure",true);//list of all Structure blocks (check for being destroyed will come later)
+		foreach($activeStructures as $struct){			
+			if (!$struct->isDestroyed($prevturn)){ //if structure is not destroyed AS OF PREVIOUS TURN
+				$structuretotal += $struct->maxhealth;
+			}
+		}
+		$multiplier = 1.1;
+		if ($this->shipSizeClass == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
+		$dmg = ceil($structuretotal * $multiplier);
+		return $dmg;
+	} //endof function getRammingFactor
 	    
     } //endof class BaseShip
     

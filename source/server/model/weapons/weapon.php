@@ -2,7 +2,7 @@
 
 
 class Weapon extends ShipSystem{
-
+ 
 	/*all (or almost all) variables will come in array form too - so they can change with mode changes*/
 	/*array should be either empty (attribute does not change) or filled for all firing modes*/
     public $weapon = true;
@@ -60,11 +60,13 @@ class Weapon extends ShipSystem{
 
     public $normalload = 0;
     public $alwaysoverloading = false;
+    public $autoFireOnly = false; //ture for weapons that should never be fired manually
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;
     public $extraoverloadshotsArray = array();	
 
+    public $doNotIntercept = false; //for attacks that are not subject to interception at all - like fields and ramming
     public $uninterceptable = false;
     public $uninterceptableArray = array();
     public $canInterceptUninterceptable = false; //able to intercept shots that are normally uninterceptable, eg. Lasers
@@ -76,7 +78,7 @@ class Weapon extends ShipSystem{
     public $dualWeapon = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
-
+	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
 
     public $shots = 1;
 	public  $shotsArray = array();
@@ -146,6 +148,9 @@ class Weapon extends ShipSystem{
 	    }
 	    $this->changeFiringMode(1); //reset mode to basic
     }
+	
+	
+
 
     public function getRange($fireOrder)
     {
@@ -608,9 +613,65 @@ class Weapon extends ShipSystem{
 	} //endof function isTargetAmbiguous
 	
 	
+	/*calculate base chance to hit for ramming attack*/
+	public function calculateHitBaseRam($gamedata, $fireOrder){
+		if ($fireOrder->calledid != -1) return 0;//can't call ramming attack!
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+		if (($target instanceof FighterFlight) && (!($shooter instanceof FighterFlight))) return 0;//ship has no chance to ram a fighter!
+		
+		$hitChance = 8; //base: 40%
+		
+		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
+		if ($shooter->Enormous) $hitChance+=6;//+6 if ramming unit is Enormous
+		if (($target->shipSizeClass >= 3) && ($shooter->shipSizeClass <3)) $hitChance += 2;//+2 if target is Capital and ramming unit is not
+		if (($shooter->shipSizeClass >= 3) && ($target->shipSizeClass <3)) $hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $hitChance += 4;//+4 for fighter trying to ram a ship
+		$targetSpeed = abs($target->getSpeed()); //I think speed cannot be negative, but just in case ;)
+		switch($targetSpeed) {
+		    case 0: //+5 if the target is not moving.
+			$hitChance += 5;
+			break;
+		    case 1://+3 if the target is moving speed 1.
+			$hitChance += 3;
+			break;
+		    case 2://+2 if the target is moving speed 2 or 3.
+		    case 3:
+			$hitChance += 2;
+			break;
+		    case 4://+1 if the target is moving speed 4 or 5.
+		    case 5:
+			$hitChance += 1;
+			break;
+		    default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
+			$hitChance -= ceil(($targetSpeed-5)/5);
+		}
+		//‐1 for every level of jinking the ramming or target unit is using
+		$hitChance -= Movement::getJinking($shooter, $gamedata->turn);
+		$hitChance -= Movement::getJinking($target, $gamedata->turn);
+		//fire control: usually 0, but units specifically designed for ramming may have some bonus!
+		$hitChance += $this->fireControl[$target->getFireControlIndex()];		
+		
+		$hitChance = $hitChance * 5; //convert d20->d100
+		
+		$hitLoc = null;
+		$hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+	    	$target->setExpectedDamage($hitLoc, $hitChance, $this);
+		
+		
+		$notes = $fireOrder->notes . "RAMMING, final hit chance: $hitChance";
+		$fireOrder->chosenLocation = $hitLoc;
+		$fireOrder->needed = $hitChance;
+		$fireOrder->notes = $notes;
+		$fireOrder->updated = true;
+	}//endof function calculateHitBaseRam
+	
+	
+	
     /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
     public function calculateHitBase($gamedata, $fireOrder){
 	$this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
+	if ($this->isRammingAttack) return $this->calculateHitBaseRam($gamedata, $fireOrder);
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
         $pos = $shooter->getCoPos();
@@ -1249,7 +1310,8 @@ class Weapon extends ShipSystem{
     }//endof function doCollateralDamage
 	
 
-    public function damage($target, $shooter, $fireOrder, $gamedata, $damage){
+	/*forcePrimary = true means PRIMARY indication is not rechecked*/
+    public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ 
 	    /*find details of shot, proceed to doDamage*/
 	    
         if($this->damageType=='Flash'){ //damage units other than base target
@@ -1265,11 +1327,11 @@ class Weapon extends ShipSystem{
         if ($this->ballistic){
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
 		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
-		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+		if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
 			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
 		}
 	}else{
-		if(!($tmpLocation > 0)){ //location not yet found or PRIMARY (reassignment causes no problem)
+		if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
  			$tmpLocation = $target->getHitSection($shooter, $fireOrder->turn);
 		}
 	}
@@ -1439,7 +1501,7 @@ class Weapon extends ShipSystem{
 			$fireOrder->armorIgnored[$system->id] = $armourIgnored;
 		}
 
-		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $fireOrder->damageclass);
+		$damageEntry = new DamageEntry(-1, $target->id, -1, $fireOrder->turn, $system->id, $modifiedDamage, $armour, 0, $fireOrder->id, $destroyed, "", $this->weaponClass, $shooter->id, $this->id);
 		$damageEntry->updated = true;
 		$system->damage[] = $damageEntry;
 		$this->onDamagedSystem($target, $system, $modifiedDamage, $armour, $gamedata, $fireOrder);
