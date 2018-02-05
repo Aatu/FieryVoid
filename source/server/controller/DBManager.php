@@ -1254,54 +1254,52 @@ class DBManager {
                 , id ASC
         ");
 
-        if ($stmt){
+        if ($stmt) {
             $stmt->bind_param('i', $gamedata->id);
             $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
             $stmt->execute();
             $prev_shipid = 0;
             $prev_turn = -1;
-	    $prev_type = '';		
+            $prev_type = '';
             $move_orders = array();
-            while ($stmt->fetch())
-            {
-            	if ($prev_shipid != $shipid) { //orders for new ship! save old ship orders... 
-            	   foreach($move_orders as $move) {
-            	   	$gamedata->getShipById($prev_shipid)->setMovement( $move );
-            	   }
-            	   $move_orders = array();
-            	   $prev_shipid = $shipid;
-            	   $prev_turn = -1;
-		   $prev_type = $type;
-            	}
-            	if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
-			if (
-				($turn == $gamedata->turn) //current move is for current turn, so previous one is the last move before that, whatever it is...
-				|| ($prev_turn <= 1) //may be special data, do include
-				|| ( ($gamedata->turn <= $prev_turn+2) && (!($gamedata->getShipByID($prev_shipid) instanceof FighterFlight)))//for ships need even more turns back, due to possible high turn delay!
-			) 
-			{ 
-			   foreach($move_orders as $move) {
-				$gamedata->getShipById($prev_shipid)->setMovement( $move );
-			   }
-			}
-            		$move_orders = array();
-            		$prev_turn = $turn;
-			$prev_type = $type;
-            	}
+            while ($stmt->fetch()) {
+                if ($prev_shipid != $shipid) { //orders for new ship! save old ship orders...
+                    foreach ($move_orders as $move) {
+                        $gamedata->getShipById($prev_shipid)->setMovement($move);
+                    }
+                    $move_orders = array();
+                    $prev_shipid = $shipid;
+                    $prev_turn = -1;
+                    $prev_type = $type;
+                }
+                if ($prev_turn < $turn) { //orders for new turn - discard previous ones!
+                    if (
+                        ($turn == $gamedata->turn) //current move is for current turn, so previous one is the last move before that, whatever it is...
+                        || ($prev_turn <= 1) //may be special data, do include
+                        || (($gamedata->turn <= $prev_turn + 2) && (!($gamedata->getShipByID($prev_shipid) instanceof FighterFlight)))//for ships need even more turns back, due to possible high turn delay!
+                    ) {
+                        foreach ($move_orders as $move) {
+                            $gamedata->getShipById($prev_shipid)->setMovement($move);
+                        }
+                    }
+                    $move_orders = array();
+                    $prev_turn = $turn;
+                    $prev_type = $type;
+                }
                 $move = new MovementOrder($id, $type, new OffsetCoordinate($x, $y), $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
-                
-                array_push ( $move_orders , $move);
+
+                array_push($move_orders, $move);
 
                 //$gamedata->getShipById($shipid)->setMovement( $move );
             }
             //after loop fill any data not filled yet
-            foreach($move_orders as $move) {
-    	   	$gamedata->getShipById($prev_shipid)->setMovement( $move );
-    	    }
-            
-                
+            foreach ($move_orders as $move) {
+                $gamedata->getShipById($prev_shipid)->setMovement($move);
+            }
+
+
             $stmt->close();
         }
         
