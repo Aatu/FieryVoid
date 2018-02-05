@@ -6,7 +6,7 @@ class TacGamedata{
     public static $currentPhase;
     public static $currentGameID;
     public static $currentActiveship;
-    public static $safeGameID = 4079; //gameID that is safe for adding new features
+    public static $safeGameID = 4086; //gameID that is safe for adding new features
     
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
     public $ships = array();
