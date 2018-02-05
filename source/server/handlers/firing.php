@@ -469,7 +469,7 @@ class Firing{
 	}else if($a->calledid!==$b->calledid){ //called shots first!
 	    return $a->targetid - $b->targetid;
 	}else if ($a->priority !== $b->priority){
-	    return $a->priority - $b->priority;
+	    	return $a->priority - $b->priority;
 	}
 	else {
 		$val = $a->shooterid - $b->shooterid;
@@ -571,11 +571,10 @@ class Firing{
                         && !$weapon->ballistic){
                     continue;
                 }
-                
+                $fire->priority = $weapon->priority;
                 $chosenfires[] = $fire;
             }
         }
-	    
         usort($chosenfires, "self::compareFiringOrders");
 		
 	//FIRE fighters at other fighters
@@ -610,6 +609,7 @@ class Firing{
                     continue;
                 }
 		
+                $fire->priority = $weapon->priority;
                 $chosenfires[] = $fire;
             }
 	}
