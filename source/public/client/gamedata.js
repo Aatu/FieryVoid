@@ -540,9 +540,6 @@ gamedata = {
         fleetListManager.displayFleetLists();
         
         gamedata.setPhaseClass();
-        for (var i in gamedata.ships){
-            gamedata.shipStatusChanged(gamedata.ships[i]);
-        }
 //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
         
@@ -779,6 +776,7 @@ gamedata = {
             
     checkGameStatus: function(){
 
+        //TODO: to phase strategy
         $("#phaseheader .turn.value").html("TURN: " + gamedata.turn+ ",");
         $("#phaseheader .phase.value").html(gamedata.getPhasename());
         $("#phaseheader .activeship.value").html(gamedata.getActiveShipName());
@@ -795,49 +793,38 @@ gamedata = {
     },
 
     parseServerData: function(serverdata){
-    
+
+        console.log("GAMEDATA", serverdata);
+
         if (serverdata == null)
             return;
         
         if (!serverdata.id)
             return;
-            
-        if (gamedata.waiting == false && serverdata.waiting == true && serverdata.changed == false){
-             gamedata.waiting = true;
-             ajaxInterface.startPollingGamedata();
-        }
-            
-    
-        if (serverdata.changed == true){               
-                
-            //console.log(serverdata);
-            gamedata.turn = serverdata.turn;
-            gamedata.gamephase = serverdata.phase;
-            gamedata.activeship = serverdata.activeship;
-            gamedata.gameid = serverdata.id;
-            gamedata.slots = serverdata.slots;
-            
-            gamedata.thisplayer = serverdata.forPlayer;
-            gamedata.waiting = serverdata.waiting;
-            gamedata.status = serverdata.status;
-            gamedata.ballistics = serverdata.ballistics;
-            gamedata.elintShips = Array();
-            gamedata.gamespace = serverdata.gamespace;
-            shipManager.initiated = 0;
 
-            
-            gamedata.setShipsFromJson(serverdata.ships);
-            
-            
-            gamedata.initPhase();
-            gamedata.drawIniGUI();
-            window.webglScene.receiveGamedata(this);
+        gamedata.turn = serverdata.turn;
+        gamedata.gamephase = serverdata.phase;
+        gamedata.activeship = serverdata.activeship;
+        gamedata.gameid = serverdata.id;
+        gamedata.slots = serverdata.slots;
 
-        }
+        gamedata.thisplayer = serverdata.forPlayer;
+        gamedata.waiting = serverdata.waiting;
+        gamedata.status = serverdata.status;
+        gamedata.ballistics = serverdata.ballistics;
+        gamedata.elintShips = Array();
+        gamedata.gamespace = serverdata.gamespace;
+        shipManager.initiated = 0;
+
+
+        gamedata.setShipsFromJson(serverdata.ships);
+
+
+        gamedata.initPhase();
+        gamedata.drawIniGUI();
+        window.webglScene.receiveGamedata(this);
+
         gamedata.checkGameStatus();
-
-
-
     },
             
     setShipsFromJson: function(jsonShips)

@@ -15,6 +15,7 @@ window.BoltEffect = (function() {
             x: args.target.x + Math.random() * 30 - 15,
             y: args.target.y + Math.random() * 30 - 15
         };
+        this.damage = args.damage || 0;
 
         this.size = args.size || 100;
         this.angle = -mathlib.getCompassHeadingOfPoint(this.origin, this.target);
@@ -23,7 +24,7 @@ window.BoltEffect = (function() {
         if (!this.hit) {
             var missFactor = distance / 1500;
             this.angle = mathlib.addToDirection(this.angle, Math.random() * missFactor - missFactor/2);
-            distance += Math.random() * 400 + 100;
+            distance += Math.random() * 100 + 50;
         }
         this.speedVector = mathlib.getPointInDirection(this.speed, this.angle, 0, 0, true);
 
@@ -38,20 +39,22 @@ window.BoltEffect = (function() {
             this.duration -= 25;
 
             new Explosion(this.emitterContainer, {
-                size: 16,
+                size: 12,
                 position: this.target,
                 type: "glow",
                 color: args.color,
-                time: this.time +  this.duration,
-            });
-
-
-            new Explosion(this.emitterContainer, {
-                size: 16,
-                position: this.target,
-                type: ["gas", "pillar"][Math.round(Math.random()*2)],
                 time: this.time +  this.duration
             });
+
+            if (this.damage) {
+                new Explosion(this.emitterContainer, {
+                    size: 25,
+                    position: this.target,
+                    type: ["gas", "pillar"][Math.round(Math.random() * 2)],
+                    time: this.time + this.duration
+                });
+            }
+
 
         }
 

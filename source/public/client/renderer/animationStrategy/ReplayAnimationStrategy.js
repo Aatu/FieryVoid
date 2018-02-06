@@ -1,19 +1,34 @@
 window.ReplayAnimationStrategy = (function(){
 
-    function ReplayAnimationStrategy(onDoneCallback, gameData, shipIcons, scene){
+    ReplayAnimationStrategy.type = {
+        INFORMATIVE: 1,
+        PHASE: 2,
+        ALL: 3
+    };
+
+    function ReplayAnimationStrategy(onDoneCallback, gameData, shipIcons, scene, type){
         AnimationStrategy.call(this, onDoneCallback);
         this.shipIconContainer = shipIcons;
         this.turn = gameData.turn;
-        buildAnimations.call(this, gamedata);
         this.emitterContainer = new ParticleEmitterContainer(scene);
         this.animations.push(this.emitterContainer);
         this.emitterContainer.start();
 
+        this.movementAnimations = {};
+
+        this.moveHexDuration = 400;
+        this.moveAnimationDuration = 2500;
+        this.type = type || ReplayAnimationStrategy.type.INFORMATIVE;
+
+        buildAnimations.call(this, gamedata);
 
         //this.animations.push(new LaserEffect(this.shipIconContainer.getArray()[0], {x: Math.random()*400 - 200, y: Math.random()*400 - 200}, scene, {color: new THREE.Color(255/255, 79/255, 15/255)}));
 
 
-        var amount = 5;
+        console.log("ReplayAnimationStrategy, turn:", this.turn);
+        //console.trace();
+
+        var amount = 1;
 
         while (amount--) {
             this.animations.push(new BoltEffect(
@@ -23,7 +38,8 @@ window.ReplayAnimationStrategy = (function(){
                     origin: this.shipIconContainer.getArray()[0].getPosition(),
                     target: this.shipIconContainer.getArray()[2].getPosition(),
                     color: new THREE.Color(119/255, 225/255, 255/255),
-                    hit: Math.round(Math.random()),
+                    hit: 1, //Math.round(Math.random()),
+                    damage: 1,
                     time: Math.random() * 1000
                 })
             );
@@ -169,6 +185,9 @@ window.ReplayAnimationStrategy = (function(){
         this.animations.forEach(function (animation) {
            animation.cleanUp(scene);
         });
+
+        this.emitterContainer.cleanUp();
+
         return this;
     };
 
@@ -176,6 +195,7 @@ window.ReplayAnimationStrategy = (function(){
         return this;
     };
 
+    /*
     ReplayAnimationStrategy.prototype.start = function() {
 
         this.stop();
@@ -190,6 +210,7 @@ window.ReplayAnimationStrategy = (function(){
 
         return this;
     };
+    */
 
     ReplayAnimationStrategy.prototype.animationDone = function(index) {
         console.log("done with animation ", index);
@@ -203,16 +224,38 @@ window.ReplayAnimationStrategy = (function(){
     };
 
     function buildAnimations(gamedata) {
+
+        var time = 0;
+        //var animation = new ShipMovementAnimation(this.shipIconContainer.getByShip(gamedata.ships[1]), this.turn);
+        //this.animations.push(animation);
+
+        //return;
+
         gamedata.ships.forEach(function (ship, i) {
             var icon = this.shipIconContainer.getByShip(ship);
-            if (this.animations.some(function (animation) { return animation.shipIcon === icon})) {
-                return;
-            }
 
-            var animation = new ShipMovementAnimation(icon, this.turn, this.animationDone.bind(this, i));
+
+            var animation = new ShipMovementAnimation(icon, this.turn);
+            setMovementAnimationDuration.call(this, animation);
+            animation.setTime(time);
             this.animations.push(animation);
 
+            this.movementAnimations[ship.id] = animation;
+
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += animation.getDuration();
+            }
+
         }, this);
+
+    }
+
+    function setMovementAnimationDuration(moveAnimation) {
+        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+            moveAnimation.setDuration(moveAnimation.getLength() * this.moveHexDuration);
+        } else {
+            moveAnimation.setDuration(this.moveAnimationDuration);
+        }
     }
 
     return ReplayAnimationStrategy;

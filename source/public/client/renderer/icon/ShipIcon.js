@@ -146,44 +146,68 @@ window.ShipIcon = (function (){
             offset: {x: movements[0].xOffset, y: movements[0].yOffset}
         };
 
+        var lastMovement = null;
+
         movements
             .filter(function (movement) {return movement.type !== 'start';})
             .filter(function (movement) {return movement.commit;})
             .forEach(function (movement) {
-                if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]){
-                    var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
 
-                    if (saved.facing !== movement.facing) {
-                        saved.oldFacings.push(saved.facing);
-                    }
+                if (lastMovement && movement.turn !== lastMovement.turn) {
 
-                    saved.facing = movement.facing;
-
-                    if (saved.heading !== movement.heading) {
-                        saved.oldHeadings.push(saved.heading);
-                    }
-
-                    saved.heading = movement.heading;
-
-                    saved.position = new hexagon.Offset(movement.position);
-                    saved.offset = {x: movement.xOffset, y: movement.yOffset};
-                } else {
-                    movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn] = {
-                        //id: movement.id,
-                        //type: movement.type,
-                        turn: movement.turn,
-                        facing: movement.facing,
-                        heading: movement.heading,
-                        position: new hexagon.Offset(movement.position),
-                        offset: {x: movement.xOffset, y: movement.yOffset},
-                        oldFacings: [],
-                        oldHeadings: []
+                    if (movement.type === "move" || movement.type === "slipleft" || movement.type === "slipright"){
+                        addMovementToRegistry(
+                            movesByHexAndTurn,
+                            {
+                                turn: movement.turn,
+                                facing: movement.facing,
+                                heading: movement.heading,
+                                position: new hexagon.Offset(lastMovement.position),
+                                oldFacings: [],
+                                oldHeadings: []
+                            }
+                        );
                     }
                 }
+
+                addMovementToRegistry(movesByHexAndTurn, movement);
+
+                lastMovement = movement;
             });
 
         return Object.keys(movesByHexAndTurn).map(function (key) {return movesByHexAndTurn[key];});
     };
+
+    function addMovementToRegistry(movesByHexAndTurn, movement) {
+        if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]){
+            var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
+
+            if (saved.facing !== movement.facing) {
+                saved.oldFacings.push(saved.facing);
+            }
+
+            saved.facing = movement.facing;
+
+            if (saved.heading !== movement.heading) {
+                saved.oldHeadings.push(saved.heading);
+            }
+
+            saved.heading = movement.heading;
+
+            saved.position = new hexagon.Offset(movement.position);
+        } else {
+            movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn] = {
+                //id: movement.id,
+                //type: movement.type,
+                turn: movement.turn,
+                facing: movement.facing,
+                heading: movement.heading,
+                position: new hexagon.Offset(movement.position),
+                oldFacings: [],
+                oldHeadings: []
+            }
+        }
+    }
 
     ShipIcon.prototype.movesEqual = function (move1, move2) {
         return move1.turn === move2.turn &&
@@ -194,14 +218,6 @@ window.ShipIcon = (function (){
             //move1.offset.y === move2.offset.y;
     };
 
-/*
-    ShipIcon.prototype.getMovingMovements = function(movements){
-        var accept = ["deploy", "move", "slipleft", "slipright", "rotateRight", "rotateLeft", "turnleft", "turnright", "pivotleft", "pivotright"];
-        return movements.filter(function (move) {
-            return accept.indexOf(move.type) !== -1;
-        });
-    };
-*/
     ShipIcon.prototype.getLastMovement = function(){
         if (this.movements.length === 0) {
             return this.defaultPosition;
@@ -209,13 +225,6 @@ window.ShipIcon = (function (){
 
         return this.movements[this.movements.length - 1]
     };
-
-    /*
-    ShipIcon.prototype.getLastCommittedMovement = function(){
-        var moves = this.movements.filter(function (movement) {return movement.commit;});
-        return moves[moves.length - 1];
-    };
-    */
 
     ShipIcon.prototype.getFirstMovementOnTurn = function(turn, ignore){
 

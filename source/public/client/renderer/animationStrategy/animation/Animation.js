@@ -1,7 +1,6 @@
 window.Animation = (function() {
-    function Animation(doneCallback) {
+    function Animation() {
         this.active = false;
-        this.onDoneCallback = doneCallback;
     }
 
     Animation.prototype.start = function () {
@@ -28,11 +27,6 @@ window.Animation = (function() {
 
     };
 
-    Animation.prototype.done = function() {
-        if (this.onDoneCallback) {
-            this.onDoneCallback();
-        }
-    };
 
     return Animation;
 })();

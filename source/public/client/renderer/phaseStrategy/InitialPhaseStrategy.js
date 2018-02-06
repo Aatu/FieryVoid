@@ -2,7 +2,6 @@ window.InitialPhaseStrategy = (function(){
 
     function InitialPhaseStrategy(coordinateConverter){
         PhaseStrategy.call(this, coordinateConverter);
-        this.animationStrategy = new window.IdleAnimationStrategy();
     }
 
     InitialPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -15,7 +14,11 @@ window.InitialPhaseStrategy = (function(){
     };
 
     InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+
+        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
+
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
+
         console.log("enabled initial phase strategy");
         infowindow.informPhase(5000, function(){});
         shipManager.power.repeatLastTurnPower();
@@ -69,6 +72,14 @@ window.InitialPhaseStrategy = (function(){
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
         addOEW(this.selectedShip, ship);
+    };
+
+    InitialPhaseStrategy.prototype.createReplayUI = function(gamedata) {
+        if (gamedata.turn === 1) {
+            return;
+        }
+
+        this.replayUI = new ReplayUI().activate();
     };
 
     function addOEW(ship, target) {

@@ -2,7 +2,6 @@ window.MovementPhaseStrategy = (function(){
 
     function MovementPhaseStrategy(coordinateConverter){
         PhaseStrategy.call(this, coordinateConverter);
-        this.animationStrategy = new window.IdleAnimationStrategy();
     }
 
     MovementPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -19,6 +18,9 @@ window.MovementPhaseStrategy = (function(){
     };
 
     MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+
+        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
+
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         console.log("enabled movement phase strategy");
         this.selectActiveShip();

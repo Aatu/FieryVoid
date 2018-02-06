@@ -16,6 +16,7 @@ window.PhaseStrategy = (function(){
         this.selectedShip = null;
         this.targetedShip = null;
         this.animationStrategy = null;
+        this.replayUI = null;
 
 
         this.movementUI = null;
@@ -49,16 +50,17 @@ window.PhaseStrategy = (function(){
         this.ballisticIconContainer = ballisticIconContainer;
         this.gamedata = gamedata;
         this.inactive = false;
-        this.animationStrategy.activate(shipIcons, gamedata.turn, webglScene.scene);
         this.consumeGamedata();
         this.ballisticIconContainer.show();
         this.onDoneCallback = doneCallback;
+        this.createReplayUI(gamedata);
         return this;
     };
 
     PhaseStrategy.prototype.deactivate = function () {
         this.inactive = true;
         this.animationStrategy.deactivate();
+        this.replayUI && this.replayUI.deactivate();
         return this;
     };
 
@@ -302,6 +304,16 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.onWeaponMouseOut = function() {
         this.shipIconContainer.getArray().forEach(function (icon){ icon.hideWeaponArcs();});
+    };
+
+    PhaseStrategy.prototype.createReplayUI = function(gamedata) {
+        this.replayUI = new ReplayUI().activate();
+    };
+
+    PhaseStrategy.prototype.changeAnimationStrategy = function(newAnimationStartegy) {
+        this.animationStrategy && this.animationStrategy.deactivate();
+        this.animationStrategy = newAnimationStartegy;
+        this.animationStrategy.activate();
     };
 
     function getInterestingStuffInPosition(payload){

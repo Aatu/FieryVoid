@@ -6,14 +6,20 @@
     position:absolute;
     top:-3px;
     left:710px;
-    height:35px;
+    min-height:35px;
     width:auto;
     opacity:0.85;
     box-shadow: 5px 5px 10px black;
-    display: flex;
+    display: none;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    font-family: arial;
+    font-size: 16px;
+}
+
+#replayUI.active, #replayUI.inactive {
+    display: flex;
 }
 
 #replayUI button {
@@ -24,16 +30,55 @@
     font-size: 16px;
     text-transform: uppercase;
     cursor: pointer;
-    display:none;
 }
 
-#replayUI.inactive #activateReplay {
+#replayUI .selected-replay {
+    text-transform: uppercase;
+}
+
+#replayUI .replay-buttons button {
+    font-size: 40px;
+    color: #496791;
+}
+
+#replayUI .replay-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#replayUI.inactive .replay-inactive {
     display: block;
 }
 
-#replayUI.active #forward, #replayUI.active #deactivateReplay {
-    display: block;
+#replayUI.inactive .replay-active {
+    display: none;
 }
 
+#replayUI.active .replay-inactive {
+    display: none;
+}
+
+#replayUI.active .replay-active {
+    display: block;
+    padding: 10px;
+}
 
 #replayUI button:focus { outline: none; }
+
+#replayUI button.active {
+    text-shadow: white 0 0 10px, white 0 0 3px;
+    color: #deebff;
+}
+
+#replayUI.loading .replay-buttons {
+    display: none;
+}
+
+#replayUI .loading-indicator {
+    display: none;
+}
+
+#replayUI.loading .loading-indicator {
+    display: flex;
+}

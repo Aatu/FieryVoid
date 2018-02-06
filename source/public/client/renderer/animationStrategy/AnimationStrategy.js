@@ -1,19 +1,18 @@
 window.AnimationStrategy = (function(){
-    function AnimationStrategy(onDoneCallback){
+    function AnimationStrategy(shipIcons, turn){
         this.shipIconContainer = null;
         this.turn = 0;
         this.lastAnimationTime = 0;
         this.totalAnimationTime = 0;
         this.currentDeltaTime = 0;
         this.animations = [];
-        this.onDoneCallback = onDoneCallback;
         this.paused = true;
-    }
-
-    AnimationStrategy.prototype.activate = function(shipIcons, turn, scene) {
         this.shipIconContainer = shipIcons;
         this.turn = turn;
-        this.start();
+    }
+
+    AnimationStrategy.prototype.activate = function() {
+        this.play();
 
         return this;
     };
@@ -35,26 +34,21 @@ window.AnimationStrategy = (function(){
         this.pause();
     };
 
-    AnimationStrategy.prototype.start = function() {
+    AnimationStrategy.prototype.play = function() {
        this.paused = false;
     };
 
     AnimationStrategy.prototype.pause = function() {
-
         this.paused = true;
     };
 
-    AnimationStrategy.prototype.deactivate = function(scene) {
+    AnimationStrategy.prototype.deactivate = function() {
         return this;
     };
 
     AnimationStrategy.prototype.render = function(coordinateConverter, scene, zoom){
-        if (this.paused) {
-            return;
-        }
-
-        updateDeltaTime.call(this);
-        updateTotalAnimationTime.call(this);
+        updateDeltaTime.call(this, this.paused);
+        updateTotalAnimationTime.call(this, this.paused);
         this.animations.forEach(function (animation) {
             animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom)
         }, this);
@@ -92,11 +86,15 @@ window.AnimationStrategy = (function(){
         toRemove.deactivate();
     };
 
-    function updateTotalAnimationTime(){
+    function updateTotalAnimationTime(paused){
+        if (paused) {
+            return;
+        }
+
         this.totalAnimationTime += this.currentDeltaTime;
     }
 
-    function updateDeltaTime(){
+    function updateDeltaTime(paused){
         var now = new Date().getTime();
 
         if (! this.lastAnimationTime) {
@@ -104,7 +102,10 @@ window.AnimationStrategy = (function(){
             this.currentDeltaTime = 0;
         }
 
-        this.currentDeltaTime = now - this.lastAnimationTime;
+        if (!paused) {
+            this.currentDeltaTime = now - this.lastAnimationTime;
+        }
+
         this.lastAnimationTime = now;
     }
 

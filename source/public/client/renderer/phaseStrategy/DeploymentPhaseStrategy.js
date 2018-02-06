@@ -2,7 +2,6 @@ window.DeploymentPhaseStrategy = (function(){
 
     function DeploymentPhaseStrategy(coordinateConverter){
         PhaseStrategy.call(this, coordinateConverter);
-        this.animationStrategy = new window.IdleAnimationStrategy();
 
         this.deploymentSprites = [];
     }
@@ -10,6 +9,9 @@ window.DeploymentPhaseStrategy = (function(){
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
     DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+
+        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
+
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);

@@ -70,42 +70,10 @@ class TacGamedata{
     public function onConstructed(){
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
-        
-        $i = 0;
+
         foreach ($this->ships as $ship){
-            $fireOrders = $ship->getAllFireOrders();
-            foreach($fireOrders as $fire){
-                $weapon = $ship->getSystemById($fire->weaponid);
-                if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
-                    $movement = $ship->getLastTurnMovement($fire->turn);
-                    $target = $fire->targetid;
-                    if ($fire->x != "null" && $fire->y != "null")
-                        $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
-                    else
-                        $targetpos = null;
-                        
-                    
-                    $this->ballistics[$i] = new Ballistic(
-                        $i,
-                        $fire->id,
-                        array("x"=>$movement->x, "y"=>$movement->y),
-                        $movement->facing,
-                        $targetpos,
-                        $target,
-                        $fire->shooterid,
-                        $fire->weaponid,
-                        $fire->shots
-                        );
-                        
-                        //$targetpos, $targetid, $shooterid, $weaponid
-                    $i++;
-                    //print(sizeof($this->ballistics));
-                }
-            
-            }
             $this->markUnavailableShips();
             $ship->onConstructed($this->turn, $this->phase, $this);
-            
         }
     }
    
@@ -400,10 +368,8 @@ class TacGamedata{
              
     }
     
-    public function prepareForPlayer($turn, $phase, $activeship){
+    public function prepareForPlayer(){
         $this->setWaiting();
-        $this->checkChanged($turn, $phase, $activeship);
-        $this->unanimateMovements($activeship, $turn); 
         $this->calculateTurndelays();
         $this->deleteHiddenData();
         $this->setPreTurnTasks();
@@ -482,12 +448,6 @@ class TacGamedata{
                 }
             }
         }
-        
-        
-        
-        
-        
-        
     }
     
     private function calculateTurndelays(){
@@ -496,68 +456,7 @@ class TacGamedata{
             $ship->currentturndelay = Movement::getTurnDelay($ship);
         }
     }
-    
-    private function unanimateAllMovements()
-    {
-        if ($this->phase == 4 || ($this->phase == 3 && $this->waiting == true)){ //|| $this->waiting == true){
-            return;
-        }
-        
-        foreach ($this->ships as $ship)
-        {
-            if ($ship->id == $this->activeship){
-                break;
-            }
 
-            $ship->unanimateMovements($this->turn);
-
-        }
-    }
-    
-    
-    private function unanimateMovements($activeship, $turn){
-        $found = false;
-        
-        if ($this->phase == 4 || ($this->phase == 3 && $this->waiting == true)){ //|| $this->waiting == true){
-            return;
-        }
-        
-        //if ($turn == -1)
-        //    return;
-        
-        $turn = $this->turn;
-            
-        if ($activeship == -1)
-        {
-            $this->unanimateAllMovements();
-            return;
-        }
-        
-        $turnchanged = ($turn != $this->turn);
-        
-        for ( $i = $turn; $i <= $this->turn; $i++) {    
-            foreach ($this->ships as $ship){
-                if ($ship->id == $activeship && $i == $turn){
-                    $found = true;
-                }
-                
-                if ($ship->id == $this->activeship && $i == $this->turn){
-                    break;
-                }
-                    
-                    
-                    
-                if ($found){
-                    if ($ship->userid != $this->forPlayer){
-                        $ship->unanimateMovements($i);
-                    }
-                }
-            }
-        }
-    }
-     
-     
-    
     private function setWaiting(){
     
         $player = $this->getSlotsByPlayerId($this->forPlayer);
@@ -588,16 +487,6 @@ class TacGamedata{
         }
         
         
-    }
-    
-    private function checkChanged($turn, $phase, $activeship){
-    
-        if ($this->phase != $phase || $this->turn != $turn || $this->activeship != $activeship){
-            $this->changed = true;
-        }else{
-            $this->changed = false;
-        }
-    
     }
     
     private function getIsWaitingForThisPlayer(){

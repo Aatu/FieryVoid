@@ -248,7 +248,7 @@ class Manager{
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
     
-	    if (!is_numeric($gameid) || !is_numeric($userid) || !is_numeric($turn) || !is_numeric($phase) || !is_numeric($activeship) )
+	    if (!is_numeric($gameid) || !is_numeric($userid) || ($turn !== null && !is_numeric($turn)) || !is_numeric($phase) || !is_numeric($activeship) )
             return null;
         
         $gamedata = null;
@@ -257,7 +257,7 @@ class Manager{
             self::initDBManager();
             self::$dbManager->startTransaction();
 
-            if ($turn === -1)
+            if ($turn === null)
                 self::deleteOldGames ();
 
             //Todo: this should propably happen after submit game data...
@@ -316,6 +316,27 @@ class Manager{
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
     
+    }
+
+    public static function getReplayGameData($userid, $gameid, $turn) {
+        try{
+            self::initDBManager();
+            $gamedata = self::$dbManager->getTacGamedata($userid, $gameid, $turn);
+
+            if ($gamedata == null)
+                return null;
+
+            $gamedata->prepareForPlayer();
+            $gamedata->turn = $turn;
+
+            $json = json_encode($gamedata, JSON_NUMERIC_CHECK);
+            return $json;
+
+        }
+        catch(Exception $e) {
+            $logid = Debug::error($e);
+            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+        }
     }
             
     public static function submitTacGamedata($gameid, $userid, $turn, $phase, $activeship, $ships, $status, $slotid = 0){

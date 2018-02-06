@@ -14,7 +14,7 @@
 		$thisplayer = $_SESSION["user"];
 	}
 	
-	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, -1, 0, -1);
+	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
 	
 	$serverdataJSON = json_encode($serverdata, JSON_NUMERIC_CHECK);
 ?>
@@ -107,7 +107,6 @@
 
     <script src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/MovementAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
@@ -213,12 +212,6 @@
         <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
         </tr>
     </table>
-</div>
-
-<div id="replayUI" class="inactive">
-    <button id="activateReplay">Replay</button>
-    <button id="deactivateReplay">Resume</button>
-    <button id="forward">▶</button>
 </div>
 
 <div id="backDiv" style="">

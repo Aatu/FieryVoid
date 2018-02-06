@@ -10,6 +10,9 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
     FirePhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+
+        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
+
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
         infowindow.informPhase(5000, null);

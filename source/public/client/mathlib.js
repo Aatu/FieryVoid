@@ -48,7 +48,7 @@ window.mathlib = {
 	},
 	
 	getDistance: function(start, end){
-		console.log("getDistane is deprecated, use distance instead");
+		console.log("getDistance is deprecated, use distance instead");
 		console.trace();
 		mathlib.distance(start, end);
 	},
@@ -129,15 +129,13 @@ window.mathlib = {
     },
 
     getArcLength: function(start, end){
-		a = 0;
+		var a = 0;
 		if (start > end){
 			a = 360 - start + end;
 		
 		}else{
 			a = end-start;
 		}
-	
-		console.log("size: " + a);
 		
 		return a;
 	

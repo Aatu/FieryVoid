@@ -372,7 +372,6 @@ window.ew = {
             e.data("EW", "");
         }
         gamedata.shipStatusChanged(ship);
-        drawEntities();
     },
 	
 	removeEW: function(ship){

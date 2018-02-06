@@ -1,12 +1,13 @@
 window.ShipMovementAnimation = (function(){
 
-    function ShipMovementAnimation(shipIcon, turn, onDoneCallback) {
+    function ShipMovementAnimation(shipIcon, turn) {
         this.shipIcon = shipIcon;
         this.turn = turn;
         this.hexAnimations = buildCurves(this.shipIcon, this.turn);
-        this.timeElapsed = null;
-        this.currentlyAnimated = null;
-        this.timePerAnimation = 500;
+        this.totalCurveLength = calculateTotalCurveLength(this.hexAnimations);
+        this.duration = 5000;
+        this.time = 0;
+
 
         this.turnCurve = new THREE.CubicBezierCurve(
             new THREE.Vector2( 0, 0 ),
@@ -15,11 +16,13 @@ window.ShipMovementAnimation = (function(){
             new THREE.Vector2( 1, 1 )
         );
 
+        /*
         this.hexAnimations.forEach(function (animation) {
             animation.debugCurve = drawRoute(animation.curve);
         });
+        */
 
-        Animation.call(this, onDoneCallback);
+        Animation.call(this);
     }
 
     ShipMovementAnimation.prototype = Object.create(Animation.prototype);
@@ -28,92 +31,102 @@ window.ShipMovementAnimation = (function(){
 
     ShipMovementAnimation.prototype.stop = function () {
         Animation.prototype.stop.call(this);
+        /*
         this.hexAnimations.forEach(function (animation) {
             webglScene.scene.remove(animation.debugCurve);
         });
-    };
-
-    ShipMovementAnimation.prototype.reset = function () {
-        this.hexAnimations.forEach(function (animation) {
-           animation.animated = 0;
-        });
-        this.currentlyAnimated = null;
+        */
     };
 
     ShipMovementAnimation.prototype.cleanUp = function () {
+        /*
         this.hexAnimations.forEach(function (animation) {
             webglScene.scene.remove(animation.debugCurve);
         });
+        */
     };
 
     ShipMovementAnimation.prototype.render =  function (now, total, last, delta) {
-        if (! this.shipIcon) {
-            return;
-        }else if (! this.active && getFirstUnAnimated(this.hexAnimations)) {
-            positionAndFaceIconToStart(this.shipIcon, this.turn);
-            return;
-        } else if (! this.active && !getFirstUnAnimated(this.hexAnimations)) {
-            positionAndFaceIcon(this.shipIcon);
-            return;
-        }
 
-        this.timeElapsed += delta;
+        var positionAndFacing = this.getPositionAndFacingAtTime(total);
 
-        if (this.currentlyAnimated && this.currentlyAnimated.animated === 1) {
-            this.currentlyAnimated = null;
-        }
-
-        if (this.currentlyAnimated === null && getFirstUnAnimated(this.hexAnimations)){
-            this.currentlyAnimated = getFirstUnAnimated(this.hexAnimations);
-            this.timeElapsed = this.timePerAnimation * this.currentlyAnimated.animated;
-        }
-
-        var percentDone = this.currentlyAnimated ? this.timeElapsed / this.timePerAnimation : 0;
-
-        if (percentDone > 1) {
-            percentDone = 1;
-        }
-
-        if (this.currentlyAnimated) {
-            this.currentlyAnimated.animated = percentDone;
-        }
-        positionAndFaceIcon(this.shipIcon, this.currentlyAnimated, percentDone, this.turnCurve);
-
-        if (!this.currentlyAnimated) {
-            this.done();
-        }
+        this.shipIcon.setPosition(positionAndFacing.position);
+        this.shipIcon.setFacing(-positionAndFacing.facing);
     };
 
-    function positionAndFaceIcon(shipIcon, animation, percentDone, turnCurve) {
-        var position;
-        var facing;
-        if (!animation) {
-            position = window.coordinateConverter.fromHexToGame(shipIcon.getLastMovement().position);
-            facing = mathlib.hexFacingToAngle(shipIcon.getLastMovement().facing);
-        } else {
-            var turnPercent = turnCurve.getPoint(percentDone).y;
-            position = animation.curve.getPoint(percentDone);
-            var turnAngle = animation.turnAngle * turnPercent;
-            facing = mathlib.addToDirection(animation.startAngle, turnAngle);
+    ShipMovementAnimation.prototype.getPositionAndFacingAtTime = function (time) {
+
+        var totalDone = (time - this.time) / this.duration;
+        if (totalDone > 1) {
+            totalDone = 1;
         }
 
-        shipIcon.setPosition(position);
-        shipIcon.setFacing(-facing);
-    }
+        if (totalDone < 0) {
+            totalDone = 0;
+        }
 
-    function positionAndFaceIconToStart(shipIcon, turn) {
-        var position = window.coordinateConverter.fromHexToGame(shipIcon.getFirstMovementOnTurn(turn).position);
-        var facing = mathlib.hexFacingToAngle(shipIcon.getFirstMovementOnTurn(turn).facing);
+        var animationAndCompletition = findAnimation.call(this, totalDone);
+        var animation = animationAndCompletition.animation;
+        var done = animationAndCompletition.done;
 
-        shipIcon.setPosition(position);
-        shipIcon.setFacing(-facing);
-    }
+        var position;
+        var facing;
 
-    function getFirstUnAnimated(hexAnimations) {
-        return hexAnimations.find(function (animation) {
-           return animation.animated < 1;
+        var turnPercent = this.turnCurve.getPoint(done).y;
+        position = animation.curve.getPoint(done);
+        var turnAngle = animation.turnAngle * turnPercent;
+        facing = mathlib.addToDirection(animation.startAngle, turnAngle);
+
+        return {position: position, facing: facing};
+    };
+
+    ShipMovementAnimation.prototype.getLength = function() {
+        return this.hexAnimations.length;
+    };
+
+    ShipMovementAnimation.prototype.setDuration = function(duration) {
+        this.duration = duration;
+    };
+
+    ShipMovementAnimation.prototype.getDuration = function() {
+        return this.duration;
+    };
+
+    ShipMovementAnimation.prototype.setTime = function(time) {
+        this.time = time;
+    };
+    
+    function findAnimation(totalDone) {
+        var length = this.totalCurveLength * totalDone;
+        var result = {
+            animation: null,
+            done: 0
+        };
+
+        var index = 0;
+
+        var current = this.hexAnimations.find(function(animation, i) {
+           if (length <= animation.length) {
+               index = i;
+               return true;
+           }
+
+           length -= animation.length;
         });
+
+        if (! current) {
+            result.animation = this.hexAnimations[this.hexAnimations.length - 1];
+            result.done = 1;
+            return result;
+        }
+
+
+        var done = length / current.length;
+        result.animation = current;
+        result.done = done;
+        return result;
     }
+
 
     function buildCurves(shipIcon, turn) {
         var moves = shipIcon.getMovements(turn);
@@ -122,13 +135,9 @@ window.ShipMovementAnimation = (function(){
             return [];
         }
 
-
-
         return moves.map(function(move, i){
             var start = i === 0 ? null : moves[i-1];
             var next = moves[i+1] ? moves[i+1] : null;
-            // shipIcon.getMovementAfter(moves[0]) for continuous playback
-            var animated = 0;
 
             var movementPoints = getMovementPoints(
                 move.position,
@@ -144,8 +153,22 @@ window.ShipMovementAnimation = (function(){
 
             var turnData = calculateTurn(start, move);
 
-            return {move: move, curve: curve, animated: animated, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle};
+            return {move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve)};
         }, this);
+    }
+
+    function calculateCurveLength(curve) {
+        var start = curve.getPoint(0);
+        var distance = 0;
+
+        for (var i = 0; i <= 100; i++){
+            var end = curve.getPoint(i/100);
+            distance += mathlib.distance(start, end);
+            start = end;
+        }
+
+
+        return distance;
     }
 
     function calculateTurn(startMove, endMove) {
@@ -165,34 +188,65 @@ window.ShipMovementAnimation = (function(){
             return {turnAngle: turn, startAngle: angleOld, endAngle: angleNew};
         }
 
-        var lastOldFacing = endMove.oldFacings[endMove.oldFacings.length - 1];
+        return {turnAngle: buildTurn(endMove), startAngle: angleOld, endAngle: angleNew};
+    }
 
-        if (endFacing > lastOldFacing || (endFacing === 0 && lastOldFacing === 5)) {
-            turn = mathlib.getAngleBetween(angleOld, angleNew, true);
-        } else {
-            turn = mathlib.getAngleBetween(angleOld, angleNew, false);
-        }
+    function buildTurn(endMove) {
+        var facings = endMove.oldFacings.concat(endMove.facing);
 
-        return {turnAngle: turn, startAngle: angleOld, endAngle: angleNew};
+        var turn = 0;
+        var lastFacing = null;
+
+        facings.forEach(function(facing){
+            if (lastFacing === null) {
+                lastFacing = facing;
+                return;
+            }
+
+            var angleLast = mathlib.hexFacingToAngle(lastFacing);
+            var angleNew = mathlib.hexFacingToAngle(facing);
+
+            var right = mathlib.getAngleBetween(angleLast, angleNew, true);
+            var left = mathlib.getAngleBetween(angleLast, angleNew, false);
+
+            if (Math.abs(right) < Math.abs(left)) {
+                turn += right;
+            } else {
+                turn += left;
+            }
+
+            lastFacing = facing;
+        });
+
+        return turn;
     }
 
     function getMovementPoints(currentHex, nextHex, lastHex) {
 
         var start, end, control;
 
+        var controlBetween = false;
+
         if (lastHex) {
             start = mathlib.getPointBetween(window.coordinateConverter.fromHexToGame(lastHex), window.coordinateConverter.fromHexToGame(currentHex), 0.5);
         } else {
+            controlBetween = true;
             start = window.coordinateConverter.fromHexToGame(currentHex);
         }
 
         if (nextHex) {
             end = mathlib.getPointBetween(window.coordinateConverter.fromHexToGame(currentHex), window.coordinateConverter.fromHexToGame(nextHex), 0.5);
         } else {
+            controlBetween = true;
             end = window.coordinateConverter.fromHexToGame(currentHex);
         }
 
-        control = window.coordinateConverter.fromHexToGame(currentHex);
+        if (controlBetween) {
+            control = mathlib.getPointBetween(start, end, 0.5);
+        } else {
+            control = window.coordinateConverter.fromHexToGame(currentHex);
+        }
+
 
         return {start: start, end: end, control: control};
     }
@@ -205,6 +259,7 @@ window.ShipMovementAnimation = (function(){
         );
     }
 
+    /*
     function buildPath(start, end, middle){
         return {
             getPoint: function(percent){
@@ -227,6 +282,7 @@ window.ShipMovementAnimation = (function(){
         };
     }
 
+*/
     function drawRoute(curve) {
 
 
@@ -236,10 +292,16 @@ window.ShipMovementAnimation = (function(){
         var geometry = new THREE.Geometry().setFromPoints( curve.getPoints( 50 ) );
         var material = new THREE.LineBasicMaterial( { color : 0xffffff, opacity: 0.5} );
 
-
         var curveObject = new THREE.Line( geometry, material );
+        curveObject.position.z = 10;
         webglScene.scene.add(curveObject);
         return curveObject;
+    }
+
+    function calculateTotalCurveLength(hexAnimations) {
+        return hexAnimations.reduce(function(total, animation) {
+            return total + animation.length;
+        }, 0)
     }
 
     return ShipMovementAnimation;
