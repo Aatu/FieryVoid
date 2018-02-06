@@ -49,7 +49,8 @@ a.link:hover
 }
 
 .panel.news {
-	width:400px;
+	/*width:400px; let's increase it some... no need to keep it so narow!*/
+	width:720px;
 	margin:0px auto 50px auto;
 }
 

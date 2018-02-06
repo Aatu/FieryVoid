@@ -15,7 +15,8 @@ class OsatStarsphere extends OSAT{
 		$this->pointCost = 200;
         $this->faction = "Ipsha";
         $this->phpclass = "OsatStarsphere";
-        $this->imagePath = "img/ships/IpshaOSAT.png";
+        $this->imagePath = "img/ships/IpshaBorgOSAT.png";	    
+        	$this->canvasSize = 100;
         $this->shipClass = 'Starsphere OSAT';
         
         $this->forwardDefense = 10;
