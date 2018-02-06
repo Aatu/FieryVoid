@@ -38,8 +38,8 @@ class Kirstom extends BaseShip{
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
-        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 240, 360));
+        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
+        $this->addFrontSystem(new AssaultLaser(4, 6, 4, 300, 60));
 
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 2, 2));
