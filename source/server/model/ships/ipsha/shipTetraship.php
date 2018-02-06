@@ -33,7 +33,7 @@ class ShipTetraship extends MediumShipLeftRight{
         
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
-        $this->accelcost = 1; //1accel/2 decel by original SCS; I gave it just 1 (same as larger Battlehex with similar thruster arrangement)
+        $this->accelcost = 1; // 1/2 by original SCS; I gave it just 1 but +2 base thrust
         $this->rollcost = 0;
         $this->pivotcost = 1;
 	$this->gravitic = true;
@@ -46,7 +46,7 @@ class ShipTetraship extends MediumShipLeftRight{
 	$this->addPrimarySystem(new MagGravReactor(3, 15, 0, 12+4));
 	$this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
-        $this->addPrimarySystem(new Engine(3, 16, 0, 3, 2));
+        $this->addPrimarySystem(new Engine(3, 16, 0, 5, 2));
         //$this->addPrimarySystem(new Hangar(4, 6));	
 	$this->addPrimarySystem(new SurgeBlaster(3, 0, 0, 300, 60));
         $this->addPrimarySystem(new MagGraviticThruster(4, 15, 0, 99, 1)); 
