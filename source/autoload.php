@@ -250,6 +250,7 @@ spl_autoload_register(
                 'lystala' =>  '/server/model/ships/abbai_old/lystala.php',               
                 'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
 
+                'selatra' =>  '/server/model/ships/abbai_old/selatra.php',               
                 'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
                 'kirva' =>  '/server/model/ships/abbai_old/kirva.php'
                 'wimuk' =>  '/server/model/ships/abbai_old/wimuk.php',
