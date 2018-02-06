@@ -245,12 +245,14 @@ spl_autoload_register(
                 
                 //Abbai ships (WoCR era)
                 'benota' =>  '/server/model/ships/abbai_old/benota.php',
+                'seta' =>  '/server/model/ships/abbai_old/seta.php',
                 'kastona' =>  '/server/model/ships/abbai_old/kastona.php',
                 'kostina' =>  '/server/model/ships/abbai_old/kostina.php',
                 'brova' =>  '/server/model/ships/abbai_old/brova.php',
                 'kirstom' =>  '/server/model/ships/abbai_old/kirstom.php',
                 'lystala' =>  '/server/model/ships/abbai_old/lystala.php',               
                 'tetrav' =>  '/server/model/ships/abbai_old/tetrav.php',
+                'tetrana' =>  '/server/model/ships/abbai_old/tetrana.php',
 
                 'selatra' =>  '/server/model/ships/abbai_old/selatra.php',               
                 'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
