@@ -5,7 +5,7 @@ class Tetrana extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 330;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Tetrana";
         $this->imagePath = "img/ships/AbbaiTetrav.png";
         $this->shipClass = "Tetrana Escort Frigate";
