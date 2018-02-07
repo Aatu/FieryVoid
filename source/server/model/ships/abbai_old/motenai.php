@@ -36,10 +36,10 @@ class Motenai extends BaseShip{
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 60));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 300, 60));
-        $this->addFrontSystem(new SMissileRack(3, 6, 0, 0, 300, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
+        $this->addFrontSystem(new SMissileRack(3, 6, 0, 300, 60));
 
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
@@ -47,13 +47,13 @@ class Motenai extends BaseShip{
         $this->addAftSystem(new GraviticShield(0, 6, 0, 1, 120, 180));
         $this->addAftSystem(new JumpEngine(5, 12, 4, 32));
 
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 0, 240, 360));
+        $this->addLeftSystem(new SMissileRack(3, 6, 0, 240, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 1, 240, 300));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
-        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 0, 120));
+        $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addRightSystem(new GraviticShield(0, 6, 0, 1, 60, 120));
