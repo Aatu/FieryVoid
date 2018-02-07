@@ -5,7 +5,7 @@ class Tetrav extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 400;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Tetrav";
         $this->imagePath = "img/ships/AbbaiTetrav.png";
         $this->shipClass = "Tetrav Heavy Frigate";
