@@ -30,7 +30,7 @@ class Wimuk extends FighterFlight{
             $fighter = new Fighter("Wimuk", $armour, 6, $this->id);
             $fighter->displayName = "Wimuk";
             $fighter->imagePath = "img/ships/AbbaiWimuk.png";
-            $fighter->iconPath = "img/ships/AbbaiWimuk_large.png";
+            $fighter->iconPath = "img/ships/AbbaiWimuk_Large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
   
 	$this->addSystem($fighter);
