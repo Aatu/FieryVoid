@@ -46,8 +46,8 @@ class Lokita extends BaseShip{
 
 
         $this->addAftSystem(new JumpEngine(4, 14, 4, 32));
-        $this->addAftSystem(new QuadArray(3, 0, 0, 300, 120));
-        $this->addAftSystem(new GraviticShield(0, 6, 0, 3, 90, 270));
+        $this->addAftSystem(new QuadArray(3, 0, 0, 90, 270));
+        $this->addAftSystem(new GraviticShield(0, 6, 0, 3, 180, 240));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 3, 120, 180));
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
