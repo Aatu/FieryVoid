@@ -1,4 +1,4 @@
-
+/*
 window.animation = {
 
     movementspeed: 10,
@@ -263,3 +263,4 @@ window.animation = {
 
 
 }
+*/

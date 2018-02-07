@@ -4,6 +4,7 @@ body {
     background-repeat:repeat;
     background-attachment:fixed;
 	background-color:black;
+	background-size:cover;
 	color:#DEEBFF;
 	font-family:arial;
     font-size:12px;

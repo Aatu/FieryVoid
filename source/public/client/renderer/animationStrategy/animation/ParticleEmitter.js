@@ -3,6 +3,8 @@ window.ParticleEmitter = (function(){
     var SHADER_VERTEX = null;
     var SHADER_FRAGMENT = null;
 
+    var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+
     function ParticleEmitter(scene, particleCount, blending)
     {
         Animation.call(this);
@@ -27,7 +29,7 @@ window.ParticleEmitter = (function(){
         var uniforms = {
             gameTime: {type: 'f', value: 0.0},
             zoomLevel: { type: 'f', value:  1.0 },
-            texture:   { type: 't', value: new THREE.TextureLoader().load("img/effect/effectTextures1024.png")}
+            texture:   { type: 't', value: texture }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
@@ -88,7 +90,6 @@ window.ParticleEmitter = (function(){
         this.scene.add(this.mesh);
     }
 
-
     ParticleEmitter.prototype =  Object.create(Animation.prototype);
 
     ParticleEmitter.prototype.start = function () {
@@ -104,6 +105,7 @@ window.ParticleEmitter = (function(){
     };
 
     ParticleEmitter.prototype.cleanUp = function () {
+        this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
@@ -143,11 +145,11 @@ window.ParticleEmitter = (function(){
     };
 
     function getShaders(){
-        if (! SHADER_VERTEX)
-            SHADER_VERTEX = document.getElementById('effectVertexShader').innerHTML;
+        //if (! SHADER_VERTEX)
+            var SHADER_VERTEX = document.getElementById('effectVertexShader').innerHTML;
 
-        if (! SHADER_FRAGMENT)
-            SHADER_FRAGMENT = document.getElementById('effectFragmentShader').innerHTML;
+        //if (! SHADER_FRAGMENT)
+            var SHADER_FRAGMENT = document.getElementById('effectFragmentShader').innerHTML;
 
         return {vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT};
     }

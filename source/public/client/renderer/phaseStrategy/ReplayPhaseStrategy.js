@@ -23,6 +23,7 @@ window.ReplayPhaseStrategy = (function(){
         this.inactive = false;
         this.currentTurn = gamedata.turn;
         this.currentPhase = gamedata.gamephase;
+        this.shipIconContainer.setAllSelected(false);
         this.replayTurn = getInitialReplayTurn.call(this);
 
         this.shipIconContainer.consumeGamedata(this.gamedata);
@@ -60,13 +61,19 @@ window.ReplayPhaseStrategy = (function(){
 
     ReplayPhaseStrategy.prototype.selectShip = function(ship) {};
 
-    ReplayPhaseStrategy.prototype.deselectShip = function(ship) {};
+    ReplayPhaseStrategy.prototype.deselectShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
+    };
 
-    ReplayPhaseStrategy.prototype.targetShip = function(ship) {};
+    ReplayPhaseStrategy.prototype.targetShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
+    };
 
     ReplayPhaseStrategy.prototype.onMouseOverShip = function(ship, payload) {
         var icon = this.shipIconContainer.getById(ship.id);
-        this.showShipTooltip(ship, payload);
+        this.showShipTooltip(ship, payload, null, true);
         icon.showSideSprite(true);
     };
 
@@ -79,17 +86,27 @@ window.ReplayPhaseStrategy = (function(){
                 stop: activateButton.bind(this, "stop"),
                 turnForward: turnForward.bind(this),
                 turnBack: turnBack.bind(this),
+                endReplay: requestPlayableGamedata.bind(this)
             }
         ).activate();
     };
 
+    ReplayPhaseStrategy.prototype.render = function(coordinateConverter, scene, zoom){
+        PhaseStrategy.prototype.render.call(this, coordinateConverter, scene, zoom);
+
+        if (this.animationStrategy && this.animationStrategy.isDone && this.animationStrategy.isDone()) {
+            activateStop.call(this);
+        }
+    };
+
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {
-            this.changeAnimationStrategy(new ReplayAnimationStrategy(null, this.gamedata, this.shipIconContainer, webglScene.scene));
+            this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene));
             this.replayUI.setTurn(this.replayTurn);
         } else {
             if (! this.animationStrategy) {
                 this.changeAnimationStrategy(new IdleAnimationStrategy(this.shipIconContainer, this.gamedata.turn));
+                this.animationStrategy.update(this.gamedata);
             }
 
             requestReplayGamedata.call(this);
@@ -98,13 +115,17 @@ window.ReplayPhaseStrategy = (function(){
 
     function activateButton(action, event) {
 
+        if (this.loading) {
+            return
+        }
+
         this.replayUI.activateButton(event.target);
 
         this.animationStrategy[action]();
     }
 
     function activateStop() {
-        this.replayUI.activateButton("#stop");
+        this.replayUI.activateButton("#pause");
         this.animationStrategy.pause();
     }
 
@@ -122,7 +143,7 @@ window.ReplayPhaseStrategy = (function(){
     }
 
     function turnBack() {
-        if (this.replayTurn === 1) {
+        if (this.replayTurn === 1 || this.loading) {
             return;
         }
 
@@ -132,7 +153,7 @@ window.ReplayPhaseStrategy = (function(){
     }
 
     function turnForward() {
-        if (this.replayTurn === getInitialReplayTurn.call(this)) {
+        if (this.replayTurn === getInitialReplayTurn.call(this) || this.loading) {
             return;
         }
 
@@ -142,7 +163,6 @@ window.ReplayPhaseStrategy = (function(){
     }
 
     function requestReplayGamedata() {
-        console.log("request replay gamedata", this.replayTurn);
         startLoading.call(this);
 
         jQuery.ajax({
@@ -159,6 +179,33 @@ window.ReplayPhaseStrategy = (function(){
                 stopLoading.call(this)
             }.bind(this),
             error : ajaxInterface.errorAjax
+        });
+    }
+
+    function requestPlayableGamedata() {
+        startLoading.call(this);
+        console.log("request playable", gamedata.thisplayer);
+
+        jQuery.ajax({
+            type : 'GET',
+            url : 'gamedata.php',
+            dataType : 'json',
+            data: {
+                turn: -1,
+                phase: 0,
+                activeship: -1,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer || -1,
+                time: new Date().getTime(),
+                force: true
+            },
+            success: function(data) {
+                console.log("new replay", data);
+                gamedata.replay = false;
+                stopLoading.call(this);
+                gamedata.parseServerData(data);
+            }.bind(this),
+            error: ajaxInterface.errorAjax
         });
     }
 

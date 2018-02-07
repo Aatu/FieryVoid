@@ -15,7 +15,7 @@
         public function isInDistanceRange($shooter, $target, $fireOrder)
         {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $pos = mathlib::hexCoToPixel($movement->position);
             $distanceRange = max($this->range, $this->distanceRange); //just in case distanceRange is not filled!
 
             if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $distanceRange )

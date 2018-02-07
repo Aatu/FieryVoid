@@ -46,7 +46,7 @@ window.ShipIconContainer = (function(){
             })
         }
 
-        var alpha = zoom > 6 ? zoom - 6 : 0;
+        var alpha = zoom > 2 ? zoom - 2 : 0;
         if (alpha > 1) {
             alpha = 1;
         }
@@ -69,26 +69,60 @@ window.ShipIconContainer = (function(){
     };
 
     ShipIconContainer.prototype.getIconsInProximity = function (payload) {
-        /* TODO: sort this out when we have two ships in same hex
+
         var hexHeight = this.coordinateConverter.getHexHeightViewport();
         var distance = hexHeight/10;
 
-        console.log(distance);
+        var icons = [];
 
-        if (distance < 10) {
-        */
-            return this.iconsAsArray.filter(function(shipIcon){
-                return this.coordinateConverter.fromGameToHex(shipIcon.getPosition()).equals(payload.hex);
-            }, this);
-        /*
+        if (distance < 30) {
+
+            icons = this.getIconsInSameHex(payload.hex);
+
         } else {
+;
+            var closest = null;
+            var closestDistance = null;
 
-            return this.iconsAsArray.filter(function(shipIcon){
-                return mathlib.distance(this.coordinateConverter.fromGameToViewPort(shipIcon.getPosition()), payload.view) <= distance;
+            this.iconsAsArray.forEach(function (shipIcon) {
+                var currentDistance = mathlib.distance(shipIcon.getPosition(), payload.game);
+
+                if (currentDistance < 10 && (!closest || currentDistance < closestDistance)) {
+                    closest = shipIcon;
+                    closestDistance = currentDistance;
+                }
             }, this);
-        }
-        */
 
+            if (closest)
+                icons.push(closest);
+        }
+
+        return icons;
+
+    };
+
+    ShipIconContainer.prototype.getIconsInSameHex = function (hex) {
+        return this.iconsAsArray.filter(function(shipIcon){
+            return this.coordinateConverter.fromGameToHex(shipIcon.getPosition()).equals(hex);
+        }, this);
+    };
+
+    ShipIconContainer.prototype.getFinalMovementInSameHex = function (hex) {
+        return this.iconsAsArray.filter(function(shipIcon){
+            return shipIcon.getLastMovement().position.equals(hex);
+        }, this);
+    };
+
+    ShipIconContainer.prototype.positionAndFaceAllIcons = function() {
+        this.getArray().forEach(function (icon) {
+            icon.positionAndFaceIcon(this.getHexOffset(icon));
+        }, this);
+    };
+
+    ShipIconContainer.prototype.setAllSelected = function(selected) {
+        this.getArray().forEach(function (icon) {
+            icon.setSelected(selected);
+        }, this);
     };
 
     function buildShipArray(){
@@ -105,6 +139,41 @@ window.ShipIconContainer = (function(){
             return new window.ShipIcon(ship, scene);
         }
     }
+
+    ShipIconContainer.prototype.getHexOffset = function(icon) {
+        var lastMove = icon.getLastMovement();
+        var hex = lastMove.position;
+
+        var iconsInHex = this.getFinalMovementInSameHex(hex).filter(function (otherIcon) {
+            return icon.ship.iniative > otherIcon.ship.iniative;
+        });
+
+        var previousHex = icon.getMovementBefore(lastMove).position;
+
+        var iconsFromSameHex = iconsInHex.filter(function (otherIcon) {
+            var movement = otherIcon.getMovementBefore(otherIcon.getLastMovement());
+            if (!movement) {
+                return false;
+            }
+
+            return movement.position.equals(previousHex);
+        });
+
+        var steps = 0;
+
+        if (iconsInHex.length > 0) {
+            steps = 1;
+        }
+
+        steps += iconsFromSameHex.length;
+
+        if (steps === 0) {
+            return null;
+        }
+
+        var angle = mathlib.getCompassHeadingOfPoint(hex, previousHex);
+        return mathlib.getPointInDirection(steps * 10, angle, 0, 0);
+    };
 
     return ShipIconContainer;
 })();

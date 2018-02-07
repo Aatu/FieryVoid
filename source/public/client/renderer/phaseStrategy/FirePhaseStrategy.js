@@ -36,22 +36,18 @@ window.FirePhaseStrategy = (function(){
         }
     };
 
-    FirePhaseStrategy.prototype.selectShip = function(ship) {
-        PhaseStrategy.prototype.selectShip.call(this, ship);
+    FirePhaseStrategy.prototype.selectShip = function(ship, payload) {
+        var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
     };
 
     FirePhaseStrategy.prototype.deselectShip = function(ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
     };
 
-    FirePhaseStrategy.prototype.targetShip = function(ship) {
-
-        if (!this.selectedShip) {
-            return;
-        }
-
-        console.log("target ship");
-        weaponManager.targetShip(this.selectedShip, ship);
+    FirePhaseStrategy.prototype.targetShip = function(ship, payload) {
+        var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
     };
 
     FirePhaseStrategy.prototype.untargetShip = function(ship) {};

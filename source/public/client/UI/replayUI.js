@@ -35,6 +35,7 @@ window.ReplayUI = (function(){
         this.pause = callbacks.pause || function(){};
         this.turnForward = callbacks.turnForward || function(){};
         this.turnBack = callbacks.turnBack || function(){};
+        this.endReplay = callbacks.endReplay || function(){};
     }
 
     ReplayUI.prototype.activate = function () {
@@ -48,7 +49,7 @@ window.ReplayUI = (function(){
         }
 
         $("#replayUI #activateReplay").on("click", this.startReplay.bind(this));
-        $("#replayUI #deactivateReplay").on("click", this.endReplay.bind(this));
+        $("#replayUI #deactivateReplay").on("click", this.endReplay);
 
         jQuery("#replayUI #play").on("click", this.play);
         jQuery("#replayUI #pause").on("click", this.pause);
@@ -68,11 +69,6 @@ window.ReplayUI = (function(){
 
     ReplayUI.prototype.startReplay = function() {
         gamedata.replay = true;
-        webglScene.receiveGamedata(gamedata);
-    };
-
-    ReplayUI.prototype.endReplay = function() {
-        gamedata.replay = false;
         webglScene.receiveGamedata(gamedata);
     };
 

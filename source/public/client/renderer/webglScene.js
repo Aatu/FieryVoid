@@ -201,6 +201,8 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseDown = function(event)
     {
+        event.stopPropagation();
+        event.preventDefault();
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
 
@@ -225,6 +227,9 @@ window.webglScene = (function(){
 
     webglScene.prototype.mouseUp = function(event)
     {
+        event.stopPropagation();
+        event.preventDefault();
+
         if (this.distanceDragged < this.draggingDistanceTreshold)
             this.click(event);
 

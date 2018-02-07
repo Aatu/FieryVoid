@@ -38,12 +38,13 @@ window.ParticleEmitterContainer = (function(){
         this.emitters = [];
     };
 
+    /*
     ParticleEmitterContainer.prototype.cleanUpAnimation = function (animation) {
         this.emitters.forEach(function (emitter) {
            cleanUpAnimationFromEmitter(animation, emitter);
         });
     };
-
+*/
     ParticleEmitterContainer.prototype.setPosition = function (pos) {
         this.emitters.forEach(function(emitter){
             emitter.emitter.mesh.position.x = pos.x;
@@ -57,6 +58,7 @@ window.ParticleEmitterContainer = (function(){
         })
     };
 
+    /*
     function cleanUpAnimationFromEmitter(animation, emitter) {
         var reservation = getReservation(emitter.reservations);
 
@@ -66,7 +68,7 @@ window.ParticleEmitterContainer = (function(){
 
         emitter.emitter.freeParticles(reservation.indexes);
     }
-
+*/
     function getReservation(reservations, animation, create) {
         var reservation = reservations.find(function(reservation){
            return reservation.animation === animation;

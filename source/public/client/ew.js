@@ -243,31 +243,29 @@ window.ew = {
         return null;
     },
 
-    getEntryByTargetAndType: function(ship, target, type){
+    getEntryByTargetAndType: function(ship, target, type, turn){
         return ship.EW.filter(function(entry) {
-            return entry.shipid == ship.id && entry.targetid == target.id && entry.type == type;
+            return entry.shipid === ship.id && (target === null || entry.targetid === target.id) && entry.type === type && entry.turn === turn;
         }).pop();
     },
 
     AssignOEW: function(selected, ship, type){
-		if (gamedata.waiting == true || gamedata.gamephase != 1)
-			return; 
-        
+
         if (!type) 
             type = "OEW";
 			
         for (var i in selected.EW){
             var EWentry = selected.EW[i];
 			
-			if (EWentry.turn != gamedata.turn)
+			if (EWentry.turn !== gamedata.turn)
 				continue;
 				
-            if (EWentry.type==type && EWentry.targetid == ship.id)
+            if (EWentry.type === type && EWentry.targetid === ship.id)
                 return;
         }
         var left = ew.getDefensiveEW(selected);
         
-        if (left < 1 || (type == "DIST" && left < 3)){
+        if (left < 1 || (type === "DIST" && left < 3)){
             return;
         }
 
@@ -311,6 +309,7 @@ window.ew = {
     },
 
     assignEW: function(ship, entry) {
+
         var left = ew.getDefensiveEW(ship);
 
         if (left < 1)
@@ -335,7 +334,6 @@ window.ew = {
                 return;
             }else{
                 ship.EW.push({shipid:ship.id, type:"BDEW", amount:1, targetid:-1, turn:gamedata.turn});
-                ew.adEWindicators(ship);
             }
         }else if (entry.type == "DIST"){
             if (left < 3)
@@ -373,6 +371,20 @@ window.ew = {
         }
         gamedata.shipStatusChanged(ship);
     },
+
+    deassignEW: function(ship, entry){
+        var amount = 1;
+        if (entry.type === "DIST")
+            amount = 3;
+
+        entry.amount -= amount;
+        
+        ship.EW = ship.EW.filter(function (shipEwEntry) {
+            return shipEwEntry.amount > 0;
+        });
+
+        gamedata.shipStatusChanged(ship);
+    },
 	
 	removeEW: function(ship){
 	
@@ -384,6 +396,8 @@ window.ew = {
 	
 	},
     checkInELINTDistance: function(ship, target, distance){
+
+        //TODO: hex distance!
         var shipPos = shipManager.getShipPositionInWindowCo(ship);
         var targetPos = shipManager.getShipPositionInWindowCo(target)
        

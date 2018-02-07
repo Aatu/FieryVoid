@@ -29,6 +29,7 @@
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
     <link href="styles/replay.css" rel="stylesheet" type="text/css">
+    <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -69,8 +70,6 @@
             );
 
             $("#pagecontainer").show();
-            animation.animationLoop();
-            effects.animationLoop();
         });
         
             
@@ -110,7 +109,9 @@
     <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
 
+    <script src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
     <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
@@ -119,6 +120,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
@@ -133,6 +135,12 @@
 
 
     <script src="client/UI/ShipTooltip.js"></script>
+    <script src="client/UI/shipTooltipMenu.js"></script>
+    <script src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
+    <script src="client/UI/shipTooltipFireMenu.js"></script>
+
+
+
     <script src="client/ShipMovementCallbacks.js"></script>
 
 

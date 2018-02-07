@@ -4,15 +4,16 @@ window.ShipTooltip = (function(){
         + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>'
         + '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>'
         + '<div class="fire targeting"></div>'
+        + '<div class="buttons"></div>'
         + '</div>';
 
-
-    function ShipTooltip(selectedShip, ships, position, showTargeting){
+    function ShipTooltip(selectedShip, ships, position, showTargeting, menu){
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
         this.position = position;
         this.selectedShip = selectedShip;
         this.showTargeting = showTargeting;
+        this.menu = menu;
 
         this.element.on('mousedown', function(e){e.preventDefault();});
         this.element.on('mouseup', function(e){e.preventDefault();});
@@ -30,17 +31,19 @@ window.ShipTooltip = (function(){
     }
 
     ShipTooltip.prototype.show = function () {
-        this.element.appendTo('#pagecontainer');
+        this.element.appendTo('body');
         this.element.show();
         positionElement(this.element, this.position)
     };
 
     ShipTooltip.prototype.reposition = function (position) {
         if (position) {
-            this.hex = position;
+            this.position = position;
         }
 
         positionElement(this.element, this.position);
+
+        return true;
     };
 
 
@@ -49,10 +52,23 @@ window.ShipTooltip = (function(){
     };
 
     ShipTooltip.prototype.addEntryElement = function (value, condition){
-        if (condition === false || condition === 0)
+        if (condition === false || condition === 0 || condition === null)
             return;
 
         jQuery('<div class="entry"><span>'+value+'</span></div>').insertAfter(this.element.find('.namecontainer'));
+    };
+
+    ShipTooltip.prototype.update = function() {
+        jQuery(".buttons", this.element).html("");
+        jQuery(".namecontainer", this.element).html("");
+        jQuery(".fire", this.element).html("");
+        jQuery(".entry", this.element).remove();
+
+        if (this.ships.length > 1) {
+            createForMultipleShips.call(this, this.ships);
+        } else {
+            createForSingleShip.call(this, this.ships[0]);
+        }
     };
 
     function createForSingleShip(ship){
@@ -67,15 +83,15 @@ window.ShipTooltip = (function(){
             var direction;
             var html;
 
-            if (ship.movement[1].value == -1){
+            if (ship.movement[1].value === -1){
                 direction = "port";
             }
-            else if (ship.movement[1].value == 1){
+            else if (ship.movement[1].value === 1){
                 direction = "starboard";
             }
 
             if (direction){
-                var html = "Rotation towards " + direction;
+                html = "Rotation towards " + direction;
                 this.addEntryElement(html);
             }
         }
@@ -91,9 +107,15 @@ window.ShipTooltip = (function(){
         this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship) + "    (" + ship.accelcost + ")");
         this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
         this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
-        this.addEntryElement(misc, ship.flight != true);
+        this.addEntryElement(misc, ship.flight !== true);
         this.addEntryElement(flightArmour, ship.flight === true);
 
+
+        if (this.selectedShip) {
+            this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship, ship.flight !== true);
+        }
+
+        this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
         var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
         this.addEntryElement("Defence (F/S): " + fDef +"("+
@@ -117,16 +139,29 @@ window.ShipTooltip = (function(){
             $(".fire", this.element).hide();
         }
 
+        if (this.menu) {
+            this.menu.renderTo(jQuery(".buttons", this.element), this);
+        }
     }
 
-    function createForMultipleShips(element, ships){
+    function createForMultipleShips(ships){
 
+
+        ships.forEach(function(ship, i) {
+            var comma = i < ships.length - 1 ? ',' : '';
+
+            jQuery('<span class="name value '+ getAllyClass(ship) +'">' + ship.name + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+        }, this);
+        this.addEntryElement("Zoom closer ton interact");
     }
 
     function positionElement(element, position){
         if (position instanceof hexagon.Offset) {
             position = window.coordinateConverter.fromHexToViewport(position);
+        } else {
+            position = window.coordinateConverter.fromGameToViewPort(position);
         }
+
 
         var yOffset = window.coordinateConverter.getHexHeightViewport()/2;
 

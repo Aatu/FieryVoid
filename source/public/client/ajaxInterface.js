@@ -395,14 +395,9 @@ window.ajaxInterface = {
 			ajaxInterface.stopPolling();
             return;
 		}          
-        if (!gamedata.animating){
-            //console.log("polling for gamedata...");
-            animation.animateWaiting();
-        
-            if (!ajaxInterface.submiting)
-                ajaxInterface.requestGamedata();
-			
-        }
+
+        if (!ajaxInterface.submiting)
+            ajaxInterface.requestGamedata();
         
         ajaxInterface.pollcount++;
         
@@ -439,7 +434,7 @@ window.ajaxInterface = {
     },
     
     pollGames: function(){
-        if (gamedata.waiting == false)
+        if (gamedata.waiting === false)
             return;
         
         if (!gamedata.animating){
@@ -454,7 +449,9 @@ window.ajaxInterface = {
     requestGamedata: function(){
         
         ajaxInterface.submiting = true;
-        
+
+        console.log("request");
+
         $.ajax({
             type : 'GET',
             url : 'gamedata.php',

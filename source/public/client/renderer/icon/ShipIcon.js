@@ -5,6 +5,7 @@ window.ShipIcon = (function (){
         this.shipId = ship.id;
         this.shipName = ship.name;
         this.imagePath = ship.imagePath;
+        this.ship = ship;
         this.movements = null;
         this.defaultPosition = null;
         this.mesh = null;
@@ -134,7 +135,6 @@ window.ShipIcon = (function (){
     };
 
     ShipIcon.prototype.consumeMovement = function(movements){
-        //console.log(JSON.stringify(movements));
 
         var movesByHexAndTurn = {};
 
@@ -227,10 +227,15 @@ window.ShipIcon = (function (){
     };
 
     ShipIcon.prototype.getFirstMovementOnTurn = function(turn, ignore){
-
-        return this.movements.filter(function (move) {
+        var movement = this.movements.filter(function (move) {
             return move.turn === turn;
         }).shift();
+
+        if (!movement) {
+            return this.getLastMovement();
+        }
+
+        return movement;
     };
 
     ShipIcon.prototype.getMovementBefore = function (move) {
@@ -280,6 +285,21 @@ window.ShipIcon = (function (){
         this.weaponArcs.forEach(function(arc) {
             this.mesh.remove(arc);
         }, this)
+    };
+
+    ShipIcon.prototype.positionAndFaceIcon = function(offset){
+        var movement = this.getLastMovement();
+        var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
+
+        if (offset) {
+            gamePosition.x += offset.x;
+            gamePosition.y += offset.y;
+        }
+
+        var facing = mathlib.hexFacingToAngle(movement.facing);
+
+        this.setPosition(gamePosition);
+        this.setFacing(-facing);
     };
 
 

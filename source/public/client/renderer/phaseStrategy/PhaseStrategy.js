@@ -12,6 +12,7 @@ window.PhaseStrategy = (function(){
         this.onMouseOutCallbacks = [];
         this.onZoomCallbacks = [];
         this.onScrollCallbacks = [];
+        this.onClickCallbacks = [];
 
         this.selectedShip = null;
         this.targetedShip = null;
@@ -19,6 +20,7 @@ window.PhaseStrategy = (function(){
         this.replayUI = null;
 
 
+        this.shipTooltip = null;
         this.movementUI = null;
 
         this.onDoneCallback = null;
@@ -51,6 +53,7 @@ window.PhaseStrategy = (function(){
         this.gamedata = gamedata;
         this.inactive = false;
         this.consumeGamedata();
+        this.shipIconContainer.setAllSelected(false);
         this.ballisticIconContainer.show();
         this.onDoneCallback = doneCallback;
         this.createReplayUI(gamedata);
@@ -61,6 +64,14 @@ window.PhaseStrategy = (function(){
         this.inactive = true;
         this.animationStrategy.deactivate();
         this.replayUI && this.replayUI.deactivate();
+
+        if (this.ballisticIconContainer) {
+            this.ballisticIconContainer.hide();
+        }
+
+        if (this.ewIconContainer) {
+            this.ewIconContainer.hide();
+        }
         return this;
     };
 
@@ -72,13 +83,13 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onScrollEvent = function(payload) {
-        this.onScrollCallbacks.filter(function(callback) {
+        this.onScrollCallbacks = this.onScrollCallbacks.filter(function(callback) {
             return callback(payload);
         });
     };
 
     PhaseStrategy.prototype.onZoomEvent = function(payload) {
-        this.onZoomCallbacks.filter(function(callback) {
+        this.onZoomCallbacks = this.onZoomCallbacks.filter(function(callback) {
             return callback(payload);
         });
     };
@@ -86,13 +97,18 @@ window.PhaseStrategy = (function(){
     PhaseStrategy.prototype.onClickEvent = function(payload) {
         var icons = this.shipIconContainer.getIconsInProximity(payload);
 
+        this.onClickCallbacks = this.onClickCallbacks.filter(function(callback) {
+            callback();
+            return false;
+        });
+
         if (icons.length > 1){
             this.onShipsClicked(icons.map(function(icon) {return this.gamedata.getShip(icon.shipId);}, this));
         } else if (icons.length === 1) {
-            if (payload.button != 0) {
-                this.onShipRightClicked(this.gamedata.getShip(icons[0].shipId));
+            if (payload.button !== 0) {
+                this.onShipRightClicked(this.gamedata.getShip(icons[0].shipId), payload);
             } else {
-                this.onShipClicked(this.gamedata.getShip(icons[0].shipId));
+                this.onShipClicked(this.gamedata.getShip(icons[0].shipId), payload);
             }
         }else{
             this.onHexClicked(payload);
@@ -108,20 +124,24 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.onShipRightClicked = function(ship) {
         if (this.gamedata.isMyShip(ship)) {
-            this.selectShip(ship);
+            this.setSelectedShip(ship);
         }
         shipWindowManager.open(ship);
     };
 
-    PhaseStrategy.prototype.onShipClicked = function(ship) {
+    PhaseStrategy.prototype.onShipClicked = function(ship, payload) {
         if (this.gamedata.isMyShip(ship)){
-            this.selectShip(ship);
+            this.selectShip(ship, payload);
         } else {
-            this.targetShip(ship);
+            this.targetShip(ship, payload);
         }
     };
 
     PhaseStrategy.prototype.selectShip = function(ship) {
+        this.setSelectedShip(ship);
+    };
+
+    PhaseStrategy.prototype.setSelectedShip = function(ship) {
         if (this.selectedShip) {
             this.deselectShip(this.selectedShip);
         }
@@ -155,7 +175,7 @@ window.PhaseStrategy = (function(){
                 this.currentlyMouseOveredIds = null;
             }
 
-            this.onMouseOutCallbacks.filter(function(callback) {
+            this.onMouseOutCallbacks = this.onMouseOutCallbacks.filter(function(callback) {
                 callback();
                 return false;
             });
@@ -172,7 +192,7 @@ window.PhaseStrategy = (function(){
             return value + icon.shipId;
         }, '');
 
-        if (mouseOverIds == this.currentlyMouseOveredIds) {
+        if (mouseOverIds === this.currentlyMouseOveredIds) {
             return;
         }
 
@@ -200,12 +220,12 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function(ships, payload) {
-        this.showShipTooltip(ships, payload);
+        this.showShipTooltip(ships, payload, null, true);
     };
 
     PhaseStrategy.prototype.onMouseOverShip = function(ship, payload) {
         var icon = this.shipIconContainer.getById(ship.id);
-        this.showShipTooltip(ship, payload);
+        this.showShipTooltip(ship, payload, null, true);
         this.showShipEW(ship);
         icon.showSideSprite(true);
     };
@@ -220,12 +240,37 @@ window.PhaseStrategy = (function(){
         this.ewIconContainer.hide();
     };
 
-    PhaseStrategy.prototype.showShipTooltip = function(ships, payload) {
+    PhaseStrategy.prototype.showShipTooltip = function(ships, payload, menu, hide) {
+
+        if (this.shipTooltip) {
+            return;
+        }
+
         ships = [].concat(ships);
-        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, payload.hex, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip));
-        this.onMouseOutCallbacks.push(function(){ shipTooltip.destroy(); });
-        this.onZoomCallbacks.push(function(){ shipTooltip.reposition(); });
-        this.onScrollCallbacks.push(function(){shipTooltip.reposition();});
+
+        var position = payload.hex;
+        if (ships.length === 1) {
+            position = this.shipIconContainer.getByShip(ships[0]).getPosition();
+        }
+
+        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu);
+
+        this.shipTooltip = shipTooltip;
+        this.onClickCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
+
+        if (hide) {
+            this.onMouseOutCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
+        }
+
+        //this.onZoomCallbacks.push(shipTooltip.destroy.bind(shipTooltip));
+        //this.onScrollCallbacks.push(shipTooltip.destroy.bind(shipTooltip));
+    };
+
+    PhaseStrategy.prototype.hideShipTooltip = function(shipTooltip){
+        if (this.shipTooltip && this.shipTooltip === shipTooltip) {
+            this.shipTooltip.destroy();
+            this.shipTooltip = null;
+        }
     };
 
     PhaseStrategy.prototype.positionMovementUI = function(){
@@ -273,7 +318,7 @@ window.PhaseStrategy = (function(){
         //TODO: Scroll to ship?
         //TODO: what about active ship?
         if (ship) {
-            this.selectShip(ship);
+            this.setSelectedShip(ship);
         }
     };
 
@@ -281,7 +326,7 @@ window.PhaseStrategy = (function(){
         var ship = gamedata.getActiveShip();
 
         if (ship && gamedata.isMyShip(ship)) {
-            this.selectShip(ship);
+            this.setSelectedShip(ship);
         }
     };
 

@@ -21,9 +21,13 @@ window.BallisticIconContainer = (function(){
 
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
-                this.scene.remove(icon.launchSprite);
+                this.scene.remove(icon.launchSprite.mesh);
                 if (icon.targetSprite) {
-                    this.scene.remove(icon.targetSprite);
+                    if (icon.targetId !== -1) {
+                        iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
+                    } else {
+                        this.scene.remove(icon.targetSprite.mesh);
+                    }
                 }
                 return false;
             }
@@ -33,23 +37,25 @@ window.BallisticIconContainer = (function(){
     };
 
     BallisticIconContainer.prototype.hide = function() {
-        console.log("ballistics hide");
         this.ballisticIcons.forEach(function(icon) {
             icon.launchSprite.hide();
             if (icon.targetSprite){
                 icon.targetSprite.hide();
             }
-        })
+        });
+
+        return this;
     };
 
     BallisticIconContainer.prototype.show = function() {
-        console.log("ballistics show");
         this.ballisticIcons.forEach(function(icon) {
             icon.launchSprite.show();
             if (icon.targetSprite){
                 icon.targetSprite.show();
             }
         });
+
+        return this;
     };
 
     BallisticIconContainer.prototype.onEvent = function(name, payload) {
@@ -89,20 +95,29 @@ window.BallisticIconContainer = (function(){
     }
 
     function createBallisticIcon(ballistic, iconContainer, turn, scene) {
-
         var shooterIcon = iconContainer.getById(ballistic.shooterid);
         var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
-        var targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+        var targetPosition = null;
+        var targetIcon = null;
+
+        if (ballistic.targetid === -1) {
+            targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
+        } else {
+            targetIcon = iconContainer.getById(ballistic.targetid);
+            targetPosition = {x: 0, y:0};
+        }
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');
-        var targetSprite = ballistic.targetid === -1 ? new BallisticSprite(targetPosition, 'hex') : null;
+        var targetSprite = new BallisticSprite(targetPosition, 'hex');
 
         scene.add(launchSprite.mesh);
-        if (targetSprite) {
+        if (targetIcon && targetSprite) {
+            targetIcon.mesh.add(targetSprite.mesh);
+        } else if (targetSprite)  {
             scene.add(targetSprite.mesh);
         }
 
-        return {
+        this.ballisticIcons.push({
             id: ballistic.id,
             shooterId: ballistic.shooterid,
             targetId: ballistic.targetid,
@@ -110,12 +125,12 @@ window.BallisticIconContainer = (function(){
             launchSprite: launchSprite,
             targetSprite: targetSprite,
             used: true
-        };
+        });
     }
 
     function getBallisticIcon(id) {
-        this.ballisticIcons.filter(function (icon) {
-           return icon.id == id;
+        return this.ballisticIcons.filter(function (icon) {
+           return icon.id === id;
         }).pop();
     }
 

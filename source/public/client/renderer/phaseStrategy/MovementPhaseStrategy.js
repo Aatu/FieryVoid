@@ -39,14 +39,13 @@ window.MovementPhaseStrategy = (function(){
 
     };
 
-    MovementPhaseStrategy.prototype.selectShip = function(ship) {
+    MovementPhaseStrategy.prototype.selectShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
+    };
 
-        var selectedShip = gamedata.getActiveShip();
-        if (ship !== selectedShip) {
-            return;
-        }
-
-        PhaseStrategy.prototype.selectShip.call(this, ship);
+    MovementPhaseStrategy.prototype.setSelectedShip = function(ship) {
+        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         botPanel.setMovement(ship);
         this.drawMovementUI(this.selectedShip);
     };
@@ -70,7 +69,9 @@ window.MovementPhaseStrategy = (function(){
         }
     };
 
-    MovementPhaseStrategy.prototype.targetShip = function(ship) {
+    MovementPhaseStrategy.prototype.targetShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
     };
 
     function isMovementReady(gamedata) {

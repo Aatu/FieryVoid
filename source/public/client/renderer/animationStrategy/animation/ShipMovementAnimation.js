@@ -1,13 +1,13 @@
 window.ShipMovementAnimation = (function(){
 
-    function ShipMovementAnimation(shipIcon, turn) {
+    function ShipMovementAnimation(shipIcon, turn, shipIconContainer) {
         this.shipIcon = shipIcon;
         this.turn = turn;
-        this.hexAnimations = buildCurves(this.shipIcon, this.turn);
+        this.shipIconContainer = shipIconContainer;
+        this.hexAnimations = buildCurves.call(this, this.shipIcon, this.turn);
         this.totalCurveLength = calculateTotalCurveLength(this.hexAnimations);
         this.duration = 5000;
         this.time = 0;
-
 
         this.turnCurve = new THREE.CubicBezierCurve(
             new THREE.Vector2( 0, 0 ),
@@ -56,6 +56,11 @@ window.ShipMovementAnimation = (function(){
 
     ShipMovementAnimation.prototype.getPositionAndFacingAtTime = function (time) {
 
+        if (this.hexAnimations.length === 0) {
+            var move = this.shipIcon.getLastMovement();
+            return {position: window.coordinateConverter.fromHexToGame(move.position), facing: mathlib.hexFacingToAngle(move.facing)};
+        }
+
         var totalDone = (time - this.time) / this.duration;
         if (totalDone > 1) {
             totalDone = 1;
@@ -95,7 +100,7 @@ window.ShipMovementAnimation = (function(){
     ShipMovementAnimation.prototype.setTime = function(time) {
         this.time = time;
     };
-    
+
     function findAnimation(totalDone) {
         var length = this.totalCurveLength * totalDone;
         var result = {
@@ -139,7 +144,8 @@ window.ShipMovementAnimation = (function(){
             var start = i === 0 ? null : moves[i-1];
             var next = moves[i+1] ? moves[i+1] : null;
 
-            var movementPoints = getMovementPoints(
+            var movementPoints = getMovementPoints.call(
+                this,
                 move.position,
                 next ? next.position : null,
                 start ? start.position : null
@@ -239,6 +245,13 @@ window.ShipMovementAnimation = (function(){
         } else {
             controlBetween = true;
             end = window.coordinateConverter.fromHexToGame(currentHex);
+
+            var offset = this.shipIconContainer.getHexOffset(this.shipIcon);
+            if (offset) {
+                end.x += offset.x;
+                end.y += offset.y;
+            }
+
         }
 
         if (controlBetween) {

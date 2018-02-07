@@ -9,6 +9,7 @@ window.EWIconContainer = (function(){
     }
 
     EWIconContainer.prototype.consumeGamedata = function(gamedata, iconContainer) {
+
         this.ewIcons.forEach(function(ewIcon) {
             ewIcon.used = false;
         });
@@ -25,12 +26,12 @@ window.EWIconContainer = (function(){
 
         this.ewIcons = this.ewIcons.filter(function (icon) {
             if (!icon.used) {
-                this.scene.remove(icon.sprite);
+                this.scene.remove(icon.sprite.mesh);
                 return false;
             }
 
             return true;
-        }, this)
+        }, this);
     };
 
     EWIconContainer.prototype.hide = function() {

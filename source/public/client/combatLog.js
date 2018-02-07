@@ -21,6 +21,9 @@ window.combatLog = {
     },
     
     logFireOrders: function(orders){
+
+        orders = [].concat(orders);
+
         //fire.x != "null" && otherFire.x == fire.x && fire.y != "null"
         var count = 0;
         var ship = gamedata.getShip(orders[0].shooterid);
@@ -42,7 +45,7 @@ window.combatLog = {
 		
 		
 	    var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-	    if(modeIteration != weapon.firingMode){
+	    if(modeIteration !== weapon.firingMode){
 		    while(modeIteration > 1){
 			weapon.changeFiringMode();
 			modeIteration--;
@@ -52,7 +55,7 @@ window.combatLog = {
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
-            weaponManager.getDamagesCausedBy(damages, fire);
+            weaponManager.getDamagesCausedBy(fire, damages);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
 				
@@ -67,7 +70,7 @@ window.combatLog = {
         }
             
         
-        var html = '<div class="logentry"><span class="logheader fire">FIRE: </span><span>';
+        var html = '<div class="logentry fire-'+orders[0].id+'"><span class="logheader fire">FIRE: </span><span>';
             html += '<span class="shiplink" data-id="'+ship.id+'" >' + ship.name + '</span>';   
             
             var counttext = (count>1) ? count+"x " : "";
@@ -164,9 +167,16 @@ window.combatLog = {
         }
         
             
-        $(html).prependTo("#log");
+
+        var element = $(html).appendTo("#log");
+
+        $("#log").scrollTop($("#log")[0].scrollHeight);
+        return element;
     },
-            
+
+    removeFireOrders: function (element) {
+        jQuery(element).remove();
+    },
         
     logAmmoExplosion: function(ship, system){
 
@@ -258,8 +268,7 @@ window.combatLog = {
             html += '<span> From ('+start.x+','+start.y+') to ('+end.x+','+end.y+') </span></div>';
         var log = $(html);
         //var details = $('<ul><li><span> From ('+start.x+','+start.y+') to ('+end.x+','+end.y+') </span></ul></li>')
-        
-        log.on('click', animation.replayMoveAnimation);
+
         //$(details).prependTo("#log");
         $(log).prependTo("#log");
         

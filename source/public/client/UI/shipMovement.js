@@ -386,7 +386,7 @@ window.UI = {
 
 
         
-            var UIpos = mathlib.getPointInDirection( dis, angle, x, y);
+            var UIpos = mathlib.getPointInDirection( dis, -angle, x, y);
             e.css("top", UIpos.y - y - s*0.5+"px").css("left", UIpos.x - x - s*0.5+"px");
             e.css("width", s+"px").css("height", s+"px");
             e.show();

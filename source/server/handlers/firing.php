@@ -341,7 +341,7 @@ class Firing{
 	    	    
 	    if ($firingweapon->ballistic){
 		$movement = $shooter->getLastTurnMovement($fire->turn);
-		$pos = mathlib::hexCoToPixel($movement->x, $movement->y); //launch hex	    
+		$pos = mathlib::hexCoToPixel($movement->position); //launch hex
 		$relativeBearing = $interceptingShip->getBearingOnPos($pos);    
 	    }else{
 		$pos = $shooter->getCoPos(); //current hex of firing unit
@@ -370,9 +370,9 @@ class Firing{
 						$targetPosPrevious = $targetPosNow;
 					}else{//standard - check actual position at the end of previous turn
 						$movement = $interceptingShip->getLastTurnMovement($fire->turn);
-						$selfPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
+						$selfPosPrevious = mathlib::hexCoToPixel($movement->position); //at start of turn
 						$movement = $target->getLastTurnMovement($fire->turn);
-						$targetPosPrevious = mathlib::hexCoToPixel($movement->x, $movement->y); //at start of turn
+						$targetPosPrevious = mathlib::hexCoToPixel($movement->position); //at start of turn
 					}
 
 					if ( ($selfPosNow==$targetPosNow) && ($selfPosPrevious==$targetPosPrevious) ){

@@ -102,10 +102,10 @@ window.graphics = {
         canvas.beginPath();
         canvas.arc(x,y,r2,s,e, false); // outer (filled)
 
-        var p1 = mathlib.getPointInDirection(r, mathlib.radianToDegree(e), x, y);
+        var p1 = mathlib.getPointInDirection(r, -mathlib.radianToDegree(e), x, y);
         canvas.lineTo(p1.x, p1.y);
         canvas.arc(x,y,r,e,s, true); // inner (unfills it)
-        var p2 = mathlib.getPointInDirection(r2, mathlib.radianToDegree(s), x, y);
+        var p2 = mathlib.getPointInDirection(r2, -mathlib.radianToDegree(s), x, y);
         canvas.lineTo(p2.x, p2.y);
 
         canvas.closePath();
@@ -143,14 +143,14 @@ window.graphics = {
 
         var p1, p2, p3, p4, p5, p6, p7;
 
-        p1 = mathlib.getPointInDirection(s*0.5, a , x, y);
-        p2 = mathlib.getPointInDirection(s*0.5, mathlib.addToDirection(a, -140), p1.x, p1.y);
-        p3 = mathlib.getPointInDirection(s*0.15, mathlib.addToDirection(a, 90), p2.x, p2.y);
-        p4 = mathlib.getPointInDirection(s*0.5, mathlib.addToDirection(a, 180), p3.x, p3.y);
+        p1 = mathlib.getPointInDirection(s*0.5, -a , x, y);
+        p2 = mathlib.getPointInDirection(s*0.5, -mathlib.addToDirection(a, -140), p1.x, p1.y);
+        p3 = mathlib.getPointInDirection(s*0.15, -mathlib.addToDirection(a, 90), p2.x, p2.y);
+        p4 = mathlib.getPointInDirection(s*0.5, -mathlib.addToDirection(a, 180), p3.x, p3.y);
 
-        p7 = mathlib.getPointInDirection(s*0.5, mathlib.addToDirection(a, 140), p1.x, p1.y);
-        p6 = mathlib.getPointInDirection(s*0.15, mathlib.addToDirection(a, -90), p7.x, p7.y);
-        p5 = mathlib.getPointInDirection(s*0.5, mathlib.addToDirection(a, 180), p6.x, p6.y);
+        p7 = mathlib.getPointInDirection(s*0.5, -mathlib.addToDirection(a, 140), p1.x, p1.y);
+        p6 = mathlib.getPointInDirection(s*0.15, -mathlib.addToDirection(a, -90), p7.x, p7.y);
+        p5 = mathlib.getPointInDirection(s*0.5, -mathlib.addToDirection(a, 180), p6.x, p6.y);
 
         canvas.lineWidth = w;
         canvas.beginPath();

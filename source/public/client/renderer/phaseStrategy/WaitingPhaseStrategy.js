@@ -2,6 +2,7 @@ window.WaitingPhaseStrategy = (function(){
 
     function WaitingPhaseStrategy(coordinateConverter){
         PhaseStrategy.call(this, coordinateConverter);
+
     }
 
     WaitingPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -12,15 +13,31 @@ window.WaitingPhaseStrategy = (function(){
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         console.log("enabled waiting phase strategy");
+        this.ballisticIconContainer = ballisticIconContainer.show();
         gamedata.hideCommitButton();
+
+        ajaxInterface.startPollingGamedata();
+        return this;
+    };
+
+    WaitingPhaseStrategy.prototype.deactivate = function () {
+        PhaseStrategy.prototype.deactivate.call(this);
+        ajaxInterface.stopPolling();
         return this;
     };
 
     WaitingPhaseStrategy.prototype.onHexClicked = function(payload) {};
 
-    WaitingPhaseStrategy.prototype.selectShip = function(ship) {};
+    WaitingPhaseStrategy.prototype.selectShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
+    };
 
-    WaitingPhaseStrategy.prototype.targetShip = function(ship) {};
+    WaitingPhaseStrategy.prototype.targetShip = function(ship, payload) {
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+        this.showShipTooltip(ship, payload, menu, false);
+    };
+
 
     return WaitingPhaseStrategy;
 })();

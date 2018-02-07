@@ -127,7 +127,7 @@ window.Explosion = (function(){
         {
             var angle = steps * step;
             var particle = this.emitterContainer.getParticle(this);
-            var target = mathlib.getPointInDirection(distance + Math.random()*30, angle, 0, 0);
+            var target = mathlib.getPointInDirection(distance + Math.random()*30, -angle, 0, 0);
 
             particle
                 .setSize(Math.random() * 50 + 100)
@@ -195,7 +195,7 @@ window.Explosion = (function(){
         var angle = args.angle || Math.floor(Math.random()*360);
         var speed = (Math.random()*0.2 + 0.1) * this.speed * this.size * 0.01;
 
-        var target = args.target || mathlib.getPointInDirection(speed, angle, 0, 0, true);
+        var target = args.target || mathlib.getPointInDirection(speed, -angle, 0, 0, true);
         var position = args.position || this.position; //mathlib.getPointInDirection(size/2, angle, this.position.x, this.position.y, true);
         var color = args.color || getYellowColor();
 
@@ -225,7 +225,7 @@ window.Explosion = (function(){
             var fadeOutAt = activationTime + Math.floor(Math.random()*50/this.speed);
 
             var angle = Math.floor(Math.random()*360);
-            var target = mathlib.getPointInDirection(0.1, angle, 0, 0);
+            var target = mathlib.getPointInDirection(0.1, -angle, 0, 0);
 
             particle
                 .setSize(Math.floor(Math.random()*size) + size/2)

@@ -55,19 +55,11 @@ window.AnimationStrategy = (function(){
     };
 
     AnimationStrategy.prototype.positionAndFaceAllIcons = function() {
-        this.shipIconContainer.getArray().forEach(function (icon) {
-            this.positionAndFaceIcon(icon);
-        }, this);
+        this.shipIconContainer.positionAndFaceAllIcons();
     };
 
     AnimationStrategy.prototype.positionAndFaceIcon = function(icon){
-        var movement = icon.getLastMovement();
-        var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
-
-        var facing = mathlib.hexFacingToAngle(movement.facing);
-
-        icon.setPosition(gamePosition);
-        icon.setFacing(-facing);
+        icon.positionAndFaceIcon();
     };
 
     /*
@@ -114,7 +106,6 @@ window.AnimationStrategy = (function(){
             this.onDoneCallback();
         }
     };
-
 
     return AnimationStrategy;
 })();

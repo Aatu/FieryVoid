@@ -248,7 +248,7 @@ class Manager{
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
     
-	    if (!is_numeric($gameid) || !is_numeric($userid) || ($turn !== null && !is_numeric($turn)) || !is_numeric($phase) || !is_numeric($activeship) )
+	    if (!is_numeric($gameid) || (!is_numeric($userid) &&  $userid !== null) || ($turn !== null && !is_numeric($turn)) || !is_numeric($phase) || !is_numeric($activeship) )
             return null;
         
         $gamedata = null;
@@ -287,7 +287,7 @@ class Manager{
         self::$dbManager->updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount);
     }
     
-    public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship){
+    public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){
         
         try{
             $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
@@ -300,7 +300,7 @@ class Manager{
                 return $gdS;
             }
 
-            if ($gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
+            if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
 
 

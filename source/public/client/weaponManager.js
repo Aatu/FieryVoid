@@ -96,6 +96,7 @@ window.weaponManager = {
 		weaponManager.removeFiringOrder(ship, system);
 		ballistics.updateList();
 		shipWindowManager.setDataForSystem(ship, system);
+        gamedata.shipStatusChanged(ship);
 	},
 
     onWeaponMouseover: function(e){
@@ -1414,9 +1415,6 @@ window.weaponManager = {
 						weaponid:weapon.id,
 						shots:fire.shots});
 
-						ballistics.calculateBallisticLocations();
-						ballistics.calculateDrawBallistics();
-						drawEntities();
 					}
 					toUnselect.push(weapon);
 				}
@@ -1633,6 +1631,52 @@ window.weaponManager = {
 		return fires;
 	},
 
+    getAllFireOrdersForDisplayingAgainst: function(target) {
+        return gamedata.ships.reduce(function(fires, shooter) {
+			return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
+				return fire.targetid === target.id && (fire.type === "normal" || fire.type === "ballistic");
+			}));
+		}, []).map(function (fireOrder) {
+			var shooter = gamedata.getShip(fireOrder.shooterid);
+			return {
+				id: fireOrder.id,
+				fireOrder: fireOrder,
+				shots: fireOrder.shots,
+				hits: fireOrder.shotshit,
+				shooter: shooter,
+				weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
+				targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),
+				damagesCaused: weaponManager.getDamagesCausedBy(fireOrder).reduce(function (damages, damage){
+					return damages.concat(damage.damages);
+				}, []).map(function (damage) {
+					return {
+                        armour: damage.armour,
+                        damage: damage.damage,
+                        damageclass: damage.damageclass,
+                        destroyed: damage.destroyed,
+						system: shipManager.systems.getSystem(target, damage.systemid)
+					};
+				}),
+                intercepts: weaponManager.getInterceptingFiringOrders(fireOrder.id).map(function(intercept) {
+                    var interceptShooter = gamedata.getShip(intercept.shooterid);
+                	return {
+                		fireOrder: intercept,
+						shooter: interceptShooter,
+						weapon: shipManager.systems.getSystem(interceptShooter, intercept.weaponid)
+					}
+				})
+			}
+		}).sort(function (obj1, obj2) {
+			if (obj1.weapon.priority !== obj2.weapon.priority){
+                return obj1.weapon.priority - obj2.weapon.priority;
+            }else {
+                var $val = obj1.shooter.id - obj2.shooter.id;
+                if ($val === 0) $val = obj1.id - obj2.id;
+                return $val
+            }
+        });
+	},
+
 	getAllFireOrdersFromSystem: function(system){
 		if (! system.weapon)
 			return;
@@ -1691,7 +1735,11 @@ window.weaponManager = {
 		shipWindowManager.setDataForSystem(ship, system);
 	},
 
-	getDamagesCausedBy: function(damages, fire){
+	getDamagesCausedBy: function(fire, damages){
+
+		if (!damages) {
+			damages = [];
+		}
 
 		for (var i in gamedata.ships){
 			var ship = gamedata.ships[i];
@@ -1730,53 +1778,6 @@ window.weaponManager = {
 
 
 	},
-
-	makeWeaponArcindicator: function(ship, weapon){
-		var effect = {};
-
-		var a = shipManager.getShipHeadingAngle(ship);
-		var arcs = shipManager.systems.getArcs(ship, weapon);
-		var dis;
-		if (weapon.rangePenalty == 0){
-			dis =  hexgrid.hexWidth()*weapon.range;
-		}else{
-			dis =  20*hexgrid.hexWidth()/weapon.rangePenalty;
-		}
-
-		arcs.start = mathlib.addToDirection(arcs.start, a);
-		arcs.end = mathlib.addToDirection(arcs.end, a);
-		//console.log("start: " + arcs.start + " end: " +arcs.end);
-		effect.ship = ship;
-		effect.type = "Arcs"
-		effect.arcs = arcs;
-		effect.dis = dis;
-		effect.draw = function(self){
-			var arcs = self.arcs;
-			var canvas = EWindicators.getEwCanvas();
-
-
-
-			var pos = shipManager.getShipPositionForDrawing(self.ship);
-			canvas.strokeStyle = "rgba(20,80,128,0.2)";
-			canvas.fillStyle = "rgba(20,80,128,0.2)";
-			if (arcs.start == arcs.end){
-				graphics.drawCircleAndFill(canvas, pos.x, pos.y, self.dis, 1);
-			}else{
-
-
-				var p1 = mathlib.getPointInDirection(self.dis, arcs.start, pos.x, pos.y);
-				var p2 = mathlib.getPointInDirection(self.dis, arcs.end, pos.x, pos.y);
-
-
-				graphics.drawCone(canvas, pos, p1, p2, arcs, 1)
-			}
-
-		};
-
-		return effect;
-
-	},
-
 
 	isLoaded: function(weapon){
 		return (weapon.loadingtime <= weapon.turnsloaded

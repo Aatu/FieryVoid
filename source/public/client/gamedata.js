@@ -542,69 +542,7 @@ gamedata = {
         gamedata.setPhaseClass();
 //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
-        
-        if (gamedata.gamephase == 4){
-            if (gamedata.waiting == false){
-                effects.displayAllWeaponFire(function(){
-					gamedata.subphase = 1;
-                    damageDrawer.checkDamages();
-                    //TODO: move to new renderer
-                    infowindow.informPhase(5000, null);
-                    
-                    });
-            }else{
-                gamedata.subphase = 1;
-                damageDrawer.checkDamages();
-            }
-
-            //TODO: move to new renderer
-            fleetListManager.updateFleetList();
-        }
-        
-               
-        if (gamedata.gamephase == 2){
-            return;
-			$(".ballclickable").remove();
-			$(".ballisticcanvas").remove();
-            ew.RemoveEWEffects();
-            animation.setAnimating(animation.animateShipMoves, function(){
-                infowindow.informPhase(5000, null);
-                scrolling.scrollToShip(gamedata.getActiveShip());
-                shipWindowManager.checkIfAnyStatusOpen(gamedata.getActiveShip());
-                
-                var ship = gamedata.getActiveShip();
-                
-                if (ship.userid == gamedata.thisplayer){
-                    //TODO: move to new renderer
-                    shipManager.movement.doForcedPivot(ship);
-
-                    if (ship.base){
-                        //TODO: move to new renderer
-                        shipManager.movement.doRotate(ship);
-                        gamedata.autoCommitOnMovement(ship);
-                    }
-
-                    gamedata.selectShip(ship, false);
-                }
-            });
-        }
-          
-        if (gamedata.gamephase == 1 && gamedata.waiting == false){
-
-
-        }
-        
-        if (gamedata.gamephase == 3 && gamedata.waiting == false){
-
-
-            
-        }
-        ballistics.initBallistics();
-       
-        
-        if (gamedata.waiting){
-            ajaxInterface.startPollingGamedata();
-        }
+        fleetListManager.updateFleetList();
     },
 
 
@@ -808,8 +746,10 @@ gamedata = {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
 
-        gamedata.thisplayer = serverdata.forPlayer;
-        gamedata.waiting = serverdata.waiting;
+        if (! gamedata.replay) {
+            gamedata.thisplayer = serverdata.forPlayer;
+            gamedata.waiting = serverdata.waiting;
+        }
         gamedata.status = serverdata.status;
         gamedata.ballistics = serverdata.ballistics;
         gamedata.elintShips = Array();

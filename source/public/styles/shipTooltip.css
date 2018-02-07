@@ -1,0 +1,16 @@
+.shipNameContainer .buttons .menu .action-buttons {
+    display: flex;
+    margin: 10px 0;
+}
+
+.shipNameContainer .buttons .menu .action-buttons button {
+    margin: 0 5px;
+    width: 40px;
+    height: 40px;
+    background-color: blue;
+    border: none;
+    color: #deebff;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+}

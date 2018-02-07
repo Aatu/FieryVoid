@@ -42,7 +42,7 @@ window.phaseDirector = (function() {
     };
 
     function resolvePhaseStrategy(gamedata, scene) {
-        if (gamedata.replay) {
+        if (!gamedata.thisplayer || gamedata.thisplayer === -1 || gamedata.replay) {
             return activatePhaseStrategy.call(this, window.ReplayPhaseStrategy, gamedata, scene);
         }
 

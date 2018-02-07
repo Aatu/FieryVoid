@@ -6,6 +6,7 @@ window.LaserEffect = (function() {
             args = {};
         }
 
+
         this.time = args.time || 0;
         this.duration = args.duration || 2000;
         this.hit = args.hit || false;
@@ -16,6 +17,8 @@ window.LaserEffect = (function() {
             x: Math.random() * 30 - 15,
             y: Math.random() * 30 - 15
         };
+
+        this.damage = args.damage || 0;
 
         this.target = target;
         if (!this.hit) {
@@ -57,7 +60,7 @@ window.LaserEffect = (function() {
                 duration: this.duration
             });
 
-            var amount = Math.round(Math.random()*3) + 1;
+            var amount = this.damage;
 
 
             while (amount--) {
@@ -124,6 +127,10 @@ window.LaserEffect = (function() {
             laser.multiplyOpacity(opacity);
             laser.setStartAndEnd(startAndEnd.start, startAndEnd.end);
         }, this);
+    };
+
+    LaserEffect.prototype.getDuration = function() {
+        return this.duration + this.fadeOutSpeed;
     };
 
     function createLaser(color, opacity, widht) {

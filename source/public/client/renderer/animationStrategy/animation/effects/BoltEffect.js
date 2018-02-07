@@ -12,8 +12,8 @@ window.BoltEffect = (function() {
         this.color = args.color || new THREE.Color(0, 0, 0);
         this.origin = args.origin;
         this.target = {
-            x: args.target.x + Math.random() * 30 - 15,
-            y: args.target.y + Math.random() * 30 - 15
+            x: args.target.x,
+            y: args.target.y
         };
         this.damage = args.damage || 0;
 
@@ -22,11 +22,11 @@ window.BoltEffect = (function() {
 
         var distance = mathlib.distance(this.origin, this.target);
         if (!this.hit) {
-            var missFactor = distance / 1500;
-            this.angle = mathlib.addToDirection(this.angle, Math.random() * missFactor - missFactor/2);
+            //var missFactor = distance / 1500;
+            //this.angle = mathlib.addToDirection(this.angle, Math.random() * missFactor - missFactor/2);
             distance += Math.random() * 100 + 50;
         }
-        this.speedVector = mathlib.getPointInDirection(this.speed, this.angle, 0, 0, true);
+        this.speedVector = mathlib.getPointInDirection(this.speed, -this.angle, 0, 0, true);
 
 
         this.duration = distance / this.speed;
@@ -48,21 +48,25 @@ window.BoltEffect = (function() {
 
             if (this.damage) {
                 new Explosion(this.emitterContainer, {
-                    size: 25,
+                    size: 12 * this.damage + 12,
                     position: this.target,
                     type: ["gas", "pillar"][Math.round(Math.random() * 2)],
                     time: this.time + this.duration
                 });
             }
-
-
         }
 
-        createBoltParticle.call(this, this.size, this.color);
-        createBoltParticle.call(this, this.size/2, {r:1, g:1, b:1});
+        createBoltParticle.call(this, this.size, this.color, this.origin);
+        createBoltParticle.call(this, this.size/2, {r:1, g:1, b:1}, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
     }
 
-    function createBoltParticle(size) {
+    BoltEffect.prototype = Object.create(ParticleAnimation.prototype);
+
+    BoltEffect.prototype.getDuration = function() {
+        return this.duration + this.fadeOutSpeed;
+    };
+
+    function createBoltParticle(size, color, position) {
 
         var particle = this.emitterContainer.getParticle(this);
         particle
@@ -72,13 +76,11 @@ window.BoltEffect = (function() {
             .setOpacity(1.0)
             .setActivationTime(this.time)
             .setVelocity(this.speedVector)
-            .setPosition(this.origin)
+            .setPosition(position)
             .setTexture(BaseParticle.prototype.texture.bolt)
-            .setColor(this.color)
+            .setColor(color)
             .setAngle(this.angle);
     }
-
-    BoltEffect.prototype = Object.create(ParticleAnimation.prototype);
 
     return BoltEffect;
 })();

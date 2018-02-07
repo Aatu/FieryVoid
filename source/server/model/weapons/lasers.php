@@ -26,10 +26,10 @@
         public $name = "heavyLaser";
         public $displayName = "Heavy Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 11);
+        public $animationColor = array(255, 79, 15);
         public $animationWidth = 4;
         public $animationWidth2 = 0.2;
-        
+
         public $loadingtime = 4;
         public $overloadable = true;
         public $extraoverloadshots = 2;
@@ -58,7 +58,7 @@
         public $name = "mediumLaser";
         public $displayName = "Medium Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 11);
+        public $animationColor = array(255, 79, 15);
         public $animationExplosionScale = 0.18;
         public $animationWidth = 3;
         public $animationWidth2 = 0.3;
@@ -85,7 +85,7 @@
         public $name = "lightLaser";
         public $displayName = "Light Laser";
         public $animation = "laser";
-        public $animationColor = array(255, 11, 11);
+        public $animationColor = array(255, 79, 15);
         public $animationExplosionScale = 0.15;
         public $animationWidth = 2;
         public $animationWidth2 = 0.2;
