@@ -7,7 +7,7 @@ class Kotha extends FighterFlight{
     	$this->pointCost = 210;
         $this->faction = "Abbai";
         $this->phpclass = "Kotha";
-        $this->shipClass = "Kotha Fighters";
+        $this->shipClass = "Kotha Medium Fighters";
     	$this->imagePath = "img/ships/AbbaiKotha.png";
 
         $this->isd = 2230; 
@@ -21,6 +21,7 @@ class Kotha extends FighterFlight{
         $this->iniativebonus = 90;
         $this->populate();
     }
+    
     public function populate(){
         $current = count($this->systems);
         $new = $this->flightSize;
@@ -28,9 +29,9 @@ class Kotha extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("Kotha", $armour, 9, $this->id);
-            $fighter->displayName = "Kotha Fighter";
+            $fighter->displayName = "Kotha";
             $fighter->imagePath = "img/ships/AbbaiKotha.png";
-            $fighter->iconPath = "img/ships/AbbaiKotha_large.png";
+            $fighter->iconPath = "img/ships/AbbaiKotha_Large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
 
        	    //Grav Shield Level 1
