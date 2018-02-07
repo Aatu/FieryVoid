@@ -350,7 +350,7 @@
 	can't fly under fighter shield!
 */
 class FtrShield extends Shield implements DefensiveSystem{
-    public $name = "ftrShield";
+    public $name = "FtrShield";
     public $displayName = "Shield";
     public $iconPath = "shield.png";
     public $boostable = false;
