@@ -5,7 +5,7 @@ class Bochi extends OSAT{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 155;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Bochi";
         $this->imagePath = "img/ships/AbbaiBochi.png";
         $this->shipClass = 'Bochi Defense Satellite';
