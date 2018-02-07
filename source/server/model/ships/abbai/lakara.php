@@ -30,20 +30,22 @@ class Lakara extends BaseShip{
  	      $this->addPrimarySystem(new Hangar(5, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
    
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+
         $this->addFrontSystem(new CombatLaser(3, 0, 0, 300, 60));
         $this->addFrontSystem(new CombatLaser(3, 0, 0, 300, 60));
         $this->addFrontSystem(new QuadArray(3, 0, 0, 240, 60));
         $this->addFrontSystem(new QuadArray(3, 0, 0, 300, 120));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 300, 360));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 0, 60));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 
-        $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
-        $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
+
         $this->addAftSystem(new JumpEngine(4, 14, 4, 32));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 3, 180, 240));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 3, 120, 180));
+        $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
+        $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 3, 240, 300));
         $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
