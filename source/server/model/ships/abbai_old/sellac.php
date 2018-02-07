@@ -5,10 +5,10 @@ class Sellac extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 105;
-	$this->faction = "Abbai_old";
+	$this->faction = "Civilians";
         $this->phpclass = "Sellac";
         $this->imagePath = "img/ships/AbbaiSellac.png";
-        $this->shipClass = "Sellac Freighter";
+        $this->shipClass = "Abbai Sellac Freighter";
         $this->canvasSize = 100;
 	    
 	$this->isd = 2000;
