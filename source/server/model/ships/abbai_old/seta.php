@@ -5,7 +5,7 @@ class Seta extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 450;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Seta";
         $this->imagePath = "img/ships/AbbaiSeta.png";
         $this->shipClass = "Seta Group Scout";
