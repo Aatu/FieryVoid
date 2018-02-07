@@ -32,7 +32,7 @@ class Kirva extends OSAT{
         $this->addPrimarySystem(new ImpCommJammer(3, 0, 0, 270, 90)); 
         $this->addPrimarySystem(new ShieldGenerator(3, 8, 4, 2));
         $this->addPrimarySystem(new GraviticShield(0, 6, 0, 1, 180, 360));
-        $this->addPrimarySystem(new GraviticShield(0, 6, 0, 1, 0, 18 0));
+        $this->addPrimarySystem(new GraviticShield(0, 6, 0, 1, 0, 180, 0));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         
