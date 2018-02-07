@@ -48,14 +48,14 @@ class Lakara extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 3, 240, 300));
-        $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
         $this->addLeftSystem(new QuadArray(3, 0, 0, 180, 360));
         $this->addLeftSystem(new Particleimpeder(2, 0, 0, 180, 360));
+        $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 3, 60, 120));
-        $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
         $this->addRightSystem(new QuadArray(3, 0, 0, 0, 180));
         $this->addRightSystem(new Particleimpeder(2, 0, 0, 0, 180));
+        $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 36));
