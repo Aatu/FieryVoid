@@ -5,7 +5,7 @@ class Wimuk extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
     	$this->pointCost = 144;
-        $this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Wimuk";
         $this->shipClass = "Wimuk Light Fighters";
     	$this->imagePath = "img/ships/AbbaiWimuk.png";
@@ -28,7 +28,7 @@ class Wimuk extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("Wimuk", $armour, 6, $this->id);
-            $fighter->displayName = "Wimuk Light Fighter";
+            $fighter->displayName = "Wimuk";
             $fighter->imagePath = "img/ships/AbbaiWimuk.png";
             $fighter->iconPath = "img/ships/AbbaiWimuk_large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
