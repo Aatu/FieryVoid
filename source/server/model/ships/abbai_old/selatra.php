@@ -30,8 +30,7 @@ class Selatra extends StarBaseSixSections{
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Hangar(5, 6));
-        	$this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 2));
-        	$this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 2));
+        	$this->addPrimarySystem(new ShieldGenerator(5, 32, 4, 4));
 		$this->addPrimarySystem(new Structure(5, 88));
 		for ($i = 0; $i < sizeof($this->locations); $i++){
 			$min = 0 + ($i*60);
