@@ -35,10 +35,10 @@ class Tetrana extends HeavyCombatVessel{
    
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 0));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 0));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 240, 0));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 0, 120));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
