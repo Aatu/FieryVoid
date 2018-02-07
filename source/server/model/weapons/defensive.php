@@ -291,7 +291,6 @@
 
 
     class EMWaveDisruptor extends Weapon{
-
         public $trailColor = array(30, 170, 255);
         
         public $name = "eMWaveDisruptor";
@@ -341,7 +340,61 @@
         public function getBonusCharges($turn){
             return $this->getBoostLevel($turn);
         }
+    } //endof class EMWaveDisruptor
+
+
+
+
+/*
+	B5Wars-style Shield for fighters (doesn't matter whether it's Gravitic or EM, effect is the same)
+	can't fly under fighter shield!
+*/
+class FtrShield extends Shield implements DefensiveSystem{
+    public $name = "FtrShield";
+    public $displayName = "Shield";
+    public $iconPath = "shield.png";
+    public $boostable = false;
+    public $baseOutput = 0; //base output, before boost
+	
+	
+ 	public $possibleCriticals = array( //irrelevant for fighter system
+            16=>"OutputReduced1"
+	);
+	
+    function __construct($shieldFactor, $startArc, $endArc){
+        // shieldfactor is handled as output.
+        parent::__construct(0, 1, 0, $shieldFactor, $startArc, $endArc);
+	$this->baseOutput = $shieldFactor;
     }
+	
+    public function onConstructed($ship, $turn, $phase){
+        	parent::onConstructed($ship, $turn, $phase);
+		$this->tohitPenalty = $this->getOutput();
+		$this->damagePenalty = $this->getOutput();
+    }
+	
+    private function checkIsFighterUnderShield($target, $shooter){ //no flying underfighter shield
+        return false;
+    }
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ 
+            return $this->output;
+    }
+
+	
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+	    return $this->output;
+    }
+	
+    public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);
+	if (!array_key_exists ( "Special" , $this->data )) $this->data["Special"] = "";
+	$this->data["Special"] .= "<br>Cannot fly under fighter shield (too small)."; 
+    }
+	
+} //endof class  FtrShield
+
+
 
 
 ?>
