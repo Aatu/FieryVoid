@@ -180,6 +180,12 @@ Particleimpeder.prototype.getDefensiveHitChangeMod = function(target, shooter, p
     }
     
     
+    
+var FtrShield = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    this.defensiveType = "Shield";
+}
 FtrShield.prototype = Object.create( ShipSystem.prototype );
 FtrShield.prototype.constructor = FtrShield;
 FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
