@@ -5,7 +5,7 @@ class Kirstom extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 625;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Kirstom";
         $this->imagePath = "img/ships/AbbaiBrova.png";
         $this->shipClass = "Kirstom Large Cruiser";
