@@ -5,7 +5,7 @@ class Kastona extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 530;
-	$this->faction = "Abbai_old";
+	$this->faction = "Abbai (WotCR)";
         $this->phpclass = "Kastona";
         $this->imagePath = "img/ships/AbbaiKastona.png";
         $this->shipClass = "Kastona Cruiser";
