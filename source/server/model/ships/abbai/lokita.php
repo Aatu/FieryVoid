@@ -56,7 +56,7 @@ class Lokita extends BaseShip{
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
         $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
-        $this->addRighSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6));
         $this->addRightSystem(new Particleimpeder(2, 0, 0, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
