@@ -18,6 +18,10 @@
 
 	    public $damageType = 'Flash'; 
     	public $weaponClass = "Antimatter"; 
+	    
+	public $firingModes = array( 
+		1 => "Flash"
+	);	    
         
         public function setSystemDataWindow($turn){
             $this->data["Remark"] = "Damage is increased depending on how high of a hit is scored.";
