@@ -8,7 +8,11 @@ class StormFront extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "StormFront";
         $this->imagePath = "img/ships/stormFront.png";
-        $this->shipClass = "Storm Front Missile Corvette (2007)";
+        $this->shipClass = "Storm Front Missile Corvette";
+		$this->variantOf = "Steadfast Escort Corvette";
+		$this->isd = 2007;	    
+		$this->occurence = "uncommon";
+	    
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -22,7 +26,6 @@ class StormFront extends MediumShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 60;
         
-        $this->occurence = "uncommon";
          
         $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
