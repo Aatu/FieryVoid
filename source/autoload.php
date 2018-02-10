@@ -267,6 +267,7 @@ spl_autoload_register(
                 'lokita' =>  '/server/model/ships/abbai/lokita.php',
                 'nakarsa' =>  '/server/model/ships/abbai/nakarsa.php',
                 'milani' =>  '/server/model/ships/abbai/milani.php',
+                'marata' =>  '/server/model/ships/abbai/marata.php',
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
