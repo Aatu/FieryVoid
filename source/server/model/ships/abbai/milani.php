@@ -51,12 +51,12 @@ class Milani extends BaseShip{
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 3, 240, 300));
         $this->addLeftSystem(new Hangar(3, 13));
         $this->addLeftSystem(new QuadArray(3, 0, 0, 180, 360));
-        $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
+        $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 3, 60, 120));
         $this->addRightSystem(new Hangar(3, 13));
         $this->addRightSystem(new QuadArray(3, 0, 0, 0, 180));
-        $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
+        $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
 	    
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -95,6 +95,7 @@ class Milani extends BaseShip{
 					5 => "Thruster",
 					7 => "Gravitic Shield",
 					9 => "Quad Array",
+					11 => "Hangar",
 					17 => "Structure",
 					20 => "Primary",
 			),
@@ -102,6 +103,7 @@ class Milani extends BaseShip{
 					5 => "Thruster",
 					7 => "Gravitic Shield",
 					9 => "Quad Array",
+					11 => "Hangar",
 					17 => "Structure",
 					20 => "Primary",
 			),
