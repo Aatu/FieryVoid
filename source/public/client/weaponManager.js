@@ -301,10 +301,11 @@ window.weaponManager = {
 
 		}
 
-
         webglScene.customEvent('WeaponSelected', {ship: ship, weapon: weapon});
 		gamedata.selectedSystems.push(weapon);
 		shipWindowManager.setDataForSystem(ship, weapon);
+
+        console.log("select weapon", gamedata.selectedSystems.length);
 	},
 	
 
@@ -374,6 +375,7 @@ window.weaponManager = {
 			$('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
 		}
 
+		console.log(gamedata.selectedSystems);
 
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
@@ -547,17 +549,13 @@ window.weaponManager = {
 	isPosOnWeaponArc: function(shooter, position, weapon){
 
 		var shooterFacing = (shipManager.getShipHeadingAngle(shooter));
-		var targetCompassHeading = mathlib.getCompassHeadingOfPosition(shooter, position);
+		var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(shooter), position);
 
 		var arcs = shipManager.systems.getArcs(shooter, weapon);
 		arcs.start = mathlib.addToDirection(arcs.start, shooterFacing);
 		arcs.end = mathlib.addToDirection(arcs.end, shooterFacing);
 
-		//console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
-
 		return (mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end));
-
-
 	},
 
 	isOnWeaponArc: function(shooter, target, weapon){
@@ -572,9 +570,7 @@ window.weaponManager = {
 
 		if (weapon.ballistic && oPos.equals(tPos))
 			return true;
-		//console.log("shooterFacing: " + shooterFacing + " targetCompassHeading: " +targetCompassHeading);
 
-		console.log("is on weapon arc");
 		return (mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end));
 	},
 
@@ -1489,27 +1485,14 @@ window.weaponManager = {
 
 
 			if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)){
-				if (weapon.range == 0 || (mathlib.getDistanceHex(shipManager.getShipPositionInWindowCo(selectedShip), hexgrid.positionToPixel(hexpos))<=weapon.range)){
+				if (weapon.range === 0 || (shipManager.getShipPosition(selectedShip).distanceTo(hexpos)<=weapon.range)){
 					weaponManager.removeFiringOrder(selectedShip, weapon);
 					for (var s=0;s<weapon.guns;s++){
 
 						var fireid = selectedShip.id+"_"+weapon.id +"_"+(weapon.fireOrders.length+1);
-						var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.x, y:hexpos.y, damageclass: weapon.data["Weapon type"].toLowerCase()};
+						var fire = {id:fireid,type:type, shooterid:selectedShip.id, targetid:-1, weaponid:weapon.id, calledid:-1, turn:gamedata.turn, firingMode:weapon.firingMode, shots:weapon.defaultShots, x:hexpos.q, y:hexpos.r, damageclass: weapon.data["Weapon type"].toLowerCase()};
 						weapon.fireOrders.push(fire);
 
-					}
-					if (weapon.ballistic){
-						gamedata.ballistics.push({id:(gamedata.ballistics.length), fireid:fireid, position:shipManager.getShipPosition(selectedShip),
-						facing:shipManager.movement.getLastCommitedMove(selectedShip).facing,
-						targetposition:hexpos,
-						targetid:-1,
-						shooterid:selectedShip.id,
-						weaponid:weapon.id,
-						shots:fire.shots});
-
-						ballistics.calculateBallisticLocations();
-						ballistics.calculateDrawBallistics();
-						drawEntities();
 					}
 
 					toUnselect.push(weapon);
@@ -1630,6 +1613,23 @@ window.weaponManager = {
 		}
 		return fires;
 	},
+
+    getAllHexTargetedBallistics: function(){
+        return gamedata.ships.reduce(function(fires, shooter) {
+            return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
+                return fire.targetid === -1;
+            }));
+        }, []).map(function (fireOrder) {
+            var shooter = gamedata.getShip(fireOrder.shooterid);
+            return {
+                id: fireOrder.id,
+                fireOrder: fireOrder,
+                shots: fireOrder.shots,
+                shooter: shooter,
+                weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid)
+            }
+        });
+    },
 
     getAllFireOrdersForDisplayingAgainst: function(target) {
         return gamedata.ships.reduce(function(fires, shooter) {

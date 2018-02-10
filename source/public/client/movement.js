@@ -259,7 +259,6 @@ shipManager.movement = {
 			};
 			
 			gamedata.shipStatusChanged(ship);
-			shipManager.drawShip(ship);
 			if (!ship.flight) {
                 shipWindowManager.assignThrust(ship);
             } else {

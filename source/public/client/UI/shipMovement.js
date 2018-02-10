@@ -10,6 +10,8 @@ window.UI = {
         sliprightElement:null,
         uiElement:null,
         lastUITime: null,
+        currentPosition: null,
+        currentHeading: null,
         
         initMoveUI: function(){
             if (UI.shipMovement.iniated == true)
@@ -369,7 +371,24 @@ window.UI = {
             
             ui.show();
         },
-        
+
+
+        reposition: function(position, heading) {
+            var element = UI.shipMovement.uiElement;
+
+            var currentPosition = UI.shipMovement.currentPosition;
+
+            if (currentPosition && currentPosition.x === position.x && currentPosition.y === position.y && UI.shipMovement.currentHeading === heading) {
+                return;
+            }
+
+            element.css("top", position.y +"px").css("left", position.x +"px").css("transform", "rotate("+heading+"deg)");
+            jQuery(".speedvalue.value").css("transform", "rotate("+ -heading +"deg)").css("display", "block");
+
+            UI.shipMovement.currentPosition = position;
+            UI.shipMovement.currentHeading = heading;
+        },
+
         drawUIimage: function(canvas, path, s, angle){
         
             var img = new Image();

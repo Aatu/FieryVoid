@@ -10,8 +10,8 @@ window.PhaseStrategy = (function(){
         this.currentlyMouseOveredIds = null;
 
         this.onMouseOutCallbacks = [];
-        this.onZoomCallbacks = [];
-        this.onScrollCallbacks = [];
+        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this)];
+        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this)];
         this.onClickCallbacks = [];
 
         this.selectedShip = null;
@@ -36,7 +36,6 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.render = function(coordinateConverter, scene, zoom){
         this.animationStrategy.render(coordinateConverter, scene, zoom);
-        this.positionMovementUI();
     };
 
     PhaseStrategy.prototype.update = function (gamedata) {
@@ -72,6 +71,15 @@ window.PhaseStrategy = (function(){
         if (this.ewIconContainer) {
             this.ewIconContainer.hide();
         }
+
+        if (this.shipTooltip) {
+            this.shipTooltip.destroy()
+        }
+
+        if (this.selectedShip) {
+            this.deselectShip(this.selectedShip);
+        }
+
         return this;
     };
 
@@ -151,6 +159,11 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
         this.shipIconContainer.getById(ship.id).setSelected(false);
+
+        gamedata.selectedSystems.slice(0).forEach(function (selected){
+            weaponManager.unSelectWeapon(this.selectedShip, selected);
+        }, this);
+
         this.selectedShip = null;
     };
 
@@ -261,9 +274,6 @@ window.PhaseStrategy = (function(){
         if (hide) {
             this.onMouseOutCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
         }
-
-        //this.onZoomCallbacks.push(shipTooltip.destroy.bind(shipTooltip));
-        //this.onScrollCallbacks.push(shipTooltip.destroy.bind(shipTooltip));
     };
 
     PhaseStrategy.prototype.hideShipTooltip = function(shipTooltip){
@@ -273,6 +283,14 @@ window.PhaseStrategy = (function(){
         }
     };
 
+    PhaseStrategy.prototype.repositionTooltip = function(){
+        if (this.shipTooltip) {
+            this.shipTooltip.reposition();
+        }
+
+        return true;
+    };
+
     PhaseStrategy.prototype.positionMovementUI = function(){
         if (!this.movementUI) {
             return;
@@ -280,7 +298,10 @@ window.PhaseStrategy = (function(){
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
         var heading = mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
-        this.movementUI.element.css("top", pos.y +"px").css("left", pos.x +"px").css("transform", "rotate("+heading+"deg)");
+
+        UI.shipMovement.reposition(pos, heading);
+
+        return true;
     };
 
     PhaseStrategy.prototype.redrawMovementUI = function(){

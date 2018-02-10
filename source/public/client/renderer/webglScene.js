@@ -43,7 +43,7 @@ window.webglScene = (function(){
             this.zoom*this.width / 2,
             this.zoom*this.height / 2,
             this.zoom*this.height / - 2,
-            -500,
+            -1000,
             1000
         );
 
@@ -147,6 +147,7 @@ window.webglScene = (function(){
 
         this.coordinateConverter.onZoom(this.zoom);
         this.hexGridRenderer.onZoom(this.zoom);
+
         this.phaseDirector.relayEvent(
             'ZoomEvent',
             {

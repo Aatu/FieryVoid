@@ -29,8 +29,6 @@ shipWindowManager = {
 	
 	open: function(ship){
 
-		console.log("hi");
-		
 		var old;
 		if (ship.userid == gamedata.thisplayer){
 			old = $(".shipwindow.owned:visible");
@@ -45,11 +43,9 @@ shipWindowManager = {
 		if (!n)
 			return;
 
-		console.log("!n");
 		if (n.css("display") == "block")
 			return;
 
-        console.log("visible");
 			
 		if (old.length){
 			old.hide();
@@ -1818,8 +1814,8 @@ setSystemData: function(ship, system, shipwindow){
 
 
 		var e = $(".shipwindow").has($(this));
-		
-		
+        var shipwindow = $(".assignthrustcontainer").has($(this));
+        var ship = gamedata.getShip(shipwindow.data("ship"));
 		
 			
 		if (!e.length)
@@ -1830,6 +1826,7 @@ setSystemData: function(ship, system, shipwindow){
 
 	
 		shipWindowManager.cancelAssignThrust(e);
+        gamedata.shipStatusChanged(ship);
 	},
 	
 	cancelAssignThrust: function(element){

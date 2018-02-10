@@ -88,5 +88,14 @@ window.InitialPhaseStrategy = (function(){
         this.replayUI = new ReplayUI().activate();
     };
 
+    InitialPhaseStrategy.prototype.onWeaponSelected = function(payload) {
+        var ship = payload.ship;
+        var weapon = payload.weapon;
+
+        if (this.selectedShip !== ship) {
+            this.setSelectedShip(ship);
+        }
+    };
+
     return InitialPhaseStrategy;
 })();

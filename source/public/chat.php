@@ -290,8 +290,9 @@ if (! isset($chatelement))
                     success : chat.successRequest,
                     //error : chat.retryRequest
                     error: function(){
-                        console.log("Retry request");
-                        $.ajax(this);
+                        //console.log("Retry request");
+                        //$.ajax(this);
+                        setTimeout(chat.requestChatdata, 3000);
                     }
                 });
             },

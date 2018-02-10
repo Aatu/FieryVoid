@@ -441,7 +441,6 @@ gamedata = {
         else if (gamedata.gamephase == 2){
             var ship = gamedata.getActiveShip();
             if (shipManager.movement.isMovementReady(ship)){
-                combatLog.logMoves(ship);
                 ajaxInterface.submitGamedata();
             }else{
                 return false;

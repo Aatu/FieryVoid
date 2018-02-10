@@ -35,6 +35,11 @@ window.FlightIcon = (function (){
         });
     };
 
+    FlightIcon.prototype.setOpacity = function(opacity){
+        //TODO: set opacity
+        console.log("TODO: set opacity for fighters");
+    };
+
     FlightIcon.prototype.create = function(ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();

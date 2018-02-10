@@ -18,13 +18,26 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
 
         this.animations = [];
 
+        if (this.incomingFire.length === 0) {
+            return;
+        }
+
+        var cameraAnimation = new CameraPositionAnimation(getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(ship), this.time), this.time);
+        this.animations.push(cameraAnimation);
+        this.duration += cameraAnimation.getDuration();
+
         this.incomingFire.forEach(function (group) {
+
+            var extraTime = 0;
 
             this.logAnimation.addLogEntryFire(group.map(function(entry) {
                 return entry.fireOrder;
             }), this.time + this.duration);
 
-            var durations = group.map(buildFireAnimations.bind(this));
+            var durations = group.map(function (group) {
+                extraTime += Math.random() * 100 + 300;
+                return buildFireAnimations.call(this, group, extraTime) + extraTime;
+            }, this);
 
             this.duration += durations.reduce(function (longest, current){
                 if (current > longest) {
@@ -34,13 +47,15 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
             }, 0);
 
         }, this);
+
+        this.duration += 1000;
     }
 
     AllWeaponFireAgainstShipAnimation.prototype = Object.create(Animation.prototype);
 
-    AllWeaponFireAgainstShipAnimation.prototype.render = function (now, total, last, delta, zoom) {
+    AllWeaponFireAgainstShipAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
         this.animations.forEach(function (animation) {
-            animation.render(now, total, last, delta, zoom);
+            animation.render(now, total, last, delta, zoom, back, paused);
         })
     };
 
@@ -72,7 +87,9 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
         });
     }
 
-    function buildFireAnimations(incomingFire) {
+    function buildFireAnimations(incomingFire, extraStartTime) {
+
+        var timeInterval = 50;
 
         Math.seedrandom(incomingFire.id);
 
@@ -87,13 +104,11 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
 
         var shotsFired = 0;
 
-        var timeInterval = 20;
-
         var systemsDestroyed = getAmountOfSystemsDestroyed(incomingFire);
         var structuresDestroyed = getAmountOfStructuresDestroyed(incomingFire);
 
         while(firstMisses--) {
-            duration = addAnimation.call(this, incomingFire, duration, false, timeInterval * shotsFired, shotsFired);
+            duration = addAnimation.call(this, incomingFire, duration, false, timeInterval * shotsFired + extraStartTime, shotsFired);
             shotsFired++;
         }
 
@@ -104,12 +119,12 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
             var damage = damageData.damage;
 
 
-            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired, shotsFired, damage);
+            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage);
             shotsFired++;
         }
 
         while(lastMisses--) {
-            duration = addAnimation.call(this, incomingFire, duration, false, timeInterval * shotsFired, shotsFired);
+            duration = addAnimation.call(this, incomingFire, duration, false, timeInterval * shotsFired + extraStartTime, shotsFired);
             shotsFired++;
         }
 
@@ -135,12 +150,12 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
             case "laser":
                 return new LaserEffect(
                     this.shipIconContainer.getByShip(incomingFire.shooter),
-                    this.shipIcon,
+                    getShipPositionAtTime.call(this, this.shipIcon, startTime),
                     this.scene,
                     {
                         color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
                         hit: hit,
-                        time: this.time + this.duration + time,
+                        time: startTime,
                         damage: damage
                     }
                 );
@@ -148,7 +163,7 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
                 return new TorpedoEffect(
                     this.particleEmitterContainer,
                     {
-                        size: 40,
+                        size: 200 * weapon.animationExplosionScale,
                         origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
                         target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                         color: new THREE.Color(weapon.animationColor[0]/255, weapon.animationColor[1]/255, weapon.animationColor[2]/255),
@@ -162,7 +177,7 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
                 return new BoltEffect(
                     this.particleEmitterContainer,
                     {
-                        size: 40,
+                        size: 300 * weapon.animationExplosionScale,
                         origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
                         target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
                         color: new THREE.Color(weapon.animationColor[0]/255, weapon.animationColor[1]/255, weapon.animationColor[2]/255),
@@ -174,11 +189,7 @@ window.AllWeaponFireAgainstShipAnimation = (function() {
     }
 
     function getShipPositionAtTime(icon, time) {
-
-        var animation = this.movementAnimations[icon.shipId];
-
-        var data = animation.getPositionAndFacingAtTime(time);
-        return data.position;
+        return FireAnimationHelper.getShipPositionAtTime(icon, time, this.movementAnimations);
     }
 
     function getShotTargetVariance(target, incomingFire, shotsFired) {

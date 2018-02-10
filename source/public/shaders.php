@@ -14,6 +14,7 @@
     uniform sampler2D texture;
     uniform float overlayAlpha;
     uniform vec3 overlayColor;
+    uniform float opacity;
 
     varying vec2 vUv;
 
@@ -29,7 +30,11 @@
             finalColor.a = textureColor.a;
         }
 
-         gl_FragColor = finalColor;
+        if (finalColor.a > 0.0) {
+            finalColor.a *= opacity;
+        }
+
+        gl_FragColor = finalColor;
 
     }
 </script>

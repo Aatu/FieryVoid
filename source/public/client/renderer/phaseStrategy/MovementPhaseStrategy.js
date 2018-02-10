@@ -22,7 +22,6 @@ window.MovementPhaseStrategy = (function(){
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
-        console.log("enabled movement phase strategy");
         this.selectActiveShip();
         doForcedMovementForActiveShip();
         return this;
@@ -33,6 +32,10 @@ window.MovementPhaseStrategy = (function(){
         botPanel.deactivate();
         this.hideMovementUI();
         return this;
+    };
+
+    MovementPhaseStrategy.prototype.onShipRightClicked = function(ship) {
+        shipWindowManager.open(ship);
     };
 
     MovementPhaseStrategy.prototype.onHexClicked = function(payload) {
@@ -76,7 +79,6 @@ window.MovementPhaseStrategy = (function(){
 
     function isMovementReady(gamedata) {
         var ship = gamedata.getActiveShip();
-        console.log("movement ready", shipManager.movement.isMovementReady(ship), gamedata.isMyShip(ship));
         return shipManager.movement.isMovementReady(ship) && gamedata.isMyShip(ship);
     }
 

@@ -13,7 +13,6 @@ window.WaitingPhaseStrategy = (function(){
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         console.log("enabled waiting phase strategy");
-        this.ballisticIconContainer = ballisticIconContainer.show();
         gamedata.hideCommitButton();
 
         ajaxInterface.startPollingGamedata();

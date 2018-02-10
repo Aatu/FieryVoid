@@ -148,6 +148,10 @@ window.ShipIconContainer = (function(){
             return icon.ship.iniative > otherIcon.ship.iniative;
         });
 
+        if (!icon.getMovementBefore(lastMove)) {
+            return null;
+        }
+
         var previousHex = icon.getMovementBefore(lastMove).position;
 
         var iconsFromSameHex = iconsInHex.filter(function (otherIcon) {

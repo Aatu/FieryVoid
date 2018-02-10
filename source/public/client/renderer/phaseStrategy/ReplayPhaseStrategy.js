@@ -32,7 +32,7 @@ window.ReplayPhaseStrategy = (function(){
 
         startReplayOrRequestGamedata.call(this);
 
-        activateStop.call(this);
+        activatePause.call(this);
 
         console.log("activate replay phase");
 
@@ -59,11 +59,13 @@ window.ReplayPhaseStrategy = (function(){
 
     ReplayPhaseStrategy.prototype.onHexClicked = function(payload) {};
 
-    ReplayPhaseStrategy.prototype.selectShip = function(ship) {};
-
-    ReplayPhaseStrategy.prototype.deselectShip = function(ship, payload) {
+    ReplayPhaseStrategy.prototype.selectShip = function(ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
+    };
+
+    ReplayPhaseStrategy.prototype.setSelectShip = function(ship, payload) {
+        this.shipIconContainer.getById(ship.id).setSelected(true);
     };
 
     ReplayPhaseStrategy.prototype.targetShip = function(ship, payload) {
@@ -83,7 +85,7 @@ window.ReplayPhaseStrategy = (function(){
             {
                 play: activateButton.bind(this, "play"),
                 pause: activateButton.bind(this, "pause"),
-                stop: activateButton.bind(this, "stop"),
+                back: activateButton.bind(this, "back"),
                 turnForward: turnForward.bind(this),
                 turnBack: turnBack.bind(this),
                 endReplay: requestPlayableGamedata.bind(this)
@@ -95,7 +97,7 @@ window.ReplayPhaseStrategy = (function(){
         PhaseStrategy.prototype.render.call(this, coordinateConverter, scene, zoom);
 
         if (this.animationStrategy && this.animationStrategy.isDone && this.animationStrategy.isDone()) {
-            activateStop.call(this);
+            activatePause.call(this);
         }
     };
 
@@ -124,7 +126,7 @@ window.ReplayPhaseStrategy = (function(){
         this.animationStrategy[action]();
     }
 
-    function activateStop() {
+    function activatePause() {
         this.replayUI.activateButton("#pause");
         this.animationStrategy.pause();
     }
@@ -148,7 +150,7 @@ window.ReplayPhaseStrategy = (function(){
         }
 
         this.replayTurn--;
-        activateStop.call(this);
+        activatePause.call(this);
         requestReplayGamedata.call(this);
     }
 
@@ -158,7 +160,7 @@ window.ReplayPhaseStrategy = (function(){
         }
 
         this.replayTurn++;
-        activateStop.call(this);
+        activatePause.call(this);
         requestReplayGamedata.call(this);
     }
 

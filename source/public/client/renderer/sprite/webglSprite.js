@@ -11,7 +11,8 @@ window.webglSprite = (function(){
         this.uniforms = {
             texture:		{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
             overlayAlpha:   { type: 'f',    value: 0.0},
-            overlayColor:   { type: 'v3',   value: new THREE.Color(0,0,0)}
+            overlayColor:   { type: 'v3',   value: new THREE.Color(0,0,0)},
+            opacity:        { type: 'f',   value: 1.0}
             //opacity:		{ type: 'f',	value: 1.0},
             //tileDimensions: { type: 'v2',	value: new THREE.Vector2(1, 1)},
             //damageLookup:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
@@ -44,6 +45,10 @@ window.webglSprite = (function(){
         this.mesh.position.x = pos.x;
         this.mesh.position.y = pos.y;
         return this;
+    };
+
+    Sprite.prototype.setOpacity = function(opacity) {
+        this.uniforms.opacity.value = opacity;
     };
 
     Sprite.prototype.setOverlayColorAlpha = function(alpha) {
@@ -103,6 +108,8 @@ window.webglSprite = (function(){
                 fragmentShader: shaders.fragment,
                 transparent: true
             });
+
+        this.material.depthTest = true;
 
         var mesh = new THREE.Mesh(
             geometry,

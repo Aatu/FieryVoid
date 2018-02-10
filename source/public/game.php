@@ -110,8 +110,12 @@
     <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/CameraPositionAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>
 
+    <script src="client/renderer/animationStrategy/animation/FireAnimationHelper.js"></script>
     <script src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
+    <script src="client/renderer/animationStrategy/animation/HexTargetedWeaponFireAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
     <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
@@ -121,6 +125,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

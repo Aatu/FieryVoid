@@ -18,7 +18,6 @@ window.BallisticIconContainer = (function(){
             createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
         }, this);
 
-
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
                 this.scene.remove(icon.launchSprite.mesh);
@@ -89,8 +88,6 @@ window.BallisticIconContainer = (function(){
     }
 
     function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
-        //TODO: if target is ship and has moved, reposition stuff
-
         icon.used = true;
     }
 

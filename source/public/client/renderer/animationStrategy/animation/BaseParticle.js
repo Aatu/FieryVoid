@@ -9,7 +9,8 @@ window.BaseParticle = (function(){
     BaseParticle.prototype.texture = {
         gas: 0,
         bolt: 1,
-        glow: 2
+        glow: 2,
+        ring: 3
     };
 
     BaseParticle.prototype.create = function(index)

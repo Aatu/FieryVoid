@@ -9,6 +9,7 @@ window.AnimationStrategy = (function(){
         this.paused = true;
         this.shipIconContainer = shipIcons;
         this.turn = turn;
+        this.goingBack = false;
     }
 
     AnimationStrategy.prototype.activate = function() {
@@ -34,12 +35,19 @@ window.AnimationStrategy = (function(){
         this.pause();
     };
 
+    AnimationStrategy.prototype.back = function() {
+        this.goingBack = true;
+        this.paused = false;
+    };
+
     AnimationStrategy.prototype.play = function() {
-       this.paused = false;
+        this.paused = false;
+        this.goingBack = false;
     };
 
     AnimationStrategy.prototype.pause = function() {
         this.paused = true;
+        this.goingBack = false;
     };
 
     AnimationStrategy.prototype.deactivate = function() {
@@ -50,7 +58,7 @@ window.AnimationStrategy = (function(){
         updateDeltaTime.call(this, this.paused);
         updateTotalAnimationTime.call(this, this.paused);
         this.animations.forEach(function (animation) {
-            animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom)
+            animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom, this.goingBack, this.paused)
         }, this);
     };
 
@@ -83,7 +91,11 @@ window.AnimationStrategy = (function(){
             return;
         }
 
-        this.totalAnimationTime += this.currentDeltaTime;
+        if (this.goingBack) {
+            this.totalAnimationTime -= this.currentDeltaTime;
+        } else {
+            this.totalAnimationTime += this.currentDeltaTime;
+        }
     }
 
     function updateDeltaTime(paused){
@@ -100,12 +112,6 @@ window.AnimationStrategy = (function(){
 
         this.lastAnimationTime = now;
     }
-
-    AnimationStrategy.prototype.done = function() {
-        if (this.onDoneCallback) {
-            this.onDoneCallback();
-        }
-    };
 
     return AnimationStrategy;
 })();

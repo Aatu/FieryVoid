@@ -321,6 +321,10 @@ class BaseShip{
         }
     }
 
+    /**
+     * @param $id
+     * @return ShipSystem|null
+     */
     public function getSystemById($id){
         if (isset($this->systems[$id])){
             return $this->systems[$id];
@@ -493,18 +497,18 @@ class BaseShip{
 
     }
 
-
-    public function getHexPos(){
+    public function getHexPos() : OffsetCoordinate{
 
         $movement = null;
         if (!is_array($this->movement)){
-            return array("x"=>0, "y"=>0);
+            return new OffsetCoordinate(0, 0);
         }
+
         foreach ($this->movement as $move){
             $movement = $move;
         }
 
-        return array($movement->x, $movement->y);
+        return $movement->position;
     }
 
 

@@ -56,10 +56,9 @@ window.FirePhaseStrategy = (function(){
         var ship = payload.ship;
         var weapon = payload.weapon;
 
-        console.log("weapon selected");
-
-        this.selectShip(ship);
-
+        if (this.selectedShip !== ship) {
+            this.setSelectedShip(ship);
+        }
     };
 
 

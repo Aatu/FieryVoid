@@ -42,7 +42,6 @@ window.BallisticSprite = (function(){
     function createTexture(type) {
 
         var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
-        var context = canvas.getContext("2d");
 
         var tex = new THREE.Texture(canvas);
         tex.needsUpdate = true;

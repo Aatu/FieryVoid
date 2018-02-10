@@ -23,7 +23,7 @@ window.Animation = (function() {
 
     };
 
-    Animation.prototype.render = function (now, total, last, delta) {
+    Animation.prototype.render = function (now, total, last, delta, goingBack) {
 
     };
 

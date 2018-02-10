@@ -42,17 +42,16 @@ window.Explosion = (function(){
             case 'pillar':
                 this.createPillar();
                 break;
-
             default:
                 this.createGas();
                 break;
         }
     };
 
+
+
     Explosion.prototype.createGlow = function()
     {
-        //if ( this.ring)
-        //	this.createRing(this.size, emitter);
 
         var amount = 3;
 
@@ -64,9 +63,6 @@ window.Explosion = (function(){
 
     Explosion.prototype.createGas = function()
     {
-        //if ( this.ring)
-        //	this.createRing(this.size, emitter);
-
         var amount = Math.ceil(this.size/4);
         if (amount > 6) {
             amount = 6;
@@ -110,39 +106,6 @@ window.Explosion = (function(){
         this.createEmpGlow(Math.ceil(amount/2), this.size);
         this.createWhiteCenter(this.size*4, 0.5);
         this.createEmpCore(this.size, BaseParticle.prototype.texture.gas);
-    };
-
-    Explosion.prototype.createRing = function(size)
-    {
-
-        var step = 360 / size;
-        var steps = Math.ceil(size);
-
-        var distance = size * 3;
-        var activation = this.time + Math.floor(Math.random()*300/this.speed);
-        var fadeOutAt = activation;
-        var fadeOutSpeed = Math.random()*1000 + 1000;
-        //amount = 1;
-        while (steps--)
-        {
-            var angle = steps * step;
-            var particle = this.emitterContainer.getParticle(this);
-            var target = mathlib.getPointInDirection(distance + Math.random()*30, -angle, 0, 0);
-
-            particle
-                .setSize(Math.random() * 50 + 100)
-                //.setSizeChange(128)
-                .setOpacity(Math.random() * 0.2 + 0.3)
-                .setFadeIn(activation, 1000)
-                .setFadeOut(fadeOutAt, fadeOutSpeed)
-                .setColor(this.getSmokeColor())
-                .setPosition({x:this.position.x, y:this.position.y})
-                .setVelocity(target)
-                .setAngle(angle)
-                .setTexture(BaseParticle.prototype.texture.glow)
-                .setActivationTime(activation);
-
-        }
     };
 
     Explosion.prototype.createWhiteCenter = function(size, opacity)

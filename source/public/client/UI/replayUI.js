@@ -13,7 +13,7 @@ window.ReplayUI = (function(){
         '        </div>\n' +
         '        <div class="replay-container replay-buttons">\n' +
         '            <button id="turnBack">❚◀</button>\n' +
-        '            <button id="stop">⏹</button>\n' +
+        '            <button id="back">◀</button>\n' +
         '            <button id="pause">❚❚</button>\n' +
         '            <button id="play">▶</button>\n' +
         '            <button id="turnForward">▶❚</button>\n' +
@@ -31,7 +31,7 @@ window.ReplayUI = (function(){
             callbacks = {};
         }
         this.play = callbacks.play || function(){};
-        this.stop = callbacks.stop || function(){};
+        this.back = callbacks.back || function(){};
         this.pause = callbacks.pause || function(){};
         this.turnForward = callbacks.turnForward || function(){};
         this.turnBack = callbacks.turnBack || function(){};
@@ -53,7 +53,7 @@ window.ReplayUI = (function(){
 
         jQuery("#replayUI #play").on("click", this.play);
         jQuery("#replayUI #pause").on("click", this.pause);
-        jQuery("#replayUI #stop").on("click", this.stop);
+        jQuery("#replayUI #back").on("click", this.back);
         jQuery("#replayUI #turnForward").on("click", this.turnForward);
         jQuery("#replayUI #turnBack").on("click", this.turnBack);
 

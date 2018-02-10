@@ -36,8 +36,8 @@ class OffsetCoordinate
             $this->q = $q->q;
             $this->r = $q->r;
         } else if (isset($q["q"]) && isset($q["r"])) {
-            $this->q = $q["q"];
-            $this->r = $q["r"];
+            $this->q = (int)$q["q"];
+            $this->r = (int)$q["r"];
         }else {
             $this->q = (int)$q;
             $this->r = (int)$r;
@@ -57,6 +57,20 @@ class OffsetCoordinate
           $this->q + $position->q,
           $this->r + $position->r
         );
+    }
+
+    public function moveToDirection($direction, $steps = 1): OffsetCoordinate {
+        $asCube = $this->toCube();
+
+        while($steps--) {
+            $asCube = $asCube->moveToDirection($direction);
+        }
+
+        return $asCube->toOffset();
+    }
+
+    public function distanceTo(OffsetCoordinate $position) {
+        return $this->toCube()->distanceTo($position->toCube());
     }
 
     public function equals(OffsetCoordinate $position): bool {

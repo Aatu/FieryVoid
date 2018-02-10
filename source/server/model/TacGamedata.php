@@ -71,7 +71,38 @@ class TacGamedata{
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
 
+        $i = 0;
         foreach ($this->ships as $ship){
+            $fireOrders = $ship->getAllFireOrders();
+            foreach($fireOrders as $fire){
+                $weapon = $ship->getSystemById($fire->weaponid);
+                if (($this->phase >= 2) && $weapon->ballistic && $fire->turn == $this->turn){
+                    $movement = $ship->getLastTurnMovement($fire->turn);
+                    $target = $fire->targetid;
+                    if ($fire->x != "null" && $fire->y != "null")
+                        $targetpos = array("x"=>$fire->x, "y"=>$fire->y);
+                    else
+                        $targetpos = null;
+
+
+                    $this->ballistics[$i] = new Ballistic(
+                        $i,
+                        $fire->id,
+                        array("x"=>$movement->position->q, "y"=>$movement->position->r),
+                        $movement->facing,
+                        $targetpos,
+                        $target,
+                        $fire->shooterid,
+                        $fire->weaponid,
+                        $fire->shots
+                        );
+
+                        //$targetpos, $targetid, $shooterid, $weaponid
+                    $i++;
+                    //print(sizeof($this->ballistics));
+                }
+
+            }
             $this->markUnavailableShips();
             $ship->onConstructed($this->turn, $this->phase, $this);
         }
@@ -333,7 +364,11 @@ class TacGamedata{
     }
     
     private $shipsById = array();
-    
+
+    /**
+     * @param $id
+     * @return BaseShip|null
+     */
     public function getShipById($id){
         
         if (isset($this->shipsById[$id]))
@@ -350,22 +385,40 @@ class TacGamedata{
     }
     
     public function getShipsInDistance($pos, $dis = 0){
+
+        if (! ($pos instanceof OffsetCoordinate)) {
+            return $this->getShipsInDistanceOld($pos, $dis);
+        }
+
         $ships = array();
         foreach ($this->ships as $ship){
             if ($ship->unavailable)
                 continue;
-            
-            $shipPos = $ship->getCoPos();
-            $curDis = mathlib::getDistance($pos, $shipPos);
-        
-            if ($curDis <= $dis){
+
+            if ( $ship->getHexPos()->distanceTo($pos) <= $dis){
                 $ships[$ship->id] = $ship;
             }
         }
         
         return $ships;
-             
-             
+    }
+
+    public function getShipsInDistanceOld($pos, $dis = 0){
+        //TODO: Convert everything to use the one above that actually uses hex distances
+        $ships = array();
+        foreach ($this->ships as $ship){
+            if ($ship->unavailable)
+                continue;
+
+            $shipPos = $ship->getCoPos();
+            $curDis = mathlib::getDistance($pos, $shipPos);
+
+            if ($curDis <= $dis){
+                $ships[$ship->id] = $ship;
+            }
+        }
+
+        return $ships;
     }
     
     public function prepareForPlayer(){

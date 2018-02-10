@@ -25,8 +25,14 @@ window.ReplayAnimationStrategy = (function(){
         this.currentTime = 0;
         this.endTime = null;
 
-        buildAnimations.call(this);
+        /*
+        this.explosion = new ShipExplosion(this.emitterContainer, {
+            time: 0,
+            position: {x:0, y:0}
+        });
+        */
 
+        buildAnimations.call(this);
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
@@ -46,7 +52,7 @@ window.ReplayAnimationStrategy = (function(){
     };
 
     ReplayAnimationStrategy.prototype.isDone = function() {
-        return this.endTime < this.totalAnimationTime;
+        return this.endTime < this.totalAnimationTime || this.totalAnimationTime < 0;
     };
 
     ReplayAnimationStrategy.prototype.update = function() {
@@ -56,21 +62,53 @@ window.ReplayAnimationStrategy = (function(){
     function buildAnimations() {
 
         var time = 0;
-        //var animation = new ShipMovementAnimation(this.shipIconContainer.getByShip(gamedata.ships[1]), this.turn);
-        //this.animations.push(animation);
-
         var logAnimation = new LogAnimation();
         this.animations.push(logAnimation);
-        //return;
 
-        this.gamedata.ships.forEach(function (ship, i) {
+
+        time = animateMovement.call(this, time);
+        time = animateWeaponFire.call(this, time, logAnimation);
+        time = animateShipDestruction.call(this, time, logAnimation);
+        time += 100;
+
+        this.endTime = time;
+
+    }
+
+    function animateShipDestruction(time, logAnimation) {
+        this.gamedata.ships.filter(function(ship){
+            return shipManager.getTurnDestroyed(ship) === this.turn && ! ship.flight;
+        }, this).forEach(function(ship){
+            console.log("SHIP DESTROYED", ship.imagePath);
+
+            var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
+            time += animation.getDuration();
+            this.animations.push(animation);
+        }, this);
+
+        return time;
+    }
+
+    function animateMovement(time) {
+        this.gamedata.ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getByShip(ship);
+
+
 
 
             var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
             setMovementAnimationDuration.call(this, animation);
+
+            var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
+            this.animations.push(cameraAnimation);
+            time += cameraAnimation.getDuration();
+
+            time -= 1000;
+
             animation.setTime(time);
             this.animations.push(animation);
+
+
 
             this.movementAnimations[ship.id] = animation;
 
@@ -79,6 +117,16 @@ window.ReplayAnimationStrategy = (function(){
             }
 
         }, this);
+
+        return time;
+    }
+
+    function animateWeaponFire(time, logAnimation) {
+        var animation = new HexTargetedWeaponFireAnimation(time, this.movementAnimations, this.shipIconContainer, this.turn, this.emitterContainer);
+        this.animations.push(animation);
+        if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+            time += animation.getDuration();
+        }
 
         this.gamedata.ships.forEach(function (ship, i) {
             var animation = new AllWeaponFireAgainstShipAnimation(ship, this.shipIconContainer, this.emitterContainer, this.gamedata, time, this.scene, this.movementAnimations, logAnimation);
@@ -90,11 +138,7 @@ window.ReplayAnimationStrategy = (function(){
 
         }, this);
 
-        time += 100;
-
-        this.endTime = time;
-        //TODO: ship destruction animations
-
+        return time;
     }
 
     function setMovementAnimationDuration(moveAnimation) {

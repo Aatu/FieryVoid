@@ -18,6 +18,8 @@ window.ShipIcon = (function (){
         this.ShipSideSprite = null;
         this.weaponArcs = [];
 
+        this.selected = false;
+
         this.create(ship, scene);
         this.consumeShipdata(ship);
     }
@@ -47,6 +49,10 @@ window.ShipIcon = (function (){
 
     ShipIcon.prototype.getPosition = function() {
         return {x: this.mesh.position.x, y: this.mesh.position.y};
+    };
+
+    ShipIcon.prototype.setOpacity = function(opacity){
+        this.shipSprite.setOpacity(opacity);
     };
 
     ShipIcon.prototype.getFacing = function(facing) {
@@ -107,9 +113,17 @@ window.ShipIcon = (function (){
     ShipIcon.prototype.setSelected = function(value) {
         if (value) {
             this.ShipSelectedSprite.show();
+            if (!this.selected) {
+                this.mesh.position.z = this.mesh.position.z + 100;
+            }
         } else {
+            if (this.selected) {
+                this.mesh.position.z = this.mesh.position.z - 100;
+            }
             this.ShipSelectedSprite.hide();
         }
+
+        this.selected = value;
     };
 
     ShipIcon.prototype.create = function(ship, scene) {

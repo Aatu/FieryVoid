@@ -118,6 +118,7 @@ class DBManager
 
     public function endTransaction($rollback = false, $force = false)
     {
+        $rollback = false;
         if ($rollback == true) {
             mysqli_rollback($this->connection);
             mysqli_autocommit($this->connection, TRUE);
@@ -1274,7 +1275,7 @@ class DBManager
         }
     }
 
-    private function getEWForShips($gamedata, $fetchTurn)
+    private function getEWForShips(TacGamedata $gamedata, $fetchTurn)
     {
 
         $stmt = $this->connection->prepare(
@@ -1283,16 +1284,16 @@ class DBManager
             FROM 
                 tac_ew 
             WHERE 
-                gameid = ?
-            AND
-                turn = ? or turn = ?
+                gameid = ? AND (turn = ? OR turn = ?)
             ORDER BY
                 id ASC
             "
         );
 
+
         if ($stmt) {
             $lastTurn = $fetchTurn - 1;
+
             $stmt->bind_param('iii', $gamedata->id, $lastTurn, $fetchTurn);
             $stmt->bind_result($id, $shipid, $turn, $type, $amount, $targetid);
             $stmt->execute();
@@ -1437,9 +1438,7 @@ class DBManager
             FROM
                 tac_power
             WHERE 
-                gameid = ?
-            AND 
-                turn = ? OR turn = ?
+                gameid = ? AND (turn = ? OR turn = ?)
             "
         );
 
@@ -1459,7 +1458,8 @@ class DBManager
 
     }
 
-    public function getSystemDataForShips($gamedata)
+
+    public function getSystemDataForShips(TacGamedata $gamedata)
     {
         $stmt = $this->connection->prepare(
             "SELECT 
@@ -1549,9 +1549,7 @@ class DBManager
             FROM 
                 tac_fireorder
             WHERE 
-                gameid = ? 
-            AND 
-                turn = ? OR turn = ?"
+                gameid = ? AND (turn = ? OR turn = ?)"
         );
 
         if ($stmt) {

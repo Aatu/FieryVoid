@@ -39,7 +39,7 @@ window.BoltEffect = (function() {
             this.duration -= 25;
 
             new Explosion(this.emitterContainer, {
-                size: 12,
+                size: this.size / 4,
                 position: this.target,
                 type: "glow",
                 color: args.color,

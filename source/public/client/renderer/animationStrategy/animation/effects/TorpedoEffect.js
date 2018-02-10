@@ -37,7 +37,7 @@ window.TorpedoEffect = (function() {
             this.duration -= 25;
 
             new Explosion(this.emitterContainer, {
-                size: 24,
+                size: this.size / 3,
                 position: this.target,
                 type: "glow",
                 color: args.color,
@@ -72,7 +72,7 @@ window.TorpedoEffect = (function() {
             var angle = Math.random()*360;
             particle = this.emitterContainer.getParticle(this);
             particle
-                .setSize(size*0.7)
+                .setSize(size*0.5)
                 .setFadeIn(this.time, this.fadeInSpeed)
                 .setFadeOut(this.time + this.duration, this.fadeOutSpeed)
                 .setOpacity(0.3)
@@ -86,7 +86,7 @@ window.TorpedoEffect = (function() {
 
             particle = this.emitterContainer.getParticle(this);
             particle
-                .setSize(size*1.5)
+                .setSize(size*1.2)
                 .setFadeIn(this.time, this.fadeInSpeed)
                 .setFadeOut(this.time + this.duration, this.fadeOutSpeed)
                 .setOpacity(0.2)

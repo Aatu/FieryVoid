@@ -22,6 +22,9 @@ window.ShipMovementAnimation = (function(){
         });
         */
 
+
+        this.endPause = 500;
+
         Animation.call(this);
     }
 
@@ -46,12 +49,16 @@ window.ShipMovementAnimation = (function(){
         */
     };
 
-    ShipMovementAnimation.prototype.render =  function (now, total, last, delta) {
+    ShipMovementAnimation.prototype.render =  function (now, total, last, delta, zoom, back, paused) {
 
         var positionAndFacing = this.getPositionAndFacingAtTime(total);
 
         this.shipIcon.setPosition(positionAndFacing.position);
         this.shipIcon.setFacing(-positionAndFacing.facing);
+
+        if (total > this.time && total < this.time + this.duration + this.endPause && !paused) {
+            window.webglScene.moveCameraTo(positionAndFacing.position);
+        }
     };
 
     ShipMovementAnimation.prototype.getPositionAndFacingAtTime = function (time) {
@@ -85,6 +92,10 @@ window.ShipMovementAnimation = (function(){
         return {position: position, facing: facing};
     };
 
+    ShipMovementAnimation.prototype.getStartPosition = function() {
+        return this.hexAnimations[0].curve.getPoint(0);
+    };
+
     ShipMovementAnimation.prototype.getLength = function() {
         return this.hexAnimations.length;
     };
@@ -94,7 +105,7 @@ window.ShipMovementAnimation = (function(){
     };
 
     ShipMovementAnimation.prototype.getDuration = function() {
-        return this.duration;
+        return this.duration + this.endPause;
     };
 
     ShipMovementAnimation.prototype.setTime = function(time) {

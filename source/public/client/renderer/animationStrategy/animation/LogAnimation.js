@@ -79,12 +79,12 @@ window.LogAnimation = (function(){
             var timeDiff = entry.time - this.currentTime;
 
             if (timeDiff > 0) {
-                if (nextTime === null || timeDiff < nextTime) {
+                if (nextTime === null || timeDiff < nextTime - this.currentTime) {
                     next = entry;
                     nextTime = entry.time;
                 }
             } else {
-                if (lastTime === null || timeDiff > lastTime) {
+                if (lastTime === null || timeDiff > lastTime - this.currentTime) {
                     last = entry;
                     lastTime = entry.time;
                 }
