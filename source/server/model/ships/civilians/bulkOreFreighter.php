@@ -9,6 +9,8 @@ class BulkOreFreighter extends HeavyCombatVessel{
         $this->phpclass = "bulkOreFreighter";
         $this->imagePath = "img/ships/civilianFreighter.png";
         $this->shipClass = "Bulk Ore Freighter";
+	$this->canvasSize = 100;
+	    
         $this->isd = 2129;        
         $this->unofficial = true;
         
