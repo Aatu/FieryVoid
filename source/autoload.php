@@ -274,6 +274,7 @@ spl_autoload_register(
                 'aldrithupgr' =>  '/server/model/ships/abbai/aldrithupgr.php',
                 
                 'tiraca' =>  '/server/model/ships/abbai/tiraca.php',
+                'bisaria' =>  '/server/model/ships/abbai/bisaria.php',
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
