@@ -269,6 +269,9 @@ spl_autoload_register(
                 'milani' =>  '/server/model/ships/abbai/milani.php',
                 'marata' =>  '/server/model/ships/abbai/marata.php',
                 'skiatha' =>  '/server/model/ships/abbai/skiatha.php',
+                'bimith' =>  '/server/model/ships/abbai/bimith.php',
+                'aldrith' =>  '/server/model/ships/abbai/aldrith.php',
+                'aldrithupgr' =>  '/server/model/ships/abbai/aldrithupgr.php',
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
