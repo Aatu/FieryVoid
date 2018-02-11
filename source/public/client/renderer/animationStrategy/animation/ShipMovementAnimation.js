@@ -11,8 +11,15 @@ window.ShipMovementAnimation = (function(){
 
         this.turnCurve = new THREE.CubicBezierCurve(
             new THREE.Vector2( 0, 0 ),
-            new THREE.Vector2( 1, 0 ),
-            new THREE.Vector2( 0, 1 ),
+            new THREE.Vector2( 0.75, 0 ),
+            new THREE.Vector2( 0, 0.75 ),
+            new THREE.Vector2( 1, 1 )
+        );
+
+        this.turnCurve = new THREE.CubicBezierCurve(
+            new THREE.Vector2( 0, 0 ),
+            new THREE.Vector2( 0.25, 0.25 ),
+            new THREE.Vector2( 0.75, 0.75 ),
             new THREE.Vector2( 1, 1 )
         );
 
@@ -23,7 +30,7 @@ window.ShipMovementAnimation = (function(){
         */
 
 
-        this.endPause = 500;
+        this.endPause = 0;
 
         Animation.call(this);
     }
@@ -93,6 +100,11 @@ window.ShipMovementAnimation = (function(){
     };
 
     ShipMovementAnimation.prototype.getStartPosition = function() {
+        if (this.hexAnimations.length === 0) {
+            var move = this.shipIcon.getLastMovement();
+            return window.coordinateConverter.fromHexToGame(move.position);
+        }
+
         return this.hexAnimations[0].curve.getPoint(0);
     };
 
@@ -242,19 +254,20 @@ window.ShipMovementAnimation = (function(){
 
         var start, end, control;
 
-        var controlBetween = false;
+        var controlBetween = 0;
 
         if (lastHex) {
             start = mathlib.getPointBetween(window.coordinateConverter.fromHexToGame(lastHex), window.coordinateConverter.fromHexToGame(currentHex), 0.5);
         } else {
-            controlBetween = true;
+            controlBetween = 0.5;
             start = window.coordinateConverter.fromHexToGame(currentHex);
+
         }
 
         if (nextHex) {
             end = mathlib.getPointBetween(window.coordinateConverter.fromHexToGame(currentHex), window.coordinateConverter.fromHexToGame(nextHex), 0.5);
         } else {
-            controlBetween = true;
+            controlBetween = 0.5;
             end = window.coordinateConverter.fromHexToGame(currentHex);
 
             var offset = this.shipIconContainer.getHexOffset(this.shipIcon);
@@ -265,8 +278,8 @@ window.ShipMovementAnimation = (function(){
 
         }
 
-        if (controlBetween) {
-            control = mathlib.getPointBetween(start, end, 0.5);
+        if (controlBetween > 0) {
+            control = mathlib.getPointBetween(start, end, controlBetween);
         } else {
             control = window.coordinateConverter.fromHexToGame(currentHex);
         }

@@ -459,7 +459,7 @@ class ShipSystem{
     
     }
     
-    public function onAdvancingGamedata($ship)
+    public function onAdvancingGamedata($ship, $gamedata)
     {
     }
     

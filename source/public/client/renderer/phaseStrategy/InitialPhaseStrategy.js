@@ -24,6 +24,8 @@ window.InitialPhaseStrategy = (function(){
         shipManager.power.repeatLastTurnPower();
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
+
+        this.setPhaseHeader("INITIAL ORDERS");
         return this;
     };
 
@@ -43,13 +45,14 @@ window.InitialPhaseStrategy = (function(){
         });
 
         if (ballistics.length > 0) {
-            console.log("targeting ballistics");
             weaponManager.targetHex(this.selectedShip, payload.hex);
         }
     };
 
     InitialPhaseStrategy.prototype.selectShip = function(ship, payload) {
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn);
+
+        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
         menu.addButton("selectShip", null, function() {
             PhaseStrategy.prototype.selectShip.call(this, ship);
             botPanel.setEW(ship);
@@ -75,8 +78,8 @@ window.InitialPhaseStrategy = (function(){
     InitialPhaseStrategy.prototype.targetShip = function(ship, payload) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
-        console.log("target ship");
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn);
+        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
         this.showShipTooltip(ship, payload, menu, false);
     };
 

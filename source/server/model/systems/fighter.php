@@ -198,11 +198,11 @@
         
 		
 		
-        public function onAdvancingGamedata($ship)
+        public function onAdvancingGamedata($ship, $gamedata)
         {
             foreach ($this->systems as $system)
             {
-                $system->onAdvancingGamedata($ship);
+                $system->onAdvancingGamedata($ship, $gamedata);
             }
         }
 

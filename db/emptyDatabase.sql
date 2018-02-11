@@ -143,8 +143,9 @@ CREATE TABLE `tac_ammo` (
   `systemid` int(11) NOT NULL,
   `firingmode` int(11) NOT NULL,
   `gameid` int(11) NOT NULL,
-  `ammo` varchar(255) NOT NULL,
-  PRIMARY KEY (`shipid`,`systemid`,`firingmode`)
+  `ammo` int(11) NOT NULL,
+  `turn` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`gameid`,`shipid`,`systemid`,`firingmode`,`turn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -306,25 +307,6 @@ CREATE TABLE `tac_iniative` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `tac_loading`
---
-
-DROP TABLE IF EXISTS `tac_loading`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tac_loading` (
-  `systemid` int(11) NOT NULL,
-  `subsystem` int(11) NOT NULL DEFAULT '0',
-  `gameid` int(11) NOT NULL,
-  `shipid` int(11) NOT NULL,
-  `loading` int(11) DEFAULT NULL,
-  `extrashots` int(11) DEFAULT NULL,
-  `loadedammo` int(11) DEFAULT NULL,
-  `overloading` int(11) DEFAULT NULL,
-  PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `tac_playeringame`
@@ -442,8 +424,9 @@ CREATE TABLE `tac_systemdata` (
   `gameid` int(11) NOT NULL,
   `shipid` int(11) NOT NULL,
   `data` text,
-  PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  `turn` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`, `turn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

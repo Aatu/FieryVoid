@@ -27,6 +27,7 @@ window.ReplayPhaseStrategy = (function(){
         this.replayTurn = getInitialReplayTurn.call(this);
 
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.ewIconContainer.consumeGamedata(this.gamedata);
 
         this.createReplayUI();
 
@@ -36,6 +37,7 @@ window.ReplayPhaseStrategy = (function(){
 
         console.log("activate replay phase");
 
+        this.setPhaseHeader(false);
         return this;
     };
 
@@ -48,6 +50,7 @@ window.ReplayPhaseStrategy = (function(){
     ReplayPhaseStrategy.prototype.update = function (gamedata) {
         this.gamedata = gamedata;
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
 
         console.log("update replay phase");
 
@@ -74,9 +77,9 @@ window.ReplayPhaseStrategy = (function(){
     };
 
     ReplayPhaseStrategy.prototype.onMouseOverShip = function(ship, payload) {
-        var icon = this.shipIconContainer.getById(ship.id);
-        this.showShipTooltip(ship, payload, null, true);
-        icon.showSideSprite(true);
+        if (this.animationStrategy.isPaused()) {
+            PhaseStrategy.prototype.onMouseOverShip.call(this, ship, payload);
+        }
     };
 
     ReplayPhaseStrategy.prototype.createReplayUI = function(gamedata) {

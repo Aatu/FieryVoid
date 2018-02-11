@@ -105,7 +105,7 @@
             return 0;
         }
         
-        public function calculateLoading()
+        public function calculateLoading(TacGamedata $gamedata)
         {
             $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
             $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);

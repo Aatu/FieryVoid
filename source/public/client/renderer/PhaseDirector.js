@@ -15,7 +15,7 @@ window.phaseDirector = (function() {
     phaseDirector.prototype.init = function (coordinateConverter, scene) {
         this.coordinateConverter = coordinateConverter;
         this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
-        this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene);
+        this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene, this.shipIconContainer);
         this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
     };
 

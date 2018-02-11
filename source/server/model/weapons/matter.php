@@ -409,7 +409,7 @@
         	//debug::log("fire function");
             parent::fire($gamedata, $fireOrder);
             $this->ammunition--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $this->ammunition);
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
         }
     
         public function setMinDamage(){     $this->minDamage = 1;      }

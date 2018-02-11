@@ -145,10 +145,10 @@ window.ParticleEmitter = (function(){
     };
 
     function getShaders(){
-        //if (! SHADER_VERTEX)
+        if (! SHADER_VERTEX)
             var SHADER_VERTEX = document.getElementById('effectVertexShader').innerHTML;
 
-        //if (! SHADER_FRAGMENT)
+        if (! SHADER_FRAGMENT)
             var SHADER_FRAGMENT = document.getElementById('effectFragmentShader').innerHTML;
 
         return {vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT};

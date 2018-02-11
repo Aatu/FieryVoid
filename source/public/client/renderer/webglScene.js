@@ -47,6 +47,8 @@ window.webglScene = (function(){
             1000
         );
 
+        this.camera.setPosition = new THREE.Vector3(0, 0, 200);
+
         /*
         var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
         var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
@@ -314,9 +316,9 @@ window.webglScene = (function(){
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log(pos, hexPos);
+        //console.log(pos, hexPos);
         if (this.lastPositionClicked) {
-            console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
+            //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }
 
 
@@ -326,7 +328,7 @@ window.webglScene = (function(){
         );
 
         if (! this.lastPositionClicked) {
-            console.log("set last position clicked");
+            //console.log("set last position clicked");
             this.lastPositionClicked = hexPos;
         }
     };

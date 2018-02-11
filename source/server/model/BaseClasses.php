@@ -1,52 +1,5 @@
 <?php
 
-
-class SystemData
-{
-    private static $allData = Array();
-    
-    public $systemid, $subsystem, $shipid;
-    public $data = Array();
-    
-    public function __construct($systemid, $subsystem, $shipid)
-    {
-        $this->systemid = $systemid;
-        $this->subsystem = $subsystem;
-        $this->shipid = $shipid;
-    }
-    
-    public function addData($data){
-        $this->data[] = $data;
-    }
-    
-    public function toJSON()
-    {
-        $json = "{".implode(",", $this->data)."}";
-        return $json;
-    }
-
-    public static function getAndPurgeAllSystemData() {
-        $data = self::$allData;
-        self::$allData = [];
-        return $data;
-    }
-
-    public static function addDataForSystem($systemid, $subsystem, $shipid, $data)
-    {
-        // with new dualWeapon implementation: ignore subsystem
-        if (!isset(self::$allData[$systemid."_0_".$shipid]))
-        {
-             $systemdata = new SystemData($systemid, 0, $shipid);
-             $systemdata->addData($data);
-             self::$allData[] = $systemdata;
-        }
-        else
-        {
-            self::$allData[$systemid."_0_".$shipid]->addData($data);
-        }
-    }
-}
-
 class WeaponLoading
 {
     public $loading, $extrashots, $loadedammo, $overloading, $loadingtime, $firingmode;
@@ -64,6 +17,10 @@ class WeaponLoading
     public function toJSON()
     {
         return '"loading":{"1":"'.$this->loading.'","2":"'.$this->extrashots.'","3":"'.$this->loadedammo.'","4":"'.$this->overloading.'","5":"'.$this->loadingtime.'","6":"'.$this->firingmode.'"}';
+    }
+
+    public function toString() {
+        return "loading: $this->loading extrashots: $this->extrashots loadedammo: $this->loadedammo overloading: $this->overloading loadingtime: $this->loadingtime firingmode: $this->firingmode";
     }
 }
 

@@ -305,7 +305,6 @@ window.weaponManager = {
 		gamedata.selectedSystems.push(weapon);
 		shipWindowManager.setDataForSystem(ship, weapon);
 
-        console.log("select weapon", gamedata.selectedSystems.length);
 	},
 	
 
@@ -375,7 +374,6 @@ window.weaponManager = {
 			$('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
 		}
 
-		console.log(gamedata.selectedSystems);
 
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
@@ -447,8 +445,6 @@ window.weaponManager = {
 			return false;
 
 		var loc = weaponManager.getShipHittingSide(shooter, target);
-	//	console.log(loc);
-	//	console.log("aiming at: " + loc + " , system is on: " + system.location);
 		if (target.flight){
 			return false;
 		}
@@ -597,7 +593,6 @@ window.weaponManager = {
 		var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
 
 		var defence = weaponManager.getShipDefenceValuePos(ball.position, target);
-		//console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
 		var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
 
 		var soew = ew.getSupportedOEW(shooter, target);
@@ -909,7 +904,7 @@ window.weaponManager = {
 		var goal = (baseDef - jammermod - rangePenalty + oew + soew + firecontrol + mod);
 
 		var change = Math.round((goal/20)*100);
-		console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
+		//console.log("rangePenalty: " + rangePenalty + "jammermod: "+jammermod+" baseDef: " + baseDef + " oew: " + oew + " soew: "+soew+" firecontrol: " + firecontrol + " mod: " +mod+ " goal: " +goal);
 
 		if (change > 100)
 			change = 100;
@@ -934,7 +929,7 @@ window.weaponManager = {
 		var targetFacing = (shipManager.getShipHeadingAngle(target));
 		var targetPos = shipManager.getShipPosition(target);
 
-		var shooterCompassHeading = mathlib.getCompassHeadingOfPosition(target, position);
+		var shooterCompassHeading = mathlib.getCompassHeadingOfPoint(targetPos, position);
 
 
 
@@ -1121,12 +1116,14 @@ window.weaponManager = {
 		return false;
 	},
 	*/
-	targetBallistic: function(ball){
-		 if (gamedata.gamephase != 3)
+	targetBallistic: function(ship, ball){
+		console.log("target Ballistics", ship, ball);
+
+		 if (gamedata.gamephase !== 3)
 			return;
 
 
-		var selectedShip = gamedata.getSelectedShip();
+		var selectedShip = ship;
 		if (shipManager.isDestroyed(selectedShip))
 			return;
 
@@ -1140,12 +1137,12 @@ window.weaponManager = {
 		for (var i in gamedata.selectedSystems){
 			var weapon = gamedata.selectedSystems[i];
 
-			if (ball.targetid != selectedShip.id
+			if (ball.targetid !== selectedShip.id
 				&& ! weapon.freeintercept
 				&& ! shipManager.isEscorting(selectedShip, target))
 				continue;
 
-			if (ball.targetid != selectedShip.id && weapon.freeintercept){
+			if (ball.targetid !== selectedShip.id && weapon.freeintercept){
 				var ballpos = hexgrid.positionToPixel(ball.position);
 				var targetpos = shipManager.getShipPositionInWindowCo(target);
 				var selectedpos = shipManager.getShipPositionInWindowCo(selectedShip);
@@ -1154,7 +1151,7 @@ window.weaponManager = {
 			}
 			if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
 				continue;
-			if (weapon.getInterceptRating() == 0)
+			if (weapon.getInterceptRating() === 0)
 				continue;
 
 			var type = 'intercept';
@@ -1197,8 +1194,6 @@ window.weaponManager = {
 		gamedata.shipStatusChanged(selectedShip);
 
 	},
-	
-
 
 	canSelfIntercept: function(ship){
 		for (var i in gamedata.selectedSystems){
@@ -1210,9 +1205,6 @@ window.weaponManager = {
 		}
 		return false;
 	},
-
-
-
 
 	checkSelfIntercept: function(ship){
 
@@ -1237,8 +1229,6 @@ window.weaponManager = {
 		}
 	},
 
-
-
     confirmSelfIntercept: function(ship, valid, invalid, message){
         confirm.confirmWithOptions(message, "Yessss", "Nope", function(response){
         	if (response){
@@ -1249,10 +1239,6 @@ window.weaponManager = {
 			}
         });
     },
-
-
-
-
 
 	setSelfIntercept: function(ship, valid){
 
@@ -1286,7 +1272,7 @@ window.weaponManager = {
 
 	//system is for called shot!
 	targetShip: function(selectedShip, ship, system){
-		var debug = true;
+		var debug = false;
 
 		debug && console.log("weaponManager target ship", ship, system);
 
@@ -1302,6 +1288,10 @@ window.weaponManager = {
                 continue;
             }
 
+            if (!weapon.targetsShips){
+				debug && console.log("This weapon targets only hexagons");
+				continue;
+			}
 
 			if (weapon.ballistic && gamedata.gamephase != 1){
                 debug && console.log("trying to fire in wrong phase for ballistic weapon");
@@ -1463,6 +1453,9 @@ window.weaponManager = {
 			if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
 				continue;
 
+            if (weapon.targetsShips){
+                continue;
+            }
 
 			if (weapon.ballistic && gamedata.gamephase != 1){
 				continue;
@@ -1614,6 +1607,34 @@ window.weaponManager = {
 		return fires;
 	},
 
+    getAllBallisticsAgainst: function(ships, hex) {
+		ships = [].concat(ships);
+
+        return gamedata.ships.reduce(function(fires, shooter) {
+            return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
+
+            	var targetingShip = ships.some(function (ship) {
+            		return ship.id === fire.targetid;
+				});
+
+            	//TODO: show weapons targeted at hex
+            	//var targetingHex = fire.targetid === -1 && new hexagon.Offset(fire.x, fire.q).equals(hex);
+
+            	return targetingShip; // || targetingHex;
+            }));
+        }, []).filter(function(fire) {
+        	return fire.type === "ballistic";
+		}).map(function (fireOrder) {
+            var shooter = gamedata.getShip(fireOrder.shooterid);
+            return {
+                id: fireOrder.id,
+                fireOrder: fireOrder,
+                shooter: shooter,
+                weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid)
+            }
+        });
+	},
+
     getAllHexTargetedBallistics: function(){
         return gamedata.ships.reduce(function(fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
@@ -1758,7 +1779,6 @@ window.weaponManager = {
 			}
 
 			if (list.length>0){
-				//console.log(list);
 				var found = false;
 				for (var a in damages){
 					var entry = damages[a];

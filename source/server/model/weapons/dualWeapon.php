@@ -120,7 +120,7 @@ class DualWeapon extends Weapon{
     
 	
 	
-    public function onAdvancingGamedata($ship)
+    public function onAdvancingGamedata($ship, $gamedata)
     {
         $weaponFired = false;
         $duoWeaponFired = false;
@@ -129,13 +129,13 @@ class DualWeapon extends Weapon{
         foreach ($this->weapons as $i=>$weapon)
         {
             if(!$weapon->duoWeapon){
-                if($weapon->firedOnTurn(TacGamedata::$currentTurn)
-                        || (TacGamedata::$currentPhase == 2 && $weapon->turnsloaded == 0)){
+                if($weapon->firedOnTurn($gamedata->turn)
+                        || ($gamedata->phase == 2 && $weapon->turnsloaded == 0)){
                     $this->firingMode = $i;
                     $weaponFired = true;                    
                 }                
             }else{
-                $weapon->onAdvancingGamedata($ship);
+                $weapon->onAdvancingGamedata($ship, $gamedata);
 
                 if($weapon->getTurnsloaded() == 0){
                     $this->firingMode = $i;

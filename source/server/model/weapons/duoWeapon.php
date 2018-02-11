@@ -91,9 +91,9 @@ class DuoWeapon extends Weapon{
         }
     }
     
-    public function onAdvancingGamedata($ship)
+    public function onAdvancingGamedata($ship, $gamedata)
     {
-        $data = parent::calculateLoading();
+        $data = parent::calculateLoading($gamedata);
         
         $curLoading = $data->loading;
         

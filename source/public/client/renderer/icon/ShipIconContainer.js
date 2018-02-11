@@ -32,7 +32,7 @@ window.ShipIconContainer = (function(){
 
     ShipIconContainer.prototype.onEvent = function(name, payload) {
         var target = this['on'+ name];
-        if (target && typeof target == 'function') {
+        if (target && typeof target === 'function') {
             target.call(this, payload);
         }
     };
@@ -154,20 +154,22 @@ window.ShipIconContainer = (function(){
 
         var previousHex = icon.getMovementBefore(lastMove).position;
 
-        var iconsFromSameHex = iconsInHex.filter(function (otherIcon) {
+        var iconsFromSameHex = iconsInHex; /* iconsInHex.filter(function (otherIcon) {
             var movement = otherIcon.getMovementBefore(otherIcon.getLastMovement());
             if (!movement) {
                 return false;
             }
 
             return movement.position.equals(previousHex);
-        });
+        });*/
 
         var steps = 0;
 
+        /*
         if (iconsInHex.length > 0) {
             steps = 1;
         }
+*/
 
         steps += iconsFromSameHex.length;
 
@@ -176,7 +178,7 @@ window.ShipIconContainer = (function(){
         }
 
         var angle = mathlib.getCompassHeadingOfPoint(hex, previousHex);
-        return mathlib.getPointInDirection(steps * 10, angle, 0, 0);
+        return mathlib.getPointInDirection(steps * 7, angle, 0, 0);
     };
 
     return ShipIconContainer;

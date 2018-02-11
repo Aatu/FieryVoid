@@ -16,6 +16,8 @@ window.WaitingPhaseStrategy = (function(){
         gamedata.hideCommitButton();
 
         ajaxInterface.startPollingGamedata();
+
+        this.setPhaseHeader("WAITING FOR TURN...");
         return this;
     };
 

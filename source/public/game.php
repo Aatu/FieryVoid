@@ -15,7 +15,7 @@
 	}
 	
 	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
-	
+
 	$serverdataJSON = json_encode($serverdata, JSON_NUMERIC_CHECK);
 ?>
 
@@ -143,6 +143,9 @@
     <script src="client/UI/shipTooltipMenu.js"></script>
     <script src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script src="client/UI/shipTooltipFireMenu.js"></script>
+    <script src="client/UI/ShipTooltipBallisticsMenu.js"></script>
+
+
 
 
 

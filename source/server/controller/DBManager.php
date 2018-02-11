@@ -118,7 +118,6 @@ class DBManager
 
     public function endTransaction($rollback = false, $force = false)
     {
-        $rollback = false;
         if ($rollback == true) {
             mysqli_rollback($this->connection);
             mysqli_autocommit($this->connection, TRUE);
@@ -181,16 +180,24 @@ class DBManager
     }
 
 
-    public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount)
+    public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount, $turn)
     {
+        $stmt = $this->connection->prepare("
+            INSERT INTO 
+              tac_ammo
+            VALUES
+                (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                firingmode = ?, ammo = ?
+            
+        ");
 
-        try {
-            $sql = "INSERT INTO `B5CGM`.`tac_ammo` VALUES($shipid, $systemid, $firingMode, $gameid, $ammoAmount)";
-            $id = $this->insert($sql);
-        } catch (Exception $e) {
-            $this->endTransaction(true);
-            throw $e;
-        }
+        $stmt->bind_param(
+            'iiiiiiii',
+            $shipid, $systemid, $firingMode, $gameid, $ammoAmount, $turn, $firingMode, $ammoAmount
+        );
+        $stmt->execute();
+        $stmt->close();
     }
 
     public function deleteEmptyGames()
@@ -518,7 +525,7 @@ class DBManager
                 tac_systemdata
             VALUES 
             ( 
-                ?,?,?,?,?
+                ?,?,?,?,?,?
             )
             ON DUPLICATE KEY UPDATE
                 data = ?
@@ -529,12 +536,13 @@ class DBManager
             foreach ($datas as $data) {
                 $json = $data->toJSON();
                 $stmt->bind_param(
-                    'iiiiss',
+                    'iiiisis',
                     $data->systemid,
                     $data->subsystem,
-                    TacGamedata::$currentGameID,
+                    $data->gameid,
                     $data->shipid,
                     $json,
+                    $data->turn,
                     $json
                 );
                 $stmt->execute();
@@ -1120,7 +1128,7 @@ class DBManager
         $this->getCriticalsForShips($gamedata, $turn);
         $this->getDamageForShips($gamedata, $turn);
         $this->getFireOrdersForShips($gamedata, $turn);
-        $this->getSystemDataForShips($gamedata);
+        $this->getSystemDataForShips($gamedata, $turn);
 
         $endtime = time();
         Debug::log("GETTING SHIPS - GAME: $gamedata->id Fetching gamedata took " . ($endtime - $starttime) . " seconds.");
@@ -1459,19 +1467,24 @@ class DBManager
     }
 
 
-    public function getSystemDataForShips(TacGamedata $gamedata)
+    public function getSystemDataForShips(TacGamedata $gamedata, $fetchTurn)
     {
         $stmt = $this->connection->prepare(
-            "SELECT 
-                data, shipid, systemid, subsystem
-            FROM 
-                tac_systemdata
+        "SELECT 
+                (SELECT data FROM tac_systemdata WHERE systemid = t.systemid AND shipid = t.shipid AND gameid = ? AND turn <= ? ORDER BY turn DESC limit 1) AS data, shipid, systemid, subsystem
+            FROM
+                tac_systemdata t
             WHERE 
-                gameid = ?"
+                gameid = ?  
+            GROUP BY 
+                systemid, subsystem, gameid, shipid
+          "
         );
 
+        //select shipid, systemid, max(turn) as maxturn, (select data from tac_systemdata where systemid = t.systemid and shipid = t.shipid and turn <= 1 order by turn desc limit 1) as data from tac_systemdata t group by systemid, subsystem, gameid, shipid;
+
         if ($stmt) {
-            $stmt->bind_param('i', $gamedata->id);
+            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
             $stmt->execute();
             $stmt->bind_result(
                 $data,
@@ -1490,15 +1503,22 @@ class DBManager
         // Get ammo info
         $stmt = $this->connection->prepare(
             "SELECT 
-                shipid, systemid, firingmode, ammo
+                shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and gameid = ? and turn <= ? order by turn desc limit 1)
             FROM 
-                tac_ammo
+                tac_ammo t
             WHERE 
-                gameid = ?"
+                gameid = ?
+            GROUP BY
+              shipid, systemid, firingmode
+            "
+
         );
 
+        //select shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and turn <= 1 order by turn desc limit 1) as ammo from tac_ammo t group by shipid, systemid, firingmode;
+
+
         if ($stmt) {
-            $stmt->bind_param('i', $gamedata->id);
+            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
             $stmt->execute();
             $stmt->bind_result(
                 $shipid,
@@ -1514,32 +1534,6 @@ class DBManager
             $stmt->close();
         }
     }
-
-
-    public function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount)
-    {
-        try {
-            if ($stmt = $this->connection->prepare(
-                "UPDATE 
-                        tac_ammo 
-                     SET
-                        ammo = ?
-                     WHERE 
-                        shipid = ?
-                        AND systemid = ?
-                        AND firingmode = ?
-                        AND gameid = ?
-                     "
-            )) {
-                $stmt->bind_param('iiisi', $ammoAmount, $shipid, $systemid, $firingmode, $gameid);
-                $stmt->execute();
-                $stmt->close();
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
 
     public function getFireOrdersForShips($gamedata, $fetchTurn)
     {

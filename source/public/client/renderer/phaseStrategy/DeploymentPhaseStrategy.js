@@ -4,6 +4,7 @@ window.DeploymentPhaseStrategy = (function(){
         PhaseStrategy.call(this, coordinateConverter);
 
         this.deploymentSprites = [];
+
     }
 
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -22,6 +23,7 @@ window.DeploymentPhaseStrategy = (function(){
 
         showEnemyDeploymentAreas(this.deploymentSprites, gamedata);
 
+        this.setPhaseHeader("DEPLOYMENT");
         return this;
     };
 
@@ -56,8 +58,8 @@ window.DeploymentPhaseStrategy = (function(){
 
     };
 
-    DeploymentPhaseStrategy.prototype.selectShip = function(ship) {
-        PhaseStrategy.prototype.selectShip.call(this, ship);
+    DeploymentPhaseStrategy.prototype.setSelectedShip = function(ship) {
+        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
 
         var hex = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
@@ -75,6 +77,8 @@ window.DeploymentPhaseStrategy = (function(){
     DeploymentPhaseStrategy.prototype.targetShip = function(ship) {};
 
     DeploymentPhaseStrategy.prototype.untargetShip = function(ship) {};
+
+    DeploymentPhaseStrategy.prototype.createReplayUI = function(gamedata) {};
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata){
         var team = gamedata.getPlayerTeam();

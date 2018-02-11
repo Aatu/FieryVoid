@@ -19,6 +19,8 @@ window.FirePhaseStrategy = (function(){
         this.selectFirstOwnShipOrActiveShip();
 
         gamedata.showCommitButton();
+
+        this.setPhaseHeader("FIRE ORDERS");
         return this;
     };
 
@@ -29,8 +31,6 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype.onHexClicked = function(payload) {
         var hex = payload.hex;
 
-        console.log("target hex");
-
         if (!this.selectedShip) {
             return;
         }
@@ -38,7 +38,13 @@ window.FirePhaseStrategy = (function(){
 
     FirePhaseStrategy.prototype.selectShip = function(ship, payload) {
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
+        menu.addButton("selectShip", null, function() {
+            PhaseStrategy.prototype.selectShip.call(this, ship);
+        }.bind(this), "Select ship");
+
+        var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+
+        this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
     };
 
     FirePhaseStrategy.prototype.deselectShip = function(ship) {
@@ -61,6 +67,17 @@ window.FirePhaseStrategy = (function(){
         }
     };
 
+    FirePhaseStrategy.prototype.setSelectedShip = function(ship) {
+        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+        this.showShipEW(ship);
+    };
+
+    FirePhaseStrategy.prototype.onMouseOutShips = function(ships, payload) {
+        PhaseStrategy.prototype.onMouseOutShips.call(this, ships, payload);
+        if (this.selectedShip) {
+            this.showShipEW(this.selectedShip);
+        }
+    };
 
     return FirePhaseStrategy;
 })();

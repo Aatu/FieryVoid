@@ -253,7 +253,7 @@ window.PhaseStrategy = (function(){
         this.ewIconContainer.hide();
     };
 
-    PhaseStrategy.prototype.showShipTooltip = function(ships, payload, menu, hide) {
+    PhaseStrategy.prototype.showShipTooltip = function(ships, payload, menu, hide, ballisticsMenu) {
 
         if (this.shipTooltip) {
             return;
@@ -266,7 +266,11 @@ window.PhaseStrategy = (function(){
             position = this.shipIconContainer.getByShip(ships[0]).getPosition();
         }
 
-        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu);
+        if (!ballisticsMenu) {
+            ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, false);
+        }
+
+        var shipTooltip = new window.ShipTooltip(this.selectedShip, ships, position, shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip), menu, payload.hex, ballisticsMenu);
 
         this.shipTooltip = shipTooltip;
         this.onClickCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
@@ -293,7 +297,7 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.positionMovementUI = function(){
         if (!this.movementUI) {
-            return;
+            return true;
         }
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
@@ -386,6 +390,22 @@ window.PhaseStrategy = (function(){
        return this.shipIconContainer.getIconsInProximity(payload);
     }
 
+    PhaseStrategy.prototype.setPhaseHeader = function(name, shipName) {
+
+        if (name === false) {
+            jQuery("#phaseheader").hide();
+            return;
+        }
+
+        if (!shipName) {
+            shipName = "";
+        }
+
+        $("#phaseheader .turn.value").html("TURN: " + this.gamedata.turn+ ",");
+        $("#phaseheader .phase.value").html(name);
+        $("#phaseheader .activeship.value").html(shipName);
+        $("#phaseheader").show();
+    };
 
     return PhaseStrategy;
 })();

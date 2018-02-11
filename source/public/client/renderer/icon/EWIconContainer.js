@@ -1,14 +1,17 @@
 window.EWIconContainer = (function(){
 
-    var COLOR_OEW = new THREE.Color(1,1,1);
+    var COLOR_OEW_FIRENDLY = new THREE.Color(160/255,250/255,100/255);
+    var COLOR_OEW_ENEMY = new THREE.Color(255/255,40/255,40/255);
 
-    function EWIconContainer(coordinateConverter, scene){
+
+    function EWIconContainer(coordinateConverter, scene, iconContainer){
         this.ewIcons = [];
         this.scene = scene;
         this.zoomScale = 1;
+        this.shipIconContainer = iconContainer;
     }
 
-    EWIconContainer.prototype.consumeGamedata = function(gamedata, iconContainer) {
+    EWIconContainer.prototype.consumeGamedata = function(gamedata) {
 
         this.ewIcons.forEach(function(ewIcon) {
             ewIcon.used = false;
@@ -19,7 +22,7 @@ window.EWIconContainer = (function(){
                var oew = ew.getOffensiveEW(ship, target);
 
                if (oew) {
-                   createOrUpdateOEW.call(this, ship, target, oew, iconContainer);
+                   createOrUpdateOEW.call(this, ship, target, oew);
                }
            }, this)
         }, this);
@@ -44,8 +47,9 @@ window.EWIconContainer = (function(){
         this.ewIcons.filter(function(icon) {
             return icon.shipId == ship.id || icon.targetId == ship.id;
         }).forEach(function(icon) {
+            icon.sprite.setStartAndEnd(getStartOffset(icon.shipIcon.getPosition(), icon.targetIcon.getPosition()), icon.targetIcon.getPosition());
             icon.sprite.show();
-        });
+        }, this);
     };
 
     EWIconContainer.prototype.onEvent = function(name, payload) {
@@ -68,35 +72,40 @@ window.EWIconContainer = (function(){
 
     };
 
-    function createOrUpdateOEW (ship, target, amount, iconContainer) {
+    function createOrUpdateOEW (ship, target, amount) {
         var icon = getOEWIcon.call(this, ship, target);
         if (icon) {
-            updateOEWIcon.call(this, icon, ship, target, amount, iconContainer);
+            updateOEWIcon.call(this, icon, ship, target, amount);
         } else {
-            this.ewIcons.push(createOEWIcon.call(this, ship, target, amount, iconContainer, this.scene));
+            this.ewIcons.push(createOEWIcon.call(this, ship, target, amount, this.scene));
         }
     }
 
-    function updateOEWIcon(icon, ship, target, amount, iconContainer) {
-        var shipIcon = iconContainer.getByShip(ship);
-        var targetIcon = iconContainer.getByShip(target);
+    function updateOEWIcon(icon, ship, target, amount) {
+        var shipIcon = this.shipIconContainer.getByShip(ship);
+        var targetIcon = this.shipIconContainer.getByShip(target);
 
         icon.sprite.setLineWidth(getOEWLineWidth.call(this, amount));
-        icon.sprite.setStartAndEnd(shipIcon.getPosition(), targetIcon.getPosition());
+        icon.sprite.setStartAndEnd(getStartOffset(shipIcon.getPosition(), targetIcon.getPosition()), targetIcon.getPosition());
+        icon.shipIcon = shipIcon;
+        icon.targetIcon = targetIcon;
         icon.amount = amount;
         icon.used = true;
-
     }
 
-    function createOEWIcon(ship, target, amount, iconContainer, scene) {
-        var shipIcon = iconContainer.getByShip(ship);
-        var targetIcon = iconContainer.getByShip(target);
+    function createOEWIcon(ship, target, amount, scene) {
+        var shipIcon = this.shipIconContainer.getByShip(ship);
+        var targetIcon = this.shipIconContainer.getByShip(target);
+
+        var color = gamedata.isMyShip(ship) ? COLOR_OEW_FIRENDLY : COLOR_OEW_ENEMY;
         var OEWIcon = {
             type:"OEW",
             shipId: ship.id,
             targetId: target.id,
             amount: amount,
-            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, COLOR_OEW, 0.5),
+            shipIcon: shipIcon,
+            targetIcon: targetIcon,
+            sprite: new LineSprite(getStartOffset(shipIcon.getPosition(), targetIcon.getPosition()), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, color, 0.5),
             used: true
         };
 
@@ -104,6 +113,22 @@ window.EWIconContainer = (function(){
         scene.add(OEWIcon.sprite.mesh);
 
         return OEWIcon;
+    }
+
+    function getStartOffset(position, target) {
+
+        if (target.x > position.x) {
+            return {
+                x: position.x,
+                y: position.y + 10
+            }
+        } else {
+            return {
+                x: position.x,
+                y: position.y - 10
+            }
+        }
+
     }
 
     function getOEWLineWidth(amount) {

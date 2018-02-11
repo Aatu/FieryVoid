@@ -8,7 +8,7 @@ window.BallisticSprite = (function(){
     function BallisticSprite(position, type){
         HexagonSprite.call(
             this,
-            -3
+            -2
         );
 
         if (!TEXTURE_LAUNCH) {

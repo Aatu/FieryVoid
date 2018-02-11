@@ -1,7 +1,8 @@
 window.ShipTooltipInitialOrdersMenu = (function(){
 
-    function ShipTooltipInitialOrdersMenu(selectedShip, targetedShip, turn) {
+    function ShipTooltipInitialOrdersMenu(selectedShip, targetedShip, turn, hexagon) {
         ShipTooltipMenu.call(this, selectedShip, targetedShip, turn);
+        this.hexagon = hexagon;
     }
 
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
@@ -19,7 +20,8 @@ window.ShipTooltipInitialOrdersMenu = (function(){
         {className: "removeSDEW",    condition: [isFriendly, isElint, notFlight],   action: removeOEW.bind(null, 'SDEW'), info: "Remove SDEW"},
         {className: "addBDEW",       condition: [isSelf, isElint, notFlight],       action: addBDEW, info: "add BDEW"},
         {className: "removeBDEW",    condition: [isSelf, isElint, notFlight],       action: removeBDEW, info: "remove BDEW"},
-        {className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected],      action: targetWeapons, info: "Target selected weapons"},
+        {className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected],  action: targetWeapons, info: "Target selected weapons on ship"},
+        {className: "targetWeapons", condition: [isEnemy, hasHexWeaponsSelected],   action: targetHexagon, info: "Target selected weapons on hexagon"},
     ];
 
 
@@ -29,8 +31,25 @@ window.ShipTooltipInitialOrdersMenu = (function(){
     };
 
 
+    function hasShipWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.targetsShips === true;
+        });
+    }
+
+    function hasHexWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.targetsShips === false;
+        });
+    }
+
     function targetWeapons(){
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
+    }
+
+    function targetHexagon(){
+        console.log(this.selectedShip, this.hexagon);
+        weaponManager.targetHex(this.selectedShip, this.hexagon);
     }
 
     function addCCEW() {
@@ -102,10 +121,6 @@ window.ShipTooltipInitialOrdersMenu = (function(){
 
     function isFriendly() {
         return gamedata.isMyShip(this.targetedShip);
-    }
-
-    function hasWeaponsSelected() {
-        return gamedata.selectedSystems.length > 0;
     }
 
     function isElint() {

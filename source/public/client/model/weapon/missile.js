@@ -1,7 +1,8 @@
 var MissileLauncher = function(json, ship)
 {
     Weapon.call( this, json, ship);
-}
+};
+
 MissileLauncher.prototype = Object.create( Weapon.prototype );
 MissileLauncher.prototype.constructor = MissileLauncher;
 
@@ -12,7 +13,7 @@ MissileLauncher.prototype.getAmmo = function(fireOrder)
         if (fireOrder)
             mode = fireOrder.mode;
 
-        console.log("returning ammo: " + this.missileArray[mode].name);
+        //console.log("returning ammo: " + this.missileArray[mode].name);
         return this.missileArray[mode];
     }else{
         return null;

@@ -18,7 +18,7 @@ window.ReplayAnimationStrategy = (function(){
 
         this.movementAnimations = {};
 
-        this.moveHexDuration = 400;
+        this.moveHexDuration = 40;
         this.moveAnimationDuration = 2500;
         this.type = type || ReplayAnimationStrategy.type.INFORMATIVE;
 
@@ -93,23 +93,17 @@ window.ReplayAnimationStrategy = (function(){
         this.gamedata.ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getByShip(ship);
 
-
-
-
             var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
             setMovementAnimationDuration.call(this, animation);
 
-            var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
-            this.animations.push(cameraAnimation);
-            time += cameraAnimation.getDuration();
-
-            time -= 1000;
+            if (animation.getLength() > 0 ) {
+                var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
+                this.animations.push(cameraAnimation);
+                time += cameraAnimation.getDuration();
+            }
 
             animation.setTime(time);
             this.animations.push(animation);
-
-
-
             this.movementAnimations[ship.id] = animation;
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
@@ -122,7 +116,7 @@ window.ReplayAnimationStrategy = (function(){
     }
 
     function animateWeaponFire(time, logAnimation) {
-        var animation = new HexTargetedWeaponFireAnimation(time, this.movementAnimations, this.shipIconContainer, this.turn, this.emitterContainer);
+        var animation = new HexTargetedWeaponFireAnimation(time, this.movementAnimations, this.shipIconContainer, this.turn, this.emitterContainer, logAnimation);
         this.animations.push(animation);
         if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
             time += animation.getDuration();

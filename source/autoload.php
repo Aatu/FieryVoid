@@ -749,7 +749,7 @@ spl_autoload_register(
                 'swvictory2sd' => '/server/model/ships/starwars_centauri/swVictory2SD.php',
                 'swvictorysd' => '/server/model/ships/starwars_centauri/swVictorySD.php',
                 'swvindicator' => '/server/model/ships/starwars_centauri/swVindicator.php',
-                'systemdata' => '/server/model/BaseClasses.php',
+                'systemdata' => '/server/model/SystemData.php',
                 'tacgamedata' => '/server/model/TacGamedata.php',
                 'tacit' => '/server/model/ships/centauri_old/tacit.php',
                 'taclaser' => '/server/model/weapons/lasers.php',

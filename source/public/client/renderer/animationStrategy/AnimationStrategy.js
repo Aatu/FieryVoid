@@ -50,6 +50,10 @@ window.AnimationStrategy = (function(){
         this.goingBack = false;
     };
 
+    AnimationStrategy.prototype.isPaused = function() {
+        return this.paused;
+    };
+
     AnimationStrategy.prototype.deactivate = function() {
         return this;
     };

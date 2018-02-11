@@ -520,7 +520,7 @@ class TacGamedata{
         
         $player = $player[0];
     
-        if ($this->phase == 1 || $this->phase == 3 || $this->phase == 4){
+        if ($this->phase === -1 || $this->phase === 1 || $this->phase === 3 || $this->phase === 4){
                             
             if ($player->lastturn == $this->turn && $player->lastphase == $this->phase){
                 $this->waiting = true;

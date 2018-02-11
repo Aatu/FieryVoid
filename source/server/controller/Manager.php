@@ -142,6 +142,8 @@ class Manager{
 
         debug::log($pointsA);
         debug::log($poinstB);
+
+
         
         foreach ($data["slots"] as $slot){
             $slots[] = new PlayerSlotFromJSON($slot);
@@ -151,6 +153,7 @@ class Manager{
             self::initDBManager();
             self::$dbManager->startTransaction();
             $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace);
+            //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
             return $gameid;
@@ -283,8 +286,8 @@ class Manager{
         }
     }
     
-    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount){
-        self::$dbManager->updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount);
+    public static function updateAmmoInfo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn){
+        self::$dbManager->submitAmmo($shipid, $systemid, $gameid, $firingmode, $ammoAmount, $turn);
     }
     
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){
@@ -363,7 +366,9 @@ class Manager{
             
 
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
-            
+
+            SystemData::initSystemData($gdS->turn, $gdS->id);
+
             if($status == "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
             }
@@ -426,6 +431,9 @@ class Manager{
                 //Debug::log("Advance gamestate, Did not get lock. playerid: $playerid");
                 return;
             }
+
+
+
             
             $starttime = time();
             
@@ -434,6 +442,8 @@ class Manager{
             self::$dbManager->startTransaction();
 		
             $gamedata = self::$dbManager->getTacGamedata($playerid, $gameid);
+
+            SystemData::initSystemData($gamedata->turn, $gamedata->id);
 
             $phase = $gamedata->getPhase();
 
@@ -454,7 +464,7 @@ class Manager{
             if (TacGamedata::$currentPhase > 0){
                 foreach ($gamedata->ships as $ship){
                     foreach ($ship->systems as $system){
-                        $system->onAdvancingGamedata($ship);
+                        $system->onAdvancingGamedata($ship, $gamedata);
                     }
                 }
                 

@@ -17,13 +17,13 @@ class CubeCoordinate
     public function __construct($x, $y = null, $z = null)
     {
         if ($x instanceof CubeCoordinate){
-            $this->x = round($x->x, self::PRECISION);
-            $this->y = round($x->y, self::PRECISION);
-            $this->z = round($x->z, self::PRECISION);
+            $this->x = round((int)$x->x, self::PRECISION);
+            $this->y = round((int)$x->y, self::PRECISION);
+            $this->z = round((int)$x->z, self::PRECISION);
         } else {
-            $this->x = round($x, self::PRECISION);
-            $this->y = round($y, self::PRECISION);
-            $this->z = round($z, self::PRECISION);
+            $this->x = round((int)$x, self::PRECISION);
+            $this->y = round((int)$y, self::PRECISION);
+            $this->z = round((int)$z, self::PRECISION);
         }
 
         $this->validate();
@@ -72,7 +72,7 @@ class CubeCoordinate
     }
 
     public function moveToDirection($direction) {
-        return $this->add(self::NEIGHBOURS[$direction]);
+        return $this->add(new CubeCoordinate(self::NEIGHBOURS[$direction]));
     }
 
     public function add(CubeCoordinate $cube)

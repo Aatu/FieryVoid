@@ -24,6 +24,8 @@ window.MovementPhaseStrategy = (function(){
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         this.selectActiveShip();
         doForcedMovementForActiveShip();
+
+        this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
         return this;
     };
 

@@ -99,7 +99,7 @@ class BuyingGamePhase implements Phase
                                 foreach ($fighter->systems as $weapon){
                                     if(isset($weapon->missileArray)){
                                         $weapon->missileArray[1]->amount = $ammo;
-                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $ammo);
+                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $ammo, 0);
                                     }
                                 }
                             }
@@ -108,7 +108,7 @@ class BuyingGamePhase implements Phase
                             foreach($ship->systems as $fighter){
                                 foreach($fighter->systems as $weapon){
                                     if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
-                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $weapon->ammunition);
+                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $weapon->ammunition, 0);
                                     }
                                 }
                             }
@@ -134,7 +134,7 @@ class BuyingGamePhase implements Phase
                             if(isset($system->missileArray)){
                                 // this system has a missileArray. It uses ammo
                                 foreach($system->missileArray as $firingMode=>$ammo){
-                                    $dbManager->submitAmmo($id, $system->id, $gameData->id, $firingMode, $ammo->amount);
+                                    $dbManager->submitAmmo($id, $system->id, $gameData->id, $firingMode, $ammo->amount, 0);
                                 }
                             }
                         }

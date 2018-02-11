@@ -8,6 +8,7 @@ window.BallisticIconContainer = (function(){
     }
 
     BallisticIconContainer.prototype.consumeGamedata = function(gamedata, iconContainer) {
+
         this.ballisticIcons.forEach(function(ballisticIcon) {
             ballisticIcon.used = false;
         });
@@ -97,17 +98,19 @@ window.BallisticIconContainer = (function(){
         var targetPosition = null;
         var targetIcon = null;
 
-        if (ballistic.targetid === -1) {
+
+        if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
             targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-        } else {
+        } else if (ballistic.targetid && ballistic.targetid !== -1) {
             targetIcon = iconContainer.getById(ballistic.targetid);
             targetPosition = {x: 0, y:0};
         }
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');
-        var targetSprite = new BallisticSprite(targetPosition, 'hex');
+        var targetSprite =  targetPosition !== null ? new BallisticSprite(targetPosition, 'hex') : null;
 
         scene.add(launchSprite.mesh);
+
         if (targetIcon && targetSprite) {
             targetIcon.mesh.add(targetSprite.mesh);
         } else if (targetSprite)  {

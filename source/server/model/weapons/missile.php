@@ -55,7 +55,7 @@ class MissileLauncher extends Weapon{
     
     public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-        $pos = mathlib::hexCoToPixel($movement->x, $movement->y);
+        $pos = mathlib::hexCoToPixel($movement->position);
     
         if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->distanceRange)
         {
@@ -577,7 +577,7 @@ class FighterMissileRack extends MissileLauncher
         $ammo = $this->missileArray[$fireOrder->firingMode];
         if($ammo->amount > 0){
             $ammo->amount--;
-            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, TacGamedata::$currentGameID, $this->firingMode, $ammo->amount);
+            Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $ammo->amount, $gamedata->turn);
         }
         else{
             $fireOrder->notes = "No ammo available of the selected type.";

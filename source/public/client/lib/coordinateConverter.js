@@ -38,6 +38,14 @@ window.coordinateConverter = (function(){
         return window.HexagonMath.getHexHeight() / this.zoom;
     };
 
+    coordinateConverter.prototype.getHexDistance = function()
+    {
+        var hex1 = new hexagon.Offset(0, 0);
+        var hex2 = hex1.getNeighbourAtDirection(0);
+
+        return mathlib.distance(this.fromHexToGame(hex1), this.fromHexToGame(hex2));
+    };
+
     coordinateConverter.prototype.fromGameToHex = function(gameCoordinates)
     {
         var q = (1/3 * Math.sqrt(3) * gameCoordinates.x - 1/3 * gameCoordinates.y) / this.hexlenght;

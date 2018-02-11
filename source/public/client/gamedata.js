@@ -9,7 +9,7 @@ gamedata = {
     animating: false,
     ships: Array(),
     ballistics: Array(),
-    thisplayer: 1,
+    thisplayer: -1,
     waiting: false,
     selectedShips: Array(),
     targetedShips: Array(),
@@ -714,9 +714,7 @@ gamedata = {
     checkGameStatus: function(){
 
         //TODO: to phase strategy
-        $("#phaseheader .turn.value").html("TURN: " + gamedata.turn+ ",");
-        $("#phaseheader .phase.value").html(gamedata.getPhasename());
-        $("#phaseheader .activeship.value").html(gamedata.getActiveShipName());
+
 
     },
     

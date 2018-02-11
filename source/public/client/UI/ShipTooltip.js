@@ -4,16 +4,20 @@ window.ShipTooltip = (function(){
         + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>'
         + '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>'
         + '<div class="fire targeting"></div>'
+        + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>INCOMING:</span></div>'
+        + '<div class="ballistics incoming"></div>'
         + '<div class="buttons"></div>'
         + '</div>';
 
-    function ShipTooltip(selectedShip, ships, position, showTargeting, menu){
+    function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu){
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
         this.position = position;
         this.selectedShip = selectedShip;
         this.showTargeting = showTargeting;
+        this.hexagon = hexagon;
         this.menu = menu;
+        this.ballisticsMenu = ballisticsMenu;
 
         this.element.on('mousedown', function(e){e.preventDefault();});
         this.element.on('mouseup', function(e){e.preventDefault();});
@@ -63,6 +67,7 @@ window.ShipTooltip = (function(){
         jQuery(".namecontainer", this.element).html("");
         jQuery(".fire", this.element).html("");
         jQuery(".entry", this.element).remove();
+        jQuery(".incoming", this.element).html("");
 
         if (this.ships.length > 1) {
             createForMultipleShips.call(this, this.ships);
@@ -139,20 +144,28 @@ window.ShipTooltip = (function(){
             $(".fire", this.element).hide();
         }
 
+        this.ballisticsMenu.renderTo(ship, this.element);
+
+
         if (this.menu) {
             this.menu.renderTo(jQuery(".buttons", this.element), this);
         }
     }
 
     function createForMultipleShips(ships){
-
-
         ships.forEach(function(ship, i) {
             var comma = i < ships.length - 1 ? ',' : '';
 
             jQuery('<span class="name value '+ getAllyClass(ship) +'">' + ship.name + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+
+            $(".ballistics", this.element).hide();
+
         }, this);
-        this.addEntryElement("Zoom closer ton interact");
+        this.addEntryElement("Zoom closer to interact");
+    }
+
+    function showBallisticsTooltip(ballistics) {
+
     }
 
     function positionElement(element, position){

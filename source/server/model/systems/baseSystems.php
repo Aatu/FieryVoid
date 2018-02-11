@@ -523,13 +523,13 @@ class GraviticThruster extends Thruster{
     
     public $firstCriticalIgnored = false;
     
-    public function onAdvancingGamedata($ship)
+    public function onAdvancingGamedata($ship, $gamedata)
     {
         SystemData::addDataForSystem(
             $this->id, 0, $ship->id,
             '"firstCriticalIgnored":{"1":"'.$this->firstCriticalIgnored.'"}');
         
-        parent::onAdvancingGamedata($ship);
+        parent::onAdvancingGamedata($ship, $gamedata);
     }
     
     public function setSystemData($data, $subsystem)

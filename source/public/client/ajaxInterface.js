@@ -1,6 +1,7 @@
 window.ajaxInterface = {
 
     poll: null,
+    pollActive: false,
     pollcount: 0,
 	submiting: false,
 //	fastpolling: false,
@@ -357,7 +358,7 @@ window.ajaxInterface = {
     
     successRequest: function(data){
         ajaxInterface.submiting = false;
-        if (data.error){
+        if (data && data.error){
             window.confirm.exception(data , function(){});
             gamedata.waiting = false;
         }else{
@@ -374,23 +375,31 @@ window.ajaxInterface = {
 	
 	
     startPollingGamedata: function(){
-        
+
+
         if (gamedata.poll != null){
 			console.log("starting to poll, but poll is not null");
             return;
 			}
-           
+
+        ajaxInterface.pollActive = true;
         ajaxInterface.pollcount = 0;
-//        ajaxInterface.fastpolling = false;    
         ajaxInterface.pollGamedata();
     },
     
     stopPolling: function(){
         ajaxInterface.poll = null;
         ajaxInterface.pollcount  = 0;
+        ajaxInterface.pollActive = false;
     },
     
     pollGamedata: function(){
+
+        if (!ajaxInterface.pollActive) {
+            ajaxInterface.stopPolling();
+            return;
+        }
+
         if (gamedata.waiting == false){
 			ajaxInterface.stopPolling();
             return;

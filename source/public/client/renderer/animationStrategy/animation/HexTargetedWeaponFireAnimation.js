@@ -1,6 +1,6 @@
 window.HexTargetedWeaponFireAnimation = (function(){
 
-    function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer) {
+    function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation) {
 
         this.duration = 0;
         this.allFire = weaponManager.getAllHexTargetedBallistics();
@@ -10,13 +10,16 @@ window.HexTargetedWeaponFireAnimation = (function(){
         this.movementAnimations = movementAnimations;
         this.particleEmitterContainer = particleEmitterContainer;
         this.turn = turn;
-        console.log(this.allFire);
+        this.logAnimation = logAnimation;
 
         this.duration = 0;
 
         this.animations = [];
 
         this.allFire.forEach(function(fire) {
+
+            this.logAnimation.addLogEntryFire(fire.fireOrder, this.time + this.duration);
+
             this.duration += buildAnimation.call(this, fire, this.duration + this.time);
         }, this);
 
