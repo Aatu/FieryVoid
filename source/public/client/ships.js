@@ -763,7 +763,7 @@ window.shipManager = {
     },
 
     getTurnDestroyed: function(ship){
-		var turn = 0;
+		var turn = null;
 		if (ship.flight){
 			for (var i in ship.systems){
 				var fighter = ship.systems[i];

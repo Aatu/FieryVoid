@@ -11,12 +11,13 @@ window.ShipIcon = (function (){
         this.mesh = null;
         this.size = ship.canvasSize;
         this.mine = gamedata.isMyShip(ship);
-
+        this.scene = scene;
         this.shipSprite = null;
         this.shipEWSprite = null;
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
         this.weaponArcs = [];
+        this.hidden = false;
 
         this.selected = false;
 
@@ -53,6 +54,24 @@ window.ShipIcon = (function (){
 
     ShipIcon.prototype.setOpacity = function(opacity){
         this.shipSprite.setOpacity(opacity);
+    };
+
+    ShipIcon.prototype.hide = function(){
+        if (this.hidden) {
+            return;
+        }
+
+        this.scene.remove(this.mesh);
+        this.hidden = true;
+    };
+
+    ShipIcon.prototype.show = function(){
+        if (!this.hidden) {
+            return;
+        }
+
+        this.scene.add(this.mesh);
+        this.hidden = false;
     };
 
     ShipIcon.prototype.getFacing = function(facing) {

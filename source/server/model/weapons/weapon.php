@@ -367,10 +367,6 @@ class Weapon extends ShipSystem
         if (!is_array($array))
             return;
 
-        Debug::log("set system data for " . get_class($this) . "data : " );
-
-
-
         foreach ($array as $i => $entry) {
             if ($i == "loading") {
                 if (sizeof($entry) == 4) {
@@ -546,13 +542,13 @@ class Weapon extends ShipSystem
 
     }
 
-    public function calculateRangePenalty($pos, $target)
+    public function calculateRangePenalty(OffsetCoordinate $pos, BaseShip $target)
     {
-        $targetPos = $target->getCoPos();
+        $targetPos = $target->getHexPos();
         $dis = mathlib::getDistanceHex($pos, $targetPos);
 
         $rangePenalty = ($this->rangePenalty * $dis);
-        $notes = "shooter: " . $pos["x"] . "," . $pos["y"] . " target: " . $targetPos["x"] . "," . $targetPos["y"] . " dis: $dis, rangePenalty: $rangePenalty";
+        $notes = "shooter: " . $pos->q . "," . $pos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis, rangePenalty: $rangePenalty";
         return Array("rp" => $rangePenalty, "notes" => $notes);
     }
 
@@ -606,12 +602,12 @@ class Weapon extends ShipSystem
 
 
     /*calculate base chance to hit (before any interception is applied) - Marcin Sawicki*/
-    public function calculateHitBase($gamedata, $fireOrder)
+    public function calculateHitBase(TacGamedata $gamedata, FireOrder $fireOrder)
     {
         $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too! - certainly important for calculating hit chance...
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
         $target = $gamedata->getShipById($fireOrder->targetid);
-        $pos = $shooter->getCoPos();
+        $pos = $shooter->getHexPos();
         $jammermod = 0;
         $jinkSelf = 0;
         $jinkTarget = 0;
@@ -621,7 +617,7 @@ class Weapon extends ShipSystem
 
         if ($this->ballistic) {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $launchPos = mathlib::hexCoToPixel($movement->position);
+            $launchPos = $movement->position;
         } else {
             $launchPos = $pos;
         }
@@ -751,8 +747,8 @@ class Weapon extends ShipSystem
         $hitLoc = null;
 
         if ($this->ballistic) {
-            $hitLoc = $target->getHitSectionPos($launchPos, $fireOrder->turn);
-            $defence = $target->getHitSectionProfilePos($launchPos);
+            $hitLoc = $target->getHitSectionPos(mathlib::hexCoToPixel($launchPos), $fireOrder->turn);
+            $defence = $target->getHitSectionProfilePos(mathlib::hexCoToPixel($launchPos));
         } else {
             $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
             $defence = $target->getHitSectionProfile($shooter);
@@ -1031,7 +1027,7 @@ class Weapon extends ShipSystem
         //$pos = $shooter->getCoPos();
         if ($this->ballistic) {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->position);
+            $pos = $movement->position;
         }
 
         $shotsFired = $fireOrder->shots; //number of actual shots fired
@@ -1085,94 +1081,11 @@ class Weapon extends ShipSystem
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
     } //endof fire
 
-
-    /*Marcin Sawicki - October 2017 - firing procedure is remade; old version not deleted just in case*/
-    public function fireOld($gamedata, $fireOrder)
-    {
-        $shooter = $gamedata->getShipById($fireOrder->shooterid);
-        $target = $gamedata->getShipById($fireOrder->targetid);
-
-        //$this->firingMode = $fireOrder->firingMode;
-        $this->changeFiringMode($fireOrder->firingMode);//changing firing mode may cause other changes, too!
-
-        $pos = null; //functions will properly calculate from firing unit, which is important at range 0
-        //$pos = $shooter->getCoPos();
-        if ($this->ballistic) {
-            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-            $pos = mathlib::hexCoToPixel($movement->position);
-        }
-
-        $this->calculateHit($gamedata, $fireOrder);
-        $intercept = $this->getIntercept($gamedata, $fireOrder);
-        $shotsFired = $fireOrder->shots; //number of actual shots fired
-
-        if ($this->damageType == 'Pulse') {//Pulse mode always fires one shot of weapon - while 	$fireOrder->shots marks number of pulses for display purposes
-            $shotsFired = 1;
-        }
-
-        for ($i = 0; $i < $shotsFired; $i++) {
-            $needed = $fireOrder->needed;
-            if ($this->damageType != 'Pulse') {//non-Pulse weapons may use $grouping, too!
-                $needed = $fireOrder->needed - $this->getShotHitChanceMod($i);
-            }
-
-            //for linked shot: further shots will do the same as first!
-            if ($i == 0) { //clear variables that may be relevant for further shots in line
-                $fireOrder->linkedHit = null;
-            }
-            $rolled = Dice::d(100);
-            if ($this->isLinked && $i > 0) { //linked shot - number rolled (and effect) for furthr shots will be just the same as for first
-                $rolled = $fireOrder->rolled;
-                /*
-                $rolled = 50; //irrelevant really, just 0<roll<100
-                if($fireOrder->linkedHit==null){ //first linked shot did not hit, so neither will further ones
-                    $needed = 0;
-                    if($fireOrder->intercepted > 0) $fireOrder->intercepted++; //if first linked shot was intercepted, so will be next ones
-                }else{//first linked shot did hit, and so will further ones
-                    $needed = 100;
-                }
-                */
-            }
-
-            //interception?
-            if ($rolled > $needed && $rolled <= $needed + ($intercept * 5)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
-                if ($this->damageType == 'Pulse') {
-                    $fireOrder->intercepted += $this->maxpulses;
-                } else {
-                    $fireOrder->intercepted += 1;
-                }
-            }
-
-
-            $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
-            $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
-
-            //hit?
-            if ($rolled <= $needed) {
-                $hitsRemaining = 1;
-
-                if ($this->damageType == 'Pulse') { //possibly more than 1 hit from a shot
-                    $hitsRemaining = $this->rollPulses($gamedata->turn, $needed, $rolled); //this takes care of all details
-                }
-
-                while ($hitsRemaining > 0) {
-                    $hitsRemaining--;
-                    $fireOrder->shotshit++;
-                    $this->beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
-                }
-            }
-        }
-
-        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
-    } //endof function fire
-
-
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata)
     {
         $damage = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
         $this->damage($target, $shooter, $fireOrder, $gamedata, $damage);
     }
-
 
     protected function getOverkillSystem($target, $shooter, $system, $fireOrder, $gamedata, $damageWasDealt, $location = null)
     {
@@ -1376,13 +1289,12 @@ class Weapon extends ShipSystem
         $damage = $damage - $damage * $this->dp; //$dp is fraction of shot that gets wasted!
 
         if ($this->rangeDamagePenalty > 0) {
-            $targetPos = $target->getCoPos();
             if ($pos != null) {
                 $sourcePos = $pos;
             } else {
-                $sourcePos = $shooter->getCoPos();
+                $sourcePos = $shooter->getHexPos();
             }
-            $dis = mathlib::getDistanceHex($sourcePos, $targetPos);
+            $dis = mathlib::getDistanceHex($sourcePos, $target);
             $damage -= round($dis * $this->rangeDamagePenalty); //round to avoid damage loss at minimal ranges!
         }
 

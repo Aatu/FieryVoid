@@ -416,6 +416,7 @@ class BaseShip{
 
 
     public function getHitChanceMod($shooter, $pos, $turn, $weapon){
+        $pos = Mathlib::hexCoToPixel($pos);
         $affectingSystems = array();
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;
@@ -429,6 +430,7 @@ class BaseShip{
     }
 
     public function getDamageMod($shooter, $pos, $turn, $weapon){
+        $pos = Mathlib::hexCoToPixel($pos);
         $affectingSystems = array();
         foreach($this->systems as $system){
             if (!$this->checkIsValidAffectingSystem($system, $shooter, $pos, $turn, $weapon)) continue;

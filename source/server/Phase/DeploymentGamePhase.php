@@ -29,21 +29,22 @@ class DeploymentGamePhase implements Phase
 
         //TODO: Test this properly. I have no faith in it.
         if ($slot->deptype == "box"){
-            $depw = $slot->depwidth*Mathlib::$hexWidth;
-            $deph = $slot->depheight*Mathlib::$hexHeight;
+            $depw = $slot->depwidth;
+            $deph = $slot->depheight;
+
             if ($hexpos["x"] < ($deppos["x"]+($depw/2)) && $hexpos["x"] > ($deppos["x"]-($depw/2))){
                 if ($hexpos["y"] < ($deppos["y"]+($deph/2)) && $hexpos["y"] > ($deppos["y"]-($deph/2))){
                     return true;
                 }
             }
         }else if ($slot->deptype=="distance"){
-            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depheight*Mathlib::$hexWidth){
-                if (Mathlib::getDistance($deppos, $hexpos) > $slot->depwidth*Mathlib::$hexWidth){
+            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depheight){
+                if (Mathlib::getDistance($deppos, $hexpos) > $slot->depwidth){
                     return true;
                 }
             }
         }else{
-            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depwidth*Mathlib::$hexWidth){
+            if (Mathlib::getDistance($deppos, $hexpos) <= $slot->depwidth){
                 return true;
             }
         }

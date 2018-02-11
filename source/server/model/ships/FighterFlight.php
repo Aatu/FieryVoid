@@ -97,6 +97,7 @@
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
 	public function getDamageMod($shooter, $pos, $turn, $weapon){
+	    $pos = Mathlib::hexCoToPixel($pos);
 	    $affectingSystems = array();
 	    $fighter = $this->systems[1];
             foreach($fighter->systems as $system){
@@ -113,6 +114,7 @@
 	    /*redefinition - as defensive systems will be on actual fighters*/
 	    /*assuming all fighters are equal, it's enough to get system from first fighter, whether it's alive or not!*/
         public function getHitChanceMod($shooter, $pos, $turn, $weapon){
+            $pos = Mathlib::hexCoToPixel($pos);
             $affectingSystems = array();
             $fighter = $this->systems[1];
             foreach($fighter->systems as $system){

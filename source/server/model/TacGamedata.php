@@ -139,8 +139,7 @@ class TacGamedata{
                 continue;
             }
             
-                 
-            $pos = $ship->getCoPos();
+
             foreach ($this->ships as $ship2){
                 if ($ship->team == $ship2->team)
                     continue;
@@ -152,9 +151,8 @@ class TacGamedata{
                 if ($ship2->isPowerless()){
                     continue;
                 }
-                    
-                $pos2 = $ship2->getCoPos();
-                $dis = mathlib::getDistanceHex($pos, $pos2);
+
+                $dis = mathlib::getDistanceHex($ship, $ship2);
                 
                 if ($dis<70 || $this->turn < 5){
                     //print($ship->name . " is on distance $dis from " . $ship2->name);

@@ -55,9 +55,8 @@ class MissileLauncher extends Weapon{
     
     public function isInDistanceRange($shooter, $target, $fireOrder){
         $movement = $shooter->getLastTurnMovement($fireOrder->turn);
-        $pos = mathlib::hexCoToPixel($movement->position);
     
-        if(mathlib::getDistanceHex($pos,  $target->getCoPos()) > $this->distanceRange)
+        if(mathlib::getDistanceHex($movement->position,  $target) > $this->distanceRange)
         {
             $fireOrder->pubnotes .= " FIRING SHOT: Target moved out of distance range.";
             return false;

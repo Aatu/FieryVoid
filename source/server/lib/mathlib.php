@@ -27,11 +27,20 @@ class Mathlib{
         //print(self::$hexWidth);
         //var_dump($start);
         //var_dump($end);
-        
-        $dis = sqrt(($end["x"]-$start["x"])*($end["x"]-$start["x"]) + ($end["y"]-$start["y"])*($end["y"]-$start["y"]));
-        $disInHex = $dis / self::$hexWidth;
-        return $disInHex;
-        
+
+        if ($start instanceof BaseShip) {
+            $start = $start->getHexPos();
+        }
+
+        if ($end instanceof BaseShip) {
+            $end = $end->getHexPos();
+        }
+
+        if (!($start instanceof OffsetCoordinate) || !($end instanceof OffsetCoordinate)) {
+            throw new Exception("You need to give 'getDistanceHex' OffsetCoordinates or BaseShips");
+        }
+
+        return $start->distanceTo($end);
     }
     
     public static function getDistanceOfShipInHex(BaseShip $ship1, BaseShip $ship2){

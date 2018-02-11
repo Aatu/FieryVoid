@@ -316,7 +316,7 @@ window.webglScene = (function(){
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        //console.log(pos, hexPos);
+        console.log(pos, hexPos);
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }

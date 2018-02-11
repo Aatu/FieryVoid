@@ -62,7 +62,7 @@
             foreach ($gamedata->ships as $ship)
             {
                 if ($ship->team == $target->team && $ship->isElint()
-                     && Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) <= 20){
+                     && Mathlib::getDistanceHex($target, $ship) <= 20){
                     $blanket = $ship->getBlanketDEW($gamedata->turn);
                     
                     if ( $blanket > $FDEW )
@@ -82,7 +82,7 @@
                             return 0;
             }
             
-            if (Mathlib::getDistanceHex( $target->getCoPos(), $ship->getCoPos() ) > 30)
+            if (Mathlib::getDistanceHex( $target, $ship ) > 30)
                 return 0;
             
             $amount = 0;
@@ -94,10 +94,10 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $target->getCoPos(), $elint->getCoPos() ) > 30)
+                if (Mathlib::getDistanceHex( $target, $elint ) > 30)
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 30)
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 30)
                     continue;
 
                 if (!$elint->getEWbyType("SOEW", $gamedata->turn, $ship))
@@ -131,7 +131,7 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 50)
                     continue;
 
                 $fdew = $elint->getEWByType("SDEW", $gamedata->turn, $ship)*0.5;
@@ -157,7 +157,7 @@
                 if (!$elint->isElint())
                     continue;
                 
-                if (Mathlib::getDistanceHex( $ship->getCoPos(), $elint->getCoPos() ) > 50)
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 50)
                     continue;
 
                 $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship)*0.25;

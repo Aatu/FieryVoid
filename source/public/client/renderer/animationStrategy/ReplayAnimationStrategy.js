@@ -18,7 +18,7 @@ window.ReplayAnimationStrategy = (function(){
 
         this.movementAnimations = {};
 
-        this.moveHexDuration = 40;
+        this.moveHexDuration = 400;
         this.moveAnimationDuration = 2500;
         this.type = type || ReplayAnimationStrategy.type.INFORMATIVE;
 
@@ -47,6 +47,10 @@ window.ReplayAnimationStrategy = (function(){
         });
 
         this.emitterContainer.cleanUp();
+
+        this.gamedata.ships.forEach(function(ship){
+            this.shipIconContainer.getByShip(ship).show();
+        }, this);
 
         return this;
     };
@@ -84,6 +88,13 @@ window.ReplayAnimationStrategy = (function(){
             var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
             time += animation.getDuration();
             this.animations.push(animation);
+        }, this);
+
+        this.gamedata.ships.filter(function(ship){
+            var turnDestroyed = shipManager.getTurnDestroyed(ship);
+            return turnDestroyed !== null && turnDestroyed < this.turn;
+        }, this).forEach(function(ship){
+            this.shipIconContainer.getByShip(ship).hide();
         }, this);
 
         return time;
