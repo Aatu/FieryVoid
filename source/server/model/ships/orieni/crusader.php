@@ -25,6 +25,7 @@ class Crusader extends MediumShip{
         $this->iniativebonus = 65;
         
         $this->occurence = "uncommon";
+        $this->limited = 33; //not present on SCS, but for Commune it isn't either - and it's a Limited hull by WotCR book...
          
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
