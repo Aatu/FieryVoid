@@ -33,16 +33,17 @@ class Steadfast extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 60));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));	
         $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));		
+        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));	
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
 
-        $this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
+
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
+        $this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
         $this->addAftSystem(new LightLaser(1, 4, 3, 0, 180));    
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
