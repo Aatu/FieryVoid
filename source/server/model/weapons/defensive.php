@@ -190,7 +190,6 @@
         public $animation = "laser";
         public $animationColor = array(160, 160, 160);
         public $animationExplosionScale = 0.15;
-        public $priority = 4;
         public $animationWidth = 2;
         public $animationWidth2 = 0;
 	    
