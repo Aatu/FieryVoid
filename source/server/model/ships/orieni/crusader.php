@@ -9,6 +9,8 @@ class Crusader extends MediumShip{
         $this->phpclass = "Crusader";
         $this->imagePath = "img/ships/commune.png";
         $this->shipClass = "Crusader Heavy Frigate";
+        $this->variantOf = "Commune Battle Leader";
+            $this->isd = 2007; 
 
         $this->canvasSize = 100;
         
@@ -32,25 +34,52 @@ class Crusader extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
         
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 240, 60));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 300, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 
+        $this->addAftSystem(new RapidGatling(2, 4, 1, 120, 360)); 
+        $this->addAftSystem(new RapidGatling(2, 4, 1, 0, 240)); 
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));        
-        $this->addAftSystem(new RapidGatling(2, 4, 1, 120, 360)); 
-        $this->addAftSystem(new RapidGatling(2, 4, 1, 0, 240)); 
         
         $this->addPrimarySystem(new Structure(5, 56));
         
+
+        //d20 hit chart
+        $this->hitChart = array(
+            0=> array(
+                8 => "Thruster",
+                11 => "Scanner",
+                15 => "Engine",
+                17 => "Hangar",
+                19 => "Reactor",
+                20 => "C&C",
+            ),
+            1=> array(
+                5 => "Thruster",
+                8 => "Heavy Gauss Cannon",
+                10 => "Rapid Gatling Railgun",
+                12 => "Class-S Missile Rack",
+                17 => "Structure",
+                20 => "Primary",
+            ),
+            2=> array(
+                7 => "Thruster",
+                9 => "Rapid Gatling Railgun",
+                17 => "Structure",
+                20 => "Primary",
+            ),
+        );                
             
         }
     }
+
 ?>
