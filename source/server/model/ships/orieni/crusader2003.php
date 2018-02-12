@@ -1,5 +1,5 @@
 <?php
-class Crusader extends MediumShip{
+class Crusader2003 extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
