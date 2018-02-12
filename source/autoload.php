@@ -230,7 +230,7 @@ spl_autoload_register(
                 'rogolonvasturshf' =>  '/server/model/ships/smallraces/rogolonVasturSHF.php',
                 'rogolonvostorshf' =>  '/server/model/ships/smallraces/rogolonVostorSHF.php',
                 
-                
+/*                
                 //Abbai
                 //weapons and system
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
@@ -268,7 +268,7 @@ spl_autoload_register(
                 'nakarsa' =>  '/server/model/ships/abbai/nakarsa.php',
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
-                
+*/                
                 
                 
                 
