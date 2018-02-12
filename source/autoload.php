@@ -243,7 +243,7 @@ spl_autoload_register(
                 'quadarray' => '/server/model/weapons/particle.php',
                 'combatlaser' => '/server/model/weapons/lasers.php',                
                 'lasercutter' => '/server/model/weapons/lasers.php',
-/*                
+                
                 //Abbai ships (WoCR era)
                 'benota' =>  '/server/model/ships/abbai_old/benota.php',
                 'seta' =>  '/server/model/ships/abbai_old/seta.php',
@@ -269,7 +269,7 @@ spl_autoload_register(
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
-*/                
+                
                 
                 
                 //Deneth
