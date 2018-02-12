@@ -9,7 +9,6 @@ class Skylark extends MediumShip{
 	$this->phpclass = "skylark";
 	$this->shipClass = "Skylark Transport";
 	$this->imagePath = "img/ships/LlortDaggaden.png"; //sure why not :-)
-
 	$this->agile = true;
 	$this->forwardDefense = 10;
 	$this->sideDefense = 11;
@@ -32,7 +31,6 @@ class Skylark extends MediumShip{
 	$this->addPrimarySystem(new Engine(3, 9, 0, 4, 1));
 	$this->addPrimarySystem(new CargoBay(2, 6));
 	$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
-
 	$this->addPrimarySystem(new Structure(3, 30));
         $this->hitChart = array(
         		0=> array( //should never happen
