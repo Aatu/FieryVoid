@@ -33,17 +33,17 @@ class Obedient extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 4));        
         
-        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
         $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));  
         $this->addFrontSystem(new LightLaser(1, 4, 3, 270, 90));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
+        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
+ 
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));   
        
         $this->addPrimarySystem(new Structure(4, 36));
         
