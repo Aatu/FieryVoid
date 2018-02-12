@@ -36,9 +36,9 @@ class Crusader extends MediumShip{
         
 
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 240, 60));
         $this->addFrontSystem(new HeavyGaussCannon(3, 10, 4, 300, 120));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new SMissileRack(3, 6, 0, 270, 90));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
