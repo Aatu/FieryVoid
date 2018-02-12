@@ -56,7 +56,7 @@ class Skiatha extends BaseShip{
         $this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 3, 60, 120));
-        $this->addRighSystem(new Particleimpeder(3, 0, 0, 0, 180));
+        $this->addRightSystem(new Particleimpeder(3, 0, 0, 0, 180));
         $this->addRightSystem(new QuadArray(3, 0, 0, 300, 180));
         $this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
 	    
