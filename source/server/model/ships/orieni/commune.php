@@ -44,13 +44,14 @@ class Commune extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         
-
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));        
+      
         $this->addAftSystem(new RapidGatling(2, 4, 1, 120, 360)); 
         $this->addAftSystem(new RapidGatling(2, 4, 1, 0, 240)); 
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 3, 2));  
+        
         
         $this->addPrimarySystem(new Structure(5, 56));
         
