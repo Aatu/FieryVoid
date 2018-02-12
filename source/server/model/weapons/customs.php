@@ -449,8 +449,8 @@ class AbsorbtionShield extends Shield implements DefensiveSystem{
 	parent::setSystemDataWindow($turn);
 	//$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
 	$this->data["Basic Strength"] = $this->baseOutput;      
-	$this->data["<font color='red'>Remark</font>"] = "<br>Does not decrease profile.";  
-	$this->data["<font color='red'>Remark</font>"] .= "<br>Doubly effective vs Raking weapons."; 
+	$this->data["Remark"] = "<br>Does not decrease profile.";  
+	$this->data["Remark"] .= "<br>Doubly effective vs Raking weapons."; 
     }
 	  
         private function getBoostLevel($turn){
