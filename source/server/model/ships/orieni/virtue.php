@@ -35,9 +35,9 @@ class Virtue extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 6, 4));        
 
+        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
+        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));
         $this->addFrontSystem(new Thruster(1, 6, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
