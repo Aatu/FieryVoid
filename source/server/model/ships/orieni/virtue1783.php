@@ -10,7 +10,7 @@ class Virtue1783 extends MediumShip{
         $this->imagePath = "img/ships/steadfast.png";
         $this->shipClass = "Virtue Strike Force Corvette (early)";  
         $this->variantOf = "Steadfast Escort Corvette";
-	    $this->isd = 1780;
+	    $this->isd = 1783;
         $this->agile = true;
         $this->canvasSize = 100;
         
