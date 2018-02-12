@@ -54,7 +54,7 @@ class Aldrith extends BaseShip{
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
-        $this->addLeftSystem(new Particleimpeder(2, 0, 0, 0, 180));
+        $this->addRightSystem(new Particleimpeder(2, 0, 0, 0, 180));
         $this->addRightSystem(new AssaultLaser(3, 6, 4, 0, 120));
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
         
