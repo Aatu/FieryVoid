@@ -20,6 +20,10 @@ class CubeCoordinate
             $this->x = round((int)$x->x, self::PRECISION);
             $this->y = round((int)$x->y, self::PRECISION);
             $this->z = round((int)$x->z, self::PRECISION);
+        } else if (isset($x["x"]) && isset($x["y"]) && isset($x["z"])) {
+            $this->x = round((int)$x["x"], self::PRECISION);
+            $this->y = round((int)$x["y"], self::PRECISION);
+            $this->z = round((int)$x["z"], self::PRECISION);
         } else {
             $this->x = round((int)$x, self::PRECISION);
             $this->y = round((int)$y, self::PRECISION);
@@ -59,7 +63,7 @@ class CubeCoordinate
     {
         if (abs($this->x + $this->y + $this->z) > 0.001) {
             throw new Exception(
-                "Invalid Cube coordinates: (" + $this->x + ", " + $this->y + ", " + $this->z + ")"
+                "Invalid Cube coordinates: (" . $this->x . ", " . $this->y . ", " . $this->z . ")"
             );
         }
     }
@@ -77,12 +81,12 @@ class CubeCoordinate
 
     public function add(CubeCoordinate $cube)
     {
-        return new CubeCoordinate($this->x + $cube->x, $this->x + $cube->y, $this->x + $cube->z);
+        return new CubeCoordinate($this->x + $cube->x, $this->y + $cube->y, $this->z + $cube->z);
     }
 
     public function subtract(CubeCoordinate $cube)
     {
-        return new CubeCoordinate($this->x - $cube->x, $this->x - $cube->y, $this->x - $cube->z);
+        return new CubeCoordinate($this->x - $cube->x, $this->y - $cube->y, $this->z - $cube->z);
     }
 
     public function scale($scale)
