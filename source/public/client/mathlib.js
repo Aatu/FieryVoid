@@ -139,6 +139,8 @@ window.mathlib = {
 	
 	isInArc: function(direction, start, end){
 		//direction: 300 start: 360 end: 240
+		direction = Math.round(direction);
+
 		if (start == end)
 			return true;
 			
@@ -152,7 +154,7 @@ window.mathlib = {
 		}else if (direction >= start && direction <= end){
 			return true;
 		}
-	
+
 		return false;
 		
 	},

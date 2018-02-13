@@ -29,6 +29,34 @@ window.FlightIcon = (function (){
         shipWindowManager.setData(ship);
     };
 
+    FlightIcon.prototype.hideDestroyedFighters = function() {
+        this.fighterSprites.forEach(function(sprite) {
+            sprite.hide();
+        });
+
+        this.fighters.forEach(function(fighter, i) {
+            if (fighter.destroyed) {
+                this.fighterSprites[fighter.location].hide();
+            }else{
+                this.fighterSprites[fighter.location].show();
+            }
+        }, this);
+    };
+
+    FlightIcon.prototype.hideFighters = function(fightersToHide) {
+        this.fighters.forEach(function (fighter) {
+            var found = fightersToHide.some(function(fighterToHide) {
+                return fighter.id === fighterToHide.id;
+            });
+
+            if (! found) {
+                this.fighterSprites[fighter.location].show();
+            } else {
+                this.fighterSprites[fighter.location].hide();
+            }
+        }, this);
+    };
+
     FlightIcon.prototype.setOverlayColorAlpha = function(alpha) {
         this.fighterSprites.forEach(function (sprite) {
             sprite.setOverlayColorAlpha(alpha);
@@ -52,6 +80,7 @@ window.FlightIcon = (function (){
             positionFighter(fighter, sprite);
             this.mesh.add(sprite.mesh);
             this.fighterSprites.push(sprite);
+            fighter.sprite = sprite;
         }, this);
 
         this.shipEWSprite = new window.ShipEWSprite({width: this.size/2, height: this.size/2}, -1);
@@ -74,9 +103,10 @@ window.FlightIcon = (function (){
     function consumeFighters(ship) {
         return ship.systems.map(function(fighter) {
            return {
+               id: fighter.id,
                imagePath: fighter.imagePath,
                destroyed: fighter.destroyed,
-               location: fighter.location
+               location: fighter.location,
            };
         });
     }

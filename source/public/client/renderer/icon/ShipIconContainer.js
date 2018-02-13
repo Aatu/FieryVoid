@@ -69,7 +69,6 @@ window.ShipIconContainer = (function(){
     };
 
     ShipIconContainer.prototype.getIconsInProximity = function (payload) {
-
         var hexHeight = this.coordinateConverter.getHexHeightViewport();
         var distance = hexHeight/10;
 

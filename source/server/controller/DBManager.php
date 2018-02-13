@@ -135,48 +135,29 @@ class DBManager
 
     public function submitShip($gameid, $ship, $userid)
     {
-
-        try {
-            $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot)";
-            //   Debug::log($sql);
-            $id = $this->insert($sql);
-            return $id;
-            //$sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, $id, 0, 0)";
-            //$this->insert($sql);			
-
-        } catch (Exception $e) {
-            $this->endTransaction(true);
-            throw $e;
-        }
+        $sql = "INSERT INTO `B5CGM`.`tac_ship` VALUES(null, $userid, $gameid, '" . $this->DBEscape($ship->name) . "', '" . $ship->phpclass . "', 0, 0, 0, 0, 0, $ship->slot)";
+        //   Debug::log($sql);
+        $id = $this->insert($sql);
+        return $id;
     }
 
 
     public function submitAdaptiveArmour($gameid, $shipid)
     {
-        try {
-            $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
-                VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
 
-            $id = $this->insert($sql);
+        $sql = "INSERT INTO `B5CGM`.`tac_adaptivearmour` (gameid, shipid, particlepoints, particlealloc, laserpoints, laseralloc, molecularpoints, molecularalloc, matterpoints, matteralloc, plasmapoints, plasmaalloc, electromagneticpoints, electromagneticalloc, antimatterpoints, antimatteralloc, ionpoints, ionalloc, graviticpoints, graviticalloc, ballisticpoints, ballisticalloc)
+            VALUES ($gameid, $shipid, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)";
 
-        } catch (Exception $e) {
-            $this->endTransaction(true);
-            throw $e;
-        }
+        $id = $this->insert($sql);
+
     }
 
     public function submitFlightSize($gameid, $shipid, $flightSize)
     {
-        try {
-            $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
-                VALUES ($gameid, $shipid, $flightSize)";
+        $sql = "INSERT INTO `B5CGM`.`tac_flightsize` (gameid, shipid, flightsize)
+            VALUES ($gameid, $shipid, $flightSize)";
 
-            $id = $this->insert($sql);
-
-        } catch (Exception $e) {
-            $this->endTransaction(true);
-            throw $e;
-        }
+        $id = $this->insert($sql);
     }
 
 

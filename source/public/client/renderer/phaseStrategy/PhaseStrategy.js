@@ -80,6 +80,8 @@ window.PhaseStrategy = (function(){
             this.deselectShip(this.selectedShip);
         }
 
+        this.currentlyMouseOveredIds = null;
+
         return this;
     };
 
@@ -103,7 +105,7 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onClickEvent = function(payload) {
-        var icons = this.shipIconContainer.getIconsInProximity(payload);
+        var icons = getInterestingStuffInPosition.call(this, payload, this.gamedata.turn);
 
         this.onClickCallbacks = this.onClickCallbacks.filter(function(callback) {
             callback();
@@ -154,7 +156,8 @@ window.PhaseStrategy = (function(){
             this.deselectShip(this.selectedShip);
         }
         this.selectedShip = ship;
-        this.shipIconContainer.getById(ship.id).setSelected(true);
+        this.shipIconContainer.getByShip(ship).setSelected(true);
+        this.shipIconContainer.getByShip(ship).showEW();
     };
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
@@ -181,7 +184,7 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.onMouseMoveEvent = function(payload) {
-        var icons = getInterestingStuffInPosition.call(this, payload);
+        var icons = getInterestingStuffInPosition.call(this, payload, this.gamedata.turn);
 
         function doMouseOut(){
             if (this.currentlyMouseOveredIds) {
@@ -196,8 +199,10 @@ window.PhaseStrategy = (function(){
             this.onMouseOutShips(gamedata.ships, payload);
         }
 
-        if (icons.length === 0) {
+        if (icons.length === 0 && this.currentlyMouseOveredIds !== null) {
             doMouseOut.call(this);
+            return;
+        } else if (icons.length === 0 ){
             return;
         }
 
@@ -340,7 +345,6 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function() {
         var ship = gamedata.getFirstFriendlyShip();
-        //TODO: Scroll to ship?
         //TODO: what about active ship?
         if (ship) {
             this.setSelectedShip(ship);
@@ -386,8 +390,11 @@ window.PhaseStrategy = (function(){
         this.animationStrategy.activate();
     };
 
-    function getInterestingStuffInPosition(payload){
-       return this.shipIconContainer.getIconsInProximity(payload);
+    function getInterestingStuffInPosition(payload, turn){
+       return this.shipIconContainer.getIconsInProximity(payload).filter(function (icon) {
+           var turnDestroyed = shipManager.getTurnDestroyed(icon.ship);
+           return turnDestroyed === null || turnDestroyed >= turn;
+       });
     }
 
     PhaseStrategy.prototype.setPhaseHeader = function(name, shipName) {

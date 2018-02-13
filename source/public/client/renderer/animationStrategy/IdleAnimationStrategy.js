@@ -20,15 +20,21 @@ window.IdleAnimationStrategy = (function(){
             } else {
                icon.show();
             }
+
+            if (icon instanceof FlightIcon) {
+                icon.hideDestroyedFighters();
+            }
         }, this);
         return this;
     };
 
     IdleAnimationStrategy.prototype.deactivate = function() {
 
-        this.shipIconContainer.getArray().forEach(function(icon){
-            icon.show();
-        }, this);
+        if (this.shipIconContainer){
+            this.shipIconContainer.getArray().forEach(function(icon){
+                icon.show();
+            }, this);
+        }
 
         return AnimationStrategy.prototype.deactivate.call(this);
     };

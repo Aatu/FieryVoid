@@ -12,7 +12,6 @@ window.EWIconContainer = (function(){
     }
 
     EWIconContainer.prototype.consumeGamedata = function(gamedata) {
-
         this.ewIcons.forEach(function(ewIcon) {
             ewIcon.used = false;
         });
@@ -27,14 +26,18 @@ window.EWIconContainer = (function(){
            }, this)
         }, this);
 
+
+
         this.ewIcons = this.ewIcons.filter(function (icon) {
             if (!icon.used) {
                 this.scene.remove(icon.sprite.mesh);
+                icon.sprite.destroy();
                 return false;
             }
 
             return true;
         }, this);
+
     };
 
     EWIconContainer.prototype.hide = function() {
@@ -45,7 +48,7 @@ window.EWIconContainer = (function(){
 
     EWIconContainer.prototype.showForShip = function(ship) {
         this.ewIcons.filter(function(icon) {
-            return icon.shipId == ship.id || icon.targetId == ship.id;
+            return icon.shipId === ship.id || icon.targetId === ship.id;
         }).forEach(function(icon) {
             icon.sprite.setStartAndEnd(getStartOffset(icon.shipIcon.getPosition(), icon.targetIcon.getPosition()), icon.targetIcon.getPosition());
             icon.sprite.show();
@@ -136,9 +139,9 @@ window.EWIconContainer = (function(){
     }
 
     function getOEWIcon(ship, target) {
-        return this.ewIcons.filter(function(icon) {
-            return icon.type == "OEW" && icon.shipId == ship.id && icon.targetId == target.id;
-        }).pop();
+        return this.ewIcons.find(function(icon) {
+            return icon.type === "OEW" && icon.shipId === ship.id && icon.targetId === target.id;
+        });
     }
 
     return EWIconContainer;

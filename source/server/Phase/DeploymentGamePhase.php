@@ -27,13 +27,31 @@ class DeploymentGamePhase implements Phase
 
         $deppos = Mathlib::hexCoToPixel(new OffsetCoordinate($slot->depx, $slot->depy));
 
-        //TODO: Test this properly. I have no faith in it.
-        if ($slot->deptype == "box"){
-            $depw = $slot->depwidth;
-            $deph = $slot->depheight;
+        $hexpos = [
+            "x" => round($hexpos["x"]),
+            "y" => round($hexpos["y"])
+        ];
 
-            if ($hexpos["x"] < ($deppos["x"]+($depw/2)) && $hexpos["x"] > ($deppos["x"]-($depw/2))){
-                if ($hexpos["y"] < ($deppos["y"]+($deph/2)) && $hexpos["y"] > ($deppos["y"]-($deph/2))){
+        $hexWidth = cos(30/180*pi()) * 2;
+        $hexHeight = sin(30/180*pi()) + 1;
+
+        if ($slot->deptype == "box"){
+            $depw = $slot->depwidth*$hexWidth;
+            $deph = $slot->depheight*$hexHeight;
+
+
+            $leftBottom = [
+                "x" => round($deppos["x"]-($depw/2)),
+                "y" => round($deppos["y"]-($deph/2))
+            ];
+
+            $rightTop = [
+                "x" => round($deppos["x"]+($depw/2)),
+                "y" => round($deppos["y"]+($deph/2))
+            ];
+
+            if ($hexpos["x"] < $rightTop["x"] && $hexpos["x"] > $leftBottom["x"]){
+                if ($hexpos["y"] < $rightTop["y"] && $hexpos["y"] > $leftBottom["y"]){
                     return true;
                 }
             }

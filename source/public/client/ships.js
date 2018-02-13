@@ -765,12 +765,20 @@ window.shipManager = {
     getTurnDestroyed: function(ship){
 		var turn = null;
 		if (ship.flight){
-			for (var i in ship.systems){
-				var fighter = ship.systems[i];
+
+		    var fightersSurviving = ship.systems.some(function(fighter) {
+		        return damageManager.getTurnDestroyed(ship, fighter) === null;
+            });
+
+		    if (fightersSurviving) {
+		        return null;
+            }
+
+            ship.systems.forEach(function(fighter){
 				var dturn = damageManager.getTurnDestroyed(ship, fighter);
 				if (dturn > turn)
 					turn = dturn;
-			}
+			});
 
 		}else{
 

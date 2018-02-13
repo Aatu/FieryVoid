@@ -68,6 +68,10 @@ window.webglSprite = (function(){
         );
     };
 
+    Sprite.prototype.destroy = function() {
+        this.mesh.material.dispose();
+    };
+
     Sprite.prototype.setFacing = function(facing) {
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };

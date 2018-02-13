@@ -49,6 +49,7 @@ window.FirePhaseStrategy = (function(){
 
     FirePhaseStrategy.prototype.deselectShip = function(ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
+        this.hideMovementUI();
     };
 
     FirePhaseStrategy.prototype.targetShip = function(ship, payload) {
@@ -70,6 +71,10 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype.setSelectedShip = function(ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         this.showShipEW(ship);
+        console.log("can pivot?", shipManager.movement.canPivot(ship));
+        if (shipManager.movement.canPivot(ship)) {
+            this.drawMovementUI(this.selectedShip);
+        }
     };
 
     FirePhaseStrategy.prototype.onMouseOutShips = function(ships, payload) {

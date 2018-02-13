@@ -157,6 +157,7 @@ window.ShipIcon = (function (){
 
         this.shipEWSprite = new window.ShipEWSprite({width: this.size/2, height: this.size/2}, -1);
         this.mesh.add(this.shipEWSprite.mesh);
+        this.shipEWSprite.hide();
 
         this.ShipSelectedSprite = new window.ShipSelectedSprite({width: this.size/2, height: this.size/2}, -2, this.mine ? 'ally' : 'enemy', true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);

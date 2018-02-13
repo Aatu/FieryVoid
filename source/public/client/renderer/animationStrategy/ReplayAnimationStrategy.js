@@ -97,6 +97,17 @@ window.ReplayAnimationStrategy = (function(){
             this.shipIconContainer.getByShip(ship).hide();
         }, this);
 
+        this.gamedata.ships.filter(function(ship){
+            return ship.flight;
+        }, this).forEach(function(ship){
+            var fightersToHide = ship.systems.filter(function (fighter) {
+                var turnDestroyed = damageManager.getTurnDestroyed(ship, fighter);
+                return turnDestroyed !== null && turnDestroyed < this.turn;
+            }, this);
+
+            this.shipIconContainer.getByShip(ship).hideFighters(fightersToHide);
+        }, this);
+
         return time;
     }
 

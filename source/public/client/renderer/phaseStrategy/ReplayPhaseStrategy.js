@@ -35,9 +35,10 @@ window.ReplayPhaseStrategy = (function(){
 
         activatePause.call(this);
 
-        console.log("activate replay phase");
 
         this.setPhaseHeader(false);
+
+
         return this;
     };
 
@@ -51,8 +52,6 @@ window.ReplayPhaseStrategy = (function(){
         this.gamedata = gamedata;
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
-
-        console.log("update replay phase");
 
         startReplayOrRequestGamedata.call(this);
     };
@@ -189,7 +188,6 @@ window.ReplayPhaseStrategy = (function(){
 
     function requestPlayableGamedata() {
         startLoading.call(this);
-        console.log("request playable", gamedata.thisplayer);
 
         jQuery.ajax({
             type : 'GET',
@@ -205,7 +203,6 @@ window.ReplayPhaseStrategy = (function(){
                 force: true
             },
             success: function(data) {
-                console.log("new replay", data);
                 gamedata.replay = false;
                 stopLoading.call(this);
                 gamedata.parseServerData(data);
