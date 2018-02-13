@@ -14,14 +14,13 @@ window.InitialPhaseStrategy = (function(){
     };
 
     InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
-
+        shipManager.power.repeatLastTurnPower();
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
         console.log("enabled initial phase strategy");
         infowindow.informPhase(5000, function(){});
-        shipManager.power.repeatLastTurnPower();
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
 
