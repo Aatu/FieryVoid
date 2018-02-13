@@ -83,7 +83,7 @@ public function calculateHit($gamedata, $fireOrder){
                     $sourceHex = $target;
                     $damage = $this->minDamage;
                 }
-                $this->AOEdamage($targetShip, $shooter, $fireOrder, Mathlib::hexCoToPixel($sourceHex), $damage, $gamedata);
+                $this->AOEdamage($targetShip, $shooter, $fireOrder, $sourceHex, $damage, $gamedata);
             }
         }
 
@@ -104,7 +104,7 @@ public function calculateHit($gamedata, $fireOrder){
                 $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, $sourceHex, $gamedata, false);
             }
         } else {
-            $tmpLocation = $target->getHitSectionPos($sourceHex, $fireOrder->turn);
+            $tmpLocation = $target->getHitSectionPos(Mathlib::hexCoToPixel($sourceHex), $fireOrder->turn);
             $system = $target->getHitSystem($shooter, $fireOrder, $this, $tmpLocation);
             $this->doDamage($target, $shooter, $system, $damage, $fireOrder, null, $gamedata, false, $tmpLocation);
         }
