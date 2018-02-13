@@ -1066,7 +1066,7 @@ class DBManager
     public function getTacShips($gamedata, $turn)
     {
 
-        $starttime = time();
+        //$starttime = time();
         $ships = array();
 
         $stmt = $this->connection->prepare(
@@ -1111,8 +1111,8 @@ class DBManager
         $this->getFireOrdersForShips($gamedata, $turn);
         $this->getSystemDataForShips($gamedata, $turn);
 
-        $endtime = time();
-        Debug::log("GETTING SHIPS - GAME: $gamedata->id Fetching gamedata took " . ($endtime - $starttime) . " seconds.");
+        //$endtime = time();
+        //Debug::log("GETTING SHIPS - GAME: $gamedata->id Fetching gamedata took " . ($endtime - $starttime) . " seconds.");
 
 
     }

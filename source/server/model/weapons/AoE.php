@@ -61,7 +61,7 @@ public function calculateHit($gamedata, $fireOrder){
                 $maxdis = $posLaunch->distanceTo($target);
                 $dis = Dice::d(6); //deviation distance
                 $dis = min($dis, floor($maxdis));
-                $direction = Dice::d(6); //deviation direction
+                $direction = Dice::d(6)-1; //deviation direction
 
                 $target = $target->moveToDirection($direction, $dis);
 
