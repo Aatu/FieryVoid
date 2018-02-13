@@ -171,9 +171,7 @@ gamedata = {
 		    throw new Error("You need to give shooter for this one");
 		}
 		
-		
-		var ret = (target.team != shooter.team); 
-		return ret;
+		return (target.team !== shooter.team);
 	},
 
     shipStatusChanged: function(ship){

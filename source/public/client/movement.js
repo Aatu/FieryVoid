@@ -1431,7 +1431,7 @@ shipManager.movement = {
         for (var i = ship.movement.length - 1; i >= 0; i--) {
             var move = ship.movement[i];
 
-            if (!new hexagon.Offset(move.position).equals(new hexagon.Offset(move.position)))
+            if (!oPos.equals(new hexagon.Offset(move.position)))
                 return move.position;
 
         }

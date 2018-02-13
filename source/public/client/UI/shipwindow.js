@@ -1710,24 +1710,19 @@ setSystemData: function(ship, system, shipwindow){
 			
 			if (gamedata.gamephase != 1 && system.ballistic)
 				return;
-		
-			if (weaponManager.isSelectedWeapon(system)){
-				weaponManager.unSelectWeapon(ship, system);
-			}else{
-				weaponManager.selectWeapon(ship, system);
+
+			if (gamedata.isMyShip(ship)) {
+                if (weaponManager.isSelectedWeapon(system)){
+                    weaponManager.unSelectWeapon(ship, system);
+                }else{
+                    weaponManager.selectWeapon(ship, system);
+                }
+
 			}
-			
 		}
 
-		/* TODO: implement called shot with new scs
-		if (gamedata.isEnemy(ship, selectedShip) 
-			&& gamedata.gamephase == 3 
-			&& gamedata.selectedSystems.length > 0 
-			&& weaponManager.canCalledshot(ship, system))
-		{
-			weaponManager.targetShip(ship, system);
-		}
-		*/
+
+        webglScene.customEvent('SystemTargeted', {ship: ship, system: system});
 	
 	},
 	

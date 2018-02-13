@@ -555,6 +555,7 @@ window.weaponManager = {
 	},
 
 	isOnWeaponArc: function(shooter, target, weapon){
+		console.log("is on arc");
 		var shooterFacing = (shipManager.getShipHeadingAngle(shooter));
 		var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
 
@@ -1272,7 +1273,7 @@ window.weaponManager = {
 
 	//system is for called shot!
 	targetShip: function(selectedShip, ship, system){
-		var debug = false;
+		var debug = true;
 
 		debug && console.log("weaponManager target ship", ship, system);
 

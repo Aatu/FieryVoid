@@ -84,5 +84,20 @@ window.FirePhaseStrategy = (function(){
         }
     };
 
+    FirePhaseStrategy.prototype.onSystemTargeted = function(payload) {
+        console.log("systemTargeted");
+        var ship = payload.ship;
+        var system = payload.system;
+
+        console.log(gamedata.isEnemy(ship, this.selectedShip), gamedata.selectedSystems.length > 0, weaponManager.canCalledshot(ship, system, this.selectedShip));
+        if (gamedata.isEnemy(ship, this.selectedShip)
+            && gamedata.selectedSystems.length > 0
+            && weaponManager.canCalledshot(ship, system))
+        {
+            console.log("call it");
+            weaponManager.targetShip(ship, system);
+        }
+    };
+
     return FirePhaseStrategy;
 })();
