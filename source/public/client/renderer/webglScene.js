@@ -72,10 +72,6 @@ window.webglScene = (function(){
 
         this.initEventListeners();
 
-        this.stats = new Stats();
-        this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-        document.body.appendChild( this.stats.dom );
-
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
         this.phaseDirector.receiveGamedata(gamedata, this);

@@ -37,7 +37,6 @@
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
     <script src="client/lib/THREE.MeshLine.js"></script>
-    <script src="client/lib/stats.min.js"></script>
     <script>
         window.Config = {
             HEX_SIZE: 50
