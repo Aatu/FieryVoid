@@ -143,16 +143,11 @@ window.ShipIconContainer = (function(){
         var lastMove = icon.getLastMovement();
         var hex = lastMove.position;
 
-        var iconsInHex = this.getFinalMovementInSameHex(hex);
-        var firstIconInHex = null;
-
-        iconsInHex.forEach(function (otherIcon) {
-            if (firstIconInHex === null || otherIcon.ship.iniative > firstIconInHex.ship.iniative){
-                firstIconInHex = otherIcon;
-            }
+        var iconsInHex = this.getFinalMovementInSameHex(hex).filter(function (otherIcon) {
+            return shipManager.hasBetterInitive(icon.ship, otherIcon.ship);
         });
 
-        if (!icon.getMovementBefore(lastMove) || icon === firstIconInHex) {
+        if (!icon.getMovementBefore(lastMove)) {
             return null;
         }
 
