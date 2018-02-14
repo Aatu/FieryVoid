@@ -22,7 +22,6 @@ window.webglScene = (function(){
         this.dragging = false;
         this.draggingDistanceTreshold = 20;
         this.distanceDragged = 0;
-        this.stats = null;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
@@ -163,11 +162,9 @@ window.webglScene = (function(){
     };
 
     webglScene.prototype.render = function () {
-        this.stats.begin();
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render( this.scene, this.camera);
         animateZoom.call(this);
-        this.stats.end();
 
         requestAnimationFrame(this.render.bind(this));
     };
