@@ -143,11 +143,16 @@ window.ShipIconContainer = (function(){
         var lastMove = icon.getLastMovement();
         var hex = lastMove.position;
 
-        var iconsInHex = this.getFinalMovementInSameHex(hex).filter(function (otherIcon) {
-            return icon.ship.iniative > otherIcon.ship.iniative;
+        var iconsInHex = this.getFinalMovementInSameHex(hex);
+        var firstIconInHex = null;
+
+        iconsInHex.forEach(function (otherIcon) {
+            if (firstIconInHex === null || otherIcon.ship.iniative > firstIconInHex.ship.iniative){
+                firstIconInHex = otherIcon;
+            }
         });
 
-        if (!icon.getMovementBefore(lastMove)) {
+        if (!icon.getMovementBefore(lastMove) || icon === firstIconInHex) {
             return null;
         }
 
@@ -165,9 +170,11 @@ window.ShipIconContainer = (function(){
         var steps = 0;
 
 
+        /*
         if (iconsInHex.length > 0) {
             steps = 1;
         }
+        */
 
         steps += iconsFromSameHex.length;
 
