@@ -164,11 +164,10 @@ window.ShipIconContainer = (function(){
 
         var steps = 0;
 
-        /*
+
         if (iconsInHex.length > 0) {
             steps = 1;
         }
-*/
 
         steps += iconsFromSameHex.length;
 
