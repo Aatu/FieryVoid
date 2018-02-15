@@ -275,6 +275,10 @@ spl_autoload_register(
                 
                 'tiraca' =>  '/server/model/ships/abbai/tiraca.php',
                 'bisaria' =>  '/server/model/ships/abbai/bisaria.php',
+                'tulati' =>  '/server/model/ships/abbai/tulati.php',
+                'lyata' =>  '/server/model/ships/abbai/lyata.php',
+                'shyarie' =>  '/server/model/ships/abbai/shyarie.php',
+                'fetula' =>  '/server/model/ships/abbai/fetula.php',
                 
                 'kotha' =>  '/server/model/ships/abbai/kotha.php',
                 
