@@ -33,7 +33,6 @@ class Skylark extends MediumShip{
 	$this->addPrimarySystem(new Engine(3, 9, 0, 4, 1));
 	$this->addPrimarySystem(new CargoBay(2, 6));
 	$this->addPrimarySystem(new LightParticleBeamShip(1, 2, 1, 240, 120));
-
 	$this->addPrimarySystem(new Structure(3, 30));
         $this->hitChart = array(
         		0=> array( //should never happen

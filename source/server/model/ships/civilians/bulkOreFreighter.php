@@ -82,6 +82,4 @@ class BulkOreFreighter extends HeavyCombatVessel{
       );
     }
 }
-
-
 ?>

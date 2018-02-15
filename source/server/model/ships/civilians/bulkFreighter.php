@@ -81,6 +81,4 @@ class BulkFreighter extends HeavyCombatVessel{
       );
     }
 }
-
-
 ?>
