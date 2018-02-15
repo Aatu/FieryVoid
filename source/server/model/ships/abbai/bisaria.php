@@ -27,7 +27,7 @@ class Bisaria extends MediumShip{
 	$this->iniativebonus = +60;
 		
         $this->addPrimarySystem(new Reactor(4, 12, 0, 8));
-        $this->addPrimarySystem(new CnC(5, 14, 0, 0));
+        $this->addPrimarySystem(new CnC(5, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 5, 7));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 	$this->addPrimarySystem(new Hangar(3, 1));
