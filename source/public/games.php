@@ -44,7 +44,7 @@
             $(document).ready(function(){
 
                 var header = document.getElementById("newsHeader");
-                    header.innerHTML = "Latest News 5th of February 2018";
+                    header.innerHTML = "Latest News 15th of February 2018";
                    
 
                 var news = document.getElementById("newsEntry");
@@ -54,18 +54,8 @@
 		    */
                     news.innerHTML += "The latest update includes:";
                     news.innerHTML += "<br><br>";
-                    news.innerHTML += "- new race - the <b>Ipsha</b>!<br>Ipsha are quite different from usual races - details on FB.";
+                    news.innerHTML += "- new race - the <b>Abbai</b> by Wolfgang!<br>Or rather two races, as WotCR and show era Abbai fleets are separate.";
 		    news.innerHTML += "<br><br>";
-                    news.innerHTML += "- ship window rearranged a bit - sides hold more systems per row";		    
-		    news.innerHTML += "<br>";
-                    news.innerHTML += "- ship window during fleet selection contains a few more core informations (Initiative, fighter armor)";		    
-		    news.innerHTML += "<br>";
-                    news.innerHTML += "- <b>Ramming</b> feature added - look for new weapon on PRIMARY sections of Your ships (and Afts of fighters)! Just remember that ramming is a feature to be used in desperate circumstances only, NOT allowed in pickup battles.";
-		    news.innerHTML += "<br>";		    
-                    news.innerHTML += "- ...unless You have unit specifically designed for this purpose. Like, say, Orieni Hunter-Killer. Enjoy :) .";	
-		    news.innerHTML += "<br>";		    
-                    news.innerHTML += "- Jammer modified - now if You turn it off, it won't block missile launches NEXT turn. Anyone wishing to shower Minbari with missiles should appreciate ;) .";		    
-		    news.innerHTML += "<br>";
                     news.innerHTML += "- a few minor bugs fixed";
                     news.innerHTML += "<br><br>";
                     news.innerHTML += "Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.";

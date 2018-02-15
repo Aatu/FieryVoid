@@ -981,8 +981,6 @@
 
     class QuadArray extends Particle{
         /*Abbai weapon - Twin Array on steroinds and with overheating problems*/
-        
-
         public $name = "quadArray";
         public $displayName = "Quad Array";
         public $iconPath = "quadParticleBeam.png";//"quadArray.png";
@@ -1037,7 +1035,7 @@
 		
             $chance = 0;
             if ($this->firingMode==1){//quad
-                $chance = 3; //75%
+                $chance = 2; //50%
             }else if ($this->firingMode==2){//triple
                 $chance = 1; //25%
             }
