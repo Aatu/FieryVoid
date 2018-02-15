@@ -185,15 +185,16 @@
         /*changed so it can be boosted for power, instead of EW; boost part affects fighters (only!) hit chance*/      
         public $name = "Particleimpeder";
         public $displayName = "Particle Impeder";
-        public $animation = "trail";
         public $iconPath = "particleImpeder.png";
 	    
-        public $trailColor = array(30, 170, 255);
-        public $animationColor = array(30, 170, 255);
+        public $animation = "laser";
+        public $animationColor = array(160, 160, 160);
         public $animationExplosionScale = 0.15;
-	public $animationWidth = 1;
+        public $animationWidth = 2;
+        public $animationWidth2 = 0;
 	    
-        public $priority = 1; //will never fire except defensively, purely a defensive system
+	    
+        public $priority = 1; //will never fire anyway except defensively, purely a defensive system
             
         public $intercept = 3;
              
@@ -388,6 +389,7 @@ class FtrShield extends Shield implements DefensiveSystem{
 	
     public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);
+	$this->data["Basic Strength"] = $this->output;      
 	if (!array_key_exists ( "Special" , $this->data )) $this->data["Special"] = "";
 	$this->data["Special"] .= "<br>Cannot fly under fighter shield (too small)."; 
     }

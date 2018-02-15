@@ -8,7 +8,9 @@ class Virtue extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Virtue";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Virtue Strike Force Corvette (2007)";
+        $this->shipClass = "Virtue Strike Force Corvette";
+        $this->variantOf = "Steadfast Escort Corvette";
+	    $this->isd = 2007;
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -22,7 +24,8 @@ class Virtue extends MediumShip{
         $this->pivotcost = 3;
 	$this->iniativebonus = 70;
 
-        $this->occurence = "uncommon"; //Strike Force: Common; Regular Navy: not eligible earlier than 2008, then uncommon
+        $this->occurence = "common"; //Strike Force: Common; Regular Navy: not eligible earlier than 2008, then uncommon	    
+	    $this->notes = 'Strike Force priority (Uncommon if force is not led by Paragon).';
          
         $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
@@ -31,21 +34,22 @@ class Virtue extends MediumShip{
 		$this->addPrimarySystem(new Hangar(1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 6, 4));        
-		
+
+        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
+        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 60));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));
         $this->addFrontSystem(new Thruster(1, 6, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 3, 1));
         $this->addFrontSystem(new Thruster(1, 6, 0, 3, 1));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 180, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new GaussCannon(3, 10, 4, 300, 60));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 300, 180));
 
-        $this->addAftSystem(new Engine(4, 7, 0, 3, 2));
+
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
+        $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
+	$this->addAftSystem(new Engine(4, 7, 0, 3, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 2));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));   
         
        
         $this->addPrimarySystem(new Structure(4, 46));

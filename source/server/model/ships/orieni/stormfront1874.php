@@ -8,7 +8,11 @@ class StormFront1874 extends MediumShip{
 		$this->faction = "Orieni";
         $this->phpclass = "StormFront1874";
         $this->imagePath = "img/ships/stormFront.png";
-        $this->shipClass = "Storm Front Missile Corvette (1874)";
+        $this->shipClass = "Storm Front Missile Corvette (early)";
+		$this->variantOf = "Steadfast Escort Corvette";
+		$this->isd = 1874;	    
+		$this->occurence = "uncommon";
+	    
         $this->agile = true;
         $this->canvasSize = 100;
         
@@ -22,7 +26,6 @@ class StormFront1874 extends MediumShip{
         $this->pivotcost = 3;
 		$this->iniativebonus = 60;
         
-        $this->occurence = "uncommon";
          
         $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
@@ -32,17 +35,18 @@ class StormFront1874 extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 		
-        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
         $this->addFrontSystem(new SoMissileRack(3, 6, 0, 240, 60));
         $this->addFrontSystem(new SoMissileRack(3, 6, 0, 270, 90));
         $this->addFrontSystem(new SoMissileRack(3, 6, 0, 300, 120));
+        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(1, 6, 0, 2, 1));
+	    
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 360));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 0, 240)); 
         $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
         $this->addAftSystem(new Thruster(1, 8, 0, 4, 2));
         $this->addAftSystem(new Thruster(1, 6, 0, 3, 2));
-        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 360));
-        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 0, 240)); 
         
        
         $this->addPrimarySystem(new Structure(4, 46));

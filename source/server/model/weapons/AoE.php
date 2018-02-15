@@ -134,6 +134,9 @@
         public $animationWidth = 10;
         public $trailLength = 10;
 	    
+	public $firingModes = array( 
+		1 => "AoE"
+	);
 	    
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

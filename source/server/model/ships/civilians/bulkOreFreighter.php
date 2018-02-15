@@ -7,7 +7,7 @@ class BulkOreFreighter extends HeavyCombatVessel{
         $this->pointCost = 90;
         $this->faction = "Civilians";
         $this->phpclass = "bulkOreFreighter";
-        $this->imagePath = "img/ships/galleon.png";
+        $this->imagePath = "img/ships/BulkOreFreighter.png";
         $this->shipClass = "Bulk Ore Freighter";
 	    
         $this->isd = 2129;        
