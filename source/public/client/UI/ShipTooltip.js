@@ -68,6 +68,10 @@ window.ShipTooltip = (function(){
             this.selectedShip = selectedShip;
         }
 
+        if (selectedShip && this.menu) {
+            this.menu.selectedShip = selectedShip;
+        }
+
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
         jQuery(".fire", this.element).html("");
