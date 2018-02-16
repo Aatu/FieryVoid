@@ -888,7 +888,7 @@ shipManager.movement = {
             return;
         }
 
-        console.log("actually forcing pivot";
+        console.log("actually forcing pivot");
     )
         ship.movement[ship.movement.length] = {
             id: -1,
