@@ -865,7 +865,6 @@ shipManager.movement = {
         if (pivoting == "no")
             return;
 
-        console.log("forced pivot for", ship.name);
         var name = "pivotright";
         var step = 1;
 
@@ -884,8 +883,6 @@ shipManager.movement = {
         if (alreadyDone) {
             return;
         }
-
-        console.log("actually forcing pivot");
     
         ship.movement[ship.movement.length] = {
             id: -1,

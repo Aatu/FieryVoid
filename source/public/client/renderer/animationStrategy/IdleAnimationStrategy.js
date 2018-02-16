@@ -2,7 +2,6 @@ window.IdleAnimationStrategy = (function(){
     function IdleAnimationStrategy(shipIcons, turn){
         AnimationStrategy.call(this, shipIcons, turn);
         console.log("IdleAnimationStrategy, turn:", this.turn);
-        console.trace();
     }
 
     IdleAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
