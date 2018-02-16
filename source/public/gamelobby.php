@@ -17,11 +17,11 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-	$gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
+    $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
+
 	if (!$gamelobbydata || $gamelobbydata->status != "LOBBY"){
 		header('Location: games.php');
 	}
-//	var_dump($gamelobbydata);
 	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
 	
 	// Getting all ships in one go causes memory overload on the server.
