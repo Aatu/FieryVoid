@@ -878,6 +878,7 @@ shipManager.movement = {
         var facing = mathlib.addToHexFacing(lm.facing, step);
 
         var alreadyDone = ship.movement.some(function(inspectedMovement) {
+            console.log(inspectedMovement.turn === gamedata.turn , inspectedMovement.type === name , inspectedMovement.forced === true , inspectedMovement.facing === facing);
             return inspectedMovement.turn === gamedata.turn && inspectedMovement.type === name && inspectedMovement.forced === true && inspectedMovement.facing === facing;
         });
 
