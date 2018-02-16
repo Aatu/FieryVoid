@@ -62,7 +62,12 @@ window.ShipTooltip = (function(){
         jQuery('<div class="entry"><span>'+value+'</span></div>').insertAfter(this.element.find('.namecontainer'));
     };
 
-    ShipTooltip.prototype.update = function() {
+    ShipTooltip.prototype.update = function(ship, selectedShip) {
+
+        if (selectedShip) {
+            this.selectedShip = selectedShip;
+        }
+
         jQuery(".buttons", this.element).html("");
         jQuery(".namecontainer", this.element).html("");
         jQuery(".fire", this.element).html("");

@@ -155,10 +155,15 @@ window.PhaseStrategy = (function(){
         if (this.selectedShip) {
             this.deselectShip(this.selectedShip);
         }
+
         this.selectedShip = ship;
         this.shipIconContainer.getByShip(ship).setSelected(true);
         this.shipIconContainer.getByShip(ship).showEW();
         botPanel.setEW(ship);
+
+        if (this.shipTooltip) {
+            this.shipTooltip.update(ship, this.selectedShip);
+        }
     };
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
@@ -419,7 +424,7 @@ window.PhaseStrategy = (function(){
         var ship = payload.ship;
 
         if (this.shipTooltip) {
-            this.shipTooltip.update(ship);
+            this.shipTooltip.update(ship, this.selectedShip);
         }
 
         botPanel.setEW(ship);

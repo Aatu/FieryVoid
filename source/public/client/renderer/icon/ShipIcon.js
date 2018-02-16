@@ -33,7 +33,7 @@ window.ShipIcon = (function (){
 
     ShipIcon.prototype.createShipWindow = function(ship) {
         var element = jQuery(".shipwindow.ship_"+ship.id);
-;
+
         if (!element.length) {
             ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
         } else {
