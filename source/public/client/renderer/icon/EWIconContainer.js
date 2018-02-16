@@ -40,6 +40,41 @@ window.EWIconContainer = (function(){
 
     };
 
+    EWIconContainer.prototype.updateForShip = function(ship) {
+
+        var length = this.ewIcons.length;
+
+        this.ewIcons.forEach(function(ewIcon) {
+            if (ewIcon.shipId === ship.id) {
+                ewIcon.used = false;
+            }
+        });
+
+
+        gamedata.ships.forEach(function(target){
+            var oew = ew.getOffensiveEW(ship, target);
+
+            if (oew) {
+                createOrUpdateOEW.call(this, ship, target, oew);
+            }
+        }, this);
+
+        this.ewIcons = this.ewIcons.filter(function (icon) {
+            if (!icon.used && icon.shipId === ship.id) {
+                this.scene.remove(icon.sprite.mesh);
+                icon.sprite.destroy();
+                return false;
+            }
+
+            return true;
+        }, this);
+
+        if (this.ewIcons.length > length) {
+            this.showForShip(ship);
+        }
+
+    };
+
     EWIconContainer.prototype.hide = function() {
         this.ewIcons.forEach(function(icon) {
             icon.sprite.hide();

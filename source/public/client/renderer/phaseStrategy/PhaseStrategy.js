@@ -158,6 +158,7 @@ window.PhaseStrategy = (function(){
         this.selectedShip = ship;
         this.shipIconContainer.getByShip(ship).setSelected(true);
         this.shipIconContainer.getByShip(ship).showEW();
+        botPanel.setEW(ship);
     };
 
     PhaseStrategy.prototype.deselectShip = function(ship) {
@@ -412,6 +413,18 @@ window.PhaseStrategy = (function(){
         $("#phaseheader .phase.value").html(name);
         $("#phaseheader .activeship.value").html(shipName);
         $("#phaseheader").show();
+    };
+
+    PhaseStrategy.prototype.onShipEwChanged = function(payload) {
+        var ship = payload.ship;
+
+        if (this.shipTooltip) {
+            this.shipTooltip.update(ship);
+        }
+
+        botPanel.setEW(ship);
+        this.shipIconContainer.getByShip(ship).consumeEW(ship);
+        this.ewIconContainer.updateForShip(ship);
     };
 
     return PhaseStrategy;

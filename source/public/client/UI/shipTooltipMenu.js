@@ -64,7 +64,6 @@ window.ShipTooltipMenu = (function(){
     function onClick(shipTooltip, action, event) {
         event.stopPropagation();
         action.call(this);
-        shipTooltip.update();
     }
 
     function mouseOut(menu) {

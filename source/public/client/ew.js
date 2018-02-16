@@ -296,7 +296,7 @@ window.ew = {
             amount = 3;
             
         selected.EW.push({shipid:selected.id, type:type, amount:amount, targetid:ship.id, turn:gamedata.turn});
-        gamedata.shipStatusChanged(selected);
+        webglScene.customEvent("ShipEwChanged", {ship: selected});
     },
     
     buttonAssignEW: function(e){
@@ -344,7 +344,8 @@ window.ew = {
         }else{
             entry.amount++;
         }
-        gamedata.shipStatusChanged(ship);
+
+        webglScene.customEvent("ShipEwChanged", {ship: ship});
     },
     
     buttonDeassignEW: function(e){
@@ -369,7 +370,7 @@ window.ew = {
             ship.EW.splice(i, 1);
             e.data("EW", "");
         }
-        gamedata.shipStatusChanged(ship);
+        webglScene.customEvent("ShipEwChanged", {ship: ship});
     },
 
     deassignEW: function(ship, entry){
@@ -383,7 +384,7 @@ window.ew = {
             return shipEwEntry.amount > 0;
         });
 
-        gamedata.shipStatusChanged(ship);
+        webglScene.customEvent("ShipEwChanged", {ship: ship});
     },
 	
 	removeEW: function(ship){
