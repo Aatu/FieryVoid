@@ -865,6 +865,7 @@ shipManager.movement = {
         if (pivoting == "no")
             return;
 
+        console.log("forced movement for", ship.name);
         var name = "pivotright";
         var step = 1;
 
