@@ -102,5 +102,14 @@ window.MovementPhaseStrategy = (function(){
         }
     }
 
+    MovementPhaseStrategy.prototype.onShipMovementChanged = function (payload) {
+        PhaseStrategy.prototype.onShipMovementChanged.call(this, payload);
+        if (isMovementReady(this.gamedata)) {
+            this.gamedata.showCommitButton();
+        } else {
+            this.gamedata.hideCommitButton();
+        }
+    };
+
     return MovementPhaseStrategy;
 })();
