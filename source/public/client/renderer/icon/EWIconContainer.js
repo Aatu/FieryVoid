@@ -85,7 +85,7 @@ window.EWIconContainer = (function(){
         this.ewIcons.filter(function(icon) {
             return icon.shipId === ship.id || icon.targetId === ship.id;
         }).forEach(function(icon) {
-            icon.sprite.setStartAndEnd(getStartOffset(icon.shipIcon.getPosition(), icon.targetIcon.getPosition()), icon.targetIcon.getPosition());
+            icon.sprite.setStartAndEnd(icon.shipIcon.getPosition(), icon.targetIcon.getPosition());
             icon.sprite.show();
         }, this);
     };
@@ -124,7 +124,7 @@ window.EWIconContainer = (function(){
         var targetIcon = this.shipIconContainer.getByShip(target);
 
         icon.sprite.setLineWidth(getOEWLineWidth.call(this, amount));
-        icon.sprite.setStartAndEnd(getStartOffset(shipIcon.getPosition(), targetIcon.getPosition()), targetIcon.getPosition());
+        icon.sprite.setStartAndEnd(shipIcon.getPosition(), targetIcon.getPosition());
         icon.shipIcon = shipIcon;
         icon.targetIcon = targetIcon;
         icon.amount = amount;
@@ -143,7 +143,7 @@ window.EWIconContainer = (function(){
             amount: amount,
             shipIcon: shipIcon,
             targetIcon: targetIcon,
-            sprite: new LineSprite(getStartOffset(shipIcon.getPosition(), targetIcon.getPosition()), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, color, 0.5),
+            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, color, 0.5),
             used: true
         };
 
@@ -151,22 +151,6 @@ window.EWIconContainer = (function(){
         scene.add(OEWIcon.sprite.mesh);
 
         return OEWIcon;
-    }
-
-    function getStartOffset(position, target) {
-
-        if (target.x > position.x) {
-            return {
-                x: position.x,
-                y: position.y + 10
-            }
-        } else {
-            return {
-                x: position.x,
-                y: position.y - 10
-            }
-        }
-
     }
 
     function getOEWLineWidth(amount) {
