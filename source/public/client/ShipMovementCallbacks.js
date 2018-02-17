@@ -8,38 +8,38 @@ window.ShipMovementCallbacks = (function(){
     ShipMovementCallbacks.prototype.cancelCallback = function(e){
         e.stopPropagation();
         shipManager.movement.deleteMove(this.ship);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.morejinkCallback = function(e){
         e.stopPropagation();
         shipManager.movement.doJink(this.ship , 1);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.lessjinkCallback = function(e){
         e.stopPropagation();
         shipManager.movement.doJink(this.ship , -1);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.accelCallback = function(e){
         e.stopPropagation();
         shipManager.movement.changeSpeed(this.ship , true);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.deaccCallback = function(e){
         e.stopPropagation();
         shipManager.movement.changeSpeed(this.ship , false);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.rollCallback = function(e){
         e.stopPropagation();
 
         shipManager.movement.doRoll(this.ship);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.pivotrightCallback = function(e){
@@ -57,7 +57,7 @@ window.ShipMovementCallbacks = (function(){
             return false;
 
         shipManager.movement.doPivot(this.ship, right);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.rotateleftCallback = function(e){
@@ -74,7 +74,7 @@ window.ShipMovementCallbacks = (function(){
         e.stopPropagation();
         if (this.ship.base){
             shipManager.movement.pickRotation(this.ship, right);
-            this.updateCallback();
+            this.updateCallback({ship: this.ship});
         }
     };
 
@@ -90,7 +90,7 @@ window.ShipMovementCallbacks = (function(){
 
     ShipMovementCallbacks.prototype.slipCallback = function(e, right){
         shipManager.movement.doSlip(this.ship, right);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
 
     };
 
@@ -106,7 +106,7 @@ window.ShipMovementCallbacks = (function(){
 
     ShipMovementCallbacks.prototype.turnCallback = function(e, right){
         shipManager.movement.doTurn(this.ship, right);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     ShipMovementCallbacks.prototype.moveCallback = function(e){
@@ -118,7 +118,7 @@ window.ShipMovementCallbacks = (function(){
             return false;
 
         shipManager.movement.doMove(this.ship);
-        this.updateCallback();
+        this.updateCallback({ship: this.ship});
     };
 
     return ShipMovementCallbacks;

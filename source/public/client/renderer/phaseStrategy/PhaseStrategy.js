@@ -333,7 +333,7 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.drawMovementUI = function(ship) {
-        UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.consumeGamedata.bind(this)));
+        UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.onShipMovementChanged.bind(this)));
         this.movementUI = {
             element: UI.shipMovement.uiElement,
             ship: ship,
@@ -430,6 +430,12 @@ window.PhaseStrategy = (function(){
         botPanel.setEW(ship);
         this.shipIconContainer.getByShip(ship).consumeEW(ship);
         this.ewIconContainer.updateForShip(ship);
+    };
+
+    PhaseStrategy.prototype.onShipMovementChanged = function(payload) {
+        var ship = payload.ship;
+        this.shipIconContainer.getByShip(ship).consumeShipdata(ship);
+
     };
 
     return PhaseStrategy;
