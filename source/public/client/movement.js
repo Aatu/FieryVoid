@@ -124,7 +124,6 @@ shipManager.movement = {
 
             var shipwindow = $(".shipwindow_" + ship.id);
             shipWindowManager.cancelAssignThrust(shipwindow);
-            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -152,7 +151,6 @@ shipManager.movement = {
 
                 var shipwindow = $(".shipwindow_" + ship.id);
                 shipWindowManager.cancelAssignThrust(shipwindow);
-                gamedata.shipStatusChanged(ship);
 
                 return true;
             }
@@ -227,7 +225,6 @@ shipManager.movement = {
 
             }
 
-            gamedata.shipStatusChanged(ship);
             shipManager.drawShip(ship);
 
         } else {
@@ -254,11 +251,8 @@ shipManager.movement = {
                 value: accel
             };
 
-            gamedata.shipStatusChanged(ship);
             if (!ship.flight) {
                 shipWindowManager.assignThrust(ship);
-            } else {
-                gamedata.shipStatusChanged(ship);
             }
         }
 
@@ -447,8 +441,6 @@ shipManager.movement = {
             forced: false,
             value: 0
         };
-
-        gamedata.shipStatusChanged(ship);
     },
 
     canSlip: function (ship, right) {
@@ -620,8 +612,6 @@ shipManager.movement = {
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
-        } else {
-            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -704,8 +694,6 @@ shipManager.movement = {
                 value: 0
             }
         }
-
-        gamedata.shipStatusChanged(ship);
     },
 
     isEndingPivot: function (ship, right) {
@@ -855,8 +843,6 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
-        } else {
-            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -905,8 +891,6 @@ shipManager.movement = {
             forced: true,
             value: 0
         };
-
-        gamedata.shipStatusChanged(ship);
     },
 
     isPivoting: function (ship) {
@@ -1326,13 +1310,10 @@ shipManager.movement = {
 
         ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
 
-        gamedata.shipStatusChanged(ship);
 
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
-        } else {
-            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -1859,8 +1840,6 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
-        } else {
-            gamedata.shipStatusChanged(ship);
         }
     },
 
@@ -1921,8 +1900,6 @@ shipManager.movement = {
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship)
             shipWindowManager.assignThrust(ship);
-        } else {
-            gamedata.shipStatusChanged(ship);
         }
     },
 

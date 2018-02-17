@@ -28,6 +28,10 @@ window.IdleAnimationStrategy = (function(){
         return this;
     };
 
+    IdleAnimationStrategy.prototype.shipMovementChanged = function(ship) {
+        this.shipIconContainer.positionAndFaceShip(ship);
+    };
+
     IdleAnimationStrategy.prototype.deactivate = function() {
 
         if (this.shipIconContainer){

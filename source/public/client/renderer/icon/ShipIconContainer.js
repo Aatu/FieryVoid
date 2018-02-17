@@ -118,6 +118,11 @@ window.ShipIconContainer = (function(){
         }, this);
     };
 
+    ShipIconContainer.prototype.positionAndFaceShip = function(ship) {
+        var icon = this.getByShip(ship);
+        icon.positionAndFaceIcon(this.getHexOffset(icon));
+    };
+
     ShipIconContainer.prototype.setAllSelected = function(selected) {
         this.getArray().forEach(function (icon) {
             icon.setSelected(selected);

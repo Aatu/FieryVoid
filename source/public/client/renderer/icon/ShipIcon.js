@@ -26,7 +26,7 @@ window.ShipIcon = (function (){
     }
 
     ShipIcon.prototype.consumeShipdata = function (ship){
-        this.movements = this.consumeMovement(ship.movement);
+        this.consumeMovement(ship.movement);
         this.consumeEW(ship);
         this.createShipWindow(ship);
     };
@@ -209,7 +209,7 @@ window.ShipIcon = (function (){
                 lastMovement = movement;
             });
 
-        return Object.keys(movesByHexAndTurn).map(function (key) {return movesByHexAndTurn[key];});
+        this.movements = Object.keys(movesByHexAndTurn).map(function (key) {return movesByHexAndTurn[key];});
     };
 
     function addMovementToRegistry(movesByHexAndTurn, movement) {

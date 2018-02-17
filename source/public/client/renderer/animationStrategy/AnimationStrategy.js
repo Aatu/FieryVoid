@@ -90,6 +90,9 @@ window.AnimationStrategy = (function(){
         toRemove.deactivate();
     };
 
+    AnimationStrategy.prototype.shipMovementChanged = function() {
+    };
+
     function updateTotalAnimationTime(paused){
         if (paused) {
             return;

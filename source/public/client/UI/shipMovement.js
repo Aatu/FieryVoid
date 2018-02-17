@@ -416,12 +416,13 @@ window.UI = {
         },
         
         hide: function(){
-            if ($("#shipMovementUI").hide)
-                $("#shipMovementUI").hide();
+            $("#shipMovementUI").hide();
         },
-    
-        
-        
+
+
+        show: function(){
+            $("#shipMovementUI").show();
+        }
         
     
     }

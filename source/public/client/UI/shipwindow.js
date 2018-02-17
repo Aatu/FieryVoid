@@ -1801,7 +1801,7 @@ setSystemData: function(ship, system, shipwindow){
 			$(".enableAssignThrust").removeClass("enableAssignThrust");
 			$("#botPanel .exists").removeClass("exists");
 			shipWindowManager.setData(ship);
-			gamedata.shipStatusChanged(ship);
+			webglScene.customEvent("ShipMovementChanged", {ship: ship});
 		}
 	},
 	
@@ -1821,7 +1821,7 @@ setSystemData: function(ship, system, shipwindow){
 
 	
 		shipWindowManager.cancelAssignThrust(e);
-        gamedata.shipStatusChanged(ship);
+        webglScene.customEvent("ShipMovementChanged", {ship: ship});
 	},
 	
 	cancelAssignThrust: function(element){

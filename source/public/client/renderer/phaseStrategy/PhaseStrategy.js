@@ -320,16 +320,17 @@ window.PhaseStrategy = (function(){
     };
 
     PhaseStrategy.prototype.redrawMovementUI = function(){
-        if (!this.movementUI) {
+
+        if (! this.selectedShip) {
             return;
         }
 
-        if (this.movementUI.ship.movement.some(function (movement) {return !movement.commit})) {
+        if (this.movementUI && this.movementUI.ship.movement.some(function (movement) {return !movement.commit})) {
             this.hideMovementUI();
             return;
         }
 
-        this.drawMovementUI(this.movementUI.ship);
+        this.drawMovementUI(this.selectedShip);
     };
 
     PhaseStrategy.prototype.drawMovementUI = function(ship) {
@@ -341,6 +342,7 @@ window.PhaseStrategy = (function(){
             position: null
         };
 
+        UI.shipMovement.show();
         this.positionMovementUI();
     };
 
@@ -434,8 +436,11 @@ window.PhaseStrategy = (function(){
 
     PhaseStrategy.prototype.onShipMovementChanged = function(payload) {
         var ship = payload.ship;
-        this.shipIconContainer.getByShip(ship).consumeShipdata(ship);
-
+        this.shipIconContainer.getByShip(ship).consumeMovement(ship.movement);
+        if (this.animationStrategy) {
+            this.animationStrategy.shipMovementChanged(ship);
+        }
+        this.redrawMovementUI(ship);
     };
 
     return PhaseStrategy;

@@ -132,6 +132,23 @@ class DBManager
         mysqli_close($this->connection);
     }
 
+    public function getActiveGames() {
+        $games = [];
+        $sql = "select distinct(gameid), g.name from tac_playeringame p join tac_game g on p.gameid = g.id where lastActivity > now() - interval 1 week";
+
+        $stmt = $this->connection->prepare($sql);
+
+        if ($stmt) {
+            $stmt->bind_result($id, $name);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $games[] = ["id" => $id, "name" => $name];
+            }
+            $stmt->close();
+        }
+
+        return $games;
+    }
 
     public function submitShip($gameid, $ship, $userid)
     {
