@@ -256,7 +256,9 @@ spl_autoload_register(
                 'tetrana' =>  '/server/model/ships/abbai_old/tetrana.php',
                 'sellac' =>  '/server/model/ships/abbai_old/sellac.php',
                 'motenai' =>  '/server/model/ships/abbai_old/motenai.php',
+                'nota' =>  '/server/model/ships/abbai_old/nota.php',
 
+                
                 'selatra' =>  '/server/model/ships/abbai_old/selatra.php',               
                 'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
                 'kirva' =>  '/server/model/ships/abbai_old/kirva.php',
