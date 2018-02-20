@@ -26,8 +26,8 @@ class Covran extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 20, 7, 14));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new ElintScanner(6, 20, 7, 14));
+        //$this->addPrimarySystem(new ElintArray(6, 6, 2));
         $this->addPrimarySystem(new Engine(6, 16, 0, 8, 3));
 		$this->addPrimarySystem(new Hangar(6, 2));
 		
