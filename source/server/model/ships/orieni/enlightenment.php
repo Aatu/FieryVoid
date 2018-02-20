@@ -10,6 +10,7 @@ class Enlightenment extends BaseShip{
         $this->imagePath = "img/ships/enlightenment.png";
         $this->shipClass = "Enlightenment Invader";
         $this->shipSizeClass = 3;
+	    $this->isd = 2007;
         $this->fighters = array("light"=>12, "assault shuttles"=>24);
         $this->canvasSize = 200;
 		
