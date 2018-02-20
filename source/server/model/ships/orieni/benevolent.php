@@ -22,7 +22,6 @@ class Benevolent extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-	$this->isd = 2007;
 
         $this->limited = 33;
 
