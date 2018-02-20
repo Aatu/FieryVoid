@@ -33,48 +33,48 @@ class Prophet extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
-        $this->addFrontSystem(new CargoBay(2, 25));
+        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new HeavyGausscannon(4, 10, 4, 270, 90));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new CargoBay(2, 25));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));
 
         $this->addAftSystem(new SMissileRack(5, 6, 0, 90, 270));
         $this->addAftSystem(new HeavyGausscannon(2, 10, 4, 90, 270));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
         $this->addAftSystem(new CargoBay(2, 25));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 2, 2));
 		
-        $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
-        $this->addLeftSystem(new CargoBay(2, 25));
         $this->addLeftSystem(new SMissileRack(5, 6, 0, 240, 60));
-        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new HeavyGausscannon(3, 10, 4, 180, 360));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new CargoBay(2, 25));
+        $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
 
 
-        $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
-        $this->addRightSystem(new CargoBay(2, 25));
         $this->addRightSystem(new SMissileRack(5, 6, 0, 300, 120));
-        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new HeavyGausscannon(3, 10, 4, 0, 180));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new CargoBay(2, 25));
+        $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
 
 
 		//structures
