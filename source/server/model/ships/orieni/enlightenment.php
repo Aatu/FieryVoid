@@ -8,9 +8,9 @@ class Enlightenment extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Enlightenment";
         $this->imagePath = "img/ships/enlightenment.png";
-        $this->shipClass = "Enlightenment Invasion Ship";
+        $this->shipClass = "Enlightenment Invader";
         $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>18);
+        $this->fighters = array("light"=>12, "assault shuttles"=>24);
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 19;
@@ -69,8 +69,62 @@ class Enlightenment extends BaseShip{
         $this->addRightSystem(new Structure(4, 54));
         $this->addPrimarySystem(new Structure(5, 51));
         
-    }
+	    
 
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		//PRIMARY
+		0=> array( 
+			9 => "Structure",
+			11 => "Scanner",
+			13 => "Engine",
+			15 => "Hangar",
+			17 => "Cargo Bay",
+			18 => "Reload Rack",			
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		//Forward
+		1=> array(
+			6 => "Thruster",
+			8 => "Laser Lance",
+			11 => "Rapid Gatling Railgun",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Aft
+		2=> array(
+			8 => "Thruster",
+			10 => "Rapid Gatling Railgun",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Port
+		3=> array(
+			4 => "Thruster",
+			6 => "Class-SO Missile Rack",
+			8 => "Rapid Gatling Railgun",
+			10 => "Hangar",			
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Starboard
+		4=> array(
+			4 => "Thruster",
+			6 => "Class-SO Missile Rack",
+			8 => "Rapid Gatling Railgun",
+			10 => "Hangar",			
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);
+
+	    
+	    
+    }
 }
 
 
