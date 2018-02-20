@@ -37,10 +37,7 @@ class Paragon1782 extends BaseShip{
         $this->addPrimarySystem(new LaserLance(3, 6, 4, 0, 360));
         $this->addPrimarySystem(new SoMissileRack(5, 6, 4, 0, 360));
         $this->addPrimarySystem(new LaserLance(3, 6, 4, 0, 360));
-        
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
@@ -48,7 +45,10 @@ class Paragon1782 extends BaseShip{
         $this->addFrontSystem(new SoMissileRack(5, 6, 4, 270, 90));
         $this->addFrontSystem(new SoMissileRack(5, 6, 4, 270, 90));
         $this->addFrontSystem(new Gausscannon(2, 10, 4, 270, 90));
-        $this->addFrontSystem(new Gausscannon(2, 10, 4, 270, 90));
+        $this->addFrontSystem(new Gausscannon(2, 10, 4, 270, 90));        
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
 
         $this->addAftSystem(new SoMissileRack(5, 6, 4, 90, 270));
         $this->addAftSystem(new Gausscannon(2, 10, 4, 90, 270));
@@ -63,7 +63,6 @@ class Paragon1782 extends BaseShip{
         $this->addAftSystem(new Thruster(2, 15, 0, 2, 2));
 		
 
-        $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
         $this->addLeftSystem(new LaserLance(2, 6, 4, 180, 360));
         $this->addLeftSystem(new LaserLance(2, 6, 4, 180, 360));
         $this->addLeftSystem(new Gausscannon(2, 10, 4, 180, 360));
@@ -72,8 +71,8 @@ class Paragon1782 extends BaseShip{
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new SoMissileRack(5, 6, 4, 240, 60));
+        $this->addLeftSystem(new Thruster(4, 25, 0, 6, 3));
 
-        $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
         $this->addRightSystem(new LaserLance(2, 6, 4, 0, 180));
         $this->addRightSystem(new LaserLance(2, 6, 4, 0, 180));
         $this->addRightSystem(new Gausscannon(2, 10, 4, 0, 180));
@@ -82,6 +81,7 @@ class Paragon1782 extends BaseShip{
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new SoMissileRack(5, 6, 4, 300, 120));
+        $this->addRightSystem(new Thruster(4, 25, 0, 6, 4));
 
 
 		//structures
