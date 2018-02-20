@@ -7,7 +7,10 @@ class Vengeful1780 extends MediumShip{
 		$this->faction = "Orieni";
 		$this->phpclass = "Vengeful1780";
 		$this->imagePath = "img/ships/vengeful.png"; 
-		$this->shipClass = "Vengeful Laser Frigate (1780)";
+		$this->shipClass = "Vengeful Laser Frigate (early)";
+		$this->variantOf = "Vengeful Laser Frigate";
+		$this->isd = 1780;
+		
 		$this->agile = true;
 		$this->canvasSize = 100;
 		$this->forwardDefense = 12;
