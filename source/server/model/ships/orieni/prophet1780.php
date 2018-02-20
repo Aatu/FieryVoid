@@ -8,10 +8,13 @@ class Prophet1780 extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Prophet1780";
         $this->imagePath = "img/ships/prophet.png";
-        $this->shipClass = "Prophet Command Ship (1780)";
-        $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>12, "medium"=>18);
         $this->canvasSize = 280;
+        $this->shipClass = "Prophet Command Ship (early)";
+        $this->variantOf = "Prophet Command Ship";
+	    $this->isd = 1780;
+        $this->limited = 33;
+        $this->shipSizeClass = 3;
+        $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 19;
@@ -92,7 +95,7 @@ class Prophet1780 extends BaseShip{
 			11 => "Scanner",
 			13 => "Engine",
 			16 => "Hangar",
-			18 => "HK-Control Node",
+			18 => "HK Control Node",
 			19 => "Reactor",
 			20 => "C&C",
 		),
