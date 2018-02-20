@@ -484,6 +484,7 @@ spl_autoload_register(
                 
                 //orieni ships
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
+                'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
                 'faithful' => '/server/model/ships/orieni/faithful.php',
                 'commune' => '/server/model/ships/orieni/commune.php',
                     'commune1983' => '/server/model/ships/orieni/commune1983.php',
