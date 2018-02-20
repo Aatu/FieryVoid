@@ -10,6 +10,7 @@ class Prophet extends BaseShip{
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
         $this->shipClass = "Prophet Command Ship";
+	    $this->isd = 1780;
         $this->limited = 33;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
