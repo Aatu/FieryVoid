@@ -9,8 +9,9 @@ class Benevolent extends BaseShip{
         $this->phpclass = "Benevolent";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout";
+	    $this->isd = 2007;
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>6, "normal"=>6);
+        $this->fighters = array("light"=>6, "medium"=>6);
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 16;
@@ -66,7 +67,7 @@ class Benevolent extends BaseShip{
                 0=> array(
                         7 => "Structure",
 			9 => "Jump Engine",
-                        12 => "Scanner",
+                        12 => "ELINT Scanner",
                         14 => "Engine",
 			16 => "Hangar",
 			17 => "Class-S Missile Rack",
