@@ -8,10 +8,15 @@ class Paragon extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Paragon";
         $this->imagePath = "img/ships/prophet.png";
-        $this->shipClass = "Paragon Strike Force Command Ship (2007)";
-        $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>12, "medium"=>18);
         $this->canvasSize = 280;
+        $this->shipClass = "Paragon Strike Force Command Ship";
+        $this->variantOf = "Prophet Command Ship";
+        $this->occurence = "rare";
+        $this->limited = 33;
+	    $this->isd = 2007;
+	    
+        $this->shipSizeClass = 3;
+        $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 19;
@@ -21,8 +26,6 @@ class Paragon extends BaseShip{
         $this->accelcost = 6;
         $this->rollcost = 4;
         $this->pivotcost = 3;
-        $this->occurence = "rare";
-        $this->limited = 33;
         
         $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
@@ -105,7 +108,7 @@ class Paragon extends BaseShip{
 			12 => "Scanner",
 			14 => "Engine",
 			16 => "Hangar",
-			18 => "HK-Control Node",
+			18 => "HK Control Node",
 			19 => "Reactor",
 			20 => "C&C",
 		),
