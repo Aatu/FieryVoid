@@ -9,7 +9,7 @@ class Paragon1782 extends BaseShip{
         $this->phpclass = "Paragon1782";
         $this->imagePath = "img/ships/prophet.png";
         $this->canvasSize = 280;
-        $this->shipClass = "Paragon Strike Force Command Ship (1782)";
+        $this->shipClass = "Paragon Strike Force Command Ship (early)";
         $this->variantOf = "Prophet Command Ship";
 	    $this->isd = 1782;
         $this->occurence = "rare";
