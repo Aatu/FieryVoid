@@ -29,14 +29,14 @@ class Enlightenment extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(4, 15));
         $this->addPrimarySystem(new CargoBay(4, 24));
-        
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));        
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+              
         $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 60));
         $this->addFrontSystem(new LaserLance(2, 6, 4, 300, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));  
 
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 240));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 240));
@@ -45,22 +45,23 @@ class Enlightenment extends BaseShip{
         $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
 		
-        $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
-        $this->addLeftSystem(new Hangar(3, 14));        
-        $this->addLeftSystem(new CargoBay(2, 30));    
+
         $this->addLeftSystem(new SoMissileRack(3, 6, 0, 240, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 300));
+        $this->addLeftSystem(new Hangar(3, 14));        
+        $this->addLeftSystem(new CargoBay(2, 30));    
+        $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
 
-
-        $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
-        $this->addRightSystem(new Hangar(3, 14));        
-        $this->addRightSystem(new CargoBay(2, 30));    
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
+        $this->addRightSystem(new Hangar(3, 14));        
+        $this->addRightSystem(new CargoBay(2, 30));    
+        $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
+	    
 
 		//structures
         $this->addFrontSystem(new Structure(4, 51));
