@@ -8,10 +8,11 @@ class Prophet extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Prophet";
         $this->imagePath = "img/ships/prophet.png";
-        $this->shipClass = "Prophet Command Ship (2007)";
-        $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>30);
         $this->canvasSize = 280;
+        $this->shipClass = "Prophet Command Ship";
+        $this->limited = 33;
+        $this->shipSizeClass = 3;
+        $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 19;
@@ -22,7 +23,6 @@ class Prophet extends BaseShip{
         $this->rollcost = 4;
         $this->pivotcost = 3;
 
-        $this->limited = 33;
         
         $this->addPrimarySystem(new Reactor(5, 34, 0, 0));
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
@@ -95,7 +95,7 @@ class Prophet extends BaseShip{
 			11 => "Scanner",
 			13 => "Engine",
 			16 => "Hangar",
-			18 => "HK-Control Node",
+			18 => "HK Control Node",
 			19 => "Reactor",
 			20 => "C&C",
 		),
