@@ -107,7 +107,7 @@ class Righteous extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Rapid Gatling Railgun",
-			11 => "Cargo Bay",
+			11 => "Class-S Missile Rack",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -115,7 +115,7 @@ class Righteous extends BaseShip{
 		4=> array(
 			4 => "Thruster",
 			6 => "Rapid Gatling Railgun",
-			11 => "Cargo Bay",
+			11 => "Class-S Missile Rack",
 			18 => "Structure",
 			20 => "Primary",
 		),
