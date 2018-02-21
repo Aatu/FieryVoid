@@ -67,10 +67,10 @@ class Enlightenment extends BaseShip{
 
 		//structures
         $this->addFrontSystem(new Structure(4, 51));
-        $this->addAftSystem(new Structure(4, 51));
+        $this->addAftSystem(new Structure(4, 54));
         $this->addLeftSystem(new Structure(4, 60));
-        $this->addRightSystem(new Structure(4, 54));
-        $this->addPrimarySystem(new Structure(5, 51));
+        $this->addRightSystem(new Structure(4, 60));
+        $this->addPrimarySystem(new Structure(5, 48));
         
 	    
 
