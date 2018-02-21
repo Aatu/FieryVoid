@@ -29,6 +29,7 @@ class Enlightenment extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 25, 4, 6));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(4, 15));
+        $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new CargoBay(4, 24));
               
         $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 60));
