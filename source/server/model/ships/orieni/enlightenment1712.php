@@ -53,7 +53,7 @@ class Enlightenment1712 extends BaseShip{
         $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new Hangar(3, 14));        
         $this->addLeftSystem(new CargoBay(2, 30));    
-        $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
+        $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 	    
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
@@ -61,14 +61,14 @@ class Enlightenment1712 extends BaseShip{
         $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new Hangar(3, 14));        
         $this->addRightSystem(new CargoBay(2, 30));    
-        $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
+        $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 	    
 		//structures
         $this->addFrontSystem(new Structure(4, 51));
-        $this->addAftSystem(new Structure(4, 51));
+        $this->addAftSystem(new Structure(4, 54));
         $this->addLeftSystem(new Structure(4, 60));
-        $this->addRightSystem(new Structure(4, 54));
-        $this->addPrimarySystem(new Structure(5, 51));
+        $this->addRightSystem(new Structure(4, 60));
+        $this->addPrimarySystem(new Structure(5, 48));
         
 	    
 	//d20 hit chart
