@@ -6,7 +6,7 @@ class Righteous1894 extends BaseShip{
         
 		$this->pointCost = 725;
 		$this->faction = "Orieni";
-        $this->phpclass = "Righteous";
+        $this->phpclass = "Righteous1894";
         $this->imagePath = "img/ships/righteous.png";
         $this->shipClass = "Righteous Missile Support Ship (early)";
 	    $this->variantOf = "Vigilant Combat Support Ship";	    
