@@ -4,7 +4,7 @@ class Faithful1793 extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 630;
+		$this->pointCost = 575;
 		$this->faction = "Orieni";
         $this->phpclass = "Faithful1793";
         $this->imagePath = "img/ships/faithful.png";
