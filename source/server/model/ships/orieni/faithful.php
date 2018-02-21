@@ -87,7 +87,7 @@ class Faithful extends BaseShip{
 		//Forward
 		1=> array(
 			6 => "Thruster",
-			8 => "Laser Lance",
+			8 => "Heavy Laser Lance",
 			10 => "Rapid Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
@@ -102,7 +102,7 @@ class Faithful extends BaseShip{
 		//Port
 		3=> array(
 			5 => "Thruster",
-			7 => "Laser Lance",
+			7 => "Heavy Laser Lance",
 			9 => "Rapid Gatling Railgun",
 			12 => "Cargo Bay",
 			18 => "Structure",
@@ -111,7 +111,7 @@ class Faithful extends BaseShip{
 		//Starboard
 		4=> array(
 			5 => "Thruster",
-			7 => "Laser Lance",
+			7 => "Heavy Laser Lance",
 			9 => "Rapid Gatling Railgun",
 			12 => "Cargo Bay",
 			18 => "Structure",
