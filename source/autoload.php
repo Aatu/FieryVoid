@@ -515,9 +515,9 @@ spl_autoload_register(
                 'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
              //   'shininglight' => '/server/model/ships/orieni/shininglight.php',
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
-                'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
-                'righteous' => '/server/model/ships/orieni/righteous.php',
-                
+                    'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
+                'righteous' => '/server/model/ships/orieni/righteous.php',                
+                    'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'templar' => '/server/model/ships/orieni/templar.php',
                     'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
                 'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
