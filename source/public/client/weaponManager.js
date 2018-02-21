@@ -680,7 +680,7 @@ window.weaponManager = {
                     var sPosHex = shipManager.getShipPosition(shooter);
                     var tPosHex = shipManager.getShipPosition(target);
 
-                    if (!(sPosHex.x == tPosHex.x && sPosHex.y == tPosHex.y)
+                    if (!(sPosHex.equals(tPosHex))
                         || shipManager.movement.getJinking(shooter) > 0) {
                         jink = shipManager.movement.getJinking(target);
 
