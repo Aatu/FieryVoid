@@ -1,16 +1,17 @@
 <?php
-class Enlightenment extends BaseShip{
+class Enlightenment1712 extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 650;
+		$this->pointCost = 600;
 		$this->faction = "Orieni";
-        $this->phpclass = "Enlightenment";
+        $this->phpclass = "Enlightenment1712";
         $this->imagePath = "img/ships/enlightenment.png";
-        $this->shipClass = "Enlightenment Invader";
+        $this->shipClass = "Enlightenment Invader (early)";
+        $this->variantOf = "Enlightenment Invader";
         $this->shipSizeClass = 3;
-	    $this->isd = 2007;
+	    $this->isd = 1712;
         $this->fighters = array("light"=>12, "assault shuttles"=>24);
         $this->canvasSize = 200;
 		
@@ -28,33 +29,36 @@ class Enlightenment extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 25, 4, 6));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(4, 15));
+        $this->addPrimarySystem(new ReloadRack(6, 9));
         $this->addPrimarySystem(new CargoBay(4, 24));
               
         $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 60));
         $this->addFrontSystem(new LaserLance(2, 6, 4, 300, 120));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 15, 0, 2, 1));  
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 240));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 240));
-        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
-        $this->addAftSystem(new Thruster(3, 12, 0, 2, 2));
+	    
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 240));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 120, 240));
+        $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
+        $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
+        $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
+        $this->addAftSystem(new Thruster(2, 12, 0, 2, 2));
 		
         $this->addLeftSystem(new SoMissileRack(3, 6, 0, 240, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 300));
+        $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
+        $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new Hangar(3, 14));        
         $this->addLeftSystem(new CargoBay(2, 30));    
         $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
+	    
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new Hangar(3, 14));        
         $this->addRightSystem(new CargoBay(2, 30));    
         $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
@@ -85,14 +89,14 @@ class Enlightenment extends BaseShip{
 		1=> array(
 			6 => "Thruster",
 			8 => "Laser Lance",
-			11 => "Rapid Gatling Railgun",
+			11 => "Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),
 		//Aft
 		2=> array(
 			8 => "Thruster",
-			10 => "Rapid Gatling Railgun",
+			10 => "Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -100,7 +104,7 @@ class Enlightenment extends BaseShip{
 		3=> array(
 			4 => "Thruster",
 			6 => "Class-SO Missile Rack",
-			8 => "Rapid Gatling Railgun",
+			8 => "Gatling Railgun",
 			10 => "Hangar",			
 			12 => "Cargo Bay",
 			18 => "Structure",
@@ -110,7 +114,7 @@ class Enlightenment extends BaseShip{
 		4=> array(
 			4 => "Thruster",
 			6 => "Class-SO Missile Rack",
-			8 => "Rapid Gatling Railgun",
+			8 => "Gatling Railgun",
 			10 => "Hangar",			
 			12 => "Cargo Bay",
 			18 => "Structure",
