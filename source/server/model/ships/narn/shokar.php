@@ -26,8 +26,8 @@ class ShoKar extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 17, 0, 3));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 21, 5, 10));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new ElintScanner(5, 21, 5, 10));
+        //$this->addPrimarySystem(new ElintArray(6, 6, 2));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 2));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
 		$this->addPrimarySystem(new Hangar(5, 8));
@@ -63,7 +63,7 @@ class ShoKar extends BaseShip{
 			0=> array(
 				8 => "Structure",
 				11 => "Jump Engine",
-				13 => "Scanner",
+				13 => "ELINT Scanner",
 				15 => "Engine",
 				17 => "Hangar",
 				19 => "Reactor",
