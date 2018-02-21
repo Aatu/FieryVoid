@@ -54,7 +54,7 @@ class Enlightenment extends BaseShip{
         $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 300));
         $this->addLeftSystem(new Hangar(3, 14));        
         $this->addLeftSystem(new CargoBay(2, 30));    
-        $this->addLeftSystem(new Thruster(4, 16, 0, 4, 3));
+        $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 0, 120));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
@@ -62,7 +62,7 @@ class Enlightenment extends BaseShip{
         $this->addRightSystem(new SoMissileRack(3, 6, 0, 60, 180));
         $this->addRightSystem(new Hangar(3, 14));        
         $this->addRightSystem(new CargoBay(2, 30));    
-        $this->addRightSystem(new Thruster(4, 16, 0, 4, 4));
+        $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 	    
 
 		//structures
