@@ -71,7 +71,7 @@ window.FirePhaseStrategy = (function(){
     FirePhaseStrategy.prototype.setSelectedShip = function(ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         this.showShipEW(ship);
-        console.log("can pivot?", shipManager.movement.canPivot(ship));
+
         if (shipManager.movement.canPivot(ship)) {
             this.drawMovementUI(this.selectedShip);
         }
@@ -85,7 +85,6 @@ window.FirePhaseStrategy = (function(){
     };
 
     FirePhaseStrategy.prototype.onSystemTargeted = function(payload) {
-        console.log("systemTargeted");
         var ship = payload.ship;
         var system = payload.system;
 
@@ -94,7 +93,6 @@ window.FirePhaseStrategy = (function(){
             && gamedata.selectedSystems.length > 0
             && weaponManager.canCalledshot(ship, system))
         {
-            console.log("call it");
             weaponManager.targetShip(ship, system);
         }
     };

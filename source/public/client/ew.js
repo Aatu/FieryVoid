@@ -397,15 +397,10 @@ window.ew = {
 	
 	},
     checkInELINTDistance: function(ship, target, distance){
-
-        //TODO: hex distance!
-        var shipPos = shipManager.getShipPositionInWindowCo(ship);
-        var targetPos = shipManager.getShipPositionInWindowCo(target)
-       
         if (!distance)
             distance = 30;
         
-        return (mathlib.getDistanceHex(shipPos, targetPos)<=distance);
+        return (mathlib.getDistanceBetweenShipsInHex(ship, target)<=distance);
     },
     
     getSupportedOEW: function(ship, target){

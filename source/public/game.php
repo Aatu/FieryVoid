@@ -162,12 +162,10 @@
     <script src="client/mousewheel.js"></script>
     <script src="client/mathlib.js"></script>
     <script src="client/lib/seedRandom.js"></script>
-    <script src="client/debug.js"></script>
     <script src="client/ajaxInterface.js"></script>
     <script src="client/ew.js"></script>
     <script src="client/weaponManager.js"></script>
     <script src="client/damage.js"></script>
-	<script src="client/Effects.js"></script>
 	<script src="client/combatLog.js"></script>
 	<script src="client/player.js"></script>
     <script src="client/ships.js"></script>
@@ -179,7 +177,6 @@
     <script src="client/UI/shipMovement.js"></script>
     <script src="client/UI/infowindow.js"></script>
 	<script src="client/UI/systemInfo.js"></script>
-    <script src="client/animation.js"></script>
     <script src="client/UI/shipwindow.js"></script>
     <script src="client/UI/fleetList.js"></script>
     <script src="client/UI/gameInfo.js"></script>
@@ -187,8 +184,6 @@
     <script src="client/UI/shipclickable.js"></script>
 	<script src="client/UI/confirm.js"></script>
 	<script src="client/UI/shipSelect.js"></script>
-	<script src="client/ballistics.js"></script>
-	<script src="client/damageDrawer.js"></script>
 	<script src="client/model/ship.js"></script>
     <script src="client/model/shipSystem.js"></script>
     <script src="client/model/systemFactory.js"></script>

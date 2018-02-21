@@ -52,26 +52,6 @@ window.mathlib = {
         var end = shipManager.getShipPosition(s2);
 		return start.distanceTo(end);
     },
-    
-	getDistanceHex: function(start, end){
-		var dis = Math.sqrt((end.x-start.x)*(end.x-start.x) + (end.y-start.y)*(end.y-start.y));
-		return (dis / hexgrid.hexWidth());
-	},
-	
-	getPointInDistanceBetween: function(start, end, distance){
-		var totalDist = mathlib.distance(start, end);
-		var perc = distance / totalDist;
-		
-			
-		return mathlib.getPointBetween(start, end, perc);
-	},
-	
-	isOver: function(start, end, point){
-		if (mathlib.distance(start, point) > mathlib.distance(start,end))
-			return true;
-			
-		return false;
-	},
 	
 	getAngleBetween: function(angle1, angle2, right){
 		//console.log(angle1  + " " + angle2);

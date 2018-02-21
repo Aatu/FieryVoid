@@ -708,8 +708,6 @@ window.weaponManager = {
 
 
     calculateHitChange: function (shooter, target, weapon, calledid) {
-        var sPos = shipManager.getShipPositionInWindowCo(shooter);
-        var tPos = shipManager.getShipPositionInWindowCo(target);
         var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         var sPosHex = shipManager.getShipPosition(shooter);
@@ -735,7 +733,7 @@ window.weaponManager = {
 
         var mod = 0;
 
-        mod -= target.getHitChangeMod(shooter, sPos);
+        mod -= target.getHitChangeMod(shooter);
 
         if (shooter.flight) {
             //oew = shooter.offensivebonus;
@@ -805,7 +803,7 @@ window.weaponManager = {
             if (jammer && !shipManager.power.isOffline(target, jammer))
                 jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
 
-            if (stealth && (mathlib.getDistanceHex(sPos, tPos) > 5))
+            if (stealth && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5))
                 jammermod = rangePenalty;
 
             if (target.flight) {
@@ -832,8 +830,6 @@ window.weaponManager = {
 
 
     calculateFighterBallisticHitChange: function (shooter, target, weapon, calledid) {
-        var sPos = shipManager.getShipPositionInWindowCo(shooter);
-        var tPos = shipManager.getShipPositionInWindowCo(target);
         var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         var sPosHex = shipManager.getShipPosition(shooter);
@@ -857,7 +853,7 @@ window.weaponManager = {
 
         var mod = 0;
 
-        mod -= target.getHitChangeMod(shooter, sPos);
+        mod -= target.getHitChangeMod(shooter);
 
         if (shooter.hasNavigator || weaponManager.isPosOnWeaponArc(shooter, tPosHex, weapon)) {
             oew = shooter.offensivebonus;
@@ -879,14 +875,14 @@ window.weaponManager = {
         }
 
         var jammermod = 0;
-        if (shooter.faction != target.faction) {
+        if (shooter.faction !== target.faction) {
             var jammer = shipManager.systems.getSystemByName(target, "jammer");
             var stealth = shipManager.systems.getSystemByName(target, "stealth");
 
             if (jammer && !shipManager.power.isOffline(target, jammer))
                 jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
 
-            if (stealth && (mathlib.getDistanceHex(sPos, tPos) > 5))
+            if (stealth && (mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5))
                 jammermod = rangePenalty;
 
             if (target.flight) {
@@ -1143,10 +1139,12 @@ window.weaponManager = {
                 continue;
 
             if (ball.targetid !== selectedShip.id && weapon.freeintercept) {
-                var ballpos = hexgrid.positionToPixel(ball.position);
-                var targetpos = shipManager.getShipPositionInWindowCo(target);
-                var selectedpos = shipManager.getShipPositionInWindowCo(selectedShip);
-                if (mathlib.getDistanceHex(ballpos, targetpos) <= mathlib.getDistanceHex(ballpos, selectedpos) || mathlib.getDistanceHex(targetpos, selectedpos) > 3)
+
+                var ballPosHex = new hexagon.Offset(ball.position);
+                var targetPosHex = shipManager.getShipPosition(target);
+                var selectedPosHex = shipManager.getShipPosition(selectedShip);
+
+                if (ballPosHex.distanceTo(targetPosHex) <= ballPosHex.distanceTo(selectedPosHex) || targetPosHex.distanceTo(selectedPosHex) > 3)
                     continue;
             }
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon))
@@ -1421,8 +1419,6 @@ window.weaponManager = {
     checkIsInRange: function (shooter, target, weapon) {
 
         var range = weapon.range;
-        var shooterPos = shipManager.getShipPositionInWindowCoWithoutOffset(shooter);
-        var targetPos = shipManager.getShipPositionInWindowCoWithoutOffset(target)
         var distance = (mathlib.getDistanceBetweenShipsInHex(shooter, target)).toFixed(2);
 
         var stealthSystem = shipManager.systems.getSystemByName(target, "stealth");

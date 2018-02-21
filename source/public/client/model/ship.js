@@ -18,11 +18,8 @@ Ship.prototype =
 {
     constructor: Ship,
     
-    getHitChangeMod: function(shooter, pos)
+    getHitChangeMod: function(shooter)
     {
-        // plopje
-        var pixelpos = hexgrid.positionToPixel(pos);
-        
         var affectingSystems = Array();
         for (var i in this.systems)
         {
@@ -32,15 +29,15 @@ Ship.prototype =
             if (!this.checkIsValidAffectingSystem(system, shooter)) //Marcin Sawicki: change to unit itself...
                 continue;
 
-            if(typeof system == 'Shield'
-                && mathlib.getDistanceBetweenShipsInHex(shooter, this).toFixed(2) == 0
+            if(system instanceof Shield
+                && mathlib.getDistanceBetweenShipsInHex(shooter, this) === 0
                 && shooter.flight
             ){
                 // Shooter is a flight, and the flight is under the shield
                 continue;
             }
 
-            var mod = system.getDefensiveHitChangeMod(this, shooter, pixelpos);
+            var mod = system.getDefensiveHitChangeMod(this, shooter);
 
             if ( ! (affectingSystems[system.defensiveType])
                 || affectingSystems[system.defensiveType] < mod)

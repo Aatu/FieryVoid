@@ -430,23 +430,6 @@ window.shipManager = {
         return new hexagon.Offset(movement.position);
     },
 
-    getShipPositionInWindowCoWithoutOffset: function(ship){
-        var hexpos = shipManager.getShipPosition(ship);
-        var pos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
-        return pos;
-    },
-
-    getShipPositionInWindowCo: function(ship){
-        var hexpos = shipManager.getShipPosition(ship);
-        var pos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
-
-        pos.x = pos.x + (hexpos.xO*gamedata.zoom);
-        pos.y = pos.y + (hexpos.yO*gamedata.zoom);
-
-        return pos;
-
-    },
-
     getShipPositionForDrawing: function(ship){
         var movement = null;
         for (var i in ship.movement){

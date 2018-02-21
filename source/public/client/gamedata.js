@@ -771,14 +771,6 @@ gamedata = {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
         }
-    },
-    
-    listShipPositions: function(){
-        
-        scrolling.scrollTo(0,0);
-        for (var i in gamedata.ships){
-            console.log(shipManager.getShipPositionInWindowCo(gamedata.ships[i]));
-        }
     }
     
 }
