@@ -1,5 +1,6 @@
 <?php
 
+/*no longer needed - superseded by ElintScanner
 class ElintArray extends ShipSystem implements SpecialAbility{
     public $name = "elintArray";
     public $displayName = "ELINT array";
@@ -16,6 +17,7 @@ class ElintArray extends ShipSystem implements SpecialAbility{
     }
     
 }
+*/
 
 class Jammer extends ShipSystem implements SpecialAbility{
     
