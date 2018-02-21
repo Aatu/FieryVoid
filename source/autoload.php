@@ -486,6 +486,7 @@ spl_autoload_register(
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
                 'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
                 'faithful' => '/server/model/ships/orieni/faithful.php',
+                    'faithful1793' => '/server/model/ships/orieni/faithful1793.php',
                 'commune' => '/server/model/ships/orieni/commune.php',
                     'commune1983' => '/server/model/ships/orieni/commune1983.php',
                 'crusader' => '/server/model/ships/orieni/crusader.php',
@@ -790,7 +791,7 @@ spl_autoload_register(
                 'duoweapon' => '/server/model/weapons/duoWeapon.php',
                 'duogravitonbeam' => '/server/model/weapons/gravitic.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
-                'elintarray' => '/server/model/systems/baseSystems.php',
+                //'elintarray' => '/server/model/systems/baseSystems.php', //no longer needed, superseded by ElintScanner
                 'elintscanner' => '/server/model/systems/baseSystems.php',
                 'elutarian' => '/server/model/ships/centauri/elutarian.php',
                 'emperorstransport' => '/server/model/ships/centauri/emperorsTransport.php',
