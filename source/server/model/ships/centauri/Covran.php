@@ -21,31 +21,30 @@ class Covran extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         
-        $this->iniativebonus = 15;
+        $this->iniativebonus = 3 *5;
         
          
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(6, 20, 7, 14));
-        $this->addPrimarySystem(new ElintArray(6, 6, 2));
+        $this->addPrimarySystem(new ElintScanner(6, 20, 7, 14));
+        //$this->addPrimarySystem(new ElintArray(6, 6, 2));
         $this->addPrimarySystem(new Engine(6, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(6, 2));
+	$this->addPrimarySystem(new Hangar(6, 2));
 		
         
-        $this->addFrontSystem(new Thruster(5, 15, 0, 6, 1));
         $this->addFrontSystem(new GuardianArray(3, 4, 2, 180, 60));
         $this->addFrontSystem(new GuardianArray(3, 4, 2, 300, 180));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
+        $this->addFrontSystem(new Thruster(5, 15, 0, 6, 1));
 		
         $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
         $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         $this->addAftSystem(new GuardianArray(3, 4, 2, 120, 0));
         $this->addAftSystem(new GuardianArray(3, 4, 2, 0, 240));
-
+	$this->addAftSystem(new JumpEngine(5, 18, 3, 16));
         $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
-		$this->addAftSystem(new JumpEngine(5, 18, 3, 16));
         
 		$this->addLeftSystem(new Thruster(5, 15, 0, 4, 3));
 		

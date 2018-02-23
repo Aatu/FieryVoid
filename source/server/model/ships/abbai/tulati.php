@@ -34,7 +34,7 @@ class Tulati extends MediumShip{
 	$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
 		
         $this->addFrontSystem(new QuadArray(2, 0, 0, 180, 60));
-        $this->addFrontSystem(new QuadArray(2, 0, 0, 240, 180));
+        $this->addFrontSystem(new QuadArray(2, 0, 0, 300, 180));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 270, 90));
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
 		

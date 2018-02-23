@@ -131,14 +131,14 @@ var Structure = function(json, ship)
 Structure.prototype = Object.create( ShipSystem.prototype );
 Structure.prototype.constructor = Structure;
 
-
+/*no longer needed, superseded by ElintScanner
 var ElintArray = function(json, ship)
 {
     ShipSystem.call( this, json, ship);
 }
 ElintArray.prototype = Object.create( ShipSystem.prototype );
 ElintArray.prototype.constructor = ElintArray;
-
+*/
 
 var Jammer = function(json, ship)
 {

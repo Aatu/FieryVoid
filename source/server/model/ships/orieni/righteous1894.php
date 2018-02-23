@@ -1,18 +1,18 @@
 <?php
-class Righteous extends BaseShip{
+class Righteous1894 extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 815;
+		$this->pointCost = 725;
 		$this->faction = "Orieni";
-        $this->phpclass = "Righteous";
+        $this->phpclass = "Righteous1894";
         $this->imagePath = "img/ships/righteous.png";
-        $this->shipClass = "Righteous Missile Support Ship";
+        $this->shipClass = "Righteous Missile Support Ship (early)";
 	    $this->variantOf = "Vigilant Combat Support Ship";	    
         $this->limited = 10;
         $this->occurence = "rare";
-	    $this->isd = 2007;
+	    $this->isd = 1894;
         $this->shipSizeClass = 3;
         $this->fighters = array("light"=>12);
         $this->canvasSize = 200;
@@ -25,7 +25,6 @@ class Righteous extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
@@ -34,36 +33,35 @@ class Righteous extends BaseShip{
         $this->addPrimarySystem(new Hangar(4, 14, 6));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new ReloadRack(6, 9, 0, 0));
-        $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
+        $this->addPrimarySystem(new SoMissileRack(5, 6, 0, 0, 360));
         
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 240, 60));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 270, 90));
-        $this->addFrontSystem(new SMissileRack(5, 6, 0, 300, 120));
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 240, 60));
+        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 270, 90));
+        $this->addFrontSystem(new SoMissileRack(5, 6, 0, 300, 120));
+        $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
-
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
-        $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
+	    
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
+        $this->addAftSystem(new OrieniGatlingRG(1, 4, 1, 60, 300));
+        $this->addAftSystem(new Thruster(2, 15, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 15, 0, 3, 2));
+        $this->addAftSystem(new Thruster(2, 15, 0, 3, 2));
 		
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
-        $this->addLeftSystem(new SMissileRack(3, 6, 0, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 360));
+        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 360));
+        $this->addLeftSystem(new SoMissileRack(3, 6, 0, 180, 360));
+        $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
+        $this->addLeftSystem(new OrieniGatlingRG(1, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-
+	    
         $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
         $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
         $this->addRightSystem(new SMissileRack(3, 6, 0, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
+        $this->addRightSystem(new OrieniGatlingRG(1, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
-
-
+	    
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
         $this->addAftSystem(new Structure(4, 48));
@@ -72,14 +70,13 @@ class Righteous extends BaseShip{
         $this->addPrimarySystem(new Structure(5, 56));
         
 	    
-
 	//d20 hit chart
 	$this->hitChart = array(
 		
 		//PRIMARY
 		0=> array( 
 			7 => "Structure",
-			8 => "Class-S Missile Rack",
+			8 => "Class-SO Missile Rack",
 			10 => "Jump Engine",
 			12 => "Scanner",
 			14 => "Engine",
@@ -91,23 +88,23 @@ class Righteous extends BaseShip{
 		//Forward
 		1=> array(
 			5 => "Thruster",
-			9 => "Class-S Missile Rack",
-			10 => "Rapid Gatling Railgun",
+			9 => "Class-SO Missile Rack",
+			10 => "Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),
 		//Aft
 		2=> array(
 			6 => "Thruster",
-			9 => "Rapid Gatling Railgun",
+			9 => "Gatling Railgun",
 			18 => "Structure",
 			20 => "Primary",
 		),
 		//Port
 		3=> array(
 			4 => "Thruster",
-			6 => "Rapid Gatling Railgun",
-			11 => "Class-S Missile Rack",
+			6 => "Gatling Railgun",
+			11 => "Class-SO Missile Rack",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -115,7 +112,7 @@ class Righteous extends BaseShip{
 		4=> array(
 			4 => "Thruster",
 			6 => "Rapid Gatling Railgun",
-			11 => "Class-S Missile Rack",
+			11 => "Class-SO Missile Rack",
 			18 => "Structure",
 			20 => "Primary",
 		),
@@ -123,9 +120,5 @@ class Righteous extends BaseShip{
 	    
 	    
     }
-
 }
-
-
-
 ?>

@@ -1020,7 +1020,7 @@
             parent::setSystemDataWindow($turn);
             //$this->output = $this->baseOutput + $this->getBoostLevel($turn); //handled in front end
             $this->data["Special"] = 'If fired offensively at full power, can overheat and shut down.<br>Can be fired at reduced power to avoid this:';    
-            $this->data["Special"] .= "<br>Quad shot: 75% chance to shut down for a turn"; 
+            $this->data["Special"] .= "<br>Quad shot: 50% chance to shut down for a turn"; 
             $this->data["Special"] .= "<br>Triple shot: 25% chance to shut down for a turn";  
             $this->data["Special"] .= "<br>Dual shot: always safe"; 
         }

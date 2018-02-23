@@ -256,7 +256,9 @@ spl_autoload_register(
                 'tetrana' =>  '/server/model/ships/abbai_old/tetrana.php',
                 'sellac' =>  '/server/model/ships/abbai_old/sellac.php',
                 'motenai' =>  '/server/model/ships/abbai_old/motenai.php',
+                'nota' =>  '/server/model/ships/abbai_old/nota.php',
 
+                
                 'selatra' =>  '/server/model/ships/abbai_old/selatra.php',               
                 'bochi' =>  '/server/model/ships/abbai_old/bochi.php',
                 'kirva' =>  '/server/model/ships/abbai_old/kirva.php',
@@ -482,7 +484,9 @@ spl_autoload_register(
                 
                 //orieni ships
                 'benevolent' => '/server/model/ships/orieni/benevolent.php',
+                'benevolent1791' => '/server/model/ships/orieni/benevolent1791.php',
                 'faithful' => '/server/model/ships/orieni/faithful.php',
+                    'faithful1793' => '/server/model/ships/orieni/faithful1793.php',
                 'commune' => '/server/model/ships/orieni/commune.php',
                     'commune1983' => '/server/model/ships/orieni/commune1983.php',
                 'crusader' => '/server/model/ships/orieni/crusader.php',
@@ -500,7 +504,8 @@ spl_autoload_register(
                     'virtue1783' => '/server/model/ships/orieni/virtue1783.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
                     'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',                
-                'enlightenment' => '/server/model/ships/orieni/enlightenment.php',
+                'enlightenment' => '/server/model/ships/orieni/enlightenment.php',              
+                    'enlightenment1712' => '/server/model/ships/orieni/enlightenment1712.php',
                 'pariah' => '/server/model/ships/orieni/pariah.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',                
@@ -510,9 +515,9 @@ spl_autoload_register(
                 'vengeful1780' => '/server/model/ships/orieni/vengeful1780.php',
              //   'shininglight' => '/server/model/ships/orieni/shininglight.php',
                 'vigilant' => '/server/model/ships/orieni/vigilant.php',
-                'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
-                'righteous' => '/server/model/ships/orieni/righteous.php',
-                
+                    'vigilant1704' => '/server/model/ships/orieni/vigilant1704.php',
+                'righteous' => '/server/model/ships/orieni/righteous.php',                
+                    'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'templar' => '/server/model/ships/orieni/templar.php',
                     'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
                 'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
@@ -786,7 +791,7 @@ spl_autoload_register(
                 'duoweapon' => '/server/model/weapons/duoWeapon.php',
                 'duogravitonbeam' => '/server/model/weapons/gravitic.php',
                 'electropulsegun' => '/server/model/weapons/specialWeapons.php',
-                'elintarray' => '/server/model/systems/baseSystems.php',
+                //'elintarray' => '/server/model/systems/baseSystems.php', //no longer needed, superseded by ElintScanner
                 'elintscanner' => '/server/model/systems/baseSystems.php',
                 'elutarian' => '/server/model/ships/centauri/elutarian.php',
                 'emperorstransport' => '/server/model/ships/centauri/emperorsTransport.php',
