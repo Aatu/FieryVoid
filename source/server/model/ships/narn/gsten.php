@@ -14,7 +14,7 @@ class Gsten extends BaseShip{
         $this->fighters = array("normal"=>6);
 	    
 	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
-	    $this->notes .= "It's not unduly powerful though, so just don't use hordes of them and it should be fine :)";
+	    $this->notes .= "<br>It's not unduly powerful though, so just don't use hordes of them";
 	    
 		
         $this->forwardDefense = 15;
