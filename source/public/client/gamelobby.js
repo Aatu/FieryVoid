@@ -225,8 +225,11 @@ window.gamedata = {
 		    case 'uncommon':
 			addOn = 'U';
 			break;
-		    default: //assume common
+		    case 'common':
 			addOn = 'C';
+			break;
+		    default: //assume something atypical
+			addOn = 'X'; 
 		}		
 		if((ship.limited>0) && (ship.limited < 100)){ //else no such info necessary
 			addOn = addOn +' '+ ship.limited + '%';
