@@ -15,6 +15,8 @@ class PrimusMaximus extends BaseShip{
 	    
         $this->isd = 2260;
         $this->variantOf = "Primus Battlecruiser";
+	    
+	    $this->notes = "Provides +1 Initiative for all friendly Centauri units";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
@@ -29,7 +31,7 @@ class PrimusMaximus extends BaseShip{
         
          
         $this->addPrimarySystem(new Reactor(8, 22, 0, 0));
-        $this->addPrimarySystem(new CnC(7, 20, 0, 0));
+        $this->addPrimarySystem(new CnC(8, 31, 0, 0)); //nominally one 7/20 and one 8/8
         $this->addPrimarySystem(new Scanner(7, 20, 5, 10));
         $this->addPrimarySystem(new Engine(7, 18, 0, 10, 2));
 		$this->addPrimarySystem(new Hangar(7, 14));
@@ -72,6 +74,47 @@ class PrimusMaximus extends BaseShip{
         $this->addRightSystem(new Structure( 5, 56));
         $this->addPrimarySystem(new Structure( 7, 42));
 
+	    
+	//d20 hit chart
+        $this->hitChart = array(
+            0=> array( //PRIMARY
+                    9 => "Structure",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array( //Forward
+                    3 => "Thruster",
+                    5 => "Battle Laser",
+                    8 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array( //Aft
+                    7 => "Thruster",
+                    12 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array( //Port
+                    3 => "Thruster",
+                    7 => "Battle Laser",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array( //Starboard
+                    3 => "Thruster",
+                    7 => "Battle Laser",
+                    11 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            )
+        );
 
     }
 }
+
+?>
