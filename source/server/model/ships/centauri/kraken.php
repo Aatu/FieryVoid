@@ -9,6 +9,7 @@ class Kraken extends StarBaseSixSections{
 		$this->phpclass = "Kraken";
 		$this->shipClass = "Kraken Star Fortress";
 		$this->fighters = array("heavy"=>36); 
+		$this->isd = 2202;
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = -200; //no voluntary movement anyway
