@@ -10,8 +10,12 @@ class Gsten extends BaseShip{
         $this->imagePath = "img/ships/gkarith.png";
         $this->shipClass = "G'Sten";
         $this->shipSizeClass = 3;
-        $this->occurence = "rare";
+        $this->occurence = "special";
         $this->fighters = array("normal"=>6);
+	    
+	    $this->notes = "Nominally Rare variant of G'Karith cruiser (not present in FV)";
+	    $this->notes .= "It's not unduly powerful though, so just don't use hordes of them and it should be fine :)";
+	    
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
