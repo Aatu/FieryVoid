@@ -9,6 +9,7 @@ class Koratyl extends StarBaseSixSections{
 		$this->phpclass = "Koratyl";
 		$this->shipClass = "Koratyl Defense Base";
 		$this->fighters = array("heavy"=>36); 
+		$this->isd = 2227;
 
 		$this->shipSizeClass = 3; //Enormous is not implemented
 		$this->iniativebonus = -200; //no voluntary movement anyway
@@ -36,7 +37,8 @@ class Koratyl extends StarBaseSixSections{
 
 
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-		$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
+		//$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
+		$this->addPrimarySystem(new CnC(6, 30, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
 		$this->addPrimarySystem(new Scanner(20, 50, 4, 8));
 		$this->addPrimarySystem(new Scanner(20, 50, 4, 8));
 		$this->addPrimarySystem(new Hangar(5, 4));
