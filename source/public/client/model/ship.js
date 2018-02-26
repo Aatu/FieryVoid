@@ -46,7 +46,8 @@ Ship.prototype =
                 || affectingSystems[system.defensiveType] < mod)
             {
       //          console.log("getting defensive: " + system.name + " mod: " + mod);
-                affectingSystems[system.getDefensiveType] = mod;
+      //          affectingSystems[system.getDefensiveType] = mod;
+                affectingSystems[system.defensiveType] = mod;
             }
 
         }
