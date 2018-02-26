@@ -35,8 +35,8 @@ class JaStat extends StarBaseFiveSections{
 			)
 		);
 
-		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
-		$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
+		//$this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
+		$this->addPrimarySystem(new CnC(7, 50, 0, 0)); //instead of one 6x25 C&C, make it 1 7x50
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 28, 4, 8));
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
