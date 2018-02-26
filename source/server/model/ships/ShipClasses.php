@@ -252,12 +252,13 @@
 		if(!$rammingExists){
 			//add ramming attack
 			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
-			if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
+			///already safe enough, commenting out!
+			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
 				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.	
 				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
 					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
 				}
-			}	
+			//}	
 		}
 	   }
             $this->addSystem($system, 0);
