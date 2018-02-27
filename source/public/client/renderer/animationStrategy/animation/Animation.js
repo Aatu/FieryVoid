@@ -1,4 +1,6 @@
-window.Animation = (function() {
+"use strict";
+
+window.Animation = function () {
     function Animation() {
         this.active = false;
     }
@@ -11,22 +13,13 @@ window.Animation = (function() {
         this.active = false;
     };
 
-    Animation.prototype.reset = function () {
+    Animation.prototype.reset = function () {};
 
-    };
+    Animation.prototype.cleanUp = function () {};
 
-    Animation.prototype.cleanUp = function () {
+    Animation.prototype.update = function (gameData) {};
 
-    };
-
-    Animation.prototype.update = function (gameData) {
-
-    };
-
-    Animation.prototype.render = function (now, total, last, delta, goingBack) {
-
-    };
-
+    Animation.prototype.render = function (now, total, last, delta, goingBack) {};
 
     return Animation;
-})();
+}();

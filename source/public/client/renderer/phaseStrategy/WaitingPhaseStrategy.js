@@ -1,8 +1,9 @@
-window.WaitingPhaseStrategy = (function(){
+"use strict";
 
-    function WaitingPhaseStrategy(coordinateConverter){
+window.WaitingPhaseStrategy = function () {
+
+    function WaitingPhaseStrategy(coordinateConverter) {
         PhaseStrategy.call(this, coordinateConverter);
-
     }
 
     WaitingPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -27,18 +28,17 @@ window.WaitingPhaseStrategy = (function(){
         return this;
     };
 
-    WaitingPhaseStrategy.prototype.onHexClicked = function(payload) {};
+    WaitingPhaseStrategy.prototype.onHexClicked = function (payload) {};
 
-    WaitingPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    WaitingPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    WaitingPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    WaitingPhaseStrategy.prototype.targetShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
-
 
     return WaitingPhaseStrategy;
-})();
+}();

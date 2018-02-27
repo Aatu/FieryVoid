@@ -1,10 +1,10 @@
-window.HexagonMath = (function() {
+"use strict";
 
-    function HexagonMath() {
+window.HexagonMath = function () {
 
-    }
+    function HexagonMath() {}
 
-    HexagonMath.prototype.getHexHeight = function(hexSize) {
+    HexagonMath.prototype.getHexHeight = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
@@ -12,7 +12,7 @@ window.HexagonMath = (function() {
         return hexSize + 2 * this.getHexA(hexSize);
     };
 
-    HexagonMath.prototype.getHexWidth = function(hexSize) {
+    HexagonMath.prototype.getHexWidth = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
@@ -20,8 +20,7 @@ window.HexagonMath = (function() {
         return this.getHexB(hexSize) * 2;
     };
 
-    HexagonMath.prototype.getHexRowHeight = function(hexSize)
-    {
+    HexagonMath.prototype.getHexRowHeight = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
@@ -29,7 +28,7 @@ window.HexagonMath = (function() {
         return hexSize + this.getHexA(hexSize);
     };
 
-    HexagonMath.prototype.getTextureHeight = function(hexSize) {
+    HexagonMath.prototype.getTextureHeight = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
@@ -37,7 +36,7 @@ window.HexagonMath = (function() {
         return Math.floor(hexSize + this.getHexHeight(hexSize));
     };
 
-    HexagonMath.prototype.getTextureWidth = function(hexSize) {
+    HexagonMath.prototype.getTextureWidth = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
@@ -45,27 +44,27 @@ window.HexagonMath = (function() {
         return this.getHexWidth(hexSize) * 2;
     };
 
-    HexagonMath.prototype.getHexA = function(hexSize) {
+    HexagonMath.prototype.getHexA = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
 
-        return hexSize * Math.sin(30/180*Math.PI);
+        return hexSize * Math.sin(30 / 180 * Math.PI);
     };
 
-    HexagonMath.prototype.getHexB = function(hexSize) {
+    HexagonMath.prototype.getHexB = function (hexSize) {
         if (!hexSize) {
             hexSize = window.Config.HEX_SIZE;
         }
 
-        return hexSize * Math.cos(30/180*Math.PI);
+        return hexSize * Math.cos(30 / 180 * Math.PI);
     };
 
-    HexagonMath.prototype.getGridWidth = function(hexCountWidth) {
-        return this.getHexWidth() * (hexCountWidth + 0.5)
+    HexagonMath.prototype.getGridWidth = function (hexCountWidth) {
+        return this.getHexWidth() * (hexCountWidth + 0.5);
     };
 
-    HexagonMath.prototype.getGridHeight = function(hexCountHeight) {
+    HexagonMath.prototype.getGridHeight = function (hexCountHeight) {
         var amount = Math.floor(hexCountHeight / 2);
         var height = amount * (this.getHexHeight() + window.Config.HEX_SIZE);
 
@@ -77,4 +76,4 @@ window.HexagonMath = (function() {
     };
 
     return new HexagonMath();
-})();
+}();

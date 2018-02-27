@@ -1,10 +1,11 @@
-window.DeploymentPhaseStrategy = (function(){
+'use strict';
 
-    function DeploymentPhaseStrategy(coordinateConverter){
+window.DeploymentPhaseStrategy = function () {
+
+    function DeploymentPhaseStrategy(coordinateConverter) {
         PhaseStrategy.call(this, coordinateConverter);
 
         this.deploymentSprites = [];
-
     }
 
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -29,22 +30,22 @@ window.DeploymentPhaseStrategy = (function(){
 
     DeploymentPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
-        this.deploymentSprites.forEach(function(icon) {
+        this.deploymentSprites.forEach(function (icon) {
             icon.ownSprite.hide();
             icon.enemySprite.hide();
             icon.allySprite.hide();
         });
     };
 
-    DeploymentPhaseStrategy.prototype.onHexClicked = function(payload) {
+    DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
         var hex = payload.hex;
 
         if (!this.selectedShip) {
             return;
         }
 
-        if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)){
-            if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0){
+        if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
+            if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
                 shipManager.movement.deploy(this.selectedShip, hex);
                 this.consumeGamedata();
                 this.drawMovementUI(this.selectedShip);
@@ -52,13 +53,11 @@ window.DeploymentPhaseStrategy = (function(){
                 if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
                     gamedata.showCommitButton();
                 }
-
             }
         }
-
     };
 
-    DeploymentPhaseStrategy.prototype.setSelectedShip = function(ship) {
+    DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
 
@@ -68,28 +67,28 @@ window.DeploymentPhaseStrategy = (function(){
         }
     };
 
-    DeploymentPhaseStrategy.prototype.deselectShip = function(ship) {
+    DeploymentPhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         hideDeploymentArea(ship, this.deploymentSprites, this.gamedata);
         this.hideMovementUI();
     };
 
-    DeploymentPhaseStrategy.prototype.targetShip = function(ship) {};
+    DeploymentPhaseStrategy.prototype.targetShip = function (ship) {};
 
-    DeploymentPhaseStrategy.prototype.untargetShip = function(ship) {};
+    DeploymentPhaseStrategy.prototype.untargetShip = function (ship) {};
 
-    DeploymentPhaseStrategy.prototype.createReplayUI = function(gamedata) {};
+    DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) {};
 
-    function showEnemyDeploymentAreas(deploymentSprites, gamedata){
+    function showEnemyDeploymentAreas(deploymentSprites, gamedata) {
         var team = gamedata.getPlayerTeam();
-        deploymentSprites.forEach(function(icon) {
+        deploymentSprites.forEach(function (icon) {
             if (icon.team != team) {
                 icon.enemySprite.show();
             }
         });
     }
 
-    function showDeploymentArea(ship, deploymentSprites, gamedata){
+    function showDeploymentArea(ship, deploymentSprites, gamedata) {
         var icon = getSlotById(ship.slot, deploymentSprites);
         if (gamedata.isMyShip(ship)) {
             icon.ownSprite.show();
@@ -106,13 +105,13 @@ window.DeploymentPhaseStrategy = (function(){
     }
 
     function getSlotById(slotId, deploymentSprites) {
-        return deploymentSprites.filter(function(icon) {
+        return deploymentSprites.filter(function (icon) {
             return icon.slotId == slotId;
         }).pop();
     }
 
-    function createSlotSprites(gamedata, scene){
-        return Object.keys(gamedata.slots).map(function(key) {
+    function createSlotSprites(gamedata, scene) {
+        return Object.keys(gamedata.slots).map(function (key) {
             var slot = gamedata.slots[key];
 
             var deploymentData = getDeploymentData(slot);
@@ -129,12 +128,11 @@ window.DeploymentPhaseStrategy = (function(){
                 allySprite: allySprite,
                 enemySprite: enemySprite
             };
-
         });
     }
 
     function getValidDeploymentCallback(slot, deploymentData) {
-        return function(hex) {
+        return function (hex) {
             if (slot.deptype != "box") {
                 //TODO: support other deployment types than box;
                 console.log("ONLY BOX DEPLOYMENT TYPE IS SUPPORTED AT THE MOMENT");
@@ -147,8 +145,8 @@ window.DeploymentPhaseStrategy = (function(){
                 y: deploymentData.position.y - hexPositionInGame.y
             };
 
-            return Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width/2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height/2);
-        }
+            return Math.abs(offsetPosition.x) < Math.floor(deploymentData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(deploymentData.size.height / 2);
+        };
     }
 
     function getDeploymentData(slot) {
@@ -158,7 +156,7 @@ window.DeploymentPhaseStrategy = (function(){
             console.log("ONLY BOX DEPLOYMENT TYPE IS SUPPORTED AT THE MOMENT");
         }
 
-        var position = window.coordinateConverter.fromHexToGame(new hexagon.Offset(slot.depx,slot.depy));
+        var position = window.coordinateConverter.fromHexToGame(new hexagon.Offset(slot.depx, slot.depy));
         var size = {
             width: window.HexagonMath.getHexWidth() * slot.depwidth,
             height: window.HexagonMath.getHexRowHeight() * slot.depheight
@@ -168,18 +166,18 @@ window.DeploymentPhaseStrategy = (function(){
         return {
             position: position,
             size: size
-        }
+        };
     }
 
     function validateAllDeployment(gamedata, deploymentSprites) {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
 
-            if (! gamedata.isMyShip(ship)) {
+            if (!gamedata.isMyShip(ship)) {
                 continue;
             }
 
-            if (! validateDeploymentPosition(ship, null, deploymentSprites)){
+            if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;
             }
         }
@@ -187,7 +185,7 @@ window.DeploymentPhaseStrategy = (function(){
         return true;
     }
 
-    function validateDeploymentPosition(ship, hex, deploymentSprites){
+    function validateDeploymentPosition(ship, hex, deploymentSprites) {
         if (!hex) {
             hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
@@ -195,12 +193,10 @@ window.DeploymentPhaseStrategy = (function(){
         var icon = getSlotById(ship.slot, deploymentSprites);
         return icon.isValidDeploymentPosition(hex);
         /*
-
-        var slot = deployment.getValidDeploymentArea(ship);
+         var slot = deployment.getValidDeploymentArea(ship);
         hexpos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
         var deppos = hexgrid.hexCoToPixel(slot.depx, slot.depy);
-
-        if (slot.deptype == "box"){
+         if (slot.deptype == "box"){
             var depw = slot.depwidth*hexgrid.hexWidth();
             var deph = slot.depheight*hexgrid.hexHeight();
             if (hexpos.x <= (deppos.x+(depw/2)) && hexpos.x > (deppos.x-(depw/2))){
@@ -224,4 +220,4 @@ window.DeploymentPhaseStrategy = (function(){
     }
 
     return DeploymentPhaseStrategy;
-})();
+}();

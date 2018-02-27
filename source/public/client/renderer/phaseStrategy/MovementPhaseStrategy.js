@@ -1,6 +1,8 @@
-window.MovementPhaseStrategy = (function(){
+"use strict";
 
-    function MovementPhaseStrategy(coordinateConverter){
+window.MovementPhaseStrategy = function () {
+
+    function MovementPhaseStrategy(coordinateConverter) {
         PhaseStrategy.call(this, coordinateConverter);
     }
 
@@ -36,26 +38,24 @@ window.MovementPhaseStrategy = (function(){
         return this;
     };
 
-    MovementPhaseStrategy.prototype.onShipRightClicked = function(ship) {
+    MovementPhaseStrategy.prototype.onShipRightClicked = function (ship) {
         shipWindowManager.open(ship);
     };
 
-    MovementPhaseStrategy.prototype.onHexClicked = function(payload) {
+    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {};
 
-    };
-
-    MovementPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    MovementPhaseStrategy.prototype.setSelectedShip = function(ship) {
+    MovementPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         botPanel.setMovement(ship);
         this.drawMovementUI(this.selectedShip);
     };
 
-    MovementPhaseStrategy.prototype.deselectShip = function(ship) {
+    MovementPhaseStrategy.prototype.deselectShip = function (ship) {
         return; //do not allow deselecting ship when moving
 
         /*
@@ -65,8 +65,7 @@ window.MovementPhaseStrategy = (function(){
         */
     };
 
-
-    MovementPhaseStrategy.prototype.onMouseOutShips = function(ships) {
+    MovementPhaseStrategy.prototype.onMouseOutShips = function (ships) {
         PhaseStrategy.prototype.onMouseOutShips.call(this, ships);
 
         if (this.selectedShip) {
@@ -74,7 +73,7 @@ window.MovementPhaseStrategy = (function(){
         }
     };
 
-    MovementPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    MovementPhaseStrategy.prototype.targetShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
@@ -84,17 +83,17 @@ window.MovementPhaseStrategy = (function(){
         return shipManager.movement.isMovementReady(ship) && gamedata.isMyShip(ship);
     }
 
-    function doForcedMovementForActiveShip(){
+    function doForcedMovementForActiveShip() {
         var ship = gamedata.getActiveShip();
 
         if (!ship || !gamedata.isMyShip(ship)) {
-            return
+            return;
         }
         //TODO: what about rolling?
         //TODO: maybe check that this is not yet done during this turn
         shipManager.movement.doForcedPivot(ship);
 
-        if (ship.base){
+        if (ship.base) {
             shipManager.movement.doRotate(ship);
 
             //TODO: Test if this autocommit thing works
@@ -112,4 +111,4 @@ window.MovementPhaseStrategy = (function(){
     };
 
     return MovementPhaseStrategy;
-})();
+}();

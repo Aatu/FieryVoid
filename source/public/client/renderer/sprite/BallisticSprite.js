@@ -1,15 +1,14 @@
-window.BallisticSprite = (function(){
+"use strict";
+
+window.BallisticSprite = function () {
 
     var TEXTURE_SIZE = 512;
     var TEXTURE_LAUNCH = null;
     var TEXTURE_HEX = null;
     var TEXTURE_SHIP = null;
 
-    function BallisticSprite(position, type){
-        HexagonSprite.call(
-            this,
-            -2
-        );
+    function BallisticSprite(position, type) {
+        HexagonSprite.call(this, -2);
 
         if (!TEXTURE_LAUNCH) {
             createTextures();
@@ -32,12 +31,11 @@ window.BallisticSprite = (function(){
         }
     }
 
-    function createTextures(){
-        TEXTURE_LAUNCH  = createTexture('launch');
-        TEXTURE_HEX     = createTexture('hex');
-        TEXTURE_SHIP    = createTexture('ship');
+    function createTextures() {
+        TEXTURE_LAUNCH = createTexture('launch');
+        TEXTURE_HEX = createTexture('hex');
+        TEXTURE_SHIP = createTexture('ship');
     }
-
 
     function createTexture(type) {
 
@@ -54,7 +52,7 @@ window.BallisticSprite = (function(){
             return "rgba(250,110,5,0.50)";
         } else if (type == "hex") {
             return "rgba(230,20,10,0.50)";
-        }else {
+        } else {
             return "rgba(144,185,208,0.80)";
         }
     }
@@ -65,10 +63,10 @@ window.BallisticSprite = (function(){
             return "rgba(250,110,5,0.15)";
         } else if (type == "hex") {
             return "rgba(230,20,10,0.15)";
-        }else {
+        } else {
             return "rgba(144,185,208,0.30)";
         }
     }
 
     return BallisticSprite;
-})();
+}();

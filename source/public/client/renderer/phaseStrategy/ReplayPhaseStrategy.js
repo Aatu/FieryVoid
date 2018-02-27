@@ -1,6 +1,8 @@
-window.ReplayPhaseStrategy = (function(){
+"use strict";
 
-    function ReplayPhaseStrategy(coordinateConverter){
+window.ReplayPhaseStrategy = function () {
+
+    function ReplayPhaseStrategy(coordinateConverter) {
         PhaseStrategy.call(this, coordinateConverter);
         this.webglScene = null;
         this.currentTurn = null;
@@ -35,9 +37,7 @@ window.ReplayPhaseStrategy = (function(){
 
         activatePause.call(this);
 
-
         this.setPhaseHeader(false);
-
 
         return this;
     };
@@ -56,46 +56,42 @@ window.ReplayPhaseStrategy = (function(){
         startReplayOrRequestGamedata.call(this);
     };
 
-
     ReplayPhaseStrategy.prototype.done = function () {};
 
-    ReplayPhaseStrategy.prototype.onHexClicked = function(payload) {};
+    ReplayPhaseStrategy.prototype.onHexClicked = function (payload) {};
 
-    ReplayPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    ReplayPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    ReplayPhaseStrategy.prototype.setSelectShip = function(ship, payload) {
+    ReplayPhaseStrategy.prototype.setSelectShip = function (ship, payload) {
         this.shipIconContainer.getById(ship.id).setSelected(true);
     };
 
-    ReplayPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    ReplayPhaseStrategy.prototype.targetShip = function (ship, payload) {
         var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    ReplayPhaseStrategy.prototype.onMouseOverShip = function(ship, payload) {
+    ReplayPhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
         if (this.animationStrategy.isPaused()) {
             PhaseStrategy.prototype.onMouseOverShip.call(this, ship, payload);
         }
     };
 
-    ReplayPhaseStrategy.prototype.createReplayUI = function(gamedata) {
-        this.replayUI = new ReplayUI(
-            true,
-            {
-                play: activateButton.bind(this, "play"),
-                pause: activateButton.bind(this, "pause"),
-                back: activateButton.bind(this, "back"),
-                turnForward: turnForward.bind(this),
-                turnBack: turnBack.bind(this),
-                endReplay: requestPlayableGamedata.bind(this)
-            }
-        ).activate();
+    ReplayPhaseStrategy.prototype.createReplayUI = function (gamedata) {
+        this.replayUI = new ReplayUI(true, {
+            play: activateButton.bind(this, "play"),
+            pause: activateButton.bind(this, "pause"),
+            back: activateButton.bind(this, "back"),
+            turnForward: turnForward.bind(this),
+            turnBack: turnBack.bind(this),
+            endReplay: requestPlayableGamedata.bind(this)
+        }).activate();
     };
 
-    ReplayPhaseStrategy.prototype.render = function(coordinateConverter, scene, zoom){
+    ReplayPhaseStrategy.prototype.render = function (coordinateConverter, scene, zoom) {
         PhaseStrategy.prototype.render.call(this, coordinateConverter, scene, zoom);
 
         if (this.animationStrategy && this.animationStrategy.isDone && this.animationStrategy.isDone()) {
@@ -108,7 +104,7 @@ window.ReplayPhaseStrategy = (function(){
             this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene));
             this.replayUI.setTurn(this.replayTurn);
         } else {
-            if (! this.animationStrategy) {
+            if (!this.animationStrategy) {
                 this.changeAnimationStrategy(new IdleAnimationStrategy(this.shipIconContainer, this.gamedata.turn));
                 this.animationStrategy.update(this.gamedata);
             }
@@ -120,7 +116,7 @@ window.ReplayPhaseStrategy = (function(){
     function activateButton(action, event) {
 
         if (this.loading) {
-            return
+            return;
         }
 
         this.replayUI.activateButton(event.target);
@@ -135,12 +131,12 @@ window.ReplayPhaseStrategy = (function(){
 
     function getInitialReplayTurn() {
 
-        if (this.currentTurn  === 1 && this.currentPhase <= 1) {
+        if (this.currentTurn === 1 && this.currentPhase <= 1) {
             throw new Error("Activating replay too early");
         }
 
         if (this.currentPhase === 1) {
-            return this.currentTurn  - 1;
+            return this.currentTurn - 1;
         }
 
         return this.currentTurn;
@@ -170,19 +166,19 @@ window.ReplayPhaseStrategy = (function(){
         startLoading.call(this);
 
         jQuery.ajax({
-            type : 'GET',
-            url : 'replay.php',
-            dataType : 'json',
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
             data: {
                 turn: this.replayTurn,
                 gameid: this.gamedata.gameid,
                 time: new Date().getTime()
             },
-            success : function(data) {
+            success: function (data) {
                 gamedata.parseServerData(data);
-                stopLoading.call(this)
+                stopLoading.call(this);
             }.bind(this),
-            error : ajaxInterface.errorAjax
+            error: ajaxInterface.errorAjax
         });
     }
 
@@ -190,9 +186,9 @@ window.ReplayPhaseStrategy = (function(){
         startLoading.call(this);
 
         jQuery.ajax({
-            type : 'GET',
-            url : 'gamedata.php',
-            dataType : 'json',
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
             data: {
                 turn: -1,
                 phase: 0,
@@ -202,7 +198,7 @@ window.ReplayPhaseStrategy = (function(){
                 time: new Date().getTime(),
                 force: true
             },
-            success: function(data) {
+            success: function (data) {
                 gamedata.replay = false;
                 stopLoading.call(this);
                 gamedata.parseServerData(data);
@@ -222,4 +218,4 @@ window.ReplayPhaseStrategy = (function(){
     }
 
     return ReplayPhaseStrategy;
-})();
+}();

@@ -70,6 +70,15 @@ background: transparent;
     right: 0px;
 }
 
+
+#reactUI{
+    position:absolute;
+    z-index:999999;
+    overflow:hidden;
+    top: 0;
+    left: 0;
+}
+
 body{
 	overflow:hidden;
 }

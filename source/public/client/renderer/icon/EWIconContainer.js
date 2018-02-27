@@ -1,32 +1,31 @@
-window.EWIconContainer = (function(){
+'use strict';
 
-    var COLOR_OEW_FIRENDLY = new THREE.Color(160/255,250/255,100/255);
-    var COLOR_OEW_ENEMY = new THREE.Color(255/255,40/255,40/255);
+window.EWIconContainer = function () {
 
+    var COLOR_OEW_FIRENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
 
-    function EWIconContainer(coordinateConverter, scene, iconContainer){
+    function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];
         this.scene = scene;
         this.zoomScale = 1;
         this.shipIconContainer = iconContainer;
     }
 
-    EWIconContainer.prototype.consumeGamedata = function(gamedata) {
-        this.ewIcons.forEach(function(ewIcon) {
+    EWIconContainer.prototype.consumeGamedata = function (gamedata) {
+        this.ewIcons.forEach(function (ewIcon) {
             ewIcon.used = false;
         });
 
-        gamedata.ships.forEach(function(ship) {
-           gamedata.ships.forEach(function(target){
-               var oew = ew.getOffensiveEW(ship, target);
+        gamedata.ships.forEach(function (ship) {
+            gamedata.ships.forEach(function (target) {
+                var oew = ew.getOffensiveEW(ship, target);
 
-               if (oew) {
-                   createOrUpdateOEW.call(this, ship, target, oew);
-               }
-           }, this)
+                if (oew) {
+                    createOrUpdateOEW.call(this, ship, target, oew);
+                }
+            }, this);
         }, this);
-
-
 
         this.ewIcons = this.ewIcons.filter(function (icon) {
             if (!icon.used) {
@@ -37,21 +36,19 @@ window.EWIconContainer = (function(){
 
             return true;
         }, this);
-
     };
 
-    EWIconContainer.prototype.updateForShip = function(ship) {
+    EWIconContainer.prototype.updateForShip = function (ship) {
 
         var length = this.ewIcons.length;
 
-        this.ewIcons.forEach(function(ewIcon) {
+        this.ewIcons.forEach(function (ewIcon) {
             if (ewIcon.shipId === ship.id) {
                 ewIcon.used = false;
             }
         });
 
-
-        gamedata.ships.forEach(function(target){
+        gamedata.ships.forEach(function (target) {
             var oew = ew.getOffensiveEW(ship, target);
 
             if (oew) {
@@ -72,26 +69,25 @@ window.EWIconContainer = (function(){
         if (this.ewIcons.length > length) {
             this.showForShip(ship);
         }
-
     };
 
-    EWIconContainer.prototype.hide = function() {
-        this.ewIcons.forEach(function(icon) {
+    EWIconContainer.prototype.hide = function () {
+        this.ewIcons.forEach(function (icon) {
             icon.sprite.hide();
-        })
+        });
     };
 
-    EWIconContainer.prototype.showForShip = function(ship) {
-        this.ewIcons.filter(function(icon) {
+    EWIconContainer.prototype.showForShip = function (ship) {
+        this.ewIcons.filter(function (icon) {
             return icon.shipId === ship.id || icon.targetId === ship.id;
-        }).forEach(function(icon) {
+        }).forEach(function (icon) {
             icon.sprite.setStartAndEnd(icon.shipIcon.getPosition(), icon.targetIcon.getPosition());
             icon.sprite.show();
         }, this);
     };
 
-    EWIconContainer.prototype.onEvent = function(name, payload) {
-        var target = this['on'+ name];
+    EWIconContainer.prototype.onEvent = function (name, payload) {
+        var target = this['on' + name];
         if (target && typeof target == 'function') {
             target.call(this, payload);
         }
@@ -101,16 +97,15 @@ window.EWIconContainer = (function(){
         var zoom = payload.zoom;
         if (zoom <= 0.5) {
             this.zoomScale = 2 * zoom;
-            this.ewIcons.forEach(function(icon){
+            this.ewIcons.forEach(function (icon) {
                 icon.sprite.setLineWidth(getOEWLineWidth.call(this, icon.amount));
             }, this);
-        }else{
+        } else {
             this.zoomScale = 1;
         }
-
     };
 
-    function createOrUpdateOEW (ship, target, amount) {
+    function createOrUpdateOEW(ship, target, amount) {
         var icon = getOEWIcon.call(this, ship, target);
         if (icon) {
             updateOEWIcon.call(this, icon, ship, target, amount);
@@ -137,7 +132,7 @@ window.EWIconContainer = (function(){
 
         var color = gamedata.isMyShip(ship) ? COLOR_OEW_FIRENDLY : COLOR_OEW_ENEMY;
         var OEWIcon = {
-            type:"OEW",
+            type: "OEW",
             shipId: ship.id,
             targetId: target.id,
             amount: amount,
@@ -158,10 +153,10 @@ window.EWIconContainer = (function(){
     }
 
     function getOEWIcon(ship, target) {
-        return this.ewIcons.find(function(icon) {
+        return this.ewIcons.find(function (icon) {
             return icon.type === "OEW" && icon.shipId === ship.id && icon.targetId === target.id;
         });
     }
 
     return EWIconContainer;
-})();
+}();

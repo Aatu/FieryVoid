@@ -1,11 +1,8 @@
-window.ShipTooltipBallisticsMenu = (function() {
+'use strict';
 
-    var template = '<div>' +
-        '<span class="weapon"></span>' +
-        '<span class="hitchange"></span>' +
-        '<span class="interception"> </span>' +
-        '<button class="intercept"> </button>' +
-        '</div>';
+window.ShipTooltipBallisticsMenu = function () {
+
+    var template = '<div>' + '<span class="weapon"></span>' + '<span class="hitchange"></span>' + '<span class="interception"> </span>' + '<button class="intercept"> </button>' + '</div>';
 
     function ShipTooltipBallisticsMenu(shipIconContainer, turn, allowIntercept, selectedShip) {
         this.shipIconContainer = shipIconContainer;
@@ -17,7 +14,6 @@ window.ShipTooltipBallisticsMenu = (function() {
     ShipTooltipBallisticsMenu.prototype.renderTo = function (ship, element) {
         var ballistics = weaponManager.getAllBallisticsAgainst(ship, this.hexagon);
 
-
         if (ballistics.length > 0) {
             $(".ballistics", element).show();
         } else {
@@ -25,7 +21,7 @@ window.ShipTooltipBallisticsMenu = (function() {
             return;
         }
 
-        ballistics.forEach(function(ball) {
+        ballistics.forEach(function (ball) {
             var ballElement = jQuery(template);
 
             var ballisticEntry = {
@@ -37,25 +33,25 @@ window.ShipTooltipBallisticsMenu = (function() {
             };
 
             jQuery(".weapon", ballElement).html(ball.weapon.displayName);
-            jQuery(".hitchange", ballElement).html('- Approx: '+weaponManager.calculataBallisticHitChange(ballisticEntry)+'%');
+            jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%');
 
-            if (this.allowIntercept){
-                var interception = weaponManager.getInterception(ball.fireOrder)*5;
+            if (this.allowIntercept) {
+                var interception = weaponManager.getInterception(ball.fireOrder) * 5;
 
                 if (interception > 0) {
-                    jQuery(".interception", ballElement).html("Interception " +interception+ "%").show();
+                    jQuery(".interception", ballElement).html("Interception " + interception + "%").show();
                 } else {
                     jQuery(".interception", ballElement).hide();
                 }
 
-                var hasIntrceptingWeaponsSelected = gamedata.selectedSystems.some(function(weapon) {
-                   return weapon.getInterceptRating && weapon.getInterceptRating() > 0;
+                var hasIntrceptingWeaponsSelected = gamedata.selectedSystems.some(function (weapon) {
+                    return weapon.getInterceptRating && weapon.getInterceptRating() > 0;
                 });
 
                 var interceptButton = jQuery(".intercept", ballElement);
 
                 if (hasIntrceptingWeaponsSelected) {
-                    interceptButton.on('click', function() {
+                    interceptButton.on('click', function () {
                         weaponManager.targetBallistic(this.selectedShip, ballisticEntry);
                     }.bind(this)).html("INTERCEPT").show();
                 } else {
@@ -71,4 +67,4 @@ window.ShipTooltipBallisticsMenu = (function() {
     };
 
     return ShipTooltipBallisticsMenu;
-})();
+}();

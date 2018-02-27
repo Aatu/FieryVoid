@@ -1,21 +1,23 @@
-window.BallisticIconContainer = (function(){
+'use strict';
 
-    function BallisticIconContainer(coordinateConverter, scene){
+window.BallisticIconContainer = function () {
+
+    function BallisticIconContainer(coordinateConverter, scene) {
         this.ballisticIcons = [];
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
         this.zoomScale = 1;
     }
 
-    BallisticIconContainer.prototype.consumeGamedata = function(gamedata, iconContainer) {
+    BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer) {
 
-        this.ballisticIcons.forEach(function(ballisticIcon) {
+        this.ballisticIcons.forEach(function (ballisticIcon) {
             ballisticIcon.used = false;
         });
 
         var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');
 
-        allBallistics.forEach(function(ballistic) {
+        allBallistics.forEach(function (ballistic) {
             createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
         }, this);
 
@@ -33,13 +35,13 @@ window.BallisticIconContainer = (function(){
             }
 
             return true;
-        }, this)
+        }, this);
     };
 
-    BallisticIconContainer.prototype.hide = function() {
-        this.ballisticIcons.forEach(function(icon) {
+    BallisticIconContainer.prototype.hide = function () {
+        this.ballisticIcons.forEach(function (icon) {
             icon.launchSprite.hide();
-            if (icon.targetSprite){
+            if (icon.targetSprite) {
                 icon.targetSprite.hide();
             }
         });
@@ -47,10 +49,10 @@ window.BallisticIconContainer = (function(){
         return this;
     };
 
-    BallisticIconContainer.prototype.show = function() {
-        this.ballisticIcons.forEach(function(icon) {
+    BallisticIconContainer.prototype.show = function () {
+        this.ballisticIcons.forEach(function (icon) {
             icon.launchSprite.show();
-            if (icon.targetSprite){
+            if (icon.targetSprite) {
                 icon.targetSprite.show();
             }
         });
@@ -58,8 +60,8 @@ window.BallisticIconContainer = (function(){
         return this;
     };
 
-    BallisticIconContainer.prototype.onEvent = function(name, payload) {
-        var target = this['on'+ name];
+    BallisticIconContainer.prototype.onEvent = function (name, payload) {
+        var target = this['on' + name];
         if (target && typeof target == 'function') {
             target.call(this, payload);
         }
@@ -81,9 +83,9 @@ window.BallisticIconContainer = (function(){
 
     function createOrUpdateBallistic(ballistic, iconContainer, turn) {
         var icon = getBallisticIcon.call(this, ballistic.id);
-        if (icon){
-            updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn)
-        }else {
+        if (icon) {
+            updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
+        } else {
             createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene);
         }
     }
@@ -98,22 +100,21 @@ window.BallisticIconContainer = (function(){
         var targetPosition = null;
         var targetIcon = null;
 
-
         if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
             targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
         } else if (ballistic.targetid && ballistic.targetid !== -1) {
             targetIcon = iconContainer.getById(ballistic.targetid);
-            targetPosition = {x: 0, y:0};
+            targetPosition = { x: 0, y: 0 };
         }
 
         var launchSprite = new BallisticSprite(launchPosition, 'launch');
-        var targetSprite =  targetPosition !== null ? new BallisticSprite(targetPosition, 'hex') : null;
+        var targetSprite = targetPosition !== null ? new BallisticSprite(targetPosition, 'hex') : null;
 
         scene.add(launchSprite.mesh);
 
         if (targetIcon && targetSprite) {
             targetIcon.mesh.add(targetSprite.mesh);
-        } else if (targetSprite)  {
+        } else if (targetSprite) {
             scene.add(targetSprite.mesh);
         }
 
@@ -130,9 +131,9 @@ window.BallisticIconContainer = (function(){
 
     function getBallisticIcon(id) {
         return this.ballisticIcons.filter(function (icon) {
-           return icon.id === id;
+            return icon.id === id;
         }).pop();
     }
 
     return BallisticIconContainer;
-})();
+}();

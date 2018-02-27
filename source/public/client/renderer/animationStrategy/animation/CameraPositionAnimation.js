@@ -1,4 +1,6 @@
-window.CameraPositionAnimation = (function() {
+"use strict";
+
+window.CameraPositionAnimation = function () {
 
     function CameraPositionAnimation(position, time, endTime) {
         Animation.call(this);
@@ -15,12 +17,7 @@ window.CameraPositionAnimation = (function() {
 
         this.startPosition = null;
 
-        this.curve = new THREE.CubicBezierCurve(
-            new THREE.Vector2( 0, 0 ),
-            new THREE.Vector2( 0.5, 0.0 ),
-            new THREE.Vector2( 0.5, 1 ),
-            new THREE.Vector2( 1, 1 )
-        );
+        this.curve = new THREE.CubicBezierCurve(new THREE.Vector2(0, 0), new THREE.Vector2(0.5, 0.0), new THREE.Vector2(0.5, 1), new THREE.Vector2(1, 1));
     }
 
     CameraPositionAnimation.prototype = Object.create(Animation.prototype);
@@ -34,14 +31,14 @@ window.CameraPositionAnimation = (function() {
             return;
         }
 
-        if (total > this.time && total < this.time + this.duration && ! paused) {
-            if ( this.startPosition === null) {
-                this.startPosition ={
+        if (total > this.time && total < this.time + this.duration && !paused) {
+            if (this.startPosition === null) {
+                this.startPosition = {
                     x: window.webglScene.camera.position.x,
                     y: window.webglScene.camera.position.y
                 };
             }
-            var done = 1 - ((this.time + this.duration - total) / this.duration);
+            var done = 1 - (this.time + this.duration - total) / this.duration;
             var point = this.curve.getPoint(done).y;
 
             var position = mathlib.getPointBetween(this.startPosition, this.position, point, true);
@@ -64,7 +61,7 @@ window.CameraPositionAnimation = (function() {
         this.lastTime = total;
     }
 
-    CameraPositionAnimation.prototype.getDuration = function() {
+    CameraPositionAnimation.prototype.getDuration = function () {
         return this.duration + this.endTime;
     };
 
@@ -73,4 +70,4 @@ window.CameraPositionAnimation = (function() {
     }
 
     return CameraPositionAnimation;
-})();
+}();

@@ -1,4 +1,6 @@
-window.BoltEffect = (function() {
+"use strict";
+
+window.BoltEffect = function () {
     function BoltEffect(emitterContainer, args) {
         ParticleAnimation.call(this, emitterContainer);
 
@@ -28,12 +30,10 @@ window.BoltEffect = (function() {
         }
         this.speedVector = mathlib.getPointInDirection(this.speed, -this.angle, 0, 0, true);
 
-
         this.duration = distance / this.speed;
 
         this.fadeInSpeed = 25;
         this.fadeOutSpeed = this.hit ? 0 : 1000;
-
 
         if (this.hit) {
             this.duration -= 25;
@@ -43,7 +43,7 @@ window.BoltEffect = (function() {
                 position: this.target,
                 type: "glow",
                 color: args.color,
-                time: this.time +  this.duration
+                time: this.time + this.duration
             });
 
             if (this.damage) {
@@ -57,30 +57,20 @@ window.BoltEffect = (function() {
         }
 
         createBoltParticle.call(this, this.size, this.color, this.origin);
-        createBoltParticle.call(this, this.size/2, {r:1, g:1, b:1}, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
+        createBoltParticle.call(this, this.size / 2, { r: 1, g: 1, b: 1 }, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
     }
 
     BoltEffect.prototype = Object.create(ParticleAnimation.prototype);
 
-    BoltEffect.prototype.getDuration = function() {
+    BoltEffect.prototype.getDuration = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
     function createBoltParticle(size, color, position) {
 
         var particle = this.emitterContainer.getParticle(this);
-        particle
-            .setSize(size)
-            .setFadeIn(this.time, this.fadeInSpeed)
-            .setFadeOut(this.time + this.duration, this.fadeOutSpeed)
-            .setOpacity(1.0)
-            .setActivationTime(this.time)
-            .setVelocity(this.speedVector)
-            .setPosition(position)
-            .setTexture(BaseParticle.prototype.texture.bolt)
-            .setColor(color)
-            .setAngle(this.angle);
+        particle.setSize(size).setFadeIn(this.time, this.fadeInSpeed).setFadeOut(this.time + this.duration, this.fadeOutSpeed).setOpacity(1.0).setActivationTime(this.time).setVelocity(this.speedVector).setPosition(position).setTexture(BaseParticle.prototype.texture.bolt).setColor(color).setAngle(this.angle);
     }
 
     return BoltEffect;
-})();
+}();

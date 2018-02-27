@@ -1,6 +1,8 @@
-window.ParticleEmitterContainer = (function(){
+"use strict";
 
-    function ParticleEmitterContainer(scene, defaultParticleAmount){
+window.ParticleEmitterContainer = function () {
+
+    function ParticleEmitterContainer(scene, defaultParticleAmount) {
         this.emitters = [];
         this.scene = scene;
         this.defaultParticleAmount = defaultParticleAmount;
@@ -9,7 +11,7 @@ window.ParticleEmitterContainer = (function(){
 
     ParticleEmitterContainer.prototype = Object.create(Animation.prototype);
 
-    ParticleEmitterContainer.prototype.getParticle = function(animation) {
+    ParticleEmitterContainer.prototype.getParticle = function (animation) {
 
         var particle;
         var emitter = null;
@@ -21,8 +23,8 @@ window.ParticleEmitterContainer = (function(){
             }
         }
 
-        if (! particle) {
-            this.emitters.push({emitter: new ParticleEmitter(this.scene, this.defaultParticleAmount), reservations: []});
+        if (!particle) {
+            this.emitters.push({ emitter: new ParticleEmitter(this.scene, this.defaultParticleAmount), reservations: [] });
             return this.getParticle(animation);
         }
 
@@ -32,7 +34,7 @@ window.ParticleEmitterContainer = (function(){
     };
 
     ParticleEmitterContainer.prototype.cleanUp = function () {
-        this.emitters.forEach(function(emitter){
+        this.emitters.forEach(function (emitter) {
             emitter.emitter.cleanUp();
         });
         this.emitters = [];
@@ -44,9 +46,9 @@ window.ParticleEmitterContainer = (function(){
            cleanUpAnimationFromEmitter(animation, emitter);
         });
     };
-*/
+    */
     ParticleEmitterContainer.prototype.setPosition = function (pos) {
-        this.emitters.forEach(function(emitter){
+        this.emitters.forEach(function (emitter) {
             emitter.emitter.mesh.position.x = pos.x;
             emitter.emitter.mesh.position.y = pos.y;
         });
@@ -55,33 +57,30 @@ window.ParticleEmitterContainer = (function(){
     ParticleEmitterContainer.prototype.render = function (now, total, last, delta, zoom) {
         this.emitters.forEach(function (emitter) {
             emitter.emitter.render(now, total, last, delta, zoom);
-        })
+        });
     };
 
     /*
     function cleanUpAnimationFromEmitter(animation, emitter) {
         var reservation = getReservation(emitter.reservations);
-
-        emitter.reservations = emitter.reservations.filter(function (res) {
+         emitter.reservations = emitter.reservations.filter(function (res) {
             return res !== reservation;
         });
-
-        emitter.emitter.freeParticles(reservation.indexes);
+         emitter.emitter.freeParticles(reservation.indexes);
     }
-*/
+    */
     function getReservation(reservations, animation, create) {
-        var reservation = reservations.find(function(reservation){
-           return reservation.animation === animation;
+        var reservation = reservations.find(function (reservation) {
+            return reservation.animation === animation;
         });
 
-        if (! reservation && create) {
-            reservation = {animation: animation, indexes: []};
+        if (!reservation && create) {
+            reservation = { animation: animation, indexes: [] };
             reservations.push(reservation);
         }
 
         return reservation;
     }
 
-
     return ParticleEmitterContainer;
-})();
+}();

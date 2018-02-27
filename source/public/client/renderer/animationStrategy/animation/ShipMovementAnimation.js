@@ -1,4 +1,6 @@
-window.ShipMovementAnimation = (function(){
+"use strict";
+
+window.ShipMovementAnimation = function () {
 
     function ShipMovementAnimation(shipIcon, turn, shipIconContainer) {
         this.shipIcon = shipIcon;
@@ -9,26 +11,15 @@ window.ShipMovementAnimation = (function(){
         this.duration = 5000;
         this.time = 0;
 
-        this.turnCurve = new THREE.CubicBezierCurve(
-            new THREE.Vector2( 0, 0 ),
-            new THREE.Vector2( 0.75, 0 ),
-            new THREE.Vector2( 0, 0.75 ),
-            new THREE.Vector2( 1, 1 )
-        );
+        this.turnCurve = new THREE.CubicBezierCurve(new THREE.Vector2(0, 0), new THREE.Vector2(0.75, 0), new THREE.Vector2(0, 0.75), new THREE.Vector2(1, 1));
 
-        this.turnCurve = new THREE.CubicBezierCurve(
-            new THREE.Vector2( 0, 0 ),
-            new THREE.Vector2( 0.25, 0.25 ),
-            new THREE.Vector2( 0.75, 0.75 ),
-            new THREE.Vector2( 1, 1 )
-        );
+        this.turnCurve = new THREE.CubicBezierCurve(new THREE.Vector2(0, 0), new THREE.Vector2(0.25, 0.25), new THREE.Vector2(0.75, 0.75), new THREE.Vector2(1, 1));
 
         /*
         this.hexAnimations.forEach(function (animation) {
             animation.debugCurve = drawRoute(animation.curve);
         });
         */
-
 
         this.endPause = 0;
 
@@ -56,7 +47,7 @@ window.ShipMovementAnimation = (function(){
         */
     };
 
-    ShipMovementAnimation.prototype.render =  function (now, total, last, delta, zoom, back, paused) {
+    ShipMovementAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
 
         var positionAndFacing = this.getPositionAndFacingAtTime(total);
 
@@ -72,7 +63,7 @@ window.ShipMovementAnimation = (function(){
 
         if (this.hexAnimations.length === 0) {
             var move = this.shipIcon.getLastMovement();
-            return {position: window.coordinateConverter.fromHexToGame(move.position), facing: mathlib.hexFacingToAngle(move.facing)};
+            return { position: window.coordinateConverter.fromHexToGame(move.position), facing: mathlib.hexFacingToAngle(move.facing) };
         }
 
         var totalDone = (time - this.time) / this.duration;
@@ -96,10 +87,10 @@ window.ShipMovementAnimation = (function(){
         var turnAngle = animation.turnAngle * turnPercent;
         facing = mathlib.addToDirection(animation.startAngle, turnAngle);
 
-        return {position: position, facing: facing};
+        return { position: position, facing: facing };
     };
 
-    ShipMovementAnimation.prototype.getStartPosition = function() {
+    ShipMovementAnimation.prototype.getStartPosition = function () {
         if (this.hexAnimations.length === 0) {
             var move = this.shipIcon.getLastMovement();
             return window.coordinateConverter.fromHexToGame(move.position);
@@ -108,19 +99,19 @@ window.ShipMovementAnimation = (function(){
         return this.hexAnimations[0].curve.getPoint(0);
     };
 
-    ShipMovementAnimation.prototype.getLength = function() {
+    ShipMovementAnimation.prototype.getLength = function () {
         return this.hexAnimations.length;
     };
 
-    ShipMovementAnimation.prototype.setDuration = function(duration) {
+    ShipMovementAnimation.prototype.setDuration = function (duration) {
         this.duration = duration;
     };
 
-    ShipMovementAnimation.prototype.getDuration = function() {
+    ShipMovementAnimation.prototype.getDuration = function () {
         return this.duration + this.endPause;
     };
 
-    ShipMovementAnimation.prototype.setTime = function(time) {
+    ShipMovementAnimation.prototype.setTime = function (time) {
         this.time = time;
     };
 
@@ -133,28 +124,26 @@ window.ShipMovementAnimation = (function(){
 
         var index = 0;
 
-        var current = this.hexAnimations.find(function(animation, i) {
-           if (length <= animation.length) {
-               index = i;
-               return true;
-           }
+        var current = this.hexAnimations.find(function (animation, i) {
+            if (length <= animation.length) {
+                index = i;
+                return true;
+            }
 
-           length -= animation.length;
+            length -= animation.length;
         });
 
-        if (! current) {
+        if (!current) {
             result.animation = this.hexAnimations[this.hexAnimations.length - 1];
             result.done = 1;
             return result;
         }
-
 
         var done = length / current.length;
         result.animation = current;
         result.done = done;
         return result;
     }
-
 
     function buildCurves(shipIcon, turn) {
         var moves = shipIcon.getMovements(turn);
@@ -163,26 +152,17 @@ window.ShipMovementAnimation = (function(){
             return [];
         }
 
-        return moves.map(function(move, i){
-            var start = i === 0 ? null : moves[i-1];
-            var next = moves[i+1] ? moves[i+1] : null;
+        return moves.map(function (move, i) {
+            var start = i === 0 ? null : moves[i - 1];
+            var next = moves[i + 1] ? moves[i + 1] : null;
 
-            var movementPoints = getMovementPoints.call(
-                this,
-                move.position,
-                next ? next.position : null,
-                start ? start.position : null
-            );
+            var movementPoints = getMovementPoints.call(this, move.position, next ? next.position : null, start ? start.position : null);
 
-            var curve = buildCurve(
-                movementPoints.start,
-                movementPoints.end,
-                movementPoints.control
-            );
+            var curve = buildCurve(movementPoints.start, movementPoints.end, movementPoints.control);
 
             var turnData = calculateTurn(start, move);
 
-            return {move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve)};
+            return { move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve) };
         }, this);
     }
 
@@ -190,12 +170,11 @@ window.ShipMovementAnimation = (function(){
         var start = curve.getPoint(0);
         var distance = 0;
 
-        for (var i = 0; i <= 100; i++){
-            var end = curve.getPoint(i/100);
+        for (var i = 0; i <= 100; i++) {
+            var end = curve.getPoint(i / 100);
             distance += mathlib.distance(start, end);
             start = end;
         }
-
 
         return distance;
     }
@@ -205,8 +184,8 @@ window.ShipMovementAnimation = (function(){
         var endFacing = endMove.facing;
         var angleNew = mathlib.hexFacingToAngle(endFacing);
 
-        if (! startMove) {
-            return {turnAngle: 0, startAngle: angleNew, endAngle: angleNew};
+        if (!startMove) {
+            return { turnAngle: 0, startAngle: angleNew, endAngle: angleNew };
         }
 
         var startFacing = startMove.facing;
@@ -214,10 +193,10 @@ window.ShipMovementAnimation = (function(){
         var turn = 0;
 
         if (startFacing === endFacing) {
-            return {turnAngle: turn, startAngle: angleOld, endAngle: angleNew};
+            return { turnAngle: turn, startAngle: angleOld, endAngle: angleNew };
         }
 
-        return {turnAngle: buildTurn(endMove), startAngle: angleOld, endAngle: angleNew};
+        return { turnAngle: buildTurn(endMove), startAngle: angleOld, endAngle: angleNew };
     }
 
     function buildTurn(endMove) {
@@ -226,7 +205,7 @@ window.ShipMovementAnimation = (function(){
         var turn = 0;
         var lastFacing = null;
 
-        facings.forEach(function(facing){
+        facings.forEach(function (facing) {
             if (lastFacing === null) {
                 lastFacing = facing;
                 return;
@@ -261,7 +240,6 @@ window.ShipMovementAnimation = (function(){
         } else {
             controlBetween = 0.5;
             start = window.coordinateConverter.fromHexToGame(currentHex);
-
         }
 
         if (nextHex) {
@@ -275,7 +253,6 @@ window.ShipMovementAnimation = (function(){
                 end.x += offset.x;
                 end.y += offset.y;
             }
-
         }
 
         if (controlBetween > 0) {
@@ -284,16 +261,11 @@ window.ShipMovementAnimation = (function(){
             control = window.coordinateConverter.fromHexToGame(currentHex);
         }
 
-
-        return {start: start, end: end, control: control};
+        return { start: start, end: end, control: control };
     }
 
-    function buildCurve(start, end, control){
-        return  new THREE.QuadraticBezierCurve(
-            new THREE.Vector3(start.x, start.y),
-            new THREE.Vector3(control.x, control.y),
-            new THREE.Vector3(end.x, end.y)
-        );
+    function buildCurve(start, end, control) {
+        return new THREE.QuadraticBezierCurve(new THREE.Vector3(start.x, start.y), new THREE.Vector3(control.x, control.y), new THREE.Vector3(end.x, end.y));
     }
 
     /*
@@ -315,31 +287,28 @@ window.ShipMovementAnimation = (function(){
                     new THREE.Vector3(end.x, end.y)
                 ];
             }
-
-        };
+         };
     }
-
-*/
+    */
     function drawRoute(curve) {
-
 
         //var path = new THREE.Path( curve.getPoints( 50 ) );
 
         //var geometry = path.createPointsGeometry( 50 );
-        var geometry = new THREE.Geometry().setFromPoints( curve.getPoints( 50 ) );
-        var material = new THREE.LineBasicMaterial( { color : 0xffffff, opacity: 0.5} );
+        var geometry = new THREE.Geometry().setFromPoints(curve.getPoints(50));
+        var material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 });
 
-        var curveObject = new THREE.Line( geometry, material );
+        var curveObject = new THREE.Line(geometry, material);
         curveObject.position.z = 10;
         webglScene.scene.add(curveObject);
         return curveObject;
     }
 
     function calculateTotalCurveLength(hexAnimations) {
-        return hexAnimations.reduce(function(total, animation) {
+        return hexAnimations.reduce(function (total, animation) {
             return total + animation.length;
-        }, 0)
+        }, 0);
     }
 
     return ShipMovementAnimation;
-})();
+}();

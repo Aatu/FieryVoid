@@ -1,11 +1,12 @@
-window.LaserEffect = (function() {
+"use strict";
+
+window.LaserEffect = function () {
     function LaserEffect(shooter, target, scene, args) {
         Animation.call(this);
 
         if (!args) {
             args = {};
         }
-
 
         this.time = args.time || 0;
         this.duration = args.duration || 2000;
@@ -28,8 +29,8 @@ window.LaserEffect = (function() {
 
         this.scene = scene;
 
-        this.fadeInSpeed = Math.random()*250;
-        this.fadeOutSpeed = Math.random()*500 + 500;
+        this.fadeInSpeed = Math.random() * 250;
+        this.fadeOutSpeed = Math.random() * 500 + 500;
         this.pulsatingFactor = Math.random() * 100 + 100;
         var offsetVelocityFactor = this.hit ? 1 : 10;
         this.offsetVelocity = {
@@ -37,23 +38,18 @@ window.LaserEffect = (function() {
             y: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor
         };
 
-        this.lasers = [
-            createLaser.call(this, this.color, 0.5, 10),
-            createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)
-        ];
+        this.lasers = [createLaser.call(this, this.color, 0.5, 10), createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, 3)];
         this.lasers.forEach(function (laser) {
             laser.multiplyOpacity(0);
             this.scene.add(laser.mesh);
         }, this);
-
-
 
         this.particleEmitter = new ParticleEmitterContainer(scene, 200);
 
         if (this.hit) {
             new Explosion(this.particleEmitter, {
                 size: 16,
-                position: {x:0, y:0},
+                position: { x: 0, y: 0 },
                 type: "glow",
                 color: args.color,
                 time: this.time,
@@ -62,22 +58,18 @@ window.LaserEffect = (function() {
 
             var amount = this.damage;
 
-
             while (amount--) {
                 new Explosion(this.particleEmitter, {
                     size: 16,
-                    position: {x:0, y:0},
-                    type: ["gas", "pillar"][Math.round(Math.random()*2)],
+                    position: { x: 0, y: 0 },
+                    type: ["gas", "pillar"][Math.round(Math.random() * 2)],
                     time: this.time + Math.random() * this.duration
                 });
             }
         }
-
-
     }
 
     LaserEffect.prototype = Object.create(Animation.prototype);
-
 
     LaserEffect.prototype.cleanUp = function () {
         this.lasers.forEach(function (laser) {
@@ -104,22 +96,21 @@ window.LaserEffect = (function() {
             opacity = (total - this.time) / this.fadeInSpeed;
         } else if (total < this.time + this.duration) {
             opacity = 1;
-        }else if (total < this.time + this.duration + this.fadeOutSpeed) {
+        } else if (total < this.time + this.duration + this.fadeOutSpeed) {
             fadeoutFactor = (total - (this.time + this.duration)) / this.fadeOutSpeed;
-            opacity = 1 - ((total - (this.time + this.duration)) / this.fadeOutSpeed);
+            opacity = 1 - (total - (this.time + this.duration)) / this.fadeOutSpeed;
         }
 
-
-        var pulseFrequency = this.pulsatingFactor - (this.pulsatingFactor * 0.9 * fadeoutFactor);
+        var pulseFrequency = this.pulsatingFactor - this.pulsatingFactor * 0.9 * fadeoutFactor;
         var pulseIntensity = 0.001 * (10 * fadeoutFactor + 1);
 
-        var pulse = 1 - ((total % pulseFrequency) * pulseIntensity);
+        var pulse = 1 - total % pulseFrequency * pulseIntensity;
 
         opacity *= pulse;
 
         var elapsedTime = total - this.time;
 
-        var startAndEnd = getStartAndEnd.call(this, {x: this.offsetVelocity.x * elapsedTime, y: this.offsetVelocity.x * elapsedTime});
+        var startAndEnd = getStartAndEnd.call(this, { x: this.offsetVelocity.x * elapsedTime, y: this.offsetVelocity.x * elapsedTime });
 
         this.particleEmitter.setPosition(startAndEnd.end);
 
@@ -129,39 +120,31 @@ window.LaserEffect = (function() {
         }, this);
     };
 
-    LaserEffect.prototype.getDuration = function() {
+    LaserEffect.prototype.getDuration = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
     function createLaser(color, opacity, widht) {
         var startAndEnd = getStartAndEnd.call(this);
-        return new LineSprite(
-            startAndEnd.start,
-            startAndEnd.end,
-            widht,
-            1,
-            color,
-            opacity,
-            {
-                blending: THREE.AdditiveBlending,
-                texture: new THREE.TextureLoader().load("img/effect/laser16.png")
-            }
-        );
+        return new LineSprite(startAndEnd.start, startAndEnd.end, widht, 1, color, opacity, {
+            blending: THREE.AdditiveBlending,
+            texture: new THREE.TextureLoader().load("img/effect/laser16.png")
+        });
     }
 
     function getStartAndEnd(offsetVelocity) {
 
         if (!offsetVelocity) {
-            offsetVelocity = {x: 0, y: 0};
+            offsetVelocity = { x: 0, y: 0 };
         }
 
         var endPosition = this.target instanceof ShipIcon ? this.target.getPosition() : this.target;
         var start = this.shooter.getPosition();
         start.x += this.startOffset.x;
         start.y += this.startOffset.y;
-        var end =  {x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y};
-        return {start: start, end: end}
+        var end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
+        return { start: start, end: end };
     }
 
     return LaserEffect;
-})();
+}();

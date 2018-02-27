@@ -1,10 +1,13 @@
-if (typeof window.hexagon === 'undefined')
-    window.hexagon = {};
+'use strict';
 
-window.hexagon.Offset = (function () {
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+if (typeof window.hexagon === 'undefined') window.hexagon = {};
+
+window.hexagon.Offset = function () {
 
     function Offset(q, r) {
-        if (typeof q === 'object') {
+        if ((typeof q === 'undefined' ? 'undefined' : _typeof(q)) === 'object') {
             var offset = q;
             this.q = offset.q;
             this.r = offset.r;
@@ -14,25 +17,7 @@ window.hexagon.Offset = (function () {
         }
     }
 
-    Offset.prototype.neighbours = [
-        [
-            {q: 1, r: 0},
-            {q: 1, r: -1},
-            {q: 0, r: -1},
-            {q: -1, r: 0},
-            {q: 0, r: 1},
-            {q: 1, r: 1}
-        ],
-        [
-            {q: 1, r: 0},
-            {q: 0, r: -1},
-            {q: -1, r: -1},
-            {q: -1, r: 0},
-            {q: -1, r: 1},
-            {q: 0, r: 1}
-        ]
-    ];
-
+    Offset.prototype.neighbours = [[{ q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 }, { q: -1, r: 0 }, { q: 0, r: 1 }, { q: 1, r: 1 }], [{ q: 1, r: 0 }, { q: 0, r: -1 }, { q: -1, r: -1 }, { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 }]];
 
     Offset.prototype.getNeighbours = function () {
         var neighbours = [];
@@ -52,18 +37,17 @@ window.hexagon.Offset = (function () {
     };
 
     Offset.prototype.equals = function (offset) {
-        return this.q === offset.q &&
-            this.r === offset.r;
+        return this.q === offset.q && this.r === offset.r;
     };
 
     Offset.prototype.getNeighbourAtDirection = function (direction) {
-      var neighbours = this.getNeighbours();
+        var neighbours = this.getNeighbours();
 
-      return neighbours[direction];
+        return neighbours[direction];
     };
 
     Offset.prototype.distanceTo = function (target) {
-      return this.toCube().distanceTo(target.toCube());
+        return this.toCube().distanceTo(target.toCube());
     };
 
     Offset.prototype.toCube = function () {
@@ -92,4 +76,4 @@ window.hexagon.Offset = (function () {
     };
 
     return Offset;
-})();
+}();

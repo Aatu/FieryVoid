@@ -1,4 +1,6 @@
-window.ShipTooltipFireMenu = (function(){
+"use strict";
+
+window.ShipTooltipFireMenu = function () {
 
     function ShipTooltipFireMenu(selectedShip, targetedShip, turn) {
         ShipTooltipMenu.call(this, selectedShip, targetedShip, turn);
@@ -6,15 +8,13 @@ window.ShipTooltipFireMenu = (function(){
 
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
-    ShipTooltipFireMenu.buttons = [
-        {className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected],      action: targetWeapons, info: "Target selected weapons"},
-    ];
+    ShipTooltipFireMenu.buttons = [{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" }];
 
-    ShipTooltipFireMenu.prototype.getAllButtons = function() {
+    ShipTooltipFireMenu.prototype.getAllButtons = function () {
         return ShipTooltipFireMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
     };
 
-    function targetWeapons(){
+    function targetWeapons() {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
     }
 
@@ -27,4 +27,4 @@ window.ShipTooltipFireMenu = (function(){
     }
 
     return ShipTooltipFireMenu;
-})();
+}();

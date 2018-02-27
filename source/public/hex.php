@@ -30,7 +30,7 @@
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+    <script src="../jssource/client/lib/jquery-ui-1.8.15.custom.min.js"></script>
     <script>
 					
         $(window).load(function(){

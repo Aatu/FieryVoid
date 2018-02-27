@@ -35,8 +35,9 @@
     <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
-    <script src="client/lib/three.min.js"></script>
-    <script src="client/lib/THREE.MeshLine.js"></script>
+    <script src="../jssource/client/lib/three.min.js"></script>
+    <script src="../jssource/client/lib/THREE.MeshLine.js"></script>
+    <script src="client/UI/reactJs/UI.bundle.js"></script>
     <script>
         window.Config = {
             HEX_SIZE: 50
@@ -45,7 +46,6 @@
 
     <?php include_once 'shaders.php'; ?>
     <script>
-					
         $(window).load(function(){
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
@@ -68,6 +68,8 @@
                 window.coordinateConverter
             );
 
+			var UIManager = new window.UIManager($("body")[0]);
+            UIManager.PlayerSettings();
             $("#pagecontainer").show();
         });
         
@@ -146,8 +148,6 @@
 
 
 
-
-
     <script src="client/ShipMovementCallbacks.js"></script>
 
 
@@ -161,7 +161,7 @@
     <script src="client/windowevents.js"></script>
     <script src="client/mousewheel.js"></script>
     <script src="client/mathlib.js"></script>
-    <script src="client/lib/seedRandom.js"></script>
+    <script src="../jssource/client/lib/seedRandom.js"></script>
     <script src="client/ajaxInterface.js"></script>
     <script src="client/ew.js"></script>
     <script src="client/weaponManager.js"></script>
@@ -499,13 +499,10 @@
     <div class="datacontainer"></div>
 </div>
 
+<div id="playerSettings"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
     <div id="background" style="background-image:url(img/maps/<?php print($serverdata->background); ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
-    <canvas id="hexgrid" class="tacticalcanvas"></canvas>
-    <canvas id="EWindicators" class="tacticalcanvas"></canvas>
-    <canvas id="effects" class="tacticalcanvas"></canvas>
-
 
 
     <div id="shipNameContainer">

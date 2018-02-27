@@ -1,4 +1,6 @@
-window.ShipTooltipMenu = (function(){
+'use strict';
+
+window.ShipTooltipMenu = function () {
 
     function ShipTooltipMenu(selectedShip, targetedShip, turn) {
         this.selectedShip = selectedShip;
@@ -12,16 +14,14 @@ window.ShipTooltipMenu = (function(){
 
     ShipTooltipMenu.buttonTemplate = '<button></button>';
 
-    ShipTooltipMenu.buttons = [
-        {className: "openSCS",       condition: null,                               action: openSCS, info: "Open ship details"}
-    ];
+    ShipTooltipMenu.buttons = [{ className: "openSCS", condition: null, action: openSCS, info: "Open ship details" }];
 
-    ShipTooltipMenu.prototype.renderTo = function(parent, shipTooltip){
+    ShipTooltipMenu.prototype.renderTo = function (parent, shipTooltip) {
 
         var menu = jQuery(ShipTooltipMenu.template);
         var allButtons = this.getAllButtons();
 
-        allButtons.filter(function (buttonData){
+        allButtons.filter(function (buttonData) {
             if (!buttonData.condition) {
                 return true;
             }
@@ -39,17 +39,16 @@ window.ShipTooltipMenu = (function(){
             jQuery(".action-buttons", menu).append(element);
         }, this);
 
-
         jQuery(".info", menu).html(this.currentInfo);
         parent.append(menu);
     };
 
-    ShipTooltipMenu.prototype.getAllButtons = function() {
+    ShipTooltipMenu.prototype.getAllButtons = function () {
         return ShipTooltipMenu.buttons.concat(this.extraButtons);
     };
 
-    ShipTooltipMenu.prototype.isEmpty = function() {
-        return this.getAllButtons().filter(function (buttonData){
+    ShipTooltipMenu.prototype.isEmpty = function () {
+        return this.getAllButtons().filter(function (buttonData) {
             var conditions = [].concat(buttonData.condition);
             return conditions.every(function (condition) {
                 return condition.call(this);
@@ -57,8 +56,8 @@ window.ShipTooltipMenu = (function(){
         }).length > 0;
     };
 
-    ShipTooltipMenu.prototype.addButton = function(className, condition, action, info) {
-        this.extraButtons.push({className: className, condition: condition, action: action, info: info});
+    ShipTooltipMenu.prototype.addButton = function (className, condition, action, info) {
+        this.extraButtons.push({ className: className, condition: condition, action: action, info: info });
     };
 
     function onClick(shipTooltip, action, event) {
@@ -72,7 +71,7 @@ window.ShipTooltipMenu = (function(){
     }
 
     function getMouseOver(menu, info) {
-        return function() {
+        return function () {
             this.currentInfo = info;
             jQuery(".info", menu).html(info);
         }.bind(this);
@@ -83,4 +82,4 @@ window.ShipTooltipMenu = (function(){
     }
 
     return ShipTooltipMenu;
-})();
+}();

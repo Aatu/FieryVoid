@@ -1,6 +1,8 @@
-window.InitialPhaseStrategy = (function(){
+"use strict";
 
-    function InitialPhaseStrategy(coordinateConverter){
+window.InitialPhaseStrategy = function () {
+
+    function InitialPhaseStrategy(coordinateConverter) {
         PhaseStrategy.call(this, coordinateConverter);
     }
 
@@ -20,7 +22,7 @@ window.InitialPhaseStrategy = (function(){
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
         console.log("enabled initial phase strategy");
-        infowindow.informPhase(5000, function(){});
+        infowindow.informPhase(5000, function () {});
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
 
@@ -34,12 +36,12 @@ window.InitialPhaseStrategy = (function(){
         return this;
     };
 
-    InitialPhaseStrategy.prototype.onHexClicked = function(payload) {
-        if (! this.selectedShip) {
+    InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
+        if (!this.selectedShip) {
             return;
         }
 
-        var ballistics = gamedata.selectedSystems.filter(function(system) {
+        var ballistics = gamedata.selectedSystems.filter(function (system) {
             return system.ballistic;
         });
 
@@ -48,11 +50,11 @@ window.InitialPhaseStrategy = (function(){
         }
     };
 
-    InitialPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
 
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
         var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
-        menu.addButton("selectShip", null, function() {
+        menu.addButton("selectShip", null, function () {
             PhaseStrategy.prototype.selectShip.call(this, ship);
             botPanel.setEW(ship);
             this.showShipEW(this.selectedShip);
@@ -60,21 +62,20 @@ window.InitialPhaseStrategy = (function(){
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    InitialPhaseStrategy.prototype.deselectShip = function(ship) {
+    InitialPhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         botPanel.onShipStatusChanged(ship);
         this.hideShipEW(ship);
     };
 
-
-    InitialPhaseStrategy.prototype.onMouseOutShips = function(ships) {
+    InitialPhaseStrategy.prototype.onMouseOutShips = function (ships) {
         PhaseStrategy.prototype.onMouseOutShips.call(this, ships);
         if (this.selectedShip) {
             this.showShipEW(this.selectedShip);
         }
     };
 
-    InitialPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    InitialPhaseStrategy.prototype.targetShip = function (ship, payload) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
@@ -82,7 +83,7 @@ window.InitialPhaseStrategy = (function(){
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    InitialPhaseStrategy.prototype.createReplayUI = function(gamedata) {
+    InitialPhaseStrategy.prototype.createReplayUI = function (gamedata) {
         if (gamedata.turn === 1) {
             return;
         }
@@ -90,7 +91,7 @@ window.InitialPhaseStrategy = (function(){
         this.replayUI = new ReplayUI().activate();
     };
 
-    InitialPhaseStrategy.prototype.onWeaponSelected = function(payload) {
+    InitialPhaseStrategy.prototype.onWeaponSelected = function (payload) {
         var ship = payload.ship;
         var weapon = payload.weapon;
 
@@ -100,4 +101,4 @@ window.InitialPhaseStrategy = (function(){
     };
 
     return InitialPhaseStrategy;
-})();
+}();

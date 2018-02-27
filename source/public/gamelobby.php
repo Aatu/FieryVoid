@@ -45,7 +45,7 @@
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+        <script src="../jssource/client/lib/jquery-ui-1.8.15.custom.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>

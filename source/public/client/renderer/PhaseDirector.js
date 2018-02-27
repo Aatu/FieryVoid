@@ -1,4 +1,6 @@
-window.phaseDirector = (function() {
+"use strict";
+
+window.phaseDirector = function () {
 
     function phaseDirector(graphics) {
         this.graphics = graphics;
@@ -78,4 +80,4 @@ window.phaseDirector = (function() {
     }
 
     return phaseDirector;
-})();
+}();

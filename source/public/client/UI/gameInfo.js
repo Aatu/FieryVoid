@@ -1,12 +1,9 @@
-jQuery(function(){
-	
-});
+"use strict";
 
-gameInfoManager = {
-    
-    prepare: function(){
+window.gameInfoManager = {
+
+    prepare: function prepare() {
         fleetListManager.prepare();
     }
-    
-    
-}
+
+};

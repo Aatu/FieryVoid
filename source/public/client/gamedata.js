@@ -1,11 +1,13 @@
-gamedata = {
+"use strict";
+
+window.gamedata = {
 
     gamewidth: 1600,
     gameheight: 1000,
     zoom: 0.6,
     zoomincrement: 0.1,
-    scroll:  {x:0,y:0},
-    scrollOffset: {x:0,y:0},
+    scroll: { x: 0, y: 0 },
+    scrollOffset: { x: 0, y: 0 },
     animating: false,
     ships: Array(),
     ballistics: Array(),
@@ -18,12 +20,12 @@ gamedata = {
     finished: false,
     gamephase: 0,
     subphase: 0,
-    selectedSlot:null,
+    selectedSlot: null,
     gamespace: null,
     replay: false,
-    
+
     mouseOverShipId: -1,
-    
+
     /*
     selectShip: function(ship, add){
         if (!add){
@@ -48,8 +50,7 @@ gamedata = {
         
         
     },
-
-    
+     
     targetShip: function(ship, add){
         if (!add){
             for (var i in gamedata.targetedShips){
@@ -72,13 +73,12 @@ gamedata = {
     },
     */
     elintShips: Array(),
-    
-    getElintShips: function(){
-        if (gamedata.elintShips.length === 0){
-            for (var i in gamedata.ships){
+
+    getElintShips: function getElintShips() {
+        if (gamedata.elintShips.length === 0) {
+            for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
-                if (shipManager.isElint(ship))
-                    gamedata.elintShips.push(ship);
+                if (shipManager.isElint(ship)) gamedata.elintShips.push(ship);
             }
         }
         return gamedata.elintShips;
@@ -106,594 +106,551 @@ gamedata = {
             
         return false;
     },
-
-    */
-    getSelectedShip: function(){
+     */
+    getSelectedShip: function getSelectedShip() {
 
         throw new Error("This won't work anymore. Get ship from phase strategy");
 
-        for (var i in gamedata.selectedShips){
+        for (var i in gamedata.selectedShips) {
             return gamedata.selectedShips[i];
-            
         }
-        
+
         return false;
     },
-    
-    getTargetedShip: function(){
-        for (var i in gamedata.targetedShips){
+
+    getTargetedShip: function getTargetedShip() {
+        for (var i in gamedata.targetedShips) {
             return gamedata.targetedShips[i];
-            
         }
     },
 
-    getFirstFriendlyShip: function(){
+    getFirstFriendlyShip: function getFirstFriendlyShip() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-            if (gamedata.isMyShip(ship)){
+            if (gamedata.isMyShip(ship)) {
                 return ship;
             }
         }
     },
 
-    getFirstEnemyShip: function(){
+    getFirstEnemyShip: function getFirstEnemyShip() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-            if (!gamedata.isMyShip(ship)){
+            if (!gamedata.isMyShip(ship)) {
                 return ship;
             }
         }
     },
-    
-    getActiveShip: function(){
+
+    getActiveShip: function getActiveShip() {
         return gamedata.getShip(gamedata.activeship);
-            
     },
-    
-    getShip: function(id){
-        for (var i in gamedata.ships){
-      //      console.log(gamedata.ships[i].id);
-            if (gamedata.ships[i].id == id){
+
+    getShip: function getShip(id) {
+        for (var i in gamedata.ships) {
+            //      console.log(gamedata.ships[i].id);
+            if (gamedata.ships[i].id == id) {
                 return gamedata.ships[i];
             }
         }
-        
-        return null;
-    
-    },
-    
-    isMyShip: function(ship){
-        return (ship.userid == gamedata.thisplayer);
-    },
-    
-    isEnemy: function(target, shooter){
-		if (!shooter){
-		    throw new Error("You need to give shooter for this one");
-		}
-		
-		return (target.team !== shooter.team);
-	},
 
-    shipStatusChanged: function(ship){
+        return null;
+    },
+
+    isMyShip: function isMyShip(ship) {
+        return ship.userid == gamedata.thisplayer;
+    },
+
+    isEnemy: function isEnemy(target, shooter) {
+        if (!shooter) {
+            throw new Error("You need to give shooter for this one");
+        }
+
+        return target.team !== shooter.team;
+    },
+
+    shipStatusChanged: function shipStatusChanged(ship) {
         botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);
     },
-    
-    onCommitClicked: function(e){
-        
-        if (gamedata.waiting == true)
-            return;     
-        
-        if(gamedata.status == "FINISHED")
-            return;
+
+    onCommitClicked: function onCommitClicked(e) {
+
+        if (gamedata.waiting == true) return;
+
+        if (gamedata.status == "FINISHED") return;
 
         // CHECK for Base Rotation
-        if (gamedata.gamephase == -1 && gamedata.turn == 1){
+        if (gamedata.gamephase == -1 && gamedata.turn == 1) {
             bases = [];
 
-            for (var i in gamedata.ships){
+            for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
-                if (ship.userid == gamedata.thisplayer){
-                    if (ship.base){
+                if (ship.userid == gamedata.thisplayer) {
+                    if (ship.base) {
                         bases.push(ship);
                     }
                 }
             }
-            if (bases){
-                for (var i = 0; i < bases.length; i++){
-                    if (bases[i].movement[1].value == 0){
-                        confirm.error("Please setup the rotation of your starbase.", function(){});
+            if (bases) {
+                for (var i = 0; i < bases.length; i++) {
+                    if (bases[i].movement[1].value == 0) {
+                        confirm.error("Please setup the rotation of your starbase.", function () {});
                         return false;
                     }
                 }
             }
-        } 
+        }
 
         // CHECK for NO EW
-        if (gamedata.gamephase == 1){
+        if (gamedata.gamephase == 1) {
             var myShips = [];
 
-            for (var ship in gamedata.ships){
-                if (gamedata.ships[ship].userid == gamedata.thisplayer){
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])){
+            for (var ship in gamedata.ships) {
+                if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                    if (!shipManager.isDestroyed(gamedata.ships[ship])) {
                         myShips.push(gamedata.ships[ship]);
                     }
                 }
             }
 
-
             var hasNoEW = [];
-	    var selfDestructing = []
+            var selfDestructing = [];
 
-            for (var ship in myShips){
-                if (!myShips[ship].flight){
-			
-			//loop at systems looking for overloading reactor(s)
-			for (var syst in myShips[ship].systems){
-				if(myShips[ship].systems[syst].name == "reactor"){
-					for (var pow in myShips[ship].systems[syst].power){
-						if( (myShips[ship].systems[syst].power[pow].turn == gamedata.turn)
-							&& (myShips[ship].systems[syst].power[pow].type == 2)
-						    ){
-							selfDestructing.push(myShips[ship]);
-						}
-					}
-				}
-			}
-			
-                    if (shipManager.isDisabled(myShips[ship])){
-                        continue;
-                    }
-                    if (gamedata.turn == 1){
-                        if (myShips[ship].EW.length == 0){
-                            hasNoEW.push(myShips[ship]);
+            for (var ship in myShips) {
+                if (!myShips[ship].flight) {
+
+                    //loop at systems looking for overloading reactor(s)
+                    for (var syst in myShips[ship].systems) {
+                        if (myShips[ship].systems[syst].name == "reactor") {
+                            for (var pow in myShips[ship].systems[syst].power) {
+                                if (myShips[ship].systems[syst].power[pow].turn == gamedata.turn && myShips[ship].systems[syst].power[pow].type == 2) {
+                                    selfDestructing.push(myShips[ship]);
+                                }
+                            }
                         }
                     }
-                    else if (gamedata.turn > 1){
+
+                    if (shipManager.isDisabled(myShips[ship])) {
+                        continue;
+                    }
+                    if (gamedata.turn == 1) {
+                        if (myShips[ship].EW.length == 0) {
+                            hasNoEW.push(myShips[ship]);
+                        }
+                    } else if (gamedata.turn > 1) {
                         var hasEW = 0;
-                        for (var entry in myShips[ship].EW){
+                        for (var entry in myShips[ship].EW) {
                             var ew = myShips[ship].EW[entry];
-                            if (ew.turn == gamedata.turn && ew.type != "DEW"){
+                            if (ew.turn == gamedata.turn && ew.type != "DEW") {
                                 hasEW = 1;
                                 break;
                             }
                         }
-                        if (hasEW == 0){
-                            hasNoEW.push(myShips[ship]);    
+                        if (hasEW == 0) {
+                            hasNoEW.push(myShips[ship]);
                         } else continue;
                     }
                 }
             }
 
-		/*
-            if (hasNoEW.length == 0){
-                confirm.confirm("Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
-            }
-            else {
-                var html = "You have not assigned any EW for the following ships: ";
+            /*
+                      if (hasNoEW.length == 0){
+                          confirm.confirm("Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
+                      }
+                      else {
+                          var html = "You have not assigned any EW for the following ships: ";
+                              html += "<br>";
+                          for (var ship in hasNoEW){
+                              html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
+                              html += "<br>";
+                          }
+                          confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
+                      }
+               */
+            var html = '';
+            if (selfDestructing.length > 0) {
+                html += "You have ordering following ships to SELF DESTRUCT: ";
+                html += "<br>";
+                for (var ship in selfDestructing) {
+                    html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
                     html += "<br>";
-                for (var ship in hasNoEW){
+                }
+                html += "<br>";
+            }
+            if (hasNoEW.length > 0) {
+                html += "You have not assigned any EW for the following ships: ";
+                html += "<br>";
+                for (var ship in hasNoEW) {
                     html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
                     html += "<br>";
                 }
-                confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
             }
-	    */
-		var html = '';
-		if(selfDestructing.length > 0){
-			html += "You have ordering following ships to SELF DESTRUCT: ";
-			    html += "<br>";
-			for (var ship in selfDestructing){
-			    html += selfDestructing[ship].name + " (" + selfDestructing[ship].shipClass + ")";
-			    html += "<br>";
-			}	
-			html += "<br>";
-		}
-		if(hasNoEW.length > 0){
-			html += "You have not assigned any EW for the following ships: ";
-			    html += "<br>";
-			for (var ship in hasNoEW){
-			    html += hasNoEW[ship].name + " (" + hasNoEW[ship].shipClass + ")";
-			    html += "<br>";
-			}	
-		}
-		confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?"), gamedata.doCommit);
+            confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
         }
-        
 
         // CHECK for NO FIRE
-        else if(gamedata.gamephase == 3){
-            var myShips = [];
+        else if (gamedata.gamephase == 3) {
+                var myShips = [];
 
-            for (var ship in gamedata.ships){
-                if (gamedata.ships[ship].userid == gamedata.thisplayer){
-                    if (!shipManager.isDestroyed(gamedata.ships[ship])){
-                        myShips.push(gamedata.ships[ship]);
-                    }
-                }
-            }
-
-            var hasNoFO = [];
-
-            for (var ship in myShips){
-                var fired = 0;
-
-                if (!myShips[ship].flight){
-                    for (var i = 0; i < myShips[ship].systems.length; i++){
-                        if (myShips[ship].systems[i].fireOrders.length > 0){
-                            fired = 1;
-                            break;
+                for (var ship in gamedata.ships) {
+                    if (gamedata.ships[ship].userid == gamedata.thisplayer) {
+                        if (!shipManager.isDestroyed(gamedata.ships[ship])) {
+                            myShips.push(gamedata.ships[ship]);
                         }
                     }
-                    if (fired == 0){
-                        hasNoFO.push(myShips[ship]);
-                    }
                 }
 
-                else if (myShips[ship].flight){
-                    for (var i = 0; i < myShips[ship].systems.length; i++){
-                        if (typeof myShips[ship].systems[i] != "undefined"){
-                            for (var j = 0; j < myShips[ship].systems[i].systems.length; j++){
-                                if (typeof myShips[ship].systems[i].systems[j] != "undefined"){
-                                    if (myShips[ship].systems[i].systems[j].fireOrders.length > 0){
-                                        fired = 1;
-                                        break;
+                var hasNoFO = [];
+
+                for (var ship in myShips) {
+                    var fired = 0;
+
+                    if (!myShips[ship].flight) {
+                        for (var i = 0; i < myShips[ship].systems.length; i++) {
+                            if (myShips[ship].systems[i].fireOrders.length > 0) {
+                                fired = 1;
+                                break;
+                            }
+                        }
+                        if (fired == 0) {
+                            hasNoFO.push(myShips[ship]);
+                        }
+                    } else if (myShips[ship].flight) {
+                        for (var i = 0; i < myShips[ship].systems.length; i++) {
+                            if (typeof myShips[ship].systems[i] != "undefined") {
+                                for (var j = 0; j < myShips[ship].systems[i].systems.length; j++) {
+                                    if (typeof myShips[ship].systems[i].systems[j] != "undefined") {
+                                        if (myShips[ship].systems[i].systems[j].fireOrders.length > 0) {
+                                            fired = 1;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    if (fired == 0){
-                        hasNoFO.push(myShips[ship]);
+                        if (fired == 0) {
+                            hasNoFO.push(myShips[ship]);
+                        }
                     }
                 }
-            }
 
-            if (hasNoFO.length == 0){
-                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
-            }
-            else {
-                var html = "You have not assigned any fire orders for the following ships: ";
+                if (hasNoFO.length == 0) {
+                    confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                } else {
+                    var html = "You have not assigned any fire orders for the following ships: ";
                     html += "<br>";
-                for (var ship in hasNoFO){
-                    html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
-                    html += "<br>";
+                    for (var ship in hasNoFO) {
+                        html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
+                        html += "<br>";
+                    }
+                    confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 }
-                confirm.confirm((html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?"), gamedata.doCommit);
-            } 
-        }
-        
-        else if(gamedata.gamephase != 4){
-            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
-        //            if (window.helper.autocomm!=true) {
-        //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
-        //            } else {
-        //            	gamedata.doCommit();
-        //            }	
-        }
-        else{
-            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
-        //            if (window.helper.autocomm!=true) {
-        //	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
-        //            } else {
-        //	            confirm.askSurrender("Do you wish to SURRENDER?", gamedata.doCommit, gamedata.onSurrenderClicked);
-        //            }	
-        }
+            } else if (gamedata.gamephase != 4) {
+                confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+                //            if (window.helper.autocomm!=true) {
+                //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+                //            } else {
+                //            	gamedata.doCommit();
+                //            }	
+            } else {
+                confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+                //            if (window.helper.autocomm!=true) {
+                //	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+                //            } else {
+                //	            confirm.askSurrender("Do you wish to SURRENDER?", gamedata.doCommit, gamedata.onSurrenderClicked);
+                //            }	
+            }
     },
-    
-    onSurrenderClicked: function(e){
+
+    onSurrenderClicked: function onSurrenderClicked(e) {
         confirm.confirm("Are you sure you wish to SURRENDER THIS MATCH?", gamedata.doSurrender);
     },
-    
-    doSurrender: function(){
+
+    doSurrender: function doSurrender() {
         UI.shipMovement.hide();
-        
+
         gamedata.status = "SURRENDERED";
         ajaxInterface.submitGamedata();
     },
-    
-    doCommit: function(){
+
+    doCommit: function doCommit() {
         UI.shipMovement.hide();
 
-
-        if (gamedata.gamephase == 1){
-//        	ajaxInterface.fastpolling=true;
+        if (gamedata.gamephase == 1) {
+            //        	ajaxInterface.fastpolling=true;
             var shipNames = shipManager.power.getShipsNegativePower();
-            
-            if (shipNames.length > 0){
+
+            if (shipNames.length > 0) {
                 var negPowerError = "The following ships have insufficient power:<br>";
-                
-                for(var index in shipNames){
+
+                for (var index in shipNames) {
                     var name = shipNames[index];
                     negPowerError += "- " + name + "<br>";
                 }
                 negPowerError += "You need to turn off systems before you can commit the turn.";
-                window.confirm.error(negPowerError, function(){});
+                window.confirm.error(negPowerError, function () {});
                 return false;
             }
-            
+
             shipNames = shipManager.power.getShipsGraviticShield();
-            
-            if (shipNames.length > 0){
+
+            if (shipNames.length > 0) {
                 var tooManyShieldsError = "The following ships have too many active shields:<br>";
-                
-                for(var i in shipNames){
+
+                for (var i in shipNames) {
                     var shipName = shipNames[i];
                     tooManyShieldsError += "- " + shipName + "<br>";
                 }
                 tooManyShieldsError += "You need to turn off shields or boost your shield generator before you can commit the turn.";
-                window.confirm.error(tooManyShieldsError, function(){});
+                window.confirm.error(tooManyShieldsError, function () {});
                 return false;
             }
-            
-            for (var i in gamedata.ships){
+
+            for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];
                 ew.convertUnusedToDEW(ship);
             }
-            
-            ajaxInterface.submitGamedata();        
-        }
 
-        else if (gamedata.gamephase == 2){
+            ajaxInterface.submitGamedata();
+        } else if (gamedata.gamephase == 2) {
             var ship = gamedata.getActiveShip();
-            if (shipManager.movement.isMovementReady(ship)){
+            if (shipManager.movement.isMovementReady(ship)) {
                 ajaxInterface.submitGamedata();
-            }else{
+            } else {
                 return false;
             }
-        }else if (gamedata.gamephase == 3){
+        } else if (gamedata.gamephase == 3) {
             ajaxInterface.submitGamedata();
-        }else if (gamedata.gamephase == 4){
+        } else if (gamedata.gamephase == 4) {
             ajaxInterface.submitGamedata();
-        }else if (gamedata.gamephase == -1){
+        } else if (gamedata.gamephase == -1) {
             ajaxInterface.submitGamedata();
-        }            
+        }
     },
 
-    autoCommitOnMovement: function(ship){
-        if (ship.base){
+    autoCommitOnMovement: function autoCommitOnMovement(ship) {
+        if (ship.base) {
             combatLog.logMoves(ship);
             shipManager.movement.RemoveMovementIndicators();
             ajaxInterface.submitGamedata();
         }
     },
-    
-    onCancelClicked: function(e){
-        if (gamedata.gamephase == 2){
+
+    onCancelClicked: function onCancelClicked(e) {
+        if (gamedata.gamephase == 2) {
             var ship = gamedata.getActiveShip();
             shipManager.movement.deleteMove(ship);
         }
-        
-        if (gamedata.gamephase == 3){
+
+        if (gamedata.gamephase == 3) {
             var ship = gamedata.getSelectedShip();
             shipManager.movement.deleteMove(ship);
         }
     },
-    
-    getActiveShipName: function(){
+
+    getActiveShipName: function getActiveShipName() {
         var ship = gamedata.getActiveShip();
-        if (ship)
-            return ship.name;
-            
+        if (ship) return ship.name;
+
         return "";
     },
-    
-    getPlayerTeam: function(){
+
+    getPlayerTeam: function getPlayerTeam() {
         console.log("this player", gamedata.thisplayer);
-        for (var i in gamedata.slots){
+        for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
-            if (slot.playerid == gamedata.thisplayer)
-                return slot.team;
+            if (slot.playerid == gamedata.thisplayer) return slot.team;
         }
     },
-    
-    getPlayerNameById: function(id){
-        for(var i in gamedata.slots){
+
+    getPlayerNameById: function getPlayerNameById(id) {
+        for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
-            if(slot.playerid == id){
+            if (slot.playerid == id) {
                 return slot.playername;
             }
         }
     },
-    
-    getPhasename: function(){
-        if (gamedata.gamephase == 1)
-            return "INITIAL ORDERS";
-            
-        if (gamedata.gamephase == 2)
-            return "MOVEMENT ORDERS:";
-        
-        if (gamedata.gamephase == 3)
-            return "FIRE ORDERS";
-            
-        if (gamedata.gamephase == 4)
-            return "FINAL ORDERS";
-        
-        if (gamedata.gamephase == -1)
-            return "DEPLOYMENT";
-            
-        return "ERROR"
+
+    getPhasename: function getPhasename() {
+        if (gamedata.gamephase == 1) return "INITIAL ORDERS";
+
+        if (gamedata.gamephase == 2) return "MOVEMENT ORDERS:";
+
+        if (gamedata.gamephase == 3) return "FIRE ORDERS";
+
+        if (gamedata.gamephase == 4) return "FINAL ORDERS";
+
+        if (gamedata.gamephase == -1) return "DEPLOYMENT";
+
+        return "ERROR";
     },
-    
-    setPhaseClass: function(){
-    
+
+    setPhaseClass: function setPhaseClass() {
+
         var b = $("body");
-        
+
         b.removeClass("phase1");
         b.removeClass("phase2");
         b.removeClass("phase3");
         b.removeClass("phase4");
         b.removeClass("phase-1");
-    
-        b.addClass("phase"+gamedata.gamephase);
+
+        b.addClass("phase" + gamedata.gamephase);
     },
-    
-    initPhase: function(){
-		gamedata.subphase = 0;
+
+    initPhase: function initPhase() {
+        gamedata.subphase = 0;
         shipManager.initShips();
         UI.shipMovement.hide();
         fleetListManager.displayFleetLists();
-        
+
         gamedata.setPhaseClass();
-//		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
+        //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
         fleetListManager.updateFleetList();
     },
 
-
-    drawIniGUI: function(){
-
+    drawIniGUI: function drawIniGUI() {
 
         var ini_gui = document.getElementById("iniGui");
-            ini_gui.innerHTML = "";
-            ini_gui.style.height = "auto";
+        ini_gui.innerHTML = "";
+        ini_gui.style.height = "auto";
 
         var topicDiv = document.createElement("div");
-            topicDiv.className = "topicDiv";
+        topicDiv.className = "topicDiv";
 
         var span = document.createElement("span");
-            span.id = "iniTopic";
-            span.innerHTML = "Order of Battle";
+        span.id = "iniTopic";
+        span.innerHTML = "Order of Battle";
 
         topicDiv.appendChild(span);
 
         ini_gui.appendChild(topicDiv);
 
-
         var allShips = gamedata.ships;
         var ships = [];
 
-        for (var i = 0; i < allShips.length; i++){
-            if (!shipManager.isDestroyed(allShips[i])){
+        for (var i = 0; i < allShips.length; i++) {
+            if (!shipManager.isDestroyed(allShips[i])) {
                 ships.push(allShips[i]);
             }
         }
-        
-        ships.sort(function(a, b){
-		/* replace with using correct initiative order!
-            if (a.iniative > b.iniative){
-                return 1;
-            } else return -1;*/
-	    if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)){
+
+        ships.sort(function (a, b) {
+            /* replace with using correct initiative order!
+                      if (a.iniative > b.iniative){
+                          return 1;
+                      } else return -1;*/
+            if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)) {
                 return 1;
             } else return -1;
-        })
+        });
         var table = document.createElement("table");
-            table.id = "iniTable";
+        table.id = "iniTable";
 
-        for (var i = 0; i < ships.length; i++){
+        for (var i = 0; i < ships.length; i++) {
 
             var tr = document.createElement("tr");
-                tr.className = "iniTr";
-                tr.id = ships[i].id;
+            tr.className = "iniTr";
+            tr.id = ships[i].id;
 
-                tr.addEventListener("click", function(){
-                    for (var i = 0; i < gamedata.ships.length; i++){
-                        if (gamedata.ships[i].id == this.id){
-                            scrolling.scrollToShip(gamedata.ships[i]);
-                            break;
-                        }
+            tr.addEventListener("click", function () {
+                for (var i = 0; i < gamedata.ships.length; i++) {
+                    if (gamedata.ships[i].id == this.id) {
+                        scrolling.scrollToShip(gamedata.ships[i]);
+                        break;
                     }
-                })
+                }
+            });
 
             var td = document.createElement("td");
-                td.position = "relative";
-                td.style.width = "10%";
-                td.id = "iniTd";
-                td.style.textAlign = "center";
-                td.style.fontSize = "18px";
-                td.innerHTML = i+1;
+            td.position = "relative";
+            td.style.width = "10%";
+            td.id = "iniTd";
+            td.style.textAlign = "center";
+            td.style.fontSize = "18px";
+            td.innerHTML = i + 1;
 
-                if (gamedata.isMyShip(ships[i])){
-                    td.style.color = "green";
-                } else td.style.color = "red";
+            if (gamedata.isMyShip(ships[i])) {
+                td.style.color = "green";
+            } else td.style.color = "red";
 
             tr.appendChild(td);
 
-
             var td = document.createElement("td");
-                td.position = "relative";
-                td.style.width = "60%";
-                td.id = "iniTd";
+            td.position = "relative";
+            td.style.width = "60%";
+            td.id = "iniTd";
 
             var span = document.createElement("span");
-                span.style.textAlign = "center";
-                span.style.fontSize = "12px";
-                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
-                span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
+            span.style.textAlign = "center";
+            span.style.fontSize = "12px";
+            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
+            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
 
-            if (gamedata.activeship == ships[i].id){
+            if (gamedata.activeship == ships[i].id) {
                 td.className = "iniActive";
             }
 
-                td.appendChild(span);
+            td.appendChild(span);
 
             tr.appendChild(td);
 
             var td = document.createElement("td");
-                td.position = "relative";
-                td.style.width = "20%";
-                td.id = "iniTd";
+            td.position = "relative";
+            td.style.width = "20%";
+            td.id = "iniTd";
 
             var img = document.createElement("img");
-                img.src = ships[i].imagePath;
+            img.src = ships[i].imagePath;
 
-                if (!ships[i].flight){
-                    img.style.width = "40px";
-                    img.style.height = "40px";
-                }
-                else {
-                    img.style.width = "20px";
-                    img.style.height = "20px";
-                    td.style.paddingLeft = "12px";
-                }
+            if (!ships[i].flight) {
+                img.style.width = "40px";
+                img.style.height = "40px";
+            } else {
+                img.style.width = "20px";
+                img.style.height = "20px";
+                td.style.paddingLeft = "12px";
+            }
 
-            td.appendChild(img)
+            td.appendChild(img);
             tr.appendChild(td);
 
             table.appendChild(tr);
         }
 
-
-            ini_gui.appendChild(table);
-
+        ini_gui.appendChild(table);
 
         var backDiv = document.getElementById("backDiv");
-            backDiv.innerHTML = "";
-            backDiv.style.paddingBottom = "10px";
-            $(backDiv).removeData();
+        backDiv.innerHTML = "";
+        backDiv.style.paddingBottom = "10px";
+        $(backDiv).removeData();
 
-            var img = new Image();
-                img.id = "iniSlider";
-                img.src = "img/pullIn.png";
-                img.style.width = "30px";
-                img.style.height = "30px";
-                img.style.marginLeft = "12px";
+        var img = new Image();
+        img.id = "iniSlider";
+        img.src = "img/pullIn.png";
+        img.style.width = "30px";
+        img.style.height = "30px";
+        img.style.marginLeft = "12px";
 
+        backDiv.appendChild(img);
 
-
-            backDiv.appendChild(img);
-
-            backDiv.addEventListener("click", gamedata.sliderToggle);
-
-
-
-
+        backDiv.addEventListener("click", gamedata.sliderToggle);
     },
 
-    sliderToggle: function(){
+    sliderToggle: function sliderToggle() {
         var backDiv = document.getElementById("backDiv");
 
-        if ($(backDiv).data("on") == 0){
+        if ($(backDiv).data("on") == 0) {
             $("#iniGui").show();
             $(backDiv).data("on", 1);
             backDiv.style.marginLeft = "250px";
             document.getElementById("iniSlider").src = "img/pullIn.png";
-
-        }
-        else {
+        } else {
             $("#iniGui").hide();
             $(backDiv).data("on", 0);
             backDiv.style.marginLeft = "0px";
@@ -701,23 +658,23 @@ gamedata = {
         }
     },
 
-    showCommitButton: function() {
+    showCommitButton: function showCommitButton() {
         $(".committurn").show();
     },
 
-    hideCommitButton: function() {
+    hideCommitButton: function hideCommitButton() {
         $(".committurn").hide();
     },
-            
-    checkGameStatus: function(){
+
+    checkGameStatus: function checkGameStatus() {
 
         //TODO: to phase strategy
 
 
     },
-    
-    goToWaiting: function(){
-        if (gamedata.waiting == false){
+
+    goToWaiting: function goToWaiting() {
+        if (gamedata.waiting == false) {
             gamedata.waiting = true;
             ajaxInterface.startPollingGamedata();
             gamedata.checkGameStatus();
@@ -725,15 +682,13 @@ gamedata = {
         }
     },
 
-    parseServerData: function(serverdata){
+    parseServerData: function parseServerData(serverdata) {
 
         console.log("GAMEDATA", serverdata);
 
-        if (serverdata == null)
-            return;
-        
-        if (!serverdata.id)
-            return;
+        if (serverdata == null) return;
+
+        if (!serverdata.id) return;
 
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
@@ -741,7 +696,7 @@ gamedata = {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
 
-        if (! gamedata.replay) {
+        if (!gamedata.replay) {
             gamedata.thisplayer = serverdata.forPlayer;
             gamedata.waiting = serverdata.waiting;
         }
@@ -751,9 +706,7 @@ gamedata = {
         gamedata.gamespace = serverdata.gamespace;
         shipManager.initiated = 0;
 
-
         gamedata.setShipsFromJson(serverdata.ships);
-
 
         gamedata.initPhase();
         gamedata.drawIniGUI();
@@ -761,18 +714,14 @@ gamedata = {
 
         gamedata.checkGameStatus();
     },
-            
-    setShipsFromJson: function(jsonShips)
-    {
+
+    setShipsFromJson: function setShipsFromJson(jsonShips) {
         //gamedata.ships = Array();
-        
-        for (var i in jsonShips)
-        {
+
+        for (var i in jsonShips) {
             var ship = jsonShips[i];
             gamedata.ships[i] = new Ship(ship);
         }
     }
-    
-}
 
-
+};

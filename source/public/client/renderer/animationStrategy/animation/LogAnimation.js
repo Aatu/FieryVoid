@@ -1,6 +1,8 @@
-window.LogAnimation = (function(){
+"use strict";
 
-    function LogAnimation(){
+window.LogAnimation = function () {
+
+    function LogAnimation() {
         Animation.call(this);
         this.entries = [];
         this.nextToDisplay = null;
@@ -15,7 +17,8 @@ window.LogAnimation = (function(){
         var lastCurrentTime = this.currentTime;
         this.currentTime = total;
 
-        if (lastCurrentTime > total) { //moving backwards in time
+        if (lastCurrentTime > total) {
+            //moving backwards in time
             tryToHideNext.call(this);
         } else {
             tryToShowNext.call(this);
@@ -23,23 +26,23 @@ window.LogAnimation = (function(){
     };
 
     LogAnimation.prototype.addLogEntryFire = function (fire, time) {
-        this.entries.push({time: time, fire: fire, displayed: null});
+        this.entries.push({ time: time, fire: fire, displayed: null });
         calculateDisplay.call(this);
     };
 
     LogAnimation.prototype.addLogEntryMove = function (movement, time) {
-        this.entries.push({time: time, movement: movement, displayed: null});
+        this.entries.push({ time: time, movement: movement, displayed: null });
         calculateDisplay.call(this);
     };
 
-    LogAnimation.prototype.cleanUp = function() {
+    LogAnimation.prototype.cleanUp = function () {
         this.entries.forEach(function (entry) {
             if (entry.fire) {
                 window.combatLog.removeFireOrders(entry.displayed);
             } else {
                 //window.combatLog.removeMoves(entry.movement);
             }
-        })
+        });
     };
 
     function tryToHideNext() {
@@ -96,4 +99,4 @@ window.LogAnimation = (function(){
     }
 
     return LogAnimation;
-})();
+}();

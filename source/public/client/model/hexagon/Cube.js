@@ -1,12 +1,12 @@
+'use strict';
 
-if ( typeof window.hexagon === 'undefined')
-    window.hexagon = {};
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+if (typeof window.hexagon === 'undefined') window.hexagon = {};
 
-window.hexagon.Cube = (function(){
-  function Cube(x, y, z)
-    {
-        if (typeof x === 'object') {
+window.hexagon.Cube = function () {
+    function Cube(x, y, z) {
+        if ((typeof x === 'undefined' ? 'undefined' : _typeof(x)) === 'object') {
             var cube = x;
             this.x = this._formatNumber(cube.x);
             this.y = this._formatNumber(cube.y);
@@ -22,19 +22,18 @@ window.hexagon.Cube = (function(){
 
     Cube.PRECISION = 4;
 
-    Cube.prototype.round = function()
-    {
+    Cube.prototype.round = function () {
         if (this.x % 1 === 0 && this.y % 1 === 0 && this.z % 1 === 0) {
             return this;
         }
 
-        rx = Math.round(this.x);
-        ry = Math.round(this.y);
-        rz = Math.round(this.z);
+        var rx = Math.round(this.x);
+        var ry = Math.round(this.y);
+        var rz = Math.round(this.z);
 
-        x_diff = Math.abs(rx - this.x);
-        y_diff = Math.abs(ry - this.y);
-        z_diff = Math.abs(rz - this.z);
+        var x_diff = Math.abs(rx - this.x);
+        var y_diff = Math.abs(ry - this.y);
+        var z_diff = Math.abs(rz - this.z);
 
         if (x_diff > y_diff && x_diff > z_diff) {
             rx = -ry - rz;
@@ -45,75 +44,56 @@ window.hexagon.Cube = (function(){
         }
 
         return new hexagon.Cube(rx, ry, rz);
-    }
+    };
 
-    Cube.prototype._validate = function()
-    {
+    Cube.prototype._validate = function () {
         if (Math.abs(this.x + this.y + this.z) > 0.001) {
-            throw new Error(
-                "Invalid Cube coordinates: (" + this.x + ", " + this.y + ", " + this.z + ")"
-            );
+            throw new Error("Invalid Cube coordinates: (" + this.x + ", " + this.y + ", " + this.z + ")");
         }
-    }
+    };
 
-    Cube.prototype.neighbours = [
-        { x:  1, y: -1, z: 0 }, { x:  1, y:  0, z: -1 }, { x:  0, y:  1, z: -1 },
-        { x: -1, y:  1, z: 0 }, { x: -1, y:  0, z:  1 }, { x:  0, y: -1, z:  1 }
-    ];
+    Cube.prototype.neighbours = [{ x: 1, y: -1, z: 0 }, { x: 1, y: 0, z: -1 }, { x: 0, y: 1, z: -1 }, { x: -1, y: 1, z: 0 }, { x: -1, y: 0, z: 1 }, { x: 0, y: -1, z: 1 }];
 
-    Cube.prototype.getNeighbours = function()
-    {
+    Cube.prototype.getNeighbours = function () {
         var neighbours = [];
 
-        this.neighbours.forEach(function(neighbour) {
+        this.neighbours.forEach(function (neighbour) {
             neighbours.push(this.add(neighbour));
         }, this);
 
         return neighbours;
-    }
+    };
 
-    Cube.prototype.moveToDirection = function(direction)
-    {
+    Cube.prototype.moveToDirection = function (direction) {
         return this.add(this.neighbours[direction]);
-    }
+    };
 
-    Cube.prototype.add = function(cube)
-    {
+    Cube.prototype.add = function (cube) {
         return new hexagon.Cube(this.x + cube.x, this.y + cube.y, this.z + cube.z);
-    }
+    };
 
-    Cube.prototype.subtract = function(cube)
-    {
+    Cube.prototype.subtract = function (cube) {
         return new hexagon.Cube(this.x - cube.x, this.y - cube.y, this.z - cube.z);
-    }
+    };
 
-    Cube.prototype.scale = function(scale)
-    {
+    Cube.prototype.scale = function (scale) {
         return new hexagon.Cube(this.x * scale, this.y * scale, this.z * scale);
-    }
+    };
 
-    Cube.prototype.distanceTo = function(cube)
-    {
-        return Math.max(
-            Math.abs(this.x - cube.x),
-            Math.abs(this.y - cube.y),
-            Math.abs(this.z - cube.z)
-        );
-    }
+    Cube.prototype.distanceTo = function (cube) {
+        return Math.max(Math.abs(this.x - cube.x), Math.abs(this.y - cube.y), Math.abs(this.z - cube.z));
+    };
 
-    Cube.prototype.equals = function(cube)
-    {
-        return this.x === cube.x &&
-               this.y === cube.y &&
-               this.z === cube.z;
-    }
+    Cube.prototype.equals = function (cube) {
+        return this.x === cube.x && this.y === cube.y && this.z === cube.z;
+    };
 
-    Cube.prototype.getFacing = function(neighbour) {
+    Cube.prototype.getFacing = function (neighbour) {
         var index = -1;
 
         var delta = neighbour.subtract(this);
 
-        this.neighbours.some(function(hex, i) {
+        this.neighbours.some(function (hex, i) {
             if (delta.equals(hex)) {
                 index = i;
                 return true;
@@ -123,8 +103,7 @@ window.hexagon.Cube = (function(){
         return index;
     };
 
-    Cube.prototype.toOffset = function()
-    {
+    Cube.prototype.toOffset = function () {
         var q = this.x + (this.z + (this.z & 1)) / 2;
         var r = this.z;
 
@@ -133,24 +112,22 @@ window.hexagon.Cube = (function(){
         return new Offset(q, r); //EVEN_R
     };
 
-/*
-    Cube.prototype.toOffset = function()
-    {
-        var q = this.x + (this.z - (this.z & 1)) / 2;
-        var r = this.z;
-
-        return new hexagon.Offset(q, r); //ODD_R
-    };
-*/
-    Cube.prototype.toString = function()
-    {
+    /*
+        Cube.prototype.toOffset = function()
+        {
+            var q = this.x + (this.z - (this.z & 1)) / 2;
+            var r = this.z;
+    
+            return new hexagon.Offset(q, r); //ODD_R
+        };
+    */
+    Cube.prototype.toString = function () {
         return "(" + this.x + "," + this.y + "," + this.z + ")";
-    }
+    };
 
-    Cube.prototype._formatNumber = function(number)
-    {
+    Cube.prototype._formatNumber = function (number) {
         return parseFloat(number.toFixed(hexagon.Cube.PRECISION));
     };
 
     return Cube;
-})();
+}();

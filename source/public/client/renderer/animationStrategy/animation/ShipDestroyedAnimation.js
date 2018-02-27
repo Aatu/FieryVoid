@@ -1,4 +1,6 @@
-window.ShipDestroyedAnimation = (function() {
+"use strict";
+
+window.ShipDestroyedAnimation = function () {
     function ShipDestroyedAnimation(time, shipIcon, emitterContainer, movementAnimations) {
         Animation.call(this);
         this.time = time;
@@ -8,7 +10,6 @@ window.ShipDestroyedAnimation = (function() {
         this.currentOpacity = 1.0;
 
         this.animations = [];
-
 
         var cameraAnimation = new CameraPositionAnimation(FireAnimationHelper.getShipPositionAtTime(this.shipIcon, this.time, movementAnimations), this.time);
 
@@ -33,7 +34,7 @@ window.ShipDestroyedAnimation = (function() {
         var opacity;
 
         if (total > this.fadeoutTime && total < this.fadeoutTime + this.fadeoutDuration) {
-            opacity = 1 -(total - this.fadeoutTime) / this.fadeoutDuration;
+            opacity = 1 - (total - this.fadeoutTime) / this.fadeoutDuration;
         } else if (total < this.fadeoutTime) {
             opacity = 1;
         } else {
@@ -55,6 +56,5 @@ window.ShipDestroyedAnimation = (function() {
         this.shipIcon.setOpacity(1);
     };
 
-
     return ShipDestroyedAnimation;
-})();
+}();

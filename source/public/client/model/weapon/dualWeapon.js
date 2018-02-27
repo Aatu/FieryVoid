@@ -1,21 +1,19 @@
-var DualWeapon = function(json, ship)
-{
-    Weapon.call( this, json, ship);
-}
-DualWeapon.prototype = Object.create( Weapon.prototype );
+"use strict";
+
+var DualWeapon = function DualWeapon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+DualWeapon.prototype = Object.create(Weapon.prototype);
 DualWeapon.prototype.constructor = DualWeapon;
 
-
-var LaserPulseArray = function(json, ship)
-{
-    DualWeapon.call( this, json, ship);
-}
-LaserPulseArray.prototype = Object.create( DualWeapon.prototype );
+var LaserPulseArray = function LaserPulseArray(json, ship) {
+    DualWeapon.call(this, json, ship);
+};
+LaserPulseArray.prototype = Object.create(DualWeapon.prototype);
 LaserPulseArray.prototype.constructor = LaserPulseArray;
 
-var GraviticLance = function(json, ship)
-{
-    DualWeapon.call( this, json, ship);
-}
-GraviticLance.prototype = Object.create( DualWeapon.prototype );
+var GraviticLance = function GraviticLance(json, ship) {
+    DualWeapon.call(this, json, ship);
+};
+GraviticLance.prototype = Object.create(DualWeapon.prototype);
 GraviticLance.prototype.constructor = GraviticLance;

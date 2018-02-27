@@ -1,6 +1,8 @@
+"use strict";
+
 window.FireAnimationHelper = {
 
-    getShipPositionForFiring: function(icon, time, movementAnimations, weapon, turn) {
+    getShipPositionForFiring: function getShipPositionForFiring(icon, time, movementAnimations, weapon, turn) {
         if (weapon.ballistic) {
             console.log("get ballistic firing position");
             console.log(turn, icon.getFirstMovementOnTurn(turn));
@@ -10,7 +12,7 @@ window.FireAnimationHelper = {
         return FireAnimationHelper.getShipPositionAtTime(icon, time, movementAnimations);
     },
 
-    getShipPositionAtTime: function(icon, time, movementAnimations) {
+    getShipPositionAtTime: function getShipPositionAtTime(icon, time, movementAnimations) {
 
         var animation = movementAnimations[icon.shipId];
 

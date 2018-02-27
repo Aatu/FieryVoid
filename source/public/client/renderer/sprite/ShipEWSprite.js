@@ -1,8 +1,10 @@
-window.ShipEWSprite = (function(){
+"use strict";
+
+window.ShipEWSprite = function () {
 
     var TEXTURE_SIZE = 256;
 
-    function ShipEWSprite(size, z){
+    function ShipEWSprite(size, z) {
 
         this.DEW = 0;
         this.CCEW = 0;
@@ -11,7 +13,7 @@ window.ShipEWSprite = (function(){
 
     ShipEWSprite.prototype = Object.create(webglSprite.prototype);
 
-    ShipEWSprite.prototype.update = function(DEW, CCEW) {
+    ShipEWSprite.prototype.update = function (DEW, CCEW) {
 
         if (this.DEW === DEW && this.CCEW === CCEW) {
             return;
@@ -30,8 +32,8 @@ window.ShipEWSprite = (function(){
         this.uniforms.texture.value = texture;
     };
 
-    function drawDEW(context, DEW){
-        if (! DEW) {
+    function drawDEW(context, DEW) {
+        if (!DEW) {
             return;
         }
 
@@ -42,25 +44,25 @@ window.ShipEWSprite = (function(){
         }
 
         context.strokeStyle = "rgba(144,185,208,0)";
-        context.fillStyle = "rgba(144,185,208,"+a+")";
+        context.fillStyle = "rgba(144,185,208," + a + ")";
 
         var r1 = getDEWStart();
         var r2 = getDEWStart() + DEW;
 
-        graphics.drawFilledCircle(context, TEXTURE_SIZE/2, TEXTURE_SIZE/2, r1, r2);
+        graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
 
     function getDEWStart() {
-        return Math.ceil(TEXTURE_SIZE*0.31);
+        return Math.ceil(TEXTURE_SIZE * 0.31);
     }
 
     function getCCEWStart(DEW) {
 
-        return Math.ceil(TEXTURE_SIZE*0.32) + DEW ;
+        return Math.ceil(TEXTURE_SIZE * 0.32) + DEW;
     }
 
-    function drawCCEW(context, DEW, CCEW){
-        if (! CCEW){
+    function drawCCEW(context, DEW, CCEW) {
+        if (!CCEW) {
             return;
         }
 
@@ -71,13 +73,13 @@ window.ShipEWSprite = (function(){
         }
 
         context.strokeStyle = "rgba(20,80,128,0)";
-        context.fillStyle = "rgba(20,80,128,"+a+")";
+        context.fillStyle = "rgba(20,80,128," + a + ")";
 
         var r1 = getCCEWStart(DEW);
         var r2 = getCCEWStart(DEW) + CCEW;
 
-        graphics.drawFilledCircle(context, TEXTURE_SIZE/2, TEXTURE_SIZE/2, r1, r2);
+        graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
 
     return ShipEWSprite;
-})();
+}();

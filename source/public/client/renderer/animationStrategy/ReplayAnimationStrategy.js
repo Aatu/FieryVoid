@@ -1,4 +1,6 @@
-window.ReplayAnimationStrategy = (function(){
+"use strict";
+
+window.ReplayAnimationStrategy = function () {
 
     ReplayAnimationStrategy.type = {
         INFORMATIVE: 1,
@@ -6,7 +8,7 @@ window.ReplayAnimationStrategy = (function(){
         ALL: 3
     };
 
-    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type){
+    function ReplayAnimationStrategy(gamedata, shipIcons, scene, type) {
         AnimationStrategy.call(this);
         this.shipIconContainer = shipIcons;
         this.gamedata = gamedata;
@@ -37,29 +39,29 @@ window.ReplayAnimationStrategy = (function(){
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
 
-    ReplayAnimationStrategy.prototype.activate = function() {
+    ReplayAnimationStrategy.prototype.activate = function () {
         return this;
     };
 
-    ReplayAnimationStrategy.prototype.deactivate = function(scene) {
+    ReplayAnimationStrategy.prototype.deactivate = function (scene) {
         this.animations.forEach(function (animation) {
-           animation.cleanUp(scene);
+            animation.cleanUp(scene);
         });
 
         this.emitterContainer.cleanUp();
 
-        this.gamedata.ships.forEach(function(ship){
+        this.gamedata.ships.forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).show();
         }, this);
 
         return this;
     };
 
-    ReplayAnimationStrategy.prototype.isDone = function() {
+    ReplayAnimationStrategy.prototype.isDone = function () {
         return this.endTime < this.totalAnimationTime || this.totalAnimationTime < 0;
     };
 
-    ReplayAnimationStrategy.prototype.update = function() {
+    ReplayAnimationStrategy.prototype.update = function () {
         return this;
     };
 
@@ -69,20 +71,18 @@ window.ReplayAnimationStrategy = (function(){
         var logAnimation = new LogAnimation();
         this.animations.push(logAnimation);
 
-
         time = animateMovement.call(this, time);
         time = animateWeaponFire.call(this, time, logAnimation);
         time = animateShipDestruction.call(this, time, logAnimation);
         time += 100;
 
         this.endTime = time;
-
     }
 
     function animateShipDestruction(time, logAnimation) {
-        this.gamedata.ships.filter(function(ship){
-            return shipManager.getTurnDestroyed(ship) === this.turn && ! ship.flight;
-        }, this).forEach(function(ship){
+        this.gamedata.ships.filter(function (ship) {
+            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight;
+        }, this).forEach(function (ship) {
             console.log("SHIP DESTROYED", ship.imagePath);
 
             var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
@@ -90,16 +90,16 @@ window.ReplayAnimationStrategy = (function(){
             this.animations.push(animation);
         }, this);
 
-        this.gamedata.ships.filter(function(ship){
+        this.gamedata.ships.filter(function (ship) {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             return turnDestroyed !== null && turnDestroyed < this.turn;
-        }, this).forEach(function(ship){
+        }, this).forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).hide();
         }, this);
 
-        this.gamedata.ships.filter(function(ship){
+        this.gamedata.ships.filter(function (ship) {
             return ship.flight;
-        }, this).forEach(function(ship){
+        }, this).forEach(function (ship) {
             var fightersToHide = ship.systems.filter(function (fighter) {
                 var turnDestroyed = damageManager.getTurnDestroyed(ship, fighter);
                 return turnDestroyed !== null && turnDestroyed < this.turn;
@@ -118,7 +118,7 @@ window.ReplayAnimationStrategy = (function(){
             var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
             setMovementAnimationDuration.call(this, animation);
 
-            if (animation.getLength() > 0 ) {
+            if (animation.getLength() > 0) {
                 var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
                 this.animations.push(cameraAnimation);
                 time += cameraAnimation.getDuration();
@@ -131,7 +131,6 @@ window.ReplayAnimationStrategy = (function(){
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time += animation.getDuration();
             }
-
         }, this);
 
         return time;
@@ -151,7 +150,6 @@ window.ReplayAnimationStrategy = (function(){
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time += animation.getDuration();
             }
-
         }, this);
 
         return time;
@@ -166,4 +164,4 @@ window.ReplayAnimationStrategy = (function(){
     }
 
     return ReplayAnimationStrategy;
-})();
+}();

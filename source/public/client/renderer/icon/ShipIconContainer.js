@@ -1,18 +1,20 @@
-window.ShipIconContainer = (function(){
-    function ShipIconContainer(coordinateConverter, scene){
+'use strict';
+
+window.ShipIconContainer = function () {
+    function ShipIconContainer(coordinateConverter, scene) {
         this.iconsAsObject = {};
         this.iconsAsArray = [];
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
     }
 
-    ShipIconContainer.prototype.consumeGamedata = function(gamedata) {
+    ShipIconContainer.prototype.consumeGamedata = function (gamedata) {
         setShips.call(this, gamedata.ships);
     };
 
-    function setShips (ships) {
+    function setShips(ships) {
         ships.forEach(function (ship) {
-            if (! this.hasIcon(ship.id)) {
+            if (!this.hasIcon(ship.id)) {
                 this.iconsAsObject[ship.id] = createIcon(ship, this.scene);
             } else {
                 this.iconsAsObject[ship.id].consumeShipdata(ship);
@@ -22,16 +24,16 @@ window.ShipIconContainer = (function(){
         buildShipArray.call(this);
     }
 
-    ShipIconContainer.prototype.getByShip = function(ship) {
+    ShipIconContainer.prototype.getByShip = function (ship) {
         return this.iconsAsObject[ship.id];
     };
 
-    ShipIconContainer.prototype.getById = function(id) {
+    ShipIconContainer.prototype.getById = function (id) {
         return this.iconsAsObject[id];
     };
 
-    ShipIconContainer.prototype.onEvent = function(name, payload) {
-        var target = this['on'+ name];
+    ShipIconContainer.prototype.onEvent = function (name, payload) {
+        var target = this['on' + name];
         if (target && typeof target === 'function') {
             target.call(this, payload);
         }
@@ -43,7 +45,7 @@ window.ShipIconContainer = (function(){
             var newzoom = 2 * zoom;
             this.iconsAsArray.forEach(function (icon) {
                 icon.setScale(newzoom, newzoom);
-            })
+            });
         }
 
         var alpha = zoom > 2 ? zoom - 2 : 0;
@@ -52,8 +54,7 @@ window.ShipIconContainer = (function(){
         }
         this.iconsAsArray.forEach(function (icon) {
             icon.setOverlayColorAlpha(alpha);
-        })
-
+        });
     };
 
     ShipIconContainer.prototype.getArray = function () {
@@ -70,16 +71,15 @@ window.ShipIconContainer = (function(){
 
     ShipIconContainer.prototype.getIconsInProximity = function (payload) {
         var hexHeight = this.coordinateConverter.getHexHeightViewport();
-        var distance = hexHeight/10;
+        var distance = hexHeight / 10;
 
         var icons = [];
 
         if (distance < 30) {
 
             icons = this.getIconsInSameHex(payload.hex);
-
         } else {
-;
+            ;
             var closest = null;
             var closestDistance = null;
 
@@ -92,46 +92,44 @@ window.ShipIconContainer = (function(){
                 }
             }, this);
 
-            if (closest)
-                icons.push(closest);
+            if (closest) icons.push(closest);
         }
 
         return icons;
-
     };
 
     ShipIconContainer.prototype.getIconsInSameHex = function (hex) {
-        return this.iconsAsArray.filter(function(shipIcon){
+        return this.iconsAsArray.filter(function (shipIcon) {
             return this.coordinateConverter.fromGameToHex(shipIcon.getPosition()).equals(hex);
         }, this);
     };
 
     ShipIconContainer.prototype.getFinalMovementInSameHex = function (hex) {
-        return this.iconsAsArray.filter(function(shipIcon){
+        return this.iconsAsArray.filter(function (shipIcon) {
             return shipIcon.getLastMovement().position.equals(hex);
         }, this);
     };
 
-    ShipIconContainer.prototype.positionAndFaceAllIcons = function() {
+    ShipIconContainer.prototype.positionAndFaceAllIcons = function () {
         this.getArray().forEach(function (icon) {
             icon.positionAndFaceIcon(this.getHexOffset(icon));
         }, this);
     };
 
-    ShipIconContainer.prototype.positionAndFaceShip = function(ship) {
+    ShipIconContainer.prototype.positionAndFaceShip = function (ship) {
         var icon = this.getByShip(ship);
         icon.positionAndFaceIcon(this.getHexOffset(icon));
     };
 
-    ShipIconContainer.prototype.setAllSelected = function(selected) {
+    ShipIconContainer.prototype.setAllSelected = function (selected) {
         this.getArray().forEach(function (icon) {
             icon.setSelected(selected);
         }, this);
     };
 
-    function buildShipArray(){
-        this.iconsAsArray = Object.keys(this.iconsAsObject).map(function(key){
-           return this.iconsAsObject[key];
+    function buildShipArray() {
+        this.iconsAsArray = Object.keys(this.iconsAsObject).map(function (key) {
+            return this.iconsAsObject[key];
         }, this);
     }
 
@@ -144,7 +142,7 @@ window.ShipIconContainer = (function(){
         }
     }
 
-    ShipIconContainer.prototype.getHexOffset = function(icon) {
+    ShipIconContainer.prototype.getHexOffset = function (icon) {
         var lastMove = icon.getLastMovement();
         var hex = lastMove.position;
 
@@ -159,16 +157,14 @@ window.ShipIconContainer = (function(){
         var previousHex = icon.getMovementBefore(lastMove).position;
 
         var iconsFromSameHex = iconsInHex; /* iconsInHex.filter(function (otherIcon) {
-            var movement = otherIcon.getMovementBefore(otherIcon.getLastMovement());
-            if (!movement) {
-                return false;
-            }
-
-            return movement.position.equals(previousHex);
-        });*/
+                                           var movement = otherIcon.getMovementBefore(otherIcon.getLastMovement());
+                                           if (!movement) {
+                                           return false;
+                                           }
+                                           return movement.position.equals(previousHex);
+                                           });*/
 
         var steps = 0;
-
 
         /*
         if (iconsInHex.length > 0) {
@@ -187,4 +183,4 @@ window.ShipIconContainer = (function(){
     };
 
     return ShipIconContainer;
-})();
+}();

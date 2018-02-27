@@ -1,13 +1,14 @@
+"use strict";
+
 window.deployment = {
-    initialized: false,
+    initialized: false
 
     /*
     drawDeploymentAreas: function(canvas){
         gameInfoManager.prepare();
         deployment.drawDeploymentForSelectedShip(canvas);
     },
-
-    drawDeploymentForSelectedShip: function(canvas){
+     drawDeploymentForSelectedShip: function(canvas){
         
         var selectedShip = gamedata.getSelectedShip();
         
@@ -18,8 +19,7 @@ window.deployment = {
         canvas.fillStyle = "rgba(160,250,100,0.1)";
         var slot = deployment.getValidDeploymentArea(selectedShip);
         deployment.drawDep(canvas, slot);
-
-        var side1Players = new Array();
+         var side1Players = new Array();
         var side2Players = new Array();
         
         for (var i in gamedata.slots){
@@ -51,11 +51,9 @@ window.deployment = {
             
             if (slot.team == otherslot.team)
                 continue;
-
-            var index = side2Players.length;
+             var index = side2Players.length;
             side2Players[index] = otherslot.playername;
-
-            canvas.strokeStyle = "rgba(250,100,100,0.5)";
+             canvas.strokeStyle = "rgba(250,100,100,0.5)";
             canvas.fillStyle = "rgba(250,100,100,0.1)";
             deployment.drawDep(canvas, otherslot);
        }
@@ -122,8 +120,7 @@ window.deployment = {
             }
         }
     },
-
-    /*
+     /*
     onHexClicked: function(hexpos){
         var selectedShip = gamedata.getSelectedShip();
         
@@ -140,13 +137,11 @@ window.deployment = {
         }
         
     },
-
-    
+     
     validateDeploymentPos: function(ship, hexpos){
         if (!hexpos)
             hexpos = shipManager.getShipPosition(ship);
-
-        var slot = deployment.getValidDeploymentArea(ship);
+         var slot = deployment.getValidDeploymentArea(ship);
         hexpos = hexgrid.hexCoToPixel(hexpos.x, hexpos.y);
         var deppos = hexgrid.hexCoToPixel(slot.depx, slot.depy);
         
@@ -184,5 +179,5 @@ window.deployment = {
     
         return true;
     }
-  */
+    */
 };
