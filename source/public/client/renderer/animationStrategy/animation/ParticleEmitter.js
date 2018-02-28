@@ -79,7 +79,7 @@ window.ParticleEmitter = function () {
         }
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
-        this.mesh.position = new THREE.Vector3(0, 0, 0);
+        this.mesh.position.set(0, 0, 0);
 
         this.needsUpdate = false;
 
