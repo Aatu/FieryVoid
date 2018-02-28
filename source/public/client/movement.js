@@ -376,14 +376,13 @@ shipManager.movement = {
 
         var lastPosition = ship.movement[ship.movement.length - 1].position;
         var pos = new hexagon.Offset(lastPosition).getNeighbourAtDirection(lm.heading);
-        var off = shipManager.movement.getMovementOffsetPos(ship, lm.heading, pos);
 
         ship.movement[ship.movement.length] = {
             id: -1,
             type: "move",
             position: pos,
-            xOffset: off.xO,
-            yOffset: off.yO,
+            xOffset: 0,
+            yOffset: 0,
             facing: lm.facing,
             heading: lm.heading,
             speed: lm.speed,
@@ -511,13 +510,12 @@ shipManager.movement = {
             }
         }
 
-        var off = shipManager.movement.getMovementOffsetPos(ship, newheading, pos);
         ship.movement[ship.movement.length] = {
             id: -1,
             type: name,
             position: pos,
-            xOffset: off.xO,
-            yOffset: off.yO,
+            xOffset: 0,
+            yOffset: 0,
             facing: lm.facing,
             heading: lm.heading,
             speed: lm.speed,
@@ -2076,16 +2074,4 @@ shipManager.movement = {
     },
     */
 
-    getMovementOffsetPos: function getMovementOffsetPos(ship, heading, pos) {
-        //TODO: support new renderer
-        if (!hexgrid.isOccupiedPos(pos)) {
-            return { xO: 0, yO: 0 };
-        }
-
-        var dir = mathlib.hexFacingToAngle(mathlib.addToHexFacing(heading, 3));
-        var per = 0.2;
-        if (ship.shipSizeClass < 0) per *= 2;
-
-        return hexgrid.getOffsetPositionInHex(pos, dir, per, true);
-    }
 };
