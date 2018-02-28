@@ -12,6 +12,7 @@ class GammaStarfury extends FighterFlight{
         $this->imagePath = "img/ships/auroraStarfury.png";
 	$this->variantOf = "Starfury: Aurora Heavy flight";	    
 	$this->isd = 2259;
+	$this->notes = 'Non-atmospheric.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
