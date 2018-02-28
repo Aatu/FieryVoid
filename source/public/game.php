@@ -157,7 +157,6 @@
 
 	<script src="client/UI/botPanel.js"></script>
     <script src="client/UI/replayUI.js"></script>
-    <script src="client/hexgrid.js"></script>
     <script src="client/gamedata.js"></script>
     <script src="client/windowevents.js"></script>
     <script src="client/mousewheel.js"></script>
