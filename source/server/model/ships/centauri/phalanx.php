@@ -44,7 +44,7 @@ class Phalanx extends OSAT{
                     9 => "Structure",
                     11 => "Thruster",
 		    14 => "Battle Laser",
-		    16 = "Twin Array",
+		    16 => "Twin Array",
                     18 => "Scanner",
                     20 => "Reactor",
             )
