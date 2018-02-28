@@ -78,20 +78,23 @@ class Balvarin extends BaseShip{
             ),
             2=> array( //Aft
                     7 => "Thruster",
+                    9 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array( //Port
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster", //do not differentiate which thruster!
+                    6 => "Guardian Array",
+                    8 => "Twin Array",
+                    11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array( //Starboard
-                    3 => "Thruster",
-                    7 => "Battle Laser",
-                    11 => "Twin Array",
+                    4 => "Thruster", //do not differentiate which thruster!
+                    6 => "Guardian Array",
+                    8 => "Twin Array",
+                    11 => "Hangar",
                     18 => "Structure",
                     20 => "Primary",
             )
