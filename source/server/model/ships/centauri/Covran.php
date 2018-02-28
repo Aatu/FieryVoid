@@ -4,13 +4,15 @@ class Covran extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 730;
-		$this->faction = "Centauri";
+	$this->pointCost = 730;
+	$this->faction = "Centauri";
         $this->phpclass = "Covran";
         $this->imagePath = "img/ships/covran.png";
         $this->shipClass = "Covran Scout";
         $this->shipSizeClass = 3;
         $this->limited = 33;
+	    
+	$this->isd = 2191;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
@@ -38,10 +40,10 @@ class Covran extends BaseShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new Thruster(5, 15, 0, 6, 1));
 		
-        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         $this->addAftSystem(new GuardianArray(3, 4, 2, 120, 0));
         $this->addAftSystem(new GuardianArray(3, 4, 2, 0, 240));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 0));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
 	$this->addAftSystem(new JumpEngine(5, 18, 3, 16));
         $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(5, 10, 0, 4, 2));
@@ -58,6 +60,47 @@ class Covran extends BaseShip{
         $this->addRightSystem(new Structure( 5, 45));
         $this->addPrimarySystem(new Structure( 6, 36));
 		
+	    
+	    
+
+	//d20 hit chart
+        $this->hitChart = array(
+            0=> array( //PRIMARY
+                    8 => "Structure",
+                    12 => "ELINT Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array( //Forward
+                    3 => "Thruster",
+		    5 => "Guardian Array",
+                    9 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array( //Aft
+                    4 => "Thruster",
+		    6 => "Guardian Array",
+                    9 => "Twin Array",		    
+                    12 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array( //Port
+                    5 => "Thruster",
+                    16 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array( //Starboard
+                    5 => "Thruster",
+                    16 => "Structure",
+                    20 => "Primary",
+            )
+        );
+	    
+	    
 		
     }
 
