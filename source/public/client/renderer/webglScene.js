@@ -156,8 +156,28 @@ window.webglScene = function () {
         this.element.on("mouseout", this.mouseOut.bind(this));
         this.element.on("mouseover", this.mouseOver.bind(this));
         this.element.on("mousemove", this.mouseMove.bind(this));
+        this.element.on("touchmove", this.touchmove.bind(this));
+        this.element.on("touchstart", this.touchstart.bind(this));
+        this.element.on("touchend", this.touchend.bind(this));
+
+        jQuery(window).on("keydown", this.keyDown.bind(this));
+        jQuery(window).on("keyup", this.keyUp.bind(this));
 
         return this;
+    };
+
+    webglScene.prototype.touchstart = function(event) {
+        this.mouseDown(event);
+    };
+
+    webglScene.prototype.touchmove = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.drag(event);
+    };
+
+    webglScene.prototype.touchend = function(event) {
+        this.dragging = false;
     };
 
     webglScene.prototype.onWindowResize = function () {
@@ -168,6 +188,16 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
+    };
+
+    webglScene.prototype.keyDown = function (event) {
+        var action = window.Settings.matchEvent(event);
+        this.customEvent(action, {up: false});
+    };
+
+    webglScene.prototype.keyUp = function (event) {
+        var action = window.Settings.matchEvent(event);
+        this.customEvent(action, {up: true});
     };
 
     webglScene.prototype.mouseDown = function (event) {
@@ -234,6 +264,10 @@ window.webglScene = function () {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var current = getPositionObject(pos, gamePos);
+
+        if (!this.lastDraggingPosition) {
+            this.lastDraggingPosition = current;
+        }
 
         var deltaView = {
             x: pos.x - this.lastDraggingPosition.view.x,
@@ -342,6 +376,14 @@ window.webglScene = function () {
     }
 
     function getMousePositionInObservedElement(event) {
+
+        if (event.originalEvent.touches) {
+            return {
+                x: event.originalEvent.touches[0].pageX - this.element.offset().left,
+                y: event.originalEvent.touches[0].pageY - this.element.offset().top
+            };
+        }
+
         return {
             x: event.pageX - this.element.offset().left,
             y: event.pageY - this.element.offset().top

@@ -454,5 +454,9 @@ window.PhaseStrategy = function () {
         this.redrawMovementUI(ship);
     };
 
+    PhaseStrategy.prototype.onShowAllEW = function (payload) {
+        console.log("SHOW ALL EW", payload);
+    };
+
     return PhaseStrategy;
 }();

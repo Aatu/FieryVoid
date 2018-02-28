@@ -35,8 +35,8 @@
     <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
-    <script src="../jssource/client/lib/three.min.js"></script>
-    <script src="../jssource/client/lib/THREE.MeshLine.js"></script>
+    <script src="client/lib/three.min.js"></script>
+    <script src="client/lib/THREE.MeshLine.js"></script>
     <script src="client/UI/reactJs/UI.bundle.js"></script>
     <script>
         window.Config = {
@@ -69,7 +69,7 @@
             );
 
 			var UIManager = new window.UIManager($("body")[0]);
-            UIManager.PlayerSettings();
+            UIManager.PlayerSettings(window.Settings);
             $("#pagecontainer").show();
         });
         
@@ -79,6 +79,7 @@
     <script src="client/lib/graphics.js"></script>
     <script src="client/lib/HexagonMath.js"></script>
     <script src="client/lib/AbstractCanvas.js"></script>
+    <script src="client/Settings.js"></script>
     <script src="client/renderer/webglHexGridRenderer.js"></script>
     <script src="client/renderer/canvasHexGridRenderer.js"></script>
     <script src="client/renderer/webglScene.js"></script>
@@ -161,7 +162,7 @@
     <script src="client/windowevents.js"></script>
     <script src="client/mousewheel.js"></script>
     <script src="client/mathlib.js"></script>
-    <script src="../jssource/client/lib/seedRandom.js"></script>
+    <script src="client/lib/seedRandom.js"></script>
     <script src="client/ajaxInterface.js"></script>
     <script src="client/ew.js"></script>
     <script src="client/weaponManager.js"></script>
