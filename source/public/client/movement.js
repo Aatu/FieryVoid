@@ -1033,7 +1033,7 @@ shipManager.movement = {
         var value = 0;
         if (accel) value = 1;
 
-        requiredThrust = Array(null, null, null, null, null);
+        var requiredThrust = Array(null, null, null, null, null);
 
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
