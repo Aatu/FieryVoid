@@ -14,6 +14,7 @@ class BadgerStarfury extends FighterFlight{
 	$this->occurence = 'uncommon';//by original rules: not a variant, but special deployment restrictions (1 in 4 fighter flights)
 	$this->variantOf = "Starfury: Aurora Heavy flight";//I think Uncommon variant of Aurora is close enough
 	*/
+	    $this->occurence = 'special';
 	    $this->notes = 'Special deployment: 1 in 4 fighers';//let's try this way...
 	    
 	    $this->isd = 2255;
