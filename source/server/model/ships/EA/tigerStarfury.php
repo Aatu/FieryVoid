@@ -10,6 +10,8 @@ class TigerStarfury extends FighterFlight{
         $this->shipClass = "Starfury: Tiger Heavy flight";
         $this->imagePath = "img/ships/tigerStarfury.png";
 	    $this->isd = 2203;
+	    
+	    $this->notes = 'Non-atmospheric.';
         
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
