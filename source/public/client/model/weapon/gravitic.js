@@ -152,6 +152,14 @@ var UltraLightGraviticBolt = function(json, ship)
 UltraLightGraviticBolt.prototype = Object.create( Gravitic.prototype );
 UltraLightGraviticBolt.prototype.constructor = UltraLightGraviticBolt;
 
+var GraviticLance = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+GraviticLance.prototype = Object.create( Weapon.prototype );
+GraviticLance.prototype.constructor = GraviticLance;
+
+/*old!*/
 var GravLance = function(json, ship)
 {
     Weapon.call( this, json, ship);
