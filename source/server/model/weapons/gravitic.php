@@ -760,7 +760,7 @@ class GraviticBolt extends Gravitic
 class GraviticLance extends Raking{
         public $name = "GraviticLance";
         public $displayName = "Gravitic Lance";
-	    public $iconPath = "GraviticLance.png";
+	    public $iconPath = "graviticLance.png";
 	
 	//visual display - will it be enough to ensure correct animations?...
 	public $animationArray = array(1=>'laser', 2=>'laser');
