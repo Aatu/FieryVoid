@@ -791,6 +791,7 @@ class GraviticLance extends Raking{
         public $overloadable = true;
         public $alwaysoverloading = true;
         public $extraoverloadshots = 2;
+        public $overloadturns = 4;
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
