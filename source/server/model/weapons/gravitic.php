@@ -270,7 +270,6 @@
             $this->setTimes();
                         
             parent::fire($gamedata, $fireOrder);
-		
             // If fully boosted: test for possible crit.
             if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
             	$crits = array();
@@ -757,8 +756,103 @@ class GraviticBolt extends Gravitic
     }
     
 
+/*new approach to Gravitic Lance, using new mode mechanism...*/
+class GraviticLance extends Raking{
+        public $name = "GraviticLance";
+        public $displayName = "Gravitic Lance";
+	    public $iconPath = "GraviticLance.png";
+	
+	//visual display - will it be enough to ensure correct animations?...
+	public $animationArray = array(1=>'laser', 2=>'laser');
+        public $animationColor = array(99, 255, 00);
+        public $animationWidthArray = array(1=>6, 2=>4);
+        public $animationWidth2 = 0.5;
+        public $animationExplosionScale = 0.35;
+	
+	
+	//actual weapons data
+	public $raking = 10; 
+        public $priorityArray = array(1=>7, 2=>7);
+        public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
+	public $uninterceptableArray = array(1=>false, 2=>false);
+	
+        public $loadingtimeArray = array(1=>4, 2=>4); //mode 1 should be the one with longest loading time
+        public $rangePenaltyArray = array(1=>0.2, 2=>0.25); //Lance -1/5 hexes, Beams -1/4 hexes
+        public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(-5, 2, 3) ); // fighters, <mediums, <capitals 
+	
+	public $firingModes = array(1=>'Lance', 2=>'Beams');
+	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
+    	public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+	public $intercept = 0; 
+	
+	
+	
+        public $overloadable = true;
+        public $alwaysoverloading = true;
+        public $extraoverloadshots = 2;
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+		    $maxhealth = 12;
+		}
+		if ( $powerReq == 0 ){
+		    $powerReq = 16;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+		$this->data["Special"] = 'Can fire as either a Gravitic Lance (Sustained) or two Graviton Beams. ';
+		parent::setSystemDataWindow($turn);
+        }
+	
 
-class GraviticLance extends DualWeapon{
+        public function isOverloadingOnTurn($turn = null){
+            return true;
+        }
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 6)+24; //Lance
+				break;
+			case 2:
+				return Dice::d(10, 5)+12; //Beam
+				break;	
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 30; //Lance
+				break;
+			case 2:
+				$this->minDamage = 17; //Beam
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 84; //Gravitic Lance
+				break;
+			case 2:
+				$this->maxDamage = 62; //Graviton Beam
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}	
+	
+} //endof GraviticLance
+
+
+/*old GraviticLance, no longer used!*/
+class GraviticLanceOld extends DualWeapon{
     public $priority = 7;
 
 	public $firingModes = array( 
