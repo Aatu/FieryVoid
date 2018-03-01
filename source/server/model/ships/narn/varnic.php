@@ -80,8 +80,8 @@ class Varnic extends BaseShip{
 				),
 			3=> array(
 				4 => "Thruster",
-				7 => "Ion Torpedo",
-				9 => "Twin Array",
+				6 => "Twin Array",
+				10 => "Medium Laser",
 				18 => "Structure",
 				20 => "Primary",
 				),

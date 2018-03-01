@@ -10,9 +10,9 @@ Reactor.prototype.hasMaxBoost = function () {
 };
 
 var MagGravReactor = function MagGravReactor(json, ship) {
-    ShipSystem.call(this, json, ship);
+    Reactor.call(this, json, ship);
 };
-MagGravReactor.prototype = Object.create(ShipSystem.prototype);
+MagGravReactor.prototype = Object.create(Reactor.prototype);
 MagGravReactor.prototype.constructor = MagGravReactor;
 MagGravReactor.prototype.hasMaxBoost = function () {
     return true;
@@ -74,10 +74,18 @@ var GraviticThruster = function GraviticThruster(json, ship) {
 GraviticThruster.prototype = Object.create(Thruster.prototype);
 GraviticThruster.prototype.constructor = GraviticThruster;
 
-var Hangar = function Hangar(json, ship) {
-    ShipSystem.call(this, json, ship);
-};
-Hangar.prototype = Object.create(ShipSystem.prototype);
+var MagGraviticThruster = function(json, ship)
+{
+    Thruster.call( this, json, ship);
+}
+MagGraviticThruster.prototype = Object.create( Thruster.prototype );
+MagGraviticThruster.prototype.constructor = MagGraviticThruster;
+
+var Hangar = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+}
+Hangar.prototype = Object.create( ShipSystem.prototype );
 Hangar.prototype.constructor = Hangar;
 
 var Catapult = function Catapult(json, ship) {
@@ -103,12 +111,6 @@ var Structure = function Structure(json, ship) {
 };
 Structure.prototype = Object.create(ShipSystem.prototype);
 Structure.prototype.constructor = Structure;
-
-var ElintArray = function ElintArray(json, ship) {
-    ShipSystem.call(this, json, ship);
-};
-ElintArray.prototype = Object.create(ShipSystem.prototype);
-ElintArray.prototype.constructor = ElintArray;
 
 var Jammer = function Jammer(json, ship) {
     ShipSystem.call(this, json, ship);

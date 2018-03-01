@@ -179,120 +179,120 @@ window.gamedata = {
 
         gamedata.allShips = factionList;
     },
-
-    /*old, simple version*/
-    /*
-    parseShips: function(jsonShips){
-    	for (var faction in jsonShips){
-    		var shipList = jsonShips[faction];
-    		
-    		this.orderShipListOnName(shipList);
-    		gamedata.setShipsFromFaction(faction, shipList);
-    			for (var index = 0; index < jsonShips[faction].length; index++){
-    			var ship = shipList[index];
-    			var targetNode = document.getElementById(ship.faction);
-    				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-    			    h.appendTo(targetNode);
-    		}
     
-    		$(".addship").bind("click", this.buyShip);
-    	}
-    },*/
+	/*old, simple version*/
+	/*
+	parseShips: function(jsonShips){
+		for (var faction in jsonShips){
+			var shipList = jsonShips[faction];
+			
+			this.orderShipListOnName(shipList);
+			gamedata.setShipsFromFaction(faction, shipList);
 
-    /*prepares ship class name for display - will contain lots of information besides class name itself!*/
-    prepareClassName: function prepareClassName(ship) {
-        //name: actualname (limited variant custom)
-        //italics if actual variant!
-        var displayName = ship.shipClass;
-        var addOn = '';
+			for (var index = 0; index < jsonShips[faction].length; index++){
+				var ship = shipList[index];
+				var targetNode = document.getElementById(ship.faction);
 
-        switch (ship.occurence) {
-            case 'unique':
-                addOn = 'Q';
-                break;
-            case 'rare':
-                addOn = 'R';
-                break;
-            case 'uncommon':
-                addOn = 'U';
-                break;
-            default:
-                //assume common
-                addOn = 'C';
-        }
-        if (ship.limited > 0 && ship.limited < 100) {
-            //else no such info necessary
-            addOn = addOn + ' ' + ship.limited + '%';
-        }
-        if (ship.unofficial == true) {
-            addOn = addOn + ' ' + 'CUSTOM';
-        }
-
-        displayName = displayName + ' (' + addOn + ')';
-        if (ship.variantOf != '') {
-            displayName = '&nbsp;&nbsp;&nbsp;<i>' + displayName + '</i>';
-        } else {
-            displayName = '<b>' + displayName + '</b>';
-        }
-
-        return displayName;
-    }, //endof prepareClassName
-
-    /*prepares fleet list for purchases for display*/
-    parseShips: function parseShips(jsonShips) {
-        for (var faction in jsonShips) {
-            var targetNode = document.getElementById(faction);
-            var h;
-            var ship;
-            var shipV;
-            var shipDisplayName;
-            var shipList = jsonShips[faction];
-
-            //this.orderShipListOnName(shipList); //alphabetical sort
-            this.orderShipListOnPV(shipList); //perhaps more appropriate here, as alphabetical order will be shot to hell anyway
-
-            gamedata.setShipsFromFaction(faction, shipList);
-
-            //show separately: immobile objects (bases/OSATs), every ship size, fighters
-            var sizeClassHeaders = ['Fighters', 'Medium Ships', 'Heavy Ships', 'Capital Ships', 'Immobile Structures'];
-            for (var desiredSize = 4; desiredSize >= 0; desiredSize--) {
-                //display header
-                h = $('<div class="shipsizehdr" data-faction="' + faction + '"><span class="shiptype">' + sizeClassHeaders[desiredSize] + '</span></div>');
-                h.appendTo(targetNode);
-                for (var index = 0; index < jsonShips[faction].length; index++) {
-                    ship = shipList[index];
-                    if (desiredSize == 4) {
-                        //bases and OSATs, size does not matter
-                        if (ship.base != true && ship.osat != true) continue; //check if it's a base or OSAT
-                    } else if (desiredSize > 0) {
-                        //ships (check actual size)
-                        if (ship.shipSizeClass != desiredSize) continue; //check if it's of correct size
-                        if (ship.base == true || ship.osat == true) continue; //check if it's not a base or OSAT
-                    } else {
-                        //fighters! check max size - they should be -1, but 0 isn't used...
-                        if (ship.shipSizeClass > 0) continue; //check if it's of correct size
-                        if (ship.base == true || ship.osat == true) continue; //check if it's not a base or OSAT
-                    }
-                    if (ship.variantOf != '') continue; //check if it's not a variant, we're looking only for base designs here...
-                    //ok, display...
-                    shipDisplayName = this.prepareClassName(ship);
-                    h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="' + ship.id + '" data-faction="' + faction + '" data-shipclass="' + ship.phpclass + '"><span class="shiptype">' + shipDisplayName + '</span><span class="pointcost">' + ship.pointCost + 'p</span><span class="addship clickable">Add to fleet</span></div>');
-                    h.appendTo(targetNode);
-                    //search for variants of the base design above...
-                    for (var indexV = 0; indexV < jsonShips[faction].length; indexV++) {
-                        shipV = shipList[indexV];
-                        if (shipV.variantOf != ship.shipClass) continue; //that's not a variant of current base ship
-                        shipDisplayName = this.prepareClassName(shipV);
-                        h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="' + shipV.id + '" data-faction="' + faction + '" data-shipclass="' + shipV.phpclass + '"><span class="shiptype">' + shipDisplayName + '</span><span class="pointcost">' + shipV.pointCost + 'p</span><span class="addship clickable">Add to fleet</span></div>');
-                        h.appendTo(targetNode);
-                    } //end of variant
-                } //end of base design
-            } //end of size
-
-            $(".addship").bind("click", this.buyShip);
-        } //end of faction
-    }, //endof parseShips
-
+				var h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+ship.shipClass+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+				    h.appendTo(targetNode);
+			}
+	
+			$(".addship").bind("click", this.buyShip);
+		}
+	},*/
+	
+	/*prepares ship class name for display - will contain lots of information besides class name itself!*/
+	prepareClassName: function(ship){
+		//name: actualname (limited variant custom)
+		//italics if actual variant!
+		var displayName = ship.shipClass;
+		var addOn = '';
+		
+		switch(ship.occurence) {
+		    case 'unique':
+			addOn = 'Q';
+			break;
+		    case 'rare':
+			addOn = 'R';
+			break;
+		    case 'uncommon':
+			addOn = 'U';
+			break;
+		    case 'common':
+			addOn = 'C';
+			break;
+		    default: //assume something atypical
+			addOn = 'X';
+		}		
+		if((ship.limited>0) && (ship.limited < 100)){ //else no such info necessary
+			addOn = addOn +' '+ ship.limited + '%';
+		}		
+		if(ship.unofficial == true){
+			addOn = addOn +' '+'CUSTOM';
+		}
+		
+		displayName=displayName+' ('+addOn+')';
+		if(ship.variantOf !=''){
+			displayName = '&nbsp;&nbsp;&nbsp;<i>'+displayName+'</i>';
+		}else{
+			displayName = '<b>'+displayName+'</b>';
+		}
+		
+		return displayName;
+	}, //endof prepareClassName
+	
+	/*prepares fleet list for purchases for display*/
+	parseShips: function(jsonShips){
+		for (var faction in jsonShips){
+			var targetNode = document.getElementById(faction);
+			var h;
+			var ship;
+			var shipV;
+			var shipDisplayName;
+			var shipList = jsonShips[faction];
+			
+			//this.orderShipListOnName(shipList); //alphabetical sort
+			this.orderShipListOnPV(shipList); //perhaps more appropriate here, as alphabetical order will be shot to hell anyway
+			
+			gamedata.setShipsFromFaction(faction, shipList);
+			
+			//show separately: immobile objects (bases/OSATs), every ship size, fighters
+			var sizeClassHeaders = ['Fighters','Medium Ships','Heavy Ships', 'Capital Ships', 'Immobile Structures'];
+			for(var desiredSize=4; desiredSize>=0;desiredSize--){
+				//display header
+				h = $('<div class="shipsizehdr" data-faction="'+ faction +'"><span class="shiptype">'+sizeClassHeaders[desiredSize]+'</span></div>');
+                    		h.appendTo(targetNode);
+				for (var index = 0; index < jsonShips[faction].length; index++){
+					ship = shipList[index];
+					if(desiredSize==4){ //bases and OSATs, size does not matter
+						if((ship.base != true) && (ship.osat != true)) continue; //check if it's a base or OSAT
+				        }else if(desiredSize>0){ //ships (check actual size)
+						if(ship.shipSizeClass!=desiredSize) continue;//check if it's of correct size
+						if((ship.base == true) || (ship.osat == true)) continue; //check if it's not a base or OSAT
+					}else{ //fighters! check max size - they should be -1, but 0 isn't used...
+						if(ship.shipSizeClass>0) continue;//check if it's of correct size
+						if((ship.base == true) || (ship.osat == true)) continue; //check if it's not a base or OSAT
+					}
+					if(ship.variantOf!='') continue;//check if it's not a variant, we're looking only for base designs here...
+					//ok, display...
+					shipDisplayName = this.prepareClassName(ship);
+					h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+					h.appendTo(targetNode);
+					//search for variants of the base design above...
+					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
+						shipV = shipList[indexV];
+						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
+						shipDisplayName = this.prepareClassName(shipV);
+						h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+shipV.id+'" data-faction="'+ faction +'" data-shipclass="'+shipV.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
+						h.appendTo(targetNode);
+					} //end of variant
+				} //end of base design
+			} //end of size
+			
+			$(".addship").bind("click", this.buyShip);
+		} //end of faction
+	}, //endof parseShips
+	
 
     expandFaction: function expandFaction(event) {
         var clickedElement = $(this);

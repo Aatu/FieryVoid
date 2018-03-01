@@ -255,31 +255,35 @@
 }
 
 .shipwindow .base #shipSection_4{
-    position:absolute;
-    width:70px;
+    position:absolute;	
     top:200px;
+    width:70px;
     right:62px;
 }
 
 .shipwindow .base #shipSection_3{
     position:absolute;
-    width:70px;
     top:200px;
-    left:55px;
+    width:70px;
+    left:55px; 
 }
 
 .shipwindow #shipSection_4{
     position:absolute;
+    top:225px;	
     width:70px;
-    top:225px;
     right:62px;
 }
 
 .shipwindow #shipSection_3{
     position:absolute;
-    width:70px;
     top:225px;
+	/*leave room for 3rd column
+    width:70px;
     left:55px;
+	*/
+    width:105px;
+    left:20px;
 }
 
 .shipwindow.rolled #shipSection_3{

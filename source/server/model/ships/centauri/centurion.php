@@ -22,7 +22,7 @@ class Centurion extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
 
-        $this->iniativebonus = 10;
+        $this->iniativebonus = 10; //2 *5
         
          
         $this->addPrimarySystem(new Reactor(7, 22, 0, 0));
@@ -37,23 +37,22 @@ class Centurion extends BaseShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 180));
         $this->addFrontSystem(new BattleLaser(4, 6, 6, 300, 60));
-
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
 		
 		
-        $this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
-        $this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
         $this->addAftSystem(new JumpEngine(6, 25, 3, 16));
+        $this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
+        $this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
 	
 		
-        $this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
         $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 0));
         $this->addLeftSystem(new MatterCannon(4, 7, 4, 240, 0));
+        $this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
 
-        $this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
         $this->addRightSystem(new BattleLaser(4, 6, 6, 0, 120));
         $this->addRightSystem(new MatterCannon(4, 7, 4, 0, 120));
+        $this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
 
         
         
@@ -63,5 +62,50 @@ class Centurion extends BaseShip{
         $this->addLeftSystem(new Structure( 5, 56));
         $this->addRightSystem(new Structure( 5, 56));
         $this->addPrimarySystem(new Structure( 7, 44));
+	    
+	    
+
+  
+	//d20 hit chart
+        $this->hitChart = array(
+            0=> array( //PRIMARY
+                    9 => "Structure",
+                    12 => "Scanner",
+                    15 => "Engine",
+                    17 => "Hangar",
+                    19 => "Reactor",
+                    20 => "C&C",
+            ),
+            1=> array( //Forward
+                    3 => "Thruster",
+                    5 => "Battle Laser",
+                    9 => "Twin Array",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            2=> array( //Aft
+                    7 => "Thruster",
+                    12 => "Jump Engine",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            3=> array( //Port
+                    3 => "Thruster",
+                    6 => "Battle Laser",
+                    9 => "Matter Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            ),
+            4=> array( //Starboard
+                    3 => "Thruster",
+                    6 => "Battle Laser",
+                    9 => "Matter Cannon",
+                    18 => "Structure",
+                    20 => "Primary",
+            )
+        );	    
+	    
     }
 }
+
+?>

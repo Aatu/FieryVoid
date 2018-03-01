@@ -111,7 +111,7 @@
 		$crits = array_values($crits); //in case some criticals were deleted!
 		
 		$dropOutBonus = $gamedata->getShipById($this->flightid)->getDropOutBonus();
-		if (($d + $dropOutBonus - $bonusCrit) > $this->getRemainingHealth()){
+		if (($d + $dropOutBonus + $bonusCrit) > $this->getRemainingHealth()){
 			$crit = new DisengagedFighter(-1, $ship->id, $this->id, "DisengagedFighter", $gamedata->turn);
 			$crit->updated = true;
 			$this->criticals[] =  $crit;
@@ -129,21 +129,7 @@
 			return false;
 		}
 		
-		
-		
-/* no longer needed
-	public function getArmourPos($gamedata, $pos){ 
-		$target = $gamedata->getShipById($this->flightid); 
-		$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
-		return $loc["armour"];
-	}
-    
-        public function getArmour($target, $shooter, $dmgType){ //for fighter no need to note where fire went, as all calculations are done on raw flight data
-		//would work for direct fire only; retaining just in case
-		$loc = $target->doGetHitSection($shooter); //finds array with relevant data!
-		return $loc["armour"];
-        }
-  */  
+
         public function getArmour($target, $shooter, $dmgType, $pos=null){ //gets total armour
 		$armour = $this->getArmourStandard($target, $shooter, $dmgType, $pos) + $this->getArmourInvulnerable($target, $shooter, $dmgType, $pos);
 		return $armour;
@@ -192,30 +178,25 @@
 	$armour += $activeAA;
 	return $armour;
     }
-		
-		
-		
-        
-		
-		
-        public function onAdvancingGamedata($ship, $gamedata)
+
+    public function onAdvancingGamedata($ship, $gamedata)
+    {
+        foreach ($this->systems as $system)
         {
-            foreach ($this->systems as $system)
-            {
-                $system->onAdvancingGamedata($ship, $gamedata);
-            }
+            $system->onAdvancingGamedata($ship, $gamedata);
         }
+    }
 
 
-        public function setInitialSystemData($ship)
+    public function setInitialSystemData($ship)
+    {
+        foreach ($this->systems as $system)
         {
-            foreach ($this->systems as $system)
-            {
-                $system->setInitialSystemData($ship);
-            }
+            $system->setInitialSystemData($ship);
         }
-        
+    }
 
-	}
+
+}
 
 ?>

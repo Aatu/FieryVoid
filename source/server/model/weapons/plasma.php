@@ -134,7 +134,6 @@ class Plasma extends Weapon{
 
 	
 class MagGun extends Plasma{
-
 	public $name = "magGun";
         public $displayName = "Mag Gun";
         public $animation = "trail";
@@ -311,6 +310,7 @@ class PlasmaTorch extends Plasma{
                 $this->criticals[] =  $crit;
                 $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
                 $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
                 $this->criticals[] =  $crit;
             }
 		
@@ -332,6 +332,7 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         public $animationExplosionScale = 0.1;
 
         public $intercept = 2;
+	public $priority = 4;//late priority due to being Plasma and able to ignore armor partially
 
         public $loadingtime = 1;
         public $shots = 2;
@@ -344,9 +345,10 @@ class PairedPlasmaBlaster extends LinkedWeapon{
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $damagebonus, $shots = 2){
+        function __construct($startArc, $endArc, $damagebonus, $shots = 2){ //damage bonus NOT accounted for!
             $this->shots = $shots;
             $this->defaultShots = $shots;
+ 	    $this->intercept = $shots;
             
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }
@@ -366,15 +368,15 @@ class PairedPlasmaBlaster extends LinkedWeapon{
         }
         
     
-        public function setSystemDataWindow($turn){
-/*
-            $this->data["Weapon type"] = "Plasma";
-            $this->data["Damage type"] = "Standard";
-            $this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (-1 per hex)";
-  */          
+        public function setSystemDataWindow($turn){    
             parent::setSystemDataWindow($turn);
-            		$this->data["<font color='red'>Remark</font>"] = "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
-			$this->data["<font color='red'>Remark</font>"] .= "<br>Ignores half of armor.";
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Does less damage over distance (".$this->rangeDamagePenalty." per hex)";
+		$this->data["Special"] .= "<br>Ignores half of armor.";
         }
 
 
@@ -399,6 +401,7 @@ class PlasmaGun extends Plasma{
                 
         public $loadingtime = 2;
         public $exlusive = true;
+	public $priority = 5;
             
         public $rangePenalty = 0.66;
         public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
@@ -443,6 +446,7 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 1;
 	public $damageBonus = 5;
+	public $priority = 5;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -504,6 +508,7 @@ class RogolonLtPlasmaCannon extends LinkedWeapon{
         public $rangePenalty = 1;
         public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
         public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+	public $priority = 5;
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 

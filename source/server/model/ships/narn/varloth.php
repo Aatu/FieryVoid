@@ -88,7 +88,7 @@ class Varloth extends BaseShip{
 			3=> array(
 				4 => "Thruster",
 				6 => "Light Pulse Cannon",
-				10 => "Medium Pulse Cannon",
+				10 => "Medium Plasma Cannon",
 				18 => "Structure",
 				20 => "Primary",
 				),

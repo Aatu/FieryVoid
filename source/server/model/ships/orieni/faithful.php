@@ -8,10 +8,12 @@ class Faithful extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Faithful";
         $this->imagePath = "img/ships/faithful.png";
-        $this->shipClass = "Faithful Search Explorer Scout";
-        $this->shipSizeClass = 3;
-        $this->fighters = array("normal"=>12);
         $this->canvasSize = 200;
+        $this->shipClass = "Faithful Search Explorer";
+	    $this->isd = 2009;
+        $this->shipSizeClass = 3;
+	    
+        $this->fighters = array("light"=>12);
 		
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
@@ -31,13 +33,13 @@ class Faithful extends BaseShip{
         $this->addPrimarySystem(new Hangar(4, 15, 12));
         $this->addPrimarySystem(new JumpEngine(5, 35, 6, 25));
         $this->addPrimarySystem(new CargoBay(4, 25));
-        
-        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
-        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));        
-        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+               
         $this->addFrontSystem(new HeavyLaserLance(3, 6, 4, 240, 60));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
+        $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1)); 
 
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
@@ -46,17 +48,17 @@ class Faithful extends BaseShip{
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         
-        $this->addLeftSystem(new Thruster(4, 23, 0, 6, 3));
-        $this->addLeftSystem(new CargoBay(2, 25));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addLeftSystem(new CargoBay(2, 25));
+        $this->addLeftSystem(new Thruster(4, 23, 0, 6, 3));
 
-        $this->addRightSystem(new Thruster(4, 23, 0, 6, 4));
-        $this->addRightSystem(new CargoBay(2, 25));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addRightSystem(new CargoBay(2, 25));
+        $this->addRightSystem(new Thruster(4, 23, 0, 6, 4));
 
 
 		//structures
@@ -64,8 +66,60 @@ class Faithful extends BaseShip{
         $this->addAftSystem(new Structure(4, 48));
         $this->addLeftSystem(new Structure(4, 45));
         $this->addRightSystem(new Structure(4, 45));
-        $this->addPrimarySystem(new Structure(5, 56));
-        
+        $this->addPrimarySystem(new Structure(5, 60));
+
+	    
+
+	//d20 hit chart
+	$this->hitChart = array(
+		
+		//PRIMARY
+		0=> array( 
+			8 => "Structure",
+			10 => "Jump Engine",
+			12 => "ELINT Scanner",
+			14 => "Engine",
+			16 => "Hangar",
+			18 => "Cargo Bay",
+			19 => "Reactor",
+			20 => "C&C",
+		),
+		//Forward
+		1=> array(
+			6 => "Thruster",
+			8 => "Heavy Laser Lance",
+			10 => "Rapid Gatling Railgun",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Aft
+		2=> array(
+			8 => "Thruster",
+			10 => "Rapid Gatling Railgun",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Port
+		3=> array(
+			5 => "Thruster",
+			7 => "Heavy Laser Lance",
+			9 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+		//Starboard
+		4=> array(
+			5 => "Thruster",
+			7 => "Heavy Laser Lance",
+			9 => "Rapid Gatling Railgun",
+			12 => "Cargo Bay",
+			18 => "Structure",
+			20 => "Primary",
+		),
+	);	    
+	    
+	    
     }
 
 }

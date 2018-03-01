@@ -8,9 +8,10 @@ class Vigilant extends BaseShip{
 		$this->faction = "Orieni";
         $this->phpclass = "Vigilant";
         $this->imagePath = "img/ships/vigilant.png";
-        $this->shipClass = "Vigilant Combat Support Ship (2007)";
+        $this->shipClass = "Vigilant Combat Support Ship";
+	    $this->isd = 2007;
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>6);
+        $this->fighters = array("light"=>6, "minesweeping shuttles"=>6);
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 17;
@@ -26,7 +27,7 @@ class Vigilant extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 4));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 25, 5, 6));
+        $this->addPrimarySystem(new Scanner(5, 25, 5, 6)); //+4 minesweeping
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 14, 6));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
@@ -83,7 +84,7 @@ class Vigilant extends BaseShip{
 			14 => "Engine",
 			15 => "Reload Rack",
 			17 => "Hangar",
-			18 => "HK-Control Node",
+			18 => "HK Control Node",
 			19 => "Reactor",
 			20 => "C&C",
 		),

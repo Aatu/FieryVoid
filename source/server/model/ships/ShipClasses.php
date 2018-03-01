@@ -40,87 +40,89 @@ class BaseShip{
 
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
 
-    protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
-    //following values from DB
-    public $id, $userid, $name, $campaignX, $campaignY;
-    public $rolled = false;
-    public $rolling = false;
-    public $team;
-    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
+        protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
+        //following values from DB
+        public $id, $userid, $name, $campaignX, $campaignY;
+        public $rolled = false;
+        public $rolling = false;
+	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 
-    public $slotid;
+        public $team;
+	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
+        
+        public $slotid;
 
-    public $movement = array();
-
-    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
-
-    public function getAdvancedArmor(){
-        return $this->advancedArmor;
-    }
-
-    function __construct($id, $userid, $name, $slot){
-        $this->id = (int)$id;
-        $this->userid = (int)$userid;
-        $this->name = $name;
-        $this->slot = $slot;
-        $this->fillLocationsGUI();//so called shots work properly
-    }
-
-    public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
-        $mod = 0;
-        $speed = $this->getSpeed();
-
-        if ( !($this instanceof OSAT) ){
-            if ($speed < 5){
-                $mod = (5-$speed)*(-10);
+        public $movement = array();
+        
+	    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+	    
+	    public function getAdvancedArmor(){
+		return $this->advancedArmor;    
+	    }
+	    
+        function __construct($id, $userid, $name, $slot){
+            $this->id = (int)$id;
+            $this->userid = (int)$userid;
+            $this->name = $name;
+            $this->slot = $slot;
+	    $this->fillLocationsGUI();//so called shots work properly
+        }
+        
+        public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
+            $mod = 0;
+            $speed = $this->getSpeed();
+        
+            if ( !($this instanceof OSAT) ){
+                if ($speed < 5){
+                    $mod = (5-$speed)*(-10);
+                }
+                $CnC = $this->getSystemByName("CnC");
+                if ($CnC){
+			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
+			    $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
+				//additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
+	    			$mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
+				//additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
+				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
+			}
+		    if ($this instanceof FighterFlight){
+			    $firstFighter = $this->getSampleFighter();
+			    if ($firstFighter){
+			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);				    
+			    }
+		    }
+	    }
+	    return $mod;
+	}
+	    
+        public function getInitiativebonus($gamedata){
+            if($this->faction == "Centauri"){
+                return $this->doCentauriInitiativeBonus($gamedata);
             }
-            $CnC = $this->getSystemByName("CnC");
-            if ($CnC){
-                $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
-                $mod += -10*($CnC->hasCritical("ReducedIniativeOneTurn", $gamedata->turn));
-                $mod += -10*($CnC->hasCritical("ReducedIniative", $gamedata->turn));
-                //additional: SWTargetHeld (ship being held by Tractor Beam - reduces Initiative
-                $mod += -20*($CnC->hasCritical("swtargetheld", $gamedata->turn)); //-4 Ini per hit
-                //additional: tmpinidown (temporary Ini reduction - Abbai weapon scan do so!
-                $mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
+            if($this->faction == "Yolu"){
+                return $this->doYoluInitiativeBonus($gamedata);
             }
-            if ($this instanceof FighterFlight){
-                $firstFighter = $this->getSampleFighter();
-                if ($firstFighter){
-                    $mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
+            if($this->faction == "Dilgar"){
+                return $this->doDilgarInitiativeBonus($gamedata);
+            }
+            return $this->iniativebonus;
+        }
+        
+        private function doCentauriInitiativeBonus($gamedata){
+            foreach($gamedata->ships as $ship){
+                if(!$ship->isDestroyed()
+                        && ($ship->faction == "Centauri")
+                        && ($this->userid == $ship->userid)
+                        && ($ship instanceof PrimusMaximus)
+                        && ($this->id != $ship->id)){
+                    return ($this->iniativebonus+5);
                 }
             }
+		return $this->iniativebonus;
         }
-        return $mod;
-    }
-
-    public function getInitiativebonus($gamedata){
-        if($this->faction == "Centauri"){
-            return $this->doCentauriInitiativeBonus($gamedata);
-        }
-        if($this->faction == "Yolu"){
-            return $this->doYoluInitiativeBonus($gamedata);
-        }
-        if($this->faction == "Dilgar"){
-            return $this->doDilgarInitiativeBonus($gamedata);
-        }
-        return $this->iniativebonus;
-    }
-
-    private function doCentauriInitiativeBonus($gamedata){
-        foreach($gamedata->ships as $ship){
-            if(!$ship->isDestroyed()
-                && ($ship->faction == "Centauri")
-                && ($this->userid == $ship->userid)
-                && ($ship instanceof PrimusMaximus)
-                && ($this->id != $ship->id)){
-                return ($this->iniativebonus+5);
-            }
-        }
-        return $this->iniativebonus;
-    }
-
-    private function doDilgarInitiativeBonus($gamedata){
+                
+        private function doDilgarInitiativeBonus($gamedata){
 
         $mod = 0;
 
@@ -227,119 +229,137 @@ class BaseShip{
         $system->setUnit($this);
 
 
-        $this->systems[$i] = $system;
-
-        if ($system instanceof Structure)
-            $this->structures[$loc] = $system->id;
-
-    }
-
-    protected function addFrontSystem($system){
-        $this->addSystem($system, 1);
-    }
-    protected function addAftSystem($system){
-        $this->addSystem($system, 2);
-    }
-    protected function addPrimarySystem($system){
-        $this->addSystem($system, 0);
-    }
-    protected function addLeftSystem($system){
-        $this->addSystem($system, 3);
-    }
-    protected function addRightSystem($system){
-        $this->addSystem($system, 4);
-    }
-
-    public function addDamageEntry($damage){
-
-        $system = $this->getSystemById($damage->systemid);
-        $system->damage[] = $damage;
-
-    }
-
-    public function getLastTurnMoved(){
-        $turn = 0;
-        foreach($this->movement as $elementKey => $move) {
-            if (!$move->preturn && $move->type != "deploy")
-                $turn = $move->turn;
+            $this->systems[$i] = $system;
+            
+            if ($system instanceof Structure)
+                $this->structures[$loc] = $system->id;
+        
         }
-
-        return $turn;
-    }
-
-    public function getMovementById($id){
-        foreach ($this->movement as $move){
-            if ($move->id === $id)
-                return $move;
+        
+        protected function addFrontSystem($system){
+            $this->addSystem($system, 1);
         }
-
-        return null;
-    }
-
-    public function getLastMovement(){
-        $m = 0;
-
-        if (!is_array($this->movement))
-            return null;
-
-        foreach($this->movement as $elementKey => $move) {
-            $m = $move;
+        protected function addAftSystem($system){
+            $this->addSystem($system, 2);
         }
+        protected function addPrimarySystem($system){
+		//if system is Structure - first add Ramming Attack! assume we're nearing the end...
+	   if($system instanceof Structure){
+		//check whether ramming attack already exists (do not add another)
+		$rammingExists = false;
+		foreach($this->systems as $sys)  if ($sys instanceof RammingAttack){
+			$rammingExists = true;
+		}
+		if(!$rammingExists){
+			//add ramming attack
+			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
+			///already safe enough, commenting out!
+			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
+				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.
+				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
+					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
+				}
+			//}
+		}
+	   }
+            $this->addSystem($system, 0);
 
-        return $m;
-    }
 
-    public function getSpeed(){
-        $m = $this->getLastMovement();
-        if ($m == null)
-            return 0;
-
-        return $m->speed;
-    }
-
-    public function unanimatePreturnMovements($turn){
-        foreach($this->movement as $elementKey => $move) {
-            if ($move->turn == $turn && $move->type != "start" && $move->preturn){
-                if ($move->type == "pivotright" || $move->type == "pivotleft"){
-                    $move->animated = false;
+        }
+        protected function addLeftSystem($system){
+            $this->addSystem($system, 3);
+        }
+        protected function addRightSystem($system){
+            $this->addSystem($system, 4);
+        }
+        
+        public function addDamageEntry($damage){
+        
+            $system = $this->getSystemById($damage->systemid);
+            $system->damage[] = $damage;
+        
+        }
+        
+        public function getLastTurnMoved(){
+            $turn = 0;
+            foreach($this->movement as $elementKey => $move) {
+                if (!$move->preturn && $move->type != "deploy")
+                    $turn = $move->turn;
+            } 
+            
+            return $turn;
+        }
+        
+        public function getMovementById($id){
+			foreach ($this->movement as $move){
+				if ($move->id === $id)
+					return $move;
+			}
+			
+			return null;
+		}
+        
+        public function getLastMovement(){
+            $m = 0;
+            
+            if (!is_array($this->movement))
+                return null;
+            
+            foreach($this->movement as $elementKey => $move) {
+                $m = $move;
+            } 
+            
+            return $m;
+        }
+        
+        public function getSpeed(){
+            $m = $this->getLastMovement();
+            if ($m == null)
+                return 0;
+                
+            return $m->speed;
+        }
+        
+        public function unanimatePreturnMovements($turn){
+            foreach($this->movement as $elementKey => $move) {
+                if ($move->turn == $turn && $move->type != "start" && $move->preturn){
+                    if ($move->type == "pivotright" || $move->type == "pivotleft"){
+                        $move->animated = false;
+                    }
                 }
-            }
+            } 
         }
-    }
-
-    public function unanimateMovements($turn){
-
-        if (!is_array($this->movement))
-            return;
-
-        foreach($this->movement as $elementKey => $move) {
-            if ($move->turn == $turn && $move->type != "start" && !$move->preturn){
-                if ($move->type == "move" || $move->type == "turnleft" || $move->type == "turnright" || $move->type == "slipright" || $move->type == "slipleft" || $move->type == "pivotright" || $move->type == "pivotleft"){
-                    $move->animated = false;
+        
+        public function unanimateMovements($turn){
+        
+            if (!is_array($this->movement))
+                return;
+            
+            foreach($this->movement as $elementKey => $move) {
+                if ($move->turn == $turn && $move->type != "start" && !$move->preturn){
+                    if ($move->type == "move" || $move->type == "turnleft" || $move->type == "turnright" || $move->type == "slipright" || $move->type == "slipleft" || $move->type == "pivotright" || $move->type == "pivotleft"){
+                        $move->animated = false;
+                    }
                 }
+            } 
+        }
+        
+        public function getSystemById($id){
+            if (isset($this->systems[$id])){
+                return $this->systems[$id];
             }
-        }
-    }
-
-    /**
-     * @param $id
-     * @return ShipSystem|null
-     */
-    public function getSystemById($id){
-        if (isset($this->systems[$id])){
-            return $this->systems[$id];
-        }
-        else{
-            foreach($this->systems as $system){
-                if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){
-                    foreach($system->weapons as $weapon){
-                        if($weapon->id == $id){
-                            return $weapon;
-                        }else{
-                            if($weapon->duoWeapon){
-                                foreach($weapon->weapons as $subweapon){
-                                    if($subweapon->id == $id){
-                                        return $subweapon;
+            else{
+                foreach($this->systems as $system){
+                    if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){
+                        foreach($system->weapons as $weapon){
+                            if($weapon->id == $id){
+                                return $weapon;
+                            }else{
+                                if($weapon->duoWeapon){
+                                    foreach($weapon->weapons as $subweapon){
+                                        if($subweapon->id == $id){
+                                            return $subweapon;
+                                        }
                                     }
                                 }
                             }
@@ -347,8 +367,7 @@ class BaseShip{
                     }
                 }
             }
-        }
-
+            
         return null;
     }
 
@@ -1074,173 +1093,190 @@ class BaseShip{
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
         }
 
-
-        $hitChart = array(); //$hitChart will contain system names, as usual!
-        //use only non-destroyed systems on section hit
-        $rngTotal = 0; //range of current system
-        $rngCurr = 0; //total range of live systems
-
-        foreach ($this->systems as $system){ //ok, do use actual systems...
-            if (($system->location == $location) && (!($system instanceof Structure))){
-                //Flash - undestroyed only
-                if(($weapon->damageType != 'Flash') || (!$system->isDestroyed())) {
-                    //Structure and C&C will get special treatment...
-                    $multiplier = 1;
-                    if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
-                    $rngCurr =  ceil($system->maxhealth * $multiplier);
-                    $rngCurr+=1; //small systems usually have relatively high chance of being hit
-                    $rngTotal = $rngTotal+$rngCurr;
-                    $hitChart[$rngTotal] = $system->displayName;
-                }
-            }
-        }
-        //add Structure
-        $system =  $this->getStructureSystem($location);
-        if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
-            if($location == 0){
-                $multiplier = 2; //PRIMARY has relatively low Structure, increase chance
-            }else{
-                $multiplier = 0.5; //non-PRIMARY have relatively high structure, reduce chance
-            }
-            $rngCurr =  ceil($system->maxhealth * $multiplier);
-            $rngCurr+=1; //small systems usually have relatively high chance of being hit
-            $rngTotal = $rngTotal+$rngCurr;
-            $hitChart[$rngTotal] = $system->displayName;
-        }
-        //is there anything to be hit? if not, just return facing Structure...
-        if($rngTotal==0){
-            $struct = $this->getStructureSystem($location); //if Structure destroyed, overkill to PRIMARY Structure
-            return $struct;
-        }
-
-        //for non-Flash/Piercing, add PRIMARY to hit table...
-        $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash'));
-        if(!$noPrimaryHits){
-            $multiplier = 0.1; //10% chance for PRIMARY penetration
-            if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
-            $rngCurr =  ceil($rngTotal * $multiplier);
-            $rngTotal = $rngTotal+$rngCurr;
-            $hitChart[$rngTotal] = 'Primary';
-        }
-
-        //now choose system from chart...
-        $roll = Dice::d($rngTotal);
-        $name = '';
-        $isSystemKiller = $weapon->systemKiller;
-        while ($name == ''){
-            if (isset($hitChart[$roll])){
-                $name = $hitChart[$roll];
-                if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
-                    $isSystemKiller = false; //don't do that again
-                    $name = '';
-                    $roll = Dice::d($rngTotal); //new location roll
-                }
-            }else{
-                $roll++;
-                if($roll>$rngTotal)//out of range already!
-                {
-                    return $this->getStructureSystem(0);
-                }
-            }
-        }
-
-        if($name == 'Primary'){ //redirect to PRIMARY!
-            return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
-        }
-        $systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
-        if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not
-            $struct = $this->getStructureSystem($location);
-            return $struct;
-        }
-
-        //now choose one of equal eligible systems (they're already known to be undestroyed)
-        $roll = Dice::d(sizeof($systems));
-        $system = $systems[$roll-1];
-        return $system;
-
-    } //end of function GetHitSystemByDice
-
-
-    public static function hasBetterIniative($a, $b){
-        if ($a->iniative > $b->iniative)
-            return true;
-
-        if ($a->iniative < $b->iniative)
-            return false;
-
-        if ($a->iniative == $b->iniative){
-            if ($a->iniativebonus > $b->iniativebonus)
+          
+		$hitChart = array(); //$hitChart will contain system names, as usual!
+		//use only non-destroyed systems on section hit
+		$rngTotal = 0; //range of current system
+		$rngCurr = 0; //total range of live systems
+		
+		foreach ($this->systems as $system){ //ok, do use actual systems...
+			if (($system->location == $location) && (!($system instanceof Structure))){ 
+				//Flash - undestroyed only
+				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed())) {
+					//Structure and C&C will get special treatment...
+					$multiplier = 1;
+					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
+					$rngCurr =  ceil($system->maxhealth * $multiplier);
+					$rngCurr+=1; //small systems usually have relatively high chance of being hit
+					$rngTotal = $rngTotal+$rngCurr;
+					$hitChart[$rngTotal] = $system->displayName;
+				}
+			}
+		}
+		//add Structure
+		$system =  $this->getStructureSystem($location);
+		if(($weapon->damageType != 'Flash') || (!$system->isDestroyed() )) {
+			if($location == 0){
+				$multiplier = 2; //PRIMARY has relatively low Structure, increase chance
+			}else{
+				$multiplier = 0.5; //non-PRIMARY have relatively high structure, reduce chance
+			}
+			$rngCurr =  ceil($system->maxhealth * $multiplier);
+			$rngCurr+=1; //small systems usually have relatively high chance of being hit
+			$rngTotal = $rngTotal+$rngCurr;
+			$hitChart[$rngTotal] = $system->displayName;
+		} 
+		//is there anything to be hit? if not, just return facing Structure...
+		if($rngTotal==0){
+			$struct = $this->getStructureSystem($location); //if Structure destroyed, overkill to PRIMARY Structure
+			return $struct;
+		}
+			
+		//for non-Flash/Piercing, add PRIMARY to hit table...
+		$noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash'));
+		if(!$noPrimaryHits){ 
+			$multiplier = 0.1; //10% chance for PRIMARY penetration
+			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
+			$rngCurr =  ceil($rngTotal * $multiplier);
+			$rngTotal = $rngTotal+$rngCurr;
+			$hitChart[$rngTotal] = 'Primary';
+		}	
+			
+		//now choose system from chart...
+		$roll = Dice::d($rngTotal);
+		$name = '';
+		$isSystemKiller = $weapon->systemKiller;
+		while ($name == ''){
+			if (isset($hitChart[$roll])){
+				$name = $hitChart[$roll];
+				if($name == 'Structure' && $isSystemKiller) { //for systemKiller weapon, reroll Structure
+					$isSystemKiller = false; //don't do that again
+					$name = '';
+					$roll = Dice::d($rngTotal); //new location roll
+				}
+			}else{
+				$roll++;
+				if($roll>$rngTotal)//out of range already!
+				{
+					return $this->getStructureSystem(0);
+				}
+			}
+		}
+		
+		if($name == 'Primary'){ //redirect to PRIMARY!
+			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
+		}
+		$systems = $this->getSystemsByNameLoc($name, $location, false); //do NOT accept destroyed systems!
+		if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not
+			$struct = $this->getStructureSystem($location);
+			return $struct;
+		}
+		
+		//now choose one of equal eligible systems (they're already known to be undestroyed)
+                $roll = Dice::d(sizeof($systems));
+                $system = $systems[$roll-1];
+		return $system;
+		
+	} //end of function GetHitSystemByDice
+		
+        
+        public static function hasBetterIniative($a, $b){
+            if ($a->iniative > $b->iniative)
                 return true;
-
-            if ($b->iniativebonus > $a->iniativebonus)
+            
+            if ($a->iniative < $b->iniative)
                 return false;
-
-            if ($a->id > $b->id)
-                return true;
-        }
-
-        return false;
-    }
-
-    public function getAllFireOrders($turn = -1)
-    {
-        $orders = array();
-
-        foreach ($this->systems as $system){
-            $orders = array_merge($orders, $system->getFireOrders($turn));
-        }
-
-        return $orders;
-    }
-
-    protected function getUndamagedSameSystem($system, $location){
-        foreach ($this->systems as $sys){
-            // check if there is another system of the same class on this location.
-            if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
-                return $sys;
+                
+            if ($a->iniative == $b->iniative){
+                if ($a->iniativebonus > $b->iniativebonus)
+                    return true;
+                
+                if ($b->iniativebonus > $a->iniativebonus)
+                    return false;
+                
+                if ($a->id > $b->id)
+                    return true;
             }
+            
+            return false;
         }
-        return null;
-    }
-
-    /*note expected damage - important for deciding ambiguous shots!*/
-    public function setExpectedDamage($hitLoc, $hitChance, $weapon){
-        //add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
-        if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
-        if(!isset($this->expectedDamage[$hitLoc])){
-            $this->expectedDamage[$hitLoc] = 0;
+        
+        public function getAllFireOrders($turn = -1)
+        {	
+            $orders = array();
+            
+            foreach ($this->systems as $system){
+                $orders = array_merge($orders, $system->getFireOrders($turn));
+            }
+            
+            return $orders;
         }
-        $structureSystem = $this->getStructureSystem($hitLoc);
-        $armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
-        $expectedDamageMax = $weapon->maxDamage-$armour;
-        $expectedDamageMin = $weapon->minDamage-$armour;
-        $expectedDamageMax = max(0,$expectedDamageMax);
-        $expectedDamageMin = max(0,$expectedDamageMin);
-        $expectedDamage = ($expectedDamageMin+$expectedDamageMax)/4; //halve damage as not all would go to Structure! - hence /4 and not /2
-        //reduce damage for non-Standard modes...
-        switch($weapon->damageType) {
-            case 'Raking': //Raking damage gets reduced multiple times
-                $expectedDamage = $expectedDamage * 0.9;
-                break;
-            case 'Piercing': //Piercing does little damage to actual outer section...
-                $expectedDamage = $expectedDamage * 0.4;
-                break;
-            case 'Pulse': //multiple hits - assume half of max pulses hit!
-                $expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
-                break;
-            default: //something else: can't be as good as Standard!
-                $expectedDamage = $expectedDamage * 0.9;
-                break;
-        }
-        //multiply by hit chance!
-        $expectedDamage = $expectedDamage * min(100,$hitChance) /100;
-        $this->expectedDamage[$hitLoc] += $expectedDamage;
-    }//endof function setExpectedDamage
+        
+        protected function getUndamagedSameSystem($system, $location){
+            foreach ($this->systems as $sys){
+                // check if there is another system of the same class on this location.
+                if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
+                    return $sys;
+                }
+            }
+            return null;
+        } 
+        
+	/*note expected damage - important for deciding ambiguous shots!*/
+	public function setExpectedDamage($hitLoc, $hitChance, $weapon){
+		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
+		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0
+		if(!isset($this->expectedDamage[$hitLoc])){
+			$this->expectedDamage[$hitLoc] = 0;
+		}		
+		$structureSystem = $this->getStructureSystem($hitLoc);
+		$armour = $structureSystem->getArmour($this, null, $weapon->damageType); //shooter relevant only for fighters - and they don't care about calculating ambiguous damage!
+		$expectedDamageMax = $weapon->maxDamage-$armour;
+		$expectedDamageMin = $weapon->minDamage-$armour;
+		$expectedDamageMax = max(0,$expectedDamageMax);
+		$expectedDamageMin = max(0,$expectedDamageMin);
+		$expectedDamage = ($expectedDamageMin+$expectedDamageMax)/4; //halve damage as not all would go to Structure! - hence /4 and not /2
+		//reduce damage for non-Standard modes...
+		switch($weapon->damageType) {
+		    case 'Raking': //Raking damage gets reduced multiple times
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		    case 'Piercing': //Piercing does little damage to actual outer section...
+			$expectedDamage = $expectedDamage * 0.4;
+			break;
+		    case 'Pulse': //multiple hits - assume half of max pulses hit!
+			$expectedDamage = 0.5 * $expectedDamage * max(1,$weapon->maxpulses);
+			break;			
+		    default: //something else: can't be as good as Standard!
+			$expectedDamage = $expectedDamage * 0.9;
+			break;
+		}
+		//multiply by hit chance!
+		$expectedDamage = $expectedDamage * min(100,$hitChance) /100;
+		$this->expectedDamage[$hitLoc] += $expectedDamage;
+	}//endof function setExpectedDamage
+	    
+	    
+	    /*returns calculated ramming factor for ship (so will never use explosive charge if, say, Delegor or HK is rammed instead of ramming itself!*/
+	    /*approximate raming factor as full Structure of undestroyed sections *110% */
+	public function getRammingFactor(){
+		$structuretotal = 0;
+		$prevturn = max(0,TacGamedata::$currentTurn-1);
+		$activeStructures = $this->getSystemsByName("Structure",true);//list of all Structure blocks (check for being destroyed will come later)
+		foreach($activeStructures as $struct){
+			if (!$struct->isDestroyed($prevturn)){ //if structure is not destroyed AS OF PREVIOUS TURN
+				$structuretotal += $struct->maxhealth;
+			}
+		}
+		$multiplier = 1.1;
+		if ($this->shipSizeClass == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
+		$dmg = ceil($structuretotal * $multiplier);
+		return $dmg;
+	} //endof function getRammingFactor
 
-
-} //endof class BaseShip
-
-class BaseShipNoAft extends BaseShip{
+    } //endof class BaseShip
+    
+    class BaseShipNoAft extends BaseShip{
 
     public $draziCap = true;
 

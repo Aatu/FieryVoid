@@ -379,7 +379,7 @@
                 <tr>
                     <td class="col1">
                         <div class="icon"><img src="" alt="" border="" width="120" height="120"></div>
-                        <div class="notes"></div>
+                        <!--<div class="notes"></div> -->
                     </td>                
                     <td class="col2">
                         <div id="shipSection_1" class="shipSection" style="margin-top: 15px">
@@ -393,7 +393,8 @@
                         </div>
                     </td>
                     <td class="col3">
-                        <div class="EW">
+			<div class="notes"></div> <!-- Marcin Sawicki - here more readable -->
+                        <div class="EW" style="display:none;"><!-- Marcin Sawicki - at fleet selection EW window is useless! -->
                             <div class="ewheader"><span class="header">ELECTRONIC WARFARE</span></div>
                             <div class="EWcontainer">
                                 <div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
@@ -528,6 +529,9 @@
                     <td class="fightercontainer 3"></td>
                     <td class="fightercontainer 4"></td>
                     <td class="fightercontainer 5"></td>        -->
+			<td>
+				<div class="notes"></div>
+			</td>
                 </tr>
             </table>
         </div>

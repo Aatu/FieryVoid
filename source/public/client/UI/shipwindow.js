@@ -170,7 +170,7 @@ window.shipWindowManager = {
 			names[1] = "Sections";
 			toDo = 2;
 		} else {
-			toDo = 5; //(almost) always try to show all 5 sections, there may be holes	
+			toDo = 5; //(almost) always try to show all 5 sections, there may be holes
 		}
 
 		for (var i = 0; i < toDo; i++) {
@@ -403,10 +403,19 @@ window.shipWindowManager = {
 				input.className += " interceptEnabled";
 			}
 		}
+	    
+        if(!ship.fighter){
+            abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost  );
+		var fDef = ship.forwardDefense*5;
+		var sDef = ship.sideDefense*5
+		abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus );
+        }
 
-		if (!ship.fighter) {
-			abilities.push("&nbsp;TC: " + ship.turncost + " TD: " + ship.turndelaycost);
-		}
+	if(ship.flight){
+		var flightArmour = shipManager.systems.getFlightArmour(ship);
+		abilities.push("&nbsp;" + flightArmour);
+		abilities.push("&nbsp;Thrust: " + ship.freethrust);
+	}
 
 		if (ship.agile) {
 			abilities.push("&nbsp;Agile ship");
@@ -515,36 +524,54 @@ window.shipWindowManager = {
 
 		var arrangement;
 		var col2 = 2;
+		var col3 = 2; //for columns that may be equal or wider to col2
 		var col4 = 4;
 		if (location == 0) {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
 		} else if (location < 3) {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
-		} else if (location > 30) {
-			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
-		} else {
-			col2 = 1;
-			col4 = 2;
-			arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+		}
+		else if (location > 30){
+			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
+		}
+		else{
+			col2 = 1; //single column here
+			col3 = 2; //double column even here!
+			col4 = 3;
+			//arrangement = shipWindowManager.getFinalArrangementTwo(ship, systems, structure, location);
+			//Marcin Sawicki: I think 3 icons in a row would be fine on sides, and will help ships with lots of systems there (...especially when they have no Aft!)
+			arrangement = shipWindowManager.getFinalArrangementThree(ship, systems, structure, location);
 		}
 
 		var index = 0;
 		for (var i in arrangement) {
 			var group = arrangement[i];
 			var row;
-			if (group.length == 1) {
-				row = $('<tr><td colspan="' + col4 + '" class="systemcontainer_' + index + '"></td></tr>');
-			} else if (group.length == 2) {
-
-				if (location == 4) {
-					row = $('<tr><td colspan="' + col2 + '" class="systemcontainer_' + (index + 1) + '"></td><td colspan="' + col2 + '" class="systemcontainer_' + index + '"></td></tr>');
-				} else {
-					row = $('<tr><td colspan="' + col2 + '" class="systemcontainer_' + index + '"></td><td colspan="' + col2 + '" class="systemcontainer_' + (index + 1) + '"></td></tr>');
+			if (group.length == 1){
+				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
+			}
+			else if (group.length == 2){
+				if (location == 4){//reverse order for Stbd!
+					row = $('<tr><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
 				}
-			} else if (group.length == 3) {
-				row = $('<tr><td class="systemcontainer_' + index + '"></td><td colspan="2" class="systemcontainer_' + (index + 1) + '"></td>' + '<td class="systemcontainer_' + (index + 2) + '"></td></tr>').appendTo(destination);
-			} else if (group.length == 4) {
-				row = $('<tr><td class="systemcontainer_' + index + '"></td><td class="systemcontainer_' + (index + 1) + '"></td>' + '<td class="systemcontainer_' + (index + 2) + '"></td><td class="systemcontainer_' + (index + 3) + '"></td></tr>');
+				else {
+					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+				}
+			}
+			else if (group.length == 3) {
+				if (location == 4){//reverse order for Stbd!
+					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index)+'"></td></tr>').appendTo(destination);
+				}else{
+					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
+						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
+						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+				}
+			}				
+			else if (group.length == 4){	
+				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
+				+'<td class="systemcontainer_'+(index+2)+'"></td><td class="systemcontainer_'+(index+3)+'"></td></tr>')
 			}
 
 			if (location == 2 || location == 32 || location == 42) {
@@ -567,9 +594,10 @@ window.shipWindowManager = {
 			$('<div style="height:' + arrangement.length * 30 + 'px"></div>').appendTo(".shipwindow.ship_" + ship.id + " .col3");
 		}
 	},
+	
 
-	getFinalArrangementTwo: function getFinalArrangementTwo(ship, systems, structure, location) {
-
+	getFinalArrangementTwo: function(ship, systems, structure, location){
+		
 		var structDone = false;
 
 		var grouped = Array();
@@ -593,6 +621,48 @@ window.shipWindowManager = {
 					list = Array();
 				}
 			}
+		}
+
+		if (!structDone){
+			grouped.push(Array(structure));
+		}
+
+		return grouped;
+
+	},
+
+
+	//Marcin Sawicki: i think there's enough room for 3 icons on the sides, and it will help when many systems are present
+	getFinalArrangementThree: function(ship, systems, structure, location){
+		var structDone = false;
+		var grouped = Array();
+		var list = Array();
+
+		if (structure){
+			if (location == 32 || location == 42){
+				grouped.push(Array(structure));
+				structDone = true;
+			}
+		}
+
+		for (var i= 0;i<systems.length;i++){
+			var system = systems[i];
+			/* let's try with top-heavy arrangement (orphan on the bottom instead of on top)
+			if (systems.length % 2 == 1 && i == 0){
+				grouped.push(Array(system));
+			}*/
+			//else {
+				list.push(system);
+				if (list.length == 3){
+					grouped.push(list);
+					list = Array();
+				}
+			//}
+		}
+
+		if (list.length > 0){ //something was left over!
+					grouped.push(list);
+					list = Array();
 		}
 
 		if (!structDone) {
@@ -1269,7 +1339,7 @@ window.shipWindowManager = {
 		if (system.weapon) {
 			var firing = weaponManager.hasFiringOrder(ship, system);
 
-			// To avoid double overlay of loading icon mask in case of a 
+			// To avoid double overlay of loading icon mask in case of a
 			// duoWeapon in a dualWeapon
 			if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
 				systemwindow.addClass("loading");

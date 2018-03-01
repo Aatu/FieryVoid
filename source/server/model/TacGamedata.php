@@ -6,7 +6,8 @@ class TacGamedata{
     public static $currentPhase;
     public static $currentGameID;
     public static $currentActiveship;
-    
+    public static $safeGameID = 4086; //gameID that is safe for adding new features
+
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
     public $ships = array();
     public $slots = array();
@@ -397,28 +398,10 @@ class TacGamedata{
                 $ships[$ship->id] = $ship;
             }
         }
-        
-        return $ships;
-    }
-
-    public function getShipsInDistanceOld($pos, $dis = 0){
-        //TODO: Convert everything to use the one above that actually uses hex distances
-        $ships = array();
-        foreach ($this->ships as $ship){
-            if ($ship->unavailable)
-                continue;
-
-            $shipPos = $ship->getCoPos();
-            $curDis = mathlib::getDistance($pos, $shipPos);
-
-            if ($curDis <= $dis){
-                $ships[$ship->id] = $ship;
-            }
-        }
 
         return $ships;
     }
-    
+
     public function prepareForPlayer(){
         $this->setWaiting();
         $this->calculateTurndelays();
@@ -464,7 +447,18 @@ class TacGamedata{
                     $ship->EW = Array();
                     
                     foreach($ship->systems as $system){
-                        $system->power = array();
+			//Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
+			if($system instanceof Jammer){
+				$power2 = array();
+				foreach($system->power as $powentry){
+					if($powentry->turn < $this->turn){
+						$power2[] = $powentry;
+					}
+				}
+				$system->power = $power2;
+			}else{
+                        	$system->power = array();
+			}
                     }
                 }
             }
@@ -539,7 +533,7 @@ class TacGamedata{
         
         
     }
-    
+
     private function getIsWaitingForThisPlayer(){
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
 
@@ -569,4 +563,19 @@ class TacGamedata{
 
         return false;
     }
+
+	/*check whether indicated ship belongs to this game - as it may happen that it does not!*/
+	public function shipBelongs($shipToCheck){
+		foreach($this->ships as $shp){
+			if ($shp===$shipToCheck){ //yes!
+				return true;
+			}
+		}
+		return false; //this ship was not found
+	}//endof function shipBelongs
+
+
 }
+
+
+

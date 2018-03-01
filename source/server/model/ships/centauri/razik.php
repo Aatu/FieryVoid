@@ -17,6 +17,8 @@ class Razik extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 10;
         $this->turncost = 0.33;
+	    
+	$this->isd = 2105;
         
 	$this->iniativebonus = 100;
         $this->populate();
@@ -31,7 +33,7 @@ class Razik extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 2, 2);
             $fighter = new Fighter("razik", $armour, 8, $this->id);
-            $fighter->displayName = "Razik Light Fighter";
+            $fighter->displayName = "Razik";
             $fighter->imagePath = "img/ships/razik.png";
             $fighter->iconPath = "img/ships/razik_large.png";
 

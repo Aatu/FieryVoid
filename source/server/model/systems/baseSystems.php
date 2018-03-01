@@ -1,5 +1,6 @@
 <?php
 
+/*no longer needed - superseded by ElintScanner
 class ElintArray extends ShipSystem implements SpecialAbility{
     public $name = "elintArray";
     public $displayName = "ELINT array";
@@ -16,6 +17,7 @@ class ElintArray extends ShipSystem implements SpecialAbility{
     }
     
 }
+*/
 
 class Jammer extends ShipSystem implements SpecialAbility{
     
@@ -50,6 +52,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
 
      public function setSystemDataWindow($turn){
         $this->data["Ability:"] = "Denies a hostile OEW-lock versus this ship.";
+	$this->data["Special"] = "Disabled Jammer won't affect enemy missile launches on NEXT turn!";	     
     }
 
 }
@@ -72,7 +75,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
     //args for Jammer ability are array("shooter", "target")
     public function getSpecialAbilityValue($args)
     {
-        Debug::log("calling stealth getSpecialAbilityValue");
+        //Debug::log("calling stealth getSpecialAbilityValue");
         if (!isset($args["shooter"]) || !isset($args["target"]))
             throw new InvalidArgumentException("Missing arguments for Stealth getSpecialAbilityValue");
         
@@ -301,15 +304,15 @@ class MagGravReactor extends Reactor{
 	}
 	
 	public function setSystemDataWindow($turn){
+		$this->data["Output"] = $this->output;
 		parent::setSystemDataWindow($turn);     
-		$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";	     
+		$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
 	}	
 	
 }//endof MagGravReactor		
 
 
 class SubReactor extends ShipSystem{
-
     public $name = "reactor";
     public $displayName = "Reactor";
     public $outputType = "power";
@@ -325,6 +328,11 @@ class SubReactor extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		$this->data["Special"] = "Secondary reactor: destruction will only destroy a section, not entire ship.";
+	}	
 	
     public function isOverloading($turn){
         return false;
@@ -402,6 +410,21 @@ class ElintScanner extends Scanner implements SpecialAbility{
         parent::__construct($armour, $maxhealth, $powerReq, $output );
     }
     
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$boostability = $this->maxBoostLevel;		
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+	$this->data["Special"] .= "Allows additional Sensor operations:";
+	$this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus.";		     
+	$this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated).";		     
+	$this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
+	$this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
+    }
+	
     public function getSpecialAbilityValue($args)
     {
         return true;
@@ -417,9 +440,13 @@ class SWScanner extends Scanner {
 
      public function setSystemDataWindow($turn){
 	parent::setSystemDataWindow($turn);     
-	$boostability = $this->maxBoostLevel;
-        //$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability."."; //does this prevent criticals from showing?...
-	$this->data["<font color='red'>Remark</font>"] = "Boostability limited to +".$boostability.".";	     
+	$boostability = $this->maxBoostLevel;		
+	if (!isset($this->data["Special"])) {
+		$this->data["Special"] = '';
+	}else{
+		$this->data["Special"] .= '<br>';
+	}
+	$this->data["Special"] .= "Boostability limited to +".$boostability.".";	     
     }
 } //end of swScanner
 
@@ -430,14 +457,15 @@ class CnC extends ShipSystem{
     public $primary = true;
     
     public $possibleCriticals = array(
-    //1=>"SensorsDisrupted", //not implemented! so I take it out for now
-	  1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
-    9=>"CommunicationsDisrupted", 
-    12=>"PenaltyToHit", 
-    15=>"RestrictedEW", 
-    18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
-    21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
-    24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn"));
+    	//1=>"SensorsDisrupted", //not implemented! so I take it out for now
+	1=>"CommunicationsDisrupted",   //this instead of SensorsDisrupted
+	9=>"CommunicationsDisrupted", 
+	12=>"PenaltyToHit", 
+	15=>"RestrictedEW", 
+	18=>array("ReducedIniativeOneTurn","ReducedIniative"), 
+	21=>array("RestrictedEW","ReducedIniativeOneTurn","ReducedIniative"), 
+	24=>array("RestrictedEW","ReducedIniative","ShipDisabledOneTurn")
+    );
         
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
@@ -566,6 +594,11 @@ class GraviticThruster extends Thruster{
     }
 }
 
+
+class MagGraviticThruster extends Thruster{ //mag-gravitic thrusters can only get HalfEfficiency crit! So they don't need fancy GraviticThruster logic
+	public $possibleCriticals = array(20=>"HalfEfficiency");
+}
+
 class Hangar extends ShipSystem{
 
     public $name = "hangar";
@@ -580,18 +613,6 @@ class Hangar extends ShipSystem{
 }
 
 
-class HkControlNode extends ShipSystem{
-
-    public $name = "hkControlNode";
-    public $displayName = "HK-Control Node";
-    public $primary = true;
-    
-
-    function __construct($armour, $maxhealth, $powerReq, $output){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
- 
-    }
-}
 
 class Catapult extends ShipSystem{
 
@@ -694,7 +715,127 @@ class DrakhRaiderController extends ShipSystem {
     }
 } //end of DrakhRaiderController
 	
+
+/*Orieni Hunter-Killer Control Node
+every 1 point of output of such systems allows for controlling 1 flight (here: 6 HKs)
+if not enough nodes are active, HKs suffer many penalties
+here penalties will be proportional (instead of, say, one flight controlled and one not, there will be 2 hal-controlled flights)
+Also, instead of multitude of different penalties, there will be just Initiative penalty - but a big one.
+Also, by rules HK link is vulnerable to ElInt activities - which is not modelled here.
+*/
+class HkControlNode extends ShipSystem{
+    public $name = "hkControlNode";
+    public $displayName = "HK Control Node";
+    public $primary = true;
+    private static $fullIniPenalty = -50; //-10, times 5 d20->d100
 	
+    public static $alreadyCleared = false;	
+	public static $nodeList = array(); //array of nodes in game
+	public static $hkList = array(); // array of HK flights in game
+    
+    public $possibleCriticals = array( //simplified from B5Wars!
+        15=>"OutputReduced1",
+        21=>"OutputReduced2",
+    );	
+
+    function __construct($armour, $maxhealth, $powerReq, $output){
+        parent::__construct($armour, $maxhealth, $powerReq, $output ); 
+	HkControlNode::$nodeList[] = $this;
+    }
+	
+	
+	
+	/*to be called by every HK flight after creation*/
+    public static function addHKFlight($HKflight){
+	HkControlNode::$hkList[] = $HKflight;
+    }
+	
+	//inactive entries (from other gamedata) might have slipped by... clear them out!
+	public static function clearLists($gamedata){
+		HkControlNode::$alreadyCleared = true;
+		$tmpArray = array();
+		foreach(HkControlNode::$nodeList as $curr){
+			$shp = $curr->getUnit();
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($shp);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		HkControlNode::$nodeList = $tmpArray;
+		$tmpArray = array();
+		foreach(HkControlNode::$hkList as $curr){
+			//is this unit defined in current gamedata? (particular instance!)
+			$belongs = $gamedata->shipBelongs($curr);
+			if ($belongs){
+				$tmpArray[] = $curr;
+			}			
+		}
+		HkControlNode::$hkList = $tmpArray;
+	}//endof function clearLists
+	
+	/*how big percentage of uncontrolled penalty will be assigned (multiplier)*/
+	public static function getUncontrolledMod($playerID,$gamedata){
+		$turn = TacGamedata::$currentTurn-1; //Ini based on Controllers from PREVIOUS turn!
+		$turn = max(1,$turn);	
+		$totalNodeOutput = 0; //output of all active HK control nodes!
+		$totalHKs = 0; //number of all Hunter-Killer craft in operation!		
+		
+		if(!HkControlNode::$alreadyCleared) HkControlNode::clearLists($gamedata); //in case some inactive entries slipped in
+		
+		foreach(HkControlNode::$nodeList as $currNode){
+			if ( ($currNode->isDestroyed($turn))
+			     || ($currNode->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect (or rather - was last turn)			
+			$shp = $currNode->getUnit();
+			if ($shp->userid == $playerID) $totalNodeOutput +=  $currNode->getOutput();			
+		}
+		$totalNodeOutput = $totalNodeOutput*6;//translate to number of controled craft - 6 per standard-sized flight
+		
+		foreach(HkControlNode::$hkList as $hkFlight){
+			if ($hkFlight->userid == $playerID) {
+				$totalHKs += $hkFlight->countActiveCraft($turn);
+			}
+		}
+		
+		$howPartial = 1;
+		if ($totalHKs > 0){ //should be! but just in case
+			$howPartial = 1-($totalNodeOutput / $totalHKs); //coverage of 100% means no penalty, no covewrage means 100% penalty
+			$howPartial = min(1, $howPartial); //can't exercise more than 100% control ;)
+		}
+		
+		return $howPartial;
+	}
+	
+	
+	/*Initiative modifier for hunter-killers (penalty for being uncontrolled)
+		originally -3, but other penalties were there too (and 1-strong flight was still a flight) - so I increase full penalty significantly!
+	*/
+	public static function getIniMod($playerID,$gamedata){
+		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
+		$iniModifier = HkControlNode::$fullIniPenalty*$howPartial;
+		    
+		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
+			$iniModifier+=HkControlNode::$fullIniPenalty;
+		}		
+		
+		$iniModifier = floor($iniModifier);
+		return $iniModifier;
+	}//endof function getIniMod
+	
+	
+	
+     public function setSystemDataWindow($turn){
+	parent::setSystemDataWindow($turn);     
+	$this->data["Special"] = "Controls up to 6 Hunter-Killer craft per point of output.";	     
+	$this->data["Special"] .= "<BR>If there are not enough nodes to control all deployed Hunter-Killers,<br>their Initiative will be reduced by up to " . HkControlNode::$fullIniPenalty . " due to (semi-)autonomous operation.";	     	     
+	$this->data["Special"] .= "<BR>On turns 1 and 2, there will be additional Ini penalty on top of that, as HKs orient themselves.";	  	     
+	$this->data["Special"] .= "<BR>Any Initiative changes are effective on NEXT TURN.";
+    }	    
+		    
+} //endof class HkControlNode
+
+
 
 
 ?>

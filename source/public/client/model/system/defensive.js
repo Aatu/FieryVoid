@@ -160,3 +160,15 @@ Particleimpeder.prototype.initBoostableInfo = function () {
 Particleimpeder.prototype.getInterceptRating = function () {
     return 3 + shipManager.power.getBoost(this);
 };
+
+var FtrShield = function(json, ship)
+{
+    ShipSystem.call( this, json, ship);
+    this.defensiveType = "Shield";
+}
+FtrShield.prototype = Object.create( ShipSystem.prototype );
+FtrShield.prototype.constructor = FtrShield;
+FtrShield.prototype.getDefensiveHitChangeMod = function(target, shooter, pos)
+{
+    return shipManager.systems.getOutput(target, this);
+}

@@ -162,11 +162,16 @@
         public $rangePenalty = 0.17;
         public $fireControl = array(null, null, 2); // fighters, <mediums, <capitals 
 
-	    public function setSystemDataWindow($turn){
-	      $this->data["<font color='red'>Remark</font>"] = "Weapon misses automatically except vs speed 0 Enormous units. "     
-	       ."Weapon misses automatically if launching unit speed is > 0. "  
-	       ."Weapon always hits Structure. ";   
-	      parent::setSystemDataWindow($turn);
+	    public function setSystemDataWindow($turn){ 
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "Weapon misses automatically except vs speed 0 Enormous units. "     
+		."<br>Weapon misses automatically if launching unit speed is > 0. "  
+		."<br>Weapon always hits Structure. "; 
 	    }	    
 
 	    
@@ -192,7 +197,7 @@
 	}
 	    
 	    
-	public function damage($target, $shooter, $fireOrder, $gamedata, $damage){ //always hit Structure...
+	public function damage($target, $shooter, $fireOrder, $gamedata, $damage, $forcePrimary = false){ //always hit Structure...
 		if ($target->isDestroyed()) return;
 		$tmpLocation = $fireOrder->chosenLocation;	
 
@@ -347,6 +352,7 @@
     }
 
     
+	/*Orieni fighter weapon*/
     class PairedGatlingGun extends LinkedWeapon{
         public $name = "pairedGatlingGun";
         public $displayName = "Paired Gatling Guns";
@@ -372,6 +378,8 @@
 	    
 	public $noOverkill = true;
 	    
+	    public $priority = 8; 
+	    
 	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
 	 
@@ -382,8 +390,6 @@
         
 	    
         public function setSystemDataWindow($turn){
-            //$this->data["Weapon type"] = "Matter";
-            //$this->data["Damage type"] = "Standard";
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Ignores armor.";
             $this->data["Ammunition"] = $this->ammunition;
@@ -423,6 +429,8 @@
         public $name = "MatterGun";
         public $displayName = "Matter Gun";  
 	    public $iconPath = 'pairedGatlingGun.png';
+	   
+	   public $priority = 8;
 	  
         public function getDamage($fireOrder){ //d6-1, minimum 1
             $dmg = Dice::d(6, 1) -1;

@@ -8,10 +8,13 @@ class Seeker1793 extends MediumShip{
 	      $this->faction = "Orieni";
         $this->phpclass = "Seeker1793";
         $this->imagePath = "img/ships/seeker.png";
-        $this->shipClass = "Seeker Recon Corvette (1793)";
-        $this->agile = true;
-        $this->canvasSize = 100;
-        
+        $this->canvasSize = 100;   
+        $this->shipClass = "Seeker Recon Corvette (early)";
+        $this->variantOf = "Steadfast Escort Corvette";
+        	$this->occurence = "rare";
+	    $this->isd = 1793;
+	    
+        $this->agile = true;     
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
         
@@ -22,7 +25,6 @@ class Seeker1793 extends MediumShip{
         $this->pivotcost = 3;
       	$this->iniativebonus = 60;
         
-        $this->occurence = "rare";
 
 
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));

@@ -121,33 +121,35 @@ public function calculateHit($gamedata, $fireOrder){
 } //endof class AoE
 
 
-class EnergyMine extends AoE
-{
-    public $name = "energyMine";
-    public $displayName = "Energy Mine";
-    public $range = 50;
-    public $loadingtime = 2;
-    public $ballistic = true;
-    public $hextarget = true;
-    public $hidetarget = true;
+    class EnergyMine extends AoE{
+        public $name = "energyMine";
+        public $displayName = "Energy Mine";
+        public $range = 50;
+        public $loadingtime = 2;
+        public $ballistic = true;
+        public $hextarget = true;
+        public $hidetarget = true;
+        
+        public $flashDamage = true;
+        public $priority = 1;
+        
+            
+        public $trailColor = array(141, 240, 255);
+        public $animation = "ball";
+        public $animationColor = array(141, 240, 255);
+        public $animationExplosionScale = 1;
+        public $animationExplosionType = "AoE";
+        public $explosionColor = array(141, 240, 255);
+        public $projectilespeed = 12;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+	    
+	public $firingModes = array(
+		1 => "AoE"
+	);
 
-    public $flashDamage = true;
-    public $priority = 1;
-
-
-    public $trailColor = array(141, 240, 255);
-    public $animation = "ball";
-    public $animationColor = array(141, 240, 255);
-    public $animationExplosionScale = 1;
-    public $animationExplosionType = "AoE";
-    public $explosionColor = array(141, 240, 255);
-    public $projectilespeed = 12;
-    public $animationWidth = 10;
-    public $trailLength = 10;
-
-
-    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-    {
+        
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
 
@@ -177,4 +179,3 @@ class EnergyMine extends AoE
 } //endof class EnergyMine
 
 
-?>

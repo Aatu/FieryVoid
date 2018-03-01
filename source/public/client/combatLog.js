@@ -37,33 +37,38 @@ window.combatLog = {
         var lowC = 100000;
         var highC = 0;
         var notes = "";
-
-        for (var a in orders) {
+        
+        for (var a in orders){            
 
             count++;
             var fire = orders[a];
 
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-
+		
+		
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-            if (modeIteration !== weapon.firingMode) {
-                while (modeIteration > 1) {
-                    weapon.changeFiringMode();
-                    modeIteration--;
+            if(modeIteration != weapon.firingMode){
+                while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+                weapon.changeFiringMode();
                 }
             }
-
+		    
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
             weaponManager.getDamagesCausedBy(fire, damages);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
+            if (fire.shots > 0){ //otherwise shot is purely technical
+                if (needed < lowC)
+                lowC = needed;
+                if (needed >highC)
+                highC = needed;
 
-            if (needed < lowC) lowC = needed;
-            if (needed > highC) highC = needed;
-
-            if (fire.pubnotes) notes += fire.pubnotes + " ";
+                if (fire.pubnotes)
+                notes += fire.pubnotes + " ";
+            }
+                        
         }
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
@@ -134,7 +139,7 @@ window.combatLog = {
                 }
 
                 //if (totaldam > 0){ //display fire orders that did no damage, too!
-                //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';   
+                //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';
 
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
                 if (damagehtml.length > 1) {

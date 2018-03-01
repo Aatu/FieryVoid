@@ -59,17 +59,20 @@ shipManager.systems = {
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
     },
 
-    getOutput: function getOutput(ship, system) {
-        if (!system) {
-            console.log("ERROR: getOutput system missing");
-            console.trace();
-        }
-
-        if (this.isDestroyed(ship, system)) return 0;
-
-        if (shipManager.power.isOffline(ship, system)) return 0;
-
-        var output = system.output + system.outputMod + shipManager.power.getBoost(system);
+    getOutput: function(ship, system){
+		if (!system){
+			console.log("ERROR: getOutput system missing");
+			console.trace();
+		}
+		
+		if (this.isDestroyed(ship, system))
+			return 0;
+        
+		if (shipManager.power.isOffline(ship, system))
+			return 0;
+		
+		var output = system.output + system.outputMod + shipManager.power.getBoost(system);
+        	output = Math.max(0,output); //output cannot be negative!
 
         return output;
     },

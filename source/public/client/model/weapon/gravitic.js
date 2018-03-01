@@ -138,11 +138,13 @@ var UltraLightGraviticBolt = function UltraLightGraviticBolt(json, ship) {
 UltraLightGraviticBolt.prototype = Object.create(Gravitic.prototype);
 UltraLightGraviticBolt.prototype.constructor = UltraLightGraviticBolt;
 
-var GravLance = function GravLance(json, ship) {
-    Weapon.call(this, json, ship);
+
+var GraviticLance = function(json, ship) {
+    Weapon.call( this, json, ship);
 };
-GravLance.prototype = Object.create(Weapon.prototype);
-GravLance.prototype.constructor = GravLance;
+GraviticLance.prototype = Object.create( Weapon.prototype );
+GraviticLance.prototype.constructor = GraviticLance;
+
 
 var GraviticCutter = function GraviticCutter(json, ship) {
     Gravitic.call(this, json, ship);

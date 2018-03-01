@@ -8,9 +8,11 @@ class Devout2007 extends MediumShip{
         $this->faction = "Orieni";
         $this->phpclass = "devout2007";
         $this->imagePath = "img/ships/obedient.png";
-        $this->shipClass = "Devout Escort Frigate (2007)";
+        $this->shipClass = "Devout Escort Frigate";
+        	$this->variantOf = "Obedient Patrol Frigate";
         $this->agile = true;
         $this->canvasSize = 100;
+	    $this->isd = 2007;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -31,18 +33,18 @@ class Devout2007 extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 4));        
         
-        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1)); 
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 0));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 0, 120));
         $this->addFrontSystem(new LightLaser(1, 4, 3, 270, 90));
-
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
-        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));    
+        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(2, 7, 0, 3, 1)); 
+  
         $this->addAftSystem(new RapidGatling(1, 4, 1, 120, 360));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 0, 240));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));
+        $this->addAftSystem(new Thruster(2, 6, 0, 4, 2));  
        
         $this->addPrimarySystem(new Structure(4, 36));
 

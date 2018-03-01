@@ -153,7 +153,9 @@ class DamageEntry{
     public $pubnotes = "";
     public $updated = false;
     
-    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass = null){
+    public $shooterid, $weaponid;//Marcin Sawicki: additional variables, usually useless, but needed to identify fire order whose ID is not known at the moment of dealing damage
+    
+    function __construct($id, $shipid, $gameid, $turn, $systemid, $damage, $armour, $shields, $fireorderid, $destroyed, $pubnotes, $damageclass = null, $shooterid = null, $weaponid = null){
         $this->id = $id;
         $this->shipid = $shipid;
         $this->gameid = $gameid;
@@ -166,6 +168,9 @@ class DamageEntry{
         $this->destroyed = $destroyed;
         $this->pubnotes = $pubnotes;
         $this->damageclass = $damageclass;
+        
+        $this->shooterid = $shooterid;
+        $this->weaponid = $weaponid;        
     }
 
 }

@@ -9,8 +9,9 @@ class Benevolent extends BaseShip{
         $this->phpclass = "Benevolent";
         $this->imagePath = "img/ships/benevolent.png";
         $this->shipClass = "Benevolent Heavy Scout";
+	    $this->isd = 2007;
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>6, "normal"=>6);
+        $this->fighters = array("light"=>6, "medium"=>6);
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 16;
@@ -21,7 +22,6 @@ class Benevolent extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 3;
-	$this->isd = 2007;
 
         $this->limited = 33;
 
@@ -33,13 +33,13 @@ class Benevolent extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new SMissileRack(5, 6, 0, 0, 360));
         
-        $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
         $this->addFrontSystem(new HeavyLaserLance(3, 6, 4, 240, 60));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new RapidGatling(2, 4, 1, 240, 120));
         $this->addFrontSystem(new HeavyLaserLance(3, 6, 4, 300, 120));
+        $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
+        $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
 
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
         $this->addAftSystem(new RapidGatling(1, 4, 1, 60, 300));
@@ -47,13 +47,13 @@ class Benevolent extends BaseShip{
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
         
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
+        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
 
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
+        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
 
 		//structures
         $this->addFrontSystem(new Structure(4, 48));
@@ -66,7 +66,7 @@ class Benevolent extends BaseShip{
                 0=> array(
                         7 => "Structure",
 			9 => "Jump Engine",
-                        12 => "Scanner",
+                        12 => "ELINT Scanner",
                         14 => "Engine",
 			16 => "Hangar",
 			17 => "Class-S Missile Rack",

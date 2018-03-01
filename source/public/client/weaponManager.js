@@ -269,7 +269,11 @@ window.weaponManager = {
             return;
         }
 
-        if (!weaponManager.isLoaded(weapon)) return;
+		if (!weaponManager.isLoaded(weapon))
+			return;
+
+        if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
+
 
         if (ship.shipSizeClass < 0) {
             for (var i = 0; i < ship.systems.length; i++) {
@@ -663,6 +667,48 @@ window.weaponManager = {
 
         return base - dew - jink - bdew - sdew;
     },
+
+    /*calculate hit chance for ramming attack - different procedure*/
+    /*also, it would be a bit different (simplified) from B5Wars original*/
+    calculateRamChance: function(shooter, target, weapon, calledid){
+        if (calledid > 0) return 0;//can't call ramming attack!
+        if ((!shooter.flight) && (target.flight)) return 0;//ship has no chance to ram a fighter!
+        var hitChance = 8; //base: 40%
+
+        if (target.Enormous) hitChance+=6;//+6 vs Enormous units
+        if (shooter.Enormous) hitChance+=6;//+6 if ramming unit is Enormous
+        if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass <3))hitChance += 2;//+2 if target is Capital and ramming unit is not
+        if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass <3))hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+        if ((shooter.flight) && (!target.flight))hitChance += 4;//+4 for fighter trying to ram a ship
+        var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
+        switch(targetSpeed) {
+            case 0: //+5 if the target is not moving.
+                hitChance += 5;
+                break;
+            case 1://+3 if the target is moving speed 1.
+                hitChance += 3;
+                break;
+            case 2://+2 if the target is moving speed 2 or 3.
+            case 3:
+                hitChance += 2;
+                break;
+            case 4://+1 if the target is moving speed 4 or 5.
+            case 5:
+                hitChance += 1;
+                break;
+            default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
+                hitChance -= Math.ceil((targetSpeed-5)/5);
+        }
+        //‐1 for every level of jinking the ramming or target unit is using
+        hitChance -= shipManager.movement.getJinking(shooter);
+        hitChance -= shipManager.movement.getJinking(target);
+
+        //fire control: usually 0, but units specifically designed for ramming may have some bonus!
+        hitChance += weaponManager.getFireControl(target, weapon);
+
+        hitChance = hitChance * 5; //convert d20->d100
+        return hitChance;
+    }, //endof calculateRamChance
 
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
@@ -1335,9 +1381,13 @@ window.weaponManager = {
 
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
 
-        if (jammer) {
-            range = range / (shipManager.systems.getOutput(target, jammer) + 1);
-        }
+		if (jammer)
+		{
+			//check whether it was enabled last turn... if so, allow missile launch :)
+			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
+				range = range / (shipManager.systems.getOutput(target, jammer)+1);
+			}
+		}
 
         return distance <= range;
     },

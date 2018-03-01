@@ -87,7 +87,7 @@ shipManager.power = {
 				systemwindow.removeClass("offline");
 
 				//    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
-				//    userMessage += "Power up all necessary systems.";                    
+				//    userMessage += "Power up all necessary systems.";
 				//    window.confirm.error(userMessage, function(){});
 
 				return;
@@ -273,16 +273,28 @@ shipManager.power = {
 				// This is a subsystem of a dual/duo weapon. Ignore
 				continue;
 			}
-
-			for (var i in system.power) {
-				var power = system.power[i];
-				if (power.turn != gamedata.turn) continue;
-				//types: 1:offline 2:boost, 3:overload
-				if (power.type == 1 && fixedPower != true) output += system.powerReq; //MagGrav = do not add power of disabled systems!					
-				if (power.type == 2) {
-					output -= shipManager.power.countBoostPowerUsed(ship, system);
+                        
+			/*standard: add power for every system powered off
+			  fixed: subtract power for every system powered on (instead!)
+			*/
+			if (!system.destroyed){ //destroyed system gets no power either way...
+				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
+					output -= system.powerReq;
 				}
-				if (power.type == 3) output -= system.powerReq;
+				var isOff = false;
+				for (var i in system.power){
+					var power = system.power[i];
+					if (power.turn != gamedata.turn) continue;
+					//types: 1:offline 2:boost, 3:overload
+					if (power.type == 1) isOff = true; //just note the fact, so multiple disables do not count multiple times!
+					if (power.type == 2){
+						output -= shipManager.power.countBoostPowerUsed(ship, system);
+					}
+					if (power.type == 3) output -= system.powerReq;
+				}
+				if (isOff == true){
+					output += system.powerReq; //power off = increase available power
+				}
 			}
 		}
 
@@ -312,12 +324,36 @@ shipManager.power = {
 		}
 		//console.log(ship.name + " possible power: " + power);
 		return power;
+	
+	},
+	
+	isOfflineOnTurn: function(ship, system, turn){
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			return true;
+		}
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
+			return true;
+		}
+
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
+			return true;
+		}
+
+		for (var i in system.power){
+			var power = system.power[i];
+			if (power.turn != turn) continue;
+			if (power.type == 1) return true;
+		}
+
+		return false;
 	},
 
-	isOffline: function isOffline(ship, system) {
 
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) {
-			return true;
+	isOffline: function(ship, system){
+		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
+		/*
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+			return true;		
 		}
 
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
@@ -339,6 +375,7 @@ shipManager.power = {
 		}
 
 		return false;
+		*/
 	},
 
 	setOnline: function setOnline(ship, system) {
