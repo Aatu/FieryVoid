@@ -1001,7 +1001,7 @@
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
         public $firingModes = array(1=>'Quad', 2=>'Triple', 3=>'Dual');
-        public $gunsArray = array(1=>4,2=>3,3=>3);
+        public $gunsArray = array(1=>4,2=>3,3=>2);
 	    
 	public $firedThisTurn = false; //to avoid re-rolling criticals!
 

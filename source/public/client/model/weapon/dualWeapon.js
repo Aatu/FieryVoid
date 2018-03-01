@@ -13,9 +13,11 @@ var LaserPulseArray = function(json, ship)
 LaserPulseArray.prototype = Object.create( DualWeapon.prototype );
 LaserPulseArray.prototype.constructor = LaserPulseArray;
 
+/*old, now in Gravitic!
 var GraviticLance = function(json, ship)
 {
     DualWeapon.call( this, json, ship);
 }
 GraviticLance.prototype = Object.create( DualWeapon.prototype );
 GraviticLance.prototype.constructor = GraviticLance;
+*/

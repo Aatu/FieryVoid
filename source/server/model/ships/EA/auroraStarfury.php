@@ -11,6 +11,8 @@ class AuroraStarfury extends FighterFlight{
         $this->imagePath = "img/ships/auroraStarfury.png";
         $this->isd = 2244;
         
+	    $this->notes = 'Non-atmospheric.';
+        
         $this->forwardDefense = 8;
         $this->sideDefense = 6;
         $this->freethrust = 12;
