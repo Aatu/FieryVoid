@@ -780,7 +780,7 @@ class GraviticLance extends Raking{
         public $rangePenaltyArray = array(1=>0.2, 2=>0.25); //Lance -1/5 hexes, Beams -1/4 hexes
         public $fireControlArray = array( 1=>array(-5, 2, 3), 2=>array(-5, 2, 3) ); // fighters, <mediums, <capitals 
 	
-	public $firingModes = array(1=>'Lance', 2=>'Beams');
+	public $firingModes = array(1=>'Sustained', 2=>'Beams');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); //indicates that this weapon does damage in Pulse mode
     	public $weaponClassArray = array(1=>'Gravitic', 2=>'Gravitic'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 	
