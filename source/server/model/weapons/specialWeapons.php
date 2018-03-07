@@ -1004,7 +1004,7 @@ class SparkFieldHandler{
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			
 			$aoe = $field->getAoE($gamedata->turn);			
-			$inAoE = $gamedata->getShipsInDistanceHex($shooter, $aoe);
+			$inAoE = $gamedata->getShipsInDistance($shooter, $aoe);
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating				

@@ -89,13 +89,15 @@ window.ew = {
         }
     },
 
-    getOffensiveEW: function getOffensiveEW(ship, target) {
+    getOffensiveEW: function getOffensiveEW(ship, target, type) {
+
+        type = type || "OEW";
 
         for (var i in ship.EW) {
             var entry = ship.EW[i];
-            if (entry.turn != gamedata.turn) continue;
+            if (entry.turn !== gamedata.turn) continue;
 
-            if (entry.type == "OEW" && entry.targetid == target.id) return entry.amount;
+            if (entry.type === type && entry.targetid === target.id) return entry.amount;
         }
 
         return 0;
@@ -327,7 +329,7 @@ window.ew = {
             return;
         }
 
-        amount = 1;
+        var amount = 1;
         if (entry.type == "DIST") amount = 3;
 
         entry.amount -= amount;

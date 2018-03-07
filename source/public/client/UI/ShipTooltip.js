@@ -127,6 +127,11 @@ window.ShipTooltip = function () {
 
         if (this.selectedShip) {
             this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship, ship.flight !== true);
+
+            if (shipManager.isElint(this.selectedShip)){
+                this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship, ship.flight !== true);
+
+            }
         }
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);

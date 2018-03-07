@@ -184,7 +184,7 @@ window.gamedata = {
 
         // CHECK for Base Rotation
         if (gamedata.gamephase == -1 && gamedata.turn == 1) {
-            bases = [];
+            var bases = [];
 
             for (var i in gamedata.ships) {
                 var ship = gamedata.ships[i];

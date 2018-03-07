@@ -4,7 +4,7 @@ window.Settings = (function(){
 
     function Settings(settings) {
         this.settings = {
-            ShowAllEW: settings.ShowAllEW || {keyCode: 87, shiftKey: false, altKey: false, ctrlKey: true, metaKey:false },
+            ShowAllEW: settings.ShowAllEW || {keyCode: 87, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
             ZoomLevelToStrategic: 0.2
         };
 

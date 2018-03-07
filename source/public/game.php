@@ -159,7 +159,6 @@
     <script src="client/UI/replayUI.js"></script>
     <script src="client/gamedata.js"></script>
     <script src="client/windowevents.js"></script>
-    <script src="client/mousewheel.js"></script>
     <script src="client/mathlib.js"></script>
     <script src="client/lib/seedRandom.js"></script>
     <script src="client/ajaxInterface.js"></script>
@@ -173,7 +172,6 @@
     <script src="client/criticals.js"></script>
     <script src="client/systems.js"></script>
 	<script src="client/power.js"></script>
-    <script src="client/deployment.js"></script>
     <script src="client/UI/shipMovement.js"></script>
     <script src="client/UI/infowindow.js"></script>
 	<script src="client/UI/systemInfo.js"></script>
@@ -181,9 +179,7 @@
     <script src="client/UI/fleetList.js"></script>
     <script src="client/UI/gameInfo.js"></script>
     <script src="client/UI/flightwindow.js"></script>
-    <script src="client/UI/shipclickable.js"></script>
 	<script src="client/UI/confirm.js"></script>
-	<script src="client/UI/shipSelect.js"></script>
 	<script src="client/model/ship.js"></script>
     <script src="client/model/shipSystem.js"></script>
     <script src="client/model/systemFactory.js"></script>

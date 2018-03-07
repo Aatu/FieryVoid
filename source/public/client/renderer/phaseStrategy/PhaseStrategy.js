@@ -242,6 +242,7 @@ window.PhaseStrategy = function () {
         ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getById(ship.id);
             icon.hideEW();
+            icon.hideBDEW();
             this.ewIconContainer.hide();
             //TODO: User settings, should this be hidden or not?
             icon.showSideSprite(false);
@@ -257,6 +258,7 @@ window.PhaseStrategy = function () {
         this.showShipTooltip(ship, payload, null, true);
         this.showShipEW(ship);
         icon.showSideSprite(true);
+        icon.showBDEW();
     };
 
     PhaseStrategy.prototype.showShipEW = function (ship) {
@@ -455,7 +457,20 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShowAllEW = function (payload) {
-        console.log("SHOW ALL EW", payload);
+        if (payload.up) {
+            gamedata.ships.forEach(function (ship) {
+                var icon = this.shipIconContainer.getById(ship.id);
+                icon.hideEW();
+                icon.hideBDEW();
+                this.ewIconContainer.hide();
+            }, this);
+        } else {
+            gamedata.ships.forEach(function (ship) {
+                var icon = this.shipIconContainer.getById(ship.id);
+                this.showShipEW(ship);
+                icon.showBDEW();
+            }, this);
+        }
     };
 
     return PhaseStrategy;

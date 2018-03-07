@@ -4,6 +4,9 @@ window.EWIconContainer = function () {
 
     var COLOR_OEW_FIRENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
     var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
+    var COLOR_OEW_DIST = new THREE.Color(255 / 255,  157 / 255, 0 / 255);
+    var COLOR_SDEW = new THREE.Color(109/255, 189/255, 255/255);
+    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1);
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];
@@ -19,11 +22,12 @@ window.EWIconContainer = function () {
 
         gamedata.ships.forEach(function (ship) {
             gamedata.ships.forEach(function (target) {
-                var oew = ew.getOffensiveEW(ship, target);
 
-                if (oew) {
-                    createOrUpdateOEW.call(this, ship, target, oew);
-                }
+                createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target));
+                createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "DIST"), "DIST");
+                createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SDEW"), "SDEW");
+                createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SOEW"), "SOEW");
+
             }, this);
         }, this);
 
@@ -49,11 +53,10 @@ window.EWIconContainer = function () {
         });
 
         gamedata.ships.forEach(function (target) {
-            var oew = ew.getOffensiveEW(ship, target);
-
-            if (oew) {
-                createOrUpdateOEW.call(this, ship, target, oew);
-            }
+            createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target));
+            createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "DIST"), "DIST");
+            createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SDEW"), "SDEW");
+            createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SOEW"), "SOEW");
         }, this);
 
         this.ewIcons = this.ewIcons.filter(function (icon) {
@@ -105,16 +108,21 @@ window.EWIconContainer = function () {
         }
     };
 
-    function createOrUpdateOEW(ship, target, amount) {
-        var icon = getOEWIcon.call(this, ship, target);
+    function createOrUpdateOEW(ship, target, amount, type) {
+        if (amount === 0) {
+            return;
+        }
+
+        var icon = getOEWIcon.call(this, ship, target, type);
         if (icon) {
-            updateOEWIcon.call(this, icon, ship, target, amount);
+            updateOEWIcon.call(this, icon, ship, target, amount, type);
         } else {
-            this.ewIcons.push(createOEWIcon.call(this, ship, target, amount, this.scene));
+            this.ewIcons.push(createOEWIcon.call(this, ship, target, amount, this.scene, type));
         }
     }
 
     function updateOEWIcon(icon, ship, target, amount) {
+
         var shipIcon = this.shipIconContainer.getByShip(ship);
         var targetIcon = this.shipIconContainer.getByShip(target);
 
@@ -126,19 +134,21 @@ window.EWIconContainer = function () {
         icon.used = true;
     }
 
-    function createOEWIcon(ship, target, amount, scene) {
+    function createOEWIcon(ship, target, amount, scene, type) {
+
+        type = type || "OEW";
+
         var shipIcon = this.shipIconContainer.getByShip(ship);
         var targetIcon = this.shipIconContainer.getByShip(target);
 
-        var color = gamedata.isMyShip(ship) ? COLOR_OEW_FIRENDLY : COLOR_OEW_ENEMY;
         var OEWIcon = {
-            type: "OEW",
+            type: type,
             shipId: ship.id,
             targetId: target.id,
             amount: amount,
             shipIcon: shipIcon,
             targetIcon: targetIcon,
-            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, color, 0.5),
+            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, getColor(ship, type), 0.5),
             used: true
         };
 
@@ -148,13 +158,28 @@ window.EWIconContainer = function () {
         return OEWIcon;
     }
 
+    function getColor(ship, type)  {
+        switch(type) {
+            case "OEW":
+                return gamedata.isMyShip(ship) ? COLOR_OEW_FIRENDLY : COLOR_OEW_ENEMY;
+            case "DIST":
+                return COLOR_OEW_DIST;
+            case "SDEW":
+                return COLOR_SDEW;
+            case "SOEW":
+                return COLOR_OEW_SOEW;
+        }
+    }
+
     function getOEWLineWidth(amount) {
         return this.zoomScale * amount;
     }
 
-    function getOEWIcon(ship, target) {
+    function getOEWIcon(ship, target, type) {
+        type = type || "OEW";
+
         return this.ewIcons.find(function (icon) {
-            return icon.type === "OEW" && icon.shipId === ship.id && icon.targetId === target.id;
+            return icon.type === type && icon.shipId === ship.id && icon.targetId === target.id;
         });
     }
 

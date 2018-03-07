@@ -350,7 +350,6 @@ window.webglScene = function () {
         if (wheelData < 0) step = 1;else step = -1;
 
         changeZoom.call(this, step);
-        return cancelEvent(e);
     }
 
     function changeZoom(zoom) {
