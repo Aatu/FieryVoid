@@ -92,7 +92,8 @@ window.ReplayAnimationStrategy = function () {
 
         this.gamedata.ships.filter(function (ship) {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
-            return turnDestroyed !== null && turnDestroyed < this.turn;
+            var destroyed = shipManager.isDestroyed(ship);
+            return (turnDestroyed !== null && turnDestroyed < this.turn) || (turnDestroyed === null && destroyed);
         }, this).forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).hide();
         }, this);

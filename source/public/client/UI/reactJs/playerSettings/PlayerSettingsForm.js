@@ -1,10 +1,10 @@
 import * as React from "react";
 import styled from 'styled-components';
-import {Container, Title, SubTitle, Backdrop, ContainerRoundedRightBottom, Clickable} from "../styled";
-import {InputAndLabel} from "../common";
+import { Container, Title, SubTitle, Backdrop, ContainerRoundedRightBottom, Clickable } from "../styled";
+import { InputAndLabel } from "../common";
 
 
-class PlayerSettingsForm extends React.Component{
+class PlayerSettingsForm extends React.Component {
 
     getOnChange(key) {
         return (e) => {
@@ -21,7 +21,7 @@ class PlayerSettingsForm extends React.Component{
             e.preventDefault();
             e.stopPropagation();
 
-            if (! keyCodes[e.keyCode]) {
+            if (!keyCodes[e.keyCode]) {
                 return;
             }
 
@@ -30,7 +30,7 @@ class PlayerSettingsForm extends React.Component{
                 shiftKey: e.shiftKey,
                 altKey: e.altKey,
                 ctrlKey: e.ctrlKey,
-                metaKey:e.metaKey
+                metaKey: e.metaKey
             };
 
             this.props.set(key, keyDefinition);
@@ -39,25 +39,25 @@ class PlayerSettingsForm extends React.Component{
         };
     }
 
-    getKey(key){
+    getKey(key) {
         return keyToString(this.props.settings[key]);
     }
 
-    get(key){
+    get(key) {
         return this.props.settings[key];
     }
 
-    render(){
+    render() {
         return (<Backdrop>
             <SubContainer>
-                <CloseButton onClick={this.props.close}>✖</CloseButton>
+                <CloseButton onClick={this.props.close}>✕</CloseButton>
                 <Title>Player settings</Title>
                 <Paragraph>Change settings for currently used browser and device. Reload the page to apply changed settings.</Paragraph>
                 <SubTitle>Keys</SubTitle>
-                <InputAndLabel label={"Key to display all EW"} onChange={() => {}} onKeydown={this.getOnKeyDown.call(this, "ShowAllEW")} value={this.getKey.call(this, "ShowAllEW")}/>
+                <InputAndLabel label={"Key to display all EW"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllEW")} value={this.getKey.call(this, "ShowAllEW")} />
 
                 <SubTitle>Visual</SubTitle>
-                <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")}  value={this.get.call(this, "ZoomLevelToStrategic")}/>
+                <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")} value={this.get.call(this, "ZoomLevelToStrategic")} />
 
             </SubContainer>
         </Backdrop>)
@@ -81,7 +81,7 @@ const keyToString = (key) => {
         value += " + ctrl";
     }
 
-    if (key.metaKey){
+    if (key.metaKey) {
         value += " + cmd";
     }
 
@@ -119,42 +119,42 @@ const Paragraph = styled.p`
 `;
 
 const keyCodes = {
-    48 : "0",
-    49 : "1",
-    50 : "2",
-    51 : "3",
-    52 : "4",
-    53 : "5",
-    54 : "6",
-    55 : "7",
-    56 : "8",
-    57 : "9",
-    58 : ":",
-    65 : "a",
-    66 : "b",
-    67 : "c",
-    68 : "d",
-    69 : "e",
-    70 : "f",
-    71 : "g",
-    72 : "h",
-    73 : "i",
-    74 : "j",
-    75 : "k",
-    76 : "l",
-    77 : "m",
-    78 : "n",
-    79 : "o",
-    80 : "p",
-    81 : "q",
-    82 : "r",
-    83 : "s",
-    84 : "t",
-    85 : "u",
-    86 : "v",
-    87 : "w",
-    88 : "x",
-    89 : "y",
-    90 : "z",
+    48: "0",
+    49: "1",
+    50: "2",
+    51: "3",
+    52: "4",
+    53: "5",
+    54: "6",
+    55: "7",
+    56: "8",
+    57: "9",
+    58: ":",
+    65: "a",
+    66: "b",
+    67: "c",
+    68: "d",
+    69: "e",
+    70: "f",
+    71: "g",
+    72: "h",
+    73: "i",
+    74: "j",
+    75: "k",
+    76: "l",
+    77: "m",
+    78: "n",
+    79: "o",
+    80: "p",
+    81: "q",
+    82: "r",
+    83: "s",
+    84: "t",
+    85: "u",
+    86: "v",
+    87: "w",
+    88: "x",
+    89: "y",
+    90: "z",
 };
 export default PlayerSettingsForm;
