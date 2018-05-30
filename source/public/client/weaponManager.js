@@ -398,7 +398,7 @@ window.weaponManager = {
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
         var targetFacing = shipManager.getShipHeadingAngle(target);
 
-        for (i = 0; i < target.outerSections.length; i++) {
+        for (var i = 0; i < target.outerSections.length; i++) {
             var currSectionData = target.outerSections[i];
             if (system.location == currSectionData.loc) {
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))) {
@@ -941,7 +941,7 @@ window.weaponManager = {
         var targetFacing = shipManager.getShipHeadingAngle(target);
         var toReturn = [];
 
-        for (i = 0; i < target.outerSections.length; i++) {
+        for (var i = 0; i < target.outerSections.length; i++) {
             var currSectionData = target.outerSections[i];
             if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(currSectionData.min, targetFacing), mathlib.addToDirection(currSectionData.max, targetFacing))) {
                 toReturn.push(currSectionData.loc);

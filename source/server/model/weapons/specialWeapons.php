@@ -2,39 +2,39 @@
 
 class PlasmaStream extends Raking{
 	public $name = "plasmaStream";
-        public $displayName = "Plasma Stream";
-        public $animation = "beam";
-        public $animationColor = array(75, 250, 90);
+	public $displayName = "Plasma Stream";
+	public $animation = "beam";
+	public $animationColor = array(75, 250, 90);
 	public $trailColor = array(75, 250, 90);
 	public $projectilespeed = 20;
-        public $animationWidth = 3;
+	public $animationWidth = 3;
 	public $animationExplosionScale = 0.25;
 	public $trailLength = 400;
-        public $priority = 1;
+	public $priority = 1;
 		        
 	public $raking = 5;
-        public $loadingtime = 2;
+	public $loadingtime = 2;
 	public $rangeDamagePenalty = 1;	
-        public $rangePenalty = 1;
-        public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
+	public $rangePenalty = 1;
+	public $fireControl = array(-4, 2, 2); // fighters, <=mediums, <=capitals 
 	
-	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-	    public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-            public $firingModes = array(
-                1 => "Raking"
-            );
+		public $firingModes = array(
+			1 => "Raking"
+		);
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+	}
         
 	
 	public function setSystemDataWindow($turn){
 	    $this->data["Special"] = "Reduces armor of hit systems.";
 	    $this->data["Special"] .= "5-point rakes.";
 	    $this->data["Special"] .= "Damage reduced by 1 point per hex.";			
-            parent::setSystemDataWindow($turn);
+		parent::setSystemDataWindow($turn);
 	}
 		 
 	
@@ -999,7 +999,7 @@ class SparkFieldHandler{
 			$targetPos = $shooter->getCoPos();
 			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
 			$fire = new FireOrder(-1, 'normal', $shooter->id, -1, $field->id, -1, $gamedata->turn, 
-				1, 0, 0, 1, 0, 0, $movementThisTurn->x,  $movementThisTurn->y, $field->weaponClass
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $field->weaponClass
 			);
 			$fire->addToDB = true;
 			$field->fireOrders[] = $fire;			

@@ -385,6 +385,10 @@ class TacGamedata{
     
     public function getShipsInDistance($pos, $dis = 0){
 
+        if ($pos instanceof BaseShip) {
+            $pos = $pos->getHexPos();
+        }
+
         if (! ($pos instanceof OffsetCoordinate)) {
             return $this->getShipsInDistanceOld($pos, $dis);
         }

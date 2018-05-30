@@ -22845,7 +22845,7 @@ var PlayerSettingsForm = function (_React$Component) {
                     React.createElement(
                         CloseButton,
                         { onClick: this.props.close },
-                        "\u2716"
+                        "\u2715"
                     ),
                     React.createElement(
                         _styled.Title,
