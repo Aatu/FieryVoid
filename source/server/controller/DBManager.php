@@ -685,8 +685,7 @@ class DBManager {
         }
     }
     
-    public function submitIniative($gameid, $turn, $ships){
-        
+    public function submitIniative($gameid, $turn, $ships){        
         try {
             
             foreach ($ships as $ship){
@@ -697,9 +696,9 @@ class DBManager {
         }
         catch(Exception $e) {
             throw $e;
-        }
-    
+        }    
     }
+	
     
     public function updatePlayerStatus($gameid, $userid, $phase, $turn, $slots = null){
         try {
@@ -733,10 +732,8 @@ class DBManager {
     }
     
     public function submitEW($gameid, $shipid, $EW, $turn){
-        try {
-                
-            foreach ($EW as $entry){
-                
+        try {                
+            foreach ($EW as $entry){                
                 if($entry->turn != $turn)
                     continue;
                 
@@ -747,7 +744,6 @@ class DBManager {
     
         }
         catch(Exception $e) {
-
             throw $e;
         }
     }
@@ -787,8 +783,6 @@ class DBManager {
         }
     }
 
-
-
     
     public function insertShips($gameid, $ships)
     {
@@ -798,6 +792,7 @@ class DBManager {
             $this->insertMovement($gameid, $ship->id, $move);
         }
     }
+	
     
     public function insertMovement($gameid, $shipid, $input)
     {
@@ -903,6 +898,7 @@ class DBManager {
         
         return $games;
     }
+	
         
     public function getFirePhaseGames($playerid){
 
@@ -925,10 +921,8 @@ class DBManager {
     }
 
     
-    public function getTacGamedata($playerid, $gameid){
-		
-		if ($gameid <=0)
-			return null;
+    public function getTacGamedata($playerid, $gameid){		
+	if ($gameid <=0) return null;
 		
         $gamedata = $this->getTacGame($gameid, $playerid);
 		if ($gamedata == null)
@@ -936,11 +930,11 @@ class DBManager {
 
         $gamedata->slots = $this->getSlotsInGame($gameid);
         $this->getTacShips($gamedata);
-		$gamedata->onConstructed();
-        
-        
+	$gamedata->onConstructed();
+                
         return $gamedata;
     }
+	
     
     public function getTacGame($gameid, $playerid){
 	
@@ -1052,6 +1046,7 @@ class DBManager {
         }
         return $slot;
     }
+	
     
     public function getShipByIdFromDB($id){
         $ship = null;
@@ -1081,8 +1076,8 @@ class DBManager {
         return $ship;
     }
     
-    public function getTacShips($gamedata){
-        
+	
+    public function getTacShips($gamedata){        
         $starttime = time();  
         $ships = array();
         
@@ -1215,12 +1210,8 @@ class DBManager {
         }
     }
 
-
-
     
     private function getIniativeForShips($gamedata){
-        
-        
         $stmt = $this->connection->prepare(
             "SELECT
                 iniative, shipid
