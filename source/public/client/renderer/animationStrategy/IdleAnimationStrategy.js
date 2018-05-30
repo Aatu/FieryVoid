@@ -16,8 +16,11 @@ window.IdleAnimationStrategy = function () {
             var ship = icon.ship;
 
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
+            var destroyed = shipManager.isDestroyed(ship);
 
             if (turnDestroyed !== null && turnDestroyed < this.turn) {
+                icon.hide();
+            } else if (turnDestroyed === null && destroyed) {
                 icon.hide();
             } else {
                 icon.show();
