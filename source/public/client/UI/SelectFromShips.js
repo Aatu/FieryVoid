@@ -93,7 +93,7 @@ window.SelectFromShips = function () {
             yOffset = 20;
         }
 
-        element.css("left", position.x - (element.width() + 30) / 2 + "px").css("bottom", position.y + yOffset + "px");
+        element.css("left", position.x - (element.width() + 30) / 2 + "px").css("top", (position.y - yOffset - element.height()) + "px");
     }
 
     function getAllyClass(ship) {

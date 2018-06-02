@@ -56,7 +56,7 @@ window.systemInfo = {
 		if (!gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip) {
 			if (weaponManager.canCalledshot(ship, system, selectedShip)) {
 
-				e = $('<div class="calledtargeting"><span>CALLED SHOT</span></div><div class="targeting"></div>');
+				var e = $('<div class="calledtargeting"><span>CALLED SHOT</span></div><div class="targeting"></div>');
 				var datac = $(".datacontainer", w);
 				datac.append(e);
 				weaponManager.targetingShipTooltip(selectedShip, ship, datac, system.id);

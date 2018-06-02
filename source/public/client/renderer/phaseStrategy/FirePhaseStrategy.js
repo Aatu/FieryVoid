@@ -91,8 +91,8 @@ window.FirePhaseStrategy = function () {
         var system = payload.system;
 
         console.log(gamedata.isEnemy(ship, this.selectedShip), gamedata.selectedSystems.length > 0, weaponManager.canCalledshot(ship, system, this.selectedShip));
-        if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
-            weaponManager.targetShip(ship, system);
+        if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
+            weaponManager.targetShip(this.selectedShip, ship, system);
         }
     };
 
