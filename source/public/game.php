@@ -142,6 +142,7 @@
 
 
     <script src="client/UI/ShipTooltip.js"></script>
+    <script src="client/UI/SelectFromShips.js"></script>
     <script src="client/UI/shipTooltipMenu.js"></script>
     <script src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
     <script src="client/UI/shipTooltipFireMenu.js"></script>

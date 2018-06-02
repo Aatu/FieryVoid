@@ -12,8 +12,8 @@ window.PhaseStrategy = function () {
         this.currentlyMouseOveredIds = null;
 
         this.onMouseOutCallbacks = [];
-        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this)];
-        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this)];
+        this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
+        this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
         this.onClickCallbacks = [];
 
         this.selectedShip = null;
@@ -22,6 +22,7 @@ window.PhaseStrategy = function () {
         this.replayUI = null;
 
         this.shipTooltip = null;
+        this.selectFromShips = null;
         this.movementUI = null;
 
         this.onDoneCallback = null;
@@ -116,7 +117,7 @@ window.PhaseStrategy = function () {
         if (icons.length > 1) {
             this.onShipsClicked(icons.map(function (icon) {
                 return this.gamedata.getShip(icon.shipId);
-            }, this));
+            }, this), payload);
         } else if (icons.length === 1) {
             if (payload.button !== 0) {
                 this.onShipRightClicked(this.gamedata.getShip(icons[0].shipId), payload);
@@ -130,9 +131,9 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onHexClicked = function (payload) {};
 
-    PhaseStrategy.prototype.onShipsClicked = function (ships) {
+    PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
         //TODO: implement clicking multiple ships
-        console.log("CLICKING MULTIPLE SHIPS IS NOT YET IMPLEMENTED");
+        this.showSelectFromShips(ships, payload)
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function (ship) {
@@ -250,6 +251,9 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
+        if (this.shipTooltip && this.shipTooltip.isForAnyOf(ships)) {
+            return;
+        }
         this.showShipTooltip(ships, payload, null, true);
     };
 
@@ -274,7 +278,7 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
 
         if (this.shipTooltip) {
-            return;
+            this.hideShipTooltip(this.shipTooltip)
         }
 
         ships = [].concat(ships);
@@ -298,12 +302,34 @@ window.PhaseStrategy = function () {
         }
     };
 
+    PhaseStrategy.prototype.showSelectFromShips = function (ships, payload) {
+        var selectFromShips = new window.SelectFromShips(this.selectedShip, ships, payload, this)
+        this.selectFromShips = selectFromShips;
+        this.onClickCallbacks.push(this.hideSelectFromShips.bind(this, selectFromShips));
+    };
+
     PhaseStrategy.prototype.hideShipTooltip = function (shipTooltip) {
         if (this.shipTooltip && this.shipTooltip === shipTooltip) {
             this.shipTooltip.destroy();
             this.shipTooltip = null;
         }
     };
+
+    PhaseStrategy.prototype.hideSelectFromShips = function (selectFromShips) {
+        if (this.selectFromShips && this.selectFromShips === selectFromShips) {
+            this.selectFromShips.destroy();
+            this.selectFromShips = null;
+        }
+    };
+
+    PhaseStrategy.prototype.repositionSelectFromShips = function () {
+        if (this.selectFromShips) {
+            this.selectFromShips.reposition();
+        }
+
+        return true;
+    };
+
 
     PhaseStrategy.prototype.repositionTooltip = function () {
         if (this.shipTooltip) {

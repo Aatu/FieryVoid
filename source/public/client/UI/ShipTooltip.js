@@ -88,6 +88,20 @@ window.ShipTooltip = function () {
         }
     };
 
+    ShipTooltip.prototype.isForAnyOf = function (ships) {
+        ships = [].concat(ships)
+
+        if (this.ships.length > 1) {
+            return false;
+        }
+
+        return this.ships.some(function(ship) {
+            return ships.includes(ship)
+        })
+
+    }
+
+
     function createForSingleShip(ship) {
 
         jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + '</span>').appendTo(this.element.find('.namecontainer'));
