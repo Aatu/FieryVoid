@@ -181,7 +181,7 @@ window.ShipTooltip = function () {
 
             $(".ballistics", this.element).hide();
         }, this);
-        this.addEntryElement("Zoom closer to interact");
+        this.addEntryElement("Zoom closer, or click to interact");
     }
 
     function showBallisticsTooltip(ballistics) {}

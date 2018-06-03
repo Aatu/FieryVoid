@@ -87,7 +87,9 @@ window.ReplayPhaseStrategy = function () {
             back: activateButton.bind(this, "back"),
             turnForward: turnForward.bind(this),
             turnBack: turnBack.bind(this),
-            endReplay: requestPlayableGamedata.bind(this)
+            endReplay: requestPlayableGamedata.bind(this),
+            toMovementPhase: toMovementPhase.bind(this),
+            toFiringPhase: toFiringPhase.bind(this)
         }).activate();
     };
 
@@ -98,6 +100,18 @@ window.ReplayPhaseStrategy = function () {
             activatePause.call(this);
         }
     };
+
+    function toMovementPhase() {
+        this.animationStrategy.toMovementPhase();
+        this.replayUI.activateButton('#pause');
+        this.animationStrategy.pause();
+    }
+
+    function toFiringPhase() {
+        this.animationStrategy.toFiringPhase();
+        this.replayUI.activateButton('#pause');
+        this.animationStrategy.pause();
+    }
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {

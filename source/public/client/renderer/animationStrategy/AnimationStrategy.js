@@ -60,6 +60,11 @@ window.AnimationStrategy = function () {
         return this;
     };
 
+    AnimationStrategy.prototype.goToTime = function (time) {
+        this.totalAnimationTime = time;
+        return this
+    };
+
     AnimationStrategy.prototype.render = function (coordinateConverter, scene, zoom) {
         updateDeltaTime.call(this, this.paused);
         updateTotalAnimationTime.call(this, this.paused);

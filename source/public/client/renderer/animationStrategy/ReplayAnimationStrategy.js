@@ -27,6 +27,9 @@ window.ReplayAnimationStrategy = function () {
         this.currentTime = 0;
         this.endTime = null;
 
+        this.movementPhaseStartTime = null;
+        this.firingPhaseStartTime = null;
+
         /*
         this.explosion = new ShipExplosion(this.emitterContainer, {
             time: 0,
@@ -65,13 +68,25 @@ window.ReplayAnimationStrategy = function () {
         return this;
     };
 
+    ReplayAnimationStrategy.prototype.toFiringPhase = function () {
+        this.goToTime(this.firingPhaseStartTime)
+        return this;
+    };
+
+    ReplayAnimationStrategy.prototype.toMovementPhase = function () {
+        this.goToTime(this.movementPhaseStartTime)
+        return this;
+    };
+
     function buildAnimations() {
 
         var time = 0;
         var logAnimation = new LogAnimation();
         this.animations.push(logAnimation);
 
+        this.movementPhaseStartTime = time;
         time = animateMovement.call(this, time);
+        this.firingPhaseStartTime = time;
         time = animateWeaponFire.call(this, time, logAnimation);
         time = animateShipDestruction.call(this, time, logAnimation);
         time += 100;
