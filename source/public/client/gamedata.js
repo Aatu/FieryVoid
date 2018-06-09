@@ -558,14 +558,9 @@ window.gamedata = {
             tr.className = "iniTr";
             tr.id = ships[i].id;
 
-            tr.addEventListener("click", function () {
-                for (var i = 0; i < gamedata.ships.length; i++) {
-                    if (gamedata.ships[i].id == this.id) {
-                        scrolling.scrollToShip(gamedata.ships[i]);
-                        break;
-                    }
-                }
-            });
+            jQuery(tr).addClass('button').on('click', function() {
+                window.webglScene.customEvent('ScrollToShip', {shipId: this.id});
+            })
 
             var td = document.createElement("td");
             td.position = "relative";

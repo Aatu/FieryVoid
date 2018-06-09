@@ -156,7 +156,6 @@
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
 
-	<script src="client/UI/botPanel.js"></script>
     <script src="client/UI/replayUI.js"></script>
     <script src="client/gamedata.js"></script>
     <script src="client/windowevents.js"></script>
@@ -623,7 +622,7 @@
     <div class="ewentry deletable"><span class="valueheader"></span><span class="value"></span><div class="button1"></div><div class="button2" ></div></div>
 
 </div>
-
+<!--
 <div id="botPanel">
 	<div class="BPcontainer EW">
 		<div class="header"><span class="header">ELECTRONIC WARFARE</span></div>
@@ -892,6 +891,7 @@
 		</div>
 	</div>
 </div>
+-->
 <div id="logcontainer">
 	<div class="visiblecontainer assignthrustcontainer red">
 		<div class="centeredvaluecontainer">

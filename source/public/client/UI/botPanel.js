@@ -8,9 +8,6 @@ jQuery(function () {
 	$(".ewentry.CCEW .button2").on("click", ew.buttonAssignEW);
 	$(".ewentry.BDEW .button1").on("click", ew.buttonDeassignEW);
 	$(".ewentry.BDEW .button2").on("click", ew.buttonAssignEW);
-	$("#botPanel").on("mouseover", windowEvents.botElementMouseOver);
-	$("#botPanel").on("mouseout", windowEvents.botElementMouseOut);
-	$("#logcontainer").on("mouseover", windowEvents.botElementMouseOver);
 
 	$("#expandBotPanel").click(function () {
 		if ($("#logcontainer").data("large") == 1) {
@@ -29,8 +26,6 @@ jQuery(function () {
 			$(".chatMessages").height(300);
 		}
 	});
-
-	$("#logcontainer").on("mouseout", windowEvents.botElementMouseOut);
 });
 
 window.botPanel = {

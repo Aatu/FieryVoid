@@ -102,8 +102,7 @@ window.fleetListManager = {
         }
 
         var shipId = shipNameEntry.dataset["shipid"];
-        var target = gamedata.getShip(shipId);
-        scrolling.scrollToShip(target);
+        window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
     },
 
     updateFleetList: function updateFleetList() {

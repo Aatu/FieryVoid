@@ -96,6 +96,7 @@ window.webglScene = function () {
         this.phaseDirector.relayEvent('ScrollEvent', this.camera.position);
     };
 
+
     webglScene.prototype.moveCameraTo = function (position) {
         if (!this.initialized) {
             return;

@@ -94,6 +94,11 @@ window.PhaseStrategy = function () {
         }
     };
 
+    PhaseStrategy.prototype.onScrollToShip = function(payload) {
+        var icon = this.shipIconContainer.getById(payload.shipId)
+        window.webglScene.moveCameraTo(icon.getPosition())
+    }
+
     PhaseStrategy.prototype.onScrollEvent = function (payload) {
         this.onScrollCallbacks = this.onScrollCallbacks.filter(function (callback) {
             return callback(payload);
@@ -163,8 +168,7 @@ window.PhaseStrategy = function () {
         this.selectedShip = ship;
         this.shipIconContainer.getByShip(ship).setSelected(true);
         this.shipIconContainer.getByShip(ship).showEW();
-        botPanel.setEW(ship);
-
+        
         if (this.shipTooltip) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
