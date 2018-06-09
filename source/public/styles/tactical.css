@@ -371,40 +371,6 @@ body {
 	display:none;
 }
 
-#botPanel{
-	width:200px;
-	height:180px;
-	opacity:0.85;
-    color: #496791; /* #deebff; */
-    background-color: #04161C;
-    border-top: 1px solid #496791;
-	border-right: 1px solid #496791;
-	position:absolute;
-	left:0px;
-	bottom:0px;
-	z-index:10000;
-	-moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
-	overflow-y:visible;
-	overflow-x:hidden;
-	font-family:arial;
-	font-size:10px;
-	border-radius: 0px 20px 0px 0px;
-    -moz-border-radius: 0px 20px 0px 0px;
-    -webkit-border-top-right-radius: 20px;
-    -webkit-transition: all 0.1s linear;
-	-moz-transition: all 0.1s linear;
-	-o-transition: all 0.1s linear;
-	transition: all 0.1s linear;
-
-}
-
-#botPanel.mouseover
-{
-    bottom:0px;
-}
-
 .BPcontainer{
 	width:190px;
 	height:170px;
@@ -412,203 +378,9 @@ body {
 	display:none;
 }
 
-.phase1 #botPanel .EW{
-	display:block;
-}
-
-.phase2 #botPanel .movement{
-	display:block;
-}
-
-.phase2 #botPanel.assignThrust .movement{
-	display:none;
-}
-
-body.phase1 #botPanel .ewentry .button1{
-	display:block;
-}
-
-body.phase1 #botPanel .ewentry .button2{
-	display:block;
-}
-
-#botPanel .ewentry{
-	margin-top:2px;
-	position:relative;
-}
-
-#botPanel  .value{
-	margin-left:3px;
-	margin-right:3px;
-	color:#DEEBFF;
-}
-
-.phase2 #botPanel .thrusters{
-	display:none;
-}
-
-.phase2 #botPanel.assignThrust .thrusters{
-	display:block
-}
-
-#botPanel .thrusters table{
-	text-align:center;
-	vertical-align:middle;
-	padding:0px;
-}
-#botPanel .thrusters tr{
-	height:22px;
-} 
-
-#botPanel .thrusters td{
-	text-align:center;
-	padding:0px;
-	vertical-align:middle;
-}
-#botPanel .system.enableAssignThrust{
-	border:1px solid #496791;
-}
-
-#botPanel .system {
-	position:relative;
-	width:20px;
-	height:20px;
-	border:1px solid #3d4755;
-	background-position:center; 
-	margin-right:auto;
-	margin-left:auto;
-	display:none;
-
-}
-
-#botPanel .system.exists {
-	display:block;
-}
-
-
-#botPanel .system  .button1{
-	
-	width:10px;
-	height:11px;
-	position:absolute;
-	right:0px;
-	top:0px;
-	display:none;
-	cursor:pointer;
-	background-image:url(../img/plussquareS.png);
-	background-position:center; 
-	
-
-}
-
-#botPanel .system .button2{
-
-	width:10px;
-	height:11px;
-	position:absolute;
-	right:0px;
-	bottom:0px;
-	display:none;
-	cursor:pointer;
-	background-image:url(../img/minussquareS.png);
-	background-position:center; 
-	
-}
-
-#botPanel .system .icon{
-	background-color:black;
-	width:20px;
-	height:20px;
-	margin:0px;
-	padding:0px;
-	text-align:center;
-	position:relative;
-	
-}
-#botPanel .frontcontainer {
-	position:absolute;
-	left:37px;
-	top:18px;
-	width:106px;
-}
-
-#botPanel .frontcontainer .system .icon{
-	background-image:url("../img/systemicons/thruster_small_1.png");
-}
-
-#botPanel .aftcontainer {
-	position:absolute;
-	left:17px;
-	bottom:2px;
-	width:146px;
-}
-
-#botPanel .aftcontainer .system .icon{
-	background-image:url("../img/systemicons/thruster_small_2.png");
-}
-
-#botPanel .portcontainer {
-	position:absolute;
-	left:10px;
-	top:45px;
-}
-
-#botPanel .portcontainer .system .icon{
-	background-image:url("../img/systemicons/thruster_small_3.png");
-}
-
-#botPanel .starboardcontainer {
-	position:absolute;
-	right:30px;
-	top:45px;
-}
-
-#botPanel .starboardcontainer .system .icon{
-	background-image:url("../img/systemicons/thruster_small_4.png");
-}
-
-
-#botPanel .system.enableAssignThrust .icon .iconmask{
-	background-color:transparent;
-	cursor:pointer;
-}
-
-#botPanel .system .icon .iconmask{
-	position:absolute;
-	left:0px;
-	top:0px;
-	width:20px;
-	height:20px;
-	background-color:black;
-	opacity:0.5;
-	display:block;
-
-}
-
-#botPanel .middlecontainer{
-	border: 2px dashed #496791;
-	width:96px;
-	height:96px;
-	position:absolute;
-	top:48px;
-	left:40px;
-}
-
-#botPanel .engine{
-	background-color:black;
-	border: 1px solid #496791;
-	width:30px;
-	height:23px;
-	position:absolute;
-	top:32px;
-	left:32px;
-	background-image:url("../img/systemicons/engine.png");
-	text-align: center;
-	padding-top:7px;
-}
-
 #logcontainer{
-	width:600px;
+    width:100%;
+    max-width: 800px;
 	height:150px;
 	opacity:0.85;
     color: #496791; /* #deebff; */
@@ -617,7 +389,6 @@ body.phase1 #botPanel .ewentry .button2{
 	border-right: 1px solid #496791;
 	border-left: 1px solid #496791;
 	position:absolute;
-	left:210px;
 	bottom:0px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
@@ -799,7 +570,7 @@ body.phase1 #botPanel .ewentry .button2{
 }
 
 #log{
-	width:600px;
+	width:100%;
 	height:150px;
 	border-right: 1px solid #496791;
 	position:absolute;

@@ -6,6 +6,7 @@ const Clickable = css`
     border-right: none;
     &:hover {
         text-shadow: white 0 0 10px, white 0 0 3px;
+        opacity: 2;
         color: #deebff;
     }
 `;

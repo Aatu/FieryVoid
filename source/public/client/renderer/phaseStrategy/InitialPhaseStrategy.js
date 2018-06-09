@@ -32,7 +32,6 @@ window.InitialPhaseStrategy = function () {
 
     InitialPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
-        botPanel.deactivate();
         return this;
     };
 
@@ -56,7 +55,6 @@ window.InitialPhaseStrategy = function () {
         var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
         menu.addButton("selectShip", null, function () {
             PhaseStrategy.prototype.selectShip.call(this, ship);
-            botPanel.setEW(ship);
             this.showShipEW(this.selectedShip);
         }.bind(this), "Select ship");
         this.showShipTooltip(ship, payload, menu, false);
@@ -64,7 +62,6 @@ window.InitialPhaseStrategy = function () {
 
     InitialPhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
-        botPanel.onShipStatusChanged(ship);
         this.hideShipEW(ship);
     };
 

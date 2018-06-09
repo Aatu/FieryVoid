@@ -118,7 +118,7 @@ shipManager.movement = {
             ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
 
             var shipwindow = $(".shipwindow_" + ship.id);
-            shipWindowManager.cancelAssignThrust(shipwindow);
+            //shipWindowManager.cancelAssignThrust(ship);
         }
     },
 
@@ -144,7 +144,7 @@ shipManager.movement = {
                 ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
 
                 var shipwindow = $(".shipwindow_" + ship.id);
-                shipWindowManager.cancelAssignThrust(shipwindow);
+                shipWindowManager.cancelAssignThrust(ship);
 
                 return true;
             }
@@ -710,9 +710,9 @@ shipManager.movement = {
             requiredThrust[0] = pivotcost;
             assignedThrust[0] = pivotcost;
         } else {
-            side = Math.floor(pivotcost / 2);
-            rear = Math.floor(pivotcost / 2);
-            any = ship.pivotcost % 2;
+            var side = Math.floor(pivotcost / 2);
+            var rear = Math.floor(pivotcost / 2);
+            var any = ship.pivotcost % 2;
 
             requiredThrust = Array(any, rear, rear, side, side);
         }
@@ -1740,18 +1740,24 @@ shipManager.movement = {
 
     revertAutoThrust: function revertAutoThrust(ship) {
         var move = ship.movement[ship.movement.length - 1];
-        var assignArray = ship.movement[ship.movement.length - 1].assignedThrust;
+        var assignArray = move.assignedThrust;
 
-        for (var id in assignArray) {
-            if (assignArray[id] != null) {
-                for (var sys in ship.systems) {
-                    if (ship.systems[sys].id == id) {
-                        ship.systems[sys].channeled -= assignArray[id];
-                        break;
-                    }
-                }
+        assignArray.forEach(function(amount, id) {
+
+            if (amount === undefined) {
+                return;
             }
-        }
+
+            var system = ship.systems.find(function (system) { return system.id === id})
+
+            if (!system) {
+                throw new Error("Thruster not found")
+            }
+
+            system.channeled -= amount;
+        })
+
+        move.assignedThrust = []
     },
 
     askForIntoPivotTurn: function askForIntoPivotTurn(ship, right, message) {

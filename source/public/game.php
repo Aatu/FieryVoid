@@ -68,8 +68,8 @@
                 window.coordinateConverter
             );
 
-			var UIManager = new window.UIManager($("body")[0]);
-            UIManager.PlayerSettings(window.Settings);
+			window.UIManagerInstance = new window.UIManager($("body")[0]);
+            window.UIManagerInstance.PlayerSettings(window.Settings);
             $("#pagecontainer").show();
         });
         
@@ -156,6 +156,7 @@
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
 
+    <script src="client/UI/botPanel.js"></script>
     <script src="client/UI/replayUI.js"></script>
     <script src="client/gamedata.js"></script>
     <script src="client/windowevents.js"></script>
@@ -496,6 +497,7 @@
 </div>
 
 <div id="playerSettings"></div>
+<div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
     <div id="background" style="background-image:url(img/maps/<?php print($serverdata->background); ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
@@ -622,288 +624,7 @@
     <div class="ewentry deletable"><span class="valueheader"></span><span class="value"></span><div class="button1"></div><div class="button2" ></div></div>
 
 </div>
-<!--
-<div id="botPanel">
-	<div class="BPcontainer EW">
-		<div class="header"><span class="header">ELECTRONIC WARFARE</span></div>
-		<div class="EWcontainer">
-			<div class="ewentry"><span class="valueheader">Defensive:</span><span class="value DEW"></span></div>
-			<div class="ewentry CCEW"><span class="valueheader">Close combat:</span><span class="value CCEW"></span><div class="button1" data-ew="CCEW"></div><div class="button2" data-ew="CCEW"></div></div>
-            <div class="ewentry BDEW"><span class="valueheader">Area defence:</span><span class="value BDEW"></span><div class="button1" data-ew="BDEW"></div><div class="button2" data-ew="BDEW"></div></div>
-				
-        </div>
-	</div>
-	
-	<div class="BPcontainer movement">
-		<div class="header"><span class="header">MOVEMENT INFO</span></div>
-		<div class="entry"><span class="valueheader">Current turn delay:</span><span class="value currentturndelay"></span></div>
-		<div class="entry"><span class="valueheader">Turn delay:</span><span class="value turndelay"></span></div>
-		<div class="entry"><span class="valueheader">Turn cost:</span><span class="value turncost"></span></div>
-		<div class="entry"><span class="valueheader">Accel/Deccel cost:</span><span class="value accelcost"></span></div>
-		<div class="entry"><span class="valueheader">Pivot cost:</span><span class="value pivotcost"></span></div>
-		<div class="entry"><span class="valueheader">Roll cost:</span><span class="value rollcost"></span></div>
-		<div class="entry evasion"><span class="valueheader">Evasion:</span><span class="value evasion"></span></div>
-		<div class="entry"><span class="valueheader">Unused thrust:</span><span class="value unusedthrust"></span></div>
-	</div>
-	
-	<div class="BPcontainer thrusters">
-		<div class="header"><span class="header">ASSIGN THRUST</span></div>
-		<table class="frontcontainer">
-			<tr>
-                        <td><div class="system slot_3">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_1">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_2">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_4">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-
-			</tr>
-		</table>
-		
-		<table class="portcontainer">
-			<tr>
-			<td><div class="system slot_3">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_1">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_2">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_4">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			</tr>
-		</table>
-		
-		<table class="starboardcontainer">
-			<tr>
-			<td><div class="system slot_3">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_1">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_2">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			</tr><tr>
-			<td><div class="system slot_4">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			</tr>
-		</table>
-		
-		<table class="aftcontainer">
-			<tr>
-			<td><div class="system slot_5">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-
-			<td><div class="system slot_3">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_1">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_2">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_4">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-			
-			<td><div class="system slot_6">
-				
-				<div class="icon">
-					<span class="efficiency value"></span>
-					<div class="iconmask" oncontextmenu="botPanel.onThrusterContextMenu(this);return false;"></div>
-				</div>
-
-					<div class="button1"></div>
-					<div class="button2"></div>
-
-			</div></td>
-
-			</tr>
-		</table>
-		
-		<div class="middlecontainer">
-			<div class="engine">
-				<span class="efficiency value"></span>
-			</div>
-		</div>
-	</div>
-</div>
--->
-<div id="logcontainer">
-	<div class="visiblecontainer assignthrustcontainer red">
-		<div class="centeredvaluecontainer">
-			<span><h2 class="">ASSIGN THRUST</h2></span>
-			<p class="thrustobjective "></p>
-
-			
-		</div>
-		<div class="ok"></div>
-		<div class="cancel"></div>
-	</div>
-    
+<div id="logcontainer">    
     <div id="logUI">
         <div id="logTab" data-select="#log" class="logUiEntry selected">
             <span>COMBAT LOG</span>

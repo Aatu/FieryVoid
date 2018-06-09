@@ -26,6 +26,7 @@ window.PhaseStrategy = function () {
         this.movementUI = null;
 
         this.onDoneCallback = null;
+        this.uiManager = new window.UIManager($("body")[0]);
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -137,7 +138,6 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onHexClicked = function (payload) {};
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
-        //TODO: implement clicking multiple ships
         this.showSelectFromShips(ships, payload)
     };
 
@@ -472,9 +472,9 @@ window.PhaseStrategy = function () {
             this.shipTooltip.update(ship, this.selectedShip);
         }
 
-        botPanel.setEW(ship);
         this.shipIconContainer.getByShip(ship).consumeEW(ship);
         this.ewIconContainer.updateForShip(ship);
+        window.shipWindowManager.addEW(ship)
     };
 
     PhaseStrategy.prototype.onShipMovementChanged = function (payload) {

@@ -48,12 +48,6 @@ window.shipWindowManager = {
 			n.css("top", old.css("top")).css("left", old.css("left"));
 		}
 
-		/*		if (shipManager.movement.isRolled(ship)){
-              n.addClass("rolled");
-          }else{
-              n.removeClass("rolled");
-          }*/
-
 		this.updateNotes(ship);
 
 		n.show();
@@ -878,7 +872,6 @@ window.shipWindowManager = {
 					//if (system.name == "scanner"){
 					if (system.isScanner()) {
 						shipWindowManager.addEW(ship, shipwindow);
-						botPanel.setEW(ship);
 					}
 				}
 			}
@@ -1014,6 +1007,11 @@ window.shipWindowManager = {
 		var ccew = !gamedata.isMyShip(ship) && gamedata.gamephase == 1 ? "?" : ew.getCCEW(ship);
 		var bdew = !gamedata.isMyShip(ship) && gamedata.gamephase == 1 ? "?" : ew.getBDEW(ship) * 0.25;
 		var elint = shipManager.isElint(ship);
+
+		if (!shipwindow) {
+			shipwindow = ship.shipStatusWindow;
+		}
+
 		shipwindow.find(".value.DEW").html(dew);
 		shipwindow.find(".value.CCEW").html(ccew);
 
@@ -1483,74 +1481,14 @@ window.shipWindowManager = {
 
 	assignThrust: function assignThrust(ship) {
 		var movement = ship.movement[ship.movement.length - 1];
+
 		if (movement.commit) return false;
 
 		var requiredThrust = movement.requiredThrust;
 		var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
-		var done = true;
-		var names = Array("either", "front", "aft", "port", "starboard");
-		if (movement.type == "roll") {
-			names[0] = "any";
-		}
-
-		var additionally = "";
-		var objective = "";
-		var objectives = Array();
-
-		for (var i in requiredThrust) {
-
-			if (stillReq[i] == null || stillReq[i] <= 0) continue;
-
-			/*
-   	if (requiredThrust[i] == null || requiredThrust[i] <= 0 )
-   		continue;
-   */
-
-			if (objective == "") objective = "You need to assign ";
-
-			objectives.push(stillReq[i] + " thrust to " + names[i] + " thrusters");
-			if (stillReq[i] > 0) done = false;
-		}
-
-		for (var i in objectives) {
-
-			if (i < objectives.length - 1 && i != 0) {
-				objective += ", ";
-			} else if (i != 0) {
-				objective += " and ";
-			}
-
-			objective += objectives[i];
-
-			if (i == objectives.length - 1) {
-				objective += ".";
-			}
-		}
-
-		if (shipManager.movement.isTurn(movement)) {
-			var turndelay = shipManager.movement.calculateTurndelay(ship, movement, movement.speed);
-			additionally = " Additionally, you can assign extra thrust to lower the turn delay to minimum of 1. Current turndelay of this turn will be " + turndelay + ".";
-		}
-
+	
 		var shipwindow = ship.shipStatusWindow;
-
-		var obe = $("#logcontainer .assignthrustcontainer .thrustobjective");
-		obe.html(objective + additionally);
-
-		var cont = $("#logcontainer .assignthrustcontainer");
-		cont.data("ship", ship.id);
-		if (done) {
-
-			cont.removeClass("red");
-			cont.addClass("green");
-		} else {
-			cont.removeClass("green");
-			cont.addClass("red");
-		}
-		cont.addClass("assignThrust");
-		$("#botPanel").addClass("assignThrust");
-		$("#logContainer").addClass("assignThrust");
-
+	
 		$(".thruster", shipwindow).each(function () {
 			var direction = $(this).data("direction");
 
@@ -1562,9 +1500,8 @@ window.shipWindowManager = {
 			}
 		});
 
-		botPanel.setSystemsForAssignThrust(ship, requiredThrust, stillReq);
-
 		shipwindow.addClass("assignThrust");
+		window.webglScene.customEvent("AssignThrust", {ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement})
 	},
 
 	selectAllGuns: function selectAllGuns(e) {
@@ -1695,10 +1632,16 @@ window.shipWindowManager = {
 		}
 	},
 
-	doneAssignThrust: function doneAssignThrust() {
+	doneAssignThrust: function doneAssignThrust(ship) {
 
-		var shipwindow = $(".assignthrustcontainer").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
+		var shipwindow;
+		if (! ship){
+			shipwindow = $(".assignthrustcontainer").has($(this));
+			ship = gamedata.getShip(shipwindow.data("ship"));
+		} else {
+			shipwindow = ship.shipStatusWindow
+		}
+		
 		var movement = ship.movement[ship.movement.length - 1];;
 		var requiredThrust = movement.requiredThrust;
 		var stillReg = shipManager.movement.calculateThrustStillReq(ship, movement);
@@ -1713,42 +1656,49 @@ window.shipWindowManager = {
 			movement.commit = true;
 			$(".assignThrust").removeClass("assignThrust");
 			$(".enableAssignThrust").removeClass("enableAssignThrust");
-			$("#botPanel .exists").removeClass("exists");
 			shipWindowManager.setData(ship);
 			webglScene.customEvent("ShipMovementChanged", { ship: ship });
+			window.webglScene.customEvent("AssignThrust", false)
 		}
 	},
 
-	cancelAssignThrustEvent: function cancelAssignThrustEvent() {
+	cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {
+
+		var shipwindow;
+		if (! ship){
+			shipwindow = $(".assignthrustcontainer").has($(this));
+			ship = gamedata.getShip(shipwindow.data("ship"));
+		} else {
+			shipwindow = ship.shipStatusWindow
+		}
 
 		var e = $(".shipwindow").has($(this));
-		var shipwindow = $(".assignthrustcontainer").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
 
-		if (!e.length) e = $(".assignthrustcontainer").has($(this));
+		if (!e.length) {
+			e = $(".assignthrustcontainer.assignThrust");
+		}
 
-		if (!e.length || !e.hasClass("assignThrust")) return;
-
-		shipWindowManager.cancelAssignThrust(e);
+		shipWindowManager.cancelAssignThrust(ship);
 		webglScene.customEvent("ShipMovementChanged", { ship: ship });
 	},
 
-	cancelAssignThrust: function cancelAssignThrust(element) {
-		if (!element || !element.hasClass("assignThrust")) return;
+	cancelAssignThrust: function cancelAssignThrust(ship) {
+		if (!ship) {
+			throw new Error("This requires ship")
+		}
 
+		var element = ship.shipStatusWindow
+	
 		$(".assignThrust").removeClass("assignThrust");
 		$(".enableAssignThrust").removeClass("enableAssignThrust");
-		$("#botPanel .exists").removeClass("exists");
 
-		var ship = gamedata.getShip(element.data("ship"));
-
-		if (!ship) return;
 
 		shipManager.movement.revertAutoThrust(ship);
 
 		ship.movement.splice(ship.movement.length - 1, 1);
 
 		shipWindowManager.setData(ship);
+		window.webglScene.customEvent("AssignThrust", false)
 	},
 
 	onModeClicked: function onModeClicked(e) {

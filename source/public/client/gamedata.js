@@ -170,7 +170,6 @@ window.gamedata = {
     },
 
     shipStatusChanged: function shipStatusChanged(ship) {
-        botPanel.onShipStatusChanged(ship);
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);

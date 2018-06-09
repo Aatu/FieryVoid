@@ -9,7 +9,6 @@ jQuery(function () {
 window.flightWindowManager = {
 
 	close: function close() {
-		//shipWindowManager.cancelAssignThrust($(this).parent().parent());
 		$(this).parent().parent().hide();
 	},
 
