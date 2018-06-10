@@ -22,7 +22,18 @@ const Thruster = styled.div`
         width: 40px;
         height: 40px;
         z-index: -1;
-        background-image: url(img/systemicons/thruster1.png);
+        background-image: ${ props => {
+            switch(props.crits) {
+                case 11: 
+                    return 'url(img/systemicons/thruster1-critical12.png);'
+                case 10: 
+                    return 'url(img/systemicons/thruster1-critical1.png);'
+                case 1: 
+                    return 'url(img/systemicons/thruster1-critical2.png);'
+                default: 
+                    return 'url(img/systemicons/thruster1.png);'
+            }
+        }}
         background-size: cover;
         transform: ${props => {
             switch(props.direction) {
@@ -253,9 +264,17 @@ const getThrusters = (ship, direction, totalRequired, movement) => {
 			shipWindowManager.assignThrust(ship);
         }
 
+        let crits = shipManager.criticals.hasCritical(thruster, "HalfEfficiency") ? 10 : 0;
+        
+
+        if (shipManager.criticals.hasCritical(thruster, "FirstThrustIgnored")) {
+            crits += 1
+        }
+       
+
         const channeled = shipManager.movement.getAmountChanneled(ship, thruster);
         const output = shipManager.systems.getOutput(ship, thruster);
-        return (<Thruster onClick={assignThrust} onContextMenu={unAssignThrust} direction={direction} key={`thruster-${direction}-${index}`}><Text>{channeled}/{output}</Text></Thruster>)
+        return (<Thruster crits={crits} onClick={assignThrust} onContextMenu={unAssignThrust} direction={direction} key={`thruster-${direction}-${index}`}><Text>{channeled}/{output}</Text></Thruster>)
     });
 }
 

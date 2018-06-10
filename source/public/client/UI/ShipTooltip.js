@@ -8,6 +8,7 @@ window.ShipTooltip = function () {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
         this.position = position;
+        //TODO: selected ship might be destroyed
         this.selectedShip = selectedShip;
         this.showTargeting = showTargeting;
         this.hexagon = hexagon;
@@ -140,12 +141,18 @@ window.ShipTooltip = function () {
         this.addEntryElement(flightArmour, ship.flight === true);
 
         if (this.selectedShip) {
-            this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship, ship.flight !== true);
+            if (! gamedata.isMyShip(ship)) {
+                this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship, ship.flight !== true, this.selectedShip.flight !== true);
+            }
 
             if (shipManager.isElint(this.selectedShip)){
                 this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship, ship.flight !== true);
-
             }
+        }
+
+        if (shipManager.isElint(ship)){
+            this.addEntryElement('BDEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
+
         }
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);

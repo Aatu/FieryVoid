@@ -1,16 +1,95 @@
 .shipNameContainer .buttons .menu .action-buttons {
     display: flex;
     margin: 10px 0;
+    justify-content: center;
 }
 
 .shipNameContainer .buttons .menu .action-buttons button {
     margin: 0 5px;
     width: 40px;
     height: 40px;
-    background-color: blue;
     border: none;
     color: #deebff;
     font-size: 16px;
     text-transform: uppercase;
     cursor: pointer;
+    background-color: transparent;
+    border-radius: 10%;
+}
+
+.shipNameContainer .buttons .menu .action-buttons button:hover {
+    box-shadow: white 0 0 10px, white 0 0 3px;
+    background-color: white;
+}
+
+.selectShip{
+    background-image: url("../img/selectShip.png");
+}
+
+.addCCEW {
+    background-image: url("../img/addCCEW.png");
+}
+
+.removeCCEW {
+    background-image: url("../img/removeCCEW.png");
+}
+
+.shipNameContainer .buttons .addOEW {
+    background-image: url("../img/addOEW.png");
+}
+
+.removeOEW {
+    background-image: url("../img/removeOEW.png");
+
+}
+
+.addDIST {
+    background-image: url("../img/addDIST.png");
+
+}
+
+.removeDIST {
+    background-image: url("../img/removeDIST.png");
+
+}
+
+.addSOEW {
+    background-image: url("../img/addSOEW.png");
+
+}
+
+.removeSOEW {
+    background-image: url("../img/removeSOEW.png");
+
+}
+
+.addSDEW {
+    background-image: url("../img/addSDEW.png");
+}
+
+.removeSDEW {
+    background-image: url("../img/removeSDEW.png");
+}
+
+.addBDEW {
+    background-image: url("../img/addBDEW.png");
+
+}
+
+.removeBDEW {
+    background-image: url("../img/removeBDEW.png");
+
+}
+
+.targetWeapons {
+    background-image: url("../img/targetShip.png");
+}
+
+.targetWeaponsHex {
+    background-image: url("../img/targetHex.png");
+
+}
+
+.openSCS {
+    background-image: url("../img/openShipDetails.png");
 }
