@@ -22,6 +22,10 @@
     display: flex;
 }
 
+#replayUI.active{
+    border: none;
+}
+
 #replayUI button {
     margin: 0 5px;
     background-color: transparent;
@@ -30,6 +34,11 @@
     font-size: 16px;
     text-transform: uppercase;
     cursor: pointer;
+    text-shadow: black 0 0 10px, black 0 0 3px;
+}
+
+#replayUI button:hover {
+    text-shadow: #deebff 0 0 10px, #deebff 0 0 3px;
 }
 
 #replayUI .selected-replay {
@@ -61,7 +70,9 @@
 
 #replayUI.active .replay-active {
     display: block;
-    padding: 10px;
+    padding: 10px;    
+    position: fixed;
+    top: 0px;
 }
 
 #replayUI button:focus { outline: none; }
@@ -81,4 +92,10 @@
 
 #replayUI.loading .loading-indicator {
     display: flex;
+}
+
+@media only screen and (max-width: 1024px) {
+    #replayUI {
+        left: calc(50% + 5px);
+    }
 }

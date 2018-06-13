@@ -38,7 +38,6 @@ window.ajaxInterface = {
     },
 
     postAdaptiveArmour: function postAdaptiveArmour(data) {
-        console.log(data);
     },
 
     react: function react() {
@@ -365,7 +364,6 @@ window.ajaxInterface = {
     startPollingGamedata: function startPollingGamedata() {
 
         if (gamedata.poll != null) {
-            console.log("starting to poll, but poll is not null");
             return;
         }
 
@@ -440,8 +438,6 @@ window.ajaxInterface = {
     requestGamedata: function requestGamedata() {
 
         ajaxInterface.submiting = true;
-
-        console.log("request");
 
         $.ajax({
             type: 'GET',

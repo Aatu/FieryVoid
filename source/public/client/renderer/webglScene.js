@@ -24,6 +24,9 @@ window.webglScene = function () {
         this.dragging = false;
         this.draggingDistanceTreshold = 20;
         this.distanceDragged = 0;
+
+        this.lastPinchDistance = null;
+        this.lastTouchMove = null;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
@@ -34,8 +37,8 @@ window.webglScene = function () {
 
         this.scene = new THREE.Scene();
 
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        this.width = jQuery('#pagecontainer').width();
+        this.height = jQuery('#pagecontainer').height();
         this.coordinateConverter.init(this.width, this.height);
         this.phaseDirector.init(this.coordinateConverter, this.scene);
 
@@ -55,6 +58,7 @@ window.webglScene = function () {
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        console.log(this.width, this.height)
         this.renderer.setSize(this.width, this.height);
         this.renderer.context.getExtension('OES_standard_derivatives');
 
@@ -168,22 +172,65 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.touchstart = function(event) {
-        this.mouseDown(event);
+        this.lastTouchMove = event;
+        if (event.originalEvent.touches.length === 1) {
+            this.mouseDown(event);
+        } else if (event.originalEvent.touches.length === 2) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
     };
 
     webglScene.prototype.touchmove = function(event) {
         event.stopPropagation();
         event.preventDefault();
-        this.drag(event);
+
+        this.lastTouchMove = event;
+
+        if (event.originalEvent.touches.length === 1 && !this.lastPinchDistance) {
+            this.drag(event);
+        } else if (event.originalEvent.touches.length === 2) {
+            var dist = Math.hypot(
+                event.originalEvent.touches[0].pageX - event.originalEvent.touches[1].pageX,
+                event.originalEvent.touches[0].pageY - event.originalEvent.touches[1].pageY
+            );
+            if (! this.lastPinchDistance) {
+                this.lastPinchDistance = dist;
+                return;
+            }
+            var delta = dist - this.lastPinchDistance;
+            var zoom = this.zoom * (1  - (delta * 0.02));
+
+            if (zoom < ZOOM_MIN) zoom = ZOOM_MIN;
+            if (zoom > ZOOM_MAX) zoom = ZOOM_MAX;
+
+            this.zoomTarget = zoom;
+            this.zoomCamera(zoom);
+            this.lastPinchDistance = dist;
+        }
     };
 
     webglScene.prototype.touchend = function(event) {
-        this.dragging = false;
+        event.stopPropagation();
+        event.preventDefault();
+
+        if (event.originalEvent.touches.length === 0) {
+            if (!this.lastPinchDistance) {
+                this.mouseUp(this.lastTouchMove);
+            }
+            this.lastTouchMove = null;
+            this.lastPinchDistance = null;
+        } else if (event.originalEvent.touches.length === 1){
+            this.phaseDirector.relayEvent('ZoomEvent', {
+                zoom: this.zoom,
+                animationReady: true
+            });
+        }
     };
 
     webglScene.prototype.onWindowResize = function () {
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        this.width = jQuery('#pagecontainer').width();
+        this.height = jQuery('#pagecontainer').height();
 
         this.zoomCamera(this.zoom);
 
@@ -289,7 +336,7 @@ window.webglScene = function () {
 
         this.distanceDragged += mathlib.distance({ x: 0, y: 0 }, deltaView);
         this.lastDraggingPosition = current;
-        this.dragging(payload);
+        this.dragging && this.dragging(payload);
     };
 
     webglScene.prototype.click = function (event) {
@@ -299,7 +346,7 @@ window.webglScene = function () {
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log(pos, hexPos);
+        console.log(payload);
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }
@@ -376,7 +423,6 @@ window.webglScene = function () {
     }
 
     function getMousePositionInObservedElement(event) {
-
         if (event.originalEvent.touches) {
             return {
                 x: event.originalEvent.touches[0].pageX - this.element.offset().left,

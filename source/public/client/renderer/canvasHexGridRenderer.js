@@ -40,8 +40,6 @@ window.canvasHexGridRenderer = function () {
             top: -(scrollOffset.y + hexHeight()) + "px",
             left: -(scrollOffset.x + hexWidth()) + "px"
         });
-
-        console.log();
     };
 
     function drawHexGrid(canvas, graphics, gamedata, hexWidth, hexHeight, hexLength) {

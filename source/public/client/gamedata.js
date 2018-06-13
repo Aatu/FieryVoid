@@ -458,7 +458,6 @@ window.gamedata = {
     },
 
     getPlayerTeam: function getPlayerTeam() {
-        console.log("this player", gamedata.thisplayer);
         for (var i in gamedata.slots) {
             var slot = gamedata.slots[i];
             if (slot.playerid == gamedata.thisplayer) return slot.team;
@@ -517,7 +516,6 @@ window.gamedata = {
 
         var ini_gui = document.getElementById("iniGui");
         ini_gui.innerHTML = "";
-        ini_gui.style.height = "auto";
 
         var topicDiv = document.createElement("div");
         topicDiv.className = "topicDiv";
@@ -677,8 +675,6 @@ window.gamedata = {
     },
 
     parseServerData: function parseServerData(serverdata) {
-
-        console.log("GAMEDATA", serverdata);
 
         if (serverdata == null) return;
 

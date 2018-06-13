@@ -4,6 +4,7 @@ const Container = styled.div`
     border: 1px solid #496791;
     color: #deebff;
     background-color: #0a3340;
+    font-family:arial;
 `;
 
 const Backdrop = styled.div`
@@ -21,4 +22,9 @@ const ContainerRoundedRightBottom = Container.extend`
     box-shadow: 5px 5px 10px black;
 `;
 
-export {Container, ContainerRoundedRightBottom, Backdrop};
+const ContainerRounded = Container.extend`
+    border-radius: 0px 0px 30px 30px;
+    box-shadow: 5px 5px 10px black;
+`;
+
+export {Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded};

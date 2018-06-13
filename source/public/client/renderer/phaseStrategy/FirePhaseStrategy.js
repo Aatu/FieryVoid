@@ -40,8 +40,13 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
-        menu.addButton("selectShip", null, function () {
-            PhaseStrategy.prototype.selectShip.call(this, ship);
+        menu.addButton("selectShip",
+         function() {
+             return this.selectedShip !== ship;
+         },
+         function () {
+            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            this.showShipEW(this.selectedShip);
         }.bind(this), "Select ship");
 
         var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
@@ -58,8 +63,6 @@ window.FirePhaseStrategy = function () {
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
-
-    FirePhaseStrategy.prototype.untargetShip = function (ship) {};
 
     FirePhaseStrategy.prototype.onWeaponSelected = function (payload) {
         var ship = payload.ship;
@@ -90,7 +93,6 @@ window.FirePhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
 
-        console.log(gamedata.isEnemy(ship, this.selectedShip), gamedata.selectedSystems.length > 0, weaponManager.canCalledshot(ship, system, this.selectedShip));
         if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
             weaponManager.targetShip(this.selectedShip, ship, system);
         }

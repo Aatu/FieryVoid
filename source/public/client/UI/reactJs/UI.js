@@ -2,11 +2,16 @@ import * as React from "react";
 import ReactDom from "react-dom";
 import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
+import FullScreen from "./fullScreen/FullScreen"
 
 class UIManager{
 
     constructor(parentElement) {
         this.parentElement = parentElement;
+    }
+
+    FullScreen(args) {
+        ReactDom.render(<FullScreen {...args}/>, jQuery("#fullScreen", this.parentElement)[0] );
     }
 
     PlayerSettings(args) {

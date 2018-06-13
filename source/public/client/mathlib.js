@@ -118,8 +118,6 @@ window.mathlib = {
 		//direction: 300 start: 360 end: 240
 		direction = Math.round(direction);
 
-		console.log(direction, start, end);
-
 		if (start == end) return true;
 
 		if (direction == 0 && start == 360 || direction == 0 && end == 360) return true;
@@ -148,16 +146,11 @@ window.mathlib = {
 		var oPos = shipManager.getShipPosition(observer);
 		var tPos = shipManager.getShipPosition(target);
 
-		console.log(oPos, tPos);
 		if (oPos.equals(tPos)) {
 			if (shipManager.hasBetterInitive(observer, target)) {
-				console.log(observer.phpclass, "has better iniative");
 				oPos = shipManager.movement.getPreviousLocation(observer);
-				console.log("position is now", oPos);
 			} else {
-				console.log(target.phpclass, "has better iniative");
 				tPos = shipManager.movement.getPreviousLocation(target);
-				console.log("position is now", tPos);
 			}
 		}
 

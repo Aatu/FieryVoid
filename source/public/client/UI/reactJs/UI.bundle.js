@@ -27810,6 +27810,10 @@ var _ShipThrust = require("./shipThrust/ShipThrust");
 
 var _ShipThrust2 = _interopRequireDefault(_ShipThrust);
 
+var _FullScreen2 = require("./fullScreen/FullScreen");
+
+var _FullScreen3 = _interopRequireDefault(_FullScreen2);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -27824,6 +27828,11 @@ var UIManager = function () {
     }
 
     _createClass(UIManager, [{
+        key: "FullScreen",
+        value: function FullScreen(args) {
+            _reactDom2.default.render(React.createElement(_FullScreen3.default, args), jQuery("#fullScreen", this.parentElement)[0]);
+        }
+    }, {
         key: "PlayerSettings",
         value: function PlayerSettings(args) {
             _reactDom2.default.render(React.createElement(_PlayerSettings3.default, args), jQuery("#playerSettings", this.parentElement)[0]);
@@ -27845,7 +27854,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./playerSettings/PlayerSettings":67,"./shipThrust/ShipThrust":69,"react":41,"react-dom":38}],64:[function(require,module,exports){
+},{"./fullScreen/FullScreen":67,"./playerSettings/PlayerSettings":68,"./shipThrust/ShipThrust":70,"react":41,"react-dom":38}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28052,11 +28061,90 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 60px;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-top: none;\n    ", "\n"], ["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 60px;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-top: none;\n    ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styled = require("../styled");
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var FullScreen = function (_React$Component) {
+    _inherits(FullScreen, _React$Component);
+
+    function FullScreen() {
+        _classCallCheck(this, FullScreen);
+
+        return _possibleConstructorReturn(this, (FullScreen.__proto__ || Object.getPrototypeOf(FullScreen)).apply(this, arguments));
+    }
+
+    _createClass(FullScreen, [{
+        key: "fullScreen",
+        value: function fullScreen() {
+            /*
+            if (! document.fullscreenElement ) {
+                var doc = window.document;
+                var docEl = doc.documentElement;
+            
+                var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+                requestFullScreen.call(docEl);
+            }
+            */
+
+            var doc = window.document;
+            var docEl = doc.documentElement;
+
+            var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+            } else {
+                cancelFullScreen.call(doc);
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                MainButton,
+                { onClick: this.fullScreen.bind(this) },
+                "FS"
+            );
+        }
+    }]);
+
+    return FullScreen;
+}(React.Component);
+
+var MainButton = _styled.ContainerRounded.extend(_templateObject, _styled.Clickable);
+
+exports.default = FullScreen;
+
+},{"../styled":74,"react":41}],68:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    border-right: none;\n    ", "\n"], ["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    border-right: none;\n    ", "\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    border-right: none;\n    border-top: none;\n    ", "\n"], ["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 46px;\n    padding-left: 5px;\n    border-right: none;\n    border-top: none;\n    ", "\n"]);
 
 var _react = require("react");
 
@@ -28124,7 +28212,7 @@ var MainButton = _styled.ContainerRoundedRightBottom.extend(_templateObject, _st
 
 exports.default = PlayerSettings;
 
-},{"../styled":73,"./PlayerSettingsForm":68,"react":41}],68:[function(require,module,exports){
+},{"../styled":74,"./PlayerSettingsForm":69,"react":41}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28334,7 +28422,7 @@ var keyCodes = {
 };
 exports.default = PlayerSettingsForm;
 
-},{"../common":66,"../styled":73,"react":41,"styled-components":58}],69:[function(require,module,exports){
+},{"../common":66,"../styled":74,"react":41,"styled-components":58}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28344,7 +28432,7 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(["\n    color: white;\n    font-family:arial;\n    font-size:12px;\n"], ["\n    color: white;\n    font-family:arial;\n    font-size:12px;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n\n    :before {\n        content: \"\";\n        position: absolute;\n        width: 40px;\n        height: 40px;\n        z-index: -1;\n        background-image: url(img/systemicons/thruster1.png);\n        background-size: cover;\n        transform: ", ";\n      }\n\n    \n    ", "\n"], ["\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n\n    :before {\n        content: \"\";\n        position: absolute;\n        width: 40px;\n        height: 40px;\n        z-index: -1;\n        background-image: url(img/systemicons/thruster1.png);\n        background-size: cover;\n        transform: ", ";\n      }\n\n    \n    ", "\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n\n    :before {\n        content: \"\";\n        position: absolute;\n        width: 40px;\n        height: 40px;\n        z-index: -1;\n        background-image: ", "\n        background-size: cover;\n        transform: ", ";\n      }\n\n    \n    ", "\n"], ["\n    width: 40px;\n    height: 40px;\n    display: flex;\n    align-items: center;\n    justify-content: space-around;\n\n    :before {\n        content: \"\";\n        position: absolute;\n        width: 40px;\n        height: 40px;\n        z-index: -1;\n        background-image: ", "\n        background-size: cover;\n        transform: ", ";\n      }\n\n    \n    ", "\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    display: flex;\n    position: absolute;\n"], ["\n    display: flex;\n    position: absolute;\n"]),
     _templateObject4 = _taggedTemplateLiteral(["\n    flex-direction: row;\n    left: 60px;\n    transform: translate(0, -50%);\n    flex-wrap: wrap;\n    max-width: 40px;\n"], ["\n    flex-direction: row;\n    left: 60px;\n    transform: translate(0, -50%);\n    flex-wrap: wrap;\n    max-width: 40px;\n"]),
     _templateObject5 = _taggedTemplateLiteral(["\n    left: -100px;\n"], ["\n    left: -100px;\n"]),
@@ -28384,6 +28472,17 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 var Text = /*#__PURE__*/_styledComponents2.default.span(_templateObject);
 
 var Thruster = /*#__PURE__*/_styledComponents2.default.div(_templateObject2, function (props) {
+    switch (props.crits) {
+        case 11:
+            return 'url(img/systemicons/thruster1-critical12.png);';
+        case 10:
+            return 'url(img/systemicons/thruster1-critical1.png);';
+        case 1:
+            return 'url(img/systemicons/thruster1-critical2.png);';
+        default:
+            return 'url(img/systemicons/thruster1.png);';
+    }
+}, function (props) {
     switch (props.direction) {
         case 4:
             return "rotate(180deg)";
@@ -28456,6 +28555,7 @@ var ShipThrust = function (_React$Component) {
         key: "autoAssign",
         value: function autoAssign() {
             var ship = this.props.ship;
+            window.shipManager.movement.revertAutoThrust(ship);
             window.shipManager.movement.autoAssignThrust(ship);
             window.shipWindowManager.setData(ship);
             window.shipWindowManager.assignThrust(ship);
@@ -28576,10 +28676,8 @@ var getText = function getText(totalRequired, remainginRequired, movement) {
         names[0] = "any";
     }
 
-    var list = remainginRequired.filter(function (required) {
-        return required !== null;
-    }).map(function (required, index) {
-        if (required <= 0) {
+    var list = remainginRequired.map(function (required, index) {
+        if (required <= 0 || require === null) {
             return null;
         }
 
@@ -28626,11 +28724,17 @@ var getThrusters = function getThrusters(ship, direction, totalRequired, movemen
             shipWindowManager.assignThrust(ship);
         };
 
+        var crits = shipManager.criticals.hasCritical(thruster, "HalfEfficiency") ? 10 : 0;
+
+        if (shipManager.criticals.hasCritical(thruster, "FirstThrustIgnored")) {
+            crits += 1;
+        }
+
         var channeled = shipManager.movement.getAmountChanneled(ship, thruster);
         var output = shipManager.systems.getOutput(ship, thruster);
         return React.createElement(
             Thruster,
-            { onClick: assignThrust, onContextMenu: unAssignThrust, direction: direction, key: "thruster-" + direction + "-" + index },
+            { crits: crits, onClick: assignThrust, onContextMenu: unAssignThrust, direction: direction, key: "thruster-" + direction + "-" + index },
             React.createElement(
                 Text,
                 null,
@@ -28701,7 +28805,7 @@ setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){
     },
     */
 
-},{"../common":66,"../styled":73,"react":41,"styled-components":58}],70:[function(require,module,exports){
+},{"../common":66,"../styled":74,"react":41,"styled-components":58}],71:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -28709,7 +28813,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Clickable = undefined;
 
-var _templateObject = _taggedTemplateLiteral(['\n    cursor: pointer;\n    border-right: none;\n    &:hover {\n        text-shadow: white 0 0 10px, white 0 0 3px;\n        opacity: 2;\n        color: #deebff;\n    }\n'], ['\n    cursor: pointer;\n    border-right: none;\n    &:hover {\n        text-shadow: white 0 0 10px, white 0 0 3px;\n        opacity: 2;\n        color: #deebff;\n    }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n    cursor: pointer;\n    &:hover {\n        text-shadow: white 0 0 10px, white 0 0 3px;\n        opacity: 2;\n        color: #deebff;\n    }\n'], ['\n    cursor: pointer;\n    &:hover {\n        text-shadow: white 0 0 10px, white 0 0 3px;\n        opacity: 2;\n        color: #deebff;\n    }\n']);
 
 var _styledComponents = require('styled-components');
 
@@ -28719,17 +28823,18 @@ var Clickable = /*#__PURE__*/(0, _styledComponents.css)(_templateObject);
 
 exports.Clickable = Clickable;
 
-},{"styled-components":58}],71:[function(require,module,exports){
+},{"styled-components":58}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Backdrop = exports.ContainerRoundedRightBottom = exports.Container = undefined;
+exports.ContainerRounded = exports.Backdrop = exports.ContainerRoundedRightBottom = exports.Container = undefined;
 
-var _templateObject = _taggedTemplateLiteral(["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n"], ["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n"]),
+var _templateObject = _taggedTemplateLiteral(["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n    font-family:arial;\n"], ["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n    font-family:arial;\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n    background-color: rgba(0,0,0,0.5);\n"], ["\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n    background-color: rgba(0,0,0,0.5);\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"]);
+    _templateObject3 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"]);
 
 var _styledComponents = require("styled-components");
 
@@ -28745,11 +28850,14 @@ var Backdrop = /*#__PURE__*/_styledComponents2.default.div(_templateObject2);
 
 var ContainerRoundedRightBottom = Container.extend(_templateObject3);
 
+var ContainerRounded = Container.extend(_templateObject4);
+
 exports.Container = Container;
 exports.ContainerRoundedRightBottom = ContainerRoundedRightBottom;
 exports.Backdrop = Backdrop;
+exports.ContainerRounded = ContainerRounded;
 
-},{"styled-components":58}],72:[function(require,module,exports){
+},{"styled-components":58}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28775,7 +28883,7 @@ var SubTitle = Title.extend(_templateObject2);
 exports.Title = Title;
 exports.SubTitle = SubTitle;
 
-},{"styled-components":58}],73:[function(require,module,exports){
+},{"styled-components":58}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28800,6 +28908,12 @@ Object.defineProperty(exports, "Backdrop", {
   enumerable: true,
   get: function get() {
     return _Container.Backdrop;
+  }
+});
+Object.defineProperty(exports, "ContainerRounded", {
+  enumerable: true,
+  get: function get() {
+    return _Container.ContainerRounded;
   }
 });
 
@@ -28827,4 +28941,4 @@ Object.defineProperty(exports, "Clickable", {
   }
 });
 
-},{"./Clickable":70,"./Container":71,"./Title":72}]},{},[63]);
+},{"./Clickable":71,"./Container":72,"./Title":73}]},{},[63]);

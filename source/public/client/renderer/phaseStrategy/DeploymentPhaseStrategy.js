@@ -73,10 +73,6 @@ window.DeploymentPhaseStrategy = function () {
         this.hideMovementUI();
     };
 
-    DeploymentPhaseStrategy.prototype.targetShip = function (ship) {};
-
-    DeploymentPhaseStrategy.prototype.untargetShip = function (ship) {};
-
     DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) {};
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata) {

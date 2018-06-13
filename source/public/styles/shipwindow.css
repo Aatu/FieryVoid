@@ -1202,3 +1202,33 @@ body .shipwindow .system.modes.firing .mode
     border-collapse: collapse;
 }
 
+.shipwindow.left{
+    left: 50px;
+}
+
+.shipwindow.right{
+    right: 50px;
+}
+
+@media only screen and (max-width: 1024px) {
+    .shipwindow.left{
+        left: 0;
+    }
+    
+    .shipwindow.right{
+        right: 0;
+    }
+
+    .shipwindow {
+        max-width: 100vw;
+        max-height: 100%;
+        overflow-x: scroll;
+        top:0;
+    }
+
+    .shipwindow .close {
+        width: 20px;
+        height: 20px;
+        background-size: cover;
+    }
+}

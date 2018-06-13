@@ -39,6 +39,7 @@ const MainButton = ContainerRoundedRightBottom.extend`
     font-size: 46px;
     padding-left: 5px;
     border-right: none;
+    border-top: none;
     ${Clickable}
 `;
 

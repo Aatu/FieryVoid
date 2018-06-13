@@ -213,7 +213,6 @@ if (! isset($chatelement))
             },
             
             retrySetTimeChecked: function(){
-                console.log("retry set time checked");
                 setTimeout(chat.setLastTimeChecked(), 3000);
             },
 
@@ -233,7 +232,6 @@ if (! isset($chatelement))
             },
 
             retryGetTimeChecked: function(){
-                console.log("retry get time checked");
                 setTimeout(chat.getLastTimeChecked(), 3000);
             },
 
@@ -264,7 +262,6 @@ if (! isset($chatelement))
                     },
                     success : chat.successSubmit,
                     error: function(){
-                        console.log("Retry submit");
                         $.ajax(this);
                     }
                 });
@@ -288,10 +285,7 @@ if (! isset($chatelement))
                         lastid:chat.lastid
                     },
                     success : chat.successRequest,
-                    //error : chat.retryRequest
                     error: function(){
-                        //console.log("Retry request");
-                        //$.ajax(this);
                         setTimeout(chat.requestChatdata, 3000);
                     }
                 });

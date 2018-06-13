@@ -151,6 +151,7 @@ class ShipThrust extends React.Component{
 
     autoAssign() {
         const ship = this.props.ship;
+        window.shipManager.movement.revertAutoThrust(ship);
         window.shipManager.movement.autoAssignThrust(ship);
         window.shipWindowManager.setData(ship)
         window.shipWindowManager.assignThrust(ship);
@@ -226,9 +227,8 @@ const getText = (totalRequired, remainginRequired, movement) => {
     }
 
     const list = remainginRequired
-        .filter(required => required !== null)
         .map((required, index) => {
-            if (required <= 0) {
+            if (required <= 0 || require === null) {
                 return null;
             }
             

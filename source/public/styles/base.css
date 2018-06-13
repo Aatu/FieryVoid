@@ -1,7 +1,7 @@
 
 body {
 	background-image:url(./../img/maps/intothefieryvoid.jpeg);
-    background-repeat:repeat;
+    background-repeat:no-repeat;
     background-attachment:fixed;
 	background-color:black;
 	background-size:cover;

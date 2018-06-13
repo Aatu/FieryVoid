@@ -18,6 +18,8 @@ window.UI = {
         initMoveUI: function initMoveUI() {
             if (UI.shipMovement.iniated == true) return;
 
+            console.log("INIT")
+
             UI.shipMovement.uiElement = $("#shipMovementUI");
             var ui = UI.shipMovement.uiElement;
             UI.shipMovement.moveElement = $("#move", ui);
@@ -44,33 +46,30 @@ window.UI = {
             UI.shipMovement.lessjinkElement = $("#lessjink", ui);
             UI.shipMovement.cancelElement = $("#cancel", ui);
 
-            UI.shipMovement.cancelElement.on("click", UI.shipMovement.cancelCallback);
+            UI.shipMovement.cancelElement.on("click touchstart", UI.shipMovement.cancelCallback);
+            UI.shipMovement.moveElement.on("click touchstart", UI.shipMovement.moveCallback);
 
-            if (gamedata.gamephase != -1) {
-                UI.shipMovement.moveElement.on("click", UI.shipMovement.moveCallback);
-            }
+            UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);
+            UI.shipMovement.turnleftElement.on("click touchstart", UI.shipMovement.turnleftCallback);
+            UI.shipMovement.sliprightElement.on("click touchstart", UI.shipMovement.sliprightCallback);
+            UI.shipMovement.slipleftElement.on("click touchstart", UI.shipMovement.slipleftCallback);
 
-            UI.shipMovement.turnrightElement.on("click", UI.shipMovement.turnrightCallback);
-            UI.shipMovement.turnleftElement.on("click", UI.shipMovement.turnleftCallback);
-            UI.shipMovement.sliprightElement.on("click", UI.shipMovement.sliprightCallback);
-            UI.shipMovement.slipleftElement.on("click", UI.shipMovement.slipleftCallback);
+            UI.shipMovement.pivotleftElement.on("click touchstart", UI.shipMovement.pivotleftCallback);
+            UI.shipMovement.pivotrightElement.on("click touchstart", UI.shipMovement.pivotrightCallback);
 
-            UI.shipMovement.pivotleftElement.on("click", UI.shipMovement.pivotleftCallback);
-            UI.shipMovement.pivotrightElement.on("click", UI.shipMovement.pivotrightCallback);
+            UI.shipMovement.rotateleftElement.on("click touchstart", UI.shipMovement.rotateleftCallback);
+            UI.shipMovement.rotaterightElement.on("click touchstart", UI.shipMovement.rotaterightCallback);
 
-            UI.shipMovement.rotateleftElement.on("click", UI.shipMovement.rotateleftCallback);
-            UI.shipMovement.rotaterightElement.on("click", UI.shipMovement.rotaterightCallback);
+            UI.shipMovement.rollElement.on("click touchstart", UI.shipMovement.rollCallback);
 
-            UI.shipMovement.rollElement.on("click", UI.shipMovement.rollCallback);
+            UI.shipMovement.accElement.on("click touchstart", UI.shipMovement.accelCallback);
+            UI.shipMovement.deaccElement.on("click touchstart", UI.shipMovement.deaccCallback);
 
-            UI.shipMovement.accElement.on("click", UI.shipMovement.accelCallback);
-            UI.shipMovement.deaccElement.on("click", UI.shipMovement.deaccCallback);
+            UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
+            UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
 
-            UI.shipMovement.morejinkElement.on("click", UI.shipMovement.morejinkCallback);
-            UI.shipMovement.lessjinkElement.on("click", UI.shipMovement.lessjinkCallback);
-
-            jQuery('#shipMovementUI div').on('mousedown', cancelEvent);
-            jQuery('#shipMovementUI div').on('mouseup', cancelEvent);
+            jQuery('#shipMovementUI div').on('mousedown touchend touchmove', cancelEvent);
+            jQuery('#shipMovementUI div').on('mouseup touchend touchmove', cancelEvent);
 
             function cancelEvent(e) {
                 e.preventDefault();
@@ -180,6 +179,7 @@ window.UI = {
         },
 
         moveCallback: function moveCallback(e) {
+            console.log("hi")
             UI.shipMovement.callbackHandler.moveCallback(e);
         },
 

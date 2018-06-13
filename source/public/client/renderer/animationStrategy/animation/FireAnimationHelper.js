@@ -4,8 +4,6 @@ window.FireAnimationHelper = {
 
     getShipPositionForFiring: function getShipPositionForFiring(icon, time, movementAnimations, weapon, turn) {
         if (weapon.ballistic) {
-            console.log("get ballistic firing position");
-            console.log(turn, icon.getFirstMovementOnTurn(turn));
             return window.coordinateConverter.fromHexToGame(icon.getFirstMovementOnTurn(turn).position);
         }
 

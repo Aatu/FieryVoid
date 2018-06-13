@@ -21,7 +21,6 @@ window.InitialPhaseStrategy = function () {
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
 
-        console.log("enabled initial phase strategy");
         infowindow.informPhase(5000, function () {});
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
@@ -52,11 +51,16 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
 
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
-        menu.addButton("selectShip", null, function () {
-            PhaseStrategy.prototype.selectShip.call(this, ship);
+        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
+        menu.addButton("selectShip",
+         function() {
+             return this.selectedShip !== ship;
+         },
+         function () {
+            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
             this.showShipEW(this.selectedShip);
         }.bind(this), "Select ship");
+        
         this.showShipTooltip(ship, payload, menu, false);
     };
 

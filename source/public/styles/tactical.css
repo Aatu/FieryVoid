@@ -1,4 +1,10 @@
 
+body {
+    height: 100%;
+    width: 100%;
+    overflow:hidden;
+    -webkit-overflow-scrolling: touch; /* iOS velocity scrolling */
+}
 
 body *::-moz-selection {
 background: transparent;
@@ -59,15 +65,16 @@ background: transparent;
 }
 
 #pagecontainer{
-    position:absolute;
+    position:fixed;
     z-index:1;
 	overflow:hidden;
-    width:100%;
+    width:100vw;
     height:100%;
     top: 0px;
     bottom: 0px;
     left: 0px;
     right: 0px;
+    background-color: black;
 }
 
 
@@ -175,7 +182,6 @@ body {
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
     padding-top:10px;
-
 }
 
 .phasecontainer{
@@ -388,7 +394,7 @@ body {
     border-top: 1px solid #496791;
 	border-right: 1px solid #496791;
 	border-left: 1px solid #496791;
-	position:absolute;
+	position:fixed;
 	bottom:0px;
 	z-index:10000;
 	-moz-box-shadow: 5px 5px 10px black;
@@ -400,6 +406,10 @@ body {
 	-moz-transition: all 0.1s linear;
 	-o-transition: all 0.1s linear;
 	transition: all 0.1s linear;
+}
+
+#logcontainer.large{
+    height: 300px;
 }
 
 #logcontainer.mouseover
@@ -719,14 +729,13 @@ body {
     background-color:#0a3340;
     margin-top: 50px;
     width: 250px;
-    height: 50px;
+    height: auto;
     position: absolute;
     display: inline-block;
     opacity: 0.8;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
     padding-top:10px;
+    padding-bottom: 10px;
     border-radius: 0px 10px 10px 0px;
     max-height: 550px;
     overflow-y: auto;
@@ -791,4 +800,59 @@ body {
     box-shadow: 5px 5px 10px black;
     padding-top:10px;
     border-radius: 0px 10px 10px 0px;
+}
+
+#fullScreen {
+
+}
+
+
+@media only screen and (max-width: 1024px) {
+    #phaseheader {
+        max-width: 50%;
+    }
+    
+    #logUI {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #logcontainer.large #logUI .logUiEntry {
+        width: 20%;
+        display: block;
+    }
+
+    #logUI .logUiEntry {
+        width: 20%;
+        display: none;
+    }
+
+    #logUI #infoTab {
+        left: 20%;
+    }
+
+    #logUI #chatTab {
+        left: 40%;
+    }
+
+    #logUI #globalChatTab {
+        left: 60%;
+    }
+
+    #logUI #expandBotPanel {
+        right: 0px;
+        left: auto;
+    }
+
+    #logcontainer {
+        height: 0;
+    }
+
+    #logcontainer.large{
+        height: 50vh;
+    }
+
+    #iniGui {
+        max-height: calc(100vh - 130px);
+    }
 }

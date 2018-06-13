@@ -25,7 +25,7 @@
 <head>
     <title>Fiery Void</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' />
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
@@ -50,8 +50,6 @@
         $(window).load(function(){
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
-            getWindowDimensions();
-            resizeGame();
             //shipWindowManager.createShipWindow(gamedata.getActiveShip());
             
 			if (gamedata.thisplayer == -1){
@@ -71,6 +69,7 @@
 
 			window.UIManagerInstance = new window.UIManager($("body")[0]);
             window.UIManagerInstance.PlayerSettings(window.Settings);
+            window.UIManagerInstance.FullScreen();
             $("#pagecontainer").show();
         });
         
@@ -216,7 +215,7 @@
     <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
     <table class="uitable">
         <tr>
-        <td class="committurn" style="display:none"><div class="ok" ></div></td>
+        <td class="committurn" style="display:none"><div class="ok" >✔</div></td>
         <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
         </tr>
     </table>
@@ -497,10 +496,11 @@
     <div class="datacontainer"></div>
 </div>
 
+<div id="fullScreen"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php print($serverdata->background); ?>)"></div>
+    <div id="background" style="background-image:url(img/maps/<?php print($serverdata ? $serverdata->background : ""); ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 
@@ -628,16 +628,16 @@
 <div id="logcontainer">    
     <div id="logUI">
         <div id="logTab" data-select="#log" class="logUiEntry selected">
-            <span>COMBAT LOG</span>
+            <span>LOG</span>
         </div>
         <div id="infoTab" data-select="#gameinfo" class="logUiEntry">
-            <span>GAME INFO</span>
+            <span>INFO</span>
         </div>
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
         <div id="globalChatTab" data-select="#globalchat" class="logUiEntry">
-            <span>GLOBAL CHAT</span>
+            <span>CHAT</span>
         </div>
         <div id="expandBotPanel">
             <span>Click!</span>

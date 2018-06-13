@@ -80,10 +80,22 @@ window.shipWindowManager = {
 
 		if (ship.userid == gamedata.thisplayer) {
 			shipwindow.addClass("owned");
-			shipwindow.css("left", "50px");
 		} else {
 			shipwindow.addClass("enemy");
-			shipwindow.css("right", "50px");
+		}
+
+		if ( gamedata.getPlayerTeam() === 1) {
+			if (ship.userid == gamedata.thisplayer) {
+				shipwindow.addClass("left");
+			} else {
+				shipwindow.addClass("right");
+			}
+		} else {
+			if (ship.userid == gamedata.thisplayer) {
+				shipwindow.addClass("right");
+			} else {
+				shipwindow.addClass("left");
+			}
 		}
 
 		shipwindow.data("ship", ship.id);

@@ -5,8 +5,7 @@ window.damageManager = {
     getDamage: function getDamage(ship, system) {
         var damage = 0;
         if (system == null) {
-            console.log("system is null");
-            console.trace();
+            throw new Error("system null")
         }
         for (var i in system.damage) {
             var damageEntry = system.damage[i];

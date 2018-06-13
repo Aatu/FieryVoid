@@ -101,7 +101,6 @@ shipManager.systems = {
     getSystem: function getSystem(ship, id) {
 
         if (ship == null) {
-            console.log("That's weird");
             return null;
         }
 
