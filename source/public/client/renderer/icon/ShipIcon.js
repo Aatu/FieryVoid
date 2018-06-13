@@ -299,7 +299,7 @@ window.ShipIcon = function () {
         var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
         var arcs = shipManager.systems.getArcs(ship, weapon);
 
-        var arcLenght = arcs.start === arcs.length ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcLenght = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
         var arcStart = mathlib.addToDirection(0, arcLenght * -0.5);
         var arcFacing = mathlib.addToDirection(arcs.end, arcLenght * -0.5);
 
