@@ -1227,7 +1227,7 @@ class Weapon extends ShipSystem
 	$launchPos = null;
         if ($this->ballistic){
 		$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-		$launchPos = mathlib::hexCoToPixel($movement->x, $movement->y);
+		$launchPos = mathlib::hexCoToPixel($movement->position);
 		if((!($tmpLocation > 0)) && (!$forcePrimary)){ //location not yet found or PRIMARY (reassignment causes no problem)
 			$tmpLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn);
 		}

@@ -883,7 +883,7 @@ class BaseShip{
         $foundLocation = 0;
         if($weapon->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn - 1?...
-            $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $posLaunch = mathlib::hexCoToPixel($movement->position);
             $foundLocation = $this->getHitSectionPos($posLaunch, $fireOrder->turn);
         }else{
             $foundLocation = $this->getHitSection($shooter, $fireOrder->turn, $returnDestroyed);
@@ -922,7 +922,7 @@ class BaseShip{
         $foundProfile = 0;
         if($weapon->ballistic){
             $movement = $shooter->getLastTurnMovement($fireOrder->turn); //turn-1?...
-            $posLaunch = mathlib::hexCoToPixel($movement->x, $movement->y);
+            $posLaunch = mathlib::hexCoToPixel($movement->position);
             $foundProfile = $this->getHitSectionProfilePos($posLaunch);
         }else{
             $foundProfile = $this->getHitSectionProfile($shooter);
