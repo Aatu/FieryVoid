@@ -6,9 +6,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 //      return;
 }
 
-$games = Manager::getTacGames($_SESSION["user"]);
+$games = "[]";
+if (isset($_SESSION["user"])) {
+    $games = Manager::getTacGames($_SESSION["user"]);
 
-$games = json_encode($games, JSON_NUMERIC_CHECK);
+    $games = json_encode($games, JSON_NUMERIC_CHECK);
+} 
 
 ?>
 

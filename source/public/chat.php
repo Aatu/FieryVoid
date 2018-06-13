@@ -27,7 +27,7 @@ if (! isset($chatelement))
             focus: false,
             message: "",
             gameid:<?php print($chatgameid) ?>,
-            playerid:<?php print($_SESSION["user"] ? $_SESSION["user"] : null) ?>,
+            playerid:<?php print(isset($_SESSION["user"]) ? $_SESSION["user"] : null) ?>,
             chatElement: <?php print("'$chatelement'") ?>,
             
             initChat: function(){
