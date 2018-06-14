@@ -169,7 +169,7 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.consumeMovement = function (movements) {
 
-        var movesByHexAndTurn = {};
+        var movesByHexAndTurn = [];
 
         this.defaultPosition = {
             turn: movements[0].turn,
@@ -206,14 +206,28 @@ window.ShipIcon = function () {
             lastMovement = movement;
         });
 
-        this.movements = Object.keys(movesByHexAndTurn).map(function (key) {
-            return movesByHexAndTurn[key];
-        });
+       this.movements = movesByHexAndTurn;
     };
 
     function addMovementToRegistry(movesByHexAndTurn, movement) {
-        if (movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn]) {
-            var saved = movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn];
+
+        var getPreviousMatchingMove = function(moves, move) {
+            var previousMove = moves[moves.length-1];
+            if (! previousMove) {
+                return null;
+            }
+
+            if (previousMove.turn === move.turn && previousMove.position.q === move.position.q && previousMove.position.r === move.position.r) {
+                return previousMove;
+            }
+            return null;
+        }
+
+        var previousMove = getPreviousMatchingMove(movesByHexAndTurn, movement);
+
+
+        if (previousMove) {
+            var saved = previousMove
 
             if (saved.facing !== movement.facing) {
                 saved.oldFacings.push(saved.facing);
@@ -229,7 +243,7 @@ window.ShipIcon = function () {
 
             saved.position = new hexagon.Offset(movement.position);
         } else {
-            movesByHexAndTurn[movement.position.q + "," + movement.position.r + "t" + movement.turn] = {
+            movesByHexAndTurn.push({
                 //id: movement.id,
                 //type: movement.type,
                 turn: movement.turn,
@@ -238,7 +252,7 @@ window.ShipIcon = function () {
                 position: new hexagon.Offset(movement.position),
                 oldFacings: [],
                 oldHeadings: []
-            };
+            });
         }
     }
 
