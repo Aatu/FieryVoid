@@ -496,21 +496,34 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShowAllEW = function (payload) {
+        showGlobalEW.call(this, gamedata.ships, payload);
+    };
+
+    PhaseStrategy.prototype.onShowFriendlyEW = function (payload) {
+        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onShowEnemyEW = function (payload) {
+        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyShip(ship) }), payload);
+    };
+
+    function showGlobalEW(ships, payload) {
         if (payload.up) {
-            gamedata.ships.forEach(function (ship) {
+            ships.forEach(function (ship) {
                 var icon = this.shipIconContainer.getById(ship.id);
                 icon.hideEW();
                 icon.hideBDEW();
                 this.ewIconContainer.hide();
             }, this);
         } else {
-            gamedata.ships.forEach(function (ship) {
+            ships.forEach(function (ship) {
                 var icon = this.shipIconContainer.getById(ship.id);
-                this.showShipEW(ship);
+                this.ewIconContainer.showByShip(ship);
                 icon.showBDEW();
             }, this);
         }
-    };
+    }
+
 
     return PhaseStrategy;
 }();

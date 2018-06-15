@@ -70,6 +70,7 @@
 			window.UIManagerInstance = new window.UIManager($("body")[0]);
             window.UIManagerInstance.PlayerSettings(window.Settings);
             window.UIManagerInstance.FullScreen();
+            window.UIManagerInstance.EwButtons();
             $("#pagecontainer").show();
         });
         
@@ -496,6 +497,7 @@
     <div class="datacontainer"></div>
 </div>
 
+<div id="showEwButtons"></div>
 <div id="fullScreen"></div>
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>

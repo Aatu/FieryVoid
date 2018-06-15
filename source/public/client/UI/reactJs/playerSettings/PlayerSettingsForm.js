@@ -40,6 +40,7 @@ class PlayerSettingsForm extends React.Component {
     }
 
     getKey(key) {
+        console.log(this.props.settings)
         return keyToString(this.props.settings[key]);
     }
 
@@ -55,6 +56,8 @@ class PlayerSettingsForm extends React.Component {
                 <Paragraph>Change settings for currently used browser and device. Reload the page to apply changed settings.</Paragraph>
                 <SubTitle>Keys</SubTitle>
                 <InputAndLabel label={"Key to display all EW"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllEW")} value={this.getKey.call(this, "ShowAllEW")} />
+                <InputAndLabel label={"Key to display FRIENDLY EW"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyEW")} value={this.getKey.call(this, "ShowFriendlyEW")} />
+                <InputAndLabel label={"Key to display ENEMY EW"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyEW")} value={this.getKey.call(this, "ShowEnemyEW")} />
 
                 <SubTitle>Visual</SubTitle>
                 <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")} value={this.get.call(this, "ZoomLevelToStrategic")} />

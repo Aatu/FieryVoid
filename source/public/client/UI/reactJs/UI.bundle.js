@@ -27814,6 +27814,10 @@ var _FullScreen2 = require("./fullScreen/FullScreen");
 
 var _FullScreen3 = _interopRequireDefault(_FullScreen2);
 
+var _EwButtons2 = require("./ewButtons/EwButtons");
+
+var _EwButtons3 = _interopRequireDefault(_EwButtons2);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -27828,6 +27832,11 @@ var UIManager = function () {
     }
 
     _createClass(UIManager, [{
+        key: "EwButtons",
+        value: function EwButtons(args) {
+            _reactDom2.default.render(React.createElement(_EwButtons3.default, args), jQuery("#showEwButtons", this.parentElement)[0]);
+        }
+    }, {
         key: "FullScreen",
         value: function FullScreen(args) {
             _reactDom2.default.render(React.createElement(_FullScreen3.default, args), jQuery("#fullScreen", this.parentElement)[0]);
@@ -27854,7 +27863,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./fullScreen/FullScreen":67,"./playerSettings/PlayerSettings":68,"./shipThrust/ShipThrust":70,"react":41,"react-dom":38}],64:[function(require,module,exports){
+},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./playerSettings/PlayerSettings":69,"./shipThrust/ShipThrust":71,"react":41,"react-dom":38}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28063,6 +28072,96 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _templateObject = _taggedTemplateLiteral(["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"], ["\n    position: fixed;\n    right:0;\n    top: 60px;\n    z-index: 4;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"], ["\n    display: flex;\n    width: 50px;\n    height: 50px;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-right: none;\n    margin-top: 5px;\n    background-repeat: no-repeat;\n    background-size: cover;\n    ", "\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/EEW.png\");\n"], ["\n    background-image: url(\"./img/EEW.png\");\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    background-image: url(\"./img/FEW.png\");\n"], ["\n    background-image: url(\"./img/FEW.png\");\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EwButtons = function (_React$Component) {
+    _inherits(EwButtons, _React$Component);
+
+    function EwButtons() {
+        _classCallCheck(this, EwButtons);
+
+        return _possibleConstructorReturn(this, (EwButtons.__proto__ || Object.getPrototypeOf(EwButtons)).apply(this, arguments));
+    }
+
+    _createClass(EwButtons, [{
+        key: "showFriendly",
+        value: function showFriendly(up) {
+            webglScene.customEvent('ShowFriendlyEW', { up: up });
+        }
+    }, {
+        key: "showEnemy",
+        value: function showEnemy(up) {
+            webglScene.customEvent('ShowEnemyEW', { up: up });
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return React.createElement(
+                Container,
+                null,
+                React.createElement(FEWButton, {
+                    onMouseDown: this.showFriendly.bind(this, false),
+                    onMouseUp: this.showFriendly.bind(this, true),
+                    onTouchStart: this.showFriendly.bind(this, false),
+                    onTouchEnd: this.showFriendly.bind(this, true)
+                }),
+                React.createElement(EEWButton, {
+                    onMouseDown: this.showEnemy.bind(this, false),
+                    onMouseUp: this.showEnemy.bind(this, true),
+                    onTouchStart: this.showEnemy.bind(this, false),
+                    onTouchEnd: this.showEnemy.bind(this, true)
+                })
+            );
+        }
+    }]);
+
+    return EwButtons;
+}(React.Component);
+
+var Container = /*#__PURE__*/_styledComponents2.default.div(_templateObject);
+
+var MainButton = _styled.ContainerRoundedRightSide.extend(_templateObject2, _styled.Clickable);
+
+var EEWButton = MainButton.extend(_templateObject3);
+
+var FEWButton = MainButton.extend(_templateObject4);
+
+exports.default = EwButtons;
+
+},{"../styled":75,"react":41,"styled-components":58}],68:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _templateObject = _taggedTemplateLiteral(["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 60px;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-top: none;\n    ", "\n"], ["\n    width: 50px;\n    height: 50px;\n    position: absolute;\n    right: 60px;\n    top: 0;\n    z-index: 4;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 32px;\n    border-top: none;\n    ", "\n"]);
 
 var _react = require("react");
@@ -28133,7 +28232,7 @@ var MainButton = _styled.ContainerRounded.extend(_templateObject, _styled.Clicka
 
 exports.default = FullScreen;
 
-},{"../styled":74,"react":41}],68:[function(require,module,exports){
+},{"../styled":75,"react":41}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28212,7 +28311,7 @@ var MainButton = _styled.ContainerRoundedRightBottom.extend(_templateObject, _st
 
 exports.default = PlayerSettings;
 
-},{"../styled":74,"./PlayerSettingsForm":69,"react":41}],69:[function(require,module,exports){
+},{"../styled":75,"./PlayerSettingsForm":70,"react":41}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28300,6 +28399,7 @@ var PlayerSettingsForm = function (_React$Component) {
     }, {
         key: "getKey",
         value: function getKey(key) {
+            console.log(this.props.settings);
             return keyToString(this.props.settings[key]);
         }
     }, {
@@ -28337,6 +28437,8 @@ var PlayerSettingsForm = function (_React$Component) {
                         "Keys"
                     ),
                     React.createElement(_common.InputAndLabel, { label: "Key to display all EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowAllEW"), value: this.getKey.call(this, "ShowAllEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display FRIENDLY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowFriendlyEW"), value: this.getKey.call(this, "ShowFriendlyEW") }),
+                    React.createElement(_common.InputAndLabel, { label: "Key to display ENEMY EW", onChange: function onChange() {}, onKeydown: this.getOnKeyDown.call(this, "ShowEnemyEW"), value: this.getKey.call(this, "ShowEnemyEW") }),
                     React.createElement(
                         _styled.SubTitle,
                         null,
@@ -28422,7 +28524,7 @@ var keyCodes = {
 };
 exports.default = PlayerSettingsForm;
 
-},{"../common":66,"../styled":74,"react":41,"styled-components":58}],70:[function(require,module,exports){
+},{"../common":66,"../styled":75,"react":41,"styled-components":58}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28805,7 +28907,7 @@ setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){
     },
     */
 
-},{"../common":66,"../styled":74,"react":41,"styled-components":58}],71:[function(require,module,exports){
+},{"../common":66,"../styled":75,"react":41,"styled-components":58}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -28823,18 +28925,19 @@ var Clickable = /*#__PURE__*/(0, _styledComponents.css)(_templateObject);
 
 exports.Clickable = Clickable;
 
-},{"styled-components":58}],72:[function(require,module,exports){
+},{"styled-components":58}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ContainerRounded = exports.Backdrop = exports.ContainerRoundedRightBottom = exports.Container = undefined;
+exports.ContainerRoundedRightSide = exports.ContainerRounded = exports.Backdrop = exports.ContainerRoundedRightBottom = exports.Container = undefined;
 
 var _templateObject = _taggedTemplateLiteral(["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n    font-family:arial;\n"], ["\n    border: 1px solid #496791;\n    color: #deebff;\n    background-color: #0a3340;\n    font-family:arial;\n"]),
     _templateObject2 = _taggedTemplateLiteral(["\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n    background-color: rgba(0,0,0,0.5);\n"], ["\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    right: 0;\n    top: 0;\n    z-index: 99999;\n    background-color: rgba(0,0,0,0.5);\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"]),
-    _templateObject4 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"]);
+    _templateObject4 = _taggedTemplateLiteral(["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 0px 0px 30px 30px;\n    box-shadow: 5px 5px 10px black;\n"]),
+    _templateObject5 = _taggedTemplateLiteral(["\n    border-radius: 30px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"], ["\n    border-radius: 30px 0px 0px 30px;\n    box-shadow: 5px 5px 10px black;\n"]);
 
 var _styledComponents = require("styled-components");
 
@@ -28852,12 +28955,15 @@ var ContainerRoundedRightBottom = Container.extend(_templateObject3);
 
 var ContainerRounded = Container.extend(_templateObject4);
 
+var ContainerRoundedRightSide = Container.extend(_templateObject5);
+
 exports.Container = Container;
 exports.ContainerRoundedRightBottom = ContainerRoundedRightBottom;
 exports.Backdrop = Backdrop;
 exports.ContainerRounded = ContainerRounded;
+exports.ContainerRoundedRightSide = ContainerRoundedRightSide;
 
-},{"styled-components":58}],73:[function(require,module,exports){
+},{"styled-components":58}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28883,7 +28989,7 @@ var SubTitle = Title.extend(_templateObject2);
 exports.Title = Title;
 exports.SubTitle = SubTitle;
 
-},{"styled-components":58}],74:[function(require,module,exports){
+},{"styled-components":58}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28916,6 +29022,12 @@ Object.defineProperty(exports, "ContainerRounded", {
     return _Container.ContainerRounded;
   }
 });
+Object.defineProperty(exports, "ContainerRoundedRightSide", {
+  enumerable: true,
+  get: function get() {
+    return _Container.ContainerRoundedRightSide;
+  }
+});
 
 var _Title = require("./Title");
 
@@ -28941,4 +29053,4 @@ Object.defineProperty(exports, "Clickable", {
   }
 });
 
-},{"./Clickable":71,"./Container":72,"./Title":73}]},{},[63]);
+},{"./Clickable":72,"./Container":73,"./Title":74}]},{},[63]);

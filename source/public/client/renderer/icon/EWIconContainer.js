@@ -89,6 +89,15 @@ window.EWIconContainer = function () {
         }, this);
     };
 
+    EWIconContainer.prototype.showByShip = function (ship) {
+        this.ewIcons.filter(function (icon) {
+            return icon.shipId === ship.id;
+        }).forEach(function (icon) {
+            icon.sprite.setStartAndEnd(icon.shipIcon.getPosition(), icon.targetIcon.getPosition());
+            icon.sprite.show();
+        }, this);
+    };
+
     EWIconContainer.prototype.onEvent = function (name, payload) {
         var target = this['on' + name];
         if (target && typeof target == 'function') {

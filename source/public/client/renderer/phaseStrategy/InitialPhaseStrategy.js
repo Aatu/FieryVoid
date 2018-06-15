@@ -52,14 +52,20 @@ window.InitialPhaseStrategy = function () {
 
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
         var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
-        menu.addButton("selectShip",
-         function() {
-             return this.selectedShip !== ship;
-         },
-         function () {
+
+        if (this.selectedShip && shipManager.isElint(this.selectedShip)){
+            menu.addButton("selectShip",
+                function() {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");
+        } else if (gamedata.isMyShip(ship)) {
             PhaseStrategy.prototype.setSelectedShip.call(this, ship);
             this.showShipEW(this.selectedShip);
-        }.bind(this), "Select ship");
+        }
         
         this.showShipTooltip(ship, payload, menu, false);
     };

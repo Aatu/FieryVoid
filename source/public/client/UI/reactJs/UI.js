@@ -2,12 +2,17 @@ import * as React from "react";
 import ReactDom from "react-dom";
 import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
-import FullScreen from "./fullScreen/FullScreen"
+import FullScreen from "./fullScreen/FullScreen";
+import EwButtons from "./ewButtons/EwButtons";
 
 class UIManager{
 
     constructor(parentElement) {
         this.parentElement = parentElement;
+    }
+
+    EwButtons(args) {
+        ReactDom.render(<EwButtons {...args}/>, jQuery("#showEwButtons", this.parentElement)[0] );
     }
 
     FullScreen(args) {

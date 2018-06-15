@@ -27,4 +27,9 @@ const ContainerRounded = Container.extend`
     box-shadow: 5px 5px 10px black;
 `;
 
-export {Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded};
+const ContainerRoundedRightSide = Container.extend`
+    border-radius: 30px 0px 0px 30px;
+    box-shadow: 5px 5px 10px black;
+`;
+
+export {Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded, ContainerRoundedRightSide};

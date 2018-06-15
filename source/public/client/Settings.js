@@ -5,6 +5,8 @@ window.Settings = (function(){
     function Settings(settings) {
         this.settings = {
             ShowAllEW: settings.ShowAllEW || {keyCode: 87, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
+            ShowFriendlyEW: settings.ShowFriendlyEW || {keyCode: 88, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
+            ShowEnemyEW: settings.ShowEnemyEW || {keyCode: 89, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
             ZoomLevelToStrategic: 0.2
         };
 
