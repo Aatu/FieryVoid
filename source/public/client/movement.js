@@ -1743,7 +1743,7 @@ shipManager.movement = {
             return;
         }
 
-        
+
         var move = ship.movement[ship.movement.length - 1];
         var assignArray = move.assignedThrust;
 

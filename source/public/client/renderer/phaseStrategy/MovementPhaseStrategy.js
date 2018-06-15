@@ -13,8 +13,11 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
     MovementPhaseStrategy.prototype.update = function (gamedata) {
+        
+        doForcedMovementForActiveShip();
         PhaseStrategy.prototype.update.call(this, gamedata);
         this.selectActiveShip();
+
 
         if (isMovementReady(gamedata)) {
             gamedata.showCommitButton();
@@ -24,12 +27,12 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
-
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
+        
+        doForcedMovementForActiveShip();
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
         this.selectActiveShip();
-        doForcedMovementForActiveShip();
 
         this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
         return this;
@@ -120,8 +123,6 @@ window.MovementPhaseStrategy = function () {
         if (!ship || !gamedata.isMyShip(ship)) {
             return;
         }
-        //TODO: what about rolling?
-        //TODO: maybe check that this is not yet done during this turn
         shipManager.movement.doForcedPivot(ship);
 
         if (ship.base) {
