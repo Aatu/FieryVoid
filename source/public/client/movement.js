@@ -208,8 +208,6 @@ shipManager.movement = {
                     break;
                 }
             }
-
-            shipManager.drawShip(ship);
         } else {
             var lm = shipManager.movement.getLastCommitedMove(ship);
             ship.movement[ship.movement.length] = {
