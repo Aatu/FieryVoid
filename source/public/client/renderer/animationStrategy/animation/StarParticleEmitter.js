@@ -1,14 +1,16 @@
 'use strict';
 
-window.ParticleEmitter = function () {
+window.StarParticleEmitter = function () {
 
     var SHADER_VERTEX = null;
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
 
-    function ParticleEmitter(scene, particleCount, blending) {
+    function StarParticleEmitter(scene, particleCount, blending) {
         Animation.call(this);
+
+        console.log("STAR PARTICLE EMITTER")
 
         if (!blending) blending = THREE.AdditiveBlending;
 
@@ -25,10 +27,13 @@ window.ParticleEmitter = function () {
 
         this.effects = 0;
 
+        var customMatrix = new THREE.Matrix4();
+        customMatrix.set(0.00078125, 0, 0, 0, 0, 0.0024813895781637717, 0, 0, 0, 0, -0.001, 0, -0, -0, -0, 1)
+
         var uniforms = {
             gameTime: { type: 'f', value: 0.0 },
-            zoomLevel: { type: 'f', value: 1.0 },
-            texture: { type: 't', value: texture }
+            texture: { type: 't', value: texture },
+            customMatrix: { type: 'm4', value: customMatrix}
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
@@ -48,6 +53,7 @@ window.ParticleEmitter = function () {
         this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.addAttribute('parallaxFactor', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
 
 
         this.particleGeometry.dynamic = true;
@@ -73,52 +79,55 @@ window.ParticleEmitter = function () {
         THREE.AdditiveAlphaBlending = 4;
         */
 
-        this.flyParticle = new BaseParticle(this.particleMaterial, this.particleGeometry);
+        this.flyParticle = new StarParticle(this.particleMaterial, this.particleGeometry);
 
         while (particleCount--) {
             this.flyParticle.create(particleCount).setInitialValues();
         }
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
-        this.mesh.position.set(0, 0, 0);
+        this.mesh.frustumCulled = false;
+        this.mesh.matrixAutoUpdate = false;
+        this.mesh.position.set(0, 0, -10);
 
         this.needsUpdate = false;
 
         this.scene.add(this.mesh);
+        
+        console.log(customMatrix)
     }
 
-    ParticleEmitter.prototype = Object.create(Animation.prototype);
+    StarParticleEmitter.prototype = Object.create(Animation.prototype);
 
-    ParticleEmitter.prototype.start = function () {
+    StarParticleEmitter.prototype.start = function () {
         this.active = true;
     };
 
-    ParticleEmitter.prototype.stop = function () {
+    StarParticleEmitter.prototype.stop = function () {
         this.active = false;
     };
 
-    ParticleEmitter.prototype.reset = function () {};
+    StarParticleEmitter.prototype.reset = function () {};
 
-    ParticleEmitter.prototype.cleanUp = function () {
+    StarParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    ParticleEmitter.prototype.update = function (gameData) {};
+    StarParticleEmitter.prototype.update = function (gameData) {};
 
-    ParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
+    StarParticleEmitter.prototype.render = function (now, total) {
         this.particleMaterial.uniforms.gameTime.value = total;
-        this.particleMaterial.uniforms.zoomLevel.value = 1 / zoom;
         this.mesh.material.needsUpdate = true;
     };
 
-    ParticleEmitter.prototype.done = function () {
+    StarParticleEmitter.prototype.done = function () {
         if (this.onDoneCallback) {
             this.onDoneCallback();
         }
     };
 
-    ParticleEmitter.prototype.getParticle = function () {
+    StarParticleEmitter.prototype.getParticle = function () {
         if (this.free.length === 0) {
             return false;
         }
@@ -128,7 +137,7 @@ window.ParticleEmitter = function () {
         return this.flyParticle.create(i);
     };
 
-    ParticleEmitter.prototype.freeParticles = function (particleIndices) {
+    StarParticleEmitter.prototype.freeParticles = function (particleIndices) {
         particleIndices.forEach(function (i) {
             this.flyParticle.create(i).setInitialValues();
         }, this);
@@ -136,12 +145,12 @@ window.ParticleEmitter = function () {
     };
 
     function getShaders() {
-        if (!SHADER_VERTEX) var SHADER_VERTEX = document.getElementById('effectVertexShader').innerHTML;
+        if (!SHADER_VERTEX) var SHADER_VERTEX = document.getElementById('starVertexShader').innerHTML;
 
-        if (!SHADER_FRAGMENT) var SHADER_FRAGMENT = document.getElementById('effectFragmentShader').innerHTML;
+        if (!SHADER_FRAGMENT) var SHADER_FRAGMENT = document.getElementById('starFragmentShader').innerHTML;
 
         return { vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT };
     }
 
-    return ParticleEmitter;
+    return StarParticleEmitter;
 }();

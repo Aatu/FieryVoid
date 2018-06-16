@@ -121,7 +121,9 @@
     <script src="client/renderer/animationStrategy/animation/HexTargetedWeaponFireAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
     <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
+    <script src="client/renderer/animationStrategy/animation/StarParticle.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
+    <script src="client/renderer/animationStrategy/animation/StarParticleEmitter.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
     <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
@@ -137,6 +139,7 @@
     <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
+    <script src="client/renderer/terrain/StarField.js"></script>
 
 
     <script src="client/renderer/texture/HexagonTexture.js"></script>
@@ -502,7 +505,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php print($serverdata ? $serverdata->background : ""); ?>)"></div>
+    <div id="background" style="background-image:url(img/maps/<?php /* print($serverdata ? $serverdata->background : ""); */ ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 

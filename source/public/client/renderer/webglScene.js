@@ -11,6 +11,9 @@ window.webglScene = function () {
         this.hexGridRenderer = null;
         this.phaseDirector = null;
         this.coordinateConverter = null;
+        this.starField = null;
+        this.width = null;
+        this.height = null;
 
         this.element = null;
 
@@ -69,6 +72,7 @@ window.webglScene = function () {
         this.initialized = true;
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
         this.phaseDirector.receiveGamedata(gamedata, this);
+        this.starField = new StarField(this);
         this.render();
     };
 
@@ -147,6 +151,7 @@ window.webglScene = function () {
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render(this.scene, this.camera);
         animateZoom.call(this);
+        this.starField.render();
 
         requestAnimationFrame(this.render.bind(this));
     };
