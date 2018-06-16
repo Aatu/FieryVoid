@@ -62,7 +62,9 @@ window.ParticleEmitter = function () {
             fragmentShader: shaders.fragment,
             transparent: true,
             alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
-            blending: blending, depthTest: true
+            blending: blending,
+            depthTest: false,
+            depthWrite: false
         });
 
         /*
@@ -80,7 +82,7 @@ window.ParticleEmitter = function () {
         }
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
-        this.mesh.position.set(0, 0, 0);
+        this.mesh.position.set(0, 0, 201);
 
         this.needsUpdate = false;
 

@@ -183,8 +183,6 @@
     attribute float sizeChange;
     attribute float angle;
     attribute float angleChange;
-    attribute vec3 velocity;
-    attribute vec3 acceleration;
     attribute float activationGameTime;
     attribute float textureNumber;
     attribute float parallaxFactor;
@@ -223,10 +221,7 @@
         vAngle = angle + angleChange * elapsedTime;
         textureN = textureNumber;
 
-        vec3 displacement = velocity * elapsedTime;
-        vec3 accelerationDisplacement  = elapsedTime * elapsedTime * 0.5 * acceleration;
-
-        vec3 modPos = vec3( position.x - (cameraPosition.x * parallaxFactor), position.y - (cameraPosition.y * parallaxFactor), position.z ) + displacement + accelerationDisplacement;
+        vec3 modPos = vec3( position.x - (cameraPosition.x * parallaxFactor), position.y - (cameraPosition.y * parallaxFactor), position.z );
 
 
         gl_PointSize = clamp(size + (sizeChange * elapsedTime), 0.0, 1024.0);

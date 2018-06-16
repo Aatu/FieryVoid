@@ -42,8 +42,6 @@ window.StarParticleEmitter = function () {
         this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
         this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
         this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
@@ -62,8 +60,11 @@ window.StarParticleEmitter = function () {
             vertexShader: shaders.vertex,
             fragmentShader: shaders.fragment,
             transparent: true,
-            alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
-            blending: blending, depthTest: true
+            //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
+            blending: blending,
+            //depthTest: true,
+            depthWrite: false,
+            side:THREE.DoubleSide
         });
 
         /*
@@ -83,7 +84,7 @@ window.StarParticleEmitter = function () {
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
         this.mesh.frustumCulled = false;
         this.mesh.matrixAutoUpdate = false;
-        this.mesh.position.set(0, 0, -10);
+        this.mesh.position.set(0, 0, -1);
 
         this.needsUpdate = false;
 
@@ -125,6 +126,7 @@ window.StarParticleEmitter = function () {
             camera.setPosition = new THREE.Vector3(0, 0, 200);
 
             camera.updateProjectionMatrix();
+
             this.particleMaterial.uniforms.customMatrix.value = camera.projectionMatrix;
         }
 

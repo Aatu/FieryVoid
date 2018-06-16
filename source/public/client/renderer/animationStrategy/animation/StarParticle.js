@@ -31,8 +31,6 @@ window.StarParticle = function () {
         this.setAngle(0.0);
         this.setAngleChange(0.0);
         this.setActivationTime(0.0);
-        this.setVelocity(new THREE.Vector3(0, 0, 0));
-        this.setAcceleration(new THREE.Vector3(0, 0, 0));
         this.setTexture(this.texture.glow);
         this.setParallaxFactor(0.0);
         this.setSineFrequency(0.0);
@@ -94,16 +92,6 @@ window.StarParticle = function () {
 
     StarParticle.prototype.setAngleChange = function (angle) {
         changeAttribute(this.geometry, this.index, 'angleChange', mathlib.degreeToRadian(angle));
-        return this;
-    };
-
-    StarParticle.prototype.setVelocity = function (velocity) {
-        changeAttribute(this.geometry, this.index, 'velocity', [velocity.x, velocity.y, 0]);
-        return this;
-    };
-
-    StarParticle.prototype.setAcceleration = function (acceleration) {
-        changeAttribute(this.geometry, this.index, 'acceleration', [acceleration.x, acceleration.y, 0]);
         return this;
     };
 

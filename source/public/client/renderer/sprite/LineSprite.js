@@ -61,6 +61,7 @@ window.LineSprite = function () {
     LineSprite.prototype.setPosition = function (pos) {
         this.mesh.position.x = pos.x;
         this.mesh.position.y = pos.y;
+        this.mesh.position.z = this.z;
         return this;
     };
 
