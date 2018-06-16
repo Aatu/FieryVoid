@@ -7,6 +7,7 @@ window.StarField = (function(){
         this.webglScene = webglScene;
         this.lastAnimationTime = null;
         this.totalAnimationTime = 0;
+        this.zoomChanged = 0;
 
         this.create();
 
@@ -17,27 +18,35 @@ window.StarField = (function(){
      
         Math.seedrandom(gamedata.gameid);
 
+        if (this.emitterContainer) {
+            this.emitterContainer.cleanUp();
+        }
+
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
-       
+
+        var width =  this.webglScene.width; 
+        var height = this.webglScene.height; 
+
         var stars = this.starCount;
         while(stars--) {
-            createStar(this.emitterContainer, this.webglScene.width, this.webglScene.height);
+            createStar(this.emitterContainer, width, height);
 
             if (Math.random() > 0.9) {
-                createShiningStar(this.emitterContainer, this.webglScene.width, this.webglScene.height);
+                createShiningStar(this.emitterContainer, width, height);
             }
         }
 
        
-        var gas = 10;
+        var gas = Math.floor(Math.random() * 15); 
          
         while(gas--){
-            createGasCloud(this.emitterContainer, this.webglScene.width, this.webglScene.height)
+            createGasCloud(this.emitterContainer, width, height)
         }
 
         this.emitterContainer.start();
         this.lastAnimationTime = new Date().getTime();
         this.totalAnimationTime = 0;
+        this.zoomChanged = 1;
         return this;
     };
 
@@ -45,7 +54,11 @@ window.StarField = (function(){
     {
         var deltaTime = new Date().getTime() - this.lastAnimationTime;
         this.totalAnimationTime += deltaTime;
-        this.emitterContainer.render(0, this.totalAnimationTime);
+        this.emitterContainer.render(0, this.totalAnimationTime, 0, 0, this.zoomChanged);
+
+        if (this.zoomChanged === 1) {
+            this.zoomChanged = 0;
+        }
 
         this.lastAnimationTime = new Date().getTime();
     };

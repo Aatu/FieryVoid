@@ -61,7 +61,6 @@ window.webglScene = function () {
 
         this.scene.add(new THREE.AmbientLight(0xffffff));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        console.log(this.width, this.height)
         this.renderer.setSize(this.width, this.height);
         this.renderer.context.getExtension('OES_standard_derivatives');
 
@@ -241,6 +240,7 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
+        this.starField.create();
     };
 
     webglScene.prototype.keyDown = function (event) {
