@@ -37,7 +37,7 @@ window.StarField = (function(){
         }
 
        
-        var gas = Math.floor(Math.random() * 15); 
+        var gas = Math.floor(Math.random() * 5) + 8; 
          
         while(gas--){
             createGasCloud(this.emitterContainer, width, height)
