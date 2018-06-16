@@ -15,7 +15,7 @@ window.StarField = (function(){
     StarField.prototype.create = function()
     {
      
-        //Math.seedrandom(gamedata.gameid);
+        Math.seedrandom(gamedata.gameid);
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
         
