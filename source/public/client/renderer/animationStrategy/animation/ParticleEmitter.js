@@ -63,8 +63,8 @@ window.ParticleEmitter = function () {
             transparent: true,
             alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
             blending: blending,
-            depthTest: false,
-            depthWrite: false
+            depthTest: true,
+            depthWrite: true
         });
 
         /*

@@ -15,7 +15,7 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
-     
+    
         Math.seedrandom(gamedata.gameid);
 
         if (this.emitterContainer) {
@@ -23,6 +23,8 @@ window.StarField = (function(){
         }
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
+        
+        return;
 
         var width =  this.webglScene.width; 
         var height = this.webglScene.height; 
