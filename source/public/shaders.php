@@ -179,10 +179,6 @@
 <script id="starVertexShader" type="x-shader/x-fragment">
     attribute vec3 color;
     attribute float opacity;
-    attribute float fadeInTime;
-    attribute float fadeInSpeed;
-    attribute float fadeOutTime;
-    attribute float fadeOutSpeed;
     attribute float size;
     attribute float sizeChange;
     attribute float angle;
@@ -192,6 +188,8 @@
     attribute float activationGameTime;
     attribute float textureNumber;
     attribute float parallaxFactor;
+    attribute float sineFrequency;
+    attribute float sineAmplitude;
     uniform float gameTime;
     uniform mat4 customMatrix;
     varying vec4  vColor;
@@ -201,7 +199,7 @@
     {
         float elapsedTime = gameTime - activationGameTime;
 
-        if (elapsedTime < 0.0 || (fadeOutTime > 0.0 && gameTime - (fadeOutTime + fadeOutSpeed) > 0.0)) {
+        if (elapsedTime < 0.0) {
             gl_PointSize = 0.0;
             gl_Position = vec4( 0.0, 0.0, 0.0, 1.0 );
             vColor = vec4(0.0, 0.0, 0.0, 0.0);
@@ -209,25 +207,11 @@
             return;
         }
 
-        float currentOpacity = 0.0;
-        if (fadeInSpeed == 0.0) {
-            currentOpacity = opacity;
+        float currentOpacity = opacity;
+        if (sineFrequency > 0.0) {
+            currentOpacity = opacity + (sineAmplitude * 0.5 * sin(gameTime/sineFrequency) + sineAmplitude);
         }
 
-
-        if (fadeInSpeed > 0.0 && gameTime > fadeInTime)
-        {
-            float fadeIn = (gameTime - fadeInTime) / fadeInSpeed;
-        if (fadeIn > 1.0) fadeIn = 1.0;
-            currentOpacity =  opacity * fadeIn;
-        }
-
-        if (fadeOutSpeed > 0.0 && gameTime > fadeOutTime)
-        {
-            float fadeOut = (gameTime - fadeOutTime) / fadeOutSpeed;
-        if (fadeOut > 1.0) fadeOut = 1.0;
-            currentOpacity =  currentOpacity * (1.0 - fadeOut);
-        }
 
         if ( currentOpacity > 0.0 && elapsedTime >= 0.0)
         {

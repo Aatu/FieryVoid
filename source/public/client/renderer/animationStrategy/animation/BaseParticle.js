@@ -13,7 +13,8 @@ window.BaseParticle = function () {
         gas: 0,
         bolt: 1,
         glow: 2,
-        ring: 3
+        ring: 3,
+        starLine: 4
     };
 
     BaseParticle.prototype.create = function (index) {

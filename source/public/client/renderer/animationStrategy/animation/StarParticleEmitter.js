@@ -10,8 +10,6 @@ window.StarParticleEmitter = function () {
     function StarParticleEmitter(scene, particleCount, blending) {
         Animation.call(this);
 
-        console.log("STAR PARTICLE EMITTER")
-
         if (!blending) blending = THREE.AdditiveBlending;
 
         if (!particleCount) {
@@ -43,10 +41,6 @@ window.StarParticleEmitter = function () {
         this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
         this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
         this.particleGeometry.addAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
@@ -54,7 +48,8 @@ window.StarParticleEmitter = function () {
         this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
         this.particleGeometry.addAttribute('parallaxFactor', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-
+        this.particleGeometry.addAttribute('sineFrequency', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.addAttribute('sineAmplitude', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
 
         this.particleGeometry.dynamic = true;
 
@@ -93,8 +88,6 @@ window.StarParticleEmitter = function () {
         this.needsUpdate = false;
 
         this.scene.add(this.mesh);
-        
-        console.log(customMatrix)
     }
 
     StarParticleEmitter.prototype = Object.create(Animation.prototype);

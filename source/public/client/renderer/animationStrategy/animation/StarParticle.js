@@ -13,7 +13,8 @@ window.StarParticle = function () {
         gas: 0,
         bolt: 1,
         glow: 2,
-        ring: 3
+        ring: 3,
+        starLine: 4
     };
 
     StarParticle.prototype.create = function (index) {
@@ -25,8 +26,6 @@ window.StarParticle = function () {
         this.setPosition({ x: 0, y: 0 });
         this.setColor(new THREE.Color(0, 0, 0));
         this.setOpacity(0.0);
-        this.setFadeIn(0.0, 0.0);
-        this.setFadeOut(0.0, 0.0);
         this.setSize(0.0);
         this.setSizeChange(0.0);
         this.setAngle(0.0);
@@ -36,6 +35,8 @@ window.StarParticle = function () {
         this.setAcceleration(new THREE.Vector3(0, 0, 0));
         this.setTexture(this.texture.glow);
         this.setParallaxFactor(0.0);
+        this.setSineFrequency(0.0);
+        this.setSineAmplitude(1);
 
         return this;
     };
@@ -45,9 +46,19 @@ window.StarParticle = function () {
 
         return this;
     };
-
+    
     StarParticle.prototype.setParallaxFactor = function (parallaxFactor) {
         changeAttribute(this.geometry, this.index, 'parallaxFactor', parallaxFactor);
+        return this;
+    };
+
+    StarParticle.prototype.setSineFrequency = function (sineFrequency) {
+        changeAttribute(this.geometry, this.index, 'sineFrequency', sineFrequency);
+        return this;
+    };
+
+    StarParticle.prototype.setSineAmplitude = function (sineAmplitude) {
+        changeAttribute(this.geometry, this.index, 'sineAmplitude', sineAmplitude);
         return this;
     };
 
@@ -68,22 +79,6 @@ window.StarParticle = function () {
 
     StarParticle.prototype.setOpacity = function (opacity) {
         changeAttribute(this.geometry, this.index, 'opacity', opacity);
-        return this;
-    };
-
-    StarParticle.prototype.setFadeIn = function (time, speed) {
-        if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
-
-        changeAttribute(this.geometry, this.index, 'fadeInTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeInSpeed', speed);
-        return this;
-    };
-
-    StarParticle.prototype.setFadeOut = function (time, speed) {
-        if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
-
-        changeAttribute(this.geometry, this.index, 'fadeOutTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeOutSpeed', speed);
         return this;
     };
 
