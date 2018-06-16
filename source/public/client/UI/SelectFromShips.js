@@ -70,6 +70,11 @@ window.SelectFromShips = function () {
                 .on('click', function() {this.phaseStrategy.onShipClicked(ship, this.payload), this.destroy()}.bind(this))
                 .on('mouseover', function() {this.phaseStrategy.onMouseOverShip(ship, this.payload)}.bind(this))
                 .on('mouseout', function() {this.phaseStrategy.onMouseOutShips(ship, this.payload)}.bind(this))
+                name.contextmenu(function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.phaseStrategy.onShipRightClicked(ship, this.payload)
+                }.bind(this))
             this.element.append(name)
         }, this)
     }
