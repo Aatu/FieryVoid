@@ -31,7 +31,7 @@ window.StarField = (function(){
         while(stars--) {
             createStar(this.emitterContainer, width, height);
 
-            if (Math.random() > 0.9) {
+            if (Math.random() > 0.98) {
                 createShiningStar(this.emitterContainer, width, height);
             }
         }
