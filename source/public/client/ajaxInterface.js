@@ -219,7 +219,6 @@ window.ajaxInterface = {
                 }
 
                 tidyships.push(newShip);
-                //    console.log(newShip);
             }
         }
 

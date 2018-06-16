@@ -368,7 +368,6 @@ window.gamedata = {
             slotElement = $('.slot.slotid_' + slot.slot);
             var data = slotElement.data();
             if (playerManager.isOccupiedSlot(slot)) {
-                //    console.log("slot " +slot.slot+" is occupied");
                 var player = playerManager.getPlayerInSlot(slot);
                 slotElement.data("playerid", player.id);
                 slotElement.addClass("taken");
@@ -494,15 +493,12 @@ window.gamedata = {
 
                 // get all selections of missiles
                 var missileOptions = $(".confirm .selectAmount");
-                //    console.log(missileOptions);
 
                 for (var k = 0; k < missileOptions.length; k++) {
                     var firingMode = $(missileOptions[k]).data("firingMode");
-                    //       console.log(firingMode);
 
                     // divide the bought missiles over the missileArrays
                     var boughtAmount = $(".confirm .selectAmount." + firingMode).data("value");
-                    //       console.log(boughtAmount);
 
                     // perLauncher should always get you an integer as result. The UI handles
                     // buying of missiles that way.
@@ -613,7 +609,6 @@ window.gamedata = {
         var id = $(e).data("id");
         var faction = $(e).data("faction");
 
-        //   console.log("id: " + id + " faction: " + faction);
         var ship = gamedata.getShip(id, faction);
 
         if (!ship.shipStatusWindow) {

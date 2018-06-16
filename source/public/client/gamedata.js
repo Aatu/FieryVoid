@@ -148,7 +148,6 @@ window.gamedata = {
 
     getShip: function getShip(id) {
         for (var i in gamedata.ships) {
-            //      console.log(gamedata.ships[i].id);
             if (gamedata.ships[i].id == id) {
                 return gamedata.ships[i];
             }
@@ -675,7 +674,6 @@ window.gamedata = {
     },
 
     parseServerData: function parseServerData(serverdata) {
-
         if (serverdata == null) return;
 
         if (!serverdata.id) return;

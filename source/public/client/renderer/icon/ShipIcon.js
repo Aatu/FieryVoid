@@ -29,6 +29,7 @@ window.ShipIcon = function () {
     }
 
     ShipIcon.prototype.consumeShipdata = function (ship) {
+        this.ship = ship;
         this.consumeMovement(ship.movement);
         this.consumeEW(ship);
         this.createShipWindow(ship);

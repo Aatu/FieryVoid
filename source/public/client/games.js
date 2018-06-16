@@ -56,7 +56,6 @@ window.gamedata = {
 		for (var i in this.games) {
 			var game = this.games[i];
 			var gameDOM = $('.game[data-gameid="' + game.id + '"]');
-			//console.log("game name: "+game.name+ " status: " + game.status +" dom.length: "+ gameDOM.length + " in game: " +playerManager.isInGame());
 			if (game.status == "ACTIVE" && this.isInGame(game.id)) {
 
 				if (gameDOM.length == 0) {
@@ -110,7 +109,6 @@ window.gamedata = {
 		for (var i in game.slots) {
 			if (game.slots[i].playerid != null) count++;
 		}
-		//     console.log(game.name +": "+ count);
 		return count;
 	},
 
