@@ -83,7 +83,7 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setPosition = function (pos) {
-        changeAttribute(this.geometry, this.index, 'position', [pos.x, pos.y, 0], true);
+        changeAttribute(this.geometry, this.index, 'position', [pos.x, pos.y, pos.z || 0], true);
         return this;
     };
 

@@ -77,7 +77,7 @@ window.FlightIcon = function () {
         this.mesh.renderDepth = 10;
 
         this.fighters.forEach(function (fighter) {
-            var sprite = new window.webglSprite(imagePath, { width: FIGHTER_SPRITE_SIZE / 2, height: FIGHTER_SPRITE_SIZE / 2 }, 0);
+            var sprite = new window.webglSprite(imagePath, { width: FIGHTER_SPRITE_SIZE / 2, height: FIGHTER_SPRITE_SIZE / 2 }, 2);
             sprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
             positionFighter(fighter, sprite);
             this.mesh.add(sprite.mesh);

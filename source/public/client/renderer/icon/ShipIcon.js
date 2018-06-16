@@ -151,7 +151,7 @@ window.ShipIcon = function () {
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
 
-        this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 0);
+        this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
         this.shipSprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
         this.mesh.add(this.shipSprite.mesh);
 

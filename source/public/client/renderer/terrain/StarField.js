@@ -18,19 +18,6 @@ window.StarField = (function(){
         Math.seedrandom(gamedata.gameid);
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
-        
-        /*
-        var particle = this.emitterContainer.getParticle(this);
-        particle.setActivationTime(0).setSize(160).setOpacity(1.0).setColor(new THREE.Color(1, 0, 0)).setParallaxFactor(0).setTexture(particle.texture.gas);
-
-        
-        particle = this.emitterContainer.getParticle(this);
-        particle.setActivationTime(0).setSize(160).setOpacity(1.0).setPosition({x: 0, y: 100}).setColor(new THREE.Color(1, 0, 0)).setParallaxFactor(0.5);
-
-        particle = this.emitterContainer.getParticle(this);
-        particle.setActivationTime(0).setSize(160).setOpacity(1.0).setPosition({x: 0, y: 200}).setColor(new THREE.Color(1, 0, 0)).setParallaxFactor(1.0);
-
-        */
        
         var stars = this.starCount;
         while(stars--) {
@@ -183,7 +170,7 @@ window.StarField = (function(){
         var particle = emitterContainer.getParticle(this);
 
         position.x += (Math.random() - 0.5) * 100; 
-        position.y += (Math.random() - 0.5) * 100; 
+        position.y += (Math.random() - 0.5) * 100;
 
         particle
             .setActivationTime(0)
