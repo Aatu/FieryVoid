@@ -258,6 +258,7 @@ window.PhaseStrategy = function () {
         ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getById(ship.id);
             icon.showSideSprite(false);
+            icon.setHighlighted(false);
         }, this);
 
         this.hideAllEW();
@@ -277,6 +278,7 @@ window.PhaseStrategy = function () {
         this.showShipEW(ship);
         icon.showSideSprite(true);
         icon.showBDEW();
+        icon.setHighlighted(true);
     };
 
     PhaseStrategy.prototype.showShipEW = function (ship) {

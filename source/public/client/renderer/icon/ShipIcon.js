@@ -129,15 +129,29 @@ window.ShipIcon = function () {
         }
     };
 
+    ShipIcon.prototype.setHighlighted = function (value) {
+        if (value) {
+            this.mesh.position.z = 101;
+        } else {
+            if (this.selected) {
+                this.mesh.position.z = 100;
+            } else {
+                this.mesh.position.z = 0;
+            }
+        }
+
+        this.selected = value;
+    };
+
     ShipIcon.prototype.setSelected = function (value) {
         if (value) {
             this.ShipSelectedSprite.show();
             if (!this.selected) {
-                this.mesh.position.z = this.mesh.position.z + 100;
+                this.mesh.position.z = 100;
             }
         } else {
             if (this.selected) {
-                this.mesh.position.z = this.mesh.position.z - 100;
+                this.mesh.position.z = 0;
             }
             this.ShipSelectedSprite.hide();
         }
