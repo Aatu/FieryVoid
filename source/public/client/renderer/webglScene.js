@@ -147,10 +147,10 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.render = function () {
+        this.starField.render();
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render(this.scene, this.camera);
         animateZoom.call(this);
-        this.starField.render();
 
         requestAnimationFrame(this.render.bind(this));
     };
@@ -240,7 +240,7 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
-        this.starField.create();
+        this.starField.cleanUp();
     };
 
     webglScene.prototype.keyDown = function (event) {

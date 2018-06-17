@@ -9,40 +9,38 @@ window.StarField = (function(){
         this.totalAnimationTime = 0;
         this.zoomChanged = 0;
 
+        this.getRandom = null;
+
         this.create();
 
     };
 
     StarField.prototype.create = function()
     {
-    
-        Math.seedrandom(gamedata.gameid);
-
-        if (this.emitterContainer) {
-            this.emitterContainer.cleanUp();
-        }
+        this.cleanUp();
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
-        
-        return;
 
-        var width =  this.webglScene.width; 
-        var height = this.webglScene.height; 
+        var width =  3000; //this.webglScene.width * 1.5; 
+        var height = 2000; // this.webglScene.height * 1.5; 
 
+        this.getRandom = mathlib.getSeededRandomGenerator(gamedata.gameid);
+
+        //var stars = Math.floor(this.starCount * (width / 4000));
         var stars = this.starCount;
         while(stars--) {
-            createStar(this.emitterContainer, width, height);
+            createStar.call(this, width, height);
 
-            if (Math.random() > 0.98) {
-                createShiningStar(this.emitterContainer, width, height);
+            if (this.getRandom() > 0.98) {
+                createShiningStar.call(this, width, height);
             }
         }
 
-       
-        var gas = Math.floor(Math.random() * 5) + 8; 
-         
+      
+        var gas = Math.floor(this.getRandom() * 5) + 8; 
+            
         while(gas--){
-            createGasCloud(this.emitterContainer, width, height)
+            createGasCloud.call(this, width, height)
         }
 
         this.emitterContainer.start();
@@ -52,8 +50,19 @@ window.StarField = (function(){
         return this;
     };
 
+    StarField.prototype.cleanUp  = function() {
+        if (this.emitterContainer) {
+            this.emitterContainer.cleanUp();
+            this.emitterContainer = null;
+        }
+    }   
+
     StarField.prototype.render = function()
     {
+        if (! this.emitterContainer) {
+            this.create();
+        }
+
         var deltaTime = new Date().getTime() - this.lastAnimationTime;
         this.totalAnimationTime += deltaTime;
         this.emitterContainer.render(0, this.totalAnimationTime, 0, 0, this.zoomChanged);
@@ -65,78 +74,78 @@ window.StarField = (function(){
         this.lastAnimationTime = new Date().getTime();
     };
 
-    function createStar(emitterContainer, width, height) {
-        var particle = emitterContainer.getParticle(this);
+    function createStar(width, height) {
+        var particle = this.emitterContainer.getParticle(this);
 
-        var x = ((Math.random() - 0.5) * width * 1.5);
-        var y = ((Math.random() - 0.5) * height * 1.5);
+        var x = ((this.getRandom() - 0.5) * width * 1.5);
+        var y = ((this.getRandom() - 0.5) * height * 1.5);
 
         particle
             .setActivationTime(0)
-            .setSize(2 + Math.random() * 2)
-            .setOpacity(Math.random() * 0.2 + 0.9)
+            .setSize(2 + this.getRandom() * 2)
+            .setOpacity(this.getRandom() * 0.2 + 0.9)
             .setPosition({x: x, y: y})
             .setColor(new THREE.Color(1, 1, 1))
-            .setParallaxFactor(0.005 + Math.random() * 0.005);
+            .setParallaxFactor(0.005 + this.getRandom() * 0.005);
 
-        if (Math.random() > 0.9) {
+        if (this.getRandom() > 0.9) {
             particle
-                .setSineFrequency(Math.random() * 200 + 50)
-                .setSineAmplitude(Math.random());
+                .setSineFrequency(this.getRandom() * 200 + 50)
+                .setSineAmplitude(this.getRandom());
         }
             
     }
 
-    function createShiningStar(emitterContainer, width, height) {
-        var particle = emitterContainer.getParticle(this);
+    function createShiningStar(width, height) {
+        var particle = this.emitterContainer.getParticle(this);
 
-        var x = ((Math.random() - 0.5) * width * 1.5);
-        var y = ((Math.random() - 0.5) * height * 1.5);
+        var x = ((this.getRandom() - 0.5) * width * 1.5);
+        var y = ((this.getRandom() - 0.5) * height * 1.5);
 
-        var size = 6 + Math.random() * 6;
-        var parallaxFactor = 0.005 + Math.random() * 0.005;
-        var color = new THREE.Color(Math.random() * 0.4 + 0.6, Math.random() * 0.2 + 0.8, Math.random() * 0.4 + 0.6);
+        var size = 6 + this.getRandom() * 6;
+        var parallaxFactor = 0.005 + this.getRandom() * 0.005;
+        var color = new THREE.Color(this.getRandom() * 0.4 + 0.6, this.getRandom() * 0.2 + 0.8, this.getRandom() * 0.4 + 0.6);
 
         particle
             .setActivationTime(0)
             .setSize(size*0.5)
-            .setOpacity(Math.random() * 0.2 + 0.9)
+            .setOpacity(this.getRandom() * 0.2 + 0.9)
             .setPosition({x: x, y: y})
             .setColor(new THREE.Color(1,1,1))
             .setParallaxFactor(parallaxFactor);
 
-        particle = emitterContainer.getParticle(this);
+        particle = this.emitterContainer.getParticle(this);
         particle
             .setActivationTime(0)
             .setSize(size)
-            .setOpacity(Math.random() * 0.1 + 0.1)
+            .setOpacity(this.getRandom() * 0.1 + 0.1)
             .setPosition({x: x, y: y})
             .setColor(color)
             .setParallaxFactor(parallaxFactor)
-            .setSineFrequency(Math.random() * 200 + 100)
-            .setSineAmplitude(Math.random() * 0.4);
+            .setSineFrequency(this.getRandom() * 200 + 100)
+            .setSineAmplitude(this.getRandom() * 0.4);
             
-        var shines = Math.round(Math.random() * 8) - 3;
+        var shines = Math.round(this.getRandom() * 8) - 3;
 
         if (shines <= 2) {
             return
         }
         
-        var angle = Math.random() * 360;
-        var angleChange = (Math.random() - 0.5) * 0.01;
+        var angle = this.getRandom() * 360;
+        var angleChange = (this.getRandom() - 0.5) * 0.01;
 
         while (shines--) {
 
-            angle += Math.random() * 60 + 40   
-            particle = emitterContainer.getParticle(this);
+            angle += this.getRandom() * 60 + 40   
+            particle = this.emitterContainer.getParticle(this);
             particle
                 .setActivationTime(0)
-                .setSize(size * Math.random() * 10 + 10)
-                .setOpacity(Math.random() * 0.1 + 0.1)
+                .setSize(size * this.getRandom() * 10 + 10)
+                .setOpacity(this.getRandom() * 0.1 + 0.1)
                 .setPosition({x: x, y: y})
                 .setColor(color)
                 .setParallaxFactor(parallaxFactor)
-                .setSineFrequency(Math.random() * 200 + 100)
+                .setSineFrequency(this.getRandom() * 200 + 100)
                 .setSineAmplitude(0.1)
                 .setAngle(angle)
                 .setAngleChange(angleChange)
@@ -145,72 +154,72 @@ window.StarField = (function(){
         
     }
 
-    function createGasCloud(emitterContainer, width, height) {
-        var gas = Math.floor(Math.random() * 10 + 10);
+    function createGasCloud(width, height) {
+        var gas = Math.floor(this.getRandom() * 10 + 10);
     
         var position = {
-            x: ((Math.random() - 0.5) * width),
-            y: ((Math.random() - 0.5) * height)
+            x: ((this.getRandom() - 0.5) * width),
+            y: ((this.getRandom() - 0.5) * height)
         }
 
         var vector = {
-            x: getRandomBand(0.5, 1) * 100,
-            y: getRandomBand(0.5, 1) * 100
+            x: getRandomBand.call(this, 0.5, 1) * width / 100,
+            y: getRandomBand.call(this, 0.5, 1) * width / 100
         }
 
-        var iterations = Math.floor(Math.random() * 3) + 5;
+        var iterations = Math.floor(this.getRandom() * 3) + 5;
 
         while(iterations--) {
-            createGasCloudPart(emitterContainer, {x: position.x, y: position.y});
-            position.x += getRandomBand(0, 1) * 50 + vector.x; 
-            position.y += getRandomBand(0, 1) * 50 + vector.y; 
+            createGasCloudPart.call(this, {x: position.x, y: position.y}, width);
+            position.x += getRandomBand.call(this, 0, 1) * 50 + vector.x; 
+            position.y += getRandomBand.call(this, 0, 1) * 50 + vector.y; 
         }
     }
 
     function getRandomBand(min, max) {
-        var random = Math.random() * (max-min) + min;
-        return Math.random() > 0.5 ? random * -1 : random;
+        var random = this.getRandom() * (max-min) + min;
+        return this.getRandom() > 0.5 ? random * -1 : random;
     }
 
-    function createGasCloudPart(emitterContainer, position) {
-        var gas = Math.floor(Math.random() * 5 + 5);
-        var baseRotation = (Math.random() - 0.5) * 0.002;
+    function createGasCloudPart(position, width) {
+        var gas = Math.floor(this.getRandom() * 5 + 5);
+        var baseRotation = (this.getRandom() - 0.5) * 0.002;
 
         while(gas--) {  
-            createGas(emitterContainer, position, baseRotation, Math.random() * 250 + 750)
+            createGas.call(this, position, baseRotation, this.getRandom() * width * 0.40  + width * 0.40)
         }
     }
 
-    function createGas(emitterContainer, position, baseRotation, size){
-        var particle = emitterContainer.getParticle(this);
+    function createGas(position, baseRotation, size){
+        var particle = this.emitterContainer.getParticle(this);
 
-        position.x += (Math.random() - 0.5) * 100; 
-        position.y += (Math.random() - 0.5) * 100;
+        position.x += (this.getRandom() - 0.5) * 100; 
+        position.y += (this.getRandom() - 0.5) * 100;
 
         particle
             .setActivationTime(0)
-            .setSize( Math.random() * size*0.5 + size*0.5)
-            .setOpacity(Math.random() * 0.005 + 0.005)
+            .setSize( this.getRandom() * size*0.5 + size*0.5)
+            .setOpacity(this.getRandom() * 0.005 + 0.005)
             .setPosition({x: position.x, y: position.y})
             .setColor(new THREE.Color(104/255, 204/255, 249/255))
             .setTexture(particle.texture.gas)   
-            .setAngle(Math.random() * 360)
-            .setAngleChange(baseRotation + (Math.random() - 0.5) * 0.001)
-            .setParallaxFactor(0.005 + Math.random() * 0.005);
+            .setAngle(this.getRandom() * 360)
+            .setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.001)
+            .setParallaxFactor(0.005 + this.getRandom() * 0.005);
 
-        if (Math.random() > 0.9) {
+        if (this.getRandom() > 0.9) {
             particle
                 .setActivationTime(0)
-                .setSize( Math.random() * size*0.25 + size*0.25)
+                .setSize( this.getRandom() * size*0.25 + size*0.25)
                 .setOpacity(0)
                 .setPosition({x: position.x, y: position.y})
                 .setColor(new THREE.Color(1, 1, 1))
                 .setTexture(particle.texture.gas)   
-                .setAngle(Math.random() * 360)
-                .setAngleChange(baseRotation + (Math.random() - 0.5) * 0.01)
-                .setParallaxFactor(0.005 + Math.random() * 0.005)
-                .setSineFrequency(Math.random() * 200 + 200)
-                .setSineAmplitude(Math.random()*0.02);
+                .setAngle(this.getRandom() * 360)
+                .setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.01)
+                .setParallaxFactor(0.005 + this.getRandom() * 0.005)
+                .setSineFrequency(this.getRandom() * 200 + 200)
+                .setSineAmplitude(this.getRandom()*0.02);
         }
 
     }

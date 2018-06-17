@@ -16,6 +16,13 @@ window.mathlib = {
 		return a;
 	},
 
+	getSeededRandomGenerator: function (seed) {
+		return function random() {
+			var x = Math.sin(seed++) * 10000;
+			return x - Math.floor(x);
+		}
+	},
+
 	arrayIsEmpty: function arrayIsEmpty(array) {
 		for (var i in array) {
 			return false;

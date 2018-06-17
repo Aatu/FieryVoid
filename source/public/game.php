@@ -505,7 +505,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php print($serverdata ? $serverdata->background : "");  ?>)"></div>
+    <div id="background" style="background-image:url(img/maps/<?php /* print($serverdata ? $serverdata->background : ""); */ ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 
