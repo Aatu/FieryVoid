@@ -620,7 +620,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
-        
+
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
 
         if (ship.osat) return false;
@@ -834,9 +834,76 @@ shipManager.movement = {
 
         var step = right ? 1 : -1;
 
-        if (mathlib.addToHexFacing(step, heading) === facing || mathlib.addToHexFacing(step, heading) === reverseheading) returnVal = true;
+        console.log(step, heading, reverseheading, mathlib.addToHexFacing(step, heading))
+
+        if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
 
         return returnVal;
+    },
+
+    isTurningIntoBackwardsPivot: function isTurningIntoBackwardsPivot(ship) {
+        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
+        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
+        var reverseheading = mathlib.addToHexFacing(heading, 3);
+
+        return mathlib.addToHexFacing(1, facing) === reverseheading || mathlib.addToHexFacing(-1, facing) === reverseheading;
+    },
+    
+    doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
+        var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
+        var lastMovement = ship.movement[ship.movement.length - 1];
+
+        var name;
+        var step = 1;
+        var commit = false;
+        var assignedThrust = Array();
+
+        name = "turnright";
+
+        if (!right) {
+            step = -1;
+            name = "turnleft";
+        }
+
+        //TODO: support new hex coordinate system?
+        var newfacing = lastMovement.facing;
+        var newheading = lastMovement.facing;
+
+        if (shipManager.movement.isTurningIntoBackwardsPivot(ship)) {
+            newfacing = lastMovement.facing;
+            newheading = mathlib.addToHexFacing(lastMovement.facing, 3);
+        }
+
+        if (ship.flight) {
+            commit = true;
+            assignedThrust[0] = requiredThrust[0];
+        }
+
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: name,
+            position: lastMovement.position,
+            xOffset: lastMovement.xOffset,
+            yOffset: lastMovement.yOffset,
+            facing: newfacing,
+            heading: newheading,
+            speed: lastMovement.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: requiredThrust,
+            assignedThrust: assignedThrust,
+            commit: commit,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: 0
+        };
+
+        if (!ship.flight) {
+            shipWindowManager.assignThrust(ship);
+        }
     },
 
     hasPivoted: function hasPivoted(ship) {
@@ -1490,7 +1557,7 @@ shipManager.movement = {
         if (pivoting != "no" && !ship.gravitic) {
             return false;
         }
-        if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !shipManager.movement.canTurnIntoPivot(ship, right) && !ship.gravitic) {
+        if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !ship.gravitic) {
             return false;
         }
 
@@ -1510,6 +1577,9 @@ shipManager.movement = {
             return;
         }
 
+        shipManager.movement.doNormalTurn(ship, right);
+
+        /*
         if (ship.flight) {
             if (shipManager.movement.canTurnIntoPivot(ship, right)) {
                 shipManager.movement.askForIntoPivotTurn(ship, right, "Do you wish to turn or turn into the pivot?");
@@ -1529,58 +1599,7 @@ shipManager.movement = {
                 shipManager.movement.doNormalTurn(ship, right);
             }
         }
-    },
-
-    doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
-        var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
-        var lastMovement = ship.movement[ship.movement.length - 1];
-
-        var name;
-        var step = 1;
-        var commit = false;
-        var assignedThrust = Array();
-
-        name = "turnright";
-
-        if (!right) {
-            step = -1;
-            name = "turnleft";
-        }
-
-        //TODO: support new hex coordinate system?
-        newfacing = mathlib.addToHexFacing(lastMovement.facing, step);
-        newheading = mathlib.addToHexFacing(lastMovement.heading, step);
-
-        if (ship.flight) {
-            commit = true;
-            assignedThrust[0] = requiredThrust[0];
-        }
-
-        ship.movement[ship.movement.length] = {
-            id: -1,
-            type: name,
-            position: lastMovement.position,
-            xOffset: lastMovement.xOffset,
-            yOffset: lastMovement.yOffset,
-            facing: lastMovement.facing,
-            heading: lastMovement.facing,
-            speed: lastMovement.speed,
-            animating: false,
-            animated: false,
-            animationtics: 0,
-            requiredThrust: requiredThrust,
-            assignedThrust: assignedThrust,
-            commit: commit,
-            preturn: false,
-            at_initiative: shipManager.getIniativeOrder(ship),
-            turn: gamedata.turn,
-            forced: false,
-            value: 0
-        };
-
-        if (!ship.flight) {
-            shipWindowManager.assignThrust(ship);
-        }
+        */
     },
 
     doNormalTurn: function doNormalTurn(ship, right) {
@@ -1739,16 +1758,6 @@ shipManager.movement = {
         })
 
         move.assignedThrust = []
-    },
-
-    askForIntoPivotTurn: function askForIntoPivotTurn(ship, right, message) {
-        confirm.confirmWithOptions(message, "Turn into Pivot", "Turn", function (respons) {
-            if (respons) {
-                shipManager.movement.doIntoPivotTurn(ship, right);
-            } else {
-                shipManager.movement.doNormalTurn(ship, right);
-            }
-        });
     },
 
     calculateRequiredThrust: function calculateRequiredThrust(ship, right) {

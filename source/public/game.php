@@ -548,6 +548,14 @@
             <canvas id="turnleftcanvas" width="40" height="40"></canvas>
         </div>
         
+        <div id="turnIntoPivotLeft">
+            <canvas id="turnIntoPivotLeftCanvas" width="40" height="40"></canvas>
+        </div>
+        
+        <div id="turnIntoPivotRight">
+            <canvas id="turnIntoPivotRightCanvas" width="40" height="40"></canvas>
+        </div>
+
         <div id="slipright">
             <canvas id="sliprightcanvas" width="30" height="30"></canvas>
         </div>

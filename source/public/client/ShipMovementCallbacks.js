@@ -118,5 +118,12 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    ShipMovementCallbacks.prototype.turnIntoPivotCallback = function (e, right) {
+        e.stopPropagation();
+
+        shipManager.movement.doIntoPivotTurn(this.ship, right);
+        this.updateCallback({ ship: this.ship });
+    };
+
     return ShipMovementCallbacks;
 }();
