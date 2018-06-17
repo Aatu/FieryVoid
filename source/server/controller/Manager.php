@@ -324,12 +324,18 @@ class Manager{
     public static function getReplayGameData($userid, $gameid, $turn) {
         try{
             self::initDBManager();
+            $game = self::$dbManager->getTacGame($gameid, 0);
+            if (!$game) {
+                return null;
+            }
+
+            $actualTurn = $game->turn;
             $gamedata = self::$dbManager->getTacGamedata($userid, $gameid, $turn);
 
             if ($gamedata == null)
                 return null;
 
-            $gamedata->prepareForPlayer();
+            $gamedata->prepareForPlayer($actualTurn > $turn);
             $gamedata->turn = $turn;
 
             $json = json_encode($gamedata, JSON_NUMERIC_CHECK);

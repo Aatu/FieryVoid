@@ -406,10 +406,12 @@ class TacGamedata{
         return $ships;
     }
 
-    public function prepareForPlayer(){
+    public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();
-        $this->deleteHiddenData();
+        if (!$all) {
+            $this->deleteHiddenData();
+        }
         $this->setPreTurnTasks();
         
         if ($this->status == "LOBBY"){
