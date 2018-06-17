@@ -30,6 +30,7 @@ window.ReplayPhaseStrategy = function () {
 
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata);
+        this.hideAllEW();
 
         this.createReplayUI();
 
