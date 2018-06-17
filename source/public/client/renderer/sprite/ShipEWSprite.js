@@ -47,7 +47,7 @@ window.ShipEWSprite = function () {
         context.fillStyle = "rgba(144,185,208," + a + ")";
 
         var r1 = getDEWStart();
-        var r2 = getDEWStart() + DEW;
+        var r2 = getDEWStart() + DEW*4;
 
         graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
@@ -58,7 +58,7 @@ window.ShipEWSprite = function () {
 
     function getCCEWStart(DEW) {
 
-        return Math.ceil(TEXTURE_SIZE * 0.32) + DEW;
+        return Math.ceil(TEXTURE_SIZE * 0.32) + DEW*4;
     }
 
     function drawCCEW(context, DEW, CCEW) {
@@ -76,7 +76,7 @@ window.ShipEWSprite = function () {
         context.fillStyle = "rgba(20,80,128," + a + ")";
 
         var r1 = getCCEWStart(DEW);
-        var r2 = getCCEWStart(DEW) + CCEW;
+        var r2 = getCCEWStart(DEW) + CCEW*4;
 
         graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
