@@ -42,7 +42,6 @@ window.FirePhaseStrategy = function () {
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
        
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-        this.showShipEW(this.selectedShip);
         var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
         this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
     };
@@ -68,7 +67,6 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-        this.showShipEW(ship);
 
         if (shipManager.movement.canPivot(ship)) {
             this.drawMovementUI(this.selectedShip);
@@ -77,9 +75,6 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
         PhaseStrategy.prototype.onMouseOutShips.call(this, ships, payload);
-        if (this.selectedShip) {
-            this.showShipEW(this.selectedShip);
-        }
     };
 
     FirePhaseStrategy.prototype.onSystemTargeted = function (payload) {

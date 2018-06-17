@@ -83,6 +83,8 @@ window.PhaseStrategy = function () {
             this.deselectShip(this.selectedShip);
         }
 
+        this.hideAllEW();
+
         this.currentlyMouseOveredIds = null;
 
         return this;
@@ -169,7 +171,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = ship;
         this.shipIconContainer.getByShip(ship).setSelected(true);
-        this.shipIconContainer.getByShip(ship).showEW();
+        this.showAppropriateEW();
         
         if (this.shipTooltip) {
             this.shipTooltip.update(ship, this.selectedShip);
@@ -255,12 +257,11 @@ window.PhaseStrategy = function () {
         ships = [].concat(ships);
         ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getById(ship.id);
-            icon.hideEW();
-            icon.hideBDEW();
-            this.ewIconContainer.hide();
-            //TODO: User settings, should this be hidden or not?
             icon.showSideSprite(false);
         }, this);
+
+        this.hideAllEW();
+        this.showAppropriateEW();
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
@@ -507,14 +508,26 @@ window.PhaseStrategy = function () {
         showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
+    PhaseStrategy.prototype.hideAllEW = function() {
+        gamedata.ships.forEach(function (ship) {
+            var icon = this.shipIconContainer.getById(ship.id);
+            icon.hideEW();
+            icon.hideBDEW();
+            this.ewIconContainer.hide();
+        }, this);
+
+        this.showAppropriateEW();
+    }
+
+    PhaseStrategy.prototype.showAppropriateEW = function() {
+        if (this.selectedShip) {
+            this.showShipEW(this.selectedShip);
+        }
+    }
+
     function showGlobalEW(ships, payload) {
         if (payload.up) {
-            ships.forEach(function (ship) {
-                var icon = this.shipIconContainer.getById(ship.id);
-                icon.hideEW();
-                icon.hideBDEW();
-                this.ewIconContainer.hide();
-            }, this);
+            this.hideAllEW();
         } else {
             ships.forEach(function (ship) {
                 var icon = this.shipIconContainer.getById(ship.id);
