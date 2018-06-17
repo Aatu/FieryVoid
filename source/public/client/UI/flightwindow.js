@@ -165,7 +165,7 @@ window.flightWindowManager = {
 			dest = flightWindowManager.getDestinationForSystem(ship, fighter, fightersystem.location);
 			template = $("#systemtemplatecontainer .fightersystem");
 
-			fightersystemwindow = template.clone(true).appendTo(dest);
+			var fightersystemwindow = template.clone(true).appendTo(dest);
 			fightersystemwindow.wrap('<td/>');
 
 			if (fightersystem.iconPath) {
