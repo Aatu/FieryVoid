@@ -64,7 +64,7 @@ window.ShipIcon = function () {
         if (this.hidden) {
             return;
         }
-
+        
         this.scene.remove(this.mesh);
         this.hidden = true;
     };

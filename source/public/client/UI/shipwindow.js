@@ -1017,9 +1017,9 @@ window.shipWindowManager = {
 	},
 
 	addEW: function addEW(ship, shipwindow) {
-		var dew = !gamedata.isMyShip(ship) && gamedata.gamephase == 1 ? "?" : ew.getDefensiveEW(ship);
-		var ccew = !gamedata.isMyShip(ship) && gamedata.gamephase == 1 ? "?" : ew.getCCEW(ship);
-		var bdew = !gamedata.isMyShip(ship) && gamedata.gamephase == 1 ? "?" : ew.getBDEW(ship) * 0.25;
+		var dew =  ew.getDefensiveEW(ship);
+		var ccew = ew.getCCEW(ship);
+		var bdew = ew.getBDEW(ship) * 0.25;
 		var elint = shipManager.isElint(ship);
 
 		if (!shipwindow) {

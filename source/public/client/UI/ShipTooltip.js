@@ -215,7 +215,7 @@ window.ShipTooltip = function () {
 
     function getAllyClass(ship) {
         if (!gamedata.thisplayer) {
-            return 'neutral';
+            return ship.team !== 1 ? 'enemy' : 'ally';
         }
 
         return ship.userid !== gamedata.thisplayer ? 'enemy' : 'ally';

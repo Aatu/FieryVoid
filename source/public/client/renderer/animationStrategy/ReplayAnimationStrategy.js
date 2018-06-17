@@ -29,20 +29,12 @@ window.ReplayAnimationStrategy = function () {
 
         this.movementPhaseStartTime = null;
         this.firingPhaseStartTime = null;
-
-        /*
-        this.explosion = new ShipExplosion(this.emitterContainer, {
-            time: 0,
-            position: {x:0, y:0}
-        });
-        */
-
-        buildAnimations.call(this);
     }
 
     ReplayAnimationStrategy.prototype = Object.create(AnimationStrategy.prototype);
 
     ReplayAnimationStrategy.prototype.activate = function () {
+        buildAnimations.call(this);
         return this;
     };
 
@@ -98,7 +90,6 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight;
         }, this).forEach(function (ship) {
-            console.log("SHIP DESTROYED", ship.imagePath);
 
             var animation = new ShipDestroyedAnimation(time, this.shipIconContainer.getByShip(ship), this.emitterContainer, this.movementAnimations);
             time += animation.getDuration();
@@ -108,7 +99,7 @@ window.ReplayAnimationStrategy = function () {
         this.gamedata.ships.filter(function (ship) {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             var destroyed = shipManager.isDestroyed(ship);
-            return (turnDestroyed !== null && turnDestroyed < this.turn) || (turnDestroyed === null && destroyed);
+            return ((turnDestroyed !== null && turnDestroyed < this.turn) || (turnDestroyed === null && destroyed));
         }, this).forEach(function (ship) {
             this.shipIconContainer.getByShip(ship).hide();
         }, this);

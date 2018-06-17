@@ -500,11 +500,11 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShowFriendlyEW = function (payload) {
-        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyShip(ship) }), payload);
+        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onShowEnemyEW = function (payload) {
-        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyShip(ship) }), payload);
+        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return !isMyOrTeamOneShip(ship) }), payload);
     };
 
     function showGlobalEW(ships, payload) {
@@ -519,8 +519,17 @@ window.PhaseStrategy = function () {
             ships.forEach(function (ship) {
                 var icon = this.shipIconContainer.getById(ship.id);
                 this.ewIconContainer.showByShip(ship);
+                icon.showEW();
                 icon.showBDEW();
             }, this);
+        }
+    }
+
+    function isMyOrTeamOneShip(ship) {
+        if (gamedata.thisplayer) {
+            return gamedata.isMyShip(ship);
+        } else {
+            return ship.team === 1;
         }
     }
 

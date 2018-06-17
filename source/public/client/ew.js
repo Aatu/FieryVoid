@@ -75,7 +75,9 @@ window.ew = {
 
         var listed = ew.getListedDEW(ship);
 
-        if (listed == 0) return ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+        if (listed === null) {
+            return ew.getScannerOutput(ship) - ew.getUsedEW(ship);
+        }
 
         return listed;
     },
@@ -165,7 +167,7 @@ window.ew = {
             if (entry.type == "DEW") return entry.amount;
         }
 
-        return 0;
+        return null;
     },
 
     getBDEW: function getBDEW(ship) {

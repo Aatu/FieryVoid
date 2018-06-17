@@ -2,7 +2,7 @@
 
 window.EWIconContainer = function () {
 
-    var COLOR_OEW_FIRENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
     var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
     var COLOR_OEW_DIST = new THREE.Color(255 / 255,  157 / 255, 0 / 255);
     var COLOR_SDEW = new THREE.Color(109/255, 189/255, 255/255);
@@ -170,7 +170,11 @@ window.EWIconContainer = function () {
     function getColor(ship, type)  {
         switch(type) {
             case "OEW":
-                return gamedata.isMyShip(ship) ? COLOR_OEW_FIRENDLY : COLOR_OEW_ENEMY;
+                if (gamedata.thisplayer) {
+                    return gamedata.isMyShip(ship) ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
+                } else {
+                    return ship.team === 1 ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
+                }
             case "DIST":
                 return COLOR_OEW_DIST;
             case "SDEW":
