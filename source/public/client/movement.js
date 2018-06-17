@@ -318,8 +318,6 @@ shipManager.movement = {
         if (ship.agile) {
             for (var i in ship.movement) {
                 var m = ship.movement[i];
-                //				if (m.turn != gamedata.turn)
-                //					continue;
 
                 if (m.type == "isRolled") {
                     ret = true;
@@ -336,13 +334,11 @@ shipManager.movement = {
                 if (m.turn != gamedata.turn) continue;
 
                 if (m.type == "isRolled") {
-                    //console.log(ship.name + " is rolled");
                     return true;
                 }
             }
             return false;
         }
-        //console.log(ship.name + " is NOT rolled");
         return ret;
     },
 
@@ -474,8 +470,6 @@ shipManager.movement = {
             var pivot = isPivoting;
 
             angle = angle / 60;
-
-            //		console.log("facing: " + facing + ", heading: " + heading, pivot + ", angle: " + angle, right);
 
             if (facing === heading) {
                 if (heading - 1 === angle || heading + 5 === angle) {
@@ -626,7 +620,7 @@ shipManager.movement = {
     canPivot: function canPivot(ship, right) {
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
-
+        
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
 
         if (ship.osat) return false;
@@ -1065,7 +1059,6 @@ shipManager.movement = {
             assignedThrust[0] = ship.accelcost;
         } else {
 
-            //      console.log("heading: " + heading + ",facing: " +  facing, accel);
 
 
             if (facing === heading) {
@@ -1330,13 +1323,10 @@ shipManager.movement = {
         if (thrustReq[system.direction] <= 0 && thrustReq[0] <= 0 && !isTurn) {
             return false;
         }
-        //console.log(thrustReq);
-        //console.log(thrustReq[system.direction] + " " + thrustReq[0] + " " + isTurn + " " + (turndelay - 1));
         if (thrustReq[system.direction] <= 0 && thrustReq[0] <= 0 && isTurn && turndelay - 1 < 1) {
             return false;
         }
 
-        //if (shipManager.systems.getOutput(ship, system)*2 < already + step)
         if (shipManager.systems.getOutput(ship, system) * 2 < already + 1) //do check effective thrust, not engine thrust
             return false;
 
@@ -1360,8 +1350,7 @@ shipManager.movement = {
 
             if (system.direction != i && assigned[i] && assigned[i] > maxassigned) maxassigned = assigned[i];
         }
-        //console.log(oreg);
-        //console.log("maxreg: "+ maxreg +" maxassigned: "+ maxassigned);
+
         if (assigned[system.direction] > maxreg && assigned[system.direction] > maxassigned) return false;
 
         if (remainingThrust < step) return false;
@@ -1376,7 +1365,6 @@ shipManager.movement = {
 
         shipWindowManager.setDataForSystem(ship, system);
         shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
-        //console.log(movement.assignedThrust[system.id]);
         return true;
     },
 
@@ -1414,7 +1402,6 @@ shipManager.movement = {
         shipWindowManager.setDataForSystem(ship, system);
         shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
 
-        //console.log(movement.assignedThrust[system.id]);
         return true;
     },
 
@@ -1434,8 +1421,6 @@ shipManager.movement = {
         if (facing == heading || mathlib.addToHexFacing(facing, 1) == heading || mathlib.addToHexFacing(facing, -1) == heading) return false;
 
         return true;
-
-        //return (mathlib.addToHexFacing(heading, 3) == facing)
     },
 
     hasTurned: function hasTurned(ship) {
@@ -1490,7 +1475,6 @@ shipManager.movement = {
         if (turndelay > 0) {
 
             if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous))) {
-                //console.log(ship.name + " has turn delay, cant turn");
                 return false;
             }
         }
@@ -1498,24 +1482,18 @@ shipManager.movement = {
         var speed = shipManager.movement.getSpeed(ship);
         var turncost = Math.ceil(speed * ship.turncost);
 
-        //console.log("remaining thrust: " + shipManager.movement.getRemainingEngineThrust(ship) + " turncost: "  + turncost);
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
-            //console.log(ship.name + " does not have enough thrust");
             return false;
         }
 
         var pivoting = shipManager.movement.isPivoting(ship);
         if (pivoting != "no" && !ship.gravitic) {
-            //&& !shipManager.movement.isTurningToPivot(ship, right) && !ship.gravitic){
-            //console.log(ship.name + " pivoting and not gravitic");
             return false;
         }
         if (heading !== facing && mathlib.addToHexFacing(heading, 3) !== facing && !shipManager.movement.canTurnIntoPivot(ship, right) && !ship.gravitic) {
-            //console.log(ship.name + " heading is not facing, and cant turn to pivot");
             return false;
         }
 
-        //console.log(ship.name + " can turn");
         return true;
     },
 
@@ -1802,9 +1780,6 @@ shipManager.movement = {
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
 
         var reversed = (back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship));
-
-        //	console.log("head: " + heading + " face:" + facing);
-        //	if (right){console.log("right");}
 
         if (facing != heading) {
             if (ship.gravitic) {

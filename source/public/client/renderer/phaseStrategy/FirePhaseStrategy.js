@@ -41,7 +41,7 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.selectShip = function (ship, payload) {
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
        
-        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+        this.setSelectedShip(ship);
         var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
         this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
     };

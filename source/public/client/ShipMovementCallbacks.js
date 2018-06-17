@@ -112,8 +112,6 @@ window.ShipMovementCallbacks = function () {
     ShipMovementCallbacks.prototype.moveCallback = function (e) {
         e.stopPropagation();
 
-        console.log("Move");
-
         if (UI.shipMovement.checkUITimeout()) return false;
 
         shipManager.movement.doMove(this.ship);

@@ -1517,6 +1517,7 @@ window.weaponManager = {
                 return false;
             }
         }
+
         return true;
     },
 
