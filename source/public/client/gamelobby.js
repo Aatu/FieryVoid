@@ -276,20 +276,26 @@ window.gamedata = {
 					if(ship.variantOf!='') continue;//check if it's not a variant, we're looking only for base designs here...
 					//ok, display...
 					shipDisplayName = this.prepareClassName(ship);
-					h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+ship.id+'" data-faction="'+ faction +'" data-shipclass="'+ship.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-					h.appendTo(targetNode);
+					h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+                    $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
+                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.id, faction));
+                        
+                    h.appendTo(targetNode);
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < jsonShips[faction].length; indexV++){
 						shipV = shipList[indexV];
 						if(shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
 						shipDisplayName = this.prepareClassName(shipV);
-						h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship" data-id="'+shipV.id+'" data-faction="'+ faction +'" data-shipclass="'+shipV.phpclass+'"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span><span class="addship clickable">Add to fleet</span></div>');
-						h.appendTo(targetNode);
+						h = $('<div oncontextmenu="gamedata.onShipContextMenu(this);return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
+                        $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
+                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.id, faction));
+                        
+                        h.appendTo(targetNode);
 					} //end of variant
 				} //end of base design
 			} //end of size
 			
-			$(".addship").bind("click", this.buyShip);
+            
 		} //end of faction
 	}, //endof parseShips
 	
@@ -431,8 +437,7 @@ window.gamedata = {
         }
     },
 
-    buyShip: function buyShip(e) {
-        var shipclass = $(this).parent().data().shipclass;
+    buyShip: function buyShip(shipclass) {
         var ship = gamedata.getShipByType(shipclass);
 
         var slotid = gamedata.selectedSlot;
@@ -604,10 +609,7 @@ window.gamedata = {
         this.constructFleetList();
     },
 
-    onShipContextMenu: function onShipContextMenu(e) {
-
-        var id = $(e).data("id");
-        var faction = $(e).data("faction");
+    onShipContextMenu: function onShipContextMenu(id, faction) {
 
         var ship = gamedata.getShip(id, faction);
 

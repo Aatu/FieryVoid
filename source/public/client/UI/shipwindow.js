@@ -84,17 +84,19 @@ window.shipWindowManager = {
 			shipwindow.addClass("enemy");
 		}
 
-		if ( gamedata.getPlayerTeam() === 1) {
-			if (ship.userid == gamedata.thisplayer) {
-				shipwindow.addClass("left");
+		if (gamedata.getPlayerTeam) {
+			if ( gamedata.getPlayerTeam() === 1) {
+				if (ship.userid == gamedata.thisplayer) {
+					shipwindow.addClass("left");
+				} else {
+					shipwindow.addClass("right");
+				}
 			} else {
-				shipwindow.addClass("right");
-			}
-		} else {
-			if (ship.userid == gamedata.thisplayer) {
-				shipwindow.addClass("right");
-			} else {
-				shipwindow.addClass("left");
+				if (ship.userid == gamedata.thisplayer) {
+					shipwindow.addClass("right");
+				} else {
+					shipwindow.addClass("left");
+				}
 			}
 		}
 
