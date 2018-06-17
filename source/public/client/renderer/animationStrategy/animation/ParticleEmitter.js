@@ -83,7 +83,7 @@ window.ParticleEmitter = function () {
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
         this.mesh.position.set(0, 0, 201);
-
+        this.mesh.frustumCulled = false;
         this.needsUpdate = false;
 
         this.scene.add(this.mesh);
