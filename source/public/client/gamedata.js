@@ -168,6 +168,26 @@ window.gamedata = {
         return target.team !== shooter.team;
     },
 
+    isMyOrTeamOneShip: function isMyOrTeamOneShip(ship) {
+        if (gamedata.isPlayerInGame()) {
+            return gamedata.isMyShip(ship);
+        } else {
+            return ship.team === 1;
+        }
+    },
+
+    isPlayerInGame: function isPlayerInGame() {
+        if (gamedata.thisplayer === null || gamedata.thisplayer === -1) {
+            return false;
+        }
+
+        var slot = Object.keys(gamedata.slots).find(function(key){
+            var slot = gamedata.slots[key];
+            return slot.playerid === gamedata.thisplayer;
+        })
+        return Boolean(slot);
+    },
+
     shipStatusChanged: function shipStatusChanged(ship) {
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();

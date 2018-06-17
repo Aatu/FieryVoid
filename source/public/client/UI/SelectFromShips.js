@@ -102,11 +102,7 @@ window.SelectFromShips = function () {
     }
 
     function getAllyClass(ship) {
-        if (!gamedata.thisplayer) {
-            return ship.team !== 1 ? 'enemy' : 'ally';
-        }
-
-        return ship.userid !== gamedata.thisplayer ? 'enemy' : 'ally';
+        return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
     }
 
     return ShipTooltip;

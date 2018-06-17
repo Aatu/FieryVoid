@@ -44,7 +44,7 @@ window.phaseDirector = function () {
     };
 
     function resolvePhaseStrategy(gamedata, scene) {
-        if (!gamedata.thisplayer || gamedata.thisplayer === -1 || gamedata.replay) {
+        if (!gamedata.isPlayerInGame() || gamedata.replay) {
             return activatePhaseStrategy.call(this, window.ReplayPhaseStrategy, gamedata, scene);
         }
 

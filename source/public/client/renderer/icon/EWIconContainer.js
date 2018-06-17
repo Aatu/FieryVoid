@@ -170,11 +170,7 @@ window.EWIconContainer = function () {
     function getColor(ship, type)  {
         switch(type) {
             case "OEW":
-                if (gamedata.thisplayer) {
-                    return gamedata.isMyShip(ship) ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
-                } else {
-                    return ship.team === 1 ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
-                }
+                return gamedata.isMyOrTeamOneShip(ship) ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
             case "DIST":
                 return COLOR_OEW_DIST;
             case "SDEW":
