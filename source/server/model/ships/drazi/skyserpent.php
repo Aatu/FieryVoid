@@ -49,9 +49,8 @@ class SkySerpent extends SuperHeavyFighter{
         if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
             // If within 5 hexes of a Fanged Serpent,
             // each Sky Serpent gets +1 initiative.
-            $pixPos = $this->getCoPos();
             
-            $ships = $gamedata->getShipsInDistance($pixPos, ((5*mathlib::$hexWidth) + 1));
+            $ships = $gamedata->getShipsInDistance($this, 5);
 
             foreach($ships as $ship){
                 if(!$ship->isDestroyed()
