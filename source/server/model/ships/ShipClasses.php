@@ -129,7 +129,7 @@ class BaseShip{
         if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
             $pixPos = $this->getCoPos();
             //TODO: Better distance calculation
-            $ships = $gamedata->getShipsInDistance($pixPos, ((9*mathlib::$hexWidth) + 1));
+            $ships = $gamedata->getShipsInDistance($this, 9);
 
             foreach($ships as $ship){
                 if( !$ship->isDestroyed()

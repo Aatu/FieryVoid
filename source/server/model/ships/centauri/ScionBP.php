@@ -42,31 +42,6 @@ class scionbp extends SuperHeavyFighter{
     public function populate(){
         return;
     }
-    
-	/* Serpent used special Ini bonus, other SHFs do not
-    public function getInitiativebonus($gamedata){
-        $initiativeBonusRet = parent::getInitiativebonus($gamedata);
-        
-        if($gamedata->turn > 0 && $gamedata->phase >= 0 ){
-            // If within 5 hexes of a Fanged Serpent,
-            // each Sky Serpent gets +1 initiative.
-            $pixPos = $this->getCoPos();
-            
-            $ships = $gamedata->getShipsInDistance($pixPos, ((5*mathlib::$hexWidth) + 1));
-
-            foreach($ships as $ship){
-                if(!$ship->isDestroyed()
-                        && ($this->userid == $ship->userid)
-                        && ($ship instanceof FangedSerpent)){
-                    $initiativeBonusRet+=5;
-                    break;
-                }
-            }
-        }
-        
-        return $initiativeBonusRet;
-    }
-    */
 }
 
 ?>

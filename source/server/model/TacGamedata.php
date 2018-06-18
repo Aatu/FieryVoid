@@ -390,7 +390,7 @@ class TacGamedata{
         }
 
         if (! ($pos instanceof OffsetCoordinate)) {
-            return $this->getShipsInDistanceOld($pos, $dis);
+            throw new Exception("only OffsetCoordinate supported");
         }
 
         $ships = array();
