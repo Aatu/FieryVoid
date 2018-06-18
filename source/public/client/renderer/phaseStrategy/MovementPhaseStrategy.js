@@ -142,5 +142,9 @@ window.MovementPhaseStrategy = function () {
         }
     };
 
+    MovementPhaseStrategy.prototype.showAppropriateEW = function() {
+    
+    }
+
     return MovementPhaseStrategy;
 }();
