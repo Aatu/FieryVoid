@@ -64,12 +64,7 @@ window.StarParticleEmitter = function () {
             vertexShader: shaders.vertex,
             fragmentShader: shaders.fragment,
             transparent: true,
-            //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
-            blending: blending,
-            depthTest: true,
-            //depthWrite: false,
-            //renderDepth: -500,
-            side:THREE.DoubleSide
+            blending: blending
         });
 
         /*
@@ -88,8 +83,8 @@ window.StarParticleEmitter = function () {
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
         this.mesh.frustumCulled = false;
-        this.mesh.matrixAutoUpdate = false;
-        this.mesh.position.set(0, 0, -10);
+        //this.mesh.matrixAutoUpdate = false;
+        this.mesh.position.set(0, 0, args.z || -10);
 
         this.needsUpdate = false;
 
@@ -118,7 +113,7 @@ window.StarParticleEmitter = function () {
     StarParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
 
-        /*
+        
         if (zoom === 1) {
             var width = window.webglScene.width;
             var height = window.webglScene.height;
@@ -135,7 +130,6 @@ window.StarParticleEmitter = function () {
 
             this.particleMaterial.uniforms.customMatrix.value = camera.projectionMatrix;
         }
-*/
         
         this.mesh.material.needsUpdate = true;
     };

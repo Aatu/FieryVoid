@@ -221,11 +221,11 @@
         vAngle = angle + angleChange * elapsedTime;
         textureN = textureNumber;
 
-        vec3 modPos = vec3( position.x - (cameraPosition.x * parallaxFactor), position.y - (cameraPosition.y * parallaxFactor), position.z );
+        vec3 modPos = vec3( position.x + (cameraPosition.x * parallaxFactor), position.y + (cameraPosition.y * parallaxFactor), position.z );
 
 
         gl_PointSize = clamp(size + (sizeChange * elapsedTime), 0.0, 1024.0);
-        gl_Position = customMatrix * vec4( modPos, 1.0 );
+        gl_Position = customMatrix * modelViewMatrix * vec4( modPos, 1.0 );
     }
 </script>
 <script id="starFragmentShader" type="x-shader/x-fragment">

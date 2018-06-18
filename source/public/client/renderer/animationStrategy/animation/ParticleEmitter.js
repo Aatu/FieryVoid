@@ -65,10 +65,7 @@ window.ParticleEmitter = function () {
             vertexShader: shaders.vertex,
             fragmentShader: shaders.fragment,
             transparent: true,
-            //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
-            blending: blending,
-            //depthTest: true,
-            //depthWrite: true
+            blending: blending
         });
 
         /*
