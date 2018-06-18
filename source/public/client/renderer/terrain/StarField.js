@@ -4,6 +4,7 @@ window.StarField = (function(){
     {
         this.starCount = 5000;
         this.emitterContainer = null;
+        this.gasEmitterContainer = null;
         this.webglScene = webglScene;
         this.lastAnimationTime = null;
         this.totalAnimationTime = 0;
@@ -20,6 +21,7 @@ window.StarField = (function(){
         this.cleanUp();
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
+        this.gasEmitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter, {z: 500});
 
         var width =  3000; //this.webglScene.width * 1.5; 
         var height = 2000; // this.webglScene.height * 1.5; 
@@ -191,7 +193,7 @@ window.StarField = (function(){
     }
 
     function createGas(position, baseRotation, size){
-        var particle = this.emitterContainer.getParticle(this);
+        var particle = this.gasEmitterContainer.getParticle(this);
 
         position.x += (this.getRandom() - 0.5) * 100; 
         position.y += (this.getRandom() - 0.5) * 100;

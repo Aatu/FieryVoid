@@ -7,10 +7,14 @@ window.ParticleEmitter = function () {
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
 
-    function ParticleEmitter(scene, particleCount, blending) {
+    function ParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
 
-        if (!blending) blending = THREE.AdditiveBlending;
+        if (!args) {
+            args = {};
+        }
+
+        var blending = args.blending || THREE.AdditiveBlending;
 
         if (!particleCount) {
             particleCount = 1000;
@@ -61,10 +65,10 @@ window.ParticleEmitter = function () {
             vertexShader: shaders.vertex,
             fragmentShader: shaders.fragment,
             transparent: true,
-            alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
+            //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
             blending: blending,
-            depthTest: true,
-            depthWrite: true
+            //depthTest: true,
+            //depthWrite: true
         });
 
         /*
@@ -82,7 +86,7 @@ window.ParticleEmitter = function () {
         }
 
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
-        this.mesh.position.set(0, 0, 201);
+        this.mesh.position.set(0, 0, args.z || 201);
         this.mesh.frustumCulled = false;
         this.needsUpdate = false;
 

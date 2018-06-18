@@ -2,11 +2,12 @@
 
 window.ParticleEmitterContainer = function () {
 
-    function ParticleEmitterContainer(scene, defaultParticleAmount, emitterClass) {
+    function ParticleEmitterContainer(scene, defaultParticleAmount, emitterClass, emitterArgs) {
         this.emitters = [];
         this.scene = scene;
         this.defaultParticleAmount = defaultParticleAmount;
         this.emitterClass = emitterClass || ParticleEmitter
+        this.emitterArgs = emitterArgs || {};
         Animation.call(this);
     }
 
@@ -25,7 +26,7 @@ window.ParticleEmitterContainer = function () {
         }
 
         if (!particle) {
-            this.emitters.push({ emitter: new this.emitterClass(this.scene, this.defaultParticleAmount), reservations: [] });
+            this.emitters.push({ emitter: new this.emitterClass(this.scene, this.defaultParticleAmount, this.emitterArgs), reservations: [] });
             return this.getParticle(animation);
         }
 

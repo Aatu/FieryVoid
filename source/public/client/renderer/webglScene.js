@@ -47,7 +47,7 @@ window.webglScene = function () {
 
         this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -1000, 1000);
 
-        this.camera.setPosition = new THREE.Vector3(0, 0, 200);
+        this.camera.setPosition = new THREE.Vector3(0, 0, 500);
 
         /*
         var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
@@ -147,11 +147,10 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.render = function () {
-        this.starField.render();
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render(this.scene, this.camera);
         animateZoom.call(this);
-
+        this.starField.render();
         requestAnimationFrame(this.render.bind(this));
     };
 

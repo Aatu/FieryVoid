@@ -7,10 +7,14 @@ window.StarParticleEmitter = function () {
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
 
-    function StarParticleEmitter(scene, particleCount, blending) {
+    function StarParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
 
-        if (!blending) blending = THREE.AdditiveBlending;
+        if (!args) {
+            args = {};
+        }
+
+        var blending = args.blending || THREE.AdditiveBlending;
 
         if (!particleCount) {
             particleCount = 1000;
@@ -60,10 +64,11 @@ window.StarParticleEmitter = function () {
             vertexShader: shaders.vertex,
             fragmentShader: shaders.fragment,
             transparent: true,
-            alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
+            //alphaTest: 0.5, // if having transparency issues, try including: alphaTest: 0.5,
             blending: blending,
             depthTest: true,
-            depthWrite: true,
+            //depthWrite: false,
+            //renderDepth: -500,
             side:THREE.DoubleSide
         });
 
@@ -84,7 +89,7 @@ window.StarParticleEmitter = function () {
         this.mesh = new THREE.Points(this.particleGeometry, this.particleMaterial);
         this.mesh.frustumCulled = false;
         this.mesh.matrixAutoUpdate = false;
-        this.mesh.position.set(0, 0, -1);
+        this.mesh.position.set(0, 0, -10);
 
         this.needsUpdate = false;
 
@@ -113,6 +118,7 @@ window.StarParticleEmitter = function () {
     StarParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
 
+        /*
         if (zoom === 1) {
             var width = window.webglScene.width;
             var height = window.webglScene.height;
@@ -123,13 +129,13 @@ window.StarParticleEmitter = function () {
             camera.top = height / 2;
             camera.bottom = height / -2;
 
-            camera.setPosition = new THREE.Vector3(0, 0, 200);
+            camera.setPosition = new THREE.Vector3(0, 0, 500);
 
             camera.updateProjectionMatrix();
 
             this.particleMaterial.uniforms.customMatrix.value = camera.projectionMatrix;
         }
-
+*/
         
         this.mesh.material.needsUpdate = true;
     };
