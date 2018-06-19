@@ -46,7 +46,7 @@ window.StarParticle = function () {
     };
     
     StarParticle.prototype.setParallaxFactor = function (parallaxFactor) {
-        changeAttribute(this.geometry, this.index, 'parallaxFactor', 1.0 + parallaxFactor);
+        changeAttribute(this.geometry, this.index, 'parallaxFactor', -1.0 + parallaxFactor);
         return this;
     };
 
