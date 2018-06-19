@@ -17,10 +17,9 @@ window.mathlib = {
 	},
 
 	getSeededRandomGenerator: function (seed) {
-		return function random() {
-			var x = Math.sin(seed++) * 10000;
-			return x - Math.floor(x);
-		}
+		function lcg(a) {return a * 48271 % 2147483647}
+		seed = seed ? lcg(seed) : lcg(Math.random());
+		return function() {return (seed = lcg(seed)) / 2147483648}
 	},
 
 	arrayIsEmpty: function arrayIsEmpty(array) {
