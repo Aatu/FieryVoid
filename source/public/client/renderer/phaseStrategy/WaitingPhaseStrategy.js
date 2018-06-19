@@ -40,5 +40,7 @@ window.WaitingPhaseStrategy = function () {
         this.showShipTooltip(ship, payload, menu, false);
     };
 
+    WaitingPhaseStrategy.prototype.showAppropriateEW = function() {}
+
     return WaitingPhaseStrategy;
 }();
