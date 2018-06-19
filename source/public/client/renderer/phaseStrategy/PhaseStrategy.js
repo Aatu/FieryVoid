@@ -269,12 +269,19 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip && this.shipTooltip.isForAnyOf(ships)) {
             return;
         }
+
+        if (this.shipTooltip && this.shipTooltip.menu) {
+            return;
+        }
+
         this.showShipTooltip(ships, payload, null, true);
     };
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
         var icon = this.shipIconContainer.getById(ship.id);
-        this.showShipTooltip(ship, payload, null, true);
+        if (!this.shipTooltip || !this.shipTooltip.menu) {
+            this.showShipTooltip(ship, payload, null, true);
+        }
         this.showShipEW(ship);
         icon.showSideSprite(true);
         icon.showBDEW();
