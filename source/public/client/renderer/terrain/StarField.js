@@ -21,6 +21,8 @@ window.StarField = (function(){
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
 
+
+        this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         var width =  3000; //this.webglScene.width * 1.5; 
         var height = 2000; // this.webglScene.height * 1.5; 
 

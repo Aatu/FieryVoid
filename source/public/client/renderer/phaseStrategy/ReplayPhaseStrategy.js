@@ -102,6 +102,8 @@ window.ReplayPhaseStrategy = function () {
         }
     };
 
+    ReplayPhaseStrategy.prototype.showAppropriateEW = function() {};
+
     function toMovementPhase() {
         this.animationStrategy.toMovementPhase();
         this.replayUI.activateButton('#pause');
