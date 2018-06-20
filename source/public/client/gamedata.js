@@ -521,7 +521,7 @@ window.gamedata = {
 
     initPhase: function initPhase() {
         gamedata.subphase = 0;
-        shipManager.initShips();
+        //shipManager.initShips();
         UI.shipMovement.hide();
         fleetListManager.displayFleetLists();
 
