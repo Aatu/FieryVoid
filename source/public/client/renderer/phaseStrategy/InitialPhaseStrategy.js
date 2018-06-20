@@ -49,10 +49,6 @@ window.InitialPhaseStrategy = function () {
     };
 
     InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
-
-        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
-
         if (this.selectedShip && shipManager.isElint(this.selectedShip)){
             menu.addButton("selectShip",
                 function() {
@@ -66,7 +62,9 @@ window.InitialPhaseStrategy = function () {
             PhaseStrategy.prototype.setSelectedShip.call(this, ship);
             this.showShipEW(this.selectedShip);
         }
-        
+
+        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
         this.showShipTooltip(ship, payload, menu, false);
     };
 
