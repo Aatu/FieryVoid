@@ -130,7 +130,6 @@ window.UI = {
 
         pivotrightCallback: function pivotrightCallback(e) {
             e.stopPropagation();
-            //console.log("pivotCallback1");
             UI.shipMovement.pivotCallback(e, true);
         },
 
@@ -261,6 +260,8 @@ window.UI = {
                 slipleft.hide();
             }
 
+
+            // TURN INTO PIVOT LEFT
             dis = 70;   
             angle = mathlib.addToDirection(shipHeading, -35);
             var turnPivotLeft = UI.shipMovement.turnIntoPivotLeftElement;
@@ -288,11 +289,13 @@ window.UI = {
                 slipright.hide();
             }
 
+            // TURN INTO PIVOT RIGHT
+
             dis = 70;   
             angle = mathlib.addToDirection(shipHeading, 35);
             var turnPivotRight = UI.shipMovement.turnIntoPivotRightElement;
             if (shipManager.movement.canTurnIntoPivot(ship, true)) {
-                UI.shipMovement.drawUIElement(turnright, pos.x, pos.y, s, dis * 1.4, angle, "img/turnIntoPivotRight.png", "turnIntoPivotRightCanvas", shipHeading);
+                UI.shipMovement.drawUIElement(turnPivotRight, pos.x, pos.y, s, dis * 1.4, angle, "img/turnIntoPivotRight.png", "turnIntoPivotRightCanvas", shipHeading);
             } else {
                 turnPivotRight.hide();
             }
