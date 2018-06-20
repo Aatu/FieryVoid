@@ -1308,7 +1308,7 @@ shipManager.movement = {
         });
 
         if (!move) {
-            move = ship.movement[ship.movement.lenght - 1];
+            move = ship.movement[ship.movement.length - 1];
         }
 
         return new hexagon.Offset(move.position);
