@@ -84,7 +84,7 @@ class Manager{
             
             
             foreach ($games as $game){
-                $game->prepareForPlayer(0, 0, -1);
+                $game->prepareForPlayer();
             }
         }
         catch(exception $e) {
@@ -272,7 +272,7 @@ class Manager{
                 if ($gamedata == null)
                     return null;
                 //print(var_dump($gamedata));
-                $gamedata->prepareForPlayer($turn, $phase, $activeship);
+                $gamedata->prepareForPlayer();
             }else{
                 return null;
             }
