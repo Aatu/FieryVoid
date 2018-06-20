@@ -1311,7 +1311,7 @@ shipManager.movement = {
             move = ship.movement[ship.movement.lenght - 1];
         }
 
-        return new hexagon.Offset(move.postion);
+        return new hexagon.Offset(move.position);
     },
 
     getPreviousLocation: function getPreviousLocation(ship) {
