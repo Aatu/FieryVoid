@@ -1,10 +1,10 @@
 "use strict";
 
 window.shipManager = {
-
+/*
     shipImages: Array(),
     initiated: 0,
-
+    
     initShips: function initShips() {
         if (window.webglScene) {
             return;
@@ -230,7 +230,7 @@ window.shipManager = {
     ship.drawDEW = dew;
     ship.drawCCEW = ccew;
       },
-    */
+    
     getShipCanvasSize: function getShipCanvasSize(ship) {
         return ship.canvasSize;
     },
@@ -246,7 +246,7 @@ window.shipManager = {
 
         return true;
     },
-
+*/
     getShipDoMAngle: function getShipDoMAngle(ship) {
         var d = shipManager.movement.getLastCommitedMove(ship).heading;
         if (d == 0) {
@@ -324,6 +324,8 @@ window.shipManager = {
           return shipManager.getShipHeadingAngle(ship);
      },
     */
+
+    /*
     getShipPositionInTurn: function getShipPositionInTurn(ship, turn) {
 
         if (turn <= 0) turn = 1;
@@ -346,6 +348,7 @@ window.shipManager = {
         var yO = movement.yOffset;
         return { x: x, y: y, xO: xO, yO: yO };
     },
+    */
 
     getShipPosition: function getShipPosition(ship) {
         var movement = shipManager.movement.getLastCommitedMove(ship);

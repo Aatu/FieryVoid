@@ -106,7 +106,7 @@ window.ShipIconContainer = function () {
 
     ShipIconContainer.prototype.getFinalMovementInSameHex = function (hex) {
         return this.iconsAsArray.filter(function (shipIcon) {
-            return shipIcon.getLastMovement().position.equals(hex);
+            return !shipManager.isDestroyed(shipIcon.ship)  && shipIcon.getLastMovement().position.equals(hex);
         }, this);
     };
 
