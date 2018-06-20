@@ -1526,6 +1526,11 @@ window.shipWindowManager = {
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
 		var ship = gamedata.getShip(shipwindow.data("ship"));
+
+		if (!gamedata.isMyShip(ship)) {
+			return;
+		}
+
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
 		for (var i = 0; i < ship.systems.length; i++) {
@@ -1533,8 +1538,6 @@ window.shipWindowManager = {
 				array.push(ship.systems[i]);
 			}
 		}
-
-		var selectedShip = gamedata.getSelectedShip();
 
 		for (var i = 0; i < array.length; i++) {
 			var system = array[i];
@@ -1549,7 +1552,7 @@ window.shipWindowManager = {
 				continue;
 			}
 
-			if (system.weapon && selectedShip.id == ship.id) {
+			if (system.weapon) {
 
 				if (gamedata.gamephase != 3 && !system.ballistic) return;
 
@@ -1562,9 +1565,11 @@ window.shipWindowManager = {
 				}
 			}
 
+			/*
 			if (gamedata.isEnemy(ship, selectedShip) && gamedata.gamephase == 3 && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
 				weaponManager.targetShip(ship, system);
 			}
+			*/
 		}
 	},
 

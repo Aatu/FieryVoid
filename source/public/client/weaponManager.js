@@ -17,7 +17,7 @@ window.weaponManager = {
     },
 
     onModeClicked: function onModeClicked(shipwindow, systemwindow, ship, system) {
-        throw new Error("Route trough phase strategy to get selected ship");
+        //throw new Error("Route trough phase strategy to get selected ship");
         if (!system) return;
 
         if (gamedata.gamephase != 3 && !system.ballistic) return;
@@ -49,7 +49,7 @@ window.weaponManager = {
                 clearTimeout(weaponManager.mouseoverTimer);
                 weaponManager.mouseOutTimer = null;
                 weaponManager.mouseoverTimer = null;
-                systemInfo.showSystemInfo(parentwindow, newSystem, ship, selectedship);
+                systemInfo.showSystemInfo(parentwindow, newSystem, ship, /*selectedship*/);
             } else {
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
