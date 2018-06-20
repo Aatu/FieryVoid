@@ -1302,7 +1302,6 @@ shipManager.movement = {
             currentTurn = gamedata.turn;
         }
 
-
         var move = ship.movement.find(function(move) {
             return move.turn === currentTurn;
         });

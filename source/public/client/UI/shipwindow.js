@@ -1292,7 +1292,7 @@ window.shipWindowManager = {
 
 		if (system.dualWeapon && system.weapons != null) {
 			var weapon = system.weapons[system.firingMode];
-			shipManager.systems.initializeSystem(weapon);;
+			shipManager.systems.initializeSystem(weapon);
 		}
 
 		var systemwindow = shipwindow.find(".system_" + system.id);

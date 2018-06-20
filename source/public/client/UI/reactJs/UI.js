@@ -4,6 +4,7 @@ import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
 import FullScreen from "./fullScreen/FullScreen";
 import EwButtons from "./ewButtons/EwButtons";
+import WeaponList from "./system/WeaponList";
 
 class UIManager{
 
@@ -30,6 +31,16 @@ class UIManager{
     hideShipThrustUI() {
         ReactDom.unmountComponentAtNode(jQuery("#shipThrust", this.parentElement)[0]);
     }
+
+    showWeaponList(args) {
+        ReactDom.render(<WeaponList {...args}/>, jQuery("#weaponList", this.parentElement)[0] );
+    }
+
+    hideWeaponList() {
+        ReactDom.unmountComponentAtNode(jQuery("#weaponList", this.parentElement)[0]);
+    }
+
+    
 }
 
 window.UIManager = UIManager;

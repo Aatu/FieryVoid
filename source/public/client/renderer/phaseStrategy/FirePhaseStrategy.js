@@ -28,6 +28,8 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
+
+        this.uiManager.hideWeaponList();
     };
 
     FirePhaseStrategy.prototype.onHexClicked = function (payload) {
@@ -48,6 +50,8 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         this.hideMovementUI();
+
+        this.uiManager.hideWeaponList();
     };
 
     FirePhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -70,6 +74,8 @@ window.FirePhaseStrategy = function () {
         if (shipManager.movement.canPivot(ship)) {
             this.drawMovementUI(this.selectedShip);
         }
+
+        this.uiManager.showWeaponList({ship: ship, gamePhase: 3});
     };
 
     FirePhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {

@@ -500,6 +500,8 @@
     <div class="datacontainer"></div>
 </div>
 
+
+<div id="weaponList"></div>
 <div id="showEwButtons"></div>
 <div id="fullScreen"></div>
 <div id="playerSettings"></div>
