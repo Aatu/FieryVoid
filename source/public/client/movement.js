@@ -822,6 +822,9 @@ shipManager.movement = {
     },
 
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
+
+        if (gamedata.gamephase != 2) return false;
+        
         var returnVal = false;
 
         if (ship.agile) returnVal = false;
@@ -833,8 +836,7 @@ shipManager.movement = {
         if (heading === facing) returnVal = false;
 
         var step = right ? 1 : -1;
-
-        console.log(step, heading, reverseheading, mathlib.addToHexFacing(step, heading))
+        
 
         if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
 
