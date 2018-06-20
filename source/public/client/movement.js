@@ -824,7 +824,7 @@ shipManager.movement = {
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
 
         if (gamedata.gamephase != 2) return false;
-        
+
         var returnVal = false;
 
         if (ship.agile) returnVal = false;
@@ -1294,6 +1294,24 @@ shipManager.movement = {
             var move = ship.movement[i];
             if (move.turn == gamedata.turn) return move;
         }
+    },
+
+    getPositionAtStartOfTurn: function getPositionAtStartOfTurn(ship, currentTurn) {
+
+        if (currentTurn === undefined) {
+            currentTurn = gamedata.turn;
+        }
+
+
+        var move = ship.movement.find(function(move) {
+            return move.turn === currentTurn;
+        });
+
+        if (!move) {
+            move = ship.movement[ship.movement.lenght - 1];
+        }
+
+        return new hexagon.Offset(move.postion);
     },
 
     getPreviousLocation: function getPreviousLocation(ship) {
