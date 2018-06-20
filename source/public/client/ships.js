@@ -810,8 +810,8 @@ window.shipManager = {
 
             if (gamedata.isEnemy(ship, othership)) continue;
 
-            var oPos = shipManager.movement.getFirstMoveOfTurn(othership).position;
-            var tPos = shipManager.movement.getFirstMoveOfTurn(ship).position;
+            var oPos = new hexagon.Offset(shipManager.movement.getFirstMoveOfTurn(othership).position);
+            var tPos = new hexagon.Offset(shipManager.movement.getFirstMoveOfTurn(ship).position);
 
             if (!target || target.id == othership.id) {
                 if (oPos.equals(tPos)) return true;
