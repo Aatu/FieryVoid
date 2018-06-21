@@ -126,27 +126,31 @@ window.ShipTooltip = function () {
         this.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
         this.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
         this.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
-        this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship) + "    (" + ship.accelcost + ")");
+        this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
         this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
         this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
         this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
-        this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+        this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship), ship.flight !== true);
         var speed = shipManager.movement.getSpeed(ship);
         var turncost = Math.ceil(speed * ship.turncost);
         var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
 
-        this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+') Turn delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')'  , ship.flight !== true);
+        this.addEntryElement('Acceleration cost: ' + ship.accelcost);
+        this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+') Turn delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')', ship.flight !== true);
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
+        this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+')', ship.flight === true);
+        this.addEntryElement('Pivot cost: 1 Combat pivot cost: 2', ship.flight === true);
+
 
         this.addEntryElement(flightArmour, ship.flight === true);
 
         if (this.selectedShip) {
             if (! gamedata.isMyShip(ship)) {
-                this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship, ship.flight !== true, this.selectedShip.flight !== true);
+                this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
             }
 
             if (shipManager.isElint(this.selectedShip)){
-                this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship, ship.flight !== true);
+                this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
             }
         }
 
