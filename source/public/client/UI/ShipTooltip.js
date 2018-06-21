@@ -15,21 +15,15 @@ window.ShipTooltip = function () {
         this.menu = menu;
         this.ballisticsMenu = ballisticsMenu;
 
-        this.element.on('mousedown', function (e) {
-            e.preventDefault();
-        });
-        this.element.on('mouseup', function (e) {
-            e.preventDefault();
-        });
-        this.element.on('mouseover', function (e) {
+        this.element.on('mousedown mouseup mouseover mousemove mouseout', function (e) {
             e.preventDefault();e.stopPropagation();
         });
-        this.element.on('mousemove', function (e) {
-            e.preventDefault();
-        });
-        this.element.on('mouseout', function (e) {
-            e.preventDefault();e.stopPropagation();
-        });
+
+        if (!menu) {
+            this.element.on('mousedown mouseup mouseover mousemove mouseout', function (e) {
+                this.destroy();
+            }.bind(this));
+        }
 
         if (ships.length > 1) {
             createForMultipleShips.call(this, this.ships);
@@ -109,7 +103,7 @@ window.ShipTooltip = function () {
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
-        var misc = shipManager.systems.getMisc(ship);
+    
 
         if (ship.base) {
             var direction;
@@ -129,15 +123,21 @@ window.ShipTooltip = function () {
 
         this.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
         this.addEntryElement('Evasion: -' + jinking + ' to hit', ship.flight === true && jinking > 0);
-        this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight === true);
         this.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
         this.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
         this.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
-        this.addEntryElement('Turn delay: ', shipManager.movement.calculateCurrentTurndelay(ship));
         this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship) + "    (" + ship.accelcost + ")");
         this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
         this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
-        this.addEntryElement(misc, ship.flight !== true);
+        this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
+        this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+        var speed = shipManager.movement.getSpeed(ship);
+        var turncost = Math.ceil(speed * ship.turncost);
+        var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
+
+        this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+') Turn delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')'  , ship.flight !== true);
+        this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
+
         this.addEntryElement(flightArmour, ship.flight === true);
 
         if (this.selectedShip) {
@@ -152,7 +152,6 @@ window.ShipTooltip = function () {
 
         if (shipManager.isElint(ship)){
             this.addEntryElement('BDEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
-
         }
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);

@@ -335,13 +335,6 @@ shipManager.systems = {
         return grouped;
     },
 
-    getMisc: function getMisc(ship) {
-        var tc = ship.turncost;
-        var td = ship.turndelaycost;
-
-        return "TurnCost: " + tc + " TurnDelay: " + td;
-    },
-
     getFlightArmour: function getFlightArmour(ship, system) {
         var front = ship.systems[1].armour[0];
         var aft = ship.systems[1].armour[1];

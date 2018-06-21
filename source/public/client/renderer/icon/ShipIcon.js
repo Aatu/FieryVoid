@@ -2,6 +2,8 @@
 
 window.ShipIcon = function () {
 
+    var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+
     function ShipIcon(ship, scene) {
 
         this.shipId = ship.id;
@@ -18,6 +20,7 @@ window.ShipIcon = function () {
         this.shipEWSprite = null;
         this.ShipSelectedSprite = null;
         this.ShipSideSprite = null;
+        this.shipDirectionOfMovementSprite = null;
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
@@ -79,11 +82,19 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.getFacing = function (facing) {
-        return mathlib.radianToDegree(this.mesh.rotation.z);
+        return mathlib.radianToDegree(this.shipSprite.mesh.rotation.z);
     };
 
     ShipIcon.prototype.setFacing = function (facing) {
-        this.mesh.rotation.z = mathlib.degreeToRadian(facing);
+        this.shipSprite.mesh.rotation.z = mathlib.degreeToRadian(facing);
+    };
+
+    ShipIcon.prototype.setHeading = function (heading) {
+        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
+    };
+
+    ShipIcon.prototype.getHeading = function (heading) {
+        this.shipDirectionOfMovementSprite.mesh.rotation.z = mathlib.degreeToRadian(heading);
     };
 
     ShipIcon.prototype.setOverlayColorAlpha = function (alpha) {
@@ -132,12 +143,14 @@ window.ShipIcon = function () {
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
             this.mesh.position.z = 101;
+            this.shipDirectionOfMovementSprite.show();
         } else {
             if (this.selected) {
                 this.mesh.position.z = 100;
             } else {
                 this.mesh.position.z = 0;
             }
+            this.shipDirectionOfMovementSprite.hide();
         }
 
         this.selected = value;
@@ -164,6 +177,11 @@ window.ShipIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
+
+        
+        this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+        this.shipDirectionOfMovementSprite.hide();
 
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
         this.shipSprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
@@ -387,9 +405,12 @@ window.ShipIcon = function () {
         }
 
         var facing = mathlib.hexFacingToAngle(movement.facing);
+        var heading = mathlib.hexFacingToAngle(movement.heading);
 
         this.setPosition(gamePosition);
         this.setFacing(-facing);
+        this.setHeading(-heading);
+
     };
 
     return ShipIcon;

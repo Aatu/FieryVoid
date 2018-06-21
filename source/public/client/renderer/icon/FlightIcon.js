@@ -7,6 +7,7 @@ window.FlightIcon = function () {
     function FlightIcon(ship, scene) {
         this.fighters = consumeFighters.call(this, ship);
         this.fighterSprites = [];
+        this.fighterObject = new THREE.Object3D();
 
         ShipIcon.call(this, ship, scene);
         this.size = FIGHTER_SPRITE_SIZE;
@@ -70,20 +71,34 @@ window.FlightIcon = function () {
         console.log("TODO: set opacity for fighters");
     };
 
+    FlightIcon.prototype.getFacing = function (facing) {
+        return mathlib.radianToDegree(this.fighterObject.rotation.z);
+    };
+
+    FlightIcon.prototype.setFacing = function (facing) {
+        this.fighterObject.rotation.z = mathlib.degreeToRadian(facing);
+    };
+
     FlightIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
 
+        this.shipDirectionOfMovementSprite = new window.webglSprite('./img/directionOfMovement.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.mesh.add(this.shipDirectionOfMovementSprite.mesh);
+        this.shipDirectionOfMovementSprite.hide();
+
         this.fighters.forEach(function (fighter) {
             var sprite = new window.webglSprite(imagePath, { width: FIGHTER_SPRITE_SIZE / 2, height: FIGHTER_SPRITE_SIZE / 2 }, 1);
             sprite.setOverlayColor(this.mine ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 40 / 255, 40 / 255));
             positionFighter(fighter, sprite);
-            this.mesh.add(sprite.mesh);
+            this.fighterObject.add(sprite.mesh);
             this.fighterSprites.push(sprite);
             fighter.sprite = sprite;
         }, this);
+
+        this.mesh.add(this.fighterObject);
 
         this.shipEWSprite = new window.ShipEWSprite({ width: this.size / 2, height: this.size / 2 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);

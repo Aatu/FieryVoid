@@ -94,7 +94,7 @@ const ThrustUIContainer = styled.div`
     left: ${props => props.left};
     top: ${props => props.top};
     transform: translate(-50%, -50%);
-    z-index: 4;
+    z-index: 7002;
     display: flex;
     align-items: center;
     justify-content: center;

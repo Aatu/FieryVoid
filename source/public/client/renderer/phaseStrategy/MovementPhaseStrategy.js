@@ -78,6 +78,16 @@ window.MovementPhaseStrategy = function () {
         this.showShipTooltip(ship, payload, menu, false);
     };
 
+    MovementPhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
+        ships = [].concat(ships);
+
+        if (this.selectedShip && this.shipThrustUIState) {
+            return;
+        } 
+
+        PhaseStrategy.prototype.showShipTooltip.call(this, ships, payload, menu, hide, ballisticsMenu);
+    };
+
     MovementPhaseStrategy.prototype.onAssignThrust = function(payload) {
         if (payload === false) {
             this.uiManager.hideShipThrustUI();
