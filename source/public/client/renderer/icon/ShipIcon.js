@@ -353,7 +353,7 @@ window.ShipIcon = function () {
         var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLenght));
         var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
         var circle = new THREE.Mesh(geometry, material);
-        circle.rotation.z = mathlib.degreeToRadian(-arcFacing);
+        circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
         circle.position.z = -1;
         this.mesh.add(circle);
         this.weaponArcs.push(circle);
