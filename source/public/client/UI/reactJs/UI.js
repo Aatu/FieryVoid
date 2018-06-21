@@ -5,6 +5,9 @@ import ShipThrust from "./shipThrust/ShipThrust";
 import FullScreen from "./fullScreen/FullScreen";
 import EwButtons from "./ewButtons/EwButtons";
 import WeaponList from "./system/WeaponList";
+import SystemInfo from "./system/SystemInfo";
+import SystemInfoMenu from "./system/SystemInfoMenu";
+import {canDoAnything} from "./system/SystemInfoButtons";
 
 class UIManager{
 
@@ -40,7 +43,25 @@ class UIManager{
         ReactDom.unmountComponentAtNode(jQuery("#weaponList", this.parentElement)[0]);
     }
 
-    
+    showSystemInfo(args) {
+        ReactDom.render(<SystemInfo {...args}/>, jQuery("#systemInfoReact", this.parentElement)[0] );
+    }
+
+    hideSystemInfo() {
+        ReactDom.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+    }
+
+    showSystemInfoMenu(args) {
+        ReactDom.render(<SystemInfoMenu {...args}/>, jQuery("#systemInfoReact", this.parentElement)[0] );
+    }
+
+    hideSystemInfoMenu() {
+        ReactDom.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+    }
+
+    canShowSystemInfoMenu(ship, system) {
+        return canDoAnything(ship, system);
+    }
 }
 
 window.UIManager = UIManager;

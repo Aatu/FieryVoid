@@ -328,6 +328,7 @@ shipManager.power = {
 	},
 	
 	isOfflineOnTurn: function(ship, system, turn){
+		
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;
 		}
@@ -526,7 +527,7 @@ shipManager.power = {
 
 		//can always boost reactor (to overload)!
 		if (system.name == 'reactor') {
-			return true;
+			return shipManager.power.getBoost(system) === 0;
 		}
 
 		var has = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
@@ -623,6 +624,9 @@ shipManager.power = {
 	},
 
 	clickPlus: function clickPlus(ship, system) {
+
+		if (gamedata.gamephase !== 1) return;
+
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
 			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
@@ -639,10 +643,13 @@ shipManager.power = {
 		shipManager.power.setBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	clickMinus: function clickMinus(ship, system) {
 
+		if (gamedata.gamephase !== 1) return;
+		
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
 
@@ -654,16 +661,11 @@ shipManager.power = {
 		shipManager.power.unsetBoost(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
-	offlineAll: function offlineAll(e) {
+	offlineAll: function offlineAll(ship, system) {
 		var array = [];
-
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
@@ -692,21 +694,19 @@ shipManager.power = {
 			shipWindowManager.setDataForSystem(ship, array[i]);
 			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		}
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
-	onOfflineClicked: function onOfflineClicked(e) {
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-
+	onOfflineClicked: function onOfflineClicked(ship, system) {
+		/*
 		if (system.duoWeapon) {
 			// create an iconMask at the top of the DOM for the system.
 			var iconmask_element = document.createElement('div');
 			iconmask_element.className = "iconmask";
 			systemwindow.find(".icon").append(iconmask_element);
 		}
+		*/
 
 		if (system.parentId > 0) {
 			system = shipManager.systems.getSystem(ship, system.parentId);
@@ -716,7 +716,7 @@ shipManager.power = {
 
 		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
 
-		if (ship.userid != gamedata.thisplayer) return;
+		if (!gamedata.isMyShip(ship)) return;
 
 		if (shipManager.power.isOffline(ship, system)) return;
 
@@ -737,16 +737,17 @@ shipManager.power = {
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+
+		if (system.weapon) {
+			weaponManager.unSelectWeapon(ship, system);
+		}
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
-	onlineAll: function onlineAll(e) {
+	onlineAll: function onlineAll(ship, system) {
 		var array = [];
 
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
@@ -770,19 +771,11 @@ shipManager.power = {
 				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 			}
 		}
+		
+        webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
-	onOnlineClicked: function onOnlineClicked(e) {
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-
-		if (system.duoWeapon) {
-			// remove the iconmask again.
-			systemwindow.find(".iconmask").remove();
-		}
+	onOnlineClicked: function onOnlineClicked(ship, system) {
 
 		if (system.parentId > 0) {
 			system = shipManager.systems.getSystem(ship, system.parentId);
@@ -822,15 +815,10 @@ shipManager.power = {
 		}
 
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
-	onOverloadClicked: function onOverloadClicked(e) {
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = ship.systems[systemwindow.data("id")];
-
+	onOverloadClicked: function onOverloadClicked(ship, system) {
 		if (gamedata.gamephase != 1) return;
 
 		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
@@ -839,17 +827,15 @@ shipManager.power = {
 
 		if (shipManager.power.isOffline(ship, system)) return;
 
+		console.log("I am boosting!")
+
 		shipManager.power.setOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
-	onStopOverloadClicked: function onStopOverloadClicked(e) {
-		e.stopPropagation();
-		var shipwindow = $(".shipwindow").has($(this));
-		var systemwindow = $(".system").has($(this));
-		var ship = gamedata.getShip(shipwindow.data("ship"));
-		var system = ship.systems[systemwindow.data("id")];
+	onStopOverloadClicked: function onStopOverloadClicked(ship, system) {
 
 		if (gamedata.gamephase != 1) return;
 
@@ -862,6 +848,7 @@ shipManager.power = {
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
 };

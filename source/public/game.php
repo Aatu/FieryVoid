@@ -495,12 +495,7 @@
     
 </div>
 
-<div id="systemInfo">
-    <div class="name"><span class="name header">test</span></div>
-    <div class="datacontainer"></div>
-</div>
-
-
+<div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>
 <div id="fullScreen"></div>

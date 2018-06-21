@@ -10,7 +10,6 @@ window.BallisticIconContainer = function () {
     }
 
     BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer) {
-
         this.ballisticIcons.forEach(function (ballisticIcon) {
             ballisticIcon.used = false;
         });

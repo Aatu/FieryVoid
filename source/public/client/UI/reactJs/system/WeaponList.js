@@ -4,7 +4,7 @@ import SystemIcon from "./SystemIcon"
 
 
 const WeaponListContainer = styled.div`
-    display:none;
+    display:flex;
     z-index: 2;
     position:fixed;
     left: 805px;
@@ -19,9 +19,17 @@ class WeaponList extends React.Component{
     }
 
     getWeapons(ship, gamePhase) {
+
+        if (ship.flight) {
+            return ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } 
+        
         return ship.systems
-            .filter(system => system.weapon)
-            .filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
+            .filter(system => system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power");
+            //.filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
     }
 
     render(){
@@ -36,7 +44,7 @@ class WeaponList extends React.Component{
         return (
             <WeaponListContainer>
                 {
-                    weapons.map((weapon, index) => (<SystemIcon key={`system-${index}`} system={weapon}/>))
+                    weapons.map((weapon, index) => (<SystemIcon key={`system-${index}`} system={weapon} ship={ship}/>))
                 }
             </WeaponListContainer>
         )

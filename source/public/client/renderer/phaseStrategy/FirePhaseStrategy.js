@@ -28,8 +28,6 @@ window.FirePhaseStrategy = function () {
 
     FirePhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
-
-        this.uiManager.hideWeaponList();
     };
 
     FirePhaseStrategy.prototype.onHexClicked = function (payload) {
@@ -50,8 +48,6 @@ window.FirePhaseStrategy = function () {
     FirePhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         this.hideMovementUI();
-
-        this.uiManager.hideWeaponList();
     };
 
     FirePhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -66,6 +62,8 @@ window.FirePhaseStrategy = function () {
         if (this.selectedShip !== ship) {
             this.setSelectedShip(ship);
         }
+
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
@@ -74,8 +72,6 @@ window.FirePhaseStrategy = function () {
         if (shipManager.movement.canPivot(ship)) {
             this.drawMovementUI(this.selectedShip);
         }
-
-        this.uiManager.showWeaponList({ship: ship, gamePhase: 3});
     };
 
     FirePhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
@@ -89,6 +85,8 @@ window.FirePhaseStrategy = function () {
         if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
             weaponManager.targetShip(this.selectedShip, ship, system);
         }
+
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
     return FirePhaseStrategy;

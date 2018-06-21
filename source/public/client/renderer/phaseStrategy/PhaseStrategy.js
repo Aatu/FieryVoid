@@ -14,7 +14,7 @@ window.PhaseStrategy = function () {
         this.onMouseOutCallbacks = [];
         this.onZoomCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
         this.onScrollCallbacks = [this.repositionTooltip.bind(this), this.positionMovementUI.bind(this), this.repositionSelectFromShips.bind(this)];
-        this.onClickCallbacks = [];
+        this.onClickCallbacks = [this.hideSystemInfo.bind(this, true)];
 
         this.selectedShip = null;
         this.targetedShip = null;
@@ -26,7 +26,41 @@ window.PhaseStrategy = function () {
         this.movementUI = null;
 
         this.onDoneCallback = null;
+
+        this.systemInfoState = null;
+
         this.uiManager = new window.UIManager($("body")[0]);
+    }
+
+    PhaseStrategy.prototype.hideSystemInfo = function(force) {
+        if (! this.systemInfoState) {
+            return true;
+        }
+
+        if (!this.systemInfoState.menu || force) {
+            this.uiManager.hideSystemInfo();
+            this.systemInfoState = null;
+        }
+
+        return true;
+    }
+
+    PhaseStrategy.prototype.showSystemInfo = function(ship, system, element, menu) {
+        if (this.systemInfoState && this.systemInfoState.menu && !menu) {
+            return;
+        } 
+
+        var boundingBox = element.getBoundingClientRect ? element.getBoundingClientRect() : element.get(0).getBoundingClientRect();
+
+        if (menu) {
+            if (!this.uiManager.canShowSystemInfoMenu(ship, system)) {
+                return;
+            }
+            this.uiManager.showSystemInfoMenu({ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox});
+        } else {
+            this.uiManager.showSystemInfo({ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox});
+        }
+        this.systemInfoState = {menu: menu, element: element, system: system}
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
@@ -87,6 +121,7 @@ window.PhaseStrategy = function () {
 
         this.currentlyMouseOveredIds = null;
 
+        this.uiManager.hideWeaponList();
         return this;
     };
 
@@ -118,8 +153,7 @@ window.PhaseStrategy = function () {
         var icons = getInterestingStuffInPosition.call(this, payload, this.gamedata.turn);
 
         this.onClickCallbacks = this.onClickCallbacks.filter(function (callback) {
-            callback();
-            return false;
+            return callback();
         });
 
         if (icons.length > 1) {
@@ -176,6 +210,8 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
+        
+        this.uiManager.showWeaponList({ship: ship, gamePhase: gamedata.gamephase});
     };
 
     PhaseStrategy.prototype.deselectShip = function (ship) {
@@ -186,6 +222,7 @@ window.PhaseStrategy = function () {
         }, this);
 
         this.selectedShip = null;
+        this.uiManager.hideWeaponList();
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -431,23 +468,27 @@ window.PhaseStrategy = function () {
         }
     };
 
-    PhaseStrategy.prototype.onWeaponMouseOver = function (payload) {
+    PhaseStrategy.prototype.onSystemMouseOver = function (payload) {
         var ship = payload.ship;
-        var weapon = payload.weapon;
+        var system = payload.weapon;
         var element = payload.element;
-        systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
+        //systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
+
+        this.showSystemInfo(ship, system, element, false);
 
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
         var icon = this.shipIconContainer.getByShip(ship);
-        icon.showWeaponArc(ship, weapon);
+        icon.showWeaponArc(ship, system);
     };
 
-    PhaseStrategy.prototype.onWeaponMouseOut = function () {
+    PhaseStrategy.prototype.onSystemMouseOut = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
+
+        this.hideSystemInfo();
     };
 
     PhaseStrategy.prototype.createReplayUI = function (gamedata) {
@@ -547,6 +588,31 @@ window.PhaseStrategy = function () {
         }
     }
 
+    PhaseStrategy.prototype.onSystemDataChanged = function (payload) {
+        var ship = payload.ship;
+        var system = payload.system;
+
+        if (this.selectedShip === ship) {
+            this.uiManager.showWeaponList({ship: ship, gamePhase: gamedata.gamephase})
+        }
+        
+        if (this.systemInfoState) {
+            this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
+        }
+
+        if (system && system.ballistic) {
+            this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        }
+    }
+
+    PhaseStrategy.prototype.onSystemClicked = function (payload) {
+        var ship = payload.ship;
+        var system = payload.system;
+        var element = payload.element;
+
+        this.showSystemInfo(ship, system, element, true);
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship, system: system});
+    };
 
     return PhaseStrategy;
 }();

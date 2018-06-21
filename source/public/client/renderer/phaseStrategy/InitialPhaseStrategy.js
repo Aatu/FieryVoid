@@ -103,6 +103,8 @@ window.InitialPhaseStrategy = function () {
         if (this.selectedShip !== ship) {
             this.setSelectedShip(ship);
         }
+
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
     return InitialPhaseStrategy;

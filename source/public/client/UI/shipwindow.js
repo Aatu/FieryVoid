@@ -1519,58 +1519,15 @@ window.shipWindowManager = {
 	},
 
 	selectAllGuns: function selectAllGuns(e) {
-
-		var array = [];
-
 		e.stopPropagation();
+		e.preventDefault();
+
 		var shipwindow = $(".shipwindow").has($(this));
 		var systemwindow = $(this);
 		var ship = gamedata.getShip(shipwindow.data("ship"));
-
-		if (!gamedata.isMyShip(ship)) {
-			return;
-		}
-
 		var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
 
-		for (var i = 0; i < ship.systems.length; i++) {
-			if (system.displayName === ship.systems[i].displayName) {
-				array.push(ship.systems[i]);
-			}
-		}
-
-		for (var i = 0; i < array.length; i++) {
-			var system = array[i];
-
-			if (gamedata.waiting) return;
-
-			if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
-				return;
-			}
-
-			if (system.destroyed) {
-				continue;
-			}
-
-			if (system.weapon) {
-
-				if (gamedata.gamephase != 3 && !system.ballistic) return;
-
-				if (gamedata.gamephase != 1 && system.ballistic) return;
-
-				if (weaponManager.isSelectedWeapon(system)) {
-					weaponManager.unSelectWeapon(ship, system);
-				} else {
-					weaponManager.selectWeapon(ship, system);
-				}
-			}
-
-			/*
-			if (gamedata.isEnemy(ship, selectedShip) && gamedata.gamephase == 3 && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
-				weaponManager.targetShip(ship, system);
-			}
-			*/
-		}
+		weaponManager.selectAllWeapons(ship, system);
 	},
 
 	clickSystem: function clickSystem(e) {

@@ -27,6 +27,7 @@ const Tooltip = styled(Component)`
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
     padding:3px 15px 3px 15px;
+    padding-bottom: 8px;
 `;
 
 
@@ -35,7 +36,7 @@ const TooltipHeader = styled.div`
     font-size: 16px;
     border-bottom: 1px solid white;
     width: 100%;
-    margin: 5px;
+    margin: 5px 0;
     font-weight: bold;
 `
 

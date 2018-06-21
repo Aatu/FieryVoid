@@ -27822,6 +27822,16 @@ var _WeaponList = require("./system/WeaponList");
 
 var _WeaponList2 = _interopRequireDefault(_WeaponList);
 
+var _SystemInfo = require("./system/SystemInfo");
+
+var _SystemInfo2 = _interopRequireDefault(_SystemInfo);
+
+var _SystemInfoMenu = require("./system/SystemInfoMenu");
+
+var _SystemInfoMenu2 = _interopRequireDefault(_SystemInfoMenu);
+
+var _SystemInfoButtons = require("./system/SystemInfoButtons");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -27870,6 +27880,31 @@ var UIManager = function () {
         value: function hideWeaponList() {
             _reactDom2.default.unmountComponentAtNode(jQuery("#weaponList", this.parentElement)[0]);
         }
+    }, {
+        key: "showSystemInfo",
+        value: function showSystemInfo(args) {
+            _reactDom2.default.render(React.createElement(_SystemInfo2.default, args), jQuery("#systemInfoReact", this.parentElement)[0]);
+        }
+    }, {
+        key: "hideSystemInfo",
+        value: function hideSystemInfo() {
+            _reactDom2.default.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+        }
+    }, {
+        key: "showSystemInfoMenu",
+        value: function showSystemInfoMenu(args) {
+            _reactDom2.default.render(React.createElement(_SystemInfoMenu2.default, args), jQuery("#systemInfoReact", this.parentElement)[0]);
+        }
+    }, {
+        key: "hideSystemInfoMenu",
+        value: function hideSystemInfoMenu() {
+            _reactDom2.default.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+        }
+    }, {
+        key: "canShowSystemInfoMenu",
+        value: function canShowSystemInfoMenu(ship, system) {
+            return (0, _SystemInfoButtons.canDoAnything)(ship, system);
+        }
     }]);
 
     return UIManager;
@@ -27877,7 +27912,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./playerSettings/PlayerSettings":69,"./shipThrust/ShipThrust":71,"./system/WeaponList":77,"react":41,"react-dom":38}],64:[function(require,module,exports){
+},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./playerSettings/PlayerSettings":69,"./shipThrust/ShipThrust":71,"./system/SystemInfo":77,"./system/SystemInfoButtons":78,"./system/SystemInfoMenu":79,"./system/WeaponList":80,"react":41,"react-dom":38}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27963,8 +27998,8 @@ exports.TooltipEntry = exports.TooltipHeader = exports.Tooltip = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    z-index:7001;\n    opacity:0.65;\n    position:absolute;\n    text-align:center;\n    font-family:arial;\n    font-size:12px;\n    color:white;\n    background-color:black;\n    border-radius: 7px;\n    -moz-border-radius: 7px;\n    -webkit-border-radius: 7px;\n    padding:3px 15px 3px 15px;\n"], ["\n    z-index:7001;\n    opacity:0.65;\n    position:absolute;\n    text-align:center;\n    font-family:arial;\n    font-size:12px;\n    color:white;\n    background-color:black;\n    border-radius: 7px;\n    -moz-border-radius: 7px;\n    -webkit-border-radius: 7px;\n    padding:3px 15px 3px 15px;\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    text-transform: uppercase;\n    font-size: 16px;\n    border-bottom: 1px solid white;\n    width: 100%;\n    margin: 5px;\n    font-weight: bold;\n"], ["\n    text-transform: uppercase;\n    font-size: 16px;\n    border-bottom: 1px solid white;\n    width: 100%;\n    margin: 5px;\n    font-weight: bold;\n"]),
+var _templateObject = _taggedTemplateLiteral(["\n    z-index:7001;\n    opacity:0.65;\n    position:absolute;\n    text-align:center;\n    font-family:arial;\n    font-size:12px;\n    color:white;\n    background-color:black;\n    border-radius: 7px;\n    -moz-border-radius: 7px;\n    -webkit-border-radius: 7px;\n    padding:3px 15px 3px 15px;\n    padding-bottom: 8px;\n"], ["\n    z-index:7001;\n    opacity:0.65;\n    position:absolute;\n    text-align:center;\n    font-family:arial;\n    font-size:12px;\n    color:white;\n    background-color:black;\n    border-radius: 7px;\n    -moz-border-radius: 7px;\n    -webkit-border-radius: 7px;\n    padding:3px 15px 3px 15px;\n    padding-bottom: 8px;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    text-transform: uppercase;\n    font-size: 16px;\n    border-bottom: 1px solid white;\n    width: 100%;\n    margin: 5px 0;\n    font-weight: bold;\n"], ["\n    text-transform: uppercase;\n    font-size: 16px;\n    border-bottom: 1px solid white;\n    width: 100%;\n    margin: 5px 0;\n    font-weight: bold;\n"]),
     _templateObject3 = _taggedTemplateLiteral(["\n    color: ", "\n    font-weight: ", ";\n    font-size: ", ";\n    margin-top: ", ";\n"], ["\n    color: ", "\n    font-weight: ", ";\n    font-size: ", ";\n    margin-top: ", ";\n"]);
 
 var _react = require("react");
@@ -29076,8 +29111,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    position: relative;\n    width: 30px;\n    height: 30px;\n    margin: 2px;\n    border: 1px solid #496791;\n    background-color: black;\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    \n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n        background-color: ", ";\n    }\n"], ["\n    position: relative;\n    width: 30px;\n    height: 30px;\n    margin: 2px;\n    border: 1px solid #496791;\n    background-color: black;\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    \n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n        background-color: ", ";\n    }\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 4px;\n    border-top: 1px solid #496791;\n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"], ["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 4px;\n    border-top: 1px solid #496791;\n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 4px;\n    border-top: 1px solid #496791;\n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"], ["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 4px;\n    border-top: 1px solid #496791;\n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"], ["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    position: relative;\n    width: 30px;\n    height: 30px;\n    margin: 2px;\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"], ["\n    position: relative;\n    width: 30px;\n    height: 30px;\n    margin: 2px;\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"]);
 
 var _react = require("react");
 
@@ -29099,20 +29135,58 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var System = /*#__PURE__*/_styledComponents2.default.div(_templateObject, function (props) {
+var HealthBar = /*#__PURE__*/_styledComponents2.default.div(_templateObject, function (props) {
+    return props.health + "%";
+}, function (props) {
+    return props.criticals ? '#ed6738' : '#3daa14';
+});
+
+var SystemText = /*#__PURE__*/_styledComponents2.default.div(_templateObject2);
+
+var System = /*#__PURE__*/_styledComponents2.default.div(_templateObject3, function (props) {
+    return props.firing ? '1px solid #eb5c15' : '1px solid #496791';
+}, function (props) {
+    if (props.selected) {
+        return '#4e6c91';
+    } else if (props.firing) {
+        return '#e06f01';
+    } else {
+        return 'black';
+    }
+}, function (props) {
+    if (props.selected) {
+        return '0px 0px 15px #0099ff';
+    } else if (props.firing) {
+        return 'box-shadow: 0px 0px 15px #eb5c15';
+    } else {
+        return 'none';
+    }
+}, function (props) {
     return "url(" + props.background + ")";
 }, function (props) {
     return props.destroyed ? 'blur(1px)' : 'none';
+}, SystemText, function (props) {
+    return props.offline ? 'none' : 'flex';
 }, function (props) {
-    return props.overlay ? '0.5' : '0';
-}, function (props) {
-    return props.overlay || 'transparent';
-});
+    if (props.destroyed || props.offline || props.loading) {
+        return '0.5';
+    }
 
-var HealthBar = /*#__PURE__*/_styledComponents2.default.div(_templateObject2, function (props) {
-    return props.health + "%";
+    return '0';
 }, function (props) {
-    return props.criticals ? '#ed6738' : '#8dd872';
+    if (props.destroyed || props.offline) {
+        return 'black';
+    } else if (props.loading) {
+        return 'orange';
+    }
+
+    return 'transparent';
+}, function (props) {
+    if (props.offline) {
+        return 'url(./img/offline.png)';
+    }
+
+    return 'none';
 });
 
 var SystemIcon = function (_React$Component) {
@@ -29125,20 +29199,93 @@ var SystemIcon = function (_React$Component) {
     }
 
     _createClass(SystemIcon, [{
-        key: "render",
-        value: function render() {
+        key: "clickSystem",
+        value: function clickSystem(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
             var _props = this.props,
                 system = _props.system,
                 ship = _props.ship;
 
+            system = shipManager.systems.initializeSystem(system);
 
-            var intializedSystem = shipManager.systems.initializeSystem(system);
-            var destroyed = getDestroyed(ship, intializedSystem);
+            if (gamedata.waiting) return;
 
-            if (getDestroyed(ship, intializedSystem)) {
+            if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+
+            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
+                if (gamedata.isMyShip(ship)) {
+                    if (weaponManager.isSelectedWeapon(system)) {
+                        weaponManager.unSelectWeapon(ship, system);
+                    } else {
+                        weaponManager.selectWeapon(ship, system);
+                    }
+                }
+            }
+
+            if (gamedata.isMyShip(ship)) {
+                webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.target });
+            } else {
+                webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
+            }
+        }
+    }, {
+        key: "onSystemMouseOver",
+        value: function onSystemMouseOver(event) {
+            var _props2 = this.props,
+                system = _props2.system,
+                ship = _props2.ship;
+
+            system = shipManager.systems.initializeSystem(system);
+
+            webglScene.customEvent('SystemMouseOver', {
+                ship: ship,
+                weapon: system,
+                element: event.target
+            });
+        }
+    }, {
+        key: "onSystemMouseOut",
+        value: function onSystemMouseOut() {
+            webglScene.customEvent('SystemMouseOut');
+        }
+    }, {
+        key: "onContextMenu",
+        value: function onContextMenu(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            var _props3 = this.props,
+                system = _props3.system,
+                ship = _props3.ship;
+
+            system = shipManager.systems.initializeSystem(system);
+
+            if (system.weapon) {
+                weaponManager.selectAllWeapons(ship, system);
+            }
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _props4 = this.props,
+                system = _props4.system,
+                ship = _props4.ship;
+
+
+            system = shipManager.systems.initializeSystem(system);
+            var destroyed = getDestroyed(ship, system);
+
+            if (system.dualWeapon && system.weapons) {
+                system = system.weapons[system.firingMode];
+                system = shipManager.systems.initializeSystem(system);
+            }
+
+            if (getDestroyed(ship, system)) {
                 return React.createElement(
                     System,
-                    { background: getBackgroundImage(intializedSystem), overlay: "black", destroyed: true },
+                    { background: getBackgroundImage(system), destroyed: true },
                     React.createElement(HealthBar, { health: "0" })
                 );
             }
@@ -29146,16 +29293,40 @@ var SystemIcon = function (_React$Component) {
             return React.createElement(
                 System,
                 {
-                    background: getBackgroundImage(intializedSystem)
-
+                    onClick: this.clickSystem.bind(this),
+                    onMouseOver: this.onSystemMouseOver.bind(this),
+                    onMouseOut: this.onSystemMouseOut.bind(this),
+                    onContextMenu: this.onContextMenu.bind(this),
+                    background: getBackgroundImage(system),
+                    offline: isOffline(ship, system),
+                    loading: isLoading(system),
+                    selected: isSelected(system),
+                    firing: isFiring(ship, system)
                 },
-                React.createElement(HealthBar, { health: getStructureLeft(ship, intializedSystem), criticals: hasCriticals(intializedSystem) })
+                React.createElement(
+                    SystemText,
+                    null,
+                    getText(ship, system)
+                ),
+                React.createElement(HealthBar, { health: getStructureLeft(ship, system), criticals: hasCriticals(system) })
             );
         }
     }]);
 
     return SystemIcon;
 }(React.Component);
+
+var isFiring = function isFiring(ship, system) {
+    return weaponManager.hasFiringOrder(ship, system);
+};
+
+var isLoading = function isLoading(system) {
+    return system.weapon && !weaponManager.isLoaded(system);
+};
+
+var isOffline = function isOffline(ship, system) {
+    return shipManager.power.isOffline(ship, system);
+};
 
 var getStructureLeft = function getStructureLeft(ship, system) {
     return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
@@ -29179,7 +29350,62 @@ var hasCriticals = function hasCriticals(system) {
     return shipManager.criticals.hasCriticals(system);
 };
 
-var setSystemData = function setSystemData(ship, system) {
+var isSelected = function isSelected(system) {
+    return weaponManager.isSelectedWeapon(system);
+};
+
+var getText = function getText(ship, system) {
+    if (system.weapon) {
+
+        var firing = weaponManager.hasFiringOrder(ship, system);
+
+        if (firing && system.canChangeShots) {
+            var fire = weaponManager.getFiringOrder(ship, system);
+            return fire.shots + "/" + system.shots;
+        } else if (!firing) {
+            /*
+            if (system.duoWeapon) {
+                var UI_active = systemwindow.find(".UI").hasClass("active");
+                  shipWindowManager.addDuoSystem(ship, system, systemwindow);
+                  if (UI_active) {
+                    systemwindow.find(".UI").addClass("active");
+                }
+            }*/
+
+            var load = weaponManager.getWeaponCurrentLoading(system);
+            var loadingtime = system.loadingtime;
+
+            if (system.normalload > 0) {
+                loadingtime = system.normalload;
+            }
+
+            if (load > loadingtime) {
+                load = loadingtime;
+            }
+
+            var overloadturns = "";
+
+            if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+                overloadturns = "(" + system.overloadturns + ")";
+            }
+
+            if (system.overloadshots > 0) {
+                return "S" + system.overloadshots;
+            } else {
+                return load + overloadturns + "/" + loadingtime;
+            }
+        }
+    } else if (system.outputType === "thrust") {
+        return shipManager.movement.getRemainingEngineThrust(ship);
+    } else if (system.outputType === "power") {
+        return shipManager.power.getReactorPower(ship, system);
+    } else {
+        return shipManager.systems.getOutput(ship, system);
+    }
+};
+/*
+
+const setSystemData = (ship, system) => {
     var parentWeapon = null;
     var parentWindow = null;
 
@@ -29215,191 +29441,195 @@ var setSystemData = function setSystemData(ship, system) {
     if (system.name == "structure") {
         systemwindow.find(".healthvalue ").html(system.maxhealth - damageManager.getDamage(ship, system) + "/" + system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
     }
-      if (system.parentId > 0) {
+
+    if (system.parentId > 0) {
         parentWindow.find(".healthbar").css("width", (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100 + "%");
     } else {
         systemwindow.find(".healthbar").css("width", (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100 + "%");
     }
-      if (system.name == "thruster") {
+
+    if (system.name == "thruster") {
         systemwindow.data("direction", system.direction);
         systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
     }
     */
 
-    //shipWindowManager.removeSystemClasses(systemwindow);
+//shipWindowManager.removeSystemClasses(systemwindow);
 
-    /*
-    if (shipManager.systems.isDestroyed(ship, system)) {
-        if (system.parentId > 0) {
-            if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
-                // create an iconMask at the top of the DOM for the system.
-                var iconmask_element = document.createElement('div');
-                iconmask_element.className = "iconmask";
-                parentWindow.find(".iconmask").remove();
-                parentWindow.find(".icon").append(iconmask_element);
-            }
-              parentWindow.addClass("destroyed");
-        } else {
-            systemwindow.addClass("destroyed");
+/*
+if (shipManager.systems.isDestroyed(ship, system)) {
+    if (system.parentId > 0) {
+        if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
+            // create an iconMask at the top of the DOM for the system.
+            var iconmask_element = document.createElement('div');
+            iconmask_element.className = "iconmask";
+            parentWindow.find(".iconmask").remove();
+            parentWindow.find(".icon").append(iconmask_element);
         }
-        return;
+          parentWindow.addClass("destroyed");
+    } else {
+        systemwindow.addClass("destroyed");
     }
-      if (shipManager.criticals.hasCriticals(system)) {
-        if (system.parentId > 0) {
-            parentWindow.addClass("critical");
-        } else {
-            systemwindow.addClass("critical");
-        }
+    return;
+}
+  if (shipManager.criticals.hasCriticals(system)) {
+    if (system.parentId > 0) {
+        parentWindow.addClass("critical");
+    } else {
+        systemwindow.addClass("critical");
     }
-      */
+}
+  */
+/*
+   if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
 
-    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
+   if (system.weapon) {
+       var firing = weaponManager.hasFiringOrder(ship, system);
 
-    if (system.weapon) {
-        var firing = weaponManager.hasFiringOrder(ship, system);
+       // To avoid double overlay of loading icon mask in case of a
+       // duoWeapon in a dualWeapon
+       if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
+           systemwindow.addClass("loading");
+       } else {
+           systemwindow.removeClass("loading");
+       }
 
-        // To avoid double overlay of loading icon mask in case of a
-        // duoWeapon in a dualWeapon
-        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
-            systemwindow.addClass("loading");
-        } else {
-            systemwindow.removeClass("loading");
-        }
+       if (weaponManager.isSelectedWeapon(system)) {
+           systemwindow.addClass("selected");
+       } else {
+           systemwindow.removeClass("selected");
+       }
 
-        if (weaponManager.isSelectedWeapon(system)) {
-            systemwindow.addClass("selected");
-        } else {
-            systemwindow.removeClass("selected");
-        }
+       if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
+           systemwindow.addClass("firing");
 
-        if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
-            systemwindow.addClass("firing");
+           if (system.parentId > -1) {
+               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
-            if (system.parentId > -1) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+               if (parentSystem.duoWeapon) {
+                   $(".system_" + system.parentId).addClass("duofiring");
+               }
+           }
+       } else if (firing == "self") {
+           systemwindow.addClass("firing");
+           systemwindow.addClass("selfIntercept");
+       } else {
+           firing = false;
+           systemwindow.removeClass("firing");
+           systemwindow.removeClass("selfIntercept");
+       }
 
-                if (parentSystem.duoWeapon) {
-                    $(".system_" + system.parentId).addClass("duofiring");
-                }
-            }
-        } else if (firing == "self") {
-            systemwindow.addClass("firing");
-            systemwindow.addClass("selfIntercept");
-        } else {
-            firing = false;
-            systemwindow.removeClass("firing");
-            systemwindow.removeClass("selfIntercept");
-        }
+       if (system.ballistic) {
+           systemwindow.addClass("ballistic");
+       } else {
+           systemwindow.removeClass("ballistic");
+       }
 
-        if (system.ballistic) {
-            systemwindow.addClass("ballistic");
-        } else {
-            systemwindow.removeClass("ballistic");
-        }
+       if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+           if (system.parentId >= 0) {
+               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
-        if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
-            if (system.parentId >= 0) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+               if (parentSystem.parentId >= 0) {
+                   parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+                   $(".parentsystem_" + parentSystem.id).addClass("modes");
+                   var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
+               } else {
+                   $(".parentsystem_" + parentSystem.id).addClass("modes");
+                   var modebutton = $(".mode", systemwindow);
+               }
 
-                if (parentSystem.parentId >= 0) {
-                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
-                } else {
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", systemwindow);
-                }
+               modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
+           } else {
+               systemwindow.addClass("modes");
 
-                modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
-            } else {
-                systemwindow.addClass("modes");
+               var modebutton = $(".mode", systemwindow);
+               modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
+           }
+       }
 
-                var modebutton = $(".mode", systemwindow);
-                modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
-            }
-        }
+       if (firing && system.canChangeShots) {
+           var fire = weaponManager.getFiringOrder(ship, system);
 
-        if (firing && system.canChangeShots) {
-            var fire = weaponManager.getFiringOrder(ship, system);
+           if (fire.shots < system.shots) {
+               systemwindow.addClass("canAddShots");
+           } else {
+               systemwindow.removeClass("canAddShots");
+           }
 
-            if (fire.shots < system.shots) {
-                systemwindow.addClass("canAddShots");
-            } else {
-                systemwindow.removeClass("canAddShots");
-            }
+           if (fire.shots > 1) {
+               systemwindow.addClass("canReduceShots");
+           } else {
+               systemwindow.removeClass("canReduceShots");
+           }
 
-            if (fire.shots > 1) {
-                systemwindow.addClass("canReduceShots");
-            } else {
-                systemwindow.removeClass("canReduceShots");
-            }
+           field.html(fire.shots + "/" + system.shots);
+       } else if (!firing) {
+           if (system.duoWeapon) {
+               var UI_active = systemwindow.find(".UI").hasClass("active");
 
-            field.html(fire.shots + "/" + system.shots);
-        } else if (!firing) {
-            if (system.duoWeapon) {
-                var UI_active = systemwindow.find(".UI").hasClass("active");
+               shipWindowManager.addDuoSystem(ship, system, systemwindow);
 
-                shipWindowManager.addDuoSystem(ship, system, systemwindow);
+               if (UI_active) {
+                   systemwindow.find(".UI").addClass("active");
+               }
+           } else {
+               if (system.dualWeapon && system.weapons) {
+                   system = system.weapons[system.firingMode];
+               }
 
-                if (UI_active) {
-                    systemwindow.find(".UI").addClass("active");
-                }
-            } else {
-                if (system.dualWeapon && system.weapons) {
-                    system = system.weapons[system.firingMode];
-                }
+               var load = weaponManager.getWeaponCurrentLoading(system);
+               var loadingtime = system.loadingtime;
 
-                var load = weaponManager.getWeaponCurrentLoading(system);
-                var loadingtime = system.loadingtime;
+               if (system.normalload > 0) {
+                   loadingtime = system.normalload;
+               }
 
-                if (system.normalload > 0) {
-                    loadingtime = system.normalload;
-                }
+               if (load > loadingtime) {
+                   load = loadingtime;
+               }
 
-                if (load > loadingtime) {
-                    load = loadingtime;
-                }
+               var overloadturns = "";
 
-                var overloadturns = "";
+               if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+                   overloadturns = "(" + system.overloadturns + ")";
+               }
 
-                if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-                    overloadturns = "(" + system.overloadturns + ")";
-                }
+               if (system.overloadshots > 0) {
+                   field.html("S" + system.overloadshots);
+               } else {
+                   field.html(load + overloadturns + "/" + loadingtime);
+               }
+           }
 
-                if (system.overloadshots > 0) {
-                    field.html("S" + system.overloadshots);
-                } else {
-                    field.html(load + overloadturns + "/" + loadingtime);
-                }
-            }
-        }
-    } else if (system.name == "thruster") {
-        systemwindow.data("direction", system.direction);
-        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+           
+       }
+   } else if (system.name == "thruster") {
+       systemwindow.data("direction", system.direction);
+       systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
 
-        var channeled = shipManager.movement.getAmountChanneled(ship, system);
-        if (channeled > output) {
-            field.addClass("darkred");
-        } else {
-            field.removeClass("darkred");
-        }
+       var channeled = shipManager.movement.getAmountChanneled(ship, system);
+       if (channeled > output) {
+           field.addClass("darkred");
+       } else {
+           field.removeClass("darkred");
+       }
 
-        if (channeled < 0) {
-            channeled = 0;
-        }
+       if (channeled < 0) {
+           channeled = 0;
+       }
 
-        field.html(channeled + "/" + output);
-    } else if (system.name == "engine") {
-        var rem = shipManager.movement.getRemainingEngineThrust(ship);
+       field.html(channeled + "/" + output);
+   } else if (system.name == "engine") {
+       var rem = shipManager.movement.getRemainingEngineThrust(ship);
 
-        field.html(rem + "/" + output);
-    } else if (system.name == "reactor") {
-        field.html(shipManager.power.getReactorPower(ship, system));
-    } else if (system.output > 0) {
-        field.html(output);
-    }
-};
-
+       field.html(rem + "/" + output);
+   } else if (system.name == "reactor") {
+       field.html(shipManager.power.getReactorPower(ship, system));
+   } else if (system.output > 0) {
+       field.html(output);
+   }
+}
+*/
 exports.default = SystemIcon;
 
 },{"react":41,"styled-components":58}],77:[function(require,module,exports){
@@ -29411,7 +29641,625 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    display:none;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100%-805px);\n    bottom: 0;\n"], ["\n    display:none;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100%-805px);\n    bottom: 0;\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n    font-size: 12px;\n"], ["\n    font-size: 12px;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    width: 200px;\n    text-align: left;\n    opacity:0.8;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    width: 200px;\n    text-align: left;\n    opacity:0.8;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"], ["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n"], ["\n    color: white;\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _common = require("../common");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var InfoHeader = _common.TooltipHeader.extend(_templateObject);
+
+var SystemInfoTooltip = _common.Tooltip.extend(_templateObject2, function (props) {
+    return Object.keys(props.position).reduce(function (style, key) {
+        return style + "\n" + key + ':' + props.position[key] + 'px;';
+    }, '');
+});
+
+var Entry = _common.TooltipEntry.extend(_templateObject3);
+
+var Header = /*#__PURE__*/_styledComponents2.default.span(_templateObject4);
+
+var SystemInfo = function (_React$Component) {
+    _inherits(SystemInfo, _React$Component);
+
+    function SystemInfo() {
+        _classCallCheck(this, SystemInfo);
+
+        return _possibleConstructorReturn(this, (SystemInfo.__proto__ || Object.getPrototypeOf(SystemInfo)).apply(this, arguments));
+    }
+
+    _createClass(SystemInfo, [{
+        key: "render",
+        value: function render() {
+            var _props = this.props,
+                ship = _props.ship,
+                selectedShip = _props.selectedShip,
+                system = _props.system,
+                boundingBox = _props.boundingBox;
+
+
+            return React.createElement(
+                SystemInfoTooltip,
+                { position: getPosition(boundingBox) },
+                React.createElement(
+                    InfoHeader,
+                    null,
+                    system.displayName
+                ),
+                !ship.flight && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth),
+                !ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system)),
+                ship.flight && getEntry('Offensive bonus', ship.offensivebonus * 5),
+                system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode]),
+                system.missileArray && system.missileArray.length > 0 && getEntry('Ammo Amount', system.missileArray && system.missileArray[system.firingMode].amount),
+                Object.keys(system.data).map(function (key, i) {
+                    return getEntry(key, system.data[key], 'data' + i);
+                }),
+                Object.keys(system.critData).length > 0 && getCriticals(system),
+                !gamedata.isMyShip(ship) && gamedata.gamephase == 3 && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
+            );
+        }
+    }]);
+
+    return SystemInfo;
+}(React.Component);
+
+var getCalledShot = function getCalledShot(ship, selectedShip, system) {
+    if (weaponManager.canCalledshot(ship, system, selectedShip)) {
+        return [React.createElement(
+            InfoHeader,
+            { key: "calledHeader" },
+            "Called shot"
+        )].concat(gamedata.selectedSystems.map(function (weapon, i) {
+            if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
+                if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
+                    var value = weapon.firingMode;
+                    value = weapon.firingModes[value];
+                    if (system.id != null && !weaponManager.canWeaponCall(weapon)) {
+                        return React.createElement(
+                            Entry,
+                            { key: "called-" + i },
+                            React.createElement(
+                                Header,
+                                null,
+                                weapon.displayName
+                            ),
+                            "CANNOT CALL SHOT"
+                        );
+                    } else {
+                        return React.createElement(
+                            Entry,
+                            { key: "called-" + i },
+                            React.createElement(
+                                Header,
+                                null,
+                                weapon.displayName
+                            ),
+                            " - Approx:  ",
+                            weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id),
+                            "%"
+                        );
+                    }
+                } else {
+                    return React.createElement(
+                        Entry,
+                        { key: "called-" + i },
+                        React.createElement(
+                            Header,
+                            null,
+                            weapon.displayName
+                        ),
+                        "NOT IN RANGE"
+                    );
+                }
+            } else {
+                return React.createElement(
+                    Entry,
+                    { key: "called-" + i },
+                    React.createElement(
+                        Header,
+                        null,
+                        weapon.displayName
+                    ),
+                    "NOT IN ARC"
+                );
+            }
+        }));
+    } else {
+        return [React.createElement(
+            InfoHeader,
+            { key: "calledHeader" },
+            "Called shot"
+        )].concat(React.createElement(
+            Entry,
+            null,
+            "CANNOT TARGET"
+        ));
+    }
+};
+
+var getCriticals = function getCriticals(system) {
+    return [React.createElement(
+        InfoHeader,
+        { key: "criticalHeader" },
+        "Damage"
+    )].concat(Object.keys(system.critData).map(function (i) {
+        var noOfCrits = 0;
+        for (var j in system.criticals) {
+            if (system.criticals[j].phpclass == i) noOfCrits++;
+        }
+        if (noOfCrits > 1) {
+            return React.createElement(
+                Entry,
+                { key: "critical-" + i },
+                "(",
+                noOfCrits,
+                " x) ",
+                system.critData[i]
+            );
+        } else {
+            return React.createElement(
+                Entry,
+                { key: "critical-" + i },
+                system.critData[i]
+            );
+        }
+    }));
+};
+
+var getEntry = function getEntry(header, value, key) {
+
+    if (value.replace) {
+        value = value.replace(/<br>/gm, "\n");
+    }
+
+    return React.createElement(
+        Entry,
+        { key: key },
+        React.createElement(
+            Header,
+            null,
+            header,
+            ": "
+        ),
+        value
+    );
+};
+
+var getPosition = function getPosition(boundingBox) {
+    var position = {};
+
+    if (boundingBox.top > window.innerHeight / 2) {
+        position.bottom = window.innerHeight - boundingBox.top;
+    } else {
+        position.top = boundingBox.top + boundingBox.height;
+    }
+
+    if (boundingBox.left > window.innerWidth / 2) {
+        position.right = window.innerWidth - boundingBox.right;
+    } else {
+        position.left = boundingBox.left + boundingBox.width;
+    }
+
+    return position;
+};
+
+exports.default = SystemInfo;
+
+},{"../common":66,"react":41,"styled-components":58}],78:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.canDoAnything = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n    display:flex;\n"], ["\n    display:flex;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n\tdisplay: flex;\n    width: 30px;\n    height: 30px;\n    background-image: url(", ");\n\tbackground-size: cover;\n\talign-items: center;\n    justify-content: center;\n    ", "\n"], ["\n\tdisplay: flex;\n    width: 30px;\n    height: 30px;\n    background-image: url(", ");\n\tbackground-size: cover;\n\talign-items: center;\n    justify-content: center;\n    ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var Container = /*#__PURE__*/_styledComponents2.default.div(_templateObject);
+
+var Button = /*#__PURE__*/_styledComponents2.default.div(_templateObject2, function (props) {
+    return props.img;
+}, _styled.Clickable);
+
+var SystemInfoButtons = function (_React$Component) {
+    _inherits(SystemInfoButtons, _React$Component);
+
+    function SystemInfoButtons() {
+        _classCallCheck(this, SystemInfoButtons);
+
+        return _possibleConstructorReturn(this, (SystemInfoButtons.__proto__ || Object.getPrototypeOf(SystemInfoButtons)).apply(this, arguments));
+    }
+
+    _createClass(SystemInfoButtons, [{
+        key: "online",
+        value: function online(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props = this.props,
+                ship = _props.ship,
+                system = _props.system;
+
+            shipManager.power.onOnlineClicked(ship, system);
+        }
+    }, {
+        key: "offline",
+        value: function offline(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props2 = this.props,
+                ship = _props2.ship,
+                system = _props2.system;
+
+            if (!canOffline(ship, system)) {
+                return;
+            }
+
+            shipManager.power.onOfflineClicked(ship, system);
+        }
+    }, {
+        key: "overload",
+        value: function overload(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props3 = this.props,
+                ship = _props3.ship,
+                system = _props3.system;
+
+            shipManager.power.onOverloadClicked(ship, system);
+        }
+    }, {
+        key: "stopOverload",
+        value: function stopOverload(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props4 = this.props,
+                ship = _props4.ship,
+                system = _props4.system;
+
+            shipManager.power.onStopOverloadClicked(ship, system);
+        }
+    }, {
+        key: "boost",
+        value: function boost(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props5 = this.props,
+                ship = _props5.ship,
+                system = _props5.system;
+
+            shipManager.power.clickPlus(ship, system);
+        }
+    }, {
+        key: "deboost",
+        value: function deboost(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props6 = this.props,
+                ship = _props6.ship,
+                system = _props6.system;
+
+            shipManager.power.clickMinus(ship, system);
+        }
+    }, {
+        key: "addShots",
+        value: function addShots(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props7 = this.props,
+                ship = _props7.ship,
+                system = _props7.system;
+
+            if (!canAddShots(ship, system)) {
+                return;
+            }
+
+            weaponManager.changeShots(ship, system, 1);
+        }
+    }, {
+        key: "reduceShots",
+        value: function reduceShots(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props8 = this.props,
+                ship = _props8.ship,
+                system = _props8.system;
+
+            if (!canReduceShots(ship, system)) {
+                return;
+            }
+
+            weaponManager.changeShots(ship, system, -1);
+        }
+    }, {
+        key: "removeFireOrder",
+        value: function removeFireOrder(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props9 = this.props,
+                ship = _props9.ship,
+                system = _props9.system;
+
+            if (!canRemoveFireOrder(ship, system)) {
+                return;
+            }
+
+            weaponManager.removeFiringOrder(ship, system);
+        }
+    }, {
+        key: "changeFiringMode",
+        value: function changeFiringMode(e) {
+            e.stopPropagation();e.preventDefault();
+            var _props10 = this.props,
+                ship = _props10.ship,
+                system = _props10.system;
+
+            if (!canChangeFiringMode(ship, system)) {
+                return;
+            }
+
+            weaponManager.onModeClicked(ship, system);
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _props11 = this.props,
+                ship = _props11.ship,
+                selectedShip = _props11.selectedShip,
+                system = _props11.system;
+
+
+            if (!canDoAnything) {
+                return null;
+            }
+
+            return React.createElement(
+                Container,
+                null,
+                canOnline(ship, system) && React.createElement(Button, { onClick: this.online.bind(this), img: "./img/on.png" }),
+                canOffline(ship, system) && React.createElement(Button, { onClick: this.offline.bind(this), img: "./img/off.png" }),
+                canOverload(ship, system) && React.createElement(Button, { onClick: this.overload.bind(this), img: "./img/overload.png" }),
+                canStopOverload(ship, system) && React.createElement(Button, { onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
+                canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
+                canDeBoost(ship, system) && React.createElement(Button, { onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
+                canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
+                canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
+                canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
+                canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this))
+            );
+        }
+    }]);
+
+    return SystemInfoButtons;
+}(React.Component);
+
+var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
+    return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
+};
+
+var canOffline = function canOffline(ship, system) {
+    return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
+};
+
+var canOnline = function canOnline(ship, system) {
+    return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
+};
+
+var canOverload = function canOverload(ship, system) {
+    return !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) && shipManager.power.canOverload(ship, system);
+};
+
+var canStopOverload = function canStopOverload(ship, system) {
+    return system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+};
+
+var canBoost = function canBoost(ship, system) {
+    return system.boostable && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
+};
+
+var canDeBoost = function canDeBoost(ship, system) {
+    return Boolean(shipManager.power.getBoost(system));
+};
+
+var canAddShots = function canAddShots(ship, system) {
+    return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
+};
+
+var canReduceShots = function canReduceShots(ship, system) {
+    return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
+};
+
+var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
+    return system.weapon && weaponManager.hasFiringOrder(ship, system);
+};
+
+var canChangeFiringMode = function canChangeFiringMode(ship, system) {
+    return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
+};
+
+var getFiringModes = function getFiringModes(ship, system, changeFiringMode) {
+    if (system.parentId >= 0) {
+        var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+
+        if (parentSystem.parentId >= 0) {
+            parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+            //$(".parentsystem_" + parentSystem.id).addClass("modes");
+            //let modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
+        } else {
+                //$(".parentsystem_" + parentSystem.id).addClass("modes");
+                //let modebutton = $(".mode", systemwindow);
+            }
+
+        console.log(parentSystem.firingModes[parentSystem.firingMode]);
+        //modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
+    } else {
+
+        console.log(system.firingModes, system.firingMode);
+
+        var firingMode = system.firingModes[system.firingMode + 1] ? system.firingModes[system.firingMode + 1] : system.firingModes[1];
+
+        var img = '';
+
+        if (system.iconPath) {
+            img = "./img/systemicons/" + system.iconPath;
+        } else {
+            img = "./img/systemicons/" + system.name + ".png";
+        }
+
+        return React.createElement(
+            Button,
+            { onClick: changeFiringMode, img: img },
+            firingMode.substring(0, 1)
+        );
+    }
+};
+
+exports.default = SystemInfoButtons;
+
+},{"../styled":75,"react":41,"styled-components":58}],79:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n    font-size: 12px;\n"], ["\n    font-size: 12px;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n"], ["\n    position: absolute;\n    z-index: 20000;\n    ", "\n    max-width: 200px;\n    text-align: left;\n    opacity:0.8;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"], ["\n    text-align: left;\n    color: #5e85bc;\n    font-family: arial;\n    font-size: 11px;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n    color: white;\n"], ["\n    color: white;\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _SystemInfoButtons = require("./SystemInfoButtons");
+
+var _SystemInfoButtons2 = _interopRequireDefault(_SystemInfoButtons);
+
+var _common = require("../common");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var InfoHeader = _common.TooltipHeader.extend(_templateObject);
+
+var SystemInfoTooltip = _common.Tooltip.extend(_templateObject2, function (props) {
+    return Object.keys(props.position).reduce(function (style, key) {
+        return style + "\n" + key + ':' + props.position[key] + 'px;';
+    }, '');
+});
+
+var Entry = _common.TooltipEntry.extend(_templateObject3);
+
+var Header = /*#__PURE__*/_styledComponents2.default.span(_templateObject4);
+
+var SystemInfoMenu = function (_React$Component) {
+    _inherits(SystemInfoMenu, _React$Component);
+
+    function SystemInfoMenu() {
+        _classCallCheck(this, SystemInfoMenu);
+
+        return _possibleConstructorReturn(this, (SystemInfoMenu.__proto__ || Object.getPrototypeOf(SystemInfoMenu)).apply(this, arguments));
+    }
+
+    _createClass(SystemInfoMenu, [{
+        key: "render",
+        value: function render() {
+            var boundingBox = this.props.boundingBox;
+
+
+            return React.createElement(
+                SystemInfoTooltip,
+                { position: getPosition(boundingBox) },
+                React.createElement(_SystemInfoButtons2.default, this.props)
+            );
+        }
+    }]);
+
+    return SystemInfoMenu;
+}(React.Component);
+
+var getPosition = function getPosition(boundingBox) {
+    var position = {};
+
+    if (boundingBox.top > window.innerHeight / 2) {
+        position.bottom = window.innerHeight - boundingBox.top;
+    } else {
+        position.top = boundingBox.top + boundingBox.height;
+    }
+
+    if (boundingBox.left > window.innerWidth / 2) {
+        position.right = window.innerWidth - boundingBox.right;
+    } else {
+        position.left = boundingBox.left;
+    }
+
+    return position;
+};
+
+exports.default = SystemInfoMenu;
+
+},{"../common":66,"./SystemInfoButtons":78,"react":41,"styled-components":58}],80:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n    display:flex;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100%-805px);\n    bottom: 0;\n"], ["\n    display:flex;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100%-805px);\n    bottom: 0;\n"]);
 
 var _react = require("react");
 
@@ -29451,11 +30299,21 @@ var WeaponList = function (_React$Component) {
     _createClass(WeaponList, [{
         key: "getWeapons",
         value: function getWeapons(ship, gamePhase) {
+
+            if (ship.flight) {
+                return ship.systems.map(function (fighter) {
+                    return fighter.systems;
+                }).reduce(function (all, weapons) {
+                    return all.concat(weapons);
+                }, []).filter(function (system) {
+                    return system.weapon;
+                });
+            }
+
             return ship.systems.filter(function (system) {
-                return system.weapon;
-            }).filter(function (weapon) {
-                return gamePhase === 1 && weapon.ballistic || gamePhase === 3 && !weapon.ballistic;
+                return system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power";
             });
+            //.filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
         }
     }, {
         key: "render",
@@ -29475,7 +30333,7 @@ var WeaponList = function (_React$Component) {
                 WeaponListContainer,
                 null,
                 weapons.map(function (weapon, index) {
-                    return React.createElement(_SystemIcon2.default, { key: "system-" + index, system: weapon });
+                    return React.createElement(_SystemIcon2.default, { key: "system-" + index, system: weapon, ship: ship });
                 })
             );
         }

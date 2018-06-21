@@ -16,7 +16,7 @@ window.weaponManager = {
         return weapon.turnsloaded;
     },
 
-    onModeClicked: function onModeClicked(shipwindow, systemwindow, ship, system) {
+    onModeClicked: function onModeClicked(ship, system) {
         //throw new Error("Route trough phase strategy to get selected ship");
         if (!system) return;
 
@@ -30,12 +30,16 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(ship, system);
 
             if (system.dualWeapon) {
+
+                console.log("changing dual weapon?")
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
                 parentSystem.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, parentSystem);
 
+                /*
                 var newSystem = parentSystem.weapons[parentSystem.firingMode];
 
+                
                 var parentwindow = shipwindow.find(".parentsystem_" + newSystem.parentId);
                 parentwindow.removeClass("system_" + system.id);
                 parentwindow.addClass("modes");
@@ -49,11 +53,14 @@ window.weaponManager = {
                 clearTimeout(weaponManager.mouseoverTimer);
                 weaponManager.mouseOutTimer = null;
                 weaponManager.mouseoverTimer = null;
-                systemInfo.showSystemInfo(parentwindow, newSystem, ship, /*selectedship*/);
+                systemInfo.showSystemInfo(parentwindow, newSystem, ship );
+                */
             } else {
                 system.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, system);
             }
+            
+            webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
         }
     },
 
@@ -149,7 +156,7 @@ window.weaponManager = {
         }
 
         var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
-        webglScene.customEvent('WeaponMouseOver', {
+        webglScene.customEvent('SystemMouseOver', {
             ship: weaponManager.currentShip,
             weapon: weapon,
             element: weaponManager.mouseoverSystem
@@ -164,7 +171,7 @@ window.weaponManager = {
 
         systemInfo.hideSystemInfo();
         weaponManager.mouseoverSystem = null;
-        webglScene.customEvent('WeaponMouseOut');
+        webglScene.customEvent('SystemMouseOut');
     },
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
@@ -183,8 +190,8 @@ window.weaponManager = {
             }
         }
 
-        webglScene.customEvent('WeaponUnSelected', { ship: ship, weapon: weapon });
         shipWindowManager.setDataForSystem(ship, weapon);
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
     checkConflictingFireOrder: function checkConflictingFireOrder(ship, weapon, alert) {
@@ -261,6 +268,7 @@ window.weaponManager = {
     },
 
     selectWeapon: function selectWeapon(ship, weapon) {
+
         if (weaponManager.checkOutOfAmmo(ship, weapon)) {
             return;
         }
@@ -270,7 +278,11 @@ window.weaponManager = {
         }
 
 		if (!weaponManager.isLoaded(weapon))
-			return;
+            return;
+            
+        if (shipManager.power.isOffline(ship, weapon)) {
+            return;
+        }
 
         if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
 
@@ -290,15 +302,75 @@ window.weaponManager = {
             }
         }
 
-        webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
         gamedata.selectedSystems.push(weapon);
         shipWindowManager.setDataForSystem(ship, weapon);
+        webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
     },
 
     isSelectedWeapon: function isSelectedWeapon(weapon) {
         if ($.inArray(weapon, gamedata.selectedSystems) >= 0) return true;
 
         return false;
+    },
+
+    selectAllWeapons: function selectAllWeapons(ship, system) {
+        
+		if (!gamedata.isMyShip(ship)) {
+			return;
+		}
+        
+        var array = [];
+
+        var systems = [];
+
+        if (ship.flight) {
+            systems = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            systems = ship.systems.filter(system => system.weapon);
+        }
+
+        console.log("hi", system.displayName)
+        console.log(systems)
+
+        array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
+
+        console.log(array);
+
+		for (var i = 0; i < array.length; i++) {
+			var system = array[i];
+
+			if (gamedata.waiting) return;
+
+			if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) {
+				return;
+			}
+
+			if (system.destroyed) {
+				continue;
+			}
+
+			if (system.weapon) {
+
+				if (gamedata.gamephase != 3 && !system.ballistic) return;
+
+				if (gamedata.gamephase != 1 && system.ballistic) return;
+
+				if (weaponManager.isSelectedWeapon(system)) {
+					weaponManager.unSelectWeapon(ship, system);
+				} else {
+					weaponManager.selectWeapon(ship, system);
+				}
+			}
+
+			/*
+			if (gamedata.isEnemy(ship, selectedShip) && gamedata.gamephase == 3 && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system)) {
+				weaponManager.targetShip(ship, system);
+			}
+			*/
+		}
     },
 
     targetingShipTooltip: function targetingShipTooltip(selectedShip, ship, e, calledid) {
@@ -1402,6 +1474,11 @@ window.weaponManager = {
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) continue;
 
+            if (shipManager.power.isOffline(selectedShip, weapon)) {
+                toUnselect.push(weapon);
+                continue;
+            }
+
             if (weapon.targetsShips) {
                 continue;
             }
@@ -1477,6 +1554,8 @@ window.weaponManager = {
                 system.fireOrders.splice(i, 1);
             }
         }
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
     hasFiringOrder: function hasFiringOrder(ship, system) {
@@ -1696,6 +1775,7 @@ window.weaponManager = {
         }
 
         shipWindowManager.setDataForSystem(ship, system);
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
     getDamagesCausedBy: function getDamagesCausedBy(fire, damages) {
