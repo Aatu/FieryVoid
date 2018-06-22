@@ -8,6 +8,7 @@ import WeaponList from "./system/WeaponList";
 import SystemInfo from "./system/SystemInfo";
 import SystemInfoMenu from "./system/SystemInfoMenu";
 import {canDoAnything} from "./system/SystemInfoButtons";
+import ShipWindowsContainer from "./shipWindow/ShipWindowsContainer";
 
 class UIManager{
 
@@ -61,6 +62,10 @@ class UIManager{
 
     canShowSystemInfoMenu(ship, system) {
         return canDoAnything(ship, system);
+    }
+
+    renderShipWindows(args) {
+        ReactDom.render(<ShipWindowsContainer {...args}/>, jQuery("#shipWindowsReact", this.parentElement)[0] );
     }
 }
 

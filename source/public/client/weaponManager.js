@@ -1691,6 +1691,7 @@ window.weaponManager = {
                 fireOrder: fireOrder,
                 shots: fireOrder.shots,
                 hits: fireOrder.shotshit,
+                firingMode: fireOrder.firingMode,
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid),
                 targetSystem: shipManager.systems.getSystem(target, fireOrder.calledid),

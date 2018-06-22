@@ -8,8 +8,9 @@ const WeaponListContainer = styled.div`
     z-index: 2;
     position:fixed;
     left: 805px;
-    width: calc(100%-805px);
+    width: calc(100% - 810px);
     bottom: 0;
+    flex-wrap: wrap-reverse;
 `;
 
 class WeaponList extends React.Component{
@@ -50,6 +51,5 @@ class WeaponList extends React.Component{
         )
     }
 }
-
 
 export default WeaponList;

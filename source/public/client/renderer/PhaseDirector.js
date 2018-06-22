@@ -12,6 +12,7 @@ window.phaseDirector = function () {
         this.animationStrategy = null;
         this.phaseStrategy = null;
         this.coordinateConverter = null;
+        this.shipWindowManager = null;
     }
 
     phaseDirector.prototype.init = function (coordinateConverter, scene) {
@@ -19,6 +20,7 @@ window.phaseDirector = function () {
         this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
         this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene, this.shipIconContainer);
         this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
+        this.shipWindowManager = new ShipWindowManager(new window.UIManager($("body")[0]));
     };
 
     phaseDirector.prototype.receiveGamedata = function (gamedata, webglScene) {
@@ -76,7 +78,7 @@ window.phaseDirector = function () {
             this.phaseStrategy.deactivate();
         }
 
-        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, onDoneCallback);
+        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, this.shipWindowManager, onDoneCallback);
     }
 
     return phaseDirector;

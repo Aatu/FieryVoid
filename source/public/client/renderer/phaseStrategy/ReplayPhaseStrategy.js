@@ -15,7 +15,7 @@ window.ReplayPhaseStrategy = function () {
 
     ReplayPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    ReplayPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    ReplayPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
         this.shipIconContainer = shipIcons;
         this.ewIconContainer = ewIconContainer;
         this.ewIconContainer.hide();
@@ -30,6 +30,7 @@ window.ReplayPhaseStrategy = function () {
 
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata);
+        this.shipWindowManager = shipWindowManager;
         this.hideAllEW();
 
         this.createReplayUI();

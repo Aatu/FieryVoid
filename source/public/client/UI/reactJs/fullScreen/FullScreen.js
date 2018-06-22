@@ -36,7 +36,7 @@ class FullScreen extends React.Component{
 const MainButton = ContainerRounded.extend`
     width: 50px;
     height: 50px;
-    position: absolute;
+    position: fixed;
     right: 60px;
     top: 0;
     z-index: 4;

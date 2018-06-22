@@ -8,6 +8,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer = null;
         this.ewIconContainer = null;
         this.ballisticIconContainer = null;
+        this.shipWindowManager = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
 
@@ -30,6 +31,14 @@ window.PhaseStrategy = function () {
         this.systemInfoState = null;
 
         this.uiManager = new window.UIManager($("body")[0]);
+    }
+
+    PhaseStrategy.prototype.onCloseShipWindow = function(payload) {
+        this.shipWindowManager.close(payload.ship);
+    }
+
+    PhaseStrategy.prototype.onCloseSystemInfo = function() {
+        this.hideSystemInfo(true);
     }
 
     PhaseStrategy.prototype.hideSystemInfo = function(force) {
@@ -82,7 +91,7 @@ window.PhaseStrategy = function () {
         this.ballisticIconContainer.show();
     };
 
-    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, doneCallback) {
+    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, doneCallback) {
         this.shipIconContainer = shipIcons;
         this.ewIconContainer = ewIconContainer;
         this.ballisticIconContainer = ballisticIconContainer;
@@ -92,6 +101,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.setAllSelected(false);
         this.ballisticIconContainer.show();
         this.onDoneCallback = doneCallback;
+        this.shipWindowManager = shipWindowManager;
         this.createReplayUI(gamedata);
         return this;
     };
@@ -122,6 +132,7 @@ window.PhaseStrategy = function () {
         this.currentlyMouseOveredIds = null;
 
         this.uiManager.hideWeaponList();
+        this.hideSystemInfo(true);
         return this;
     };
 
@@ -181,7 +192,8 @@ window.PhaseStrategy = function () {
         if (this.gamedata.isMyShip(ship)) {
             this.setSelectedShip(ship);
         }
-        shipWindowManager.open(ship);
+        this.shipWindowManager.open(ship);
+        //shipWindowManager.open(ship);
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {
@@ -603,6 +615,8 @@ window.PhaseStrategy = function () {
         if (system && system.ballistic) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
+
+        this.shipWindowManager.update();
     }
 
     PhaseStrategy.prototype.onSystemClicked = function (payload) {

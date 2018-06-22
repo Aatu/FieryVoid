@@ -23,6 +23,7 @@ class SystemInfoButtons extends React.Component {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.onOnlineClicked(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     offline(e) {
@@ -33,30 +34,53 @@ class SystemInfoButtons extends React.Component {
         }
 
         shipManager.power.onOfflineClicked(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
+	}
+	
+	allOnline(e) {
+        e.stopPropagation(); e.preventDefault();
+        const {ship, system} = this.props;
+        shipManager.power.onlineAll(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
+    }
+
+    allOffline(e) {
+        e.stopPropagation(); e.preventDefault();
+        const {ship, system} = this.props;
+        if (!canOffline(ship, system)) {
+            return;
+        }
+
+        shipManager.power.offlineAll(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     overload(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.onOverloadClicked(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     stopOverload(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.onStopOverloadClicked(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     boost(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.clickPlus(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     deboost(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.clickMinus(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
 	}
 
 	addShots(e) {
@@ -67,6 +91,7 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.changeShots(ship, system, 1);
+        webglScene.customEvent('CloseSystemInfo');
     }
 
     reduceShots(e) {
@@ -77,6 +102,7 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.changeShots(ship, system, -1);
+        webglScene.customEvent('CloseSystemInfo');
 	}
 	
 	removeFireOrder(e) {
@@ -87,6 +113,7 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.removeFiringOrder(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
 	}
 
 	changeFiringMode(e) {
@@ -97,6 +124,7 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.onModeClicked(ship, system);
+        webglScene.customEvent('CloseSystemInfo');
 	}
 	
 	
@@ -109,8 +137,8 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-                {canOnline(ship, system) && <Button onClick={this.online.bind(this)} img="./img/on.png"></Button>}
-                {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} img="./img/off.png"></Button>}
+				{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+                {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
                 {canOverload(ship, system) && <Button onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
                 {canStopOverload(ship, system) && <Button onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
                 {canBoost(ship, system) && <Button onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}

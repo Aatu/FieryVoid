@@ -8,11 +8,11 @@ window.WaitingPhaseStrategy = function () {
 
     WaitingPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    WaitingPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    WaitingPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
 
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
         console.log("enabled waiting phase strategy");
         gamedata.hideCommitButton();
 

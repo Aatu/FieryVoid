@@ -8,6 +8,8 @@ const HealthBar = styled.div`
     width: 100%;
     height: 4px;
     border-top: 1px solid #496791;
+    box-sizing: border-box;
+    
     background-color: black;
 
     :before {
@@ -17,7 +19,7 @@ const HealthBar = styled.div`
         height: 100%;
         left: 0;
         bottom: 0;
-        background-color: ${props => props.criticals ? '#ed6738' : '#3daa14'};
+        background-color: ${props => props.criticals ? '#ed6738' : props.scs ? '#2f5123' : '#3daa14'};
     }
 `;
 
@@ -35,16 +37,23 @@ const SystemText = styled.div`
 
 const System = styled.div`
     position: relative;
-    width: 30px;
-    height: 30px;
-    margin: 2px;
-    border: ${props => props.firing ? '1px solid #eb5c15' : '1px solid #496791' };
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    margin: ${props => props.scs ? '3px 0' : '2px'};
+    border: ${props => {
+        if (props.firing) {
+            return '1px solid #eb5c15'
+        } else {
+            return '1px solid #496791';
+        }
+    }};
     background-color:  ${props => {
         if (props.selected) {
             return '#4e6c91';
         } else if (props.firing) {
             return '#e06f01';
-        }else {
+        } else {
             return 'black';
         }
     }};
@@ -163,15 +172,10 @@ class SystemIcon extends React.Component{
     }
 
     render(){
-        let {system, ship} = this.props;
+        let {system, ship, scs} = this.props;
 
         system = shipManager.systems.initializeSystem(system);
         const destroyed = getDestroyed(ship, system);
-
-        if (system.dualWeapon && system.weapons) {
-            system = system.weapons[system.firingMode];
-            system = shipManager.systems.initializeSystem(system);
-        }
 
         if (getDestroyed(ship, system)){
             return (
@@ -181,6 +185,7 @@ class SystemIcon extends React.Component{
 
         return (
             <System 
+                scs={scs}
                 onClick={this.clickSystem.bind(this)}
                 onMouseOver={this.onSystemMouseOver.bind(this)}
                 onMouseOut={this.onSystemMouseOut.bind(this)}
@@ -192,7 +197,7 @@ class SystemIcon extends React.Component{
                 firing={isFiring(ship, system)}
             >
             <SystemText>{getText(ship, system)}</SystemText>
-            <HealthBar health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>
+            <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>
             </System>
         )
     }
@@ -210,7 +215,7 @@ const getDestroyed = (ship, system) => shipManager.systems.isDestroyed(ship, sys
 
 const getBackgroundImage = (system) => {
     if (system.name == "thruster") {
-        return './img/systemicons/thruster';
+        return './img/systemicons/thruster' + system.direction + '.png';
     } else if (system.iconPath) {
         return `./img/systemicons/${system.iconPath}`;
     } else {

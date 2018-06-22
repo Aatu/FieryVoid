@@ -89,6 +89,8 @@
     <script src="client/renderer/PhaseDirector.js"></script>
     <script src="client/renderer/Animation.js"></script>
 
+    <script src="client/renderer/shipWindowManager.js"></script>
+
     <script src="client/renderer/sprite/webglSprite.js"></script>
     <script src="client/renderer/sprite/HexagonSprite.js"></script>
     <script src="client/renderer/sprite/ShipEWSprite.js"></script>
@@ -495,6 +497,7 @@
     
 </div>
 
+<div id="shipWindowsReact"></div>
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
 <div id="showEwButtons"></div>

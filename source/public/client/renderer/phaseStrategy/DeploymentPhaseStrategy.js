@@ -10,11 +10,11 @@ window.DeploymentPhaseStrategy = function () {
 
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
 
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
 
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);
 

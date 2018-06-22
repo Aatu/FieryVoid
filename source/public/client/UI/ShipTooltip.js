@@ -105,9 +105,8 @@ window.ShipTooltip = function () {
         var flightArmour = shipManager.systems.getFlightArmour(ship);
     
 
-        if (ship.base) {
+        if (ship.base && ship.movement[1]) {
             var direction;
-            var html;
 
             if (ship.movement[1].value === -1) {
                 direction = "port";
@@ -116,8 +115,7 @@ window.ShipTooltip = function () {
             }
 
             if (direction) {
-                html = "Rotation towards " + direction;
-                this.addEntryElement(html);
+                this.addEntryElement("Rotation towards " + direction);
             }
         }
 

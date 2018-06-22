@@ -26,12 +26,12 @@ window.MovementPhaseStrategy = function () {
         }
     };
 
-    MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
         
         doForcedMovementForActiveShip();
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
         this.selectActiveShip();
 
         this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);

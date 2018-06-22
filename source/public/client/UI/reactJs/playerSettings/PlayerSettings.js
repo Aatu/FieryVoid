@@ -29,7 +29,7 @@ class PlayerSettings extends React.Component{
 const MainButton = ContainerRoundedRightBottom.extend`
     width: 50px;
     height: 50px;
-    position: absolute;
+    position: fixed;
     right: 0;
     top: 0;
     z-index: 4;

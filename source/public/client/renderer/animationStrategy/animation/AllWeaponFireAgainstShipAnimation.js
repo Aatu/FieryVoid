@@ -74,7 +74,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         var grouped = {};
 
         incomingFire.forEach(function (fire) {
-            var key = fire.shooter.id + "-" + fire.weapon.constructor.name;
+            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
 
             if (grouped[key]) {
                 grouped[key].push(fire);
@@ -146,10 +146,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         var startTime = this.time + this.duration + time;
         var weapon = incomingFire.weapon;
-        switch (weapon.animation) {
+        var animationType = weapon.animationArray[incomingFire.firingMode] || weapon.animation;
+        var animationColor = weapon.animationColorArray[incomingFire.firingMode] || weapon.animationColor;
+
+        switch (animationType) {
             case "laser":
                 return new LaserEffect(this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startTime), this.scene, {
-                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
+                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     time: startTime,
                     damage: damage
@@ -159,7 +162,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     size: 200 * weapon.animationExplosionScale,
                     origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
+                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     damage: damage,
                     time: startTime
@@ -171,7 +174,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     size: 300 * weapon.animationExplosionScale,
                     origin: getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(incomingFire.shooter), startTime),
                     target: getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired),
-                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255),
+                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     damage: damage,
                     time: startTime

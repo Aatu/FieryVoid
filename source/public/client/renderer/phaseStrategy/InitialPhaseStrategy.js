@@ -15,11 +15,11 @@ window.InitialPhaseStrategy = function () {
         }
     };
 
-    InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene) {
+    InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
         shipManager.power.repeatLastTurnPower();
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene);
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
 
         infowindow.informPhase(5000, function () {});
         this.selectFirstOwnShipOrActiveShip();
