@@ -12,13 +12,14 @@ jQuery(function ($) {
     $("#createGameForm").on("submit", createGame.setData);
     $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
     $("#gamespacecheck").on("click", createGame.doFlightCheck);
+    $("#movementcheck").on("click", createGame.doMovementCheck);
 
     createGame.createSlotsFromArray();
 });
 
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
-
+    rules: {},
     slots: Array({ id: 1, team: 1, name: "BLUE", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }, { id: 2, team: 2, name: "RED", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 0 }),
     slotid: 2,
 
@@ -97,6 +98,16 @@ window.createGame = {
         if (checkval == "on") {
             createGame.variableFlights = 1;
         } else createGame.variableFlights = 0;
+    },
+
+    doMovementCheck: function doMovementCheck(data) {
+        var checkval = $("#movementcheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.initiativeCategories = 4;
+        } else {
+            delete createGame.rules.initiativeCategories;
+        }
     },
 
     doGameSpaceCheck: function doGameSpaceCheck(data) {
@@ -213,7 +224,7 @@ window.createGame = {
             flight = 1;
         }
 
-        var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight };
+        var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight, rules: createGame.rules };
         data = JSON.stringify(data);
         $("#createGameData").val(data);
     }

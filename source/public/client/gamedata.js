@@ -142,8 +142,24 @@ window.gamedata = {
         }
     },
 
-    getActiveShip: function getActiveShip() {
-        return gamedata.getShip(gamedata.activeship);
+    getActiveShips: function getActiveShips() {
+
+        if (Array.isArray(gamedata.activeship)){
+            return gamedata.activeship.map(function (id) {
+                return gamedata.getShip(id);
+            }).filter(function(ship) { 
+                return Boolean(ship);
+            });
+        } else {
+            return [gamedata.getShip(gamedata.activeship)].filter(function(ship) { 
+                return Boolean(ship);
+            });
+        }
+    },
+
+    getMyActiveShips: function getMyActiveShips() {
+        console.log(gamedata.activeship)
+        return gamedata.getActiveShips().filter(gamedata.isMyShip)
     },
 
     getShip: function getShip(id) {
@@ -434,12 +450,7 @@ window.gamedata = {
 
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 2) {
-            var ship = gamedata.getActiveShip();
-            if (shipManager.movement.isMovementReady(ship)) {
-                ajaxInterface.submitGamedata();
-            } else {
-                return false;
-            }
+            ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 3) {
             ajaxInterface.submitGamedata();
         } else if (gamedata.gamephase == 4) {
@@ -556,15 +567,7 @@ window.gamedata = {
             }
         }
 
-        ships.sort(function (a, b) {
-            /* replace with using correct initiative order!
-                      if (a.iniative > b.iniative){
-                          return 1;
-                      } else return -1;*/
-            if (shipManager.getIniativeOrder(a) > shipManager.getIniativeOrder(b)) {
-                return 1;
-            } else return -1;
-        });
+        ships.sort(shipManager.hasBetterInitive);
         var table = document.createElement("table");
         table.id = "iniTable";
 
@@ -603,7 +606,7 @@ window.gamedata = {
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
 
-            if (gamedata.activeship == ships[i].id) {
+            if (gamedata.getMyActiveShips().includes(ships[i])) {
                 td.className = "iniActive";
             }
 

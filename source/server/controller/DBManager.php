@@ -356,7 +356,7 @@ class DBManager
         }
     }
 
-    public function createGame($gamename, $background, $slots, $userid, $gamespace)
+    public function createGame($gamename, $background, $slots, $userid, $gamespace, $rules = '{}')
     {
         $stmt = $this->connection->prepare("
             INSERT INTO 
@@ -367,13 +367,14 @@ class DBManager
                 ?,
                 0,
                 -2,
-                -1,
+                '-1',
                 ?,
                 0,
                 'LOBBY',
                 ?,
                 ?,
                 null,
+                ?,
                 ?
             )
         ");
@@ -384,12 +385,13 @@ class DBManager
             $slotnum = count($slots);
             $gamespace = $this->DBEscape($gamespace);
             $stmt->bind_param(
-                'ssiis',
+                'ssiiss',
                 $gamename,
                 $background,
                 $slotnum,
                 $userid,
-                $gamespace
+                $gamespace,
+                $rules
             );
             $stmt->execute();
             $stmt->close();
@@ -746,9 +748,23 @@ class DBManager
     public function updateGamedata($gamedata)
     {
         try {
-
-            $sql = "UPDATE `B5CGM`.`tac_game` SET `turn` = " . $gamedata->turn . ", `phase` = " . $gamedata->phase . ", `activeship` = " . $gamedata->activeship . ", `status` = '" . $gamedata->status . "'  WHERE id = " . $gamedata->id;
-            $this->update($sql);
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                        tac_game
+                     SET
+                        turn = ?,
+                        phase = ?,
+                        activeship = ?,
+                        `status` = ?
+                     WHERE 
+                        id = ?
+                     "
+            )) {
+                $activeShip = json_encode($gamedata->activeship);
+                $stmt->bind_param('iissi', $gamedata->turn, $gamedata->phase, $activeShip, $gamedata->status, $gamedata->id);
+                $stmt->execute();
+                $stmt->close();
+            }
         } catch (Exception $e) {
             throw $e;
         }
@@ -909,6 +925,8 @@ class DBManager
             // for the games. And you do not want to do that, because
             // it takes too much time.
             // Just get the activeship and check that.
+
+            //TODO: Activeship might now be an array
             $ship = $this->getShipByIdFromDB($game->activeship);
 
             if ($ship != null) {
@@ -934,7 +952,7 @@ class DBManager
             return null;
 
         foreach ($result as $value) {
-            $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
+            $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
             $games[] = $game;
         }
 
@@ -997,7 +1015,7 @@ class DBManager
                 return null;
 
             foreach ($result as $value) {
-                $game = new TacGamedata($value->id, $value->turn, $value->phase, $value->activeship, $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace);
+                $game = new TacGamedata($value->id, $value->turn, $value->phase, json_decode($value->activeship), $playerid, $value->name, $value->status, $value->points, $value->background, $value->creator, $value->gamespace, json_decode($value->rules, true));
                 $games[] = $game;
             }
 
@@ -1629,7 +1647,7 @@ class DBManager
                 if ($dbstatus === "LOBBY")
                     return true;
 
-                if ($dbphase !== $phase || $dbturn !== $turn || $dbactiveship !== $activeship)
+                if ($dbphase !== $phase || $dbturn !== $turn || json_decode($dbactiveship) !== $activeship)
                     return true;
 
             }

@@ -83,6 +83,15 @@
                   -->
                     </div>
                 </div>
+
+                <div style="margin-top:20px;"><h3>SIMULTAENOUS MOVEMENT</h3></div>
+                <div id="simultaenousMovement" class="subpanel movementspacecontainer">
+                    <div class="slot" >
+                        <div>
+                            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTAENOUS MOVEMENT
+                        </div>
+                    </div>
+                </div>
                 
                 <div style="margin-top:20px;"><h3>TEAM 1</h3></div>
                 <div id="team1" class="subpanel slotcontainer">

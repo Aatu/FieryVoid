@@ -474,14 +474,6 @@ window.PhaseStrategy = function () {
         }
     };
 
-    PhaseStrategy.prototype.selectActiveShip = function () {
-        var ship = gamedata.getActiveShip();
-
-        if (ship && gamedata.isMyShip(ship)) {
-            this.setSelectedShip(ship);
-        }
-    };
-
     PhaseStrategy.prototype.done = function () {
         if (this.onDoneCallback) {
             this.onDoneCallback();

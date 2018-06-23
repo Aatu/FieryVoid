@@ -10,13 +10,41 @@ class MovementGamePhase implements Phase
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
-        $turn = $gameData->getActiveship()->getLastTurnMoved();
-        if ($gameData->turn <= $turn)
-            throw new Exception("The ship has already moved");
+        foreach ($gameData->getMyActiveShips() as $ship) {
+            $turn = $ship->getLastTurnMoved();
+            if ($turn >= $gameData->turn) {
+                throw new Exception("The ship has already moved");
+            }
+        }
 
-        //TODO: Validate movement
-        $dbManager->submitMovement($gameData->id, $ships[$gameData->activeship]->id, $gameData->turn, $ships[$gameData->activeship]->movement);
 
+        $activeShips = $gameData->getMyActiveShips();
+        foreach ($ships as $ship) {
+
+            $found = false;
+            foreach ($activeShips as $activeShip) {
+                if ($ship->id === $activeShip->id) {
+                    $found = true;
+                }
+            }
+
+            if (!$found) {
+                continue;
+            }
+            
+            //TODO: Validate movement
+            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
+
+        }
+
+        if ($gameData->rules->hasRule("processMovement")) {
+            return $gameData->rules->callRule("processMovement", [$gameData, $dbManager, $ships]);
+        } else {
+            return $this->setNextActiveShip($gameData, $gameData);
+        }
+    }
+
+    private function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager) {
         $next = false;
         $nextshipid = -1;
         $firstship = null;

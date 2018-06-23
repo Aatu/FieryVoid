@@ -132,6 +132,8 @@ class Manager{
     
     public static function createGame($userid, $data){
         $data = json_decode($data, true);
+
+        var_export($data);
         
         $gamename = $data["gamename"];
         $background = $data["background"];
@@ -139,12 +141,8 @@ class Manager{
         $slots = array();
         $pointsA = $data["slots"][0]["points"];
         $poinstB = $data["slots"][1]["points"];
+        $rules = new GameRules($data["rules"]);
 
-        debug::log($pointsA);
-        debug::log($poinstB);
-
-
-        
         foreach ($data["slots"] as $slot){
             $slots[] = new PlayerSlotFromJSON($slot);
         }
@@ -152,7 +150,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace);
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $rules->toJSON());
             //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);
@@ -251,7 +249,7 @@ class Manager{
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
     
-	    if (!is_numeric($gameid) || (!is_numeric($userid) &&  $userid !== null) || ($turn !== null && !is_numeric($turn)) || !is_numeric($phase) || !is_numeric($activeship) )
+	    if (!is_numeric($gameid) || (!is_numeric($userid) &&  $userid !== null) || ($turn !== null && !is_numeric($turn)) || !is_numeric($phase) )
             return null;
         
         $gamedata = null;
@@ -521,14 +519,19 @@ class Manager{
         }
     }
 
-    private static function generateIniative($gamedata){
-        foreach ($gamedata->ships as $key=>$ship){
+    private static function generateIniative(TacGamedata $gamedata){
 
-            $mod =  $ship->getCommonIniModifiers( $gamedata );
-            $iniBonus =  $ship->getInitiativebonus($gamedata);
+        if ($gamedata->rules->hasRule("generateIniative")) {
+            $gamedata->rules->callRule("generateIniative", $gamedata);
+        } else {
+            foreach ($gamedata->ships as $key=>$ship){
 
-            $ship->iniative = Dice::d(100) + $iniBonus + $mod;
+                $mod =  $ship->getCommonIniModifiers( $gamedata );
+                $iniBonus =  $ship->getInitiativebonus($gamedata);
 
+                $ship->iniative = Dice::d(100) + $iniBonus + $mod;
+
+            }
         }
         self::$dbManager->submitIniative($gamedata->id, $gamedata->turn, $gamedata->ships);
     }

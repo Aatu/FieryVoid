@@ -6,7 +6,11 @@ class InitialOrdersGamePhase implements Phase
     public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
         $gameData->setPhase(2);
-        $gameData->setActiveship($gameData->getFirstShip()->id);
+        if ($gameData->rules->hasRule("getNewActiveShip")) {
+            $gameData->setActiveship($gameData->rules->callRule("getNewActiveShip", [$gameData, null]));
+        } else {
+            $gameData->setActiveship($gameData->getFirstShip()->id);
+        }
         $dbManager->updateGamedata($gameData);
     }
 

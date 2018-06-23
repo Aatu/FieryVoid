@@ -5,7 +5,6 @@ class TacGamedata{
     public static $currentTurn;
     public static $currentPhase;
     public static $currentGameID;
-    public static $currentActiveship;
     public static $safeGameID = 4086; //gameID that is safe for adding new features
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace;
@@ -17,22 +16,23 @@ class TacGamedata{
     public $forPlayer;
     public $ballistics = array();
     public $waitingForThisPlayer = false;
+    public $rules;
     
     
     
-    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $gamespace = null){
+    function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $gamespace = null, $rules = null){
         $this->setId($id);
         $this->setTurn($turn);
         $this->setPhase($phase);
         $this->setActiveship($activeship);
         $this->setForPlayer($forPlayer);
-        $this->activeship = (int)$activeship;
         $this->name = $name;
         $this->status = $status;
         $this->points = (int)$points;
         $this->background = $background;
         $this->creator = $creator;
         $this->gamespace = $gamespace;
+        $this->rules = new GameRules($rules);
     }
    
     public function setPhase($phase)
@@ -53,7 +53,6 @@ class TacGamedata{
     
     public function setActiveship($activeship)
     {
-        self::$currentActiveship = $activeship;
         $this->activeship = $activeship;
     }
     
@@ -352,14 +351,32 @@ class TacGamedata{
         
     }
     
-    public function getActiveship(){
+    public function getActiveships(){
+
+        if (is_array($this->activeship)){
+            $ships = [];
+
+
+            foreach ($this->ships as $ship){
+                if (in_array($ship->id, $this->activeship)){
+                    array_push($ships, $ship);
+                }
+            }
+
+            if (count($ships) === 0) {
+                return [];
+            }
+
+            return $ships;
+        }
+
         foreach ($this->ships as $ship){
             if ($ship->id == $this->activeship){
-                return $ship;
+                return [$ship];
             }
         }
         
-        return null;
+        return [];
     }
     
     private $shipsById = array();
@@ -470,6 +487,9 @@ class TacGamedata{
             }
         }
         
+        if ($this->phase == 2) {
+            $this->hideActiveShipMovement();
+        }
        
         foreach ($this->ships as $ship){
             if ($ship instanceof FighterFlight) {
@@ -510,6 +530,24 @@ class TacGamedata{
             }
         }
     }
+
+    private function hideActiveShipMovement() {
+        $activeShips = $this->getOpponentActiveShips();
+
+        foreach ($activeShips as $ship) {
+            $toDelete = [];
+
+            foreach ($ship->movement as $i => $move) {
+                if ($move->turn == $this->turn && $move->type !== "deploy" && $move->type !== "start") {
+                    $toDelete[] = $i;
+                }
+            }
+
+            foreach ($toDelete as $i) {
+                unset($ship->movement[$i]);
+            }
+        }
+    }
     
     private function calculateTurndelays(){
     
@@ -536,13 +574,15 @@ class TacGamedata{
         
         }else if ($this->phase == 2){
             
-            $ship = $this->getActiveship();
-                            
-            if ($ship != null && $ship->userid == $this->forPlayer){
-                $this->waiting = false;
-            }else{
-                $this->waiting = true;
+            $this->waiting = true;
+
+            foreach ($this->getMyActiveShips() as $ship) {
+                $turn = $ship->getLastTurnMoved();
+                if ($turn < $this->turn) {
+                    $this->waiting = false;
+                }
             }
+    
         }else{
             $this->waiting = false;
         }
@@ -553,13 +593,11 @@ class TacGamedata{
     private function getIsWaitingForThisPlayer(){
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
 
-        
-        $activeship = $this->getShipById($this->activeship);
-        
-        if ( $activeship != null)
-        {
-            if ($activeship->userid == $this->forPlayer)
+        foreach ($this->getMyActiveShips() as $ship) {
+            $turn = $ship->getLastTurnMoved();
+            if ($turn < $this->turn) {
                 return true;
+            }
         }
         
         foreach ($slots as $slot){
@@ -579,6 +617,36 @@ class TacGamedata{
 
         return false;
     }
+
+    public function getMyActiveShips() {
+        $forPlayer = $this->forPlayer;
+        return array_filter($this->getActiveships(), function($ship) use ($forPlayer) {
+            return $ship->userid == $forPlayer;
+        });
+    }
+
+    public function getOpponentActiveShips() {
+        $forPlayer = $this->forPlayer;
+        return array_filter($this->getActiveships(), function($ship) use ($forPlayer) {
+            return $ship->userid != $forPlayer;
+        });
+    }
+
+    /*
+    private function isActiveShipMine() {
+        $ships = $this->getActiveships();
+
+        if (count($ships) === 0) {
+            return false;
+        }
+
+        foreach ($ships as $ship) {
+            if ($ship->userid == $this->forPlayer) {
+                return true;
+            }
+        }
+    }
+    */
 
 	/*check whether indicated ship belongs to this game - as it may happen that it does not!*/
 	public function shipBelongs($shipToCheck){
