@@ -47,6 +47,10 @@ window.shipManager.criticals = {
             }
         }
         return amount;
+    },
+
+    isDisengagedFighter: function (fighter) {
+        return Boolean(shipManager.criticals.hasCritical(fighter, "DisengagedFighter"));
     }
 
 };

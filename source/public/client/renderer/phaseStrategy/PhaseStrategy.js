@@ -33,6 +33,10 @@ window.PhaseStrategy = function () {
         this.uiManager = new window.UIManager($("body")[0]);
     }
 
+    PhaseStrategy.prototype.onOpenShipWindowFor = function(payload) {
+        this.shipWindowManager.open(payload.ship);
+    }
+
     PhaseStrategy.prototype.onCloseShipWindow = function(payload) {
         this.shipWindowManager.close(payload.ship);
     }
@@ -50,6 +54,10 @@ window.PhaseStrategy = function () {
             this.uiManager.hideSystemInfo();
             this.systemInfoState = null;
         }
+
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            icon.hideWeaponArcs();
+        });
 
         return true;
     }
@@ -133,6 +141,7 @@ window.PhaseStrategy = function () {
 
         this.uiManager.hideWeaponList();
         this.hideSystemInfo(true);
+        this.shipWindowManager.closeAll();
         return this;
     };
 
@@ -193,7 +202,6 @@ window.PhaseStrategy = function () {
             this.setSelectedShip(ship);
         }
         this.shipWindowManager.open(ship);
-        //shipWindowManager.open(ship);
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {
@@ -482,7 +490,7 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.onSystemMouseOver = function (payload) {
         var ship = payload.ship;
-        var system = payload.weapon;
+        var system = payload.system;
         var element = payload.element;
         //systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
 
@@ -546,6 +554,7 @@ window.PhaseStrategy = function () {
 
         this.shipIconContainer.getByShip(ship).consumeEW(ship);
         this.ewIconContainer.updateForShip(ship);
+        this.shipWindowManager.update();
         window.shipWindowManager.addEW(ship)
     };
 

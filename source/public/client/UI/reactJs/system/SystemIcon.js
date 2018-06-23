@@ -6,8 +6,8 @@ const HealthBar = styled.div`
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 4px;
-    border-top: 1px solid #496791;
+    height: 7px;
+    border: 2px solid black;
     box-sizing: border-box;
     
     background-color: black;
@@ -19,7 +19,7 @@ const HealthBar = styled.div`
         height: 100%;
         left: 0;
         bottom: 0;
-        background-color: ${props => props.criticals ? '#ed6738' : props.scs ? '#2f5123' : '#3daa14'};
+        background-color: ${props => props.criticals ? '#ed6738' : '#427231'};
     }
 `;
 
@@ -144,18 +144,23 @@ class SystemIcon extends React.Component{
     }
 
     onSystemMouseOver(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
         let {system, ship} = this.props;
 		system = shipManager.systems.initializeSystem(system);
 
         webglScene.customEvent('SystemMouseOver', {
             ship: ship,
-            weapon: system,
+            system: system,
             element: event.target
         });
         
     }
 
-    onSystemMouseOut() {
+    onSystemMouseOut(event) {
+        event.stopPropagation();
+        event.preventDefault();
         webglScene.customEvent('SystemMouseOut');
     }
 
@@ -172,12 +177,11 @@ class SystemIcon extends React.Component{
     }
 
     render(){
-        let {system, ship, scs} = this.props;
+        let {system, ship, scs, fighter, destroyed} = this.props;
 
         system = shipManager.systems.initializeSystem(system);
-        const destroyed = getDestroyed(ship, system);
 
-        if (getDestroyed(ship, system)){
+        if (getDestroyed(ship, system) || destroyed){
             return (
                 <System background={getBackgroundImage(system)} destroyed><HealthBar health="0"/></System>
             )
@@ -197,7 +201,7 @@ class SystemIcon extends React.Component{
                 firing={isFiring(ship, system)}
             >
             <SystemText>{getText(ship, system)}</SystemText>
-            <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>
+            {!fighter && <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>}
             </System>
         )
     }

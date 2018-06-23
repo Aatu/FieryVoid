@@ -78,7 +78,7 @@ window.ShipTooltipMenu = function () {
     }
 
     function openSCS() {
-        shipWindowManager.open(this.targetedShip);
+        webglScene.customEvent("OpenShipWindowFor", {ship: this.targetedShip});
     }
 
     return ShipTooltipMenu;

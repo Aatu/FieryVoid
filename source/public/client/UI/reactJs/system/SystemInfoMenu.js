@@ -17,6 +17,7 @@ const SystemInfoTooltip = Tooltip.extend`
     text-align: left;
     opacity:0.8;
     border: 1px solid #496791;
+    padding-bottom: 3px;
 `;
 
 const Entry = TooltipEntry.extend`

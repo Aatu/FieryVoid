@@ -340,7 +340,7 @@ shipManager.systems = {
         var aft = ship.systems[1].armour[1];
         var side = ship.systems[1].armour[2];
 
-        var armour = "Armor (F/S/A): " + front + " / " + side + " / " + aft;
+        var armour =  front + " / " + side + " / " + aft;
 
         return armour;
     },

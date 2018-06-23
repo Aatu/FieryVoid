@@ -3,26 +3,44 @@ import styled from "styled-components"
 import ReactDom from "react-dom";
 
 import { Clickable } from "../styled";
-import ShipSection from "./ShipSection"
+import ShipSection from "./ShipSection";
+import ShipWindowEw from "./ShipWindowEw";
+import FighterList from "./FighterList";
 
 const ShipWindowContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     position: absolute;
-    left: 50px;
-    top: 50px;
-    width: 400px;
+    ${  props => {
+        if (props.team === 1) {
+            return "left: 50px; \n top: 50px;"
+        } else {
+            return "right: 50px; \n top: 50px;"
+        }
+    }}
+    max-width: 400px;
     height: auto;
     border: 1px solid #496791;
     background-color: #0a3340;
-    opacity: 0.85;
+    opacity: 0.95;
     z-index: 10001;
     overflow: hidden;
     box-shadow: 5px 5px 10px black;
     font-size: 10px;
     color: white;
     font-family: arial;
-    padding-bottom: 4px;
+
+    @media (max-width: 1024px) {
+        ${  props => {
+            if (props.team === 1) {
+                return "left: 0; \n top: 0; \n right: unset;"
+            } else {
+                return "right: 0; \n top: 0; \n left: unset;"
+            }
+        }}
+        max-height: 100vh;
+        overflow-y: scroll;
+    }
 `;
 
 const Header = styled.div`
@@ -63,21 +81,42 @@ const Column = styled.div`
     max-height: calc(33.3333333% - 11px);
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: ${props => props.top ? 'space-between' : 'center'};
     overflow: hidden;
 `;
 
 const ShipImage = styled.div`
-    width: 30%;
-    height: 100%;
+    width: 114px;
+    height: 114px;
     background-color: black;
     background-image: ${ props => `url(${props.img})`};
-    background-size: cover;
+    background-size: 85%;
+    background-repeat: no-repeat;
     background-position: center;
+    border: 1px solid #496791;
+    box-sizing: border-box;
+    margin: 2px;
+    transform: rotate(-90deg);
 `;
 
 
 class ShipWindow extends React.Component{
+
+    onShipMouseOver(event) {
+        let {ship} = this.props;
+
+        webglScene.customEvent('SystemMouseOver', {
+            ship: ship,
+            system: ship,
+            element: event.target
+        });
+        
+    }
+
+    onShipMouseOut() {
+        webglScene.customEvent('SystemMouseOut');
+    }
+
 
     componentDidMount() {
         const element = jQuery(ReactDom.findDOMNode(this));
@@ -91,14 +130,23 @@ class ShipWindow extends React.Component{
     render() {
         const {ship} = this.props;
 
+        if (ship.flight) {
+            return (
+                <ShipWindowContainer onClick={shipWindowClicked} onContextMenu={e => {e.preventDefault();e.stopPropagation();}} team={ship.team}>
+                    <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
+                    <FighterList ship={ship}/>
+                </ShipWindowContainer>
+            )
+        }
+
         const systemsByLocation = sortIntoLocations(ship);
 
-        return (<ShipWindowContainer onClick={shipWindowClicked} onContextMenu={e => {e.preventDefault();e.stopPropagation();}}>
+        return (<ShipWindowContainer onClick={shipWindowClicked} onContextMenu={e => {e.preventDefault();e.stopPropagation();}} team={ship.team}>
             <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
-            <Column>
-                <ShipImage img={ship.imagePath}/>
+            <Column top>
+                <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)}/>
                 {systemsByLocation[1].length > 0 && <ShipSection location={1} ship={ship} systems={systemsByLocation[1]} />}
-                <ShipImage img={ship.imagePath}/>
+                <ShipWindowEw ship={ship}/>
             </Column>
                 
             <Column>

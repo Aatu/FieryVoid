@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components"
 import {Tooltip, TooltipHeader, TooltipEntry} from '../common'
+import ShipInfo from "./ShipInfo";
 
 const InfoHeader = TooltipHeader.extend`
     font-size: 12px;
@@ -12,26 +13,39 @@ const SystemInfoTooltip = Tooltip.extend`
     ${props => Object.keys(props.position).reduce((style, key) => {
         return style + "\n" + key + ':' + props.position[key] + 'px;';
     }, '')}
-    width: 200px;
+    width: ${props => props.ship ? '300px' : '200px'};
     text-align: left;
     opacity:0.8;
 `;
 
-const Entry = TooltipEntry.extend`
+export const Entry = TooltipEntry.extend`
     text-align: left;
     color: #5e85bc;
     font-family: arial;
     font-size: 11px;
 `;
 
-const Header = styled.span`
+export const Header = styled.span`
     color: white;
+`;
+
+const ShipNameHeader = styled.span`
+    color: #C6E2FF;
 `;
 
 class SystemInfo extends React.Component {
 
     render() {
         const {ship, selectedShip, system, boundingBox} = this.props;
+
+        if (system instanceof Ship) {
+            return (
+                <SystemInfoTooltip ship position={getPosition(boundingBox)}>
+                    <InfoHeader><ShipNameHeader>{ship.name}</ShipNameHeader> - {ship.shipClass}</InfoHeader>
+                    <ShipInfo ship={ship}/>
+                </SystemInfoTooltip>
+            );
+        }
 
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>

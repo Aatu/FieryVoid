@@ -137,7 +137,7 @@ window.ShipTooltip = function () {
         this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+') Turn delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
         this.addEntryElement('Acceleration cost: ' + ship.accelcost);
         this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
-        this.addEntryElement(flightArmour, ship.flight === true);
+        this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
 
         if (this.selectedShip) {
             if (! gamedata.isMyShip(ship)) {

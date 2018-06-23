@@ -5,59 +5,67 @@ import SystemIcon from "../system/SystemIcon"
 const ShipSectionContainer = styled.div`
     display: flex;
     flex-wrap: wrap-reverse;
-    width: ${props => props.location === 1 || props.location === 0 ||  props.location === 2 ? '40%' : '30%' };
-    height: 100%;
+    width: ${props => {
+        switch(props.location) {
+            case 1:
+            case 0:
+            case 2:
+                return '40%';
+            default:
+                return '30%'
+        }
+    }};
     align-items: end;
     justify-content: space-around;
     overflow: hidden;
     box-sizing: border-box;
+    margin: 2px;
 
-    border-top: ${props => {
-        if (props.location === 0) {
-            return '2px dotted #7e9dc7';
-        } else if (props.location === 3 || props.location === 4 || props.location === 31 || props.location === 41) {
-            return '2px dotted #7e9dc7';
-        } else {
-            return 'none';
-        }
-    }};
-
-    border-bottom: ${props => {
-        if (props.location === 0) {
-            return '2px dotted #7e9dc7';
-        } else if (props.location === 3 || props.location === 4|| props.location === 31 || props.location === 41) {
-            return '2px dotted #7e9dc7';
-        } else {
-            return 'none';
-        }
-    }};
-
-    border-left: ${props => {
-        if (props.location === 0) {
-            return '2px dotted #7e9dc7';
-        } else if (props.location === 1 || props.location === 2 || props.location === 32) {
-            return '2px dotted #7e9dc7';
-        } else {
-            return 'none';
-        }
-    }};
-
-    border-right: ${props => {
-        if (props.location === 0) {
-            return '2px dotted #7e9dc7';
-        } else if (props.location === 1 || props.location === 2 || props.location === 42 || props.location === 32) {
-            return '2px dotted #7e9dc7';
-        } else {
-            return 'none';
+    border: ${props => {
+        switch(props.location) {
+            case 0:
+                return '2px solid #6089c1';
+            default:
+                return '2px dotted #496791';
         }
     }};
 `
 
+const StructureText = styled.div`
+    z-index: 1;
+`;
+
 const StructureContainer = styled.div`
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
-    width: 100%;
-    height: 20px;
+    width: calc(100% - 4px);
+    height: 16px;
+    box-sizing: border-box;
     background-color: black;
+    color: ${props => props.health === 0 ? 'transparent' : 'white'};
+    font-family: arial;
+    font-size: 11px;
+    text-shadow: black 0 0 6px, black 0 0 6px;
+    border: 1px solid #496791;
+    margin: 2px;
+    filter: ${props => props.health === 0 ? 'blur(1px)' : 'none'};
+
+    :before {
+        box-sizing: border-box;
+        content: "";
+        position:absolute;
+        width:  ${props => `${props.health}%`};
+        height: 100%;
+        left: 0;
+        bottom: 0;
+        z-index: 0;
+        background-color: ${props => props.criticals ? '#ed6738' : '#427231'};
+        border: 1px solid black;
+    }
+
 `;
 
 class ShipSection extends React.Component {
@@ -65,21 +73,123 @@ class ShipSection extends React.Component {
     render() {
         const {ship, systems, location} = this.props;
 
+        const structure = getStructure(systems);
+
         return (
             <ShipSectionContainer location={location}>
-                {orderSystems(systems).map(system => (<SystemIcon scs key={`system-scs-${ship.id}-${system.id}`} system={system} ship={ship}/>))}
+                {orderSystems(systems, location).map(system => (<SystemIcon scs key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship}/>))}
 
-                <StructureContainer></StructureContainer>
+                {structure && <StructureContainer health={getStructureLeft(ship, structure)} criticals={hasCriticals(structure)}>
+                    <StructureText>{ structure.maxhealth - damageManager.getDamage(ship, structure)} / {structure.maxhealth} A {shipManager.systems.getArmour(ship, structure)}</StructureText>
+                </StructureContainer>}
             </ShipSectionContainer>
         )
     }
 }
 
+const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
+
+const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
+
 const getStructure = systems => systems.find(system => system instanceof Structure)
 
 const filterStructure = systems => systems.filter(system => !(system instanceof Structure))
 
-const orderSystems = (systems) => {
+const orderSystems = (systems, location) => {
+    systems = filterStructure(systems);
+
+    if ([4, 41, 41].includes(location)) {
+        return orderSystemsThreeWide(systems);
+    } else if ([3, 31, 32].includes(location)) {
+        return reverseRowsOfThree(orderSystemsThreeWide(systems));
+    } else if ([1, 2, 0].includes(location)) {
+        return orderSystemsFourWide(systems);
+    } else {
+        return orderWide(systems)
+    }
+}
+
+const reverseRowsOfThree = (systems) => {
+    let list = [];
+
+    systems.forEach((system, i) => {
+        const j = i % 3;
+        if (j === 0) {
+            list[i+2] = system;
+        } else if (j === 1) {
+            list[i] = system;
+        } else {
+            list[i-2] = system;
+        }
+    })
+
+    return list;
+}
+
+const orderWide = (systems) => {
+    systems = filterStructure(systems);
+
+    let list = [];
+
+    if (systems.length === 3) {
+        return orderSystemsThreeWide(systems);
+    } else if (systems.length === 4) {
+        return orderSystemsFourWide(systems);
+    } else {
+        return systems;
+    }
+}
+
+const orderSystemsFourWide = (systems) => {
+    systems = filterStructure(systems);
+
+    let list = [];
+
+    console.log("am I even trying")
+
+    while(true) {
+
+        const {picked, remaining} = pick(systems, 4);
+
+        if(picked.length === 0) {
+            break;
+        }
+
+        systems = remaining;
+
+        list = list.concat(picked);
+    }
+
+    while(true) {
+
+        const {picked, remaining} = pick(systems, 2);
+
+        if(picked.length === 0) {
+            break;
+        }
+
+        console.log("picked 2 out of 4")
+        
+        systems = remaining;
+
+        const secondPick = pick(systems, 2);
+
+        if (secondPick.picked.length > 0) {
+            console.log("picked 4 out of 4")
+            systems = secondPick.remaining;
+            list = list.concat([picked[0], secondPick.picked[0], secondPick.picked[1], picked[1]])
+        } else {
+            list = list.concat([picked[0], systems.pop(), systems.pop(), picked[1]])
+            list = list.filter(system => system)
+        }
+    }
+
+    list = list.concat(systems);
+
+    return list;
+}
+
+const orderSystemsThreeWide = (systems) => {
     systems = filterStructure(systems);
 
     let list = [];

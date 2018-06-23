@@ -158,7 +158,7 @@ window.weaponManager = {
         var weapon = shipManager.systems.initializeSystem(weaponManager.currentSystem);
         webglScene.customEvent('SystemMouseOver', {
             ship: weaponManager.currentShip,
-            weapon: weapon,
+            system: weapon,
             element: weaponManager.mouseoverSystem
         });
     },

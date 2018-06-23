@@ -11,6 +11,11 @@ const WeaponListContainer = styled.div`
     width: calc(100% - 810px);
     bottom: 0;
     flex-wrap: wrap-reverse;
+
+    @media (max-width: 1024px) {
+        left: 0;
+        width: calc(100% - 25px);
+    }
 `;
 
 class WeaponList extends React.Component{
@@ -45,7 +50,7 @@ class WeaponList extends React.Component{
         return (
             <WeaponListContainer>
                 {
-                    weapons.map((weapon, index) => (<SystemIcon key={`system-${index}`} system={weapon} ship={ship}/>))
+                    weapons.map((weapon, index) => (<SystemIcon fighter={ship.flight} key={`system-${index}`} system={weapon} ship={ship}/>))
                 }
             </WeaponListContainer>
         )
