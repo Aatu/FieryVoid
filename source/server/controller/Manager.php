@@ -141,7 +141,7 @@ class Manager{
         $slots = array();
         $pointsA = $data["slots"][0]["points"];
         $poinstB = $data["slots"][1]["points"];
-        $rules = new GameRules($data["rules"]);
+        $rules = new GameRules(isset($data["rules"]) ? $data["rules"] : []) ;
 
         foreach ($data["slots"] as $slot){
             $slots[] = new PlayerSlotFromJSON($slot);
