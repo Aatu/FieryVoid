@@ -17,6 +17,7 @@ class BaseShip{
     public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
     public $currentturndelay = 0;
     public $iniative = "N/A";
+    public $unmodifiedIniative = null;
     public $iniativebonus = 0;
     public $iniativeadded = 0; //Initiative bonus difference - compared to base bonus! Just for display to player.
     public $gravitic = false;
@@ -1186,6 +1187,14 @@ class BaseShip{
             
             if ($a->iniative < $b->iniative)
                 return false;
+
+            if ($a->unmodifiedIniative != null && $b->unmodifiedIniative != null) {
+                if ($a->unmodifiedIniative > $b->unmodifiedIniative)
+                    return true;
+            
+                if ($a->unmodifiedIniative < $b->unmodifiedIniative)
+                    return false;
+            }
                 
             if ($a->iniative == $b->iniative){
                 if ($a->iniativebonus > $b->iniativebonus)

@@ -40,7 +40,7 @@ class MovementGamePhase implements Phase
         if ($gameData->rules->hasRule("processMovement")) {
             return $gameData->rules->callRule("processMovement", [$gameData, $dbManager, $ships]);
         } else {
-            return $this->setNextActiveShip($gameData, $gameData);
+            return $this->setNextActiveShip($gameData, $dbManager);
         }
     }
 

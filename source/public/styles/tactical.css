@@ -775,6 +775,12 @@ body {
     box-shadow: 0px 0px 15px #09F;
 }
 
+.iniActiveEnemy {
+    border: 1px solid #ce9184 !important;
+    background-color: #823425 !important;
+    box-shadow: 0px 0px 15px #ff3700;
+}
+
 .redIni {
     color: red;
 }

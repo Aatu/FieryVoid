@@ -158,7 +158,6 @@ window.gamedata = {
     },
 
     getMyActiveShips: function getMyActiveShips() {
-        console.log(gamedata.activeship)
         return gamedata.getActiveShips().filter(gamedata.isMyShip)
     },
 
@@ -559,15 +558,13 @@ window.gamedata = {
         ini_gui.appendChild(topicDiv);
 
         var allShips = gamedata.ships;
-        var ships = [];
+        var ships = gamedata.ships.filter(function (ship){
+            return !shipManager.isDestroyed(ship);
+        })
 
-        for (var i = 0; i < allShips.length; i++) {
-            if (!shipManager.isDestroyed(allShips[i])) {
-                ships.push(allShips[i]);
-            }
-        }
+       
 
-        ships.sort(shipManager.hasBetterInitive);
+        //ships.sort(shipManager.hasBetterInitive);
         var table = document.createElement("table");
         table.id = "iniTable";
 
@@ -581,13 +578,15 @@ window.gamedata = {
                 window.webglScene.customEvent('ScrollToShip', {shipId: this.id});
             })
 
+            var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
+
             var td = document.createElement("td");
             td.position = "relative";
             td.style.width = "10%";
             td.id = "iniTd";
             td.style.textAlign = "center";
             td.style.fontSize = "18px";
-            td.innerHTML = i + 1;
+            td.innerHTML = categoryIndex !== null ? categoryIndex : i + 1;
 
             if (gamedata.isMyShip(ships[i])) {
                 td.style.color = "green";
@@ -606,8 +605,8 @@ window.gamedata = {
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
 
-            if (gamedata.getMyActiveShips().includes(ships[i])) {
-                td.className = "iniActive";
+            if (gamedata.getActiveShips().includes(ships[i])) {
+                td.className = gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy";
             }
 
             td.appendChild(span);
@@ -706,6 +705,7 @@ window.gamedata = {
         gamedata.activeship = serverdata.activeship;
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
+        gamedata.rules = serverdata.rules;
 
         if (!gamedata.replay) {
             gamedata.thisplayer = serverdata.forPlayer;

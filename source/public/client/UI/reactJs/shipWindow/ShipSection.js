@@ -145,7 +145,6 @@ const orderSystemsFourWide = (systems) => {
 
     let list = [];
 
-    console.log("am I even trying")
 
     while(true) {
 
@@ -168,14 +167,12 @@ const orderSystemsFourWide = (systems) => {
             break;
         }
 
-        console.log("picked 2 out of 4")
         
         systems = remaining;
 
         const secondPick = pick(systems, 2);
 
         if (secondPick.picked.length > 0) {
-            console.log("picked 4 out of 4")
             systems = secondPick.remaining;
             list = list.concat([picked[0], secondPick.picked[0], secondPick.picked[1], picked[1]])
         } else {

@@ -1,6 +1,6 @@
 <?php
 
-class GameRules {
+class GameRules implements JsonSerializable{
 
     private $rules = [];
 
@@ -21,15 +21,14 @@ class GameRules {
         return null;
     }
 
-    public function toJSON() {
+    public function jsonSerialize() {
         $list = [];
-        $json = '{';
 
-            foreach ($this->rules as $rule) {
-                array_push($list, $rule->toJSON());
-            }
-
-        return '{' . implode(',', $list) . '}';
+        foreach ($this->rules as $rule) {
+            $list[$rule->getRuleName()] = $rule;
+        }
+        
+        return $list;
     }
 
     public function hasRule($name) {

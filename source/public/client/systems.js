@@ -19,6 +19,13 @@ shipManager.systems = {
         return armour;
     },
 
+    getFighterForSystem: function getFighterForSystem(ship, system) {
+        
+        return ship.systems.find(function(fighter) {
+            return fighter && fighter.systems.includes(system);
+        })
+    },
+
     isDestroyed: function isDestroyed(ship, system) {
         if (system.parentId > 0) {
             var parentSystem = system;
@@ -28,6 +35,14 @@ shipManager.systems = {
             }
 
             return parentSystem.destroyed;
+        }
+
+
+        if (ship.flight && !(system instanceof Fighter)) {
+            var fighter = shipManager.systems.getFighterForSystem(ship, system);
+            if (fighter.destroyed) {
+                return true;
+            }
         }
 
         return system.destroyed;

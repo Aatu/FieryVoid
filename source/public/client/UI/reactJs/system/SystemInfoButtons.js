@@ -73,14 +73,12 @@ class SystemInfoButtons extends React.Component {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.clickPlus(ship, system);
-        webglScene.customEvent('CloseSystemInfo');
     }
 
     deboost(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
         shipManager.power.clickMinus(ship, system);
-        webglScene.customEvent('CloseSystemInfo');
 	}
 
 	addShots(e) {
@@ -91,7 +89,6 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.changeShots(ship, system, 1);
-        webglScene.customEvent('CloseSystemInfo');
     }
 
     reduceShots(e) {
@@ -102,7 +99,6 @@ class SystemInfoButtons extends React.Component {
 		}
 		
         weaponManager.changeShots(ship, system, -1);
-        webglScene.customEvent('CloseSystemInfo');
 	}
 	
 	removeFireOrder(e) {

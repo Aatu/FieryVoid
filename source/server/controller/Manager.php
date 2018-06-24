@@ -150,7 +150,7 @@ class Manager{
         try {
             self::initDBManager();
             self::$dbManager->startTransaction();
-            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, $rules->toJSON());
+            $gameid = self::$dbManager->createGame($gamename, $background, $slots, $userid, $gamespace, json_encode($rules));
             //SystemData::initSystemData(0, $gameid);
             self::takeSlot($userid, $gameid, 1);
             self::$dbManager->endTransaction(false);

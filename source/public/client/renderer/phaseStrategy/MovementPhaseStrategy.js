@@ -180,7 +180,7 @@ window.MovementPhaseStrategy = function () {
             icon.showSideSprite(false);
         }, this);
 
-        gamedata.getMyActiveShips().filter(function(ship) {
+        gamedata.getActiveShips().filter(function(ship) {
             return !shipManager.movement.isMovementReady(ship);
         }).forEach(function (ship) {
             var icon = this.shipIconContainer.getByShip(ship);

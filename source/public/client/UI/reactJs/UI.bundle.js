@@ -29376,8 +29376,6 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
 
     var list = [];
 
-    console.log("am I even trying");
-
     while (true) {
         var _pick = pick(systems, 4),
             picked = _pick.picked,
@@ -29401,14 +29399,11 @@ var orderSystemsFourWide = function orderSystemsFourWide(systems) {
             break;
         }
 
-        console.log("picked 2 out of 4");
-
         systems = _remaining;
 
         var secondPick = pick(systems, 2);
 
         if (secondPick.picked.length > 0) {
-            console.log("picked 4 out of 4");
             systems = secondPick.remaining;
             list = list.concat([_picked[0], secondPick.picked[0], secondPick.picked[1], _picked[1]]);
         } else {
@@ -29855,7 +29850,7 @@ var getEW = function getEW(ship) {
     }
 
     list = list.concat(ship.EW.filter(function (ewEntry) {
-        return ewEntry.turn !== gamedata.turn;
+        return ewEntry.turn === gamedata.turn;
     }).filter(function (ewEntry) {
         return ewEntry.type === "OEW" || ewEntry.type === "DIST" || ewEntry.type === "SOEW" || ewEntry.type === "SDEW";
     }).map(function (ewEntry) {
@@ -31135,7 +31130,6 @@ var SystemInfoButtons = function (_React$Component) {
                 system = _props7.system;
 
             shipManager.power.clickPlus(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
         }
     }, {
         key: "deboost",
@@ -31146,7 +31140,6 @@ var SystemInfoButtons = function (_React$Component) {
                 system = _props8.system;
 
             shipManager.power.clickMinus(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
         }
     }, {
         key: "addShots",
@@ -31161,7 +31154,6 @@ var SystemInfoButtons = function (_React$Component) {
             }
 
             weaponManager.changeShots(ship, system, 1);
-            webglScene.customEvent('CloseSystemInfo');
         }
     }, {
         key: "reduceShots",
@@ -31176,7 +31168,6 @@ var SystemInfoButtons = function (_React$Component) {
             }
 
             weaponManager.changeShots(ship, system, -1);
-            webglScene.customEvent('CloseSystemInfo');
         }
     }, {
         key: "removeFireOrder",

@@ -74,7 +74,7 @@ const getEW = ship => {
     }
 
     list = list.concat(ship.EW
-        .filter(ewEntry => ewEntry.turn !== gamedata.turn)
+        .filter(ewEntry =>  ewEntry.turn === gamedata.turn)
         .filter(ewEntry => ewEntry.type === "OEW" || ewEntry.type === "DIST" || ewEntry.type === "SOEW" || ewEntry.type === "SDEW")
         .map(ewEntry => (<Entry key={`${ewEntry.type}-scs-${ship.id}-${ewEntry.targetid}`}><EntryHeader>{ewEntry.type}:</EntryHeader><ShipLink>{gamedata.getShip(ewEntry.targetid).name}</ShipLink>{getAmount(ewEntry, ship)}</Entry>)))
 

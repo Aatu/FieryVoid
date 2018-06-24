@@ -104,7 +104,7 @@ window.createGame = {
         var checkval = $("#movementcheck:checked").val();
 
         if (checkval == "on") {
-            createGame.rules.initiativeCategories = 4;
+            createGame.rules.initiativeCategories = 6;
         } else {
             delete createGame.rules.initiativeCategories;
         }

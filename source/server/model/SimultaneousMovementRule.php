@@ -1,6 +1,6 @@
 <?php
 
-class SimultaneousMovementRule {
+class SimultaneousMovementRule implements JsonSerializable {
 
     private $categories = [];
     private $numberOfCategories = 0;
@@ -10,8 +10,12 @@ class SimultaneousMovementRule {
         $this->categories = $this->generateGategories($numberOfCategories);
     }
 
-    public function toJSON() {
-        return '"initiativeCategories": ' . $this->numberOfCategories;
+    public function getRuleName() {
+        return 'initiativeCategories';
+    }
+
+    public function jsonSerialize() {
+        return $this->numberOfCategories;
     }
 
     public function generateIniative($gameData) {
@@ -38,6 +42,7 @@ class SimultaneousMovementRule {
 
             debug::log("changing inative from $iniative to $newInitiative as per category");
 
+            $ship->unmodifiedIniative = $iniative;
             $ship->iniative = $newInitiative;
         }
     }
@@ -68,10 +73,12 @@ class SimultaneousMovementRule {
                 continue;
             }
 
+            debug::log("Looking for ini candidates");
+
             if ($this->hasShipsAtIniative($gameData, $category)) {
                 debug::log("Hey there are ships at iniative '$category'");
                 $ships = array_filter($gameData->ships, function($ship) use ($iniative, $category) {
-                    return $ship->iniative === $category;
+                    return $ship->iniative == $category;
                 });
 
                 $list = [];
@@ -82,6 +89,10 @@ class SimultaneousMovementRule {
 
                 return $list;
             }
+        }
+
+        if ($lastIndex === null) {
+            throw new Error("Unable to find ships for movement?");
         }
 
         return [];
@@ -104,8 +115,11 @@ class SimultaneousMovementRule {
     }
 
     private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
+
+        debug::log("hasShipsAtIniative '$iniative'");
         return count(array_filter($gameData->ships, function($ship) use ($iniative) {
-            return $ship->iniative === $iniative;
+            debug::log("shipIniative is '$ship->iniative ' and I am looking for '$iniative'");
+            return $ship->iniative == $iniative;
         })) > 0;
     }
 
@@ -137,7 +151,7 @@ class SimultaneousMovementRule {
 
     private function generateGategories() {
         $categories = [];
-        $step = 200 / $this->numberOfCategories;
+        $step = (int)floor(200 / $this->numberOfCategories);
         $number = $this->numberOfCategories;
 
         while ($number--) {

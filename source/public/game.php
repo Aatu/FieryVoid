@@ -161,6 +161,7 @@
 
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
+    <script src="client/gameRules/SimultaneousMovementRule.js"></script>
 
     <script src="client/UI/botPanel.js"></script>
     <script src="client/UI/replayUI.js"></script>

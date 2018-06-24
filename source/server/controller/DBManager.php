@@ -716,7 +716,7 @@ class DBManager
         try {
 
             foreach ($ships as $ship) {
-                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ")";
+                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $ship->unmodifiedIniative.")";
 
                 $this->update($sql);
             }
@@ -1260,7 +1260,7 @@ class DBManager
 
         $stmt = $this->connection->prepare(
             "SELECT
-                iniative, shipid
+                iniative, unmodified_iniative as unmodified, shipid
             FROM
                 tac_iniative 
             WHERE
@@ -1272,11 +1272,13 @@ class DBManager
 
         if ($stmt) {
             $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
-            $stmt->bind_result($iniative, $shipid);
+            $stmt->bind_result($iniative, $unmodified, $shipid);
             $stmt->execute();
 
             while ($stmt->fetch()) {
-                $gamedata->getShipById($shipid)->iniative = $iniative;
+                $ship = $gamedata->getShipById($shipid);
+                $ship->iniative = $iniative;
+                $ship->unmodifiedIniative = $unmodified;
             }
 
             $stmt->close();

@@ -686,6 +686,14 @@ window.shipManager = {
 
         if (a.iniative < b.iniative) return false;
 
+        if (a.unmodifiedIniative != null && b.unmodifiedIniative != null) {
+            if (a.unmodifiedIniative > b.unmodifiedIniative)
+                return true;
+        
+            if (a.unmodifiedIniative < b.unmodifiedIniative)
+                return false;
+        }
+
         if (a.iniative == b.iniative) {
             if (a.iniativebonus > b.iniativebonus) return true;
 

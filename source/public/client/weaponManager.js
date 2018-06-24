@@ -284,6 +284,10 @@ window.weaponManager = {
             return;
         }
 
+        if (shipManager.systems.isDestroyed(ship, weapon)) {
+            return;
+        }
+
         if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
 
 
@@ -1298,7 +1302,7 @@ window.weaponManager = {
 
     //system is for called shot!
     targetShip: function targetShip(selectedShip, ship, system) {
-        var debug = true;
+        var debug = false;
 
         debug && console.log("weaponManager target ship", ship, system);
 
