@@ -162,10 +162,12 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype.selectActiveShip = function () {
 
         var ship = gamedata.getMyActiveShips().filter(function(ship) {
-            return !shipManager.movement.isMovementReady(ship);
+            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
         }).pop();
 
-        this.setSelectedShip(ship);
+        if (ship) {
+            this.setSelectedShip(ship);
+        }
     };
 
     MovementPhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
