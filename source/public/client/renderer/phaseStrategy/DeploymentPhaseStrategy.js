@@ -47,7 +47,7 @@ window.DeploymentPhaseStrategy = function () {
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
                 shipManager.movement.deploy(this.selectedShip, hex);
-                this.consumeGamedata();
+                this.onShipMovementChanged({ship: this.selectedShip});
                 this.drawMovementUI(this.selectedShip);
 
                 if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
