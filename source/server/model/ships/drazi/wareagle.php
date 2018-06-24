@@ -10,7 +10,7 @@ class Wareagle extends MediumShipLeftRight{
         $this->imagePath = "img/ships/stareagle.png";
         $this->shipClass = "Wareagle Frigate Leader";
         $this->agile = true;
-        $this->canvasSize = 100;
+        $this->canvasSize = 128;
         $this->occurence = "uncommon";
 	    
         $this->variantOf = "Stareagle Frigate";

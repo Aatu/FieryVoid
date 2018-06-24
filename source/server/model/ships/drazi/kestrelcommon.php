@@ -11,7 +11,7 @@ class KestrelCommon extends MediumShip{
         $this->imagePath = "img/ships/kestrel.png";
         $this->shipClass = "Kestrel Corvette";
         $this->agile = true;
-        $this->canvasSize = 100;
+        $this->canvasSize = 128;
         $this->forwardDefense = 12;
         $this->sideDefense = 11;
         $this->turncost = 0.5;

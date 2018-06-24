@@ -9,7 +9,7 @@ class Hawk extends MediumShipLeftRight{
         $this->phpclass = "Hawk";
         $this->imagePath = "img/ships/stareagle.png"; //needs to be changed
         $this->shipClass = "Hawk Frigate";
-        $this->canvasSize = 100;
+        $this->canvasSize = 128;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

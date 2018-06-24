@@ -10,7 +10,7 @@ class Taileagle extends MediumShipLeftRight{
         $this->imagePath = "img/ships/stareagle.png";
         $this->shipClass = "Taileagle Escort Frigate";
         $this->agile = true;
-        $this->canvasSize = 100;
+        $this->canvasSize = 128;
         $this->occurence = "uncommon";
         $this->variantOf = "Stareagle Frigate";
 	$this->isd = 2162;
