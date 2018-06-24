@@ -533,6 +533,10 @@ class TacGamedata{
 
     private function hideActiveShipMovement() {
         $activeShips = $this->getActiveships();
+        if (count($activeShips) === 0) {
+            return;
+        }
+        
         $iniative = $activeShips[0]->iniative;
 
         foreach ($this->ships as $ship) {
