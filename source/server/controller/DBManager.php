@@ -716,8 +716,8 @@ class DBManager
         try {
 
             foreach ($ships as $ship) {
-                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $ship->unmodifiedIniative.")";
-
+                $unmodified = $ship->unmodifiedIniative === null ? 'NULL' : $ship->unmodifiedIniative;
+                $sql = "INSERT INTO `B5CGM`.`tac_iniative` VALUES($gameid, " . $ship->id . ", $turn, " . $ship->iniative . ", " . $unmodified .")";
                 $this->update($sql);
             }
         } catch (Exception $e) {
