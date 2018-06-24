@@ -167,6 +167,8 @@ window.MovementPhaseStrategy = function () {
 
         if (ship) {
             this.setSelectedShip(ship);
+        } else {
+            this.setSelectedShip(gamedata.getMyActiveShips().pop())
         }
     };
 
