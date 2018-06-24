@@ -37,6 +37,13 @@ window.MovementPhaseStrategy = function () {
         this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
 
         this.highlightUnmovedShips();
+
+        if (isMovementReady(gamedata)) {
+            gamedata.showCommitButton();
+        } else {
+            gamedata.hideCommitButton();
+        }
+
         return this;
     };
 
@@ -184,12 +191,15 @@ window.MovementPhaseStrategy = function () {
             icon.showSideSprite(false);
         }, this);
 
-        gamedata.getActiveShips().filter(function(ship) {
-            return !shipManager.movement.isMovementReady(ship);
-        }).forEach(function (ship) {
-            var icon = this.shipIconContainer.getByShip(ship);
-            icon.showSideSprite(true);
-        }, this);
+        gamedata.ships
+            .filter(window.SimultaneousMovementRule.isActiveMovementShip)
+            .filter(function(ship) {
+                return !shipManager.movement.isMovementReady(ship) || !gamedata.isMyShip(ship);
+            })
+            .forEach(function (ship) {
+                var icon = this.shipIconContainer.getByShip(ship);
+                icon.showSideSprite(true);
+            }, this);
     }
 
     return MovementPhaseStrategy;

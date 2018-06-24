@@ -32,7 +32,7 @@ class MovementGamePhase implements Phase
                 continue;
             }
             
-            //TODO: Validate movement
+            //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
 
         }

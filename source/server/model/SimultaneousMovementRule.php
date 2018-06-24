@@ -81,13 +81,7 @@ class SimultaneousMovementRule implements JsonSerializable {
                     return $ship->iniative == $category;
                 });
 
-                $list = [];
-
-                foreach($ships as $ship) {
-                    array_push($list, $ship->id);
-                }
-
-                return $list;
+                return $this->mapShipsToIds($ships);
             }
         }
 
@@ -124,17 +118,16 @@ class SimultaneousMovementRule implements JsonSerializable {
     }
 
     public function processMovement(TacGamedata $gameData, DBManager $dbManager, Array $ships) {
+        $myActiveShips = $this->mapShipsToIds($gameData->getMyActiveShips());
+        $allActiveShips = $this->mapShipsToIds($gameData->getActiveShips());
+        $newActiveShipIds = $this->bjectToArray(array_diff($allActiveShips, $myActiveShips));
 
-        $updatedGameData = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+        debug::log("After movement active ships is " . json_encode($newActiveShipIds) .  " was " . json_encode($allActiveShips));
 
-        foreach ($updatedGameData->getActiveShips() as $ship) {
-            $turn = $ship->getLastTurnMoved();
-            if ($turn < $gameData->turn) {
-                return true; //Not all active ships have moved yet, do nothing.
-            }
+        if (count($newActiveShipIds) === 0) {
+            $newActiveShipIds = $this->getNewActiveShip($gameData, $gameData->getActiveShips());
         }
 
-        $newActiveShipIds = $this->getNewActiveShip($gameData, $gameData->getActiveShips());
 
         debug::log("new active ships for movement " . json_encode($newActiveShipIds));
         if (count($newActiveShipIds) > 0){
@@ -147,6 +140,27 @@ class SimultaneousMovementRule implements JsonSerializable {
         }
 
         return true;
+    }
+
+    private function bjectToArray($object) {
+        $list = [];
+
+        foreach($object as $entry) {
+            array_push($list, $entry);
+        }
+
+        return $list;
+    }
+
+
+    private function mapShipsToIds($ships) {
+        $list = [];
+
+        foreach($ships as $ship) {
+            array_push($list, $ship->id);
+        }
+
+        return $list;
     }
 
     private function generateGategories() {

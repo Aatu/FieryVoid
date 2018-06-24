@@ -605,9 +605,19 @@ window.gamedata = {
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
             span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-style: italic; font-weight: bold'>" + ships[i].shipClass;
 
-            if (gamedata.getActiveShips().includes(ships[i])) {
-                td.className = gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy";
+            var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
+            if (active !== null) {
+                if (active === true && gamedata.isMyShip(ships[i])) {
+                    td.className = "iniActive";
+                } else if (active === true  && !gamedata.isMyShip(ships[i])){
+                    td.className = "iniActiveEnemy";
+                }
+            } else {
+                if (gamedata.getActiveShips().includes(ships[i])) {
+                    td.className = gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy";
+                }
             }
+            
 
             td.appendChild(span);
 

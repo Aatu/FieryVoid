@@ -532,10 +532,15 @@ class TacGamedata{
     }
 
     private function hideActiveShipMovement() {
-        $activeShips = $this->getOpponentActiveShips();
+        $activeShips = $this->getActiveships();
+        $iniative = $activeShips[0]->iniative;
 
-        foreach ($activeShips as $ship) {
+        foreach ($this->ships as $ship) {
             $toDelete = [];
+
+            if ($ship->userid === $this->forPlayer || $ship->iniative !== $iniative) {
+                continue;
+            }
 
             foreach ($ship->movement as $i => $move) {
                 if ($move->turn == $this->turn && $move->type !== "deploy" && $move->type !== "start") {
