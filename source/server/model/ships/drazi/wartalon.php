@@ -4,15 +4,16 @@ class Wartalon extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 500;
-	$this->faction = "Drazi";
+	    $this->pointCost = 500;
+	    $this->faction = "Drazi";
         $this->phpclass = "Wartalon";
-        $this->imagePath = "img/ships/warbird.png";
+        $this->imagePath = "img/ships/drazi/warbird4.png";
         $this->shipClass = "Wartalon Escort Carrier";
         $this->occurence = "uncommon";
         $this->fighters = array("light" => 6);
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2234;
+        $this->canvasSize = 256;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

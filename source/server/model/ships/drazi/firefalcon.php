@@ -8,13 +8,14 @@ class Firefalcon extends BaseShipNoAft{
         $this->pointCost = 850;
         $this->faction = "Drazi";
         $this->phpclass = "Firefalcon";
-        $this->imagePath = "img/ships/stormfalcon.png";
+        $this->imagePath = "img/ships/drazi/stormfalcon.png";
         $this->shipClass = "Firefalcon Command Cruiser";
         $this->fighters = array("light" => 12, "superheavy" => 1);
         $this->occurence = "rare";
         $this->variantOf = 'Stormfalcon Heavy Cruiser';
         $this->limited = 33;
         $this->isd = 2255;
+        $this->canvasSize = 256;
 
         $this->forwardDefense = 15;
         $this->sideDefense = 14;

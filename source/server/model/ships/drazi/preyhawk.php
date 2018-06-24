@@ -7,11 +7,12 @@ class Preyhawk extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 575;
 	$this->faction = "Drazi";
         $this->phpclass = "Preyhawk";
-        $this->imagePath = "img/ships/sunhawk.png";
+        $this->imagePath = "img/ships/drazi/sunhawk.png";
         $this->shipClass = "Preyhawk Battlecruiser";
         $this->occurence = "rare";
-	     $this->variantOf = "Sunhawk Battlecruiser";
+	    $this->variantOf = "Sunhawk Battlecruiser";
 	    $this->isd = 2232;
+        $this->canvasSize = 256;
 
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

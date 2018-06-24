@@ -8,7 +8,7 @@ class Kestrel extends MediumShip{
 		$this->pointCost = 390;
 		$this->faction = "Drazi";
         $this->phpclass = "Kestrel";
-        $this->imagePath = "img/ships/kestrel.png";
+        $this->imagePath = "img/ships/drazi/kestrel.png";
         $this->shipClass = "Kestrel Corvette Leader";
         $this->agile = true;
         $this->canvasSize = 128;
@@ -21,11 +21,11 @@ class Kestrel extends MediumShip{
         $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 2;
-	$this->iniativebonus = 70;
+	    $this->iniativebonus = 70;
 	
 	    $this->isd = 2229;
-	$this->occurence = "rare";
-	$this->variantOf = "Kestrel Corvette";
+	    $this->occurence = "rare";
+	    $this->variantOf = "Kestrel Corvette";
 	
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 4));

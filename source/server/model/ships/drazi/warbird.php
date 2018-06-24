@@ -7,9 +7,10 @@ class Warbird extends HeavyCombatVesselLeftRight{
 	$this->pointCost = 480;
 	$this->faction = "Drazi";
         $this->phpclass = "Warbird";
-        $this->imagePath = "img/ships/warbird.png";
+        $this->imagePath = "img/ships/drazi/warbird.png";
         $this->shipClass = "Warbird Cruiser";
 	    $this->isd = 2234;
+        $this->canvasSize = 256;
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;

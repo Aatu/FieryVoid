@@ -4,15 +4,16 @@ class Strikebird extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 400;
-	$this->faction = "Drazi";
+        $this->pointCost = 400;
+        $this->faction = "Drazi";
         $this->phpclass = "Strikebird";
-        $this->imagePath = "img/ships/warbird.png";
+        $this->imagePath = "img/ships/drazi/warbird.png";
         $this->shipClass = "Strikebird Carrier";
         $this->occurence = "uncommon";
         $this->fighters = array("light" => 12);
 	    $this->variantOf = "Warbird Cruiser";
 	    $this->isd = 2234;
+        $this->canvasSize = 256;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
