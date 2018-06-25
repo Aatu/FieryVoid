@@ -382,6 +382,10 @@ window.weaponManager = {
         var f = $(".targeting", e);
         f.html("");
 
+        if (gamedata.selectedSystems.length === 0) {
+            return;
+        }
+
         if (!(calledid > 0)) {
             //(calledid == null){
             var html = "";
@@ -1439,7 +1443,7 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-        gamedata.shipStatusChanged(selectedShip);
+        webglScene.customEvent('ShipTargeted', {shooter: selectedShip, target: ship, weapons: toUnselect})
     },
 
     checkIsInRange: function checkIsInRange(shooter, target, weapon) {
@@ -1537,7 +1541,8 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-        gamedata.shipStatusChanged(selectedShip);
+        
+        webglScene.customEvent('HexTargeted', {shooter: selectedShip, hexagon: hexpos})
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {

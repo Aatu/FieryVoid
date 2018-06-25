@@ -339,6 +339,11 @@ window.PhaseStrategy = function () {
         if (!this.shipTooltip || !this.shipTooltip.menu) {
             this.showShipTooltip(ship, payload, null, true);
         }
+
+        if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
+            this.shipTooltip.update(ship, this.selectedShip);
+        }
+
         this.showShipEW(ship);
         icon.showSideSprite(true);
         icon.showBDEW();
@@ -627,6 +632,31 @@ window.PhaseStrategy = function () {
 
         this.showSystemInfo(ship, system, element, true);
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship, system: system});
+    };
+
+    PhaseStrategy.prototype.onHexTargeted = function(payload) {
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        this.shipWindowManager.update();
+
+        if (this.selectedShip === payload.shooter) {
+            this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
+        }
+    };
+
+    PhaseStrategy.prototype.onShipTargeted = function(payload) {
+        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
+            this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        }
+
+        if (this.selectedShip === payload.shooter) {
+            this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
+        }
+
+        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
+            this.shipTooltip.update(payload.target, this.selectedShip);
+        }
+
+        this.shipWindowManager.update();
     };
 
     return PhaseStrategy;

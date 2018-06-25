@@ -14,7 +14,7 @@ class Darkhawk extends HeavyCombatVesselLeftRight{
         $this->canvasSize = 256;
 
         $this->forwardDefense = 14;
-        $this->sideDefense = 13;
+        $this->sideDefense = 13; 
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
