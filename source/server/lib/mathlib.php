@@ -57,8 +57,8 @@ class Mathlib{
     public static function getCompassHeadingOfPos($observer, $pos){
         
         $oPos = $observer->getCoPos();
-        $tPos = $pos;
-        
+        $tPos = ($pos instanceof OffsetCoordinate) ? self::hexCoToPixel($pos) : $pos;
+
         if ($oPos["x"] == $tPos["x"] && $oPos["y"] == $tPos["y"]){
             $oPos =  $observer->getPreviousCoPos();
             
