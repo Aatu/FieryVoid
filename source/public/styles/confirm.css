@@ -16,7 +16,6 @@
 	display:none;
     text-align: center;
     transform: translate(-50%, -50%);
-    overflow-y: scroll;
 }
 
 .confirm .missileselect{
@@ -222,5 +221,5 @@
 }
 
 @media only screen and (max-width: 1024px) {
-    
+    overflow-y: scroll;
 }

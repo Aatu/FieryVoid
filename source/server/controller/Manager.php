@@ -388,7 +388,7 @@ class Manager{
             if ($gdS->status == "FINISHED")
                 throw new Exception("Game is finished");
 
-            if ($activeship != $gdS->activeship){
+            if ($activeship != $gdS->activeship && array_diff($gdS->activeship, $activeship)){
                 throw new Exception("Active ship does not match");
             }
             //print(var_dump($ships));

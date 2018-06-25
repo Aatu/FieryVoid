@@ -926,12 +926,10 @@ class DBManager
             // it takes too much time.
             // Just get the activeship and check that.
 
-            //TODO: Activeship might now be an array
-            $ship = $this->getShipByIdFromDB($game->activeship);
+            $this->getTacShips($game, $game->turn, false);
 
-            if ($ship != null) {
-                if ($ship->userid == $game->forPlayer)
-                    $game->waitingForThisPlayer = true;
+            if (count($game->getMyActiveShips()) > 0 ) {
+                $game->waitingForThisPlayer = true;
             }
         }
 
@@ -1117,7 +1115,7 @@ class DBManager
         return $ship;
     }
 
-    public function getTacShips($gamedata, $turn)
+    public function getTacShips($gamedata, $turn, $allData = true)
     {
 
         //$starttime = time();
@@ -1153,17 +1151,19 @@ class DBManager
 
         $gamedata->setShips($ships);
 
-        $this->getFlightSize($gamedata);
-        $this->flightSizeFix($ships);
-        $this->getAdaptiveArmourSettings($gamedata);
-        $this->getIniativeForShips($gamedata, $turn);
-        $this->getMovesForShips($gamedata, $turn);
-        $this->getEWForShips($gamedata, $turn);
-        $this->getPowerForShips($gamedata, $turn);
-        $this->getCriticalsForShips($gamedata, $turn);
-        $this->getDamageForShips($gamedata, $turn);
-        $this->getFireOrdersForShips($gamedata, $turn);
-        $this->getSystemDataForShips($gamedata, $turn);
+        if ($allData) {
+            $this->getFlightSize($gamedata);
+            $this->flightSizeFix($ships);
+            $this->getAdaptiveArmourSettings($gamedata);
+            $this->getIniativeForShips($gamedata, $turn);
+            $this->getMovesForShips($gamedata, $turn);
+            $this->getEWForShips($gamedata, $turn);
+            $this->getPowerForShips($gamedata, $turn);
+            $this->getCriticalsForShips($gamedata, $turn);
+            $this->getDamageForShips($gamedata, $turn);
+            $this->getFireOrdersForShips($gamedata, $turn);
+            $this->getSystemDataForShips($gamedata, $turn);
+        }
 
         //$endtime = time();
         //Debug::log("GETTING SHIPS - GAME: $gamedata->id Fetching gamedata took " . ($endtime - $starttime) . " seconds.");

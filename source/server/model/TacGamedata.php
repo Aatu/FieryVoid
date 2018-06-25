@@ -602,11 +602,8 @@ class TacGamedata{
     private function getIsWaitingForThisPlayer(){
         $slots = $this->getSlotsByPlayerId($this->forPlayer);
 
-        foreach ($this->getMyActiveShips() as $ship) {
-            $turn = $ship->getLastTurnMoved();
-            if ($turn < $this->turn) {
-                return true;
-            }
+        if (count($this->getMyActiveShips()) > 0) {
+            return true;
         }
         
         foreach ($slots as $slot){
