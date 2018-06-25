@@ -61,7 +61,7 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.onShipRightClicked = function (ship) {
-        shipWindowManager.open(ship);
+        this.shipWindowManager.open(ship);
     };
 
     MovementPhaseStrategy.prototype.onHexClicked = function (payload) {};
