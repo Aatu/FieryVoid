@@ -150,8 +150,12 @@ window.ShipTooltip = function () {
             }
         }
 
+        if (ew.getSupportedDEW(ship)) {
+            this.addEntryElement('Support DEW: ' + ew.getSupportedDEW(ship), ship.flight !== true);
+        }
+
         if (shipManager.isElint(ship)){
-            this.addEntryElement('BDEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
+            this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
         }
 
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
