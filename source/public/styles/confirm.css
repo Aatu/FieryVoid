@@ -6,14 +6,17 @@
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px;
 	position:fixed;
-	width:450px;
+    width:450px;
+    max-width: 100%;
+    max-height: 100%;
 	left:50%;
-	top:200px;
-	margin-left:-200px;
+	top:50%;
 	opacity:0.85;
 	z-index:999999;
 	display:none;
     text-align: center;
+    transform: translate(-50%, -50%);
+    overflow-y: scroll;
 }
 
 .confirm .missileselect{
@@ -219,8 +222,5 @@
 }
 
 @media only screen and (max-width: 1024px) {
-    .confirm {
-        top:0;
-        overflow-y: scroll;
-    }
+    
 }
