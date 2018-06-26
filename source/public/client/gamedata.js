@@ -461,8 +461,8 @@ window.gamedata = {
 
     autoCommitOnMovement: function autoCommitOnMovement(ship) {
         if (ship.base) {
-            combatLog.logMoves(ship);
-            shipManager.movement.RemoveMovementIndicators();
+            //combatLog.logMoves(ship);
+            //shipManager.movement.RemoveMovementIndicators();
             ajaxInterface.submitGamedata();
         }
     },
