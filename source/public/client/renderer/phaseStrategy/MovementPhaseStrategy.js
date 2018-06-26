@@ -131,7 +131,6 @@ window.MovementPhaseStrategy = function () {
 
     function isMovementReady(gamedata) {
         return gamedata.getMyActiveShips().every(function(ship) {
-            console.log(ship.name, shipManager.movement.isMovementReady(ship));
             return shipManager.movement.isMovementReady(ship);
         });
     }
@@ -161,6 +160,8 @@ window.MovementPhaseStrategy = function () {
         this.onClickCallbacks = this.onClickCallbacks.filter(function (callback) {
             return callback();
         });
+
+        this.gamedata.drawIniGUI();
     };
 
     MovementPhaseStrategy.prototype.showAppropriateEW = function() {

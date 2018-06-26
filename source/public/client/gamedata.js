@@ -607,7 +607,9 @@ window.gamedata = {
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
-                if (active === true && gamedata.isMyShip(ships[i])) {
+                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i])) {
+                    td.className = "iniActiveMoved";
+                }else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.className = "iniActive";
                 } else if (active === true  && !gamedata.isMyShip(ships[i])){
                     td.className = "iniActiveEnemy";

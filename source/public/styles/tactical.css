@@ -768,6 +768,10 @@ body {
     margin-left: 63px;
 }
 
+.iniActiveMoved {
+    border: 1px solid #84A5CE !important;
+    box-shadow: 0px 0px 15px #09F;
+}
 
 .iniActive {
     border: 1px solid #84A5CE !important;
