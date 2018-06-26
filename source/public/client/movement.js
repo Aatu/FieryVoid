@@ -68,7 +68,7 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0;
+        return shipManager.movement.getRemainingMovement(ship) == 0 && !shipManager.isDestroyed(ship);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {

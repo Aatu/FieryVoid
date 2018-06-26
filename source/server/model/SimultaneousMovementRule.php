@@ -78,7 +78,7 @@ class SimultaneousMovementRule implements JsonSerializable {
             if ($this->hasShipsAtIniative($gameData, $category)) {
                 debug::log("Hey there are ships at iniative '$category'");
                 $ships = array_filter($gameData->ships, function($ship) use ($iniative, $category) {
-                    return $ship->iniative == $category;
+                    return $ship->iniative == $category && !$ship->isDestroyed();
                 });
 
                 return $this->mapShipsToIds($ships);
@@ -113,7 +113,7 @@ class SimultaneousMovementRule implements JsonSerializable {
         debug::log("hasShipsAtIniative '$iniative'");
         return count(array_filter($gameData->ships, function($ship) use ($iniative) {
             debug::log("shipIniative is '$ship->iniative ' and I am looking for '$iniative'");
-            return $ship->iniative == $iniative;
+            return $ship->iniative == $iniative && !$ship->isDestroyed();
         })) > 0;
     }
 
