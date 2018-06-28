@@ -1188,7 +1188,7 @@ class Weapon extends ShipSystem
     public function doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount)
     {
         $explosionPos = $target->getCoPos();
-        $ships1 = $gamedata->getShipsInDistance($explosionPos);
+        $ships1 = $gamedata->getShipsInDistance($target, 0);
         foreach ($ships1 as $ship) {
             if ($ship === $target) continue;// make certain the target doesn't get the damage twice
             if ($ship->isDestroyed()) continue; //no point allocating
@@ -1217,7 +1217,7 @@ class Weapon extends ShipSystem
 	    
         if($this->damageType=='Flash'){ //damage units other than base target
             $flashDamageAmount = floor($damage/4); //other units on target hex receive 25% of damage dealt to target
-	    $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
+	        $this->doCollateralDamage($target, $shooter, $fireOrder, $gamedata, $flashDamageAmount);
         }
 
 	    
