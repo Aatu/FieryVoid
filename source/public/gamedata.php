@@ -1,4 +1,5 @@
-<?php ob_start("ob_gzhandler"); 
+<?php 
+	ob_start("ob_gzhandler"); 
     include_once 'global.php';
 
 
@@ -35,3 +36,5 @@
 	}
 
 	print($ret);
+
+	ob_end_flush();
