@@ -146,6 +146,21 @@ class Weapon extends ShipSystem
         $this->changeFiringMode(1); //reset mode to basic
     }
 
+    
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+
+        $strippedSystem->turnsloaded = $this->turnsloaded;
+        $strippedSystem->turnsloadedArray = $this->turnsloadedArray;
+        $strippedSystem->overloadturns = $this->overloadturns;
+        $strippedSystem->overloadshots = $this->overloadshots;
+        $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
+        $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
+        $strippedSystem->fireOrders = $this->fireOrders;
+       
+        return $strippedSystem;
+    }
+
     public function getRange($fireOrder)
     {
         return $this->range;

@@ -31,7 +31,7 @@
 				if (class_exists($name)){
                     			$count++;
 					$ship = new $name($count, 0, "", 0, 0, false, false, array());
-					if($ship->faction != $faction){
+					if($faction && $ship->faction != $faction){
 						continue;
 					}
 					    foreach ($ship->systems as $system){

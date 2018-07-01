@@ -30,7 +30,7 @@
 	
 	$factions = json_encode(Manager::getAllFactions(), JSON_NUMERIC_CHECK);
 	
-	$ships = json_encode(Manager::getAllShips(), JSON_NUMERIC_CHECK);
+	$ships = [];
 	
 	
 ?>

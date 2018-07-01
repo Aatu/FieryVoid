@@ -1,6 +1,6 @@
 <?php
 
-class ShipSystem{
+class ShipSystem {
     public $jsClass = false;
     public $destroyed = false;
     public $startArc, $endArc;
@@ -28,7 +28,7 @@ class ShipSystem{
 	
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     
-        public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
+    public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
 	
     public $criticals = array();
 	protected $advancedArmor = false; //indicates that system has advanced armor
@@ -46,10 +46,23 @@ class ShipSystem{
         $this->output = (int)$output;
     }
 
+    public function stripForJson(){
+        $strippedSystem = new stdClass();
+        $strippedSystem->id = $this->id;
+        $strippedSystem->name = $this->name;
+        $strippedSystem->damage = $this->damage;
+        $strippedSystem->criticals = $this->criticals;
+        $strippedSystem->power = $this->power;
+        $strippedSystem->specialAbilities = $this->specialAbilities;
+
+        return $strippedSystem;
+    }
+
     public function onConstructed($ship, $turn, $phase){
-	if($ship->getAdvancedArmor()==true){
-		$this->advancedArmor = true;
-	}
+
+        if($ship->getAdvancedArmor()==true){
+            $this->advancedArmor = true;
+        }
         $this->structureSystem = $ship->getStructureSystem($this->location);
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();

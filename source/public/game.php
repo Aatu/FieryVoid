@@ -15,8 +15,14 @@
 	}
 	
 	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
+    $serverdataJSON = '{}';
+    $error = 'null';
 
-	$serverdataJSON = json_encode($serverdata, JSON_NUMERIC_CHECK);
+    if ($serverdata instanceof TacGameData) {
+        $serverdataJSON = json_encode($serverdata->stripForJson(), JSON_NUMERIC_CHECK);
+    } else {
+        $error = json_encode($serverdata, JSON_NUMERIC_CHECK);
+    }
 ?>
 
 
@@ -39,6 +45,7 @@
     <script src="client/lib/three.min.js"></script>
     <script src="client/lib/THREE.MeshLine.js"></script>
     <script src="client/UI/reactJs/UI.bundle.js"></script>
+    <script src="static/ships.js"></script>
     <script>
         window.Config = {
             HEX_SIZE: 50
@@ -48,6 +55,10 @@
     <?php include_once 'shaders.php'; ?>
     <script>
         $(window).load(function(){
+            
+            if (<?php print($error); ?>) {
+                alert(<?php print($error); ?>);
+            }
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
             //shipWindowManager.createShipWindow(gamedata.getActiveShip());

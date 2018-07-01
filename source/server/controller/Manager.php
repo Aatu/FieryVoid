@@ -196,12 +196,6 @@ class Manager{
     	return ShipLoader::getAllFactions();
     }
     
-    public static function getAllShips(){
-        
-        //return ShipLoader::getAllShips();
-        return array();
-    }
-    
     public static function canCreateGame($userid){
         return true;
     }
@@ -304,8 +298,7 @@ class Manager{
             if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
 
-
-            $json = json_encode($gdS, JSON_NUMERIC_CHECK);
+            $json = json_encode($gdS->stripForJson(), JSON_NUMERIC_CHECK);
 
 
             //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");

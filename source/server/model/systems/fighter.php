@@ -26,6 +26,17 @@
 			
 			
 		}
+
+		public function stripForJson() {
+			$strippedSystem = parent::stripForJson();
+
+			$strippedSystem->fighter = true;
+			$strippedSystem->location = $this->location;
+			$strippedSystem->flightid = $this->flightid;
+			$strippedSystem->systems = $this->systems;
+
+			return $strippedSystem;
+		}
         
         public function getSpecialAbilityList($list)
         {

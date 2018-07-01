@@ -24,28 +24,38 @@ ShipSystem.prototype.isScanner = function () {
 				return false;
 };
 
-var Fighter = function Fighter(json, ship) {
-				for (var i in json) {
-								if (i == 'systems') {
-												this.systems = SystemFactory.createSystemsFromJson(json[i], this);
-								} else {
-												this[i] = json[i];
-								}
-				}
+var Fighter = function Fighter(json, staticFighter, ship) {
+
+	console.log("staticFighter", staticFighter)
+	Object.keys(staticFighter).forEach(function(key) {
+        this[key] = staticFighter[key];
+    }, this)
+
+	for (var i in json) {
+		if (i == 'systems') {
+			this.systems = SystemFactory.createSystemsFromJson(json[i], ship, this);
+		} else {
+			this[i] = json[i];
+		}
+	}
 };
 
 Fighter.prototype = Object.create(ShipSystem.prototype);
 Fighter.prototype.constructor = Fighter;
 
 var SuperHeavyFighter = function SuperHeavyFighter(json, ship) {
-				for (var i in json) {
-								if (i == 'systems') {
-												this.systems = SystemFactory.createSystemsFromJson(json[i], this);
-								} else {
-												this[i] = json[i];
-								}
-				}
-};
+	Object.keys(staticFighter).forEach(function(key) {
+        this[key] = staticFighter[key];
+    }, this)
+
+	for (var i in json) {
+		if (i == 'systems') {
+			this.systems = SystemFactory.createSystemsFromJson(json[i], ship, this);
+		} else {
+			this[i] = json[i];
+		}
+	}
+}
 
 SuperHeavyFighter.prototype = Object.create(ShipSystem.prototype);
 SuperHeavyFighter.prototype.constructor = SuperHeavyFighter;

@@ -1,6 +1,6 @@
 <?php
 
-class TacGamedata{
+class TacGamedata {
 
     public static $currentTurn;
     public static $currentPhase;
@@ -67,6 +67,30 @@ class TacGamedata{
         usort ( $this->ships , "self::sortShips" );
     }
    
+    public function stripForJson() {
+        
+        $strippedGamedata = new stdClass();
+        $strippedGamedata->ships = array_map( function($ship) {return $ship->stripForJson();}, $this->ships);
+        $strippedGamedata->id = $this->id;
+        $strippedGamedata->turn = $this->turn;
+        $strippedGamedata->phase = $this->phase;
+        $strippedGamedata->activeship = $this->activeship;
+        $strippedGamedata->name = $this->name;
+        $strippedGamedata->status = $this->status;
+        $strippedGamedata->points = $this->points;
+        $strippedGamedata->background = $this->background;
+        $strippedGamedata->creator = $this->creator;
+        $strippedGamedata->gamespace = $this->gamespace;
+        $strippedGamedata->slots = $this->slots;
+        $strippedGamedata->waiting = $this->waiting;
+        $strippedGamedata->changed = $this->changed;
+        $strippedGamedata->rules = $this->rules;
+        $strippedGamedata->forPlayer = $this->forPlayer;
+
+
+        return $strippedGamedata;
+    }
+
     public function onConstructed(){
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();

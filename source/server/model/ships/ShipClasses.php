@@ -1,5 +1,5 @@
 <?php
-class BaseShip{
+class BaseShip {
 
     public $shipSizeClass = 3; //0:Light, 1:Medium, 2:Heavy, 3:Capital, 4:Enormous
     public $Enormous = false; //size class 4 is NOT implemented!!! for semi-Enormous unit, set this variable to True
@@ -41,21 +41,21 @@ class BaseShip{
 
     public $outerSections = array(); //for determining hit locations in GUI: loc, min, max, call (loc is location id, min/max is for arc, call is true if location systems can be called)
 
-        protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
-        //following values from DB
-        public $id, $userid, $name, $campaignX, $campaignY;
-        public $rolled = false;
-        public $rolling = false;
+    protected $activeHitLocations = array(); //$shooterID->targetSection ; no need for this to go public! just making sure that firing from one unit is assigned to one section
+    //following values from DB
+    public $id, $userid, $name, $campaignX, $campaignY;
+    public $rolled = false;
+    public $rolling = false;
 	public $EMHardened = false; //EM Hardening (Ipsha have it) - some weapons would check for this value!
 
-        public $team;
-	    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
-        
-        public $slotid;
+    public $team;
+    private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
+    
+    public $slotid;
 
-        public $movement = array();
-        
-	    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
+    public $movement = array();
+    
+    protected $advancedArmor = false; //set to true if ship is equipped with advanced armor!
 	    
 	    public function getAdvancedArmor(){
 		return $this->advancedArmor;    
@@ -95,7 +95,31 @@ class BaseShip{
 		    }
 	    }
 	    return $mod;
-	}
+    }
+    
+    public function stripForJson() {
+        $strippedShip = new stdClass();
+        $strippedShip->name = $this->name;
+        $strippedShip->team = $this->team;
+        $strippedShip->currentturndelay = $this->currentturndelay;
+        $strippedShip->iniative = $this->iniative;
+        $strippedShip->unmodifiedIniative = $this->unmodifiedIniative;
+        $strippedShip->iniativeadded = $this->iniativeadded;
+        $strippedShip->destroyed = $this->destroyed;
+        $strippedShip->slot = $this->slot;
+        $strippedShip->unavailable = $this->unavailable;
+        $strippedShip->id = $this->id;
+        $strippedShip->userid = $this->userid;
+        $strippedShip->rolled = $this->rolled;
+        $strippedShip->rolling = $this->rolling;
+        $strippedShip->slotid = $this->slotid;
+        $strippedShip->EW = $this->EW;
+        $strippedShip->movement = $this->movement; 
+        $strippedShip->faction = $this->faction; 
+        $strippedShip->phpclass = $this->phpclass; 
+        $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
+        return $strippedShip;
+    }
 	    
         public function getInitiativebonus($gamedata){
             if($this->faction == "Centauri"){

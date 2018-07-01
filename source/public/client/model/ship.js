@@ -1,6 +1,16 @@
 'use strict';
 
 var Ship = function Ship(json) {
+    var staticShip = window.staticShips[json.faction][json.phpclass];
+
+    if (!staticShip) {
+        throw new Error("Static ship not found for " + json.phpclass)
+    }
+
+    Object.keys(staticShip).forEach(function(key) {
+        this[key] = staticShip[key];
+    }, this)
+
     for (var i in json) {
         if (i == 'systems') {
             this.systems = SystemFactory.createSystemsFromJson(json[i], this);
