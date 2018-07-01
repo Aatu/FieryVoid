@@ -1,4 +1,5 @@
 <?php 
+    ob_start("ob_gzhandler"); 
     include_once 'global.php';
     
 	$gameid = 1;
@@ -723,3 +724,7 @@
 </body>
 
 </html>
+
+<?php 
+    ob_end_flush();
+?>
