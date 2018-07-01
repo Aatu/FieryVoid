@@ -25,13 +25,13 @@ window.ReplayPhaseStrategy = function () {
         this.inactive = false;
         this.currentTurn = gamedata.turn;
         this.currentPhase = gamedata.gamephase;
+        this.setSelectShip(null);
         this.shipIconContainer.setAllSelected(false);
         this.replayTurn = getInitialReplayTurn.call(this);
 
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata);
         this.shipWindowManager = shipWindowManager;
-        this.hideAllEW();
 
         this.createReplayUI();
 
@@ -40,6 +40,8 @@ window.ReplayPhaseStrategy = function () {
         activatePause.call(this);
 
         this.setPhaseHeader(false);
+        this.showAppropriateHighlight();
+        this.showAppropriateEW();
 
         return this;
     };
@@ -68,7 +70,6 @@ window.ReplayPhaseStrategy = function () {
     };
 
     ReplayPhaseStrategy.prototype.setSelectShip = function (ship, payload) {
-        this.shipIconContainer.getById(ship.id).setSelected(true);
     };
 
     ReplayPhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -103,7 +104,24 @@ window.ReplayPhaseStrategy = function () {
         }
     };
 
-    ReplayPhaseStrategy.prototype.showAppropriateEW = function() {};
+    ReplayPhaseStrategy.prototype.showAppropriateEW = function() {
+        this.shipIconContainer.getArray().forEach(icon => {
+            icon.hideEW();
+            icon.hideBDEW();
+        });
+        
+        this.ewIconContainer.hide();
+        if (this.selectedShip) {
+            this.showShipEW(this.selectedShip);
+        }
+    }
+
+    ReplayPhaseStrategy.prototype.showAppropriateHighlight = function () {
+        this.shipIconContainer.getArray().forEach(icon => {
+            icon.showSideSprite(false);
+            icon.setHighlighted(false);
+        })
+    }
 
     function toMovementPhase() {
         this.animationStrategy.toMovementPhase();

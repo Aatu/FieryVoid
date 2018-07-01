@@ -23,6 +23,8 @@ window.FirePhaseStrategy = function () {
         gamedata.showCommitButton();
 
         this.setPhaseHeader("FIRE ORDERS");
+        this.showAppropriateHighlight();
+        this.showAppropriateEW();
         return this;
     };
 

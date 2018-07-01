@@ -638,12 +638,13 @@ window.gamedata = {
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
-        gamedata.allShips[faction] = new Array();
 
-        for (var i in jsonShips) {
-            var ship = jsonShips[i];
-            gamedata.allShips[faction][i] = new Ship(ship);
-        }
+
+
+        console.log(window.staticShips[faction]);
+        gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
+            return new Ship(window.staticShips[faction][shipClass]);
+        })
     }
 
 };

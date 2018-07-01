@@ -55,6 +55,14 @@ class FighterFlight extends BaseShip
         $this->slot = $slot;
     }
 
+    public function stripForJson() {
+        $strippedShip = parent::stripForJson();
+
+        $strippedShip->flightSize = $this->flightSize;
+       
+        return $strippedShip;
+    }
+
     private $autoid = 1;
 
 

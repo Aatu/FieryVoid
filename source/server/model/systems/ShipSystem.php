@@ -54,6 +54,7 @@ class ShipSystem {
         $strippedSystem->criticals = $this->criticals;
         $strippedSystem->power = $this->power;
         $strippedSystem->specialAbilities = $this->specialAbilities;
+        $strippedSystem->output = $this->output;
 
         return $strippedSystem;
     }

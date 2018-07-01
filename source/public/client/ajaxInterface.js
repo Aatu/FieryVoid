@@ -144,6 +144,7 @@ window.ajaxInterface = {
                         var fires = Array();
                         var ammoArray = Array();
 
+                        /*
                         if (system.dualWeapon || system.duoWeapon) {
                             for (var c in system.weapons) {
                                 var weapon = system.weapons[c];
@@ -179,23 +180,24 @@ window.ajaxInterface = {
                                 systems[a] = { 'id': weapon.id, 'power': weapon.power, 'fireOrders': fires };
                             }
                         } else {
-                            for (var b = system.fireOrders.length - 1; b >= 0; b--) {
-                                var fire = system.fireOrders[b];
-                                if (fire.turn < gamedata.turn) {
-                                    system.fireOrders.splice(b, 1);
-                                }
+                            */
+                        for (var b = system.fireOrders.length - 1; b >= 0; b--) {
+                            var fire = system.fireOrders[b];
+                            if (fire.turn < gamedata.turn) {
+                                system.fireOrders.splice(b, 1);
                             }
-                            fires = system.fireOrders;
-
-                            for (var b = system.power.length - 1; b >= 0; b--) {
-                                var power = system.power[b];
-                                if (power.turn < gamedata.turn) {
-                                    system.power.splice(b, 1);
-                                }
-                            }
-
-                            systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires };
                         }
+                        fires = system.fireOrders;
+
+                        for (var b = system.power.length - 1; b >= 0; b--) {
+                            var power = system.power[b];
+                            if (power.turn < gamedata.turn) {
+                                system.power.splice(b, 1);
+                            }
+                        }
+
+                        systems[a] = { 'id': system.id, 'power': system.power, 'fireOrders': fires };
+                        // }
 
                         if (system.missileArray != null) {
                             for (var index in system.missileArray) {

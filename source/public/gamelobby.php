@@ -46,6 +46,7 @@
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+        <script src="static/ships.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
@@ -86,7 +87,7 @@
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
     	<script src="client/model/weapon/customs.js"></script>
-	<script src="client/model/weapon/customSW.js"></script>
+	    <script src="client/model/weapon/customSW.js"></script>
 		<script>
 			
             window.weaponManager = 
@@ -175,7 +176,6 @@
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 				gamedata.parseFactions(<?php print($factions); ?>);
-			//	gamedata.parseShips(<?php print($ships); ?>);
 				$('.readybutton').on("click", gamedata.onReadyClicked);
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);

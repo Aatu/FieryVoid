@@ -36,13 +36,16 @@ window.MovementPhaseStrategy = function () {
 
         this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
 
-        this.highlightUnmovedShips();
 
         if (isMovementReady(gamedata)) {
             gamedata.showCommitButton();
         } else {
             gamedata.hideCommitButton();
         }
+
+        
+        this.showAppropriateHighlight();
+        this.showAppropriateEW();
 
         return this;
     };
@@ -165,7 +168,18 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.showAppropriateEW = function() {
-    
+        this.shipIconContainer.getArray().forEach(icon => {
+            icon.hideEW();
+            icon.hideBDEW();
+        });
+        
+        this.ewIconContainer.hide();
+    }
+
+
+    MovementPhaseStrategy.prototype.showAppropriateHighlight = function () {
+        PhaseStrategy.prototype.showAppropriateHighlight.call(this);
+        this.highlightUnmovedShips();
     }
 
     MovementPhaseStrategy.prototype.selectActiveShip = function () {
@@ -179,11 +193,6 @@ window.MovementPhaseStrategy = function () {
         } else {
             this.setSelectedShip(gamedata.getMyActiveShips().pop())
         }
-    };
-
-    MovementPhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
-        PhaseStrategy.prototype.onMouseOutShips.call(this, ships, payload);
-        this.highlightUnmovedShips();
     };
 
     MovementPhaseStrategy.prototype.highlightUnmovedShips = function () {

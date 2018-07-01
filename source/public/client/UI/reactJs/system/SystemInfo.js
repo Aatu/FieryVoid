@@ -56,7 +56,8 @@ class SystemInfo extends React.Component {
 
                 
                 {system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode])}
-                {system.missileArray && system.missileArray.length > 0 && getEntry('Ammo Amount', system.missileArray && system.missileArray[system.firingMode].amount)}
+                
+                {system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
                 {Object.keys(system.data).map((key, i) => getEntry(key, system.data[key], 'data'+ i))}
 

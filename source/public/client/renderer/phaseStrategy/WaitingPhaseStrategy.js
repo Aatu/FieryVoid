@@ -19,6 +19,8 @@ window.WaitingPhaseStrategy = function () {
         ajaxInterface.startPollingGamedata();
 
         this.setPhaseHeader("WAITING FOR TURN...");
+        this.showAppropriateHighlight();
+        this.showAppropriateEW();
         return this;
     };
 
@@ -40,7 +42,21 @@ window.WaitingPhaseStrategy = function () {
         this.showShipTooltip(ship, payload, menu, false);
     };
 
-    WaitingPhaseStrategy.prototype.showAppropriateEW = function() {}
+    WaitingPhaseStrategy.prototype.showAppropriateEW = function() {
+        this.shipIconContainer.getArray().forEach(icon => {
+            icon.hideEW();
+            icon.hideBDEW();
+        });
+        
+        this.ewIconContainer.hide();
+    }
+
+    WaitingPhaseStrategy.prototype.showAppropriateHighlight = function () { 
+        this.shipIconContainer.getArray().forEach(icon => {
+            icon.showSideSprite(false);
+            icon.setHighlighted(false);
+        })
+    }
 
     return WaitingPhaseStrategy;
 }();

@@ -712,8 +712,6 @@ window.gamedata = {
 
         if (!serverdata.id) return;
 
-        console.log(serverdata);
-
         gamedata.turn = serverdata.turn;
         gamedata.gamephase = serverdata.phase;
         gamedata.activeship = serverdata.activeship;

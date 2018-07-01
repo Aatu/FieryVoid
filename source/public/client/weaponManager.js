@@ -335,13 +335,8 @@ window.weaponManager = {
         } else {
             systems = ship.systems.filter(system => system.weapon);
         }
-
-        console.log("hi", system.displayName)
-        console.log(systems)
-
+        
         array = systems.filter(function(weapon) {return weapon.displayName === system.displayName});
-
-        console.log(array);
 
 		for (var i = 0; i < array.length; i++) {
 			var system = array[i];
@@ -1312,7 +1307,7 @@ window.weaponManager = {
 
         if (shipManager.isDestroyed(selectedShip)) return;
 
-        var toUnselect = Array();
+        var toUnselect = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -1421,19 +1416,7 @@ window.weaponManager = {
                         };
                         weapon.fireOrders.push(fire);
                     }
-                    if (weapon.ballistic) {
-                        gamedata.ballistics.push({
-                            id: gamedata.ballistics.length,
-                            fireid: fireid,
-                            position: shipManager.getShipPosition(selectedShip),
-                            facing: shipManager.movement.getLastCommitedMove(selectedShip).facing,
-                            targetposition: { x: null, y: null },
-                            targetid: ship.id,
-                            shooterid: selectedShip.id,
-                            weaponid: weapon.id,
-                            shots: fire.shots
-                        });
-                    }
+
                     toUnselect.push(weapon);
                 }
             }

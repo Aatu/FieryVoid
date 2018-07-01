@@ -21,6 +21,14 @@ class Ammo extends Weapon
             $this->fireControl = array(0, 0, 0);
         }
     }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+
+        $strippedSystem->amount = $this->amount;
+       
+        return $strippedSystem;
+    }
     
     public function getDamage($fireOrder)
     {

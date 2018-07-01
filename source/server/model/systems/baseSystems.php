@@ -52,7 +52,7 @@ class Jammer extends ShipSystem implements SpecialAbility{
 
      public function setSystemDataWindow($turn){
         $this->data["Ability:"] = "Denies a hostile OEW-lock versus this ship.";
-	$this->data["Special"] = "Disabled Jammer won't affect enemy missile launches on NEXT turn!";	     
+	    $this->data["Special"] = "Disabled Jammer won't affect enemy missile launches on NEXT turn!";	     
     }
 
 }
@@ -279,8 +279,8 @@ class Reactor extends ShipSystem{
     }
 	
     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);     
-	$this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
+        parent::setSystemDataWindow($turn);     
+        $this->data["Special"] = "Can be set to overload, self-destroying ship after Firing phase.";	     
     }
 } //endof Reactor
 
@@ -418,11 +418,11 @@ class ElintScanner extends Scanner implements SpecialAbility{
 	}else{
 		$this->data["Special"] .= '<br>';
 	}
-	$this->data["Special"] .= "Allows additional Sensor operations:";
-	$this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus.";		     
-	$this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated).";		     
-	$this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
-	$this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
+        $this->data["Special"] .= "Allows additional Sensor operations:";
+        $this->data["Special"] .= "<br> - SOEW: indicated friendly ship gets half of ElInt ships' OEW bonus.";		     
+        $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated).";		     
+        $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
+        $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
     }
 	
     public function getSpecialAbilityValue($args)
@@ -502,19 +502,19 @@ class Thruster extends ShipSystem{
 	switch($this->direction){
 		case 1: //retro
 			$this->startArc = 330;
-        		$this->endArc = 30;
+            $this->endArc = 30;
 			break;
 		case 2: //main
 			$this->startArc = 150;
-        		$this->endArc = 210;
+            $this->endArc = 210;
 			break;	
 		case 3://port
 			$this->startArc = 210;
-        		$this->endArc = 330;
+            $this->endArc = 330;
 			break;
 		case 4://Stbd
 			$this->startArc = 30;
-        		$this->endArc = 150;
+            $this->endArc = 150;
 			break;
 	}
     }
@@ -673,7 +673,7 @@ class DrakhRaiderController extends ShipSystem {
     function __construct($armour, $maxhealth, $powerReq, $output ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
         $this->boostEfficiency = $powerReq;
-	DrakhRaiderController::addController($this);
+	    DrakhRaiderController::addController($this);
     }    
 	
 	
@@ -697,21 +697,21 @@ class DrakhRaiderController extends ShipSystem {
     }
 	
     public function getOutputOnTurn($turn){
-	$output = parent::getOutput();
-	foreach ($this->power as $power){
-	    if ($power->turn == $turn && $power->type == 2){
-		$output += $power->amount;
-	    }    
-	}
-	return $output;
+        $output = parent::getOutput();
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                $output += $power->amount;
+            }    
+        }
+        return $output;
     }
 
 	
-     public function setSystemDataWindow($turn){
-	parent::setSystemDataWindow($turn);     
-	$this->data["Special"] = "Gives indicated Initiative bonus to all friendly Raiders and Heavy Raiders.";	     
-	$this->data["Special"] .= "<BR>Only strongest bonus applies.";	     	     
-	$this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);     
+        $this->data["Special"] = "Gives indicated Initiative bonus to all friendly Raiders and Heavy Raiders.";	     
+        $this->data["Special"] .= "<BR>Only strongest bonus applies.";	     	     
+        $this->data["Special"] .= "<BR>Any changes are effective on NEXT TURN.";	
     }
 } //end of DrakhRaiderController
 	
@@ -740,14 +740,14 @@ class HkControlNode extends ShipSystem{
 
     function __construct($armour, $maxhealth, $powerReq, $output){
         parent::__construct($armour, $maxhealth, $powerReq, $output ); 
-	HkControlNode::$nodeList[] = $this;
+	    HkControlNode::$nodeList[] = $this;
     }
 	
 	
 	
 	/*to be called by every HK flight after creation*/
     public static function addHKFlight($HKflight){
-	HkControlNode::$hkList[] = $HKflight;
+	    HkControlNode::$hkList[] = $HKflight;
     }
 	
 	//inactive entries (from other gamedata) might have slipped by... clear them out!

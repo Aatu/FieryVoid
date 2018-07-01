@@ -376,16 +376,24 @@
         public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
         private $damagebonus = 0;
 	    
-	public $noOverkill = true;
+	    public $noOverkill = true;
 	    
 	    public $priority = 8; 
 	    
-	public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     	public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!  
 	 
 
         function __construct($startArc, $endArc){
             parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+    
+            $strippedSystem->ammunition = $this->ammunition;
+           
+            return $strippedSystem;
         }
         
 	    

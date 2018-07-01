@@ -43,6 +43,13 @@ class MissileLauncher extends Weapon{
             1 => $MissileB
         );
     }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+
+        $strippedSystem->missileArray = $this->missileArray;
+        return $strippedSystem;
+    }
     
     public function setSystemDataWindow($turn){
         //$this->data["Weapon type"] = "Ballistic";
@@ -125,122 +132,6 @@ class MissileLauncher extends Weapon{
             $this->doDamage($ship, $ship, $this, $damage, $fireOrder, null, $gamedata, false, $this->location); //show $this as target system - this will ensure its destruction, and Flash mode will take care of the rest
         }
     }
-
-/*no longer needed
-    public function getHitSystemShip($ship){
-
-        $systems = array();
-        $total = 0;
-        $current = 0;
-        foreach ($ship->systems as $system){
-            if ($system->location == $this->location){
-                $systems[] = $system;
-
-                $multi = 1;
-
-                if ($system instanceof Structure){
-                    $multi = 0.5;
-                }
-                $total += $system->maxhealth * $multi;
-            }
-        }
-
-        foreach ($systems as $system){
-            $multi = 1;
-            if ($system instanceof Structure){
-                $multi = 0.5;
-            }
-
-            $current += $system->maxhealth * $multi;
-            $roll = Dice::d($total);
-
-            if ($roll <= $current){
-                if ($system->isDestroyed()){
-                    foreach ($ship->systems as $sys){
-                        if ( $sys->location == $system->location && !$sys->isDestroyed() && get_class($sys) == get_class($system) ){
-               //     debug::log($system->displayName." destroyed, taking new one");
-                            $system = $sys;
-                        }
-                    }
-                }
-                if ($system->isDestroyed()){
-                    $system = $ship->getStructureSystem($this->location);
-                }
-                return $system;
-            }
-        }
-    }
-
-
-    public function ammoExplosionDamage($ship, $system, $damage, $gamedata){
-    //    debug::log("Damage Loop");
-
-        $armour = $system->armour;
-        foreach ($this->hits as $previous){
-            if ($previous->systemid == $system->id)
-                $armour -= $previous->damage;
-        }
-        
-        $systemHealth = $system->getRemainingHealth();
-        $modifiedDamage = $damage;
-        
-        if ($armour < 0){
-            $armour = 0;
-        }        
-
-        $destroyed = false;
-
-        if ($damage-$armour >= $systemHealth){
-            $destroyed = true;
-            $modifiedDamage = $systemHealth + $armour;
-        }
-        
-        $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $system->id, $modifiedDamage, $armour, 0, -1, $destroyed, "particle");
-        $damageEntry->updated = true;
-        $system->damage[] = $damageEntry;
-        $this->hits[] = $damageEntry;
-     //   debug::log("REGULAR vs:".$system->displayName."__".$system->location." id: ".$system->id." left: ".$systemHealth." for: ".$modifiedDamage."--armour: ".$armour." destroyed: ".$destroyed);
-     //   debug::log("remaining: ".($system->getRemainingHealth()));
-
-        if ($damage-$armour > $systemHealth){
-            $damage = $damage-$modifiedDamage;             
-            $okSystem = $ship->getStructureSystem($this->location);
-    //        debug::log("destroyed, overkilling remaining ".$damage." versus ok system: ".$okSystem->displayName." ".$okSystem->location);
-
-            if ($okSystem->isDestroyed()){
-                $okSystem = $ship->getStructureSystem(0);
-    //           debug::log("ok system killed, now: ".$okSystem->displayName." ".$okSystem->location);
-            }
-
-            $armour = $okSystem->armour;
-
-            foreach ($this->hits as $previous){
-                if ($previous->systemid == $okSystem->id)
-                    $armour -= $previous->damage;
-            }
-
-            if ($armour < 0){
-                $armour = 0;
-            }
-
-            $destroyed = false;
-
-            $okSystemHealth = $okSystem->getRemainingHealth();
-
-
-            if ($damage-$armour >= $okSystemHealth){
-                $destroyed = true;
-            }
-
-            $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $okSystem->id, $damage, $armour, 0, -1, $destroyed, "");
-            $damageEntry->updated = true;
-            $okSystem->damage[] = $damageEntry;
-            $this->hits[] = $damageEntry;
-     //       debug::log("OK vs:".$okSystem->displayName."__".$okSystem->location." id: ".$okSystem->id." left: ".$okSystemHealth."for: ".$damage."--armour: ".$armour." destroyed: ".$destroyed);
-     //       debug::log("remaining: ".($okSystem->getRemainingHealth()));
-        }
-    }
-*/
     
     public function addMissileCritOnSelf($shipid, $phpclass, $gamedata){
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);

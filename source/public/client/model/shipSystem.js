@@ -26,7 +26,6 @@ ShipSystem.prototype.isScanner = function () {
 
 var Fighter = function Fighter(json, staticFighter, ship) {
 
-	console.log("staticFighter", staticFighter)
 	Object.keys(staticFighter).forEach(function(key) {
         this[key] = staticFighter[key];
     }, this)
