@@ -55,6 +55,8 @@ class ShipSystem {
         $strippedSystem->power = $this->power;
         $strippedSystem->specialAbilities = $this->specialAbilities;
         $strippedSystem->output = $this->output;
+        $strippedSystem->outputMod = $this->outputMod;
+        $strippedSystem->destroyed = $this->destroyed;
 
         return $strippedSystem;
     }
@@ -362,15 +364,15 @@ class ShipSystem {
     
     
     public function effectCriticals(){ 
-	$percentageMod = 0;
+        $percentageMod = 0;
         foreach ($this->criticals as $crit){
             $this->outputMod += $crit->outputMod;
-	    $percentageMod += $crit->outputModPercentage;
+        $percentageMod += $crit->outputModPercentage;
         }
-	//convert percentage mod to absolute value...
-	if($percentageMod != 0){
-		$this->outputMod += round($percentageMod * $this->output /100 );
-	}    
+        //convert percentage mod to absolute value...
+        if($percentageMod != 0){
+            $this->outputMod += round($percentageMod * $this->output /100 );
+        }    
     }
 	
     
