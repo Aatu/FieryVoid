@@ -67,6 +67,12 @@ window.LaserEffect = function () {
                 });
             }
         }
+
+        this.textAnimation = null;
+
+        if (args.damagedNames) {
+            this.textAnimation = new SystemDestroyedEffect(this.target, args.damagedNames, this.scene, this.time + Math.random() * this.duration)
+        }
     }
 
     LaserEffect.prototype = Object.create(Animation.prototype);
@@ -77,9 +83,17 @@ window.LaserEffect = function () {
         }, this);
 
         this.particleEmitter.cleanUp();
+
+        if (this.textAnimation) {
+            this.textAnimation.cleanUp();
+        }
     };
 
     LaserEffect.prototype.render = function (now, total, last, delta, zoom) {
+
+        if (this.textAnimation) {
+            this.textAnimation.render(now, total, last, delta, zoom)
+        }
 
         this.particleEmitter.render(now, total, last, delta, zoom);
         if (total < this.time || total > this.time + this.duration + this.fadeOutSpeed) {

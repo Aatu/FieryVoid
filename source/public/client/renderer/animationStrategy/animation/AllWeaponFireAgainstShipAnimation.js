@@ -113,13 +113,18 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             shotsFired++;
         }
 
+        let destroyedNames = getSystemNamesDestroyed(incomingFire);
         while (hits--) {
             var damageData = divideDamage(systemsDestroyed, structuresDestroyed, hits);
             systemsDestroyed = damageData.systemsDestroyed;
             structuresDestroyed = damageData.structuresDestroyed;
             var damage = damageData.damage;
 
-            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage);
+            var picked = destroyedNames;
+            destroyedNames = [];
+            
+
+            duration = addAnimation.call(this, incomingFire, duration, true, timeInterval * shotsFired + extraStartTime, shotsFired, damage, picked);
             shotsFired++;
         }
 
@@ -130,9 +135,34 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         return timeInterval * shotsFired + duration;
     }
+/*
+    function pickAmountOfSystems(names, hitsLeft) {
 
-    function addAnimation(incomingFire, duration, hit, time, shotsFired, damage) {
-        var animation = buildAnimation.call(this, incomingFire, hit, time, shotsFired, damage);
+        let amount = names.length / hitsLeft;
+
+        if (amount < 1 && amount > 0 && Math.random() > 0.7) {
+            amount = 1;
+        }
+
+
+        let picked = [];
+
+        const remaining = names.filter(name => {
+            if (amount > 0 && !name.structure) {
+                amount--;
+                picked.push(name);
+                return false;
+            }
+
+            return true;
+        })
+        return {remaining, picked}
+    }
+*/
+
+    function addAnimation(incomingFire, duration, hit, time, shotsFired, damage, damagedNames) {
+        var animation = buildAnimation.call(this, incomingFire, hit, time, shotsFired, damage, damagedNames);
+
 
         if (duration < animation.getDuration()) {
             duration = animation.getDuration();
@@ -142,7 +172,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return duration;
     }
 
-    function buildAnimation(incomingFire, hit, time, shotsFired, damage) {
+    function buildAnimation(incomingFire, hit, time, shotsFired, damage, damagedNames) {
 
         var startTime = this.time + this.duration + time;
         var weapon = incomingFire.weapon;
@@ -155,7 +185,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     time: startTime,
-                    damage: damage
+                    damage: damage,
+                    damagedNames: damagedNames
                 });
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
@@ -165,7 +196,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     damage: damage,
-                    time: startTime
+                    time: startTime,
+                    damagedNames: damagedNames,
+                    scene: this.scene
                 });
             case "beam":
             case "trail":
@@ -177,9 +210,19 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     hit: hit,
                     damage: damage,
-                    time: startTime
+                    time: startTime,
+                    damagedNames: damagedNames,
+                    scene: this.scene
                 });
         }
+    }
+
+    function getSystemNamesDestroyed(incomingFire) {
+        return incomingFire.damagesCaused.filter(damage => damage.destroyed)
+            .map(damage => ({
+                name: shipManager.systems.getDisplayName(damage.system),
+                structure: damage.system instanceof Structure
+            }));
     }
 
     function getShipPositionAtTime(icon, time) {
@@ -205,7 +248,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return incomingFire.damagesCaused.filter(function (damage) {
             return !(damage.system instanceof Structure);
         }).reduce(function (amount, damage) {
-            return amount + damage.destroyed;
+            return amount + (damage.destroyed ? 1 : 0);
         }, 0);
     }
 
@@ -213,7 +256,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return incomingFire.damagesCaused.filter(function (damage) {
             return damage.system instanceof Structure;
         }).reduce(function (amount, damage) {
-            return amount + damage.destroyed;
+            return amount + (damage.destroyed ? 1 : 0);
         }, 0);
     }
 

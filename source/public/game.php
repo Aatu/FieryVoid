@@ -111,7 +111,8 @@
     <script src="client/renderer/sprite/PlainSprite.js"></script>
     <script src="client/renderer/sprite/LineSprite.js"></script>
     <script src="client/renderer/sprite/BallisticSprite.js"></script>
-
+    <script src="client/renderer/sprite/TextSprite.js"></script>
+    
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
     <script src="client/renderer/icon/DeploymentIcon.js"></script>
@@ -145,6 +146,7 @@
     <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
     <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
+    <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
 
     <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

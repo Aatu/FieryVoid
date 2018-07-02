@@ -724,7 +724,6 @@ window.gamedata = {
             gamedata.waiting = serverdata.waiting;
         }
         gamedata.status = serverdata.status;
-        gamedata.ballistics = serverdata.ballistics;
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
         shipManager.initiated = 0;
