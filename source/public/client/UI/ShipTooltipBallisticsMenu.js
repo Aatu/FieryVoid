@@ -11,6 +11,35 @@ window.ShipTooltipBallisticsMenu = function () {
         this.selectedShip = selectedShip;
     }
 
+    function getBallisticEntry(ball) {
+        return {
+            weaponid: ball.weapon.id,
+            targetid: ball.fireOrder.targetid,
+            shooterid: ball.shooter.id,
+            fireOrderId: ball.fireOrder.id,
+            position: this.shipIconContainer.getByShip(ball.shooter).getFirstMovementOnTurn(this.turn).position
+        };
+    }
+
+    function groupByOriginAndHitChange(ballistics) {
+        let listObject = {};
+
+        ballistics.forEach(ballistic => {
+            const key = ballistic.shooter.id + '-' +  ballistic.weapon.displayName + '-' + weaponManager.calculataBallisticHitChange(getBallisticEntry.call(this, ballistic));
+     
+            if (listObject[key]) {
+                listObject[key].amount++;
+            } else {
+                listObject[key] = {
+                    ballistic,
+                    amount: 1
+                }
+            }
+        }, this)
+
+        return listObject;
+    }
+
     ShipTooltipBallisticsMenu.prototype.renderTo = function (ship, element) {
         var ballistics = weaponManager.getAllBallisticsAgainst(ship, this.hexagon);
 
@@ -21,18 +50,16 @@ window.ShipTooltipBallisticsMenu = function () {
             return;
         }
 
-        ballistics.forEach(function (ball) {
+        const grouped = groupByOriginAndHitChange.call(this, ballistics)
+
+        Object.keys(grouped).forEach(function (key) {
+            var ball = grouped[key].ballistic;
+            const amount = grouped[key].amount;
             var ballElement = jQuery(template);
 
-            var ballisticEntry = {
-                weaponid: ball.weapon.id,
-                targetid: ball.fireOrder.targetid,
-                shooterid: ball.shooter.id,
-                fireOrderId: ball.fireOrder.id,
-                position: this.shipIconContainer.getByShip(ball.shooter).getFirstMovementOnTurn(this.turn).position
-            };
+            var ballisticEntry = getBallisticEntry.call(this, ball)
 
-            jQuery(".weapon", ballElement).html(ball.weapon.displayName);
+            jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName);
             jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%');
 
             if (this.allowIntercept) {
