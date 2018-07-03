@@ -58,6 +58,7 @@ window.MovementPhaseStrategy = function () {
         gamedata.ships.forEach(function(ship) {
             var icon = this.shipIconContainer.getByShip(ship);
             icon.showSideSprite(false);
+            icon.setNotMoved(false);
         }, this);
 
         return this;
@@ -211,6 +212,17 @@ window.MovementPhaseStrategy = function () {
                 var icon = this.shipIconContainer.getByShip(ship);
                 icon.showSideSprite(true);
             }, this);
+
+        gamedata.ships
+            .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
+            .forEach(function (ship) {
+                console.log("highlight")
+                var icon = this.shipIconContainer.getByShip(ship);
+                icon.setNotMoved(true);
+            }, this);
+
+
+            
     }
 
     return MovementPhaseStrategy;

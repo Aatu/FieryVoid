@@ -24,6 +24,7 @@ window.ShipIcon = function () {
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
+        this.NotMovedSprite = null;
 
         this.selected = false;
 
@@ -172,6 +173,16 @@ window.ShipIcon = function () {
         this.selected = value;
     };
 
+    ShipIcon.prototype.setNotMoved = function (value) {
+        if (value) {
+            this.NotMovedSprite.show();
+        } else {
+            this.NotMovedSprite.hide();
+        }
+
+        this.selected = value;
+    };
+
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
@@ -196,6 +207,9 @@ window.ShipIcon = function () {
 
         this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, this.mine ? 'ally' : 'enemy', false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
+
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, 'neutral', false).hide();
+        this.mesh.add(this.NotMovedSprite.mesh);
 
         scene.add(this.mesh);
     };

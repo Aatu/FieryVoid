@@ -35,6 +35,17 @@ window.SimultaneousMovementRule = (function(){
 
         return ship.iniative === ini;
     }
+
+    SimultaneousMovementRule.prototype.isNotYetMovedShip = function(ship) {
+        var active = gamedata.getActiveShips();
+        if (active.length === 0) {
+            return null;
+        }
+
+        var ini = active.pop().iniative;
+
+        return ship.iniative > ini;
+    }
     
     function getGategories(number) {
         var categories = [];

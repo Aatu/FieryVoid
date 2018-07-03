@@ -109,6 +109,9 @@ window.FlightIcon = function () {
         this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, this.mine ? 'ally' : 'enemy', false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size / 2, height: this.size / 2 }, -2, 'neutral', false).hide();
+        this.mesh.add(this.NotMovedSprite.mesh);
+
         scene.add(this.mesh);
     };
 
