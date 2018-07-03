@@ -627,14 +627,12 @@ window.gamedata = {
         return false;
     },
 
-    getShip: function getShip(id) {
-        for (var a in gamedata.allShips) {
-            for (var i in gamedata.allShips[a]) {
-                var ship = gamedata.allShips[a][i];
-                if (ship.id == id) return ship;
-            }
+    getShip: function getShip(id, faction) {
+        if (! gamedata.allShips[faction]) {
+            throw new Error("Unable to find faction " + faction)
         }
-        return null;
+
+        return gamedata.allShips[faction].find(ship => ship.id == id);
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
