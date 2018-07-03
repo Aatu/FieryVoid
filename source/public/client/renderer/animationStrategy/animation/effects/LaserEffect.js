@@ -68,10 +68,8 @@ window.LaserEffect = function () {
             }
         }
 
-        this.textAnimation = null;
-
-        if (args.damagedNames) {
-            this.textAnimation = new SystemDestroyedEffect(this.target, args.damagedNames, this.scene, this.time + Math.random() * this.duration)
+        if (args.systemDestroyedEffect) {
+            args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + Math.random() * this.duration)
         }
     }
 
@@ -83,18 +81,9 @@ window.LaserEffect = function () {
         }, this);
 
         this.particleEmitter.cleanUp();
-
-        if (this.textAnimation) {
-            this.textAnimation.cleanUp();
-        }
     };
 
     LaserEffect.prototype.render = function (now, total, last, delta, zoom) {
-
-        if (this.textAnimation) {
-            this.textAnimation.render(now, total, last, delta, zoom)
-        }
-
         this.particleEmitter.render(now, total, last, delta, zoom);
         if (total < this.time || total > this.time + this.duration + this.fadeOutSpeed) {
             this.lasers.forEach(function (laser) {

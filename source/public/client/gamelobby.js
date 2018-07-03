@@ -638,10 +638,6 @@ window.gamedata = {
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
-
-
-
-        console.log(window.staticShips[faction]);
         gamedata.allShips[faction] = Object.keys(window.staticShips[faction]).map(function(shipClass) {
             return new Ship(window.staticShips[faction][shipClass]);
         })

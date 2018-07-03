@@ -329,7 +329,7 @@ class Manager{
             $gamedata->prepareForPlayer($actualTurn > $turn);
             $gamedata->turn = $turn;
 
-            $json = json_encode($gamedata, JSON_NUMERIC_CHECK);
+            $json = json_encode($gamedata->stripForJson(), JSON_NUMERIC_CHECK);
             return $json;
 
         }

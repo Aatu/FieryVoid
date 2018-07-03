@@ -24,6 +24,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             return;
         }
 
+        this.systemDestroyedEffect = new SystemDestroyedEffect(scene)
+        this.animations.push(this.systemDestroyedEffect)
+
         var cameraAnimation = new CameraPositionAnimation(getShipPositionAtTime.call(this, this.shipIconContainer.getByShip(ship), this.time), this.time);
         this.animations.push(cameraAnimation);
         this.duration += cameraAnimation.getDuration();
@@ -186,7 +189,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     hit: hit,
                     time: startTime,
                     damage: damage,
-                    damagedNames: damagedNames
+                    damagedNames: damagedNames,
+                    systemDestroyedEffect: this.systemDestroyedEffect
                 });
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
@@ -198,7 +202,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    scene: this.scene
+                    systemDestroyedEffect: this.systemDestroyedEffect
                 });
             case "beam":
             case "trail":
@@ -212,7 +216,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     damage: damage,
                     time: startTime,
                     damagedNames: damagedNames,
-                    scene: this.scene
+                    systemDestroyedEffect: this.systemDestroyedEffect
                 });
         }
     }

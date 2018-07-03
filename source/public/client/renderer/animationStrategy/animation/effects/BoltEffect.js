@@ -59,12 +59,9 @@ window.BoltEffect = function () {
 
         createBoltParticle.call(this, this.size, this.color, this.origin);
         createBoltParticle.call(this, this.size / 2, { r: 1, g: 1, b: 1 }, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
-
-
-        this.textAnimation = null;
-
-        if (args.damagedNames) {
-            this.textAnimation = new SystemDestroyedEffect(this.target, args.damagedNames, this.scene, this.time+this.duration)
+        
+        if (args.systemDestroyedEffect) {
+            args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration)
         }
     }
 
@@ -74,17 +71,6 @@ window.BoltEffect = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
-    BoltEffect.prototype.cleanUp = function () {
-        if (this.textAnimation) {
-            this.textAnimation.cleanUp();
-        }
-    };
-    
-    BoltEffect.prototype.render = function (now, total, last, delta, zoom) {
-        if (this.textAnimation) {
-            this.textAnimation.render(now, total, last, delta, zoom)
-        }
-    };
 
     function createBoltParticle(size, color, position) {
 

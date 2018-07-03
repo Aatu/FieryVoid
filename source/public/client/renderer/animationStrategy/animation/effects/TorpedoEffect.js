@@ -55,6 +55,11 @@ window.TorpedoEffect = function () {
         }
 
         createTorpedoParticles.call(this, this.size, this.color, this.origin);
+
+        
+        if (args.systemDestroyedEffect) {
+            args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration)
+        }
     }
 
     TorpedoEffect.prototype = Object.create(ParticleAnimation.prototype);
