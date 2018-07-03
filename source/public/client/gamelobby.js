@@ -278,7 +278,7 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+ship.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                     $(".addship", h).on("click", this.buyShip.bind(this, ship.phpclass));
-                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.id, faction));
+                    $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction));
                         
                     h.appendTo(targetNode);
 					//search for variants of the base design above...
@@ -288,7 +288,7 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						h = $('<div oncontextmenu="return false;" class="ship"><span class="shiptype">'+shipDisplayName+'</span><span class="pointcost">'+shipV.pointCost+'p</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
                         $(".addship", h).on("click",  this.buyShip.bind(this, shipV.phpclass));
-                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.id, faction));
+                        $(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction));
                         
                         h.appendTo(targetNode);
 					} //end of variant
@@ -609,9 +609,9 @@ window.gamedata = {
         this.constructFleetList();
     },
 
-    onShipContextMenu: function onShipContextMenu(id, faction) {
+    onShipContextMenu: function onShipContextMenu(phpclass, faction) {
 
-        var ship = gamedata.getShip(id, faction);
+        var ship = gamedata.getShip(phpclass, faction);
 
         if (!ship.shipStatusWindow) {
             if (ship.flight) {
@@ -627,12 +627,12 @@ window.gamedata = {
         return false;
     },
 
-    getShip: function getShip(id, faction) {
+    getShip: function getShip(phpclass, faction) {
         if (! gamedata.allShips[faction]) {
             throw new Error("Unable to find faction " + faction)
         }
 
-        return gamedata.allShips[faction].find(ship => ship.id == id);
+        return gamedata.allShips[faction].find(ship => ship.phpclass == phpclass);
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
