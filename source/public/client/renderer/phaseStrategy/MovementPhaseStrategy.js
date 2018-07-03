@@ -216,7 +216,6 @@ window.MovementPhaseStrategy = function () {
         gamedata.ships
             .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
             .forEach(function (ship) {
-                console.log("highlight")
                 var icon = this.shipIconContainer.getByShip(ship);
                 icon.setNotMoved(true);
             }, this);
