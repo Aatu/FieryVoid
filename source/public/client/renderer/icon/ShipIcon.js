@@ -143,7 +143,7 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 101;
+            this.mesh.position.z = 500;
             this.shipDirectionOfMovementSprite.show();
         } else {
             if (this.selected) {

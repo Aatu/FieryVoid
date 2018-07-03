@@ -23,6 +23,10 @@ window.BallisticIconContainer = function () {
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
                 this.scene.remove(icon.launchSprite.mesh);
+                if (icon.launchSprite) {
+                    this.scene.remove(icon.launchSprite.mesh);
+                }
+
                 if (icon.targetSprite) {
                     if (icon.targetId !== -1) {
                         iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
@@ -39,7 +43,9 @@ window.BallisticIconContainer = function () {
 
     BallisticIconContainer.prototype.hide = function () {
         this.ballisticIcons.forEach(function (icon) {
-            icon.launchSprite.hide();
+            if (icon.launchSprite) {
+                icon.launchSprite.hide();
+            }
             if (icon.targetSprite) {
                 icon.targetSprite.hide();
             }
@@ -50,7 +56,9 @@ window.BallisticIconContainer = function () {
 
     BallisticIconContainer.prototype.show = function () {
         this.ballisticIcons.forEach(function (icon) {
-            icon.launchSprite.show();
+            if (icon.launchSprite) {
+                icon.launchSprite.show();
+            }
             if (icon.targetSprite) {
                 icon.targetSprite.show();
             }
@@ -106,27 +114,40 @@ window.BallisticIconContainer = function () {
             targetPosition = { x: 0, y: 0 };
         }
 
-        var launchSprite = new BallisticSprite(launchPosition, 'launch');
-        var targetSprite = targetPosition !== null ? new BallisticSprite(targetPosition, 'hex') : null;
+        var launchSprite = null;
 
-        scene.add(launchSprite.mesh);
+        if (!getByLaunchPosition(launchPosition, this.ballisticIcons)) {
+            launchSprite = new BallisticSprite(launchPosition, 'launch');
+            scene.add(launchSprite.mesh);
+        }
 
-        if (targetIcon && targetSprite) {
-            targetIcon.mesh.add(targetSprite.mesh);
-        } else if (targetSprite) {
-            scene.add(targetSprite.mesh);
+        var targetSprite = null;
+
+        if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
+            if (targetIcon && targetPosition) {
+                targetSprite =  new BallisticSprite(targetPosition, 'hex');
+                targetIcon.mesh.add(targetSprite.mesh);
+            } else if (targetPosition) {
+                targetSprite =  new BallisticSprite(targetPosition, 'hex');
+                scene.add(targetSprite.mesh);
+            }
         }
 
         this.ballisticIcons.push({
             id: ballistic.id,
             shooterId: ballistic.shooterid,
             targetId: ballistic.targetid,
+            launchPosition: launchPosition,
             position: new hexagon.Offset(ballistic.x, ballistic.y),
             launchSprite: launchSprite,
             targetSprite: targetSprite,
             used: true
         });
     }
+
+    const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+
+    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => (icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId ) )
 
     function getBallisticIcon(id) {
         return this.ballisticIcons.filter(function (icon) {

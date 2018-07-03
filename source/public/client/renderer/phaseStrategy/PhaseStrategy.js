@@ -500,6 +500,11 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
+        
+        if (system instanceof Ship) {
+            return;
+        }
+        
         var icon = this.shipIconContainer.getByShip(ship);
         icon.showWeaponArc(ship, system);
     };
