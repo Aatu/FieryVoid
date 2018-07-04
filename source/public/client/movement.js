@@ -134,6 +134,7 @@ shipManager.movement = {
                 // adjust the current turn delay if the new speed changes the turn delay
                 var oldspeed = shipManager.movement.getSpeed(ship);
 
+                console.log("I am going to delete ", movement)
                 shipManager.movement.revertAutoThrust(ship);
 
                 ship.movement.splice(ship.movement.length - 1, 1);
