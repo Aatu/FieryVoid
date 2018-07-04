@@ -2,6 +2,8 @@
 
 window.webglSprite = function () {
 
+    let loadedTextures = {};
+    
     var SHADER_VERTEX = null;
     var SHADER_FRAGMENT = null;
 
@@ -83,7 +85,12 @@ window.webglSprite = function () {
         //var attributes = {};
 
         if (typeof image == "string") {
-            var tex = new THREE.TextureLoader().load(image);
+            var tex = loadedTextures[image] || new THREE.TextureLoader().load(image);
+
+            if (!loadedTextures[image]) {
+                loadedTextures[image] = tex;
+            } 
+            
             //tex.magFilter = THREE.NearestFilter;
             tex.minFilter = THREE.LinearMipMapNearestFilter; //THREE.NearestFilter;
 
