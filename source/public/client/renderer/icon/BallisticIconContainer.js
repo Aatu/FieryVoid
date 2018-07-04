@@ -147,7 +147,7 @@ window.BallisticIconContainer = function () {
 
     const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
 
-    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => (icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId ) )
+    const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
 
     function getBallisticIcon(id) {
         return this.ballisticIcons.filter(function (icon) {
