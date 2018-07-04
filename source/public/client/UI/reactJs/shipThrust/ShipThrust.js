@@ -105,6 +105,7 @@ const ThrustUIContainer = styled.div`
 const ThrustTooltip = Tooltip.extend`
     top: 125px;
     min-width: 150px;
+    z-index: 10001;
 `
 
 const ThrustButtons = styled.div`
