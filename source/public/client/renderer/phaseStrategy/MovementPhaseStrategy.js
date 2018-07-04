@@ -47,6 +47,13 @@ window.MovementPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
+        gamedata.ships
+            .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
+            .forEach(function (ship) {
+                var icon = this.shipIconContainer.getByShip(ship);
+                icon.setNotMoved(true);
+            }, this);
+
         return this;
     };
 
@@ -197,12 +204,6 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.highlightUnmovedShips = function () {
-
-        gamedata.ships.forEach(function(ship) {
-            var icon = this.shipIconContainer.getByShip(ship);
-            icon.showSideSprite(false);
-        }, this);
-
         gamedata.ships
             .filter(window.SimultaneousMovementRule.isActiveMovementShip)
             .filter(function(ship) {
@@ -211,17 +212,7 @@ window.MovementPhaseStrategy = function () {
             .forEach(function (ship) {
                 var icon = this.shipIconContainer.getByShip(ship);
                 icon.showSideSprite(true);
-            }, this);
-
-        gamedata.ships
-            .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
-            .forEach(function (ship) {
-                var icon = this.shipIconContainer.getByShip(ship);
-                icon.setNotMoved(true);
-            }, this);
-
-
-            
+            }, this);            
     }
 
     return MovementPhaseStrategy;
