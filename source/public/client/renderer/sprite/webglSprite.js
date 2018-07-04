@@ -85,12 +85,7 @@ window.webglSprite = function () {
         //var attributes = {};
 
         if (typeof image == "string") {
-            var tex = loadedTextures[image] || new THREE.TextureLoader().load(image);
-
-            if (!loadedTextures[image]) {
-                loadedTextures[image] = tex;
-            } 
-            
+            var tex = new THREE.TextureLoader().load(image);
             //tex.magFilter = THREE.NearestFilter;
             tex.minFilter = THREE.LinearMipMapNearestFilter; //THREE.NearestFilter;
 

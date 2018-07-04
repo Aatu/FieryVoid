@@ -80,6 +80,13 @@ Vagrant.configure("2") do |config|
 
     sudo apt-get install -y apache2
 
+    sudo a2enmod cache
+    sudo a2enmod cache_disk
+    sudo a2enmod expires
+    sudo a2enmod headers
+
+    sudo echo "<FilesMatch \"\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|js)$\"> Header set Cache-Control "max-age=3024000, public"</FilesMatch>" >> /etc/apache2/apache2.conf
+
     debconf-set-selections <<< "mysql-server mysql-server/root_password password root"
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
     apt-get install -y mysql-server
