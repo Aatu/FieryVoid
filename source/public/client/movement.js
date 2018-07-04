@@ -144,9 +144,6 @@ shipManager.movement = {
                 //                            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
                 ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
 
-                var shipwindow = $(".shipwindow_" + ship.id);
-                shipWindowManager.cancelAssignThrust(ship);
-
                 return true;
             }
         }
