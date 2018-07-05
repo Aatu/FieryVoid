@@ -45,9 +45,25 @@ window.webglScene = function () {
         this.coordinateConverter.init(this.width, this.height);
         this.phaseDirector.init(this.coordinateConverter, this.scene);
 
-        this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -1000, 1000);
+        this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -1000000, 1000000);
+        this.camera.position.set( 0, 500, 500 )
+        
+        this.camera.lookAt(0, 0, 0)
 
-        this.camera.setPosition = new THREE.Vector3(0, 0, 500);
+        /*
+        var aspect = window.innerWidth / window.innerHeight;
+        var d = 20;
+        camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 1000 );
+
+        camera.position.set( 20, 20, 20 ); // all components equal
+        camera.lookAt( scene.position ); // or the origin
+        method 2 - set the x-component of camera.rotation
+
+        camera.position.set( 20, 20, 20 );
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = - Math.PI / 4;
+        camera.rotation.x = Math.atan( - 1 / Math.sqrt( 2 ) );
+        */
 
         /*
         var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
