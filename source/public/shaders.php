@@ -221,7 +221,7 @@
         vAngle = angle + angleChange * elapsedTime;
         textureN = textureNumber;
 
-        vec3 modPos = vec3( position.x - (cameraPosition.x * parallaxFactor), position.y - (cameraPosition.y * parallaxFactor), position.z );
+        vec3 modPos = vec3( position.x, position.y, position.z );
 
 
         gl_PointSize = clamp(size + (sizeChange * elapsedTime), 0.0, 1024.0);

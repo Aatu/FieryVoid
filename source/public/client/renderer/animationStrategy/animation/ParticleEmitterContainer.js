@@ -49,10 +49,24 @@ window.ParticleEmitterContainer = function () {
         });
     };
     */
+
+   ParticleEmitterContainer.prototype.setRotation = function (rotation) {
+        this.emitters.forEach(function (emitter) {
+            emitter.emitter.mesh.rotation.y = rotation * Math.PI / 180
+        });
+    };
+
     ParticleEmitterContainer.prototype.setPosition = function (pos) {
         this.emitters.forEach(function (emitter) {
             emitter.emitter.mesh.position.x = pos.x;
             emitter.emitter.mesh.position.y = pos.y;
+            emitter.emitter.mesh.position.z = pos.z;
+        });
+    };
+
+    ParticleEmitterContainer.prototype.lookAt = function (thing) {
+        this.emitters.forEach(function (emitter) {
+            emitter.emitter.mesh.quaternion.copy(thing.quaternion)
         });
     };
 
