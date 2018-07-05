@@ -22,7 +22,7 @@ window.BallisticIconContainer = function () {
 
         this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
             if (!icon.used) {
-                this.scene.remove(icon.launchSprite.mesh);
+                
                 if (icon.launchSprite) {
                     this.scene.remove(icon.launchSprite.mesh);
                 }
