@@ -17,11 +17,12 @@ class ChatManager{
      *  @return DBManager dbManager
      */
     private static function initDBManager() {
+        global $database_host;
     	global $database_name;
     	global $database_user;
     	global $database_password;
         if (self::$dbManager == null)
-            self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password);
+            self::$dbManager = new DBManager($database_host ?? "localhost", 3306, $database_name, $database_user, $database_password);
     }
     
     public static function submitChatMessage($userid, $message, $gameid = 0)

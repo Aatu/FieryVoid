@@ -1,0 +1,39 @@
+version: '2'
+services:
+  mariadb:
+    build:
+      context: docker/mariadb
+    volumes:
+      - .:/usr/src/fieryvoid
+    networks:
+      - default
+
+  php:
+    build:
+      context: docker/php
+    volumes:
+      - .:/usr/src/current
+      - composer:/usr/src/fieryvoid/vendor
+      - composercache:/root/.composer
+    networks:
+      - default
+
+  nginx:
+    build:
+      context: docker/nginx
+    volumes:
+      - .:/usr/src/fieryvoid
+    ports:
+      - "80:80"
+    networks:
+      - default
+
+networks:
+  default:
+
+volumes:
+  composer:
+    external: false
+  composercache:
+    external: false
+
