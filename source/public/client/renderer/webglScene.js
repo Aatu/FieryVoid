@@ -46,7 +46,7 @@ window.webglScene = function () {
         this.phaseDirector.init(this.coordinateConverter, this.scene);
 
         this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -1000000, 1000000);
-        this.camera.position.set( 0, 500, 500 )
+        this.camera.position.set( 0, -500, 500 )
         
         this.camera.lookAt(0, 0, 0)
 
@@ -74,6 +74,22 @@ window.webglScene = function () {
         sprite.show();
         this.scene.add(sprite.mesh);
          */
+
+        var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+        var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+        var cube = new THREE.Mesh( geometry, material );
+        cube.position.set(0, 0, 100)
+        this.scene.add( cube );
+       
+        this.cube = cube;
+
+        this.testParticleEmitter = new ParticleEmitter(this.scene);
+        var particle = this.testParticleEmitter.getParticle();
+
+        this.testParticleEmitter.mesh.position.set(0, -400, 100);
+        particle.setPosition({x:0, y: 0}).setActivationTime(0).setOpacity(1).setSize(100).setColor(new THREE.Color(1, 0, 0)).setVelocity(new THREE.Vector3(0, 1, 0));
+        this.testParticleEmitter.start();
+
 
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -162,11 +178,18 @@ window.webglScene = function () {
         jQuery('#background').css({ opacity: 1 - alpha });
     };
 
+    var time = 0;
+
     webglScene.prototype.render = function () {
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render(this.scene, this.camera);
         animateZoom.call(this);
         this.starField.render();
+
+        time++
+
+        this.testParticleEmitter.render(time, time, 0, 0, 1);
+        //this.cube.position.set(0, 0, time)
         requestAnimationFrame(this.render.bind(this));
     };
 
