@@ -14,7 +14,7 @@ window.ParticleEmitter = function () {
             args = {};
         }
 
-        var blending = args.blending || THREE.AdditiveBlending;
+        var blending = THREE.NormalBlending;//args.blending || THREE.AdditiveBlending;
 
         if (!particleCount) {
             particleCount = 1000;
