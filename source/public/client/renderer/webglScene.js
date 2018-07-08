@@ -75,6 +75,24 @@ window.webglScene = function () {
         this.scene.add(sprite.mesh);
          */
 
+        var loader = new THREE.ObjectLoader();
+        this.testObject = null;
+        loader.load( "img/3d/rhino.json", (object) => {
+
+            
+            var tex = new THREE.TextureLoader().load('img/3d/sculptNormal.png');
+            var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
+            console.log(object)
+            var material = new THREE.MeshPhongMaterial({normalMap: tex, map: diffuse});
+            object.children[0].material = material;
+
+            object.scale.set(3, 3, 3)
+            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
+            this.scene.add(object)
+            this.testObject = object;
+        } );
+
+        /*
         var geometry = new THREE.BoxGeometry( 100, 100, 100 );
         var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
         var cube = new THREE.Mesh( geometry, material );
@@ -89,9 +107,23 @@ window.webglScene = function () {
         this.testParticleEmitter.mesh.position.set(0, -400, 100);
         particle.setPosition({x:0, y: 0}).setActivationTime(0).setOpacity(1).setSize(100).setColor(new THREE.Color(1, 0, 0)).setVelocity(new THREE.Vector3(0, 1, 0));
         this.testParticleEmitter.start();
+        */
 
 
-        //this.scene.add(new THREE.AmbientLight(0xff0000));
+        /*
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.1 );
+        this.scene.add( directionalLight );
+*/
+        
+/*
+        var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        directionalLight2.position.set(0, 500, 500)
+        this.scene.add( directionalLight2 );
+*/
+        var directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.9 );
+        directionalLight3.position.set(500, -500, 500)
+        this.scene.add( directionalLight3 );
+        this.scene.add(new THREE.AmbientLight(0x000007));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
         this.renderer.context.getExtension('OES_standard_derivatives');
@@ -188,7 +220,12 @@ window.webglScene = function () {
 
         time++
 
-        this.testParticleEmitter.render(time, time, 0, 0, 1);
+        if (this.testObject) {
+
+            this.testObject.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90 + time/3), 0);
+        }
+
+        //this.testParticleEmitter.render(time, time, 0, 0, 1);
         //this.cube.position.set(0, 0, time)
         requestAnimationFrame(this.render.bind(this));
     };
