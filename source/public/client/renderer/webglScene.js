@@ -222,7 +222,7 @@ window.webglScene = function () {
 
         if (this.testObject) {
 
-            this.testObject.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90 + time/3), 0);
+            this.testObject.rotation.set(mathlib.degreeToRadian(90 + time), mathlib.degreeToRadian(90 + time/3), 0);
         }
 
         //this.testParticleEmitter.render(time, time, 0, 0, 1);
