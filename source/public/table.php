@@ -9,7 +9,7 @@ $pw='Kiiski';
 //$pw='';
 
 
-mysql_connect("localhost", $user, $pw) or die(mysql_error());
+mysql_connect($database_host ?? "localhost", $user, $pw) or die(mysql_error());
 mysql_select_db($db) or die(mysql_error());
 
 

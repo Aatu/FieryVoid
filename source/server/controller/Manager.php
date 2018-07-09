@@ -17,11 +17,12 @@ class Manager{
     private static $dbManager = null;
 
     private static function initDBManager() {
+        global $database_host;
     	global $database_name;
     	global $database_user;
     	global $database_password;
         if (self::$dbManager == null)
-            self::$dbManager = new DBManager("localhost", 3306, $database_name, $database_user, $database_password);
+            self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
     }
 
     public static function setDBManager(DBManager $dbManager) {
@@ -133,7 +134,7 @@ class Manager{
     public static function createGame($userid, $data){
         $data = json_decode($data, true);
 
-        var_export($data);
+        //var_export($data);
         
         $gamename = $data["gamename"];
         $background = $data["background"];

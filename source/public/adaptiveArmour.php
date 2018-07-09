@@ -7,7 +7,7 @@
 	$turn = $_GET["turn"];
 
 	try {
-		$link = new PDO("mysql:host=localhost;dbname=B5CGM","root","",
+		$link = new PDO("mysql:host=" . ($database_host ?? 'localhost') . ";dbname=B5CGM","root","",
 						array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 	}
 	catch(PDOException $ex){
