@@ -2,10 +2,15 @@
 
 window.webglSprite = function () {
 
+    const imageBitmapLoader = new THREE.ImageBitmapLoader();
+    const geometries = {};
     let loadedTextures = {};
-    
-    var SHADER_VERTEX = null;
-    var SHADER_FRAGMENT = null;
+
+    const baseMaterial = new THREE.ShaderMaterial({
+        vertexShader: document.getElementById('spriteVertexShader').innerHTML,
+        fragmentShader: document.getElementById('spriteFragmentShader').innerHTML,
+        transparent: true
+    });
 
     function Sprite(image, size, z) {
         this.z = z || 0;
@@ -71,38 +76,44 @@ window.webglSprite = function () {
         this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
 
-    function getShaders() {
-        if (!SHADER_VERTEX) SHADER_VERTEX = document.getElementById('spriteVertexShader').innerHTML;
-
-        if (!SHADER_FRAGMENT) SHADER_FRAGMENT = document.getElementById('spriteFragmentShader').innerHTML;
-
-        return { vertex: SHADER_VERTEX, fragment: SHADER_FRAGMENT };
-    }
-
     function create(size, image) {
-        var geometry = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
+        const geometry = geometries['' + size.width + '-' + size.height] || (function () {
+            const geometry = new THREE.PlaneGeometry(size.width, size.height, 1, 1);
+            geometries['' + size.width + '-' + size.height] = geometry;
+            return geometry;
+        }());
 
         //var attributes = {};
 
         if (typeof image == "string") {
-            var tex = new THREE.TextureLoader().load(image);
-            //tex.magFilter = THREE.NearestFilter;
-            tex.minFilter = THREE.LinearMipMapNearestFilter; //THREE.NearestFilter;
+            if (!loadedTextures[image]) {
+                loadedTextures[image] = new Promise((resolve, reject) => {
+                    imageBitmapLoader.load(
+                        image,
+                        imageBitmap => {
+                            setTimeout(() => {
+                                const texture = new THREE.CanvasTexture(imageBitmap);
+                                texture.minFilter = THREE.LinearMipMapNearestFilter; //THREE.NearestFilter;
+                                //tex.magFilter = THREE.NearestFilter;
+                                //THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.NearestMipMapLinearFilter, THREE.LinearFilter, and THREE.LinearMipMapNearestFilter
 
-            //THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.NearestMipMapLinearFilter, THREE.LinearFilter, and THREE.LinearMipMapNearestFilter
-
-            this.uniforms.texture.value = tex;
+                                resolve(texture);
+                            }, 0);
+                        },
+                        undefined,
+                        reject
+                    );
+                })
+            }
+            loadedTextures[image].then(texture => {
+                setTimeout(() => {
+                    this.uniforms.texture.value = texture;
+                }, 0);
+            });
         }
 
-        var shaders = getShaders();
-
-        this.material = new THREE.ShaderMaterial({
-            uniforms: this.uniforms,
-            //attributes: attributes,
-            vertexShader: shaders.vertex,
-            fragmentShader: shaders.fragment,
-            transparent: true
-        });
+        this.material = baseMaterial.clone();
+        this.material.uniforms = this.uniforms;
 
         this.material.depthTest = true;
 
