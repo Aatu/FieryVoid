@@ -62,6 +62,7 @@ window.ShipTooltipBallisticsMenu = function () {
             jQuery(".weapon", ballElement).html(amount ? amount + 'x ' + ball.weapon.displayName : ball.weapon.displayName);
             jQuery(".hitchange", ballElement).html('- Approx: ' + weaponManager.calculataBallisticHitChange(ballisticEntry) + '%');
 
+            /*
             if (this.allowIntercept) {
                 var interception = weaponManager.getInterception(ball.fireOrder) * 5;
 
@@ -89,6 +90,7 @@ window.ShipTooltipBallisticsMenu = function () {
                 jQuery(".intercept", ballElement).hide();
             }
 
+            */
             jQuery(".incoming", element).append(ballElement);
         }, this);
     };
