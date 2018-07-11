@@ -17,6 +17,7 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
+        return;
         this.cleanUp();
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
@@ -60,6 +61,8 @@ window.StarField = (function(){
 
     StarField.prototype.render = function()
     {
+        return;
+
         if (! this.emitterContainer) {
             this.create();
         }
