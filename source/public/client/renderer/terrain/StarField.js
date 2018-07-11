@@ -17,6 +17,8 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
+        
+        return;
         this.cleanUp();
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
@@ -61,12 +63,13 @@ window.StarField = (function(){
     StarField.prototype.render = function()
     {
 
+        
+        return;
         if (! this.emitterContainer) {
             this.create();
         }
 
         
-        return;
         var deltaTime = new Date().getTime() - this.lastAnimationTime;
         this.totalAnimationTime += deltaTime;
         this.emitterContainer.render(0, this.totalAnimationTime, 0, 0, this.zoomChanged);
