@@ -80,14 +80,27 @@ window.webglScene = function () {
         loader.load( "img/3d/rhino.json", (object) => {
 
             
+            console.log(object)
+            
             var tex = new THREE.TextureLoader().load('img/3d/sculptNormal.png');
             var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
-            console.log(object)
             var material = new THREE.MeshPhongMaterial({normalMap: tex, map: diffuse});
             object.children[0].material = material;
 
+            
+            var tex2 = new THREE.TextureLoader().load('img/3d/normalDoc.png');
+            var diffuse2 = new THREE.TextureLoader().load('img/3d/diffuseDoc.png');
+            var material2 = new THREE.MeshPhongMaterial({normalMap: tex2, map: diffuse2});
+            object.children[1].material = material2;
+
+            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
+            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
+            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
+            object.children[2].material = material3;
+
             object.scale.set(3, 3, 3)
             object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
+            object.position.set(0, 0, 10)
             this.scene.add(object)
             this.testObject = object;
         } );
@@ -101,13 +114,14 @@ window.webglScene = function () {
        
         this.cube = cube;
 
+        
         this.testParticleEmitter = new ParticleEmitter(this.scene);
         var particle = this.testParticleEmitter.getParticle();
 
         this.testParticleEmitter.mesh.position.set(0, -400, 100);
         particle.setPosition({x:0, y: 0}).setActivationTime(0).setOpacity(1).setSize(100).setColor(new THREE.Color(1, 0, 0)).setVelocity(new THREE.Vector3(0, 1, 0));
         this.testParticleEmitter.start();
-        */
+       
 
 
         /*
