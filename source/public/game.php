@@ -95,6 +95,7 @@
     <script src="client/Settings.js"></script>
     <script src="client/renderer/webglHexGridRenderer.js"></script>
     <script src="client/renderer/canvasHexGridRenderer.js"></script>
+    <script src="client/renderer/Loader.js"></script>
     <script src="client/renderer/webglScene.js"></script>
     <script src="client/renderer/webglScrolling.js"></script>
     <script src="client/renderer/webglZooming.js"></script>
@@ -113,6 +114,9 @@
     <script src="client/renderer/sprite/BallisticSprite.js"></script>
     <script src="client/renderer/sprite/TextSprite.js"></script>
     
+    
+    <script src="client/renderer/object/ShipObject.js"></script>
+    <script src="client/renderer/object/ships/Gunship.js"></script>
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
     <script src="client/renderer/icon/DeploymentIcon.js"></script>
