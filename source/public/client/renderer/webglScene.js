@@ -14,6 +14,7 @@ window.webglScene = function () {
         this.starField = null;
         this.width = null;
         this.height = null;
+        this.loader = null;
 
         this.element = null;
 
@@ -49,6 +50,7 @@ window.webglScene = function () {
         this.camera.position.set( 0, -500, 500 )
         
         this.camera.lookAt(0, 0, 0)
+        this.loader = new window.Loader();
 
         /*
         var aspect = window.innerWidth / window.innerHeight;
