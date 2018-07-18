@@ -40,8 +40,6 @@ class SimultaneousMovementRule implements JsonSerializable {
                 } 
             }
 
-            debug::log("changing inative from $iniative to $newInitiative as per category");
-
             $ship->unmodifiedIniative = $iniative;
             $ship->iniative = $newInitiative;
         }
@@ -49,15 +47,8 @@ class SimultaneousMovementRule implements JsonSerializable {
 
     public function getNewActiveShip(TacGamedata $gameData, $lastShips = null) {
 
-        debug::log("get new active ship, categories: " . json_encode($this->categories));
         $iniative = $this->categories[count($this->categories) - 1];
         $lastIndex = $this->getLastIniIndex($gameData, $lastShips);
-
-        if ($lastIndex === null) {
-            debug::log("This is first batch of ships for movement this turn");
-        } else {
-            debug::log("Last index of iniative was '$lastIndex' at iniative '".$this->categories[$lastIndex]."'");
-        }
 
         $found = $lastIndex === null ? true : false;
 
@@ -73,10 +64,7 @@ class SimultaneousMovementRule implements JsonSerializable {
                 continue;
             }
 
-            debug::log("Looking for ini candidates");
-
             if ($this->hasShipsAtIniative($gameData, $category)) {
-                debug::log("Hey there are ships at iniative '$category'");
                 $ships = array_filter($gameData->ships, function($ship) use ($iniative, $category) {
                     return $ship->iniative == $category && !$ship->isDestroyed();
                 });
@@ -86,7 +74,7 @@ class SimultaneousMovementRule implements JsonSerializable {
         }
 
         if ($lastIndex === null) {
-            throw new Error("Unable to find ships for movement?");
+            throw new Exception("Unable to find ships for movement?");
         }
 
         return [];
@@ -109,10 +97,7 @@ class SimultaneousMovementRule implements JsonSerializable {
     }
 
     private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
-
-        debug::log("hasShipsAtIniative '$iniative'");
         return count(array_filter($gameData->ships, function($ship) use ($iniative) {
-            debug::log("shipIniative is '$ship->iniative ' and I am looking for '$iniative'");
             return $ship->iniative == $iniative && !$ship->isDestroyed();
         })) > 0;
     }
@@ -122,14 +107,10 @@ class SimultaneousMovementRule implements JsonSerializable {
         $allActiveShips = $this->mapShipsToIds($gameData->getActiveShips());
         $newActiveShipIds = $this->bjectToArray(array_diff($allActiveShips, $myActiveShips));
 
-        debug::log("After movement active ships is " . json_encode($newActiveShipIds) .  " was " . json_encode($allActiveShips));
-
         if (count($newActiveShipIds) === 0) {
             $newActiveShipIds = $this->getNewActiveShip($gameData, $gameData->getActiveShips());
         }
 
-
-        debug::log("new active ships for movement " . json_encode($newActiveShipIds));
         if (count($newActiveShipIds) > 0){
             $gameData->setActiveship($newActiveShipIds);
             $dbManager->updateGamedata($gameData);
