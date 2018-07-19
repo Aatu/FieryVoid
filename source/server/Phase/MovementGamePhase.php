@@ -46,7 +46,7 @@ class MovementGamePhase implements Phase
 
     private function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager) {
         $next = false;
-        $nextshipid = -1;
+        $nextship = null;
         $firstship = null;
         foreach ($gameData->ships as $ship){
 
@@ -54,7 +54,7 @@ class MovementGamePhase implements Phase
                 $firstship = $ship;
 
             if ($next && !$ship->isDestroyed() && !$ship->unavailable){
-                $nextshipid = $ship->id;
+                $nextship = $ship;
                 break;
             }
 
@@ -62,13 +62,16 @@ class MovementGamePhase implements Phase
                 $next = true;
         }
 
-        if ($nextshipid > -1){
-            $gameData->setActiveship($nextshipid);
+        if ($nextship){
+            $gameData->setActiveship($nextship->id);
             $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
+            $dbManager->setPlayerWaitingStatus($nextship->userid, $gameData->id, false);
         }else{
             $gameData->setPhase(3);
             $gameData->setActiveship(-1);
             $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
         }
 
         return true;

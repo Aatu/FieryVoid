@@ -94,6 +94,8 @@ Vagrant.configure("2") do |config|
     apt-get install -y mysql-server
 
     mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
+    mysql -uroot -proot B5CGM < /vagrant/db/addGameRules.sql
+    mysql -uroot -proot B5CGM < /vagrant/db/playerWaiting.sql
 
     add-apt-repository ppa:ondrej/php
     apt-get update -y

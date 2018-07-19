@@ -105,7 +105,7 @@ class SimultaneousMovementRule implements JsonSerializable {
     public function processMovement(TacGamedata $gameData, DBManager $dbManager, Array $ships) {
         $myActiveShips = $this->mapShipsToIds($gameData->getMyActiveShips());
         $allActiveShips = $this->mapShipsToIds($gameData->getActiveShips());
-        $newActiveShipIds = $this->bjectToArray(array_diff($allActiveShips, $myActiveShips));
+        $newActiveShipIds = $this->objectToArray(array_diff($allActiveShips, $myActiveShips));
 
         if (count($newActiveShipIds) === 0) {
             $newActiveShipIds = $this->getNewActiveShip($gameData, $gameData->getActiveShips());
@@ -114,16 +114,32 @@ class SimultaneousMovementRule implements JsonSerializable {
         if (count($newActiveShipIds) > 0){
             $gameData->setActiveship($newActiveShipIds);
             $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
+            $this->setActiveShipPlayersNotWaiting($gameData, $dbManager);
         }else{
             $gameData->setPhase(3);
             $gameData->setActiveship(-1);
             $dbManager->updateGamedata($gameData);
+            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
         }
 
         return true;
     }
 
-    private function bjectToArray($object) {
+    public function setActiveShipPlayersNotWaiting($gameData, $dbManager) {
+        $activeUsers = [];
+        foreach ( $gameData->getActiveShips() as $ship){
+            if (!in_array($ship->userid, $activeUsers)) {
+                $activeUsers[] = $ship->userid;
+            }
+        }
+
+        foreach ( $activeUsers as $playerid){ 
+            $dbManager->setPlayerWaitingStatus($playerid, $gameData->id, false);
+        }
+    }
+
+    private function objectToArray($object) {
         $list = [];
 
         foreach($object as $entry) {

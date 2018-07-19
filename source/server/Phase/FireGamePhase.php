@@ -33,6 +33,7 @@ class FireGamePhase implements Phase
 
         // submit criticals
         $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -56,7 +57,8 @@ class FireGamePhase implements Phase
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
-
+        $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
+        
         return true;
     }
 }

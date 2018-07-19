@@ -5,13 +5,20 @@ class InitialOrdersGamePhase implements Phase
 
     public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
+        
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
         $gameData->setPhase(2);
         if ($gameData->rules->hasRule("getNewActiveShip")) {
-            $gameData->setActiveship($gameData->rules->callRule("getNewActiveShip", [$gameData, null]));
+            $activeShipIds = $gameData->rules->callRule("getNewActiveShip", [$gameData, null]);
+            $gameData->setActiveship($activeShipIds);
+            $gameData->rules->callRule("setActiveShipPlayersNotWaiting", [$gameData, $dbManager]);
         } else {
-            $gameData->setActiveship($gameData->getFirstShip()->id);
+            $ship = $gameData->getFirstShip();
+            $dbManager->setPlayerWaitingStatus($ship->userid, $gameData->id, false);
+            $gameData->setActiveship($ship->id);
         }
         $dbManager->updateGamedata($gameData);
+
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -66,5 +73,6 @@ class InitialOrdersGamePhase implements Phase
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
+        $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
     }
 }

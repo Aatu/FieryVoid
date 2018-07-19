@@ -47,6 +47,7 @@ class BuyingGamePhase implements Phase
 
         }
 
+        $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
         $dbManager->insertShips($servergamedata->id, $servergamedata->ships);
         $dbManager->insertSystemData(SystemData::getAndPurgeAllSystemData());
     }
@@ -144,6 +145,9 @@ class BuyingGamePhase implements Phase
 
             if ($points > $slot->points)
                 throw new Exception("Fleet too expensive.");
+
+                
+            $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn, $seenSlots);

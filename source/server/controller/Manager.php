@@ -76,17 +76,12 @@ class Manager{
         
         try {
             self::initDBManager();
-            
-            $games = self::$dbManager->getTacGames($userid);
-
-            if ($games == null){
-                return null;
-            }
-            
-            
-            foreach ($games as $game){
-                $game->prepareForPlayer();
-            }
+        
+            return array_merge(
+                self::$dbManager->getPlayerGames($userid),
+                self::$dbManager->getLobbyGames()
+            );
+      
         }
         catch(exception $e) {
             throw $e;

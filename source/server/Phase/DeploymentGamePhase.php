@@ -6,6 +6,7 @@ class DeploymentGamePhase implements Phase
     {
         $gameData->setPhase(1);
 
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
         $dbManager->updateGamedata($gameData);
     }
 
@@ -18,6 +19,7 @@ class DeploymentGamePhase implements Phase
         }
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
+        $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
     }
 
     private static function validateDeploymentArea($gamedata, $ship, $move){

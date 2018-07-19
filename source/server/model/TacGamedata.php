@@ -605,22 +605,14 @@ class TacGamedata {
                 $this->waiting = true;
             }
         
-        }else if ($this->phase == 2){
-            
+        }else if ($this->phase == 2){  
             $this->waiting = true;
-
-            foreach ($this->getMyActiveShips() as $ship) {
-                $turn = $ship->getLastTurnMoved();
-                if ($turn < $this->turn) {
-                    $this->waiting = false;
-                }
+            if (count($this->getMyActiveShips()) > 0) {
+                $this->waiting = false;
             }
-    
         }else{
             $this->waiting = false;
         }
-        
-        
     }
 
     private function getIsWaitingForThisPlayer(){

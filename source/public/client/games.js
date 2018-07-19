@@ -53,10 +53,11 @@ window.gamedata = {
 		var gamehtml = '<div class="game slot clickable" data-gameid="{gameid}"><span class="name">{gamename}</span><span class="value players">players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
+		console.log("GAMES LOLS", this.games)
 		for (var i in this.games) {
 			var game = this.games[i];
 			var gameDOM = $('.game[data-gameid="' + game.id + '"]');
-			if (game.status == "ACTIVE" && this.isInGame(game.id)) {
+			if (game.status == "ACTIVE") {
 
 				if (gameDOM.length == 0) {
 					var html = gamehtml;
@@ -66,7 +67,7 @@ window.gamedata = {
 					gameDOM = $(html);
 					gameDOM.find('.players').remove();
 
-					if (game.waitingForThisPlayer) gameDOM.addClass("waitingForTurn");
+					if (!game.waiting) gameDOM.addClass("waitingForTurn");
 
 					gameDOM.appendTo($('.gamecontainer.active'));
 					$('.gamecontainer.active').addClass("found");
@@ -79,14 +80,14 @@ window.gamedata = {
 					var html = gamehtml;
 					html = html.replace("{gameid}", game.id);
 					html = html.replace("{gamename}", game.name);
-					html = html.replace("{players}", gamedata.getNumberOfPlayers(game));
-					html = html.replace("{maxplayers}", Object.keys(game.slots).length);
+					html = html.replace("{players}", game.playerCount);
+					html = html.replace("{maxplayers}", game.slots);
 
 					gameDOM = $(html);
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				} else {
-					$('.players', gameDOM).html("players: " + gamedata.getNumberOfPlayers(game) + "/" + Object.keys(game.slots).length);
+					$('.players', gameDOM).html("players: " + game.playerCount + "/" + game.slots);
 				}
 				lobbyfound = true;
 			}

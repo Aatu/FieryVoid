@@ -326,7 +326,8 @@ class DBManager
                 ?,
                 ?,
                 ?,
-                ?
+                ?,
+                false
             )
 
         ");
@@ -745,6 +746,51 @@ class DBManager
 
     }
 
+    
+    public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
+    {
+        try {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                        tac_playeringame
+                     SET
+                        waiting = ?
+                     WHERE 
+                        playerid = ? AND gameid = ?
+                     "
+            )) {
+                $stmt->bind_param('iii', $waiting, $playerid, $gameid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+    }
+
+    public function setPlayersWaitingStatusInGame($gameid, $waiting)
+    {
+        try {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE 
+                        tac_playeringame
+                     SET
+                        waiting = ?
+                     WHERE 
+                        gameid = ?
+                     "
+            )) {
+                $stmt->bind_param('ii', $waiting, $gameid);
+                $stmt->execute();
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+    }
+
     public function updateGamedata($gamedata)
     {
         try {
@@ -910,32 +956,6 @@ class DBManager
         }
     }
 
-
-    public function getTacGames($playerid)
-    {
-        $games = $this->getTacGame(0, $playerid);
-        if ($games == null)
-            return array();
-
-        foreach ($games as $game) {
-            $game->slots = $this->getSlotsInGame($game->id);
-            $game->onConstructed();
-
-            // We are still in gamelobby. Ships are not loaded yet
-            // for the games. And you do not want to do that, because
-            // it takes too much time.
-            // Just get the activeship and check that.
-
-            $this->getTacShips($game, $game->turn, false);
-
-            if (count($game->getMyActiveShips()) > 0 ) {
-                $game->waitingForThisPlayer = true;
-            }
-        }
-
-        return $games;
-    }
-
     public function getFirePhaseGames($playerid)
     {
 
@@ -981,28 +1001,45 @@ class DBManager
         return $gamedata;
     }
 
+    public function getPlayerGames($playerid) {
+
+        $stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+        $games = [];
+
+        if ($stmt) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->bind_result($id, $gameName, $waiting);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $games[] = ["id" => $id, "name" => $gameName, "waiting" => $waiting, "status" => "ACTIVE"];
+            }
+            $stmt->close();
+        }
+        return $games;
+
+    }
+
+    public function getLobbyGames() {
+
+        $stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
+        $games = [];
+
+        if ($stmt) {
+            $stmt->bind_result($id, $gameName, $slots, $playerCount);
+            $stmt->execute();
+            while ($stmt->fetch()) {
+                $games[] = ["id" => $id, "name" => $gameName, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY"];
+            }
+            $stmt->close();
+        }
+        return $games;
+
+    }
+
     public function getTacGame($gameid, $playerid)
     {
-
-        if ($gameid > 0) {
-            // gameid is set. We only need that particular one game.
-            $sql = "SELECT * FROM `B5CGM`.`tac_game` where id = $gameid";
-        } else {
-            // gameid is not set. We are looking for all games that might be interesting
-            // for a player.
-            // Only select those games that are either relevant to the current player.
-            // So the ones he is participating in, or those games that are in the lobby
-            // and still have player spots left.
-            $sql = "SELECT * FROM tac_game tg RIGHT JOIN
-		 			(SELECT id
-		 					FROM tac_playeringame pg
-		 					LEFT JOIN tac_game tgs
-		 					on tgs.id = pg.gameid
-		 					WHERE tgs.status <> 'finished' AND (pg.playerid = $playerid OR pg.playerid IS NULL OR pg.playerid = '')
-		 			) AS result1
-	 			ON tg.id = result1.id;";
-        }
-
+         $sql = "SELECT * FROM `B5CGM`.`tac_game` where id = $gameid";
+    
 
         $games = array();
 
