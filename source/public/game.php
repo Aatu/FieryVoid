@@ -44,7 +44,7 @@
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
-    <script src="client/lib/THREE.MeshLine.js"></script>
+    <script src="client/lib/threeObjectLoader.js"></script>
     <script src="client/UI/reactJs/UI.bundle.js"></script>
     <script src="static/ships.js"></script>
     <script>

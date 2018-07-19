@@ -14,7 +14,6 @@ window.webglScene = function () {
         this.starField = null;
         this.width = null;
         this.height = null;
-        this.loader = null;
 
         this.element = null;
 
@@ -50,8 +49,8 @@ window.webglScene = function () {
         this.camera.position.set( 0, -500, 500 )
         
         this.camera.lookAt(0, 0, 0)
-        this.loader = new window.Loader();
 
+        let ship = new window.shipObjects.Gunship(null, this.scene);
         /*
         var aspect = window.innerWidth / window.innerHeight;
         var d = 20;
@@ -77,18 +76,18 @@ window.webglScene = function () {
         this.scene.add(sprite.mesh);
          */
 
+         /*
         var loader = new THREE.ObjectLoader();
+        var objLoader = new THREE.OBJLoader();
         this.testObject = null;
-        loader.load( "img/3d/rhino.json", (object) => {
+        objLoader.load( "img/3d/rhino/rhino.obj", (object) => {
 
-            
-            console.log(object)
-            
-            var tex = new THREE.TextureLoader().load('img/3d/sculptNormal.png');
-            var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
+        
+            var tex = new THREE.TextureLoader().load('img/3d/rhino/sculptNormal.png');
+            var diffuse = new THREE.TextureLoader().load('img/3d/rhino/texture.png');
             var material = new THREE.MeshPhongMaterial({normalMap: tex, map: diffuse});
             object.children[0].material = material;
-
+           
             
             var tex2 = new THREE.TextureLoader().load('img/3d/normalDoc.png');
             var diffuse2 = new THREE.TextureLoader().load('img/3d/diffuseDoc.png');
@@ -100,12 +99,63 @@ window.webglScene = function () {
             var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
             object.children[2].material = material3;
 
-            object.scale.set(3, 3, 3)
+            object.scale.set(2, 2, 2)
             object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
-            object.position.set(0, 0, 10)
+            object.position.set(0, 0, 0)
             this.scene.add(object)
             this.testObject = object;
         } );
+
+        objLoader.load( "img/3d/gunship/gunship.obj", (object) => {
+
+            
+            console.log(object)
+            
+            var tex = new THREE.TextureLoader().load('img/3d/gunship/normal.png');
+            console.log(tex)
+            //var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
+            var material = new THREE.MeshPhongMaterial({normalMap: tex});
+            object.children[0].material = material;
+
+            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
+            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
+            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
+            object.children[4].material = material3;
+            object.children[5].material = material3;
+
+            object.scale.set(5, 5, 5)
+            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
+            object.position.set(0, 60, 0)
+            object.receiveShadow = true;
+            object.castShadow = true;
+            this.scene.add(object)
+            this.testObject2 = object;
+        } );
+
+        /*
+        loader.load( "img/3d/gunship/gunship.json", (object) => {
+
+            
+            console.log(object)
+            
+            var tex = new THREE.TextureLoader().load('img/3d/gunship/normal.png');
+            console.log(tex)
+            //var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
+            //var material = new THREE.MeshPhongMaterial({wireframe: true});
+            //object.children[0].material = material;
+
+            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
+            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
+            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
+            object.children[1].material = material3;
+            object.children[2].material = material3;
+
+            object.scale.set(10, 10, 10)
+            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
+            object.position.set(0, 100, 10)
+            this.scene.add(object)
+        } );
+        */
 
         /*
         var geometry = new THREE.BoxGeometry( 100, 100, 100 );
@@ -239,6 +289,11 @@ window.webglScene = function () {
         if (this.testObject) {
 
             this.testObject.rotation.set(mathlib.degreeToRadian(90 + time), mathlib.degreeToRadian(90 + time/3), 0);
+        }
+
+        if (this.testObject2) {
+
+            this.testObject2.rotation.set(mathlib.degreeToRadian(90 + time), mathlib.degreeToRadian(90 + time/3), 0);
         }
 
         //this.testParticleEmitter.render(time, time, 0, 0, 1);

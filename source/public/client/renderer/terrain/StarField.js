@@ -17,8 +17,10 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
+        this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         
-        return;
+        return
+
         this.cleanUp();
 
         this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
@@ -63,7 +65,8 @@ window.StarField = (function(){
 
     StarField.prototype.render = function()
     {
-        return;
+        return
+
         if (! this.emitterContainer) {
             this.create();
         }
