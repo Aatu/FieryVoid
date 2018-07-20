@@ -17,13 +17,13 @@ window.mathlib = {
 	},
 
 	distance3d: function(pointA, pointB){
-    var dx = pointB.x - pointA.x;
-    var dy = pointB.y - pointA.y;
-    var dz = pointB.z - pointA.z;
-    
-    var dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2));
-    
-    return dist;
+		var dx = pointB.x - pointA.x;
+		var dy = pointB.y - pointA.y;
+		var dz = pointB.z - pointA.z;
+		
+		var dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2));
+		
+		return dist;
 	},
 
 	getSeededRandomGenerator: function (seed) {

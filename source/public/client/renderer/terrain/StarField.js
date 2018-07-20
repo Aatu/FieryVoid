@@ -17,9 +17,9 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
-        this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
+        //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         
-        return
+        return;
 
         this.cleanUp();
 
@@ -27,7 +27,7 @@ window.StarField = (function(){
         
         
 
-        this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
+        //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         var width =  3000; //this.webglScene.width * 1.5; 
         var height = 2000; // this.webglScene.height * 1.5; 
 
@@ -65,8 +65,8 @@ window.StarField = (function(){
 
     StarField.prototype.render = function()
     {
-        return
 
+        return;
         if (! this.emitterContainer) {
             this.create();
         }

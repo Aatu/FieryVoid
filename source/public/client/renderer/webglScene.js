@@ -45,12 +45,16 @@ window.webglScene = function () {
         this.coordinateConverter.init(this.width, this.height);
         this.phaseDirector.init(this.coordinateConverter, this.scene);
 
-        this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -1000000, 1000000);
+        this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -4000, 30000);
         this.camera.position.set( 0, -500, 500 )
         
         this.camera.lookAt(0, 0, 0)
 
-        let ship = new window.shipObjects.Gunship(null, this.scene);
+        this.ship = new window.shipObjects.Gunship({}, this.scene);
+
+        
+        this.ship2 = new window.shipObjects.Rhino({}, this.scene);
+        this.ship2.setPosition(100, 0)
         /*
         var aspect = window.innerWidth / window.innerHeight;
         var d = 20;
@@ -189,6 +193,10 @@ window.webglScene = function () {
         var directionalLight3 = new THREE.DirectionalLight( 0xffffff, 0.9 );
         directionalLight3.position.set(500, -500, 500)
         this.scene.add( directionalLight3 );
+        var directionalLight4 = new THREE.DirectionalLight( 0x609dc1, 0.5 );
+        directionalLight4.position.set(0, 100, -500)
+        this.scene.add( directionalLight4 );
+
         this.scene.add(new THREE.AmbientLight(0x000007));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
@@ -285,6 +293,9 @@ window.webglScene = function () {
         this.starField.render();
 
         time++
+        if (this.ship) {
+            //this.ship.setPosition(time, 0, 0);
+        }
 
         if (this.testObject) {
 

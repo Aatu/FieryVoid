@@ -9,7 +9,8 @@ window.webglSprite = function () {
     const baseMaterial = new THREE.ShaderMaterial({
         vertexShader: document.getElementById('spriteVertexShader').innerHTML,
         fragmentShader: document.getElementById('spriteFragmentShader').innerHTML,
-        transparent: true
+        transparent: true,
+        depthWrite: false
     });
 
     function Sprite(image, size, z) {
@@ -21,17 +22,7 @@ window.webglSprite = function () {
             overlayAlpha: { type: 'f', value: 0.0 },
             overlayColor: { type: 'v3', value: new THREE.Color(0, 0, 0) },
             opacity: { type: 'f', value: 1.0
-                //opacity:		{ type: 'f',	value: 1.0},
-                //tileDimensions: { type: 'v2',	value: new THREE.Vector2(1, 1)},
-                //damageLookup:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
-                //damageLookup2:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
-                //damageBrushes:  { type: 't', 	value: THREE.ImageUtils.loadTexture("/misc/damageBrushes.png")},
-                //damageNormalMap:{ type: 't', 	value: THREE.ImageUtils.loadTexture("/misc/damageBrushes-normal.png")},
-                //normalMap:		{ type: 't', 	value: new THREE.DataTexture(null, 0, 0)},
-                //worldPosition:	{ type: 'v3',	value: new THREE.Vector3(0, 0, 0)},
-                //scale:			{ type: 'v2',	value: new THREE.Vector2(1, 1)},
-                //flatLight:		{ type: 'f',	value: 1.0}
-            } };
+        } };
 
         this.mesh = create.call(this, size, image);
     }

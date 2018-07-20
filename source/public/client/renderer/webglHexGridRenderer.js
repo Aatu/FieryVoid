@@ -30,7 +30,7 @@ window.webglHexGridRenderer = function () {
         var texture = window.HexagonTexture.getHexGridTexture(HEX_CANVAS_SIZE, HEX_COUNT_WIDTH, HEX_COUNT_HEIGHT, HEX_LINE_COLOR, HEX_FILL_COLOR, HEX_LINE_WIDTH);
 
         var geometry = new THREE.PlaneGeometry(width, height, 1, 1);
-        this.material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: HEX_OPACITY });
+        this.material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: HEX_OPACITY, depthWrite: false});
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.x += window.HexagonMath.getHexB() / 2;
         scene.add(this.mesh);
@@ -100,9 +100,9 @@ window.webglHexGridRenderer = function () {
     webglHexGridRenderer.prototype.onZoom = function (zoom) {
 
         if (zoom > 1) {
-            this.material.opacity = (HEX_MAX_OPACITY - HEX_OPACITY) * ((zoom - 1) / (this.maxZoom - 1)) + HEX_OPACITY;
+            //this.material.opacity = (HEX_MAX_OPACITY - HEX_OPACITY) * ((zoom - 1) / (this.maxZoom - 1)) + HEX_OPACITY;
         } else {
-            this.material.opacity = zoom * HEX_OPACITY;
+            //this.material.opacity = zoom * HEX_OPACITY;
         }
     };
 

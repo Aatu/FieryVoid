@@ -10,6 +10,7 @@ window.LineSprite = function () {
         this.mesh = null;
         this.start = start;
         this.end = end;
+        this.lineWidth = lineWidth || 10;
 
         this.color = color;
         this.opacity = opacity;
@@ -19,25 +20,77 @@ window.LineSprite = function () {
             transparent: true,
             opacity: this.opacity,
             map: args.texture || null,
-            blending: args.blending || null
+            blending: args.blending || null,
+            depthWrite: false
         });
 
-        this.geometry = new THREE.Geometry();
+        this.geometry = createGeometry(start, end, lineWidth);
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+    }
 
+    const createGeometry = (start, end, lineWidth) => {
+        const geometry = new THREE.Geometry();
 
-        this.geometry.vertices.push(
-            new THREE.Vector3( -100,  100, 0 ),
-            new THREE.Vector3( -100, -100, 0 ),
-            new THREE.Vector3(  100, -100, 0 )
+        const lineAngle = mathlib.getCompassHeadingOfPoint({x: start.x, y: start.z}, {x: end.x, y: end.z})
+        const startA = offsetPoint(start, lineAngle, -90, lineWidth) 
+        const startB = offsetPoint(start, lineAngle, 90, lineWidth) 
+        const endA = offsetPoint(end, lineAngle, -90, lineWidth)
+        const endB = offsetPoint(end, lineAngle, 90, lineWidth)
+
+        geometry.vertices.push(
+            new THREE.Vector3( startA.x, startA.y, startA.z ),
+            new THREE.Vector3( startB.x, startB.y, startB.z  ),
+            new THREE.Vector3( endA.x, endA.y, endA.z ),
+            new THREE.Vector3( endB.x, endB.y, endB.z )
         );
 
-        this.geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+        geometry.faces.push( new THREE.Face3( 0, 1, 2, ) );
+        geometry.faces.push( new THREE.Face3( 3, 2, 1 ) );
+        
+        geometry.faceVertexUvs[ 0 ].push( [
+            new THREE.Vector2( 0, 0 ),
+            new THREE.Vector2( 0, 1 ),
+            new THREE.Vector2( 1, 0 ),
+        ]);
 
-        this.geometry.computeBoundingSphere();
+        geometry.faceVertexUvs[ 0 ].push( [
+            new THREE.Vector2( 1, 1 ),
+            new THREE.Vector2( 1, 0 ),
+            new THREE.Vector2( 0, 1 ),
+        ]);
 
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        geometry.computeBoundingSphere();
+        geometry.dynamic = true;
 
+        return geometry;
     }
+
+    const offsetPoint = (point, lineAngle, angle, lineWidth) => {
+        const offset = mathlib.getPointInDirection(lineWidth / 2, mathlib.addToDirection(lineAngle, angle), point.x, point.z, true)
+        return {
+            x: offset.x,
+            y: point.y,
+            z: offset.y
+        }
+    }
+
+    LineSprite.prototype.update = function (start, end, lineWidth) {
+        if (! lineWidth) {
+            lineWidth = this.lineWidth;
+        }
+        this.lineWidth = lineWidth;
+        
+        const lineAngle = mathlib.getCompassHeadingOfPoint({x: start.x, y: start.z}, {x: end.x, y: end.z})
+        const startA = offsetPoint(start, lineAngle, 90, lineWidth) 
+        const startB = offsetPoint(start, lineAngle, -90, lineWidth) 
+        const endA = offsetPoint(end, lineAngle, 90, lineWidth)
+        const endB = offsetPoint(end, lineAngle, -90, lineWidth)
+
+        this.geometry.vertices[0] = new THREE.Vector3( startA.x, startA.y, startA.z );
+        this.geometry.vertices[1] = new THREE.Vector3( startB.x, startB.y, startB.z );
+        this.geometry.vertices[2] = new THREE.Vector3( endA.x, endA.y, endA.z );
+        this.geometry.vertices[3] = new THREE.Vector3( endB.x, endB.y, endB.z );
+    };
 
     LineSprite.prototype.multiplyOpacity = function (m) {
         this.material.opacity = this.opacity * m;
