@@ -2,12 +2,11 @@
 
 window.LineSprite = function () {
 
-    function LineSprite(start, end, lineWidth, z, color, opacity, args) {
+    function LineSprite(start, end, lineWidth, color, opacity, args) {
         if (!args) {
             args = {};
         }
 
-        this.z = z || 0;
         this.mesh = null;
         this.start = start;
         this.end = end;
@@ -15,7 +14,6 @@ window.LineSprite = function () {
         this.color = color;
         this.opacity = opacity;
 
-        this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1);
         this.material = new THREE.MeshBasicMaterial({
             color: this.color,
             transparent: true,
@@ -24,21 +22,22 @@ window.LineSprite = function () {
             blending: args.blending || null
         });
 
+        this.geometry = new THREE.Geometry();
+
+
+        this.geometry.vertices.push(
+            new THREE.Vector3( -100,  100, 0 ),
+            new THREE.Vector3( -100, -100, 0 ),
+            new THREE.Vector3(  100, -100, 0 )
+        );
+
+        this.geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+
+        this.geometry.computeBoundingSphere();
+
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-        this.setStartAndEnd(start, end);
-
-        this.setLineWidth(lineWidth);
     }
-
-    LineSprite.prototype.setStartAndEnd = function (start, end) {
-
-        var width = mathlib.distance(start, end);
-        var position = mathlib.getPointBetween(start, end, 0.5, true);
-        this.setPosition(position);
-        this.mesh.scale.x = width;
-        this.mesh.rotation.z = -mathlib.degreeToRadian(mathlib.getCompassHeadingOfPoint(start, end));
-    };
 
     LineSprite.prototype.multiplyOpacity = function (m) {
         this.material.opacity = this.opacity * m;
@@ -61,7 +60,7 @@ window.LineSprite = function () {
     LineSprite.prototype.setPosition = function (pos) {
         this.mesh.position.x = pos.x;
         this.mesh.position.y = pos.y;
-        this.mesh.position.z = this.z;
+        this.mesh.position.z = pos.z;
         return this;
     };
 
