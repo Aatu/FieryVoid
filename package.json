@@ -11,7 +11,8 @@
     "watchify": "^3.10.0"
   },
   "scripts": {
-    "build": "watchify source/public/client/UI/reactJs/UI.js -o source/public/client/UI/reactJs/UI.bundle.js -t [ babelify --presets [ env react ] ]"
+    "build-ui": "watchify source/public/client/UI/reactJs/UI.js -o source/public/client/UI/reactJs/UI.bundle.js -t [ babelify --presets [ env react ] ]",
+    "build-ships": "watchify source/public/client/renderer/object/objects.js -o source/public/client/renderer/object/objects.bundle.js -t [ babelify --presets [ env react ] ]"
   },
   "dependencies": {
     "react": "^16.2.0",

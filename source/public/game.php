@@ -114,9 +114,7 @@
     <script src="client/renderer/sprite/BallisticSprite.js"></script>
     <script src="client/renderer/sprite/TextSprite.js"></script>
     
-    
-    <script src="client/renderer/object/ShipObject.js"></script>
-    <script src="client/renderer/object/ships/Gunship.js"></script>
+    <script src="client/renderer/object/objects.bundle.js"></script>
     <script src="client/renderer/icon/ShipIcon.js"></script>
     <script src="client/renderer/icon/FlightIcon.js"></script>
     <script src="client/renderer/icon/DeploymentIcon.js"></script>
@@ -524,7 +522,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php /* print($serverdata ? $serverdata->background : ""); */ ?>)"></div>
+    <div id="background" style="background-image:url(img/maps/<?php  /* print($serverdata ? $serverdata->background : ""); */  ?>)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 

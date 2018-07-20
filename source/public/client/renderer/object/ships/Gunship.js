@@ -1,5 +1,13 @@
+import ShipObject from './ShipObject'
+
 class Gunship extends ShipObject {
 
+    constructor(ship, scene) {
+        super(ship, scene);
+        this.defaultHeight = 30;
+        this.sideSpriteSize = 50;
+        this.create();
+    }
 
     create () {
         window.Loader.loadObject( 
@@ -28,15 +36,13 @@ class Gunship extends ShipObject {
                 this.shipObject = object
                 this.setRotation(0, 0, 0)
                 this.mesh.add(this.shipObject)
-                object.position.set(0, 0, 100)
+                object.position.set(0, 0, this.defaultHeight)
             }
         )
+
+        super.create();
     }
 
 }
 
-if (!window.shipObjects) {
-    window.shipObjects = {}
-}
-
-window.shipObjects.Gunship = Gunship;
+export default Gunship
