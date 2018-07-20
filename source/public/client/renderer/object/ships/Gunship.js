@@ -21,12 +21,14 @@ class Gunship extends ShipObject {
 
                
                 object.scale.set(5, 5, 5)
-                object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
+                this.startRotation = {x:90, y:90, z:0}
+                //object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
                 //object.position.set(0, 60, 0)
                 
                 this.shipObject = object
                 this.setRotation(0, 0, 0)
                 this.mesh.add(this.shipObject)
+                object.position.set(0, 0, 100)
             }
         )
     }

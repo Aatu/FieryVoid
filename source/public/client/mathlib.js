@@ -16,6 +16,16 @@ window.mathlib = {
 		return a;
 	},
 
+	distance3d: function(pointA, pointB){
+    var dx = pointB.x - pointA.x;
+    var dy = pointB.y - pointA.y;
+    var dz = pointB.z - pointA.z;
+    
+    var dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2) + Math.pow(dz, 2));
+    
+    return dist;
+	},
+
 	getSeededRandomGenerator: function (seed) {
 		function lcg(a) {return a * 48271 % 2147483647}
 		seed = seed ? lcg(seed) : lcg(Math.random());
@@ -54,6 +64,18 @@ window.mathlib = {
 		}
 
 		return { x: Math.floor(x), y: Math.floor(y) };
+	},
+
+	getPointBetween3d: function getPointBetween(start, end, percentage, noRound) {
+		var x = start.x + percentage * (end.x - start.x);
+		var y = start.y + percentage * (end.y - start.y);
+		var z = start.z + percentage * (end.z - start.z);
+
+		if (noRound) {
+			return { x: x, y: y, z: z };
+		}
+
+		return { x: Math.floor(x), y: Math.floor(y), z: Math.floor(z) };
 	},
 
 	getDistanceBetweenShipsInHex: function getDistanceBetweenShipsInHex(s1, s2) {
