@@ -85,7 +85,7 @@ Vagrant.configure("2") do |config|
     sudo a2enmod expires
     sudo a2enmod headers
 
-    echo -e "<FilesMatch \"\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|js)$\">\nHeader set Cache-Control \"max-age=3024000, public\"\n</FilesMatch>" | sudo tee -a /etc/apache2/apache2.conf
+    #echo -e "<FilesMatch \"\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|js)$\">\nHeader set Cache-Control \"max-age=3024000, public\"\n</FilesMatch>" | sudo tee -a /etc/apache2/apache2.conf
 
 
 
