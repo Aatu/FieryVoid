@@ -32,7 +32,7 @@ class Nial extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(4, 4, 4, 4);
             $nial = new Fighter("nial", $armour, 14, $this->id);
-            $nial->displayName = "Nial Heavy Fighter";
+            $nial->displayName = "Nial";
         // need picture
             $nial->imagePath = "img/ships/nial.png";
         // need picture

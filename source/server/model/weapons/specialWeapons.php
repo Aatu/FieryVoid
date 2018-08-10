@@ -1250,10 +1250,10 @@ class SurgeCannon extends Raking{
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "Can combine multiple Surge Cannons into a single shot with increased range and damage (and cooldown):";  
-		      $this->data["Special"] .= "<br> - 2 SC: 5-23 dmg, -1/hex"; 
-		      $this->data["Special"] .= "<br> - 3 SC: 9-36 dmg, -1/2 hexes"; 
-		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1/3 hexes"; 
-		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1/4 hexes"; 
+		      $this->data["Special"] .= "<br> - 2 SC: 5-23 dmg, -5/hex"; 
+		      $this->data["Special"] .= "<br> - 3 SC: 9-36 dmg, -2.5/hex"; 
+		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1.65/hex"; 
+		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1.25/hex"; 
 		      $this->data["Special"] .= "<br>If You allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in single mode instead.";  
 		      $this->data["Special"] .= "<br>Cooldown period: 1 less than number of weapons combining.";  

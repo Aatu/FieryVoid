@@ -32,7 +32,7 @@ class Tishat extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
             $tishat = new Fighter("tishat", $armour, 9, $this->id);
-            $tishat->displayName = "Tishat Medium Fighter";
+            $tishat->displayName = "Tishat";
         // need picture
             $tishat->imagePath = "img/ships/tishat.png";
         // need picture

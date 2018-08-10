@@ -21,6 +21,7 @@ class DrakhShuttle extends FighterFlight{
         $this->turndelaycost = 0.33;
         $this->advancedArmor = true;   
         
+		$this->hangarRequired = 'Shuttles'; //for fleet check
 	$this->iniativebonus = 10*5;
       
         $this->populate();

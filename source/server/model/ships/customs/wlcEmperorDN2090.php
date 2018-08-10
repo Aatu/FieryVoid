@@ -35,8 +35,9 @@ class wlcEmperorDN2090 extends BaseShip{
         $this->pivotcost = 6;
        
         $this->addPrimarySystem(new Reactor(6, 36, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
-        $this->addPrimarySystem(new CnC(7, 16, 0, 0)); 
+        //$this->addPrimarySystem(new CnC(6, 25, 0, 0)); //no dual bridges!!! - combine into one stronger instead
+        //$this->addPrimarySystem(new CnC(7, 16, 0, 0)); 
+	$this->addPrimarySystem(new CnC(7, 40, 0, 0)); //"combined" bridge
         $this->addPrimarySystem(new Scanner(5, 25, 6, 9));
         $this->addPrimarySystem(new Engine(5, 36, 0, 12, 3));
 	$this->addPrimarySystem(new Hangar(5, 12));

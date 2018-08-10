@@ -22,6 +22,7 @@ class DrakhRaiderFlt extends FighterFlight{
         $this->jinkinglimit = 4; //deliberately low jinking limit and Init, they're SHFs grouped for convenience!
         $this->turncost = 0.33;
         
+		$this->hangarRequired = 'Raiders'; //for fleet check
     	$this->iniativebonus = 14 *5; 
 	    $this->advancedArmor = true; 
         

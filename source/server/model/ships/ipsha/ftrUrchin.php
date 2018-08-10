@@ -23,6 +23,8 @@ class FtrUrchin extends FighterFlight{
         $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
+
+	$this->gravitic = true;
         
     	$this->iniativebonus = 16 *5;
         $this->populate();

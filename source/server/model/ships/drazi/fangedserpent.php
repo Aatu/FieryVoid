@@ -21,6 +21,7 @@ class FangedSerpent extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
+		$this->hangarRequired = 'superheavy'; //for fleet check
 	    $this->iniativebonus = 75;
         $this->hasNavigator = true;
         
@@ -35,7 +36,10 @@ class FangedSerpent extends SuperHeavyFighter{
         $fighter->addFrontSystem(new FighterMissileRack(6, 330, 30));
 
         $particleBlaster = new ParticleBlaster(0, 0, 0, 330, 30);
-        $particleBlaster->fireControl = array(-4, 0, 0);
+
+
+        $particleBlaster->rangepenalty = 1 ; 
+ $particleBlaster->fireControl = array(-4, 0, 0);
         $particleBlaster->loadingtime = 3;
         $fighter->addFrontSystem($particleBlaster);
         

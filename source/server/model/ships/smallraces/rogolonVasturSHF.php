@@ -12,7 +12,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
         $this->imagePath = "img/ships/RogolonVostor.png";
 	    $this->unofficial = true;
 	
-	$this->isd = 2255;
+		$this->isd = 2255;
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
         $this->freethrust = 9;
@@ -20,6 +20,7 @@ class RogolonVasturSHF extends SuperHeavyFighter{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.25;
+		$this->hangarRequired = 'superheavy'; //for fleet check
         $this->iniativebonus = 70;
         $this->hasNavigator = true;
         

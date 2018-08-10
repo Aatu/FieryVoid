@@ -18,6 +18,8 @@ class TobrakiAS extends FighterFlight{
         $this->jinkinglimit = 0;
 	$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
+		
+		$this->hangarRequired = 'assault shuttles'; //for fleet check
         $this->iniativebonus = 9*5;
         
         $this->gravitic = true;

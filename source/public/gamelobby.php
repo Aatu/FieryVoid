@@ -176,7 +176,8 @@
             
 				gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
 				gamedata.parseFactions(<?php print($factions); ?>);
-				$('.readybutton').on("click", gamedata.onReadyClicked);
+				$('.readybutton').on("click", gamedata.onReadyClicked);		
+				$('.checkbutton').on("click", gamedata.checkChoices); //fleet correctness check
                 $('.leave').on("click", gamedata.onLeaveClicked);
                 $('.leaveslot').on("click", gamedata.onLeaveSlotClicked);
                 $('.selectslot').on("click", gamedata.onSelectSlotClicked);
@@ -225,7 +226,11 @@
 				</td></tr>
 			</table>
 			
-			<div><span class="clickable readybutton">READY</span></div>
+			<div><span class="clickable readybutton">READY</span>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="clickable checkbutton">CHECK</span> <!--fleet correctness check -->
+			</div>
+			<div id="fleetcheck" class="panel large" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+		
 			
 		</div>
                     
