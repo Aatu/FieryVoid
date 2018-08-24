@@ -661,6 +661,9 @@
         <div id="infoTab" data-select="#gameinfo" class="logUiEntry">
             <span>INFO</span>
         </div>
+        <div id="declarationTab" data-select="#chat" class="logUiEntry"> <!-- fire and EW declarations review -->
+            <span>DECLARATIONS</span>
+        </div>	    
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
