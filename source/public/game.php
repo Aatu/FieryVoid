@@ -199,8 +199,7 @@
 	<script src="client/UI/systemInfo.js"></script>
     <script src="client/UI/shipwindow.js"></script>
     <script src="client/UI/fleetList.js"></script>
-    <script src="client/UI/gameInfo.js"></script>	
-    <script src="client/UI/declarations.js"></script>
+	<script src="client/UI/gameInfo.js"></script>
     <script src="client/UI/flightwindow.js"></script>
 	<script src="client/UI/confirm.js"></script>
 	<script src="client/model/ship.js"></script>
