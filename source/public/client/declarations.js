@@ -62,18 +62,20 @@ window.declarations = {
           if (!ship.flight){ //fighters do not emit any EW            
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
-	      dispEWEntry = new dispEWNew();		    
-              dispEWEntry.name = EWentry.type;
-              dispEWEntry.value = EWentry.amount;
-              if (EWentry.targetid>0){
-                var targetUnit = gamedata.getShip(EWentry.targetid);
-                dispEWEntry.targetName = targetUnit.name;
-                dispEWEntry.targetClass = targetUnit.shipClass;
-              }else{//targetless EW                
-                dispEWEntry.targetName = '';
-                dispEWEntry.targetClass = '';
-              }              
-              dispShip.EW.push(dispEWEntry);
+	      if (EWentry.type != 'DEW'){ //DEW already listed
+		      dispEWEntry = new dispEWNew();		    
+		      dispEWEntry.name = EWentry.type;
+		      dispEWEntry.value = EWentry.amount;
+		      if (EWentry.targetid>0){
+			var targetUnit = gamedata.getShip(EWentry.targetid);
+			dispEWEntry.targetName = targetUnit.name;
+			dispEWEntry.targetClass = targetUnit.shipClass;
+		      }else{//targetless EW                
+			dispEWEntry.targetName = '';
+			dispEWEntry.targetClass = '';
+		      }              
+		      dispShip.EW.push(dispEWEntry);
+	      }
             }
           }
         }else{ //by target - display EW dished out at self BY OPPONENT! (for fighters - CCEW)
@@ -82,8 +84,8 @@ window.declarations = {
             if (srcShip.team != ship.team){ //enemy ships only
               for (var e in srcShip.EW) {
                 var EWentry = srcShip.EW[e];
-                if(EWEntry.targetID == ship.id //self is target
-                  || (ship.flight && EWEntry.type == 'CCEW') //self is fighter and EWentry is CCEW
+                if (EWentry.targetID == ship.id //self is target
+                  || (ship.flight && EWentry.type == 'CCEW') //self is fighter and EWentry is CCEW
                 ){
 		  dispEWEntry = new dispEWNew();	 	
                   dispEWEntry.name = EWentry.type;
