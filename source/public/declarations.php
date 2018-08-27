@@ -31,14 +31,21 @@ window showing current declarations (fire/EW)
         dispShip.value = ship.pointCost;
         dispShip.EW = new Array();
         //now all EW entries...either own or incoming!
+        if(ship.flight){//for fighters, show jinking in all circumstances
+          dispEWEntry.name = 'jinking';
+          dispEWEntry.targetName = '';
+          dispEWEntry.targetClass = '';
+          dispEWEntry.value = shipManager.movement.getJinking(ship);
+          dispShip.EW.push(dispEWEntry);
+        }else{//for ships, show DEW in all circumstances
+          dispEWEntry.name = 'DEW';
+          dispEWEntry.targetName = '';
+          dispEWEntry.targetClass = '';
+          dispEWEntry.value = ew.getDefensiveEW(ship);
+          dispShip.EW.push(dispEWEntry);
+        }
         if(GlobalDisplay=='Source'){ //by source - display EW dished out by self!
-          if(!ship.flight){ //fighters do not emit any EW
-            //first entry is always DEW...
-            dispEWEntry.name = 'DEW';
-            dispEWEntry.targetName = '';
-            dispEWEntry.targetClass = '';
-            dispEWEntry.value = ew.getDefensiveEW(ship);
-            dispShip.EW.push(dispEWEntry);
+          if(!ship.flight){ //fighters do not emit any EW            
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
               dispEWEntry.name = EWentry.type;
@@ -54,10 +61,23 @@ window showing current declarations (fire/EW)
               dispShip.EW.push(dispEWEntry);
             }
           }
-        }else{ //by target - display EW dished out at self! (for fighters - CCEW)
-          
-          
-          
+        }else{ //by target - display EW dished out at self BY OPPONENT! (for fighters - CCEW)
+          for (var j in gamedata.ships){
+            var srcShip = gamedata.ships[j]; 
+            if(srcShip.team != ship.team){ //enemy ships only
+              for (var e in srcShip.EW) {
+                var EWentry = srcShip.EW[e];
+                if(EWEntry.targetID == ship.id //self is target
+                  || (ship.flight && EWEntry.type == 'CCEW') //self is fighter and EWentry is CCEW
+                ){
+                  dispEWEntry.name = EWentry.type;
+                  dispEWEntry.value = EWentry.amount;
+                  dispEWEntry.targetName = srcShip.name; //source, in this case
+                  dispEWEntry.targetClass = srcShip.shipClass;
+                }
+              }
+            }
+          }
         }
         dispShips.push(dispShip);
       }
