@@ -480,7 +480,7 @@ window.ew = {
 
     resetEW: function resetEW(shipID) {
         var ship = gamedata.ships[shipID];
-        ship.EW = array{};        
+        ship.EW = new Array();        
         var toInform = "EW is reset for " + ship.name;
         alert(toInform);
     }
