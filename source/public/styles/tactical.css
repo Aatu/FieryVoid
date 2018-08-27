@@ -840,13 +840,19 @@ body {
     #logUI #infoTab {
         left: 20%;
     }
-
-    #logUI #chatTab {
+	
+    #logUI #declarationTab {
         left: 40%;
     }
 
-    #logUI #globalChatTab {
+    #logUI #chatTab {
         left: 60%;
+	width: 15%;
+    }
+
+    #logUI #globalChatTab {
+        left: 75%;
+	width: 15%;    
     }
 
     #logUI #expandBotPanel {
