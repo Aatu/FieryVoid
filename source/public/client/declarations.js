@@ -119,8 +119,9 @@ window.declarations = {
 	  }
           txt += EWentry.targetName + ' ('+ EWentry.targetClass +')';
 	}
-	txt += '<br>'.
+	txt += '<br>';
       }
+    }
     
     return txt;
   }, //endof function readDeclarationsEW
