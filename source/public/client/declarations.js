@@ -49,7 +49,7 @@ window.declarations = {
               var EWentry = ship.EW[e];
               dispEWEntry.name = EWentry.type;
               dispEWEntry.value = EWentry.amount;
-              if (EWentry.targetid>=0){
+              if (EWentry.targetid>0){
                 var targetUnit = gamedata.getShip(EWentry.targetid);
                 dispEWEntry.targetName = targetUnit.name;
                 dispEWEntry.targetClass = targetUnit.shipClass;
@@ -103,7 +103,7 @@ window.declarations = {
       //reset EW button - for own ships
       if ( gamedata.gamephase == 1 && declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source') {//Initial phase, displaying own ships
         if (shpEntry.EW.count > 1 ){ //has something besides DEW!
-          txt += '<input type="button" value="Reset EW" onclick="doResetEW(' + shpEntry.id + ');">';
+          txt += '<input type="button" value="Reset EW" onclick="declarations.doResetEW(' + shpEntry.id + ');">';
         }
       }
       txt += '<br>';
