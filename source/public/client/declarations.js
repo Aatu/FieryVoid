@@ -43,7 +43,7 @@ window.declarations = {
           dispEWEntry.value = ew.getDefensiveEW(ship);
           dispShip.EW.push(dispEWEntry);
         }
-        if(GlobalDisplay=='Source'){ //by source - display EW dished out by self!
+        if(declarations.GlobalDisplay=='Source'){ //by source - display EW dished out by self!
           if (!ship.flight){ //fighters do not emit any EW            
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
@@ -101,7 +101,7 @@ window.declarations = {
       var shpEntry = dispShips[i];
       txt += '<b>' + shpEntry.name + ' (' + shpEntry.class + ') ' + '</b>';
       //reset EW button - for own ships
-      if ( gamedata.gamephase == 1 && globalSide=='Own' && GlobalDisplay=='Source') {//Initial phase, displaying own ships
+      if ( gamedata.gamephase == 1 && declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source') {//Initial phase, displaying own ships
         if (shpEntry.EW.count > 1 ){ //has something besides DEW!
           txt += '<input type="button" value="Reset EW" onclick="doResetEW(' + shpEntry.id + ');">';
         }
@@ -112,7 +112,7 @@ window.declarations = {
       	var EWentry = shpEntry.EW[e];
 	txt += EWentry.name + ' <b>' + EWentry.value + '</b>';
 	if (EWentry.targetName != ''){
-	  if (GlobalDisplay=='Source'){
+	  if (declarations.GlobalDisplay=='Source'){
 	    txt += ' at '  ;
 	  }else{
 	    txt += ' by ';
@@ -130,13 +130,13 @@ window.declarations = {
   //writes actual content to declarationsActual div
   fillDeclarationsActual: function fillDeclarationsActual() {
     //fix data (if not done yet)
-    if(GlobalSide=='') GlobalSide = 'Own';
-    if(GlobalContent=='') GlobalContent = 'EW';
-    if(GlobalDisplay=='') GlobalDisplay = 'Source';
+    if(declarations.GlobalSide=='') declarations.GlobalSide = 'Own';
+    if(declarations.GlobalContent=='') declarations.GlobalContent = 'EW';
+    if(declarations.GlobalDisplay=='') declarations.GlobalDisplay = 'Source';
     
     //prepare data (actually text!)
     var srcData = array();
-    if(globalContent=='EW'){
+    if(declarations.GlobalContent=='EW'){
       srcData = readDeclarationsEW();
     }else{
       
@@ -146,7 +146,7 @@ window.declarations = {
     var newText = '';
     //start with header
     newText = '<b><u>';
-    newText += GlobalSide + ' ' + GlobalContent + ' by ' + GlobalDisplay;
+    newText += declarations.GlobalSide + ' ' + declarations.GlobalContent + ' by ' + declarations.GlobalDisplay;
     newText += '</b></u><br>';
     //actual data
     newText += srcData;
@@ -158,15 +158,15 @@ window.declarations = {
   
 
   callOwn: function callOwn() {
-    GlobalSide = 'Own';
+    declarations.GlobalSide = 'Own';
     fillDeclarationsActual();
   },  
   callEnemy: function callEnemy() {
-    GlobalSide = 'Enemy';
+    declarations.GlobalSide = 'Enemy';
     fillDeclarationsActual();
   },    
   callEW: function callEW() {
-    GlobalContent = 'EW';
+    declarations.GlobalContent = 'EW';
     fillDeclarationsActual();
   },      
   callFire: function callFire() {
@@ -174,7 +174,7 @@ window.declarations = {
     fillDeclarationsActual();
   },  
   callSource: function callSource() {
-    GlobalDisplay = 'Source';
+    declarations.GlobalDisplay = 'Source';
     fillDeclarationsActual();
   },    
   callTarget: function callTarget() {
