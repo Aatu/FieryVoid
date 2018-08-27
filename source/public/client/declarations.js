@@ -1,9 +1,9 @@
 "use strict";
 
 window.declarations = {
-  //var GlobalSide = '',
- // var GlobalContent = '',
-  //var GlobalDisplay = '',
+   var GlobalSide = '',
+   var GlobalContent = '',
+   var GlobalDisplay = '',
 
   //resets EW and re-displays
   doResetEW: function doResetEW(shipID){
@@ -12,7 +12,7 @@ window.declarations = {
   },
   
   //reads appropriate EW declarations into table
-  function readDeclarationsEW(){
+  readDeclarationsEW: function readDeclarationsEW(){
     var dispShips = new Array(); 
     var dispShip = {id: 0, name: '', class: '', value: '', EW: new Array() };
     var dispEWEntry = {name: '', targetName: '', targetClass: '', value: 0};
@@ -80,21 +80,20 @@ window.declarations = {
         }
         dispShips.push(dispShip);
       }
-    }
-    
-    //sort ships by value
-		dispShips.sort(function(a, b){
-			if (a.flight && !b.flight){//fighters always after ships
-				return -1;
-      }elseif (!a.flight && b.flight){
-        return 1;
-			}elseif (a.value > b.value){ //more valuable units first
-        return 1;
-      }elseif (a.value < b.value){
-        return -1;
-			}
-			else return 0;
-		});
+    }    
+      //sort ships by value
+      dispShips.sort(function(a, b){
+	if (a.flight && !b.flight){//fighters always after ships
+		return -1;
+	      }elseif (!a.flight && b.flight){
+		return 1;
+				}elseif (a.value > b.value){ //more valuable units first
+		return 1;
+	      }elseif (a.value < b.value){
+		return -1;
+	      }
+	      else return 0;
+        });
     
     var txt = '';
     //change to text
@@ -109,14 +108,15 @@ window.declarations = {
       }
       txt += '<br>';
       
+	    
     }
     
     return txt;
-  }//endof function readDeclarationsEW
+  }, //endof function readDeclarationsEW
   
   
   //writes actual content to declarationsActual div
-  function fillDeclarationsActual() {
+  fillDeclarationsActual: function fillDeclarationsActual() {
     //fix data (if not done yet)
     if(GlobalSide=='') GlobalSide = 'Own';
     if(GlobalContent=='') GlobalContent = 'EW';
@@ -145,27 +145,27 @@ window.declarations = {
   } //endof function fillDeclarationsActual
   
 
-  function callOwn() {
+  callOwn: function callOwn() {
     GlobalSide = 'Own';
     fillDeclarationsActual();
   }  
-  function callEnemy() {
+  callEnemy: function callEnemy() {
     GlobalSide = 'Enemy';
     fillDeclarationsActual();
   }    
-  function callEW() {
+  callEW: function callEW() {
     GlobalContent = 'EW';
     fillDeclarationsActual();
   }      
-  function callFire() {
+  callFire: function callFire() {
     GlobalContent = 'Fire';
     fillDeclarationsActual();
   }  
-  function callSource() {
+  callSource: function callSource() {
     GlobalDisplay = 'Source';
     fillDeclarationsActual();
   }    
-  function callTarget() {
+  callTarget: function callTarget() {
     GlobalDisplay = 'Target';
     fillDeclarationsActual();
   }    
