@@ -19,10 +19,16 @@ window.declarations = {
 		this.class = "";
 		this.value = "";
 	}
+	function dispEWNew() {
+		this.name = "";
+		this.targetName = "";
+		this.targetClass = "";
+		this.value = 0;
+	}
 	  
     var dispShips = new Array(); 
     var dispShip = new dispShipNew();
-    var dispEWEntry = {name: '', targetName: '', targetClass: '', value: 0};
+    var dispEWEntry = new dispEWNew();
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
       if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
@@ -38,12 +44,14 @@ window.declarations = {
         dispShip.EW = new Array();
         //now all EW entries...either own or incoming!
         if (ship.flight){//for fighters, show jinking in all circumstances
+	  dispEWEntry = new dispEWNew();	
           dispEWEntry.name = 'jinking';
           dispEWEntry.targetName = '';
           dispEWEntry.targetClass = '';
           dispEWEntry.value = shipManager.movement.getJinking(ship);
           dispShip.EW.push(dispEWEntry);
         }else{//for ships, show DEW in all circumstances
+          dispEWEntry = new dispEWNew();	
           dispEWEntry.name = 'DEW';
           dispEWEntry.targetName = '';
           dispEWEntry.targetClass = '';
@@ -54,6 +62,7 @@ window.declarations = {
           if (!ship.flight){ //fighters do not emit any EW            
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
+	      dispEWEntry = new dispEWNew();		    
               dispEWEntry.name = EWentry.type;
               dispEWEntry.value = EWentry.amount;
               if (EWentry.targetid>0){
@@ -76,10 +85,12 @@ window.declarations = {
                 if(EWEntry.targetID == ship.id //self is target
                   || (ship.flight && EWEntry.type == 'CCEW') //self is fighter and EWentry is CCEW
                 ){
+		  dispEWEntry = new dispEWNew();	 	
                   dispEWEntry.name = EWentry.type;
                   dispEWEntry.value = EWentry.amount;
                   dispEWEntry.targetName = srcShip.name; //source, in this case
                   dispEWEntry.targetClass = srcShip.shipClass;
+		  dispShip.EW.push(dispEWEntry);
                 }
               }
             }
@@ -159,7 +170,7 @@ window.declarations = {
     newText += srcData;
     
     //display text
-    var targetDiv = $(".declarationsActual");
+    var targetDiv = document.getElementById("declarationsActual"); //$(".declarationsActual");
     targetDiv.html = newText;
   }, //endof function fillDeclarationsActual
   
