@@ -135,7 +135,7 @@ window.declarations = {
     if(declarations.GlobalDisplay=='') declarations.GlobalDisplay = 'Source';
     
     //prepare data (actually text!)
-    var srcData = array();
+    var srcData = '';
     if(declarations.GlobalContent=='EW'){ //display EW declarations
       srcData = declarations.readDeclarationsEW();
     }else{ //display fire declarations
