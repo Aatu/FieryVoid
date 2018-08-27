@@ -684,7 +684,9 @@
 
     </div>
     <div id="declarations" class="logPanelEntry" style="display:none;"> <!-- fire and EW declarations review -->
-
+	<?php
+	    include("declarations.php");
+	?>
     </div>
     
     <div id="chat" class="logPanelEntry" style="display:none;">
