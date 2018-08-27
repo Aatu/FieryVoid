@@ -6,7 +6,7 @@ window showing current declarations (fire/EW)
 
 <link href="styles/chat.css" rel="stylesheet" type="text/css">
 
-
+<script src="client/declarations.js"></script>
 
 
 
