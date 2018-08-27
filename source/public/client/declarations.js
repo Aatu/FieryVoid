@@ -13,10 +13,16 @@ window.declarations = {
   
   //reads appropriate EW declarations into table
   readDeclarationsEW: function readDeclarationsEW(){
+	function dispShip() {
+		this.id = -1;
+		this.name = "";
+		this.class = "";
+		this.value = "";
+	}
+	  
     var dispShips = new Array(); 
-    var dispShip = {id: 0, name: '', class: '', value: '', EW: new Array() };
+    var dispShip = new dispShip();
     var dispEWEntry = {name: '', targetName: '', targetClass: '', value: 0};
-    
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
       if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
@@ -24,6 +30,7 @@ window.declarations = {
         || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
         || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
       ){
+	dispShip = new dispShip();
         dispShip.id = ship.id;
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
@@ -110,7 +117,7 @@ window.declarations = {
       //now actual entries
       for(var e in shpEntry.EW){
       	var EWentry = shpEntry.EW[e];
-	txt += EWentry.name + ' <b>' + EWentry.value + '</b>';
+	txt += ' - ' + EWentry.name + ' <b>' + EWentry.value + '</b>';
 	if (EWentry.targetName != ''){
 	  if (declarations.GlobalDisplay=='Source'){
 	    txt += ' at '  ;
