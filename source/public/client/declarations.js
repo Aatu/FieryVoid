@@ -171,7 +171,8 @@ window.declarations = {
     
     //display text
     var targetDiv = document.getElementById("declarationsActual"); //$(".declarationsActual");
-    targetDiv.html = newText;
+    targetDiv.style.display = "block";
+    targetDiv.innerHTML = newText;
   }, //endof function fillDeclarationsActual
   
 
