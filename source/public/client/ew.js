@@ -476,6 +476,13 @@ window.ew = {
             ew.adEWindicators(ship);
         }
         drawEntities();
-    }
+    },
 
+    resetEW: function resetEW(shipID) {
+        var ship = gamedata.ships[shipID];
+        ship.EW = array{};        
+        var toInform = "EW is reset for " + ship.name;
+        alert(toInform);
+    }
+    
 };
