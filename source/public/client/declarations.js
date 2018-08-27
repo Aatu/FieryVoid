@@ -1,14 +1,14 @@
 "use strict";
 
 window.declarations = {
-   var GlobalSide = '',
-   var GlobalContent = '',
-   var GlobalDisplay = '',
+   GlobalSide : '',
+   GlobalContent : '',
+   GlobalDisplay : '',
 
   //resets EW and re-displays
   doResetEW: function doResetEW(shipID){
     ew.resetEW(shipID);
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },
   
   //reads appropriate EW declarations into table
@@ -19,10 +19,10 @@ window.declarations = {
     
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
-      if( (globalSide=='Own' && GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
-        || (globalSide!='Own' && GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
-        || (globalSide=='Own' && GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
-        || (globalSide!='Own' && GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
+      if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
+        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
+        || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
+        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
       ){
         dispShip.id = ship.id;
         dispShip.name = ship.name;
