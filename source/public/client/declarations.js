@@ -136,9 +136,9 @@ window.declarations = {
     
     //prepare data (actually text!)
     var srcData = array();
-    if(declarations.GlobalContent=='EW'){
-      srcData = readDeclarationsEW();
-    }else{
+    if(declarations.GlobalContent=='EW'){ //display EW declarations
+      srcData = declarations.readDeclarationsEW();
+    }else{ //display fire declarations
       
     }
     
@@ -159,27 +159,27 @@ window.declarations = {
 
   callOwn: function callOwn() {
     declarations.GlobalSide = 'Own';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },  
   callEnemy: function callEnemy() {
     declarations.GlobalSide = 'Enemy';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },    
   callEW: function callEW() {
     declarations.GlobalContent = 'EW';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },      
   callFire: function callFire() {
     GlobalContent = 'Fire';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },  
   callSource: function callSource() {
     declarations.GlobalDisplay = 'Source';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   },    
   callTarget: function callTarget() {
     declarations.GlobalDisplay = 'Target';
-    fillDeclarationsActual();
+    declarations.fillDeclarationsActual();
   }    
   
 }
