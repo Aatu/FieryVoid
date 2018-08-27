@@ -1,13 +1,15 @@
-<script>
-  var GlobalSide = '';
-  var GlobalContent = '';
-  var GlobalDisplay = '';
+"use strict";
+
+window.declarations = {
+  //var GlobalSide = '',
+ // var GlobalContent = '',
+  //var GlobalDisplay = '',
 
   //resets EW and re-displays
-  function doResetEW(shipID){
+  doResetEW: function doResetEW(shipID){
     ew.resetEW(shipID);
     fillDeclarationsActual();
-  }
+  },
   
   //reads appropriate EW declarations into table
   function readDeclarationsEW(){
@@ -168,4 +170,4 @@
     fillDeclarationsActual();
   }    
   
-</script>
+}
