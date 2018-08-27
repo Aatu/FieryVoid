@@ -13,7 +13,7 @@ window.declarations = {
   
   //reads appropriate EW declarations into table
   readDeclarationsEW: function readDeclarationsEW(){
-	function dispShip() {
+	function dispShipNew() {
 		this.id = -1;
 		this.name = "";
 		this.class = "";
@@ -21,7 +21,7 @@ window.declarations = {
 	}
 	  
     var dispShips = new Array(); 
-    var dispShip = new dispShip();
+    var dispShip = new dispShipNew();
     var dispEWEntry = {name: '', targetName: '', targetClass: '', value: 0};
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
@@ -30,7 +30,7 @@ window.declarations = {
         || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
         || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
       ){
-	dispShip = new dispShip();
+	dispShip = new dispShipNew();
         dispShip.id = ship.id;
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
