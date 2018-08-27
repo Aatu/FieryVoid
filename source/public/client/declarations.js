@@ -1,7 +1,7 @@
 "use strict";
 
 window.declarations = {
-   var GlobalSide = '',
+   GlobalSide: var GlobalSide = '',
    var GlobalContent = '',
    var GlobalDisplay = '',
 
