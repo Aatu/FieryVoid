@@ -107,8 +107,20 @@ window.declarations = {
         }
       }
       txt += '<br>';
-      
-	    
+      //now actual entries
+      for(var e in shpEntry.EW){
+      	var EWentry = shpEntry.EW[e];
+	txt += EWentry.name + ' <b>' + EWentry.value + '</b>';
+	if (EWentry.targetName != ''){
+	  if (GlobalDisplay=='Source'){
+	    txt += ' at '  ;
+	  }else{
+	    txt += ' by ';
+	  }
+          txt += EWentry.targetName + ' ('+ EWentry.targetClass +')';
+	}
+	txt += '<br>'.
+      }
     }
     
     return txt;
