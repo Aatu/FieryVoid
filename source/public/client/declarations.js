@@ -121,7 +121,6 @@ window.declarations = {
 	}
 	txt += '<br>'.
       }
-    }
     
     return txt;
   }, //endof function readDeclarationsEW
