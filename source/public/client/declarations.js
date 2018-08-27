@@ -85,11 +85,11 @@ window.declarations = {
       dispShips.sort(function(a, b){
 	if (a.flight && !b.flight){//fighters always after ships
 		return -1;
-	      }elseif (!a.flight && b.flight){
+	      }else if (!a.flight && b.flight){
 		return 1;
 				}elseif (a.value > b.value){ //more valuable units first
 		return 1;
-	      }elseif (a.value < b.value){
+	      }else if (a.value < b.value){
 		return -1;
 	      }
 	      else return 0;
