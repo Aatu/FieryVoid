@@ -49,7 +49,7 @@ window.declarations = {
               var EWentry = ship.EW[e];
               dispEWEntry.name = EWentry.type;
               dispEWEntry.value = EWentry.amount;
-              if (EWentry.targetid>0){
+              if (EWentry.targetid>=0){
                 var targetUnit = gamedata.getShip(EWentry.targetid);
                 dispEWEntry.targetName = targetUnit.name;
                 dispEWEntry.targetClass = targetUnit.shipClass;
