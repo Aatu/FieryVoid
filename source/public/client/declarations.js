@@ -87,7 +87,7 @@ window.declarations = {
 		return -1;
 	      }else if (!a.flight && b.flight){
 		return 1;
-				}elseif (a.value > b.value){ //more valuable units first
+	      }else if (a.value > b.value){ //more valuable units first
 		return 1;
 	      }else if (a.value < b.value){
 		return -1;
