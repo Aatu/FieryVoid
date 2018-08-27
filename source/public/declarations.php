@@ -12,6 +12,65 @@ window showing current declarations (fire/EW)
   var GlobalContent = '';
   var GlobalDisplay = '';
 
+  //reads appropriate EW declarations into table
+  function readDeclarationsEW(){
+    var dispShips = new Array(); 
+    var dispShip = {id: 0, name: '', class: '', value: '', EW: new Array() };
+    var dispEWEntry = {name: '', targetName: '', targetClass: '', value: 0};
+    
+    for (var i in gamedata.ships){
+      var ship = gamedata.ships[i];
+      if( (globalSide=='Own' && GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
+        || (globalSide!='Own' && GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
+        || (globalSide=='Own' && GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
+        || (globalSide!='Own' && GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
+      ){
+        dispShip.id = ship.id;
+        dispShip.name = ship.name;
+        dispShip.class = ship.shipClass;
+        dispShip.value = ship.pointCost;
+        dispShip.EW = new Array();
+        //now all EW entries...either own or incoming!
+        if(GlobalDisplay=='Source'){ //by source - display EW dished out by self!
+          if(!ship.flight){ //fighters do not emit any EW
+            //first entry is always DEW...
+            dispEWEntry.name = 'DEW';
+            dispEWEntry.targetName = '';
+            dispEWEntry.targetClass = '';
+            dispEWEntry.value = ew.getDefensiveEW(ship);
+            dispShip.EW.push(dispEWEntry);
+            for (var e in ship.EW) {
+              var EWentry = ship.EW[e];
+              dispEWEntry.name = EWentry.type;
+              dispEWEntry.value = EWentry.amount;
+              if(EWentry.targetid>0){
+                var targetUnit = gamedata.getShip(EWentry.targetid);
+                dispEWEntry.targetName = targetUnit.name;
+                dispEWEntry.targetClass = targetUnit.shipClass;
+              }else{//targetless EW                
+                dispEWEntry.targetName = '';
+                dispEWEntry.targetClass = '';
+              }              
+              dispShip.EW.push(dispEWEntry);
+            }
+          }
+        }else{ //by target - display EW dished out at self! (for fighters - CCEW)
+          
+          
+          
+        }
+        dispShips.push(dispShip);
+      }
+    }
+    
+    //sort ships by value
+    
+    
+    //change to text
+    
+    
+  }
+  
   //writes actual content to declarationsActual div
   function fillDeclarationsActual() {
     //fix data (if not done yet)
@@ -20,15 +79,26 @@ window showing current declarations (fire/EW)
     if(GlobalDisplay=='') GlobalDisplay = 'Source';
     
     //prepare data
-    
+    var srcData = array();
+    if(globalContent=='EW'){
+      srcData = readDeclarationsEW();
+    }else{
+      
+    }
     
     //prepare text
-    
+    var newText = '';
+    //start with header
+    newText = '<b><u>';
+    newText += GlobalSide + ' ' + GlobalContent + ' by ' + GlobalDisplay;
+    newText += '</b></u><br>';
+    //actual data
     
     //display text
-    
-
+    var targetDiv = $(".declarationsActual");
+    targetDiv.html = newText;
   }
+  
 
   function callOwn() {
     GlobalSide = 'Own';
