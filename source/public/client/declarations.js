@@ -154,31 +154,31 @@ window.declarations = {
     //display text
     var targetDiv = $(".declarationsActual");
     targetDiv.html = newText;
-  } //endof function fillDeclarationsActual
+  }, //endof function fillDeclarationsActual
   
 
   callOwn: function callOwn() {
     GlobalSide = 'Own';
     fillDeclarationsActual();
-  }  
+  },  
   callEnemy: function callEnemy() {
     GlobalSide = 'Enemy';
     fillDeclarationsActual();
-  }    
+  },    
   callEW: function callEW() {
     GlobalContent = 'EW';
     fillDeclarationsActual();
-  }      
+  },      
   callFire: function callFire() {
     GlobalContent = 'Fire';
     fillDeclarationsActual();
-  }  
+  },  
   callSource: function callSource() {
     GlobalDisplay = 'Source';
     fillDeclarationsActual();
-  }    
+  },    
   callTarget: function callTarget() {
-    GlobalDisplay = 'Target';
+    declarations.GlobalDisplay = 'Target';
     fillDeclarationsActual();
   }    
   
