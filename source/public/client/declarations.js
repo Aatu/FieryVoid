@@ -119,25 +119,27 @@ window.declarations = {
     //change to text
     for (var i in dispShips){
       var shpEntry = dispShips[i];
-      txt += '<b>' + shpEntry.name + ' (' + shpEntry.class + ') ' + '</b>';
+      txt += '<big><b>' + shpEntry.name + ' <i>(' + shpEntry.class + ')</i> ' + '</b></big>';
       //reset EW button - for own ships
+	/* ...maybe that won't be necessary...
       if ( gamedata.gamephase == 1 && declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source') {//Initial phase, displaying own ships
         if (shpEntry.EW.count > 1 ){ //has something besides DEW!
           txt += '<input type="button" value="Reset EW" onclick="declarations.doResetEW(' + shpEntry.id + ');">';
         }
       }
+      */
       txt += '<br>';
       //now actual entries
       for(var e in shpEntry.EW){
       	var EWentry = shpEntry.EW[e];
-	txt += ' - ' + EWentry.name + ' <b>' + EWentry.value + '</b>';
+	txt += ' -- ' + EWentry.name + ' <b>' + EWentry.value + '</b>';
 	if (EWentry.targetName != ''){
 	  if (declarations.GlobalDisplay=='Source'){
 	    txt += ' at '  ;
 	  }else{
 	    txt += ' by ';
 	  }
-          txt += EWentry.targetName + ' ('+ EWentry.targetClass +')';
+          txt += EWentry.targetName + ' <i>('+ EWentry.targetClass +')</i>';
 	}
 	txt += '<br>';
       }
@@ -165,9 +167,9 @@ window.declarations = {
     //prepare text
     var newText = '';
     //start with header
-    newText = '<b><u>';
+    newText = '<br><big><b><u>';
     newText += declarations.GlobalSide + ' ' + declarations.GlobalContent + ' by ' + declarations.GlobalDisplay;
-    newText += '</b></u><br>';
+    newText += '</b></u></big><br><br>';
     //actual data
     newText += srcData;
     
