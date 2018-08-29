@@ -18,6 +18,7 @@ window.declarations = {
 		this.name = "";
 		this.class = "";
 		this.value = "";
+		this.EW = new Array();
 	}
 	function dispEWNew() {
 		this.name = "";
@@ -157,49 +158,58 @@ window.declarations = {
 		this.name = "";
 		this.class = "";
 		this.value = "";
+		this.fire = new Array();
 	}
 	function dispFireNew() {
-		this.name = "";
+		this.wpnName = "";
 		this.oppName = "";
 		this.oppClass = "";
 		this.count = 0;
-		this.chance = "";
+		this.chanceMin = 1000;
+		this.chanceMax = -1000;
 	}
 	  
     var dispShips = new Array(); 
-    var dispShip = new dispShipNew();
-    var dispEWEntry = new dispEWNew();
+    var dispShip = new dispShipNew();    
     for (var i in gamedata.ships){
       var ship = gamedata.ships[i];
-      if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own ew, by source
-        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy EW, by source
-        || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own ew, by target
-        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy EW, by target
+      if( (declarations.GlobalSide=='Own' && declarations.GlobalDisplay=='Source' && gamedata.isMyShip(ship)) //own ship, own fire, by source
+        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay=='Source' && !gamedata.isMyShip(ship)) //enemy ship, enemy fire, by source
+        || (declarations.GlobalSide=='Own' && declarations.GlobalDisplay!='Source' && !gamedata.isMyShip(ship)) //enemy ship, own fire, by target
+        || (declarations.GlobalSide!='Own' && declarations.GlobalDisplay!='Source' && gamedata.isMyShip(ship)) //own ship, enemy fire, by target
       ){
 	dispShip = new dispShipNew();
         dispShip.id = ship.id;
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
         dispShip.value = ship.pointCost;
-        dispShip.EW = new Array();
-        //now all EW entries...either own or incoming!
-        if (ship.flight){//for fighters, show jinking in all circumstances
-	  dispEWEntry = new dispEWNew();	
-          dispEWEntry.name = 'jinking';
-          dispEWEntry.targetName = '';
-          dispEWEntry.targetClass = '';
-          dispEWEntry.value = shipManager.movement.getJinking(ship);
-          dispShip.EW.push(dispEWEntry);
-        }else{//for ships, show DEW in all circumstances
-          dispEWEntry = new dispEWNew();	
-          dispEWEntry.name = 'DEW';
-          dispEWEntry.targetName = '';
-          dispEWEntry.targetClass = '';
-          dispEWEntry.value = ew.getDefensiveEW(ship);
-          dispShip.EW.push(dispEWEntry);
-        }
-        if(declarations.GlobalDisplay=='Source'){ //by source - display EW dished out by self!
-          if (!ship.flight){ //fighters do not emit any EW            
+        //now all fire entries...either own or incoming!
+        if(declarations.GlobalDisplay=='Source'){ //by source - display fire dished out by self!  
+ 	  for (var sysNo = 0; sysNo < ship.systems.length; sysNo++){
+            var systemsTab = new Array();
+            if (!ship.flight){ //actual ship system
+	      systemsTab = [ship.systems[sysNo]];
+            }else{ //fighter - with subsystems!
+              systemsTab = ship.systems[sysNo].systems;
+            }
+            for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
+	      var actSys = systemsTab[actSysNo];
+	      if (actSys.fireOrders.length > 0){
+		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
+		  var order = ship.systems[sysNo].fireOrders[fireNo];
+		  if (order.type.indexOf('intercept') !== -1){ //this is actual offensive fire!
+		    var dispFireEntry = new dispFireNew();
+			  
+			  
+			  
+		  }
+		}      
+		      
+		    
+	      }
+	    }
+	  }
+		
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
 	      if (EWentry.type != 'DEW'){ //DEW already listed
@@ -217,7 +227,6 @@ window.declarations = {
 		      dispShip.EW.push(dispEWEntry);
 	      }
             }
-          }
         }else{ //by target - display EW dished out at self BY OPPONENT! (for fighters - CCEW)
           for (var j in gamedata.ships){
             var srcShip = gamedata.ships[j]; 
