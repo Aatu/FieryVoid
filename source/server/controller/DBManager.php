@@ -2108,6 +2108,14 @@ class DBManager
                     gameid = ?"
             );
             $this->executeGameDeleteStatement($stmt, $ids);
+
+            $stmt = $this->connection->prepare(
+                "DELETE FROM 
+                    tac_flightsize
+                WHERE
+                    gameid = ?"
+            );
+            $this->executeGameDeleteStatement($stmt, $ids);
         } catch (Exception $e) {
             throw $e;
         }
