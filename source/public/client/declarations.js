@@ -85,7 +85,7 @@ window.declarations = {
             if (srcShip.team != ship.team){ //enemy ships only
               for (var e in srcShip.EW) {
                 var EWentry = srcShip.EW[e];
-                if (EWentry.targetID == ship.id //self is target
+                if (EWentry.targetid == ship.id //self is target
                   || (ship.flight && EWentry.type == 'CCEW') //self is fighter and EWentry is CCEW
                 ){
 		  dispEWEntry = new dispEWNew();	 	
