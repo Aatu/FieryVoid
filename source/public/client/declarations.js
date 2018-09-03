@@ -339,6 +339,7 @@ window.declarations = {
     //display text
     var targetDiv = document.getElementById("declarationsActual"); //$(".declarationsActual");
     targetDiv.style.display = "block";
+    targetDiv.style.overflow-y = "auto";
     targetDiv.innerHTML = newText;
   }, //endof function fillDeclarationsActual
   
