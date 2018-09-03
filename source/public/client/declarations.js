@@ -105,13 +105,13 @@ window.declarations = {
       //sort ships by value
       dispShips.sort(function(a, b){
 	if (a.flight && !b.flight){//fighters always after ships
-		return -1;
+		return 1;
 	      }else if (!a.flight && b.flight){
-		return 1;
-	      }else if (a.value > b.value){ //more valuable units first
-		return 1;
-	      }else if (a.value < b.value){
 		return -1;
+	      }else if (a.value > b.value){ //more valuable units first
+		return -1;
+	      }else if (a.value < b.value){
+		return 1;
 	      }
 	      else return 0;
         });
@@ -268,13 +268,13 @@ window.declarations = {
       //sort ships by value
       dispShips.sort(function(a, b){
 	if (a.flight && !b.flight){//fighters always after ships
-		return -1;
+		return 1;
 	      }else if (!a.flight && b.flight){
-		return 1;
-	      }else if (a.value > b.value){ //more valuable units first
-		return 1;
-	      }else if (a.value < b.value){
 		return -1;
+	      }else if (a.value > b.value){ //more valuable units first
+		return -1;
+	      }else if (a.value < b.value){
+		return 1;
 	      }
 	      else return 0;
         });
