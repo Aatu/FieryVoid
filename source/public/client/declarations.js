@@ -356,7 +356,7 @@ window.declarations = {
     declarations.fillDeclarationsActual();
   },      
   callFire: function callFire() {
-    GlobalContent = 'Fire';
+    declarations.GlobalContent = 'Fire';
     declarations.fillDeclarationsActual();
   },  
   callSource: function callSource() {
