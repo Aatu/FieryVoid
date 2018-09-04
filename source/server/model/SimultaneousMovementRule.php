@@ -117,10 +117,8 @@ class SimultaneousMovementRule implements JsonSerializable {
             $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
             $this->setActiveShipPlayersNotWaiting($gameData, $dbManager);
         }else{
-            $gameData->setPhase(3);
-            $gameData->setActiveship(-1);
-            $dbManager->updateGamedata($gameData);
-            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
+            $movementPhase = new MovementGamePhase();
+            $movementPhase->advance($gameData, $dbManager);
         }
 
         return true;

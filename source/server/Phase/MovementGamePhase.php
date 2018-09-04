@@ -4,8 +4,21 @@ class MovementGamePhase implements Phase
 {
     public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
-        //this is done below after last ship has moved
-        //TODO: handle advance better: always when last order is submitted
+        //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
+        foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
+            if ($ship->isDestroyed() || $ship->base || $ship->smallBase)  {
+                continue;
+            }
+
+            $lastmove = $ship->getLastMovement();
+            $newMove = new MovementOrder(null, 'end', $lastmove->position, 0, 0, $lastmove->speed, $lastmove->heading, $lastmove->facing, false, $gameData->turn, 0, 0);
+            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
+        }
+
+        $gameData->setPhase(3);
+        $gameData->setActiveship(-1);
+        $dbManager->updateGamedata($gameData);
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);        
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
@@ -68,10 +81,7 @@ class MovementGamePhase implements Phase
             $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
             $dbManager->setPlayerWaitingStatus($nextship->userid, $gameData->id, false);
         }else{
-            $gameData->setPhase(3);
-            $gameData->setActiveship(-1);
-            $dbManager->updateGamedata($gameData);
-            $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
+          $this->advance($gameData, $dbManager);
         }
 
         return true;
