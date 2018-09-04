@@ -466,6 +466,10 @@ body {
     left:312px;
 }
 
+#declarationsTab.logUiEntry{
+    left:416px;
+}
+
 #settingsTab.logUiEntry{
     left:417px;
 }
