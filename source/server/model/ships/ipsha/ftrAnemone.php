@@ -27,6 +27,8 @@ class FtrAnemone extends FighterFlight{
         $this->jinkinglimit = 8;
         $this->turncost = 0.33;
         
+	$this->gravitic = true;
+
     	$this->iniativebonus = 18 *5;
         $this->populate();
     }

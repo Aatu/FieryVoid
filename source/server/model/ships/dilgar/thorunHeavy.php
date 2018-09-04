@@ -9,6 +9,8 @@ class ThorunHeavy extends FighterFlight{
         $this->phpclass = "ThorunHeavy";
         $this->shipClass = "Thorun Heavy Dartfighters";
 	$this->imagePath = "img/ships/thorun.png";
+
+        $this->occurence = "rare";
         $this->variantOf = "Thorun Dartfighters";
         
         $this->forwardDefense = 8;
@@ -39,11 +41,11 @@ class ThorunHeavy extends FighterFlight{
             $fighter->iconPath = "img/ships/thorun_large.png";
             
             if(count($this->systems) == 0 ){
-                $fighter->displayName = "Thorun Heavy Dartfighter Leader";  
+                $fighter->displayName = "Thorun Heavy Leader";  
                 $this->flightLeader = $fighter;
                 $fighter->iconPath = "img/ships/thorun_leader_large.png";
             } else {
-                $fighter->displayName = "Thorun Heavy Dartfighter";
+                $fighter->displayName = "Thorun Heavy";
             }
             
             $fighter->addFrontSystem(new PairedLightBoltCannon(330, 30, 4));

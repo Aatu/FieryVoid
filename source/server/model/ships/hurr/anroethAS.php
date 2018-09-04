@@ -5,11 +5,11 @@ class AnroethAS extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		    $this->pointCost = 26*6;
-		    $this->faction = "Hurr";
+		$this->pointCost = 26*6;
+		$this->faction = "Hurr";
         $this->phpclass = "AnroethAS";
         $this->shipClass = "Anroeth Assault Shuttles";
-		    $this->imagePath = "img/ships/doubleV.png";
+		$this->imagePath = "img/ships/doubleV.png";
         
         $this->forwardDefense = 9;
         $this->sideDefense = 10;
@@ -19,7 +19,8 @@ class AnroethAS extends FighterFlight{
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
-		    $this->iniativebonus = 9*5;
+		$this->hangarRequired = 'assault shuttles'; //for fleet check
+		$this->iniativebonus = 9*5;
       
         $this->populate();
     }

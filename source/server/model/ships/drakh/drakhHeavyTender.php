@@ -35,7 +35,7 @@ class DrakhHeavyTender extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 30, 6, 10));
 	$this->addPrimarySystem(new DrakhRaiderController(5, 10, 5, 1));
         $this->addPrimarySystem(new Engine(5, 30, 0, 10, 3));
-        $this->addPrimarySystem(new TractorBeam(5, 4, 0, 0));
+        $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
         $this->addPrimarySystem(new JumpEngine(5, 25, 5, 36));
 	$this->addPrimarySystem(new Hangar(4, 6, 2));
  		

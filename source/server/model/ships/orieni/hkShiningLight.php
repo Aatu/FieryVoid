@@ -19,6 +19,7 @@ class HkShiningLight extends FighterFlight{
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
         
+		$this->hangarRequired = 'medium'; //for fleet check; HKs require medium fighter hangar space
     	$this->iniativebonus = 6 *5;//no mistake, this is semi-autonomous unit without pilot - so its Ini is really low!
         $this->populate();     
         

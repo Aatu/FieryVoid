@@ -34,7 +34,7 @@ class TarzaNav extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("tarzaNav", $armour, 10, $this->id);
-            $fighter->displayName = "Tarza Torpedo Fighter";
+            $fighter->displayName = "Tarza";
             $fighter->imagePath = "img/ships/gorith.png";
             $fighter->iconPath = "img/ships/gorith_large.png";
             

@@ -50,13 +50,13 @@ class Faithful extends BaseShip{
         
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
         $this->addLeftSystem(new RapidGatling(2, 4, 1, 180, 360));
-        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
+        $this->addLeftSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
         $this->addLeftSystem(new CargoBay(2, 25));
         $this->addLeftSystem(new Thruster(4, 23, 0, 6, 3));
 
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
         $this->addRightSystem(new RapidGatling(2, 4, 1, 0, 180));
-        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 180, 360));
+        $this->addRightSystem(new HeavyLaserLance(3, 6, 4, 0, 180));
         $this->addRightSystem(new CargoBay(2, 25));
         $this->addRightSystem(new Thruster(4, 23, 0, 6, 4));
 

@@ -19,6 +19,7 @@ class trakhabp extends FighterFlight{
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
+		$this->hangarRequired = 'breaching pods'; //for fleet check; 
 		    $this->iniativebonus = 8*5;
       
         $this->populate();

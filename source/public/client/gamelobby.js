@@ -51,6 +51,434 @@ window.gamedata = {
         h.appendTo("#fleet");
         gamedata.calculateFleet();
     },
+	
+	/*returns ship variant as a single letter*/
+	variantLetter: function(ship){
+		var vLetter = '';		
+		switch(ship.occurence) {
+		    case 'unique':
+			vLetter = 'Q';
+			break;
+		    case 'rare':
+			vLetter = 'R';
+			break;
+		    case 'uncommon':
+			vLetter = 'U';
+			break;
+		    case 'common':
+			vLetter = 'C';
+			break;
+		    default: //assume something atypical
+			vLetter = 'X'; 
+		}	
+		return(vLetter);
+	},
+	
+	/*checks fleet composition and displays alert with result*/
+    checkChoices: function(){
+	    var checkResult = "";
+	    var problemFound = false;
+	    var warningFound = false;
+	    var slotid = gamedata.selectedSlot;
+            var selectedSlot = playerManager.getSlotById(slotid);
+	    
+	    var units10 = 0;
+	    var units33 = 0;
+	    var points10 = 0;
+	    var points33 = 0;
+	    var totalU = 0;
+	    var totalR = 0;
+	    var jumpDrivePresent = false;
+	    var capitalShips = 0;
+	    var totalShips = 0;
+	    var customShipPresent = false;
+	    var staticPresent = false;
+	    var shipTable = []; 
+	    
+	    var totalHangarH = 0; //hangarspace for heavy fighters
+	    var totalHangarM = 0; //hangarspace for medium fighters
+	    var totalHangarL = 0; //hangarspace for light fighters
+	    var totalHangarOther = new Array( ); //other hangarspace
+	    var totalFtrH = 0;//total heavy fighters
+	    var totalFtrM = 0;//total medium fighters
+	    var totalFtrL = 0;//total light fighters
+	    var totalFtrOther = new Array( );//total other small craft
+		var smallCraftUsed = new Array( );//small craft sizes that happen to be present, whether as hangar space or actual craft
+
+	    for (var i in gamedata.ships){
+            	var lship = gamedata.ships[i];
+            	if (lship.slot != slotid) continue;
+		if (lship.limited==10){
+			points10 += lship.pointCost;
+			units10 += 1;
+		}
+		if (lship.limited==33){
+			points33 += lship.pointCost;
+			units33 += 1;
+		}
+		var vLetter = gamedata.variantLetter(lship);
+		var hull = lship.variantOf; 
+		var hullFound;
+		hullFound = false;
+		if (hull == "") hull = lship.shipClass; //ship is either base itself, or base is indicated in variantOf variable
+		for (var j in  shipTable){
+			var oHull = shipTable[j];
+			if (oHull.name == hull){
+				hullFound = true;
+				oHull.Total++;
+				switch(vLetter) {
+				    case 'Q':
+					oHull.Q++;
+					totalR++;
+					break;
+				    case 'R':
+					oHull.R++;
+					totalR++;
+					break;
+				    case 'U':
+					oHull.U++;
+					totalU++;
+					break;
+				    case 'C':
+					oHull.C++;
+					break;
+				    default:
+					nHull.X++;
+			     	}
+			}
+		}
+		if (hullFound == false){
+		    var nHull = {name:hull, Total: 1, Q:0, R: 0, U: 0, C: 0, X: 0, isFtr:false};
+	            if(lship.flight){
+	            	nHull.isFtr = lship.flight;
+		    }
+		    switch(vLetter) {
+			    case 'Q':
+				nHull.Q++;
+				totalR++; //Unique is treated more or less the same as Rare
+				break;
+			    case 'R':
+				nHull.R++;
+				totalR++;
+				break;
+			    case 'U':
+				nHull.U++;
+				totalU++;
+				break;
+			    case 'C':
+				nHull.C++;
+				break;
+			    default:
+				nHull.X++;
+		     }
+		     shipTable.push(nHull);
+		}
+		if(!lship.flight){
+	            totalShips++;
+	            //check hangar space available...
+		    for(var h in lship.fighters){
+				var amount = lship.fighters[h];
+			    if(h == "normal" || h =="heavy"){
+					totalHangarH += amount;
+			    }else if(h=="medium"){ 
+					totalHangarM += amount;
+			    }else if(h=="light" || h=="ultralight"){ 
+					totalHangarL += amount;
+			    }else{ //something other than fighters
+					var found = false;
+					for(var nh in totalHangarOther){ 					
+						if (totalHangarOther[nh][0] == h){//this is small craft type we're looking for!
+							found = true;
+							totalHangarOther[nh][1] += amount;
+						}
+					}
+					if (found != true){ //such craft wasn't encountered yet
+						totalHangarOther.push(new Array(h,amount));
+						smallCraftUsed.push(h);
+					}
+			    }
+		    }
+		}else{//note presence of fighters
+			var smallCraftSize = 'not recognized';			
+			if (lship.hangarRequired != '') { //classify based on explicit info from craft
+				smallCraftSize = lship.hangarRequired;
+			}else{//classify depending on jinking limit...
+				if (lship.jinkinglimit>=10){
+					smallCraftSize = 'light';
+				}else if (lship.jinkinglimit>=8){
+					smallCraftSize = 'medium';
+				}else if (lship.jinkinglimit>=6){
+					smallCraftSize = 'heavy';
+				}
+			}
+			//now translate size into hangar space used...
+			if(smallCraftSize =="heavy"){
+				totalFtrH += lship.flightSize;
+			}else if(smallCraftSize=="medium"){ 
+				totalFtrM += lship.flightSize;
+			}else if(smallCraftSize=="light" || smallCraftSize=="ultralight"){ 
+				totalFtrL += lship.flightSize;
+			}else{ //something other than fighters
+				var found = false;
+				for(var nh in totalFtrOther){ 					
+					if (totalFtrOther[nh][0] == smallCraftSize){//this is small craft type we're looking for!
+						found = true;
+						totalFtrOther[nh][1] += lship.flightSize;
+					}
+				}
+				if (found != true){ //such craft wasn't encountered yet
+					totalFtrOther.push(new Array(smallCraftSize,lship.flightSize));
+					smallCraftUsed.push(smallCraftSize);
+				}
+			}
+		}
+		if (jumpDrivePresent == false){ //if already found there's no point
+			for (var a in lship.systems){
+				var sSystem = lship.systems[a];
+				if (sSystem.name=='jumpEngine') jumpDrivePresent = true;
+			}
+		}
+		if (lship.shipSizeClass >= 3) capitalShips++;
+		if (lship.unofficial){
+			customShipPresent = true;
+			warningFound = true;
+		}
+		if ((lship.base == true) || (lship.osat == true)) staticPresent = true;
+		    
+		    
+	    } //end of loop at ships preparing data
+	    
+	    
+
+	    checkResult = "Total fleet limit: " + selectedSlot.points + "<br><br>";
+	    
+	    //check: overall fleet traits
+	    checkResult += "Jump engine: "; //Jump Engine present?
+	    if (jumpDrivePresent){
+		    checkResult += " present";
+	    }else{		    
+		    checkResult += " NOT present! (at least one is required)";
+		    problemFound = true;
+	    }
+	    checkResult += "<br>";
+	    
+	    checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
+	    var capsRequired = Math.floor(selectedSlot.points/3000);
+	    if (capitalShips >= capsRequired){ //tournament rules: at least 1; changed for scalability
+		    checkResult += " OK";
+	    }else{		    
+		    checkResult += " FAILED! (at least " + capsRequired + " required)";
+		    problemFound = true;
+	    }
+	    checkResult += "<br>";
+	    
+	    //Custom units present?
+	    if (customShipPresent){
+		checkResult += "Custom unit(s) present! Opponent's permission required.<br>"; 	
+		warningFound = true;
+	    }
+	    
+	    //Static structures present?
+	    if (staticPresent){
+		   checkResult += "Static structures present! They're not allowed in pickup battle."; 
+		   problemFound = true;
+	    }
+	    checkResult += "<br>";
+	    
+	    
+	    var limit10 = Math.floor(selectedSlot.points*0.1);
+	    var limit33 = Math.floor(selectedSlot.points*0.33);
+	    var oneOverAllowed = false;	    
+	    checkResult += "<br><u><b>Deployment restrictions:</b></u><br>";
+	    checkResult += " - 10% bracket: " + points10 +"/" + limit10 + ": ";
+	    if (points10<=limit10){
+		    checkResult += "OK";
+	    }else{		
+		    if(units10==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
+			oneOverAllowed = true;
+			checkResult += "OK (one single ship is allowed to break limit)";
+		    }else{
+			checkResult += "FAILED! (too many points in this deployment bracket)";
+		    	problemFound = true;
+		    }
+	    }
+	    checkResult += "<br>";
+	    checkResult += " - 33% bracket: " + points33 +"/" + limit33 + ": ";
+	    if (points33<=limit33){
+		    checkResult += "OK";
+	    }else{		
+		    if(units33==1 && oneOverAllowed == false){ //only 1 unit, and this exception wasn't used yet
+			oneOverAllowed = true;
+			checkResult += "OK (one single ship is allowed to break limit)";
+		    }else{
+			checkResult += "FAILED! (too many points in this deployment bracket)";
+		    	problemFound = true;
+		    }
+	    }
+	    if(points10>0 && totalShips<2){
+		checkResult += "<br>Restricted (10%) ship present without escort! Such a rare ship needs to be accompanied by at least one other ship, unless it's Dargan or a Minbari ship.";
+		problemFound = true;
+	    }	    
+	    checkResult += "<br><br>";
+	    
+	    //variant restrictions
+	    checkResult += "<br>><u><b>Variant restrictions:</b></u><br><br>";
+	    var limitPerHull = Math.floor(selectedSlot.points/1000); //turnament rules: 3, but it's for 3500 points
+	    limitPerHull = Math.max(limitPerHull,2); //always allow at least 2!
+	    var currRlimit = 0;
+	    var currUlimit = 0;
+	    var sumVar = 0;
+	    for (var j in  shipTable){
+		var currHull = shipTable[j];
+		checkResult += " <i>" + currHull.name + "</i><br>";			
+		checkResult +=  " - Total: " + currHull.Total;
+		if (!currHull.isFtr){ //fighter total is not limited
+		    	checkResult +=  " (allowed " +limitPerHull+ ")";
+			if (currHull.Total>limitPerHull ){
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}
+		}
+		checkResult += "<br>";
+		currRlimit = Math.ceil(currHull.Total/9);
+		currUlimit = Math.ceil(currHull.Total/3);
+		sumVar = currHull.R + currHull.Q + currHull.U;
+		if (sumVar > 0){
+			checkResult += " - Uncommon/Rare/Unique: " + sumVar + " (allowed " +currUlimit+ ")";
+			if (sumVar>currUlimit){
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}
+			checkResult += "<br>";
+		}
+		sumVar = currHull.R + currHull.Q;
+		if (sumVar > 0){
+			checkResult += " - Rare/Unique: " + sumVar + " (allowed " +currRlimit+ ")";
+			if (sumVar>currRlimit){
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}
+			checkResult += "<br>";
+		}
+		sumVar = currHull.X;
+		if (sumVar > 0){
+			checkResult += " - Special: "+sumVar;
+			checkResult += " CORRECTNESS NOT CHECKED!";
+			warningFound = true;
+			checkResult += "<br>";
+		}  		
+	        checkResult += "<br>";
+	    }
+	    checkResult += "<br>";
+	    
+	    //total Uncommon/Rare units in fleet	    
+	    var limitUTotal =  0;
+	    if((selectedSlot.points-1500) > 0){
+	    	limitUTotal = Math.floor((selectedSlot.points-1500)/1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
+	    }
+	    limitUTotal = Math.max(limitUTotal,2); //always allow at least 2! 
+	    var totalCombined = totalU + 2*totalR; //Rares take 2 slots
+	    if (totalCombined>limitUTotal){
+		    checkResult += "FAILED: You have " + totalU + " Uncommon and " + totalR + " Rare units , out of total " + limitUTotal + " Uncommon allowed (Rare units count double).<br><br>" ;
+		    problemFound = true;
+	    }	    
+	    
+	    
+	    //fighters!
+	    var totalHangarAvailable = totalHangarH+totalHangarM+totalHangarL;
+	    var minFtrRequired = Math.ceil(totalHangarAvailable/2);
+	    var totalFtrPresent = totalFtrH+totalFtrM+totalFtrL;
+	    var totalFtrCurr = 0;
+	    var totalHangarCurr = 0;
+	    checkResult += "<br><b><u>Fighters:</u></b><br>";
+		checkResult +=  " - Total fighters: " + totalFtrPresent;
+	    checkResult +=  " (allowed between " +minFtrRequired+ " and " + totalHangarAvailable + ")";
+		if (totalFtrPresent > totalHangarAvailable || totalFtrPresent < minFtrRequired){ //fighter total is not within limits
+			checkResult += " FAILURE!";
+			problemFound = true;
+		}else{
+			checkResult += " OK";
+		}
+		checkResult += "<br>";
+	    
+		totalFtrCurr = totalFtrH+totalFtrM;
+		totalHangarCurr = totalHangarH+totalHangarM;
+		checkResult +=  " - Medium/Heavy Fighters: " + totalFtrCurr;
+		checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+		if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+			checkResult += " TOO MANY!";
+			problemFound = true;
+		}else{
+			checkResult += " OK";
+		}
+		checkResult += "<br>";
+	    
+		totalFtrCurr = totalFtrH;
+		totalHangarCurr = totalHangarH;
+		checkResult +=  " - Heavy Fighters: " + totalFtrCurr;
+	    	checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+		if (totalFtrCurr > totalHangarCurr){ //fighter total is not within limits
+			checkResult += " TOO MANY!";
+			problemFound = true;
+		}else{
+			checkResult += " OK";
+		}
+		checkResult += "<br>";
+	    
+		//make list of small craft in fleet contain only unique values...
+		var smallCraftUsedUnique = smallCraftUsed.filter(function(item, pos) {
+			return smallCraftUsed.indexOf(item) == pos;
+		})
+		
+		//list each small craft size used separately!
+		for(var sc in smallCraftUsedUnique){
+			var scSize = smallCraftUsedUnique[sc];
+			totalFtrCurr = 0;
+			totalHangarCurr = 0;
+			for(var nh in totalFtrOther){ 					
+				if (totalFtrOther[nh][0] == scSize){//this is small craft type we're looking for!
+					totalFtrCurr = totalFtrOther[nh][1] ;
+				}
+			}
+			for(var nh in totalHangarOther){ 					
+				if (totalHangarOther[nh][0] == scSize){//this is small craft type we're looking for!
+					totalHangarCurr = totalHangarOther[nh][1] ;
+				}
+			}	
+			checkResult +=  " - " + scSize + ": " + totalFtrCurr;
+			checkResult +=  " (allowed up to " + totalHangarCurr + ")";
+			if (totalFtrCurr > totalHangarCurr){ //small craft total is not within limits
+				checkResult += " TOO MANY!";
+				problemFound = true;
+			}else{
+				checkResult += " OK";
+			}
+			checkResult += "<br>";				
+		}
+		checkResult += "<br>";		
+			
+	    
+	    if (warningFound){
+		    checkResult = "Unchecked or non-canon elements found - check text for details.<br><br>"+checkResult;
+	    }
+	    
+	    if (problemFound){
+		    checkResult = "Overall: <b><u>FAILED</u></b>!<br><br>"+checkResult;
+	    }else{
+		    checkResult = "Overall: <b><u>OK</u></b>.<br><br>"+checkResult;
+	    }
+	    
+	    checkResult = "<b>FLEET CORRECTNESS REPORT</b><br>based on tournament rules, modified for scalability.<br><br>"+checkResult;   
+	    
+	    //alert(checkResult); //alert will be truncated by browser
+	    var targetDiv = document.getElementById("fleetcheck");
+	    targetDiv.style.display = "block";
+	    var targetSpan = document.getElementById("fleetchecktxt");
+	    targetSpan.innerHTML = checkResult;	    
+	    
+	    alert("Fleet check updated!");
+    }, //endof function checkChoices
+	
 
     constructFleetList: function constructFleetList() {
 

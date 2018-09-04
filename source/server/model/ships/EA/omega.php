@@ -109,14 +109,14 @@ class Omega  extends BaseShip{
                         9 => "Standard Particle Beam",
                         12 => "Interceptor II",
                         18 => "Structure",
-                        20 => "Structure",
+                        20 => "Primary",
                 ),
                 4=> array(
                         4 => "Thruster",
                         9 => "Standard Particle Beam",
                         12 => "Interceptor II",
                         18 => "Structure",
-                        20 => "Structure",
+                        20 => "Primary",
                 ),
         );
     }

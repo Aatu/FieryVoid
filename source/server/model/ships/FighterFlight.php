@@ -31,6 +31,7 @@ class FighterFlight extends BaseShip
 
     public $offensivebonus, $freethrust;
     public $jinkinglimit = 0;
+	public $hangarRequired = ''; //if left empty, will be classified based on Ini; fleet check only
 
 
     public $canvasSize = 200;

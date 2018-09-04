@@ -18,6 +18,7 @@ class scionbp extends SuperHeavyFighter{
         $this->jinkinglimit = 0;
         $this->turncost = 0.33;
 
+		$this->hangarRequired = 'breaching pods'; //for fleet check
         $this->iniativebonus = 9 *5;
         
         $armour = array(2, 2, 2, 2);

@@ -37,7 +37,7 @@ class Nota extends BaseShip{
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 1, 300, 360));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
-        $this->addFrontSystem(new LaserCutter(3, 0, 0, 240, 360));
+        $this->addFrontSystem(new LaserCutter(3, 0, 0, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 

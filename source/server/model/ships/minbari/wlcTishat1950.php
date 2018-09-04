@@ -34,7 +34,7 @@ class wlcTishat1950 extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 3, 3);
             $tishat = new Fighter("tishat", $armour, 9, $this->id);
-            $tishat->displayName = "Early Tishat Medium Fighter";
+            $tishat->displayName = "Tishat";
             $tishat->imagePath = "img/ships/tishat.png";
             $tishat->iconPath = "img/ships/tishat-large.png";
             $tishat->addFrontSystem(new LightFusionCannon(330, 30, 4, 2));

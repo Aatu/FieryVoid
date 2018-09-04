@@ -20,6 +20,7 @@ class RogolonVostorSHF extends SuperHeavyFighter{
         $this->turncost = 0.33;
         $this->turndelaycost = 0.25;
 
+		$this->hangarRequired = 'superheavy'; //for fleet check
         $this->iniativebonus = 70;
         $this->hasNavigator = true;
         
