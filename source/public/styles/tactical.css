@@ -845,17 +845,13 @@ body {
         left: 20%;
     }
 	
-    #logUI #declarationTab {
-        left: 40%;
-    }
-
     #logUI #chatTab {
-        left: 60%;
+        left: 40%;
 	width: 15%;
     }
 
     #logUI #globalChatTab {
-        left: 75%;
+        left: 60%;
 	width: 15%;    
     }
 
