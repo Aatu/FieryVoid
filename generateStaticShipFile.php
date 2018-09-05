@@ -16,7 +16,9 @@ foreach ($ships as $faction) {
 			print(" ");
 			print($ship->phpclass);
 			print("\n");
-            $data[$ship->faction][$ship->phpclass] = $ship;
+            if ($ship && $ship instanceof BaseShip) {
+                $data[$ship->faction][$ship->phpclass] = $ship;
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ window.StarField = (function(){
     {
         //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         
-        return;
+        //return;
 
         this.cleanUp();
 
@@ -66,7 +66,7 @@ window.StarField = (function(){
     StarField.prototype.render = function()
     {
 
-        return;
+        //return;
         if (! this.emitterContainer) {
             this.create();
         }

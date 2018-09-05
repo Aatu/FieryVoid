@@ -135,10 +135,10 @@ window.ShipIconContainer = function () {
 
     function createIcon(ship, scene) {
         if (ship.flight) {
-            //TODO: not the best place to create SCS
             return new window.FlightIcon(ship, scene);
         } else {
-            return new window.ShipIcon(ship, scene);
+            console.log(ship.shipModel)
+            return new window.shipObjects[ship.shipModel](ship, scene);
         }
     }
 

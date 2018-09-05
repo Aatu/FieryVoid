@@ -10,6 +10,8 @@ class Gunship extends ShipObject {
     }
 
     create () {
+        super.create();
+
         window.Loader.loadObject( 
             "img/3d/gunship/gunship.obj", 
             (object) => { 
@@ -30,17 +32,12 @@ class Gunship extends ShipObject {
                
                 object.scale.set(5, 5, 5)
                 this.startRotation = {x:90, y:90, z:0}
-                //object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
-                //object.position.set(0, 60, 0)
-                
                 this.shipObject = object
-                this.setRotation(0, 0, 0)
+                this.setRotation(this.rotation.x, this.rotation.y, this.rotation.z)
                 this.mesh.add(this.shipObject)
-                object.position.set(0, 0, this.defaultHeight)
+                object.position.set(0, 0, this.position.z)
             }
         )
-
-        super.create();
     }
 
 }
