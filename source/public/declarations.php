@@ -11,7 +11,7 @@ window showing current declarations (fire/EW)
 
 
 
-<div id=declarationsContainer" class="chatcontainer">
+<div id="declarationsContainer" class="chatcontainer">
     <div id="declarationsButtons" class = "chatMessages"> <!-- buttons directing what's to be displayed -->
       Side: <input type="button" value="Own" onclick="window.declarations.callOwn();"> <input type="button" value="Enemy" onclick="declarations.callEnemy();"> 
       <br>Content: <input type="button" value="EW" onclick="declarations.callEW();"> <input type="button" value="Fire" onclick="declarations.callFire();"> 
