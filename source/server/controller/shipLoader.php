@@ -29,7 +29,7 @@
             		$count = 0;
 			foreach ($names as $name){
 				if (class_exists($name)){
-                    			$count++;
+                    $count++;
 					$ship = new $name($count, 0, "", 0, 0, false, false, array());
 					if($faction && $ship->faction != $faction){
 						continue;

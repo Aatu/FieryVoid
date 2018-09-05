@@ -6,7 +6,17 @@ class Loader {
         this.loadedTextures = {};
 
         this.objectLoader = new THREE.OBJLoader();
+        this.gltfLoader = new THREE.GLTFLoader();
+        this.daeLoader = new THREE.ColladaLoader();
         this.textureLoader = new THREE.TextureLoader()
+    }
+
+    loadObjectGLTF(objectLocation, callback) {
+        return this.gltfLoader.load(objectLocation, callback)
+    }
+
+    loadObjectDae(objectLocation, callback) {
+        return this.daeLoader.load(objectLocation, callback)
     }
 
     loadObject(objectLocation, callback) {

@@ -9,9 +9,7 @@ $data = [];
 
 foreach ($ships as $faction) {
     foreach ($faction as $ship) {
-        print(gettype($ship));
         if ($ship && $ship instanceof BaseShip) {
-            print("hi");
             $data[$ship->faction][$ship->phpclass] = $ship;
         }
     }

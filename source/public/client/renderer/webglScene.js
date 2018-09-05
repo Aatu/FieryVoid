@@ -50,11 +50,17 @@ window.webglScene = function () {
         
         this.camera.lookAt(0, 0, 0)
 
-        this.ship = new window.shipObjects.Gunship({}, this.scene);
-
         
-        this.ship2 = new window.shipObjects.Rhino({}, this.scene);
-        this.ship2.setPosition(100, 0)
+        this.ship = new window.shipObjects.Capital({movement: [{
+            turn: 0,
+            facing: 1,
+            heading: 1,
+            position: {x: 0, y: 0},
+            xOffset: 0,
+            yOffset: 0
+        }]}, this.scene);
+        
+
         /*
         var aspect = window.innerWidth / window.innerHeight;
         var d = 20;
@@ -293,18 +299,16 @@ window.webglScene = function () {
         this.starField.render();
 
         time++
+    
+
         if (this.ship) {
-            //this.ship.setPosition(time, 0, 0);
-        }
 
-        if (this.testObject) {
-
-            this.testObject.rotation.set(mathlib.degreeToRadian(90 + time), mathlib.degreeToRadian(90 + time/3), 0);
+            this.ship.setRotation(time/3,time/3, 0);
         }
 
         if (this.testObject2) {
 
-            this.testObject2.rotation.set(mathlib.degreeToRadian(90 + time), mathlib.degreeToRadian(90 + time/3), 0);
+            this.testObject2.rotation.set(mathlib.degreeToRadian(90 + time/3), mathlib.degreeToRadian(90 + time/3), 0);
         }
 
         //this.testParticleEmitter.render(time, time, 0, 0, 1);
