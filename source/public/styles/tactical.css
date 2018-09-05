@@ -477,15 +477,15 @@ body {
 
 #declarationsContainer{	
     overflow-y: scroll;
-    overflow-x: none;
+    overflow-x: hidden;
 }
 #declarationsButtons{	
-    overflow-y: none;
-    overflow-x: none;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 #declarationsActual{	
     overflow-y: visible;
-    overflow-x: none;
+    overflow-x: visible;
 }
 
 #expandBotPanel{
