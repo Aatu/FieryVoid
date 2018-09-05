@@ -466,18 +466,19 @@ body {
     left:312px;
 }
 
-#declarationsTab.logUiEntry{
-    left:422px;
-}
-
 #settingsTab.logUiEntry{
     left:417px;
 }
 
-.declarationsContainer{	
+
+#declarationsTab.logUiEntry{
+    left:416px;
+}
+
+#declarationsContainer{	
     overflow-y:scroll;
 }
-.declarationsButtons{	
+#declarationsButtons{	
     overflow-y: none;
     overflow-x: none;
 }
