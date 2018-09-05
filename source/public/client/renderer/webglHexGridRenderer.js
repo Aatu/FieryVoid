@@ -36,9 +36,6 @@ window.webglHexGridRenderer = function () {
         scene.add(this.mesh);
 
         drawGameSpace(scene);
-
-        //debug(scene);
-        //debug2(scene);
     };
 
     function drawGameSpace(scene) {
@@ -65,7 +62,7 @@ window.webglHexGridRenderer = function () {
             y: 0
         };
 
-        var sprite = new window.BoxSprite(size, 10, 0, new THREE.Color(0, 0, 0), 1);
+        var sprite = new window.BoxSprite(size, 10, 0, new THREE.Color(1, 1, 1), 0.5);
 
         sprite.setPosition(position);
         scene.add(sprite.mesh);
