@@ -201,16 +201,7 @@ class DBManager
     public function deleteEmptyGames()
     {
         $ids = array();
-        $stmt = $this->connection->prepare("
-            SELECT 
-                gameid, playerid
-            FROM
-                tac_playeringame
-            GROUP BY 
-                gameid 
-            HAVING
-                count(playerid) = 0
-        ");
+        $stmt = $this->connection->prepare("SELECT gameid, count(playerid) as players FROM tac_playeringame GROUP BY gameid HAVING players = 0");
 
         if ($stmt) {
             $stmt->bind_result($id, $playerid);
