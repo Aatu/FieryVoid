@@ -467,11 +467,19 @@ body {
 }
 
 #declarationsTab.logUiEntry{
-    left:416px;
+    left:422px;
 }
 
 #settingsTab.logUiEntry{
     left:417px;
+}
+
+.declarationsContainer{	
+    overflow-y:scroll;
+}
+.declarationsButtons{	
+    overflow-y: none;
+    overflow-x: none;
 }
 
 #expandBotPanel{
