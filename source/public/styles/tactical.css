@@ -475,8 +475,9 @@ body {
     left:416px;
 }
 
-#declarationsContainer{	
-    overflow-y:scroll;
+#declarationsContainer.chatcontainer{	
+    overflow-x: none;
+    overflow-y: scroll;
 }
 #declarationsButtons{	
     overflow-y: none;
