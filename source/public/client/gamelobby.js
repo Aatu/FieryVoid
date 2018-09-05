@@ -853,7 +853,8 @@ window.gamedata = {
     onLeaveSlotClicked: function onLeaveSlotClicked() {
         var slot = $(".slot").has($(this));
         var slotid = slot.data("slotid");
-        ajaxInterface.submitSlotAction("leaveslot", slotid);
+		ajaxInterface.submitSlotAction("leaveslot", slotid);
+		window.location = "games.php";
     },
 
     enableBuy: function enableBuy() {
