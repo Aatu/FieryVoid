@@ -140,7 +140,7 @@ window.declarations = {
 	  }else{
 	    txt += ' by ';
 	  }
-          txt += EWentry.targetName + ' <i>('+ EWentry.targetClass +')</i>';
+          txt += '<b>'+ EWentry.targetName + '</b> <i>('+ EWentry.targetClass +')</i>';
 	}
 	txt += '<br>';
       }
@@ -192,7 +192,15 @@ window.declarations = {
             if (!ship.flight){ //actual ship system
 	      systemsTab = [ship.systems[sysNo]];
             }else{ //fighter - with subsystems!
-              systemsTab = ship.systems[sysNo].systems;
+              //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
+	      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
+	      if (ship.systems[sysNo]){ //such fighter exists
+		for (var subSysNo = 0;subSysNo<ship.systems[sysNo].systems.length;subSysNo++){
+		  if ( ship.systems[sysNo].systems[subSysNo]) {  
+              	    systemsTab.push(ship.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
+		  }
+		}
+	      }
             }
             for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
 	      var actSys = systemsTab[actSysNo];
@@ -200,6 +208,7 @@ window.declarations = {
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 		  var weapon = ship.systems[sysNo];
 		  var order = ship.systems[sysNo].fireOrders[fireNo];
+var justATest = order.type.indexOf('intercept');			
 		  if (order.type.indexOf('intercept') !== -1){ //this is actual offensive fire!
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
@@ -295,7 +304,7 @@ window.declarations = {
 	  txt += ' by ';
 	}
 	if (salvo.oppName != ''){	  
-          txt += salvo.oppName + ' <i>('+ salvo.targetClass +')</i>';
+          txt += '<b>' + salvo.oppName + '</b> <i>('+ salvo.targetClass +')</i>';
 	  txt += ', ' + salvo.chanceMin;
 	  if (salvo.chanceMax > salvo.chanceMin){
 	     txt += '..' + salvo.chanceMax;
