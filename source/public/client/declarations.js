@@ -195,10 +195,8 @@ window.declarations = {
               //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
 	      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
 	      if (ship.systems[sysNo]){ //such fighter exists
-		for (var subSysNo = 0;subSysNo<ship.systems[sysNo].systems.length;subSysNo++){
-		  if ( ship.systems[sysNo].systems[subSysNo]) {  
-              	    systemsTab.push(ship.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
-		  }
+		for (var subSystem in ship.systems[sysNo].systems){
+              	  systemsTab.push(subSystem); //creating table with actual systems only...
 		}
 	      }
             }
@@ -206,8 +204,8 @@ window.declarations = {
 	      var actSys = systemsTab[actSysNo];
 	      if (actSys.fireOrders.length > 0){
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
-		  var weapon = actSys;//ship.systems[sysNo];
-		  var order = actSys.fireOrders[fireNo]; //ship.systems[sysNo].fireOrders[fireNo];
+		  var weapon = actSys;
+		  var order = actSys.fireOrders[fireNo]; 
 		  if (order.type.indexOf('intercept') == -1){ //this is actual offensive fire!
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
@@ -249,26 +247,81 @@ window.declarations = {
 	    }
 	  }		
         }else{ //by target - display EW dished out at self BY OPPONENT! (for fighters - CCEW)
-		/*
-          for (var j in gamedata.ships){
+	  for (var j in gamedata.ships){
             var srcShip = gamedata.ships[j]; 
-            if (srcShip.team != ship.team){ //enemy ships only
-              for (var e in srcShip.EW) {
-                var EWentry = srcShip.EW[e];
-                if (EWentry.targetID == ship.id //self is target
-                  || (ship.flight && EWentry.type == 'CCEW') //self is fighter and EWentry is CCEW
-                ){
-		  dispEWEntry = new dispEWNew();	 	
-                  dispEWEntry.name = EWentry.type;
-                  dispEWEntry.value = EWentry.amount;
-                  dispEWEntry.targetName = srcShip.name; //source, in this case
-                  dispEWEntry.targetClass = srcShip.shipClass;
-		  dispShip.EW.push(dispEWEntry);
-                }
-              }
-            }
-          }
-	  */
+            if (srcShip.team != ship.team) { //enemy units only!
+		    
+		  for (var sysNo = 0; sysNo < srcShip.systems.length; sysNo++){
+		    var systemsTab = new Array();
+		    if (!srcShip.flight){ //actual ship system
+		      systemsTab = [ship.systems[sysNo]];
+		    }else{ //fighter - with subsystems!
+		      //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
+		      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
+		      if (srcShip.systems[sysNo]){ //such fighter exists
+			for (var subSystem in ship.systems[sysNo].systems){
+              	  	  systemsTab.push(subSystem); //creating table with actual systems only...
+			}
+			      /*old version, to be deleted later
+			for (var subSysNo = 0;subSysNo<srcShip.systems[sysNo].systems.length;subSysNo++){
+			  if ( srcShip.systems[sysNo].systems[subSysNo]) {  
+			    systemsTab.push(srcShip.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
+			  }
+			}
+			*/
+		      }
+		    }
+		    for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
+		      var actSys = systemsTab[actSysNo];
+		      if (actSys.fireOrders.length > 0){
+			for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
+			  var weapon = actSys;//ship.systems[sysNo];
+			  var order = actSys.fireOrders[fireNo]; 
+			  if (order.type.indexOf('intercept') == -1 && order.){ 
+			    var dispFireEntry = new dispFireNew();
+			    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
+			    if (order.calledid > -1 ){
+			      dispFireEntry.wpnName += ' CALLED';
+			      dispFireEntry.calledid = order.calledid;
+			    }
+			    dispFireEntry.oppId = order.targetid;
+			    //if such order exists, on list, find it; else fill basic data and add to list
+			    var alreadyExists = false;
+			    for (var existingEntry in dispShip.fire){
+			      var extEntry = dispShip.fire[existingEntry];
+			      if ( extEntry.wpnName == dispFireEntry.wpnName && extEntry.oppId == dispFireEntry.oppId ){
+				dispFireEntry = extEntry;    
+				alreadyExists = true;
+			      }
+			    }
+			    var targetUnit;
+			    if (dispFireEntry.oppId > -1){
+			      targetUnit = gamedata.getShip(dispFireEntry.oppId);
+			    }
+			    if(!alreadyExists){ //fill initial data
+			      if (dispFireEntry.oppId > -1){
+				dispFireEntry.oppName = targetUnit.name; 
+				dispFireEntry.oppClass = targetUnit.shipClass;
+			      }
+			      dispFireEntry.calledid = order.calledid;
+			      dispShip.fire.push(dispFireEntry);
+			    }
+			    dispFireEntry.count++;
+			    if(dispFireEntry.oppId > -1){ //fire at actual target
+			      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
+			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
+			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
+			    }			  
+			  }
+			}    
+		      }
+		    }
+		  }
+	  
+		    
+		    
+	    }
+	  }
         }
         dispShips.push(dispShip);
       }
@@ -303,7 +356,7 @@ window.declarations = {
 	  txt += ' by ';
 	}
 	if (salvo.oppName != ''){	  
-          txt += '<b>' + salvo.oppName + '</b> <i>('+ salvo.targetClass +')</i>';
+          txt += '<b>' + salvo.oppName + '</b> <i>('+ salvo.oppClass +')</i>';
 	  txt += ', ' + salvo.chanceMin;
 	  if (salvo.chanceMax > salvo.chanceMin){
 	     txt += '..' + salvo.chanceMax;
