@@ -200,8 +200,7 @@ window.declarations = {
 		}
 	      }
             }
-            for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
-	      var actSys = systemsTab[actSysNo];
+            for (var actSys in systemsTab){
 	      if (actSys.fireOrders.length > 0){
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 		  var weapon = actSys;
@@ -271,8 +270,11 @@ window.declarations = {
 */
 		      }
 		    }
+            	    for (var actSys in systemsTab){
+/*old version, to be deleted later
 		    for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
 		      var actSys = systemsTab[actSysNo];
+*/		      
 		      if (actSys.fireOrders.length > 0){
 			for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 			  var weapon = actSys;
