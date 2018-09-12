@@ -297,7 +297,7 @@ window.declarations = {
 			      dispShip.fire.push(dispFireEntry);
 			    }
 			    dispFireEntry.count++;
-			      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
+			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid);
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 			  }
