@@ -255,7 +255,7 @@ window.declarations = {
 		  for (var sysNo = 0; sysNo < srcShip.systems.length; sysNo++){
 		    var systemsTab = new Array();
 		    if (!srcShip.flight){ //actual ship system
-		      systemsTab = [ship.systems[sysNo]];
+		      systemsTab = [srcShip.systems[sysNo]];
 		    }else{ //fighter - with subsystems!
 		      //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
 		      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
