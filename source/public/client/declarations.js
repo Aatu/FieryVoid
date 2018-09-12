@@ -262,29 +262,29 @@ window.declarations = {
 			for (var subSystem in ship.systems[sysNo].systems){
               	  	  systemsTab.push(subSystem); //creating table with actual systems only...
 			}
-			      /*old version, to be deleted later
+/*old version, to be deleted later
 			for (var subSysNo = 0;subSysNo<srcShip.systems[sysNo].systems.length;subSysNo++){
 			  if ( srcShip.systems[sysNo].systems[subSysNo]) {  
 			    systemsTab.push(srcShip.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
 			  }
 			}
-			*/
+*/
 		      }
 		    }
 		    for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
 		      var actSys = systemsTab[actSysNo];
 		      if (actSys.fireOrders.length > 0){
 			for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
-			  var weapon = actSys;//ship.systems[sysNo];
+			  var weapon = actSys;
 			  var order = actSys.fireOrders[fireNo]; 
-			  if (order.type.indexOf('intercept') == -1 && order.){ 
+			  if (order.type.indexOf('intercept') == -1 && order.targetid == ship.id){ //fire at self!
 			    var dispFireEntry = new dispFireNew();
 			    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
 			    if (order.calledid > -1 ){
 			      dispFireEntry.wpnName += ' CALLED';
 			      dispFireEntry.calledid = order.calledid;
 			    }
-			    dispFireEntry.oppId = order.targetid;
+			    dispFireEntry.oppId = srcShip; //actually, here firing ship id!
 			    //if such order exists, on list, find it; else fill basic data and add to list
 			    var alreadyExists = false;
 			    for (var existingEntry in dispShip.fire){
@@ -294,31 +294,21 @@ window.declarations = {
 				alreadyExists = true;
 			      }
 			    }
-			    var targetUnit;
-			    if (dispFireEntry.oppId > -1){
-			      targetUnit = gamedata.getShip(dispFireEntry.oppId);
-			    }
 			    if(!alreadyExists){ //fill initial data
-			      if (dispFireEntry.oppId > -1){
-				dispFireEntry.oppName = targetUnit.name; 
-				dispFireEntry.oppClass = targetUnit.shipClass;
-			      }
+			      dispFireEntry.oppName = srcShip.name; 
+			      dispFireEntry.oppClass = srcShip.shipClass;
 			      dispFireEntry.calledid = order.calledid;
 			      dispShip.fire.push(dispFireEntry);
 			    }
 			    dispFireEntry.count++;
-			    if(dispFireEntry.oppId > -1){ //fire at actual target
 			      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
-			    }			  
 			  }
 			}    
 		      }
 		    }
 		  }
-	  
-		    
 		    
 	    }
 	  }
