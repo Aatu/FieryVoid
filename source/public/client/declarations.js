@@ -239,7 +239,7 @@ window.declarations = {
 		    }
 	            dispFireEntry.count++;
 	            if(dispFireEntry.oppId > -1){ //fire at actual target
-		      var toHit = weaponManager.calculateHitChange(dispShip, targetUnit, weapon, order.calledid);
+		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
 		      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 		      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 		    }			  
