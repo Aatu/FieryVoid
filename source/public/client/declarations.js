@@ -206,10 +206,9 @@ window.declarations = {
 	      var actSys = systemsTab[actSysNo];
 	      if (actSys.fireOrders.length > 0){
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
-		  var weapon = ship.systems[sysNo];
-		  var order = ship.systems[sysNo].fireOrders[fireNo];
-var justATest = order.type.indexOf('intercept');			
-		  if (order.type.indexOf('intercept') !== -1){ //this is actual offensive fire!
+		  var weapon = actSys;//ship.systems[sysNo];
+		  var order = actSys.fireOrders[fireNo]; //ship.systems[sysNo].fireOrders[fireNo];
+		  if (order.type.indexOf('intercept') == -1){ //this is actual offensive fire!
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
 	            if (order.calledid > -1 ){
