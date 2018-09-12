@@ -195,12 +195,15 @@ window.declarations = {
               //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
 	      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
 	      if (ship.systems[sysNo]){ //such fighter exists
-		for (var subSystem in ship.systems[sysNo].systems){
-              	  systemsTab.push(subSystem); //creating table with actual systems only...
-		}
+			for (var subSysNo = 0;subSysNo<srcShip.systems[sysNo].systems.length;subSysNo++){
+			  if ( srcShip.systems[sysNo].systems[subSysNo]) {  
+			    systemsTab.push(srcShip.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
+			  }
+			}
 	      }
             }
-            for (var actSys in systemsTab){
+	    for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
+	      var actSys = systemsTab[actSysNo];	    
 	      if (actSys.fireOrders.length > 0){
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 		  var weapon = actSys;
@@ -248,8 +251,7 @@ window.declarations = {
         }else{ //by target - display EW dished out at self BY OPPONENT! (for fighters - CCEW)
 	  for (var j in gamedata.ships){
             var srcShip = gamedata.ships[j]; 
-            if (srcShip.team != ship.team) { //enemy units only!
-		    
+            if (srcShip.team != ship.team) { //enemy units only!		    
 		  for (var sysNo = 0; sysNo < srcShip.systems.length; sysNo++){
 		    var systemsTab = new Array();
 		    if (!srcShip.flight){ //actual ship system
@@ -258,23 +260,15 @@ window.declarations = {
 		      //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
 		      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
 		      if (srcShip.systems[sysNo]){ //such fighter exists
-			for (var subSystem in ship.systems[sysNo].systems){
-              	  	  systemsTab.push(subSystem); //creating table with actual systems only...
-			}
-/*old version, to be deleted later
 			for (var subSysNo = 0;subSysNo<srcShip.systems[sysNo].systems.length;subSysNo++){
 			  if ( srcShip.systems[sysNo].systems[subSysNo]) {  
 			    systemsTab.push(srcShip.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
 			  }
 			}
-*/
 		      }
 		    }
-            	    for (var actSys in systemsTab){
-/*old version, to be deleted later
 		    for (var actSysNo = 0; actSysNo < systemsTab.length; actSysNo++){
-		      var actSys = systemsTab[actSysNo];
-*/		      
+		      var actSys = systemsTab[actSysNo];	      
 		      if (actSys.fireOrders.length > 0){
 			for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 			  var weapon = actSys;
