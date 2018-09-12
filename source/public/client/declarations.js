@@ -195,9 +195,9 @@ window.declarations = {
               //BUT both fighter and subsystem numeration is strange (eg. 10-elements table with only 1 or 2 elements)
 	      systemsTab = new Array(); //if fighter does not exist, this will be just left empty
 	      if (ship.systems[sysNo]){ //such fighter exists
-			for (var subSysNo = 0;subSysNo<srcShip.systems[sysNo].systems.length;subSysNo++){
-			  if ( srcShip.systems[sysNo].systems[subSysNo]) {  
-			    systemsTab.push(srcShip.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
+			for (var subSysNo = 0;subSysNo<ship.systems[sysNo].systems.length;subSysNo++){
+			  if ( ship.systems[sysNo].systems[subSysNo]) {  
+			    systemsTab.push(ship.systems[sysNo].systems[subSysNo]); //creating table with actual systems only...
 			  }
 			}
 	      }
