@@ -194,21 +194,18 @@
 }
 
 .ui .surrender{
-    	position:absolute;
+    position:absolute;
 	left:175px;
 	top:0px;
-	background-image: url("../img/surrender_icon.png");
-    cursor: pointer;
-    height: 30px;
-    width: 30px;
-    }
+}
 
-.ui .surrender2{
+.surrender{
 	background-image: url("../img/surrender_icon.png");
+    background-size:cover;
     cursor: pointer;
     height: 30px;
     width: 30px;
-    }
+}
 
 .ui span{
 	cursor:pointer;

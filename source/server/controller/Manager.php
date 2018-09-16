@@ -358,12 +358,15 @@ class Manager{
             self::$dbManager->startTransaction();
             
 
+            /** @var TacGamedata $gdS */
             $gdS = self::$dbManager->getTacGamedata($userid, $gameid);
 
             SystemData::initSystemData($gdS->turn, $gdS->id);
 
-            if($status == "SURRENDERED"){
+            if ($status == "SURRENDERED" && $gdS->status !== "SURRENDERED"){
                 self::$dbManager->updateGameStatus($gameid, $status);
+            } else if ($gdS->status === "SURRENDERED") {
+                return "{}";
             }
             
             if ($gameid != $gdS->id || $turn != $gdS->turn || $phase != $gdS->phase)

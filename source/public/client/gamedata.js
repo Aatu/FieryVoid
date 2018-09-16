@@ -691,6 +691,15 @@ window.gamedata = {
         $(".committurn").hide();
     },
 
+    showSurrenderButton: function showSurrenderButton() {
+        $(".surrender").on('click', gamedata.onSurrenderClicked).show();
+    },
+
+    hideSurrenderButton: function hideSurrenderButton() {
+        $(".surrender").off('click', gamedata.onSurrenderClicked).hide();
+    },
+
+
     checkGameStatus: function checkGameStatus() {
 
         //TODO: to phase strategy

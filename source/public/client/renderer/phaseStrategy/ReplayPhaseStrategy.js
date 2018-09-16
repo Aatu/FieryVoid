@@ -43,6 +43,8 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
+        infowindow.informPhase(5000, function () {});
+
         return this;
     };
 

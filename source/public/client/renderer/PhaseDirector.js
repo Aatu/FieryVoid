@@ -46,7 +46,7 @@ window.phaseDirector = function () {
     };
 
     function resolvePhaseStrategy(gamedata, scene) {
-        if (!gamedata.isPlayerInGame() || gamedata.replay) {
+        if (!gamedata.isPlayerInGame() || gamedata.replay || gamedata.status === "SURRENDERED" || gamedata.status === "FINISHED") {
             return activatePhaseStrategy.call(this, window.ReplayPhaseStrategy, gamedata, scene);
         }
 

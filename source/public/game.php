@@ -236,7 +236,8 @@
     <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
     <table class="uitable">
         <tr>
-        <td class="committurn" style="display:none"><div class="ok" >✔</div></td>
+        <td class="committurn" style="display:none"><div class="ok" ></div></td>
+        <td class="surrender" style="display:none"></td>
         <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
         </tr>
     </table>
