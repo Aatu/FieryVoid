@@ -14,7 +14,7 @@ const WeaponListContainer = styled.div`
 
     @media (max-width: 1024px) {
         left: 0;
-        width: calc(100% - 25px);
+        width: calc(100% - 50px);
     }
 `;
 
