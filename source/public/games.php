@@ -53,15 +53,19 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News 13th of February 2018</div>
+    <div id="newsHeader">Latest News September 2018</div>
     <div id="newsEntry">
+        <!-- no longer quite the news?
         <h3>Good news everyone!</h3><br>Our little world is looking awesome, now in <del>hi-def 3d</del> faster 2d!
         <br><br>
+        -->
         The latest update includes:
         <br><br>
-        - New webGL renderer for fiery void, allowing better performance and more confusing bugs.
+        - Panel with text description of fire and EW declarations (for text-loving dinosaurs out there!).
         <br>
-        - Replay feature that allows anyone to replay a whole game from start to finish.
+        - Long demanded Surrender button! Choice of all brave task force commanders :) (available in Initial phase).        
+        <br>
+        - some bugfixes
         <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
