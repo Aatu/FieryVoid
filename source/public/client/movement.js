@@ -237,37 +237,27 @@ shipManager.movement = {
     },
 
     canRoll: function canRoll(ship) {
-
         if (gamedata.gamephase != 2) return false;
-
         if (ship.flight || ship.osat) return false;
-
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
-
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-
         if (shipManager.movement.hasRolled(ship) && !ship.agile) {
             return false;
         }
-
         if (shipManager.movement.isPivoting(ship) != "no" && !ship.gravitic) {
             return false;
         }
-
         if (ship.rollcost > shipManager.movement.getRemainingEngineThrust(ship)) {
             return false;
         }
-
         return true;
     },
 
     doRoll: function doRoll(ship) {
-
         if (!shipManager.movement.canRoll(ship)) return false;
-
+        
         var lm = ship.movement[ship.movement.length - 1];
         var requiredThrust = Array(ship.rollcost, 0, 0, 0, 0);
-
         ship.movement[ship.movement.length] = {
             id: -1,
             type: "roll",
