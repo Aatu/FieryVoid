@@ -1603,7 +1603,7 @@ shipManager.movement = {
         var thrusterLoc = 0;
         
 /* JUST A TEST */        
- var testVar = thrusterDirectionRequired(ship,"port");
+ var testVar = shipManager.movement.thrusterDirectionRequired(ship,"port");
         
         
         //Marcin Sawicki: no auto assignment if can assign suspiciously widely (Pivot assignment was NOT good)
@@ -2042,7 +2042,7 @@ shipManager.movement = {
         
         //Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
         if(ship.gravitic){
-            if(isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
+            if(shipManager.movement.isPivotedPort(ship)){ //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
                 switch(orientationRequired) {
                     case 1: 
                         orientationRequired = 3;
@@ -2057,7 +2057,7 @@ shipManager.movement = {
                         orientationRequired = 1;
                         break;
                 }
-            }else if (isPivotedStbd(ship)){//pivoted to Stbd means: Stbd if Main, Main is Port, Port is Retro, Retro is Stbd
+            }else if (shipManager.movement.isPivotedStbd(ship)){//pivoted to Stbd means: Stbd if Main, Main is Port, Port is Retro, Retro is Stbd
                 switch(orientationRequired) {
                     case 1: 
                         orientationRequired = 4;
@@ -2089,7 +2089,7 @@ shipManager.movement = {
     
     /*is pivoted to Port == goes Stbd-forward*/
     isPivotedPort: function isPivotedPort(ship) {
-        if (!isOutOfAlignment(ship)) return false; //ship in alignment is certainly not pivoted anywhere
+        if (!shipManager.movement.isOutOfAlignment(ship)) return false; //ship in alignment is certainly not pivoted anywhere
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         if (mathlib.addToHexFacing(facing, 1) == heading || mathlib.addToHexFacing(facing, 2) == heading) return true; 
@@ -2098,8 +2098,8 @@ shipManager.movement = {
     
     /*is pivoted to Stbd == goes Port-forward*/
     isPivotedStbd: function isPivotedStbd(ship) {
-        if (!isOutOfAlignment(ship)) return false; //ship in alignment is certainly not pivoted anywhere
-        if (!isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
+        if (!shipManager.movement.isOutOfAlignment(ship)) return false; //ship in alignment is certainly not pivoted anywhere
+        if (!shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
         return false;
     },
     
