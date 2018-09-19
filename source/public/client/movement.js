@@ -614,7 +614,7 @@ shipManager.movement = {
             var side = Math.floor(pivotcost / 2);
             var rear = Math.floor(pivotcost / 2);
             var any = ship.pivotcost % 2;
-            requiredThrust = Array(any, rear, rear, side, side);
+            requiredThrust = Array(any, rear, rear, side, side); //actually, rear and side requirements are always the same...
         }
         if (pivoting == "no") newfacing = mathlib.addToHexFacing(lm.facing, step);
 
@@ -693,9 +693,7 @@ shipManager.movement = {
 
     isPivoting: function isPivoting(ship) {
         var pivoting = "no";
-
         if (ship.agile) return pivoting;
-
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
@@ -740,7 +738,6 @@ shipManager.movement = {
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
         var reverseheading = mathlib.addToHexFacing(heading, 3);
-
         return mathlib.addToHexFacing(1, facing) === reverseheading || mathlib.addToHexFacing(-1, facing) === reverseheading;
     },
     
@@ -802,7 +799,6 @@ shipManager.movement = {
     },
 
     hasPivoted: function hasPivoted(ship) {
-
         var left = false;
         var right = false;
         for (var i in ship.movement) {
@@ -816,47 +812,36 @@ shipManager.movement = {
                 right = true;
             }
         }
-
         return { left: left, right: right };
     },
 
     hasCombatPivoted: function hasCombatPivoted(ship) {
-
         if (!ship.flight) return false;
-
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
-
             if (movement.value != 'combatpivot') continue;
-
             if (movement.type == "pivotleft" || movement.type == "pivotright") {
                 return true;
             }
-
             if (movement.type == "isPivotingRight" || movement.type == "isPivotingLeft") {
                 return true;
             }
         }
-
         return false;
     },
 
     hasPivotedForShooting: function hasPivotedForShooting(ship) {
-
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
-
             if (movement.type == "pivotleft" || movement.type == "pivotright") {
                 return true;
             }
-
             if (movement.type == "isPivotingRight" || movement.type == "isPivotingLeft") {
                 return true;
             }
         }
-
         return false;
     },
 
@@ -864,26 +849,20 @@ shipManager.movement = {
         if (ship.osat || ship.base) {
             return false;
         }
-
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
-
         if (gamedata.gamephase != 2) {
             return false;
         }
-
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
-
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
-
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
-
         if (ship.accelcost > shipManager.movement.getRemainingEngineThrust(ship)) {
             return false;
-        }
+        }       
 
+        /* old version
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-
         if (!ship.gravitic) {
             if (heading !== facing) {
                 if (heading < 3) {
@@ -901,16 +880,19 @@ shipManager.movement = {
                 }
             }
         }
+        */
+        //non-gravitic ship cannot accelerate if it's not aligned OR pivoting    
+        if (!ship.gravitic && ( shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no" ) return false;
 
+        //acceleration must be the first thing in a turn...
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
-
             if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
         }
 
+        /* not necessary any longer, checked above
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
-
         for (var i in ship.movement) {
             var movement = ship.movement[i];
 
@@ -920,6 +902,7 @@ shipManager.movement = {
                 return true;
             }
         }
+        */
 
         if (ship.accelcost <= shipManager.movement.getRemainingEngineThrust(ship)) {
             return true;
@@ -971,14 +954,11 @@ shipManager.movement = {
     },
 
     changeSpeed: function changeSpeed(ship, accel) {
-
         if (!shipManager.movement.canChangeSpeed(ship, accel)) return false;
-
         if (gamedata.gamephase == -1) {
             shipManager.movement.doDeploymentAccel(ship, accel);
             return;
         }
-
         if (shipManager.movement.deleteSpeedChange(ship, accel)) {
             ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
             return;
