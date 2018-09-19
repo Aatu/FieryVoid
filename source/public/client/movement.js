@@ -2072,6 +2072,7 @@ shipManager.movement = {
                         orientationRequired = 2;
                         break;
                 }
+            }
         }        
         return orientationRequired;
     }, //endof thrusterDirectionRequired
