@@ -1602,6 +1602,10 @@ shipManager.movement = {
         var needArray = ship.movement[ship.movement.length - 1].requiredThrust;
         var thrusterLoc = 0;
         
+/* JUST A TEST */        
+ var testVar = thrusterDirectionRequired(ship,"port");
+        
+        
         //Marcin Sawicki: no auto assignment if can assign suspiciously widely (Pivot assignment was NOT good)
         if ( needArray[1] == 0 && needArray[2] == 0 && needArray[3] == 0 && needArray[4] ==0 ){
             return;   
