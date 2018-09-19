@@ -157,7 +157,13 @@ class Weapon extends ShipSystem
         $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
         $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
         $strippedSystem->fireOrders = $this->fireOrders;
-       
+        $strippedSystem->range = $this->range;
+        $strippedSystem->rangeArray = $this->rangeArray;
+        $strippedSystem->minDamage = $this->minDamage;
+        $strippedSystem->maxDamage = $this->maxDamage;
+        $strippedSystem->minDamageArray = $this->minDamageArray;
+        $strippedSystem->maxDamageArray = $this->maxDamageArray;
+	    
         return $strippedSystem;
     }
 
