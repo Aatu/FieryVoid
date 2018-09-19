@@ -1975,15 +1975,42 @@ shipManager.movement = {
         return reversed;
     },
     
+    
+    /*return thruster direction required from text input - for readability*/
+    directionNoFromName: function directionNoFromName(direction) {
+        var thrusterDirectionNo = 0;
+        switch(direction) {
+            case "retro": 
+                thrusterDirectionNo = 1;
+                break;
+            case "main": 
+                thrusterDirectionNo = 2;
+                break;
+            case "port": 
+                thrusterDirectionNo = 3;
+                break;
+            case "stbd": 
+                thrusterDirectionNo = 4;
+                break;
+            default: //let's assume number was used...
+                thrusterDirectionNo = direction;
+                break;
+        }
+        return thrusterDirectionNo;
+    },
+    
+    
     /*returns thruster direction actually required - from thruster direction ship in default alignment would need
       eg. if requirement is '2' (main), it should return:
       - normal alignment: 2
       - reverse: 1
       - side: 1 or 2 usually, 3 or 4 Gravitic
       - ...add roll on top of that!
+      
+      DIRECTION may be text ("port","stbd","main","retro")
     */
     thrusterDirectionRequired: function thrusterDirectionRequired(ship,direction) {
-        var orientationRequired = direction;
+        var orientationRequired = directionNoFromName(direction);
         
         if (orientationRequired>2 && shipManager.movement.isRolled(ship)){ //rolled reverses side requirements
             if (orientationRequired==3){
