@@ -74,17 +74,44 @@ window.AllWeaponFireAgainstShipAnimation = function () {
     };
 
     function groupByShipAndWeapon(incomingFire) {
-        var grouped = {};
-
+        var grouped = {};        
+        
         incomingFire.forEach(function (fire) {
-            var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
-
+            //var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
+            //let's group by TARGET instead of firing unit...
+            var key;
+            if (fire.target.id >= 0){ //actually targeted at unit
+                key = fire.target.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
+            } else{ //hextarget
+                key = 'HEX' + fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
+            }
+            
             if (grouped[key]) {
                 grouped[key].push(fire);
             } else {
                 grouped[key] = [fire];
             }
         });
+        //above code groups fire all right, but doesn't sort it within a target... appropriate code below!
+        for(var gr_key in grouped){
+            grouped[gr_key].sort(function(obj1, obj2){
+                if(obj1.shooter.flight && !obj2.shooer.flight){ //fighters after ships
+                    return -1;                   
+                }else if(!obj1.shooter.flight && obj2.shooer.flight){ //fighters after ships
+                    return 1;                   
+                }else if (obj1.priority !== obj2.priority){
+                    return obj1.weapon.priority-obj2.weapon.priority; 
+                }/*else if (obj1.firingMode !== obj2.firingMode){
+                    return obj1.firingMode-obj2.firingMode; 
+                }*/
+                else {
+                    var val = obj1.shooter.id - obj2.shooter.id;
+                    if (val == 0) val = obj1.id - obj2.id;
+                    return val;
+                } 
+            });            
+        }
+        
 
         return Object.keys(grouped).map(function (key) {
             return grouped[key];
