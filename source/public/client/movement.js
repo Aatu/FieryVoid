@@ -1770,7 +1770,7 @@ shipManager.movement = {
         return assignedarray;
     },
 
-    
+    /*called when point of thrust is assigned*/
     calculateThrustStillReq: function calculateThrustStillReq(ship, movement) {
         var assignedarray = shipManager.movement.calculateAssignedThrust(ship, movement);
         var requiredThrust = movement.requiredThrust;
@@ -1857,29 +1857,20 @@ shipManager.movement = {
         return stillReq;
     }, //endof function calculateThrustStillReq
 
+    
     calculateCurrentTurndelay: function calculateCurrentTurndelay(ship) {
-
         var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * ship.turndelaycost);
-
         var last = null;
         var didTurn = false;
-
         if (gamedata.turn == 1) {
             turndelay = 0;
         }
-
         for (var i in ship.movement) {
-
             var movement = ship.movement[i];
-
             if (movement.commit == false) continue;
-
             if ((movement.type == "move" || movement.type == "slipright" || movement.type == "slipleft") && turndelay > 0) turndelay--;
-
             if (shipManager.movement.isTurn(movement)) {
-
                 didTurn = true;
-
                 if (!ship.agile || !last || !shipManager.movement.isTurn(last)) {
                     // calculate the turndelay using the NEW speed, iso of the one
                     // in this old movement.
@@ -1888,57 +1879,46 @@ shipManager.movement = {
             }
             last = movement;
         }
-
         if (turndelay < 0) turndelay = 0;
-
         if (turndelay > 0 && ship.turndelaycost > 1) {
             if (!didTurn) {
                 turndelay = 0;
             }
         }
-
         return turndelay;
-    },
+    }, //endof calculateCurrentTurndelay
 
+    
     calculateTurndelay: function calculateTurndelay(ship, movement, speed) {
-
         // speed as a seperate parameter needed to allow for calculation with
         // new speed.
         if (speed == 0) return 0;
-
         var turndelay = Math.ceil(speed * ship.turndelaycost);
-
         if (ship.flight) return turndelay;
-
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         if (turndelay < 1) turndelay = 1;
-
         return turndelay;
     },
 
     calculateExtraThrustSpent: function calculateExtraThrustSpent(ship, movement) {
         var reg = shipManager.movement.calculateThrustStillReq(ship, movement);
-
         var extra = 0 - reg[0];
-
         if (extra < 0) extra = 0;
-
         return extra;
     },
 
     isTurn: function isTurn(movement) {
         if (!movement) console.trace();
-
         return movement.type == "turnright" || movement.type == "turnleft";
     },
 
+    /*Marcin Sawicki - actually this should no longer be needed! as new thruster allocation takes care of such things
     hasSidesReversedForMovement: function hasSidesReversedForMovement(ship) {
         var back = shipManager.movement.isGoingBackwards(ship);
-
         var reversed = (back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship));
-
         return reversed;
     },
+    */
     
     
     /*return thruster direction required from text input - for readability*/
