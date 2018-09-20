@@ -92,9 +92,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             var obj1 = grouped[a][0];
             var obj2 = grouped[b][0];
             if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
-                return -1;                   
-            }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
                 return 1;                   
+            }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
+                return -1;                   
             }else if (obj1.weapon.priority !== obj2.weapon.priority){
                 return obj1.weapon.priority-obj2.weapon.priority; 
             }
