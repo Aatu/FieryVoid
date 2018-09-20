@@ -99,7 +99,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     return -1;                   
                 }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
                     return 1;                   
-                }else if (obj1.priority !== obj2.priority){
+                }else if (obj1.weapon.priority !== obj2.weapon.priority){
                     return obj1.weapon.priority-obj2.weapon.priority; 
                 }/*else if (obj1.firingMode !== obj2.firingMode){
                     return obj1.firingMode-obj2.firingMode; 
