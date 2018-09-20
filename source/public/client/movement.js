@@ -1517,12 +1517,11 @@ shipManager.movement = {
 
     autoAssignThrust: function autoAssignThrust(ship) {
         var move = ship.movement[ship.movement.length - 1];
-        var needArray = ship.movement[ship.movement.length - 1].requiredThrust;
+        var needArray = move.requiredThrust;
         var thrusterLoc = 0;               
         
-        //Marcin Sawicki: no auto assignment if can assign suspiciously widely (Pivot auto-assignment was NOT good)
-        //although still fine if only 1 point needs to be allocated :)
-        if ( needArray[0]>1 && needArray[1] == 0 && needArray[2] == 0 && needArray[3] == 0 && needArray[4] ==0 ){
+        //Marcin Sawicki: no auto assignment for pivots!
+        if (move.type == "pivotright" || move.type == "pivotleft") {
             return;   
         }
 
@@ -1534,6 +1533,7 @@ shipManager.movement = {
             var thrusters = [];
             var toDo = needArray[loc];
             thrusterLoc = loc;
+            //assign "any" thrust to main/retro thrusters
             if (thrusterLoc == 0) {
                 if (shipManager.movement.isGoingBackwards(ship)) { //Marcin Sawicki: this skips Gravitic recognition but is good enough for auto!
                     thrusterLoc = 1;
