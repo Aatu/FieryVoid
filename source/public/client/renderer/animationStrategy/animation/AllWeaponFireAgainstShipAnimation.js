@@ -80,8 +80,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             //var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
             //let's group by TARGET instead of firing unit...
             var key;
-            if (fire.target.id >= 0){ //actually targeted at unit
-                key = fire.target.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
+            if (fire.fireOrder.targetid >= 0){ //actually targeted at unit
+                key = fire.fireOrder.targetid + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
             } else{ //hextarget
                 key = 'HEX' + fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
             }
