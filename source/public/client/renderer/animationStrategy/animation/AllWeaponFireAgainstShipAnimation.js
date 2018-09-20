@@ -85,10 +85,12 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             }
         });
         
-        grouped.sort(function (a, b){ 
+        //can't sort main array directly...
+        var groupedKeys = grouped.keys();        
+        groupedKeys.sort(function (a, b){ 
             //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
-            obj1 = a[0];
-            obj2 = b[0];
+            var obj1 = grouped[a][0];
+            var obj2 = grouped[b][0];
             if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
                 return -1;                   
             }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
@@ -101,11 +103,15 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                 if (val == 0) val = obj1.id - obj2.id;
                 return val;
             } 
-        });                   
-
+        });        
+        return groupedKeys.map(function (key) {
+            return grouped[key];
+        });
+/*
         return Object.keys(grouped).map(function (key) {
             return grouped[key];
         });
+        */
     }
 
     function buildFireAnimations(incomingFire, extraStartTime) {
