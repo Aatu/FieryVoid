@@ -719,24 +719,35 @@ shipManager.movement = {
     
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
-        var returnVal = false;
-        if (ship.agile) returnVal = false;
+        //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
+
+        /*cannot turn into pivot if unit is aligned...*/
+        if(!shipManager.movement.isOutOfAlignment(ship)) return false;
+        
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
+        var facing = shipManager.movement.getLastCommitedMove(ship).facing;        
         var reverseheading = mathlib.addToHexFacing(heading, 3);
+        /*
         if (heading === facing) returnVal = false;
-        var step = right ? 1 : -1;
-        if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
-        return returnVal;
+        */
+        
+        var step = right ? -1 : 1;
+        //if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) returnVal = true;
+        if (mathlib.addToHexFacing(step, facing) === heading || mathlib.addToHexFacing(step, facing) === reverseheading) return true;
+        return false;
     },
     
-
+/*no longer needed
     isTurningIntoBackwardsPivot: function isTurningIntoBackwardsPivot(ship) {
+        //if ship is moving backwards, it's turning into pivot backwards; else, it's not.
+        return shipManager.movement.isGoingBackwards(ship);
+               
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
         var facing = shipManager.movement.getLastCommitedMove(ship).facing;
         var reverseheading = mathlib.addToHexFacing(heading, 3);
         return mathlib.addToHexFacing(1, facing) === reverseheading || mathlib.addToHexFacing(-1, facing) === reverseheading;
     },
+*/
     
     doIntoPivotTurn: function doIntoPivotTurn(ship, right) {
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
@@ -758,7 +769,7 @@ shipManager.movement = {
         var newfacing = lastMovement.facing;
         var newheading = lastMovement.facing;
 
-        if (shipManager.movement.isTurningIntoBackwardsPivot(ship)) {
+        if (shipManager.movement.isGoingBackwards(ship)) { //ship going backwards is turning _backwards_ into pivot, which affects facing
             newfacing = lastMovement.facing;
             newheading = mathlib.addToHexFacing(lastMovement.facing, 3);
         }
@@ -767,7 +778,6 @@ shipManager.movement = {
             commit = true;
             assignedThrust[0] = requiredThrust[0];
         }
-
         ship.movement[ship.movement.length] = {
             id: -1,
             type: name,
