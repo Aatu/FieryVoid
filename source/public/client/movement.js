@@ -1000,7 +1000,7 @@ shipManager.movement = {
                 reqThrusterName = "retro";  
             }
             var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
-            requiredThrust[requiredThruster] = slipcost;
+            requiredThrust[requiredThruster] = ship.accelcost;
             
             /*no longer needed
             if (facing === heading) {
