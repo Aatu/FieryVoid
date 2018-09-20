@@ -879,7 +879,7 @@ shipManager.movement = {
         }
         */
         //non-gravitic ship cannot accelerate if it's not aligned OR pivoting    
-        if (!ship.gravitic && ( shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no" ) return false;
+        if (!ship.gravitic && (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") ) return false;
 
         //acceleration must be the first thing in a turn...
         for (var i in ship.movement) {
