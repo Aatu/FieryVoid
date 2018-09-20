@@ -86,7 +86,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         });
         
         //can't sort main array directly...
-        var groupedKeys = grouped.keys();        
+        var groupedKeys = Object.keys(grouped);        
         groupedKeys.sort(function (a, b){ 
             //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
             var obj1 = grouped[a][0];
@@ -107,7 +107,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         return groupedKeys.map(function (key) {
             return grouped[key];
         });
-/*
+        /* otiginal version, before sorting keys
         return Object.keys(grouped).map(function (key) {
             return grouped[key];
         });
