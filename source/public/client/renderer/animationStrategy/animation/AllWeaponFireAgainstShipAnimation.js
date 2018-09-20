@@ -78,42 +78,30 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         
         incomingFire.forEach(function (fire) {
             var key = fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
-            /*
-            //let's group by TARGET instead of firing unit...
-            var key;
-            if (fire.fireOrder.targetid >= 0){ //actually targeted at unit
-                key = fire.fireOrder.targetid + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
-            } else{ //hextarget
-                key = 'HEX' + fire.shooter.id + "-" + fire.weapon.constructor.name + "-" + fire.firingMode;
-            }
-            */
-            
             if (grouped[key]) {
                 grouped[key].push(fire);
             } else {
                 grouped[key] = [fire];
             }
         });
-        for(var gr_key in grouped){
-            grouped.sort(function(group1, group2){ 
-                //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
-                obj1 = group1[0];
-                obj2 = group2[0];
-                if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
-                    return -1;                   
-                }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
-                    return 1;                   
-                }else if (obj1.weapon.priority !== obj2.weapon.priority){
-                    return obj1.weapon.priority-obj2.weapon.priority; 
-                }
-                else {
-                    var val = obj1.shooter.id - obj2.shooter.id;
-                    if (val == 0) val = obj1.id - obj2.id;
-                    return val;
-                } 
-            });            
-        }
         
+        grouped.sort(function (a, b){ 
+            //compare first object in both groups - every group should contain only fire by one shooter from one weapon, and by default at one target
+            obj1 = a[0];
+            obj2 = b[0];
+            if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
+                return -1;                   
+            }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
+                return 1;                   
+            }else if (obj1.weapon.priority !== obj2.weapon.priority){
+                return obj1.weapon.priority-obj2.weapon.priority; 
+            }
+            else {
+                var val = obj1.shooter.id - obj2.shooter.id;
+                if (val == 0) val = obj1.id - obj2.id;
+                return val;
+            } 
+        });                   
 
         return Object.keys(grouped).map(function (key) {
             return grouped[key];
