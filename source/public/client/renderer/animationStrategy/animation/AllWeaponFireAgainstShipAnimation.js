@@ -95,9 +95,9 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         //above code groups fire all right, but doesn't sort it within a target... appropriate code below!
         for(var gr_key in grouped){
             grouped[gr_key].sort(function(obj1, obj2){
-                if(obj1.shooter.flight && !obj2.shooer.flight){ //fighters after ships
+                if(obj1.shooter.flight && !obj2.shooter.flight){ //fighters after ships
                     return -1;                   
-                }else if(!obj1.shooter.flight && obj2.shooer.flight){ //fighters after ships
+                }else if(!obj1.shooter.flight && obj2.shooter.flight){ //fighters after ships
                     return 1;                   
                 }else if (obj1.priority !== obj2.priority){
                     return obj1.weapon.priority-obj2.weapon.priority; 
