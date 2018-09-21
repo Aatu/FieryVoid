@@ -165,10 +165,6 @@ window.ShipTooltip = function () {
 	this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
 	*/
 	    
-	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
-	this.addEntryElement(toDisplay, toDisplay!='');
-        //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
-	    
         //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
 	var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
         var speed = shipManager.movement.getSpeed(ship);
@@ -177,7 +173,12 @@ window.ShipTooltip = function () {
 
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-        this.addEntryElement('TC: ' + turncost + ' ('+ship.turncost+'); TD: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
+        this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
+
+	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
+	this.addEntryElement(toDisplay, toDisplay!='');
+        //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
+	    
 	toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
 	if (currDelay>0) toDisplay += ' (delay '+currDelay+ ')';
 	toDisplay += ' (acc cost: ' +ship.accelcost+')';
@@ -209,7 +210,7 @@ window.ShipTooltip = function () {
 
         if (this.selectedShip && this.selectedShip !== ship) {
             var dis = mathlib.getDistanceBetweenShipsInHex(this.selectedShip, ship);
-            this.addEntryElement('DISTANCE: ' + dis + 'hexes');
+            this.addEntryElement('DISTANCE: ' + dis + ' hexes');
         }
 
         if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) {
