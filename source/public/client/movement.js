@@ -1128,7 +1128,28 @@ shipManager.movement = {
         }
 
         return rem;
-    },
+    }, //endof function getRemainingEngineThrust
+    
+    getFullEngineThrust: function getRemainingEngineThrust(ship) {
+        var rem = 0;
+        if (ship.flight) {
+            rem = ship.freethrust;
+        } else {
+            for (var i in ship.systems) {
+                var system = ship.systems[i];
+                if (shipManager.systems.isDestroyed(ship, system)) continue;
+
+                if (system.name == "engine") {
+                    rem += shipManager.systems.getOutput(ship, system);
+                }
+                //tractor beams reduce thrust available!
+                var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
+                rem -= crits;
+            }
+        }
+
+        return rem;
+    }, //endof function getFullEngineThrust    
 
     getRemainingMovement: function getRemainingMovement(ship) {
         return shipManager.movement.getSpeed(ship) - shipManager.movement.getUsedMovement(ship);
