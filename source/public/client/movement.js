@@ -1429,6 +1429,7 @@ shipManager.movement = {
 
         var speed = shipManager.movement.getSpeed(ship);
         var turncost = Math.ceil(speed * ship.turncost);
+        turncost = Math.max(1,turncost);//turn cost may never be less than 1!
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
