@@ -99,12 +99,28 @@ window.ShipTooltip = function () {
 
 
     function createForSingleShip(ship) {
-
         jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + '</span>').appendTo(this.element.find('.namecontainer'));
 
+        //part 1: current data
+        
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
     
+        //add info of flight-wide criticals!
+	    if (ship.flight === true){
+            //get first fighter in flight
+            var firstFighter = shipManager.systems.getSystem(ship, 1);
+            var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+            if (sensorDown > 0){
+                sensorDown = sensorDown * 5;
+                    this.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>", true );
+            }
+            var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
+            if (iniDown > 0){
+                iniDown = iniDown * 5;
+                    this.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>",true );
+            }	
+	    }
 
         if (ship.base && ship.movement[1]) {
             var direction;
