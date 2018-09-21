@@ -865,7 +865,18 @@ shipManager.movement = {
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         if (ship.accelcost > shipManager.movement.getRemainingEngineThrust(ship)) {
             return false;
-        }       
+        }      
+        
+        //acceleration must be the first thing in a turn...
+        for (var i in ship.movement) {
+            var movement = ship.movement[i];
+            if (movement.turn != gamedata.turn) continue;
+            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
+        }
+        
+        
+        //gravitic ship with enough thrust can accelerate, no matter her alignment
+        if (ship.gravitic) return true;
 
         /* old version
         var heading = shipManager.movement.getLastCommitedMove(ship).heading;
@@ -888,15 +899,9 @@ shipManager.movement = {
             }
         }
         */
-        //non-gravitic ship cannot accelerate if it's not aligned OR pivoting    
-        if (!ship.gravitic && (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") ) return false;
-
-        //acceleration must be the first thing in a turn...
-        for (var i in ship.movement) {
-            var movement = ship.movement[i];
-            if (movement.turn != gamedata.turn) continue;
-            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
-        }
+        
+        //ship cannot accelerate if it's not aligned OR pivoting    
+        if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
 
         /* not necessary any longer, checked above
         var curheading = shipManager.movement.getLastCommitedMove(ship).heading;
@@ -911,11 +916,7 @@ shipManager.movement = {
         }
         */
 
-        if (ship.accelcost <= shipManager.movement.getRemainingEngineThrust(ship)) {
-            return true;
-        }
-
-        return false;
+        return true;
     },
 
     adjustTurnDelay: function adjustTurnDelay(ship, oldspeed, newspeed) {
