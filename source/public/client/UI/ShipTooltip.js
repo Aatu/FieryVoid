@@ -103,7 +103,6 @@ window.ShipTooltip = function () {
         
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
-	var misc = shipManager.systems.getMisc(ship);
     
         //add info of flight-wide criticals!
 	if (ship.flight === true){
@@ -161,7 +160,10 @@ window.ShipTooltip = function () {
         //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
         this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total "+ship.iniative+"): base " + ship.iniativebonus + "; mod "+ ship.iniativeadded );
 	    
-	this.addEntryElement(misc, misc!=''); //miscellanous info from systems - special information o be shown here
+	/*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
+	toDisplay = shipManager.systems.getMisc(ship);
+	this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
+	*/
 	    
 	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
 	this.addEntryElement(toDisplay, toDisplay!='');
