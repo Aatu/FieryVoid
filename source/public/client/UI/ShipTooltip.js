@@ -154,7 +154,7 @@ window.ShipTooltip = function () {
 	    */
 	    toDisplay = '';
 	if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
-	if (shipManager.shipManager.isEscorting(ship)) toDisplay += 'Escorting ships; ';
+	if (shipManager.isEscorting(ship)) toDisplay += 'Escorting ships; ';
 	this.addEntryElement(toDisplay, toDisplay != '');	    
 	    
         //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
