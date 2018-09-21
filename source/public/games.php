@@ -69,6 +69,8 @@ if (isset($_SESSION["user"])) {
         <br>
         - With replay feature available, 'active fire' button was no longer useful. It was replaced by 'recent activity' - games which progressed during recent 48 hours.
         <br>
+        - Onmouseover ship info was rearranged (mostly condensed)
+        <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
