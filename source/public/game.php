@@ -199,7 +199,7 @@
 	<script src="client/UI/systemInfo.js"></script>
     <script src="client/UI/shipwindow.js"></script>
     <script src="client/UI/fleetList.js"></script>
-    <script src="client/UI/gameInfo.js"></script>
+	<script src="client/UI/gameInfo.js"></script>
     <script src="client/UI/flightwindow.js"></script>
 	<script src="client/UI/confirm.js"></script>
 	<script src="client/model/ship.js"></script>
@@ -662,6 +662,9 @@
         <div id="infoTab" data-select="#gameinfo" class="logUiEntry">
             <span>INFO</span>
         </div>
+        <div id="declarationsTab" data-select="#declarations" class="logUiEntry" style = "overflow-y: auto;"> <!-- fire and EW declarations review -->
+            <span>DECLARATIONS</span>
+        </div>	    
         <div id="chatTab" data-select="#chat" class="logUiEntry">
             <span>GAME CHAT</span>
         </div>
@@ -680,6 +683,11 @@
     </div>
     <div id="gameinfo" class="logPanelEntry" style="display:none;">
 
+    </div>
+    <div id="declarations" class="logPanelEntry" style="display:none;"> <!-- fire and EW declarations review -->
+	<?php
+	    include("declarations.php");
+	?>
     </div>
     
     <div id="chat" class="logPanelEntry" style="display:none;">

@@ -396,7 +396,7 @@ body {
 	border-left: 1px solid #496791;
 	position:fixed;
 	bottom:0px;
-	z-index:1;
+	z-index:2;
 	-moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
@@ -470,6 +470,25 @@ body {
     left:417px;
 }
 
+
+#declarationsTab.logUiEntry{
+    left:416px;
+}
+
+#declarationsContainer{	
+    overflow-y: scroll;
+    position: absolute;
+    padding: 0 5px;
+}
+
+#declarationsButtons{	
+    padding-top: 5px;
+}
+
+#declarationsActual{	
+    padding-bottom: 10px;
+}
+
 #expandBotPanel{
     position:absolute;
     top:-26px;
@@ -487,7 +506,7 @@ body {
     z-index: 9999;
     background-color:#020E12;
     cursor:pointer;
-    left:500px;
+    right:5px;
     width: 40px;
     color: white;
 
@@ -828,25 +847,32 @@ body {
     }
 
     #logcontainer.large #logUI .logUiEntry {
-        width: 20%;
+        width: 15%;
         display: block;
     }
 
     #logUI .logUiEntry {
-        width: 20%;
+        width: 15%;
         display: none;
     }
 
     #logUI #infoTab {
-        left: 20%;
+        left: 15%;
     }
-
+	
     #logUI #chatTab {
-        left: 40%;
+        left: 30%;
+	    width: 15%;
     }
 
     #logUI #globalChatTab {
+        left: 45%;
+	    width: 15%;    
+    }
+
+    #logUI #declarationsTab {
         left: 60%;
+	    width: 15%;    
     }
 
     #logUI #expandBotPanel {
@@ -856,6 +882,8 @@ body {
 
     #logcontainer {
         height: 0;
+        width: 100%;
+        max-width: none;
     }
 
     #logcontainer.large{
