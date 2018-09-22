@@ -65,7 +65,11 @@ if (isset($_SESSION["user"])) {
         <br>
         - Long demanded Surrender button! Choice of all brave task force commanders :) (available in Initial phase).        
         <br>
-        - some bugfixes
+        - General overhaul of movement - especially recent Pivot-related problems should be corrected. If any trouble happens, report!
+        <br>
+        - With replay feature available, 'active fire' button was no longer useful. It was replaced by 'recent activity' - games which progressed during recent 48 hours.
+        <br>
+        - Onmouseover ship info was rearranged (mostly condensed)
         <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
@@ -85,7 +89,7 @@ if (isset($_SESSION["user"])) {
         <tr>
             <td class="centered">ACTIVE GAMES</td>
             <td class="centered">STARTING GAMES</td>
-            <td class="centered">ACTIVE FIRE IN:</td>
+            <td class="centered">RECENT ACTIVITY IN:</td>
         </tr>
         <tr>
             <td>
@@ -105,7 +109,7 @@ if (isset($_SESSION["user"])) {
             </td>
             <td>
                 <a class="link" href="creategame.php">CREATE GAME</a>
-                <input type="button" id="loadFireButton" onclick="loadFireList()" value="LOAD ACTIVE FIRE">
+                <input type="button" id="loadFireButton" onclick="loadFireList()" value="LOAD RECENTLY ACTIVE">
 
             </td>
         </tr>
