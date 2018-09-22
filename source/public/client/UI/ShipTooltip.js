@@ -99,12 +99,26 @@ window.ShipTooltip = function () {
 
 
     function createForSingleShip(ship) {
-
         jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + '</span>').appendTo(this.element.find('.namecontainer'));
-
+        
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
     
+        //add info of flight-wide criticals!
+	if (ship.flight === true){
+            //get first fighter in flight
+            var firstFighter = shipManager.systems.getSystem(ship, 1);
+            var sensorDown = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+            if (sensorDown > 0){
+                sensorDown = sensorDown * 5;
+                    this.addEntryElement("<i>OB temporarily lowered by <b>" + sensorDown + "</b></i>", true );
+            }
+            var iniDown = shipManager.criticals.hasCritical(firstFighter, "tmpinidown");
+            if (iniDown > 0){
+                iniDown = iniDown * 5;
+                    this.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>",true );
+            }	
+	}
 
         if (ship.base && ship.movement[1]) {
             var direction;
@@ -120,24 +134,55 @@ window.ShipTooltip = function () {
             }
         }
 
-        this.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
-        this.addEntryElement('Evasion: -' + jinking + ' to hit', ship.flight === true && jinking > 0);
+        
+	/*condensed to one line
+        this.addEntryElement('Evasion: -' + jinking + ' to hit', ship.flight === true && jinking > 0);	
         this.addEntryElement('Pivoting ' + shipManager.movement.isPivoting(ship), shipManager.movement.isPivoting(ship) !== 'no');
         this.addEntryElement('Rolling', shipManager.movement.isRolling(ship));
         this.addEntryElement('Rolled', shipManager.movement.isRolled(ship));
-        this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
-        this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
-        this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
-        this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+	*/
+	var toDisplay = '';
+	if (ship.flight === true && jinking > 0) toDisplay += 'Evasion: -' + jinking + ' to hit; ';
+	if (shipManager.movement.isPivoting(ship) !== 'no') toDisplay += 'Pivoting; ';
+	if (shipManager.movement.isRolling(ship)) toDisplay += 'Rolling; ';
+	if (shipManager.movement.isRolled(ship)) toDisplay += 'Rolled; ';
+	this.addEntryElement(toDisplay, toDisplay != '');
+	    
+	    /*condensed to one line
+	    this.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
+	    this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
+	    */
+	    toDisplay = '';
+	if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
+	if (shipManager.isEscorting(ship)) toDisplay += 'Escorting ships; ';
+	this.addEntryElement(toDisplay, toDisplay != '');	    
+	    
+        //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
+        this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total "+ship.iniative+"): base " + ship.iniativebonus + "; mod "+ ship.iniativeadded );
+	    
+	/*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
+	toDisplay = shipManager.systems.getMisc(ship);
+	this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
+	*/
+	    
+        //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+	var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
         var speed = shipManager.movement.getSpeed(ship);
         var turncost = Math.ceil(speed * ship.turncost);
         var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
 
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-        this.addEntryElement('Turn cost: ' + turncost + ' ('+ship.turncost+') Turn delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
-        this.addEntryElement('Acceleration cost: ' + ship.accelcost);
-        this.addEntryElement('Speed: ' + shipManager.movement.getSpeed(ship));
+        this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
+
+	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
+	this.addEntryElement(toDisplay, toDisplay!='');
+        //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
+	    
+	toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
+	if (currDelay>0) toDisplay += ' (delay '+currDelay+ ')';
+	toDisplay += ' (acc cost: ' +ship.accelcost+')';
+        this.addEntryElement(toDisplay);
         this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
 
         if (this.selectedShip) {
@@ -164,9 +209,8 @@ window.ShipTooltip = function () {
         this.addEntryElement("Defence (F/S): " + fDef + "(" + ship.forwardDefense * 5 + ") / " + sDef + "(" + ship.sideDefense * 5 + ")%");
 
         if (this.selectedShip && this.selectedShip !== ship) {
-
             var dis = mathlib.getDistanceBetweenShipsInHex(this.selectedShip, ship);
-            this.addEntryElement('DISTANCE: ' + dis);
+            this.addEntryElement('DISTANCE: ' + dis + ' hexes');
         }
 
         if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) {
