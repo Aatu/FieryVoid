@@ -54,7 +54,7 @@ class SystemInfoButtons extends React.Component {
         shipManager.power.offlineAll(ship, system);
         webglScene.customEvent('CloseSystemInfo');
     }
-
+	
     overload(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
@@ -112,17 +112,56 @@ class SystemInfoButtons extends React.Component {
         webglScene.customEvent('CloseSystemInfo');
 	}
 
-	changeFiringMode(e) {
-        e.stopPropagation(); e.preventDefault();
+	    allChangeFiringMode(e) {
+		e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
 		if (!canChangeFiringMode(ship, system)) {
-            return;
+		    return;
+		}		    
+		//change firing mode of self
+		weaponManager.onModeClicked(ship, system);
+		//check which mode was set
+		var modeSet = system.firingMode;		    
+		//set this mode on ALL similar weapons that aren't declared and can change firing mode
+		var similarWeapons = new Array();
+		for (var i = 0; i < ship.systems.length; i++) {
+			if (system.displayName === ship.systems[i].displayName) {
+				if (system.weapon) {
+					similarWeapons.push(ship.systems[i]);
+				}
+			}
 		}
-		
-        weaponManager.onModeClicked(ship, system);
-        webglScene.customEvent('CloseSystemInfo');
+		for (var i = 0; i < similarWeapons.length; i++) {
+			var weapon = similarWeapons[i];
+			if (weapon.firingMode == modeSet) continue;
+			if (!canChangeFiringMode(ship, weapon)) continue;
+			var originalMode = weapon.firingMode; //so mode is properly reset for weapon that cannot have desired mode set for some reason!
+			var iterations = 0;
+			while (weapon.firingMode!=modeSet && iterations < 2){
+				weaponManager.onModeClicked(ship, weapon);
+				if(weapon.firingMode == 1){
+					iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+				}
+			}
+			//reset mode back if necessary! (this one is guaranteed to be available)
+			if (weapon.firingMode!=modeSet) while (weapon.firingMode!=originalMode){
+				weaponManager.onModeClicked(ship, weapon);
+			}
+		}
+		webglScene.customEvent('CloseSystemInfo');
+	    }
+	
+	changeFiringMode(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canChangeFiringMode(ship, system)) {
+            		return;
+		}		
+		weaponManager.onModeClicked(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
 	}
 	
+		
 	
     render() {
 		const {ship, selectedShip, system} = this.props;
