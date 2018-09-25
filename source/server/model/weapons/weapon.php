@@ -157,14 +157,15 @@ class Weapon extends ShipSystem
         $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
         $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
         $strippedSystem->fireOrders = $this->fireOrders;
-        $strippedSystem->range = $this->range;
-        $strippedSystem->rangeArray = $this->rangeArray;
-/*damage is not strictly necessary (player will see appropriate criticals and that's it)	    
-        $strippedSystem->minDamage = $this->minDamage;
-        $strippedSystem->maxDamage = $this->maxDamage;
-        $strippedSystem->minDamageArray = $this->minDamageArray;
-        $strippedSystem->maxDamageArray = $this->maxDamageArray;
-*/	    
+/*this needs to be sent only if weapon suffered crits!*/
+	if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!
+		$strippedSystem->range = $this->range;
+		$strippedSystem->rangeArray = $this->rangeArray;	    
+		$strippedSystem->minDamage = $this->minDamage;
+		$strippedSystem->maxDamage = $this->maxDamage;
+		$strippedSystem->minDamageArray = $this->minDamageArray;
+		$strippedSystem->maxDamageArray = $this->maxDamageArray;
+	}
         return $strippedSystem;
     }
 
