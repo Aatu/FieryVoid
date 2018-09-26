@@ -954,7 +954,7 @@ class DBManager
 	/* originally games replaying firing; now when entire history is available for replay, this would be useless
         $sql = "SELECT * FROM `B5CGM`.`tac_game` WHERE phase = 4 AND status = 'ACTIVE'";
 	*/
-	//replacement: games recently active    
+	//replacement: games recently active (including closed ones! - recent conclusion qualifies)
 	$sql = "SELECT DISTINCT g.* FROM tac_game g JOIN tac_playeringame p ON p.gameid = g.id
 		WHERE DATE_ADD(p.lastactivity, INTERVAL 2 day) >= NOW() ";
         //    debug::log($sql);
