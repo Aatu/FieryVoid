@@ -63,13 +63,9 @@ if (isset($_SESSION["user"])) {
         <br><br>
         - Panel with text description of fire and EW declarations (for text-loving dinosaurs out there!).
         <br>
-        - Long demanded Surrender button! Choice of all brave task force commanders :) (available in Initial phase).        
+        - some Declarations panel fixes.        
         <br>
-        - General overhaul of movement - especially recent Pivot-related problems should be corrected. If any trouble happens, report!
-        <br>
-        - With replay feature available, 'active fire' button was no longer useful. It was replaced by 'recent activity' - games which progressed during recent 48 hours.
-        <br>
-        - Onmouseover ship info was rearranged (mostly condensed)
+        - Game Lobby fixes (player count in game, recent games)
         <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
