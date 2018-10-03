@@ -1018,7 +1018,7 @@ class DBManager
 
         //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
 	//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
-	$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count (distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+	$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
         $games = [];
 
         if ($stmt) {
