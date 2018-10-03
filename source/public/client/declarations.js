@@ -63,7 +63,7 @@ window.declarations = {
           if (!ship.flight){ //fighters do not emit any EW            
             for (var e in ship.EW) {
               var EWentry = ship.EW[e];
-		if (EWentry.turn <> gamedata.turn) continue;
+		if (EWentry.turn != gamedata.turn) continue;
 	      if (EWentry.type != 'DEW'){ //DEW already listed
 		      dispEWEntry = new dispEWNew();		    
 		      dispEWEntry.name = EWentry.type;
@@ -86,7 +86,7 @@ window.declarations = {
             if (srcShip.team != ship.team){ //enemy ships only
               for (var e in srcShip.EW) {
                 var EWentry = srcShip.EW[e];		      
-		if (EWentry.turn <> gamedata.turn) continue;
+		if (EWentry.turn != gamedata.turn) continue;
                 if (EWentry.targetid == ship.id //self is target
                   || (ship.flight && EWentry.type == 'CCEW') //self is fighter and EWentry is CCEW
                 ){
@@ -210,7 +210,7 @@ window.declarations = {
 		for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 		  var weapon = actSys;
 		  var order = actSys.fireOrders[fireNo]; 
-		  if (order.turn <> gamedata.turn) continue;
+		  if (order.turn != gamedata.turn) continue;
 		  if (order.type.indexOf('intercept') == -1){ //this is actual offensive fire!
 		    var dispFireEntry = new dispFireNew();
 		    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
@@ -276,7 +276,7 @@ window.declarations = {
 			for (var fireNo = 0; fireNo < actSys.fireOrders.length; fireNo++){
 			  var weapon = actSys;
 			  var order = actSys.fireOrders[fireNo]; 
-		  	  if (order.turn <> gamedata.turn) continue;
+		  	  if (order.turn != gamedata.turn) continue;
 			  if (order.type.indexOf('intercept') == -1 && order.targetid == ship.id){ //fire at self!
 			    var dispFireEntry = new dispFireNew();
 			    dispFireEntry.wpnName = weapon.displayName + ' ('+ weapon.firingModes[order.firingMode] +')';
