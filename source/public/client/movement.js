@@ -1561,7 +1561,8 @@ shipManager.movement = {
         //reset "channeled" value for all thrusters on a ship! (don't count on it to be correct BETWEEN assignments)
         for (var sys in ship.systems) {
             if (ship.systems[sys].displayName == "Thruster") {
-                ship.systems[sys].channeled = movement.assignedThrust[system.id];                
+                var thruster = ship.systems[sys];
+                 thruster.channeled = shipManager.movement.getAmountChanneledReal(ship, thruster);
             }
         }        
         
