@@ -1584,7 +1584,7 @@ shipManager.movement = {
             for (var sys in ship.systems) {
                 if (ship.systems[sys].displayName == "Thruster") {
                     if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed) {
-                        if (ship.systems[sys].channeled + 1 < ship.systems[sys].output * 2) {
+                        if (ship.systems[sys].channeled < ship.systems[sys].output ) { //auto-assignment shall not overhrust
                             if (ship.systems[sys].criticals.length == 0) {
                                 thrusters.push(ship.systems[sys]);
                             }
@@ -1606,11 +1606,7 @@ shipManager.movement = {
                     if (thrusters[j].channeled + 1 > thrusters[j].output) {
                         checked++;
                         continue;
-                    } /*Marcin Sawicki - impossible if previous condition not met, unreachable otherwise?
-                    else if (thrusters[j].channeled + 1 > thrusters[j].output * 2) {
-                        checked++;
-                        continue;
-                    }*/
+                    }
                     if (typeof move.assignedThrust[thrusters[j].id] == "undefined") {
                         move.assignedThrust[thrusters[j].id] = 1;
                         thrusters[j].channeled++;
