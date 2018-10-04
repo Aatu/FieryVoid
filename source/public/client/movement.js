@@ -1552,12 +1552,19 @@ shipManager.movement = {
         var move = ship.movement[ship.movement.length - 1];
         var needArray = move.requiredThrust;
         var thrusterLoc = 0;               
-        
+                
         //Marcin Sawicki: no auto assignment for pivots!
         if (move.type == "pivotright" || move.type == "pivotleft") {
             return;   
         }
 
+        //reset "channeled" value for all thrusters on a ship! (don't count on it to be correct BETWEEN assignments)
+        for (var sys in ship.systems) {
+            if (ship.systems[sys].displayName == "Thruster") {
+                ship.systems[sys].channeled = movement.assignedThrust[system.id];                
+            }
+        }        
+        
         for (var loc in needArray) {
             var checked = 0;
             if (needArray[loc] == null || needArray[loc] < 1) {
@@ -1670,89 +1677,8 @@ shipManager.movement = {
         rear = Math.floor(turncost / 2);
         any = turncost % 2;
 
-        /*no longer needed
-        var back = shipManager.movement.isGoingBackwards(ship);        
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-
-        var reversed = (back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship));
-
-        if (facing != heading) {
-            if (ship.gravitic) {
-                if (heading + 5 === facing || heading - 1 === facing) {
-                    if (right) {
-                        sideindex = 3;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 4 === facing || heading - 2 === facing) {
-                    if (right) {
-                        sideindex = 3;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 3 === facing || heading - 3 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 1;
-                    }
-                }
-                if (heading + 2 === facing || heading - 4 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 4;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 1 === facing || heading - 5 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 4;
-                        rearindex = 2;
-                    }
-                }
-                requiredThrust[0] = any;
-                requiredThrust[sideindex] = side;
-                requiredThrust[rearindex] = rear;
-                return requiredThrust;
-            }
-        }
-
-        if (reversed) right = !right;
-
-        if (right) {
-            sideindex = 3;
-        } else {
-            sideindex = 4;
-        }
-
-        if (back) {
-            rearindex = 1;
-        } else {
-            rearindex = 2;
-        }
-        */
-        
-
-
         requiredThrust[0] = any;
-        /*replaced by code below
-        requiredThrust[sideindex] = side;
-        requiredThrust[rearindex] = rear;
-        */
+
         var reqThrusterName = "main";
         var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
         requiredThrust[requiredThruster] = rear;
@@ -1763,19 +1689,6 @@ shipManager.movement = {
         requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
         requiredThrust[requiredThruster] = side;        
 
-        /* no longer needed?...
-        var empty = true;
-        for (var i in requiredThrust) {
-            if (requiredThrust[i] > 0) {
-                empty = false;
-                break;
-            }
-        }
-
-        if (empty) {
-            requiredThrust[0] = 1;
-        }
-        */
         return requiredThrust;
     }, //endof function calculateRequiredThrust
 
