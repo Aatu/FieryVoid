@@ -1833,13 +1833,14 @@ shipManager.movement = {
 
     
     calculateTurndelay: function calculateTurndelay(ship, movement, speed) {
-        // speed as a seperate parameter needed to allow for calculation with
-        // new speed.
+        // speed as a seperate parameter needed to allow for calculation with new speed.
         if (speed == 0) return 0;
+        if (ship.turndelaycost == 0) return 0;
         var turndelay = Math.ceil(speed * ship.turndelaycost);
-        if (ship.flight) return turndelay;
+        if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
-        if (turndelay < 1) turndelay = 1;
+        //if (turndelay < 1) turndelay = 1; //Marcin Sawicki: I think this just adds turn delay after accel when delay is satisfied exactly...
+        if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
         return turndelay;
     },
 
