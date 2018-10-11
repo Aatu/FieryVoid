@@ -149,8 +149,29 @@ window.ReplayAnimationStrategy = function () {
         if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
             time += animation.getDuration();
         }
+        
+        //Marcin Sawicki: start with fire at fighters - this will solve most of strange order results!
+        var shipList = new Array();
+        this.gamedata.ships.forEach(function (shp){
+            shipList.push(shp);
+        });
+        
+        //now sort - fighters first!
+        shipList.sort(function(a, b){
+	    if (a.flight && !b.flight){//fighters always before ships
+                return -1;
+              }else if (!a.flight && b.flight){
+                return 1;
+              }else if (a.value > b.value){ //less valuable units first
+                return 1;
+              }else if (a.value < b.value){
+                return -1;
+              }
+              else return 0;
+        });
 
-        this.gamedata.ships.forEach(function (ship, i) {
+        //this.gamedata.ships.forEach(function (ship, i) 
+        shipList.forEach(function (ship, i) {
             var animation = new AllWeaponFireAgainstShipAnimation(ship, this.shipIconContainer, this.emitterContainer, this.gamedata, time, this.scene, this.movementAnimations, logAnimation);
             this.animations.push(animation);
 
