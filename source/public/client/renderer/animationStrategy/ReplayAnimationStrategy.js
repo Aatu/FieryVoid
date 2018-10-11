@@ -162,9 +162,9 @@ window.ReplayAnimationStrategy = function () {
                 return -1;
               }else if (!a.flight && b.flight){
                 return 1;
-              }else if (a.value > b.value){ //less valuable units first
+              }else if (a.pointCost > b.pointCost){ //less valuable units first
                 return 1;
-              }else if (a.value < b.value){
+              }else if (a.pointCost < b.pointCost){
                 return -1;
               }
               else return 0;
