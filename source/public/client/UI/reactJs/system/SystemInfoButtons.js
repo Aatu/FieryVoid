@@ -181,7 +181,7 @@ class SystemInfoButtons extends React.Component {
                 {canAddShots(ship, system) && <Button onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
 		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
-		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this))}
+		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
             </Container>
         )
     }
@@ -213,7 +213,7 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
 
 
-const getFiringModes = (ship, system, changeFiringMode) => {
+const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
 		let parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 	
