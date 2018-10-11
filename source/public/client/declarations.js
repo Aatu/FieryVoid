@@ -18,6 +18,7 @@ window.declarations = {
 		this.name = "";
 		this.class = "";
 		this.value = "";
+		this.flight = false;
 		this.EW = new Array();
 	}
 	function dispEWNew() {
@@ -45,6 +46,7 @@ window.declarations = {
         dispShip.EW = new Array();
         //now all EW entries...either own or incoming!
         if (ship.flight){//for fighters, show jinking in all circumstances
+	  dispShip.flight = ship.flight;
 	  dispEWEntry = new dispEWNew();	
           dispEWEntry.name = 'jinking';
           dispEWEntry.targetName = '';
@@ -160,6 +162,7 @@ window.declarations = {
 		this.name = "";
 		this.class = "";
 		this.value = "";
+		this.flight = false;
 		this.fire = new Array();
 	}
 	function dispFireNew() {
@@ -187,6 +190,7 @@ window.declarations = {
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
         dispShip.value = ship.pointCost;
+	dispShip.flight = ship.flight;
         //now all fire entries...either own or incoming!
         if(declarations.GlobalDisplay=='Source'){ //by source - display fire dished out by self!  
  	  for (var sysNo = 0; sysNo < ship.systems.length; sysNo++){
