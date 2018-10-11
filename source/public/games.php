@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News September 2018</div>
+    <div id="newsHeader">Latest News - October 2018</div>
     <div id="newsEntry">
         <!-- no longer quite the news?
         <h3>Good news everyone!</h3><br>Our little world is looking awesome, now in <del>hi-def 3d</del> faster 2d!
@@ -66,6 +66,8 @@ if (isset($_SESSION["user"])) {
         - some Declarations panel fixes.        
         <br>
         - Game Lobby fixes (player count in game, recent games)
+        <br>
+        - mass mode change (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
         <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
