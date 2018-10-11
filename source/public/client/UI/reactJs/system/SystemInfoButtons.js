@@ -242,7 +242,7 @@ const getFiringModes = (ship, system, changeFiringMode) => {
 			img = `./img/systemicons/${system.name}.png`;
 		}
 
-		return <Button onClick={changeFiringMode} onContextMenu={this.allChangeFiringMode.bind(this)}  img={img}>{firingMode.substring(0, 1)}</Button>
+		return <Button onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>
 	}
 }
 
