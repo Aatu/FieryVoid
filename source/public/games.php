@@ -61,8 +61,6 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - Panel with text description of fire and EW declarations (for text-loving dinosaurs out there!).
-        <br>
         - some Declarations panel fixes.        
         <br>
         - Game Lobby fixes (player count in game, recent games)
