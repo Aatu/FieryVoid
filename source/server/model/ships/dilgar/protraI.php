@@ -45,10 +45,10 @@ class ProtraI extends BaseShip{
         $this->addAftSystem(new Engine(3, 9, 0, 4, 4));
         $this->addAftSystem(new LightBolter(2, 6, 2, 60, 240));
 
-        $this->addLeftSystem(new ScatterPulsar(2, 4, 3, 180, 360));
+        $this->addLeftSystem(new ScatterPulsar(2, 4, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 
-        $this->addRightSystem(new ScatterPulsar(2, 4, 3, 0, 180));
+        $this->addRightSystem(new ScatterPulsar(2, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
