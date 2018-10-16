@@ -1988,7 +1988,7 @@ class DBManager
             WHERE
                 DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
             OR
-                (DATE_ADD(p.lastactivity, INTERVAL 2 DAY) < NOW() 
+                (DATE_ADD(p.lastactivity, INTERVAL 3 DAY) < NOW() 
                 AND
                 g.status = 'LOBBY')
 
@@ -2297,7 +2297,7 @@ class DBManager
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 2 DAY) < NOW()    
+                DATE_ADD(time, INTERVAL 3 DAY) < NOW()    
         ");
 
         if ($stmt) {
