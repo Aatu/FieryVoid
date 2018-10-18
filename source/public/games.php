@@ -67,6 +67,10 @@ if (isset($_SESSION["user"])) {
         <br>
         - mass mode change (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
         <br>
+        - movement order displayed correctly, both in classic and simultaneous movement - onmouseover as well as OoB
+        <br>
+        - units on same hex tooltip sorted by Initiative
+        <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
