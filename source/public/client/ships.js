@@ -676,7 +676,7 @@ window.shipManager = {
             if (gamedata.ships[i] == ship) return order;
             if (gamedata.ships[i].iniative > previousInitiative){ //new Ini higher than previous!         
                 order++;
-                previousInitiative = amedata.ships[i].iniative;
+                previousInitiative = gamedata.ships[i].iniative;
             }
         }
 
