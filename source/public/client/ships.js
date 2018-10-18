@@ -668,19 +668,18 @@ window.shipManager = {
 
     getIniativeOrder: function getIniativeOrder(ship) {
         var previousInitiative = -100000; //same Ini move together now!
-        var order = 1;  
+        var order = 0;  
 
         for (var i in gamedata.ships) {
             if (shipManager.isDestroyed(gamedata.ships[i])) continue;
-
-            if (gamedata.ships[i] == ship) return order;
             if (gamedata.ships[i].iniative > previousInitiative){ //new Ini higher than previous!         
                 order++;
                 previousInitiative = gamedata.ships[i].iniative;
             }
+            if (gamedata.ships[i].id == ship.id) return order;
         }
 
-        return 0;
+        return 0; //should not happen
     },
 
     hasBetterInitive: function hasBetterInitive(a, b) {
