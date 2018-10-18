@@ -586,7 +586,9 @@ window.gamedata = {
             td.id = "iniTd";
             td.style.textAlign = "center";
             td.style.fontSize = "18px";
-            td.innerHTML = categoryIndex !== null ? categoryIndex : i + 1;
+            //td.innerHTML = categoryIndex !== null ? categoryIndex : i + 1;
+            //Marcin Sawicki, display actual movement order instead:
+            td.innerHTML = shipManager.getIniativeOrder(ships[i]);
 
             if (gamedata.isMyShip(ships[i])) {
                 td.style.color = "green";
