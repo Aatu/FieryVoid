@@ -228,6 +228,7 @@ window.ShipTooltip = function () {
     }
 
     function createForMultipleShips(ships) {
+	ships.sort(shipManager.hasBetterInitive);
         ships.forEach(function (ship, i) {
             var comma = i < ships.length - 1 ? ',' : '';
 
