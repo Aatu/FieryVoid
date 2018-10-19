@@ -76,10 +76,10 @@ if (isset($_SESSION["user"])) {
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
 
         <br><br>----------<b>LINKS</b>----------
-        <br><a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs
-        <br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
-        <br><a href=\"//fieryvoid.net/reg.php\">Register</a> new player account
-        <br><a href=\"http://fieryvoid.net/chpass.php\">Change password</a> of Your account
+        <br><a href="https://www.facebook.com/groups/218482691602941/files/" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs
+        <br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
+        <br><a href="reg.php">Register</a> new player account
+        <br><a href="chpass.php">Change password</a> of Your account
     </div>
 </div>
 <div class="panel large">
