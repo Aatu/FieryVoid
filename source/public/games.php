@@ -71,6 +71,8 @@ if (isset($_SESSION["user"])) {
         <br>
         - units on same hex tooltip sorted by Initiative
         <br>
+        - links behavior fixed
+        <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
