@@ -152,9 +152,14 @@ window.ShipTooltip = function () {
 	    this.addEntryElement("Ballistic navigator aboard", ship.hasNavigator === true);
 	    this.addEntryElement("Escorting ships in same hex", shipManager.isEscorting(ship));
 	    */
-	    toDisplay = '';
+	toDisplay = '';
 	if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
-	if (shipManager.isEscorting(ship)) toDisplay += 'Escorting ships; ';
+	var listEscorting = shipManager.listEscorting(ship);
+	if (listEscorting != ''){
+		toDisplay += 'Escorting: ';
+		//list of unit names
+		toDisplay += listEscorting;
+	}
 	this.addEntryElement(toDisplay, toDisplay != '');	    
 	    
         //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
@@ -173,7 +178,9 @@ window.ShipTooltip = function () {
 
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-        this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')');
+	toDisplay = ''. //display Agile status
+	if (ship.agile) toDisplay = ', Agile';
+        this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')' + toDisplay);
 
 	toDisplay = 'Thrust: ' + shipManager.movement.getRemainingEngineThrust(ship) + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
 	this.addEntryElement(toDisplay, toDisplay!='');
