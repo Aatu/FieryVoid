@@ -810,12 +810,10 @@ window.shipManager = {
 
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
-
         var ships = shipManager.getShipsInSameHex(ship);
-
         for (var i in ships) {
             var othership = ships[i];
-
+            if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue;
 
             if (gamedata.isEnemy(ship, othership)) continue;
@@ -827,7 +825,30 @@ window.shipManager = {
                 if (oPos.equals(tPos)) return true;
             }
         }
-
         return false;
     }
+    
+    /*list of names of escorted ships*/
+    listEscorting: function listEscorting(ship) {
+        var resultTxt = '';
+        if (!ship.flight) return resultTxt;
+
+        for (var i in gamedata.ships) {
+            var othership = gamedata.ships[i];
+            if (othership.flight === true) continue; //can escort only ships
+            if (othership.id == ship.id) continue; //self
+            if (gamedata.isEnemy(ship, othership)) continue; //no escorting opponent
+
+            var oPos = shipManager.movement.getPositionAtStartOfTurn(othership);
+            var tPos = shipManager.movement.getPositionAtStartOfTurn(ship);
+
+            if (oPos.equals(tPos)){
+                if(resultTxt != '') resultTxt += ', ';
+                resultTxt += othership.name;
+            }
+        }
+
+        return resultTxt;
+    }
+    
 };
