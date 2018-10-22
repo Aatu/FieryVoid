@@ -813,6 +813,8 @@ window.shipManager = {
         //var ships = shipManager.getShipsInSameHex(ship);
         //for (var i in ships) {
             //var othership = ships[i];
+        if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected!
+        
         for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
             var othership = gamedata.ships[i];
                     
@@ -829,12 +831,14 @@ window.shipManager = {
             }
         }
         return false;
-    }
+    },
     
     /*list of names of escorted ships*/
     listEscorting: function listEscorting(ship) {
         var resultTxt = '';
         if (!ship.flight) return resultTxt;
+    
+        if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted
 
         for (var i in gamedata.ships) {
             var othership = gamedata.ships[i];
