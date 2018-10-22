@@ -63,7 +63,7 @@ if (isset($_SESSION["user"])) {
         <br><br>
         - some Declarations panel fixes.        
         <br>
-        - Game Lobby fixes (player count in game, recent games)
+        - Game Lobby fixes (player count in game, recent games lists, links behavior)
         <br>
         - mass mode change (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
         <br>
@@ -71,7 +71,7 @@ if (isset($_SESSION["user"])) {
         <br>
         - units on same hex tooltip sorted by Initiative
         <br>
-        - links behavior fixed
+        - Fighter ballistic escort: now showing names of potentially escorted ships (as this was repeatedly a source of doubt)
         <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
