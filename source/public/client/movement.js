@@ -1212,7 +1212,7 @@ shipManager.movement = {
         //replacement:
         for (var i = ship.movement.length - 1; i >= 0; i--) {
             var move = ship.movement[i];
-            if (move.turn != currentTurn) { //first move from earlier turn! this is what we need!
+            if (move.turn < currentTurn) { //first move from earlier turn! this is what we need!
                 break; //get out of loop
             } //if such a move is not found, first move of current turn would do - should be turn 1 and deployment move
         }        
