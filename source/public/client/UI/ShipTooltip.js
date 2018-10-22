@@ -178,7 +178,7 @@ window.ShipTooltip = function () {
 
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
         this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-	toDisplay = ''. //display Agile status
+	toDisplay = ''; //display Agile status
 	if (ship.agile) toDisplay = ', Agile';
         this.addEntryElement('Turn Cost: ' + turncost + ' ('+ship.turncost+'); Turn Delay: ' + turnDelayCost + ' ('+ship.turndelaycost+')' + toDisplay);
 
