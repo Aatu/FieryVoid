@@ -810,9 +810,12 @@ window.shipManager = {
 
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
-        var ships = shipManager.getShipsInSameHex(ship);
-        for (var i in ships) {
-            var othership = ships[i];
+        //var ships = shipManager.getShipsInSameHex(ship);
+        //for (var i in ships) {
+            //var othership = ships[i];
+        for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
+            var othership = gamedata.ships[i];
+                    
             if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue;
 
