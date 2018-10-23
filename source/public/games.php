@@ -73,6 +73,8 @@ if (isset($_SESSION["user"])) {
         <br>
         - Fighter ballistic escort: now showing names of potentially escorted ships (as this was repeatedly a source of doubt)
         <br>
+        - Deployment area validation fix (You can now deploy on the edges deployment area and won't get an error on confirmation)
+        <br>
         - last but not least - brand new collection of BUGS!";
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
