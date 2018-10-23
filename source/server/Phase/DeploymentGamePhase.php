@@ -43,17 +43,17 @@ class DeploymentGamePhase implements Phase
 
 
             $leftBottom = [
-                "x" => round($deppos["x"]-($depw/2)),
-                "y" => round($deppos["y"]-($deph/2))
+                "x" => floor($deppos["x"]-($depw/2)),
+                "y" => floor($deppos["y"]-($deph/2))
             ];
 
             $rightTop = [
-                "x" => round($deppos["x"]+($depw/2)),
-                "y" => round($deppos["y"]+($deph/2))
+                "x" => ceil($deppos["x"]+($depw/2)),
+                "y" => ceil($deppos["y"]+($deph/2))
             ];
 
-            if ($hexpos["x"] < $rightTop["x"] && $hexpos["x"] > $leftBottom["x"]){
-                if ($hexpos["y"] < $rightTop["y"] && $hexpos["y"] > $leftBottom["y"]){
+            if ($hexpos["x"] <= $rightTop["x"] && $hexpos["x"] >= $leftBottom["x"]){
+                if ($hexpos["y"] <= $rightTop["y"] && $hexpos["y"] >= $leftBottom["y"]){
                     return true;
                 }
             }
