@@ -7,6 +7,7 @@ window.SelectFromShips = function () {
     function ShipTooltip(selectedShip, ships, payload, phaseStrategy) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
+		    this.ships.sort(shipManager.hasBetterInitive); //so they're displayed in Ini order
         this.position = payload.hex;
         this.payload = payload;
         this.selectedShip = selectedShip;
