@@ -6,7 +6,8 @@ window.ShipTooltip = function () {
 
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
-        this.ships = [].concat(ships);
+        this.ships = [].concat(ships);	    
+		this.ships.sort(shipManager.hasBetterInitive); //so they're displayed in Ini order
         this.position = position;
         //TODO: selected ship might be destroyed
         this.selectedShip = selectedShip;
@@ -235,7 +236,6 @@ window.ShipTooltip = function () {
     }
 
     function createForMultipleShips(ships) {
-	ships.sort(shipManager.hasBetterInitive);
         ships.forEach(function (ship, i) {
             var comma = i < ships.length - 1 ? ',' : '';
 
