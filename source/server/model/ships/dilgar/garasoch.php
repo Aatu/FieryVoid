@@ -46,10 +46,10 @@ class Garasoch extends BaseShip{
         $this->addAftSystem(new Engine(3, 7, 0, 4, 4));
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 120, 240));
 
-        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 0, 180));
+        $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 5, 3));
 
-        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 180, 360));
+        $this->addRightSystem(new ScatterPulsar(1, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

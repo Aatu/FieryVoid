@@ -213,6 +213,7 @@ shipManager.movement = {
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
+        if (shipManager.movement.isRolling(ship)) return true; //rolling ship should be always able to stop...
         if (shipManager.movement.hasRolled(ship) && !ship.agile) {
             return false;
         }
@@ -1199,12 +1200,23 @@ shipManager.movement = {
         if (currentTurn === undefined) {
             currentTurn = gamedata.turn;
         }
+        
+        /* this gives position after current turn move, NOT good
         var move = ship.movement.find(function(move) {
             return move.turn === currentTurn;
         });
         if (!move) {
             move = ship.movement[ship.movement.length - 1];
         }
+        */
+        //replacement:
+        for (var i = ship.movement.length - 1; i >= 0; i--) {
+            var move = ship.movement[i];
+            if (move.turn < currentTurn) { //first move from earlier turn! this is what we need!
+                break; //get out of loop
+            } //if such a move is not found, first move of current turn would do - should be turn 1 and deployment move
+        }        
+        
         return new hexagon.Offset(move.position);
     },
 
@@ -1552,12 +1564,20 @@ shipManager.movement = {
         var move = ship.movement[ship.movement.length - 1];
         var needArray = move.requiredThrust;
         var thrusterLoc = 0;               
-        
+                
         //Marcin Sawicki: no auto assignment for pivots!
         if (move.type == "pivotright" || move.type == "pivotleft") {
             return;   
         }
 
+        //reset "channeled" value for all thrusters on a ship! (don't count on it to be correct BETWEEN assignments)
+        for (var sys in ship.systems) {
+            if (ship.systems[sys].displayName == "Thruster") {
+                var thruster = ship.systems[sys];
+                 thruster.channeled = shipManager.movement.getAmountChanneledReal(ship, thruster);
+            }
+        }        
+        
         for (var loc in needArray) {
             var checked = 0;
             if (needArray[loc] == null || needArray[loc] < 1) {
@@ -1576,7 +1596,7 @@ shipManager.movement = {
             for (var sys in ship.systems) {
                 if (ship.systems[sys].displayName == "Thruster") {
                     if (ship.systems[sys].direction == thrusterLoc && !ship.systems[sys].destroyed) {
-                        if (ship.systems[sys].channeled + 1 < ship.systems[sys].output * 2) {
+                        if (ship.systems[sys].channeled < ship.systems[sys].output ) { //auto-assignment shall not overhrust
                             if (ship.systems[sys].criticals.length == 0) {
                                 thrusters.push(ship.systems[sys]);
                             }
@@ -1598,11 +1618,7 @@ shipManager.movement = {
                     if (thrusters[j].channeled + 1 > thrusters[j].output) {
                         checked++;
                         continue;
-                    } /*Marcin Sawicki - impossible if previous condition not met, unreachable otherwise?
-                    else if (thrusters[j].channeled + 1 > thrusters[j].output * 2) {
-                        checked++;
-                        continue;
-                    }*/
+                    }
                     if (typeof move.assignedThrust[thrusters[j].id] == "undefined") {
                         move.assignedThrust[thrusters[j].id] = 1;
                         thrusters[j].channeled++;
@@ -1670,89 +1686,8 @@ shipManager.movement = {
         rear = Math.floor(turncost / 2);
         any = turncost % 2;
 
-        /*no longer needed
-        var back = shipManager.movement.isGoingBackwards(ship);        
-        var heading = shipManager.movement.getLastCommitedMove(ship).heading;
-        var facing = shipManager.movement.getLastCommitedMove(ship).facing;
-
-        var reversed = (back || shipManager.movement.isRolled(ship)) && !(back && shipManager.movement.isRolled(ship));
-
-        if (facing != heading) {
-            if (ship.gravitic) {
-                if (heading + 5 === facing || heading - 1 === facing) {
-                    if (right) {
-                        sideindex = 3;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 4 === facing || heading - 2 === facing) {
-                    if (right) {
-                        sideindex = 3;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 3 === facing || heading - 3 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 3;
-                        rearindex = 1;
-                    }
-                }
-                if (heading + 2 === facing || heading - 4 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 4;
-                        rearindex = 2;
-                    }
-                }
-                if (heading + 1 === facing || heading - 5 === facing) {
-                    if (right) {
-                        sideindex = 4;
-                        rearindex = 1;
-                    } else {
-                        sideindex = 4;
-                        rearindex = 2;
-                    }
-                }
-                requiredThrust[0] = any;
-                requiredThrust[sideindex] = side;
-                requiredThrust[rearindex] = rear;
-                return requiredThrust;
-            }
-        }
-
-        if (reversed) right = !right;
-
-        if (right) {
-            sideindex = 3;
-        } else {
-            sideindex = 4;
-        }
-
-        if (back) {
-            rearindex = 1;
-        } else {
-            rearindex = 2;
-        }
-        */
-        
-
-
         requiredThrust[0] = any;
-        /*replaced by code below
-        requiredThrust[sideindex] = side;
-        requiredThrust[rearindex] = rear;
-        */
+
         var reqThrusterName = "main";
         var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
         requiredThrust[requiredThruster] = rear;
@@ -1763,19 +1698,6 @@ shipManager.movement = {
         requiredThruster = shipManager.movement.thrusterDirectionRequired(ship,reqThrusterName);
         requiredThrust[requiredThruster] = side;        
 
-        /* no longer needed?...
-        var empty = true;
-        for (var i in requiredThrust) {
-            if (requiredThrust[i] > 0) {
-                empty = false;
-                break;
-            }
-        }
-
-        if (empty) {
-            requiredThrust[0] = 1;
-        }
-        */
         return requiredThrust;
     }, //endof function calculateRequiredThrust
 
@@ -1923,13 +1845,14 @@ shipManager.movement = {
 
     
     calculateTurndelay: function calculateTurndelay(ship, movement, speed) {
-        // speed as a seperate parameter needed to allow for calculation with
-        // new speed.
+        // speed as a seperate parameter needed to allow for calculation with new speed.
         if (speed == 0) return 0;
+        if (ship.turndelaycost == 0) return 0;
         var turndelay = Math.ceil(speed * ship.turndelaycost);
-        if (ship.flight) return turndelay;
+        if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
-        if (turndelay < 1) turndelay = 1;
+        //if (turndelay < 1) turndelay = 1; //Marcin Sawicki: I think this just adds turn delay after accel when delay is satisfied exactly...
+        if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
         return turndelay;
     },
 

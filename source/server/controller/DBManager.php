@@ -954,9 +954,9 @@ class DBManager
 	/* originally games replaying firing; now when entire history is available for replay, this would be useless
         $sql = "SELECT * FROM `B5CGM`.`tac_game` WHERE phase = 4 AND status = 'ACTIVE'";
 	*/
-	//replacement: games recently active    
+	//replacement: games recently active (including closed ones! - recent conclusion qualifies)
 	$sql = "SELECT DISTINCT g.* FROM tac_game g JOIN tac_playeringame p ON p.gameid = g.id
-		WHERE DATE_ADD(p.lastactivity, INTERVAL 2 day) < NOW() ";
+		WHERE DATE_ADD(p.lastactivity, INTERVAL 2 day) >= NOW() ";
         //    debug::log($sql);
 
         $result = $this->query($sql);
@@ -1016,7 +1016,9 @@ class DBManager
 
     public function getLobbyGames() {
 
-        $stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
+        //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
+	//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
+	$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
         $games = [];
 
         if ($stmt) {
@@ -1986,7 +1988,7 @@ class DBManager
             WHERE
                 DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
             OR
-                (DATE_ADD(p.lastactivity, INTERVAL 2 DAY) < NOW() 
+                (DATE_ADD(p.lastactivity, INTERVAL 3 DAY) < NOW() 
                 AND
                 g.status = 'LOBBY')
 
@@ -2295,7 +2297,7 @@ class DBManager
             DELETE FROM
                 chat
             WHERE
-                DATE_ADD(time, INTERVAL 2 DAY) < NOW()    
+                DATE_ADD(time, INTERVAL 3 DAY) < NOW()    
         ");
 
         if ($stmt) {

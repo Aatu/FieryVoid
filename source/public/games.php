@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News September 2018</div>
+    <div id="newsHeader">Latest News - October 2018</div>
     <div id="newsEntry">
         <!-- no longer quite the news?
         <h3>Good news everyone!</h3><br>Our little world is looking awesome, now in <del>hi-def 3d</del> faster 2d!
@@ -61,25 +61,29 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - Panel with text description of fire and EW declarations (for text-loving dinosaurs out there!).
+        - <b>Game Lobby</b> fixes (player count in game, recent games lists, links behavior)
         <br>
-        - Long demanded Surrender button! Choice of all brave task force commanders :) (available in Initial phase).        
+        - <b>mass mode change</b> (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
         <br>
-        - General overhaul of movement - especially recent Pivot-related problems should be corrected. If any trouble happens, report!
+        - <b>movement order</b> displayed correctly, both in classic and simultaneous movement - onmouseover as well as OoB
         <br>
-        - With replay feature available, 'active fire' button was no longer useful. It was replaced by 'recent activity' - games which progressed during recent 48 hours.
+        - units on same hex tooltip sorted by Initiative
         <br>
-        - Onmouseover ship info was rearranged (mostly condensed)
+        - <b>Fighter ballistic escort</b>: now showing names of potentially escorted ships (as this was repeatedly a source of doubt)
         <br>
-        - last but not least - brand new collection of BUGS!";
+        - <b>Deployment</b> area validation fix (You can now deploy on the edges deployment area and won't get an error on confirmation)
+        <br>
+        - some <b>Declarations</b> panel fixes.        
+        <br>
+        - last but not least - brand new collection of BUGS!;
         <br><br>
         Enjoy and report BUGS on FB. Also force reload (ctrl+F5) whenever something weird happens.
 
         <br><br>----------<b>LINKS</b>----------
-        <br><a href=\"https://www.facebook.com/groups/218482691602941/files/\" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs
-        <br><a href=\"http://b5warsvault.wikidot.com/\" target=\"_blank\">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
-        <br><a href=\"http://fieryvoid.net/reg.php\">Register</a> new player account
-        <br><a href=\"http://fieryvoid.net/chpass.php\">Change password</a> of Your account
+        <br><a href="https://www.facebook.com/groups/218482691602941/files/" target=\"_blank\">FV FAQ</a> - differences from B5Wars and known bugs
+        <br><a href="http://b5warsvault.wikidot.com/" target="_blank">B5Wars Vault</a> - B5Wars rules and LOTS of related stuff
+        <br><a href="reg.php">Register</a> new player account
+        <br><a href="chpass.php">Change password</a> of Your account
     </div>
 </div>
 <div class="panel large">

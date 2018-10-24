@@ -54,7 +54,7 @@ class SystemInfoButtons extends React.Component {
         shipManager.power.offlineAll(ship, system);
         webglScene.customEvent('CloseSystemInfo');
     }
-
+	
     overload(e) {
         e.stopPropagation(); e.preventDefault();
         const {ship, system} = this.props;
@@ -112,17 +112,56 @@ class SystemInfoButtons extends React.Component {
         webglScene.customEvent('CloseSystemInfo');
 	}
 
-	changeFiringMode(e) {
-        e.stopPropagation(); e.preventDefault();
+	    allChangeFiringMode(e) {
+		e.stopPropagation(); e.preventDefault();
 		const {ship, system} = this.props;
 		if (!canChangeFiringMode(ship, system)) {
-            return;
+		    return;
+		}		    
+		//change firing mode of self
+		weaponManager.onModeClicked(ship, system);
+		//check which mode was set
+		var modeSet = system.firingMode;		    
+		//set this mode on ALL similar weapons that aren't declared and can change firing mode
+		var similarWeapons = new Array();
+		for (var i = 0; i < ship.systems.length; i++) {
+			if (system.displayName === ship.systems[i].displayName) {
+				if (system.weapon) {
+					similarWeapons.push(ship.systems[i]);
+				}
+			}
 		}
-		
-        weaponManager.onModeClicked(ship, system);
-        webglScene.customEvent('CloseSystemInfo');
+		for (var i = 0; i < similarWeapons.length; i++) {
+			var weapon = similarWeapons[i];
+			if (weapon.firingMode == modeSet) continue;
+			if (!canChangeFiringMode(ship, weapon)) continue;
+			var originalMode = weapon.firingMode; //so mode is properly reset for weapon that cannot have desired mode set for some reason!
+			var iterations = 0;
+			while (weapon.firingMode!=modeSet && iterations < 2){
+				weaponManager.onModeClicked(ship, weapon);
+				if(weapon.firingMode == 1){
+					iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+				}
+			}
+			//reset mode back if necessary! (this one is guaranteed to be available)
+			if (weapon.firingMode!=modeSet) while (weapon.firingMode!=originalMode){
+				weaponManager.onModeClicked(ship, weapon);
+			}
+		}
+		webglScene.customEvent('CloseSystemInfo');
+	    }
+	
+	changeFiringMode(e) {
+        	e.stopPropagation(); e.preventDefault();
+		const {ship, system} = this.props;
+		if (!canChangeFiringMode(ship, system)) {
+            		return;
+		}		
+		weaponManager.onModeClicked(ship, system);
+		webglScene.customEvent('CloseSystemInfo');
 	}
 	
+		
 	
     render() {
 		const {ship, selectedShip, system} = this.props;
@@ -133,7 +172,7 @@ class SystemInfoButtons extends React.Component {
 		
         return (
             <Container>
-				{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
+		{canOnline(ship, system) && <Button onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
                 {canOffline(ship, system) && <Button onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
                 {canOverload(ship, system) && <Button onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
                 {canStopOverload(ship, system) && <Button onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
@@ -141,8 +180,8 @@ class SystemInfoButtons extends React.Component {
                 {canDeBoost(ship, system) && <Button onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
                 {canAddShots(ship, system) && <Button onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
                 {canReduceShots(ship, system) && <Button onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
-				{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this))}
+		{canRemoveFireOrder(ship, system) && <Button onClick={this.removeFireOrder.bind(this)} img="./img/firing.png"></Button>}
+		{canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))}
             </Container>
         )
     }
@@ -174,7 +213,7 @@ const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasF
 const canChangeFiringMode = (ship, system) => system.weapon  && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 3 && !system.ballistic)) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
 
 
-const getFiringModes = (ship, system, changeFiringMode) => {
+const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
 		let parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 	
@@ -203,7 +242,7 @@ const getFiringModes = (ship, system, changeFiringMode) => {
 			img = `./img/systemicons/${system.name}.png`;
 		}
 
-		return <Button onClick={changeFiringMode} img={img}>{firingMode.substring(0, 1)}</Button>
+		 return <Button onClick={changeFiringMode} onContextMenu={allChangeFiringMode}  img={img}>{firingMode.substring(0, 1)}</Button>
 	}
 }
 
