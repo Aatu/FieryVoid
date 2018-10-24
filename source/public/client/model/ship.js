@@ -97,9 +97,8 @@ Ship.prototype = {
 
             if (system.name == "shieldGenerator") {
                 if (system.destroyed || shipManager.power.isOffline(this, system)) {
-                    return true;
+                    continue; 
                 }
-
                 shieldCapacity = system.output + shipManager.power.getBoost(system);
             }
 
