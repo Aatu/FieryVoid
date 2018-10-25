@@ -143,6 +143,7 @@ window.gamedata = {
     },
 
     /*Marcin Sawicki: re-created so there are no dumps during replay...*/
+    //TODO: remove this function AND ALL CALLS TO IT (delete or replace by new approach, as appropriate)
     getActiveShip: function getActiveShip() {
         return null;
     },
