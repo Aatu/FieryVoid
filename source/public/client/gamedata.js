@@ -142,6 +142,11 @@ window.gamedata = {
         }
     },
 
+    /*Marcin Sawicki: re-created so there are no dumps during replay...*/
+    getActiveShip: function getActiveShip() {
+        return null;
+    },
+    
     getActiveShips: function getActiveShips() {
 
         if (Array.isArray(gamedata.activeship)){
