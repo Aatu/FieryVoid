@@ -61,6 +61,8 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
+        - <b><u>Replay fixed</u></b> - now You can play replay at any moment (...again ;) )
+        <br>
         - <b>Game Lobby</b> fixes (player count in game, recent games lists, links behavior)
         <br>
         - <b>mass mode change</b> (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
