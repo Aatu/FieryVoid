@@ -44,7 +44,7 @@ class ThorunEarly extends FighterFlight{
                 $this->flightLeader = $fighter;
                 //$fighter->iconPath = "img/ships/thorun_leader_large.png";
             } //else {
-                $fighter->displayName = "Thorun";
+                $fighter->displayName = "Thorun (early)";
             //}
             
             $fighter->addFrontSystem(new PairedLightBoltCannon(330, 30, 2));

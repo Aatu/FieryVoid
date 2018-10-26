@@ -7,6 +7,8 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
+                
+                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
@@ -430,6 +432,10 @@ spl_autoload_register(
                 'lightship' => '/server/model/ships/ShipClasses.php',
                 'liner' => '/server/model/ships/civilians/liner.php',
                 'linkedweapon' => '/server/model/weapons/linkedWeapon.php',
+				
+                'erlorhark' => '/server/model/ships/llort/erlorhark.php',
+                'palaceship' => '/server/model/ships/llort/palaceship.php',
+				
                 'lmissilerack' => '/server/model/weapons/missile.php',
                 'lokita' => '/server/model/ships/abbai/lokita.php',
                 'looter' => '/server/model/ships/raiders/looter.php',

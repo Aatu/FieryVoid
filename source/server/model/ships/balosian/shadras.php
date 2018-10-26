@@ -32,7 +32,7 @@ class Shadras extends FighterFlight{
 			
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("shadras", $armour, 12, $this->id);
-            $fighter->displayName = "Shadras Heavy Fighter";
+            $fighter->displayName = "Shadras";
             $fighter->imagePath = "img/ships/shadras.png";
             $fighter->iconPath = "img/ships/shadras_large.png";
 

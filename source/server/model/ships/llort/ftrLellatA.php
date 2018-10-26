@@ -32,7 +32,7 @@ class ftrLellatA extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(2, 1, 2, 2);
 		$fighter = new Fighter("ftrLellatA", $armour, 10, $this->id);
-		$fighter->displayName = "Lellat-A Medium Fighter";
+		$fighter->displayName = "Lellat-A";
 		$fighter->imagePath = "img/ships/LlortLellat.png";
 		$fighter->iconPath = "img/ships/LlortLellat_Large.png";
 			
