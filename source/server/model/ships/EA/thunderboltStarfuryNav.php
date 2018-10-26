@@ -35,7 +35,7 @@ class ThunderboltStarfuryNav extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 2, 2, 2);
             $fighter = new Fighter("ThunderboltStarfuryNav", $armour, 15, $this->id);
-            $fighter->displayName = "Thunderbolt Heavy Fighter";
+            $fighter->displayName = "Thunderbolt";
             $fighter->imagePath = "img/ships/thunderboltStarfury.png";
             $fighter->iconPath = "img/ships/thunderboltStarfury_large.png";
 
