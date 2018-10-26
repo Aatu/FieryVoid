@@ -6,8 +6,8 @@ class DeltaV extends FighterFlight{
         
 	$this->pointCost = 192;
 	$this->faction = "Raiders";
-      $this->phpclass = "DeltaV";
-       $this->shipClass = "Delta-V Light Fighters";
+        $this->phpclass = "DeltaV";
+        $this->shipClass = "Delta-V Light Fighters";
 	$this->imagePath = "img/ships/deltaV.png";
         
         $this->forwardDefense = 5;
