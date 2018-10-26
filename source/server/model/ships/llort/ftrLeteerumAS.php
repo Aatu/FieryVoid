@@ -34,7 +34,7 @@ class ftrLeteerumAS extends FighterFlight{
 			
 			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("ftrLeteerumAS", $armour, 10, $this->id);
-			$fighter->displayName = "Leteerum Assault Shuttle";
+			$fighter->displayName = "Leteerum";
 			$fighter->imagePath = "img/ships/LlortLeteerum.png";
 			$fighter->iconPath = "img/ships/LlortLeteerum_Large.png";
 			
