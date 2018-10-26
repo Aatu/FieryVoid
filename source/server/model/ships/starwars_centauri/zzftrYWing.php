@@ -34,7 +34,7 @@ class zzftrywing extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 1, 2, 2);
             $fighter = new Fighter("zzftrywing", $armour, 15, $this->id);
-            $fighter->displayName = "Y-Wing Assault Fighter";
+            $fighter->displayName = "Y-Wing";
             $fighter->imagePath = "img/starwars/yWing.png";
             $fighter->iconPath = "img/starwars/yWing_large.png"; 
             
