@@ -31,7 +31,7 @@ class Falkosi extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 1, 1);
             $fighter = new Fighter("falkosi", $armour, 9, $this->id);
-            $fighter->displayName = "Falkosi Light Fighter";
+            $fighter->displayName = "Falkosi";
             $fighter->imagePath = "img/ships/falkosi.png";
             $fighter->iconPath = "img/ships/falkosi_large.png";
 
