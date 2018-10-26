@@ -30,7 +30,7 @@ class Shasi extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(1, 1, 2, 2);
 		$fighter = new Fighter("shasi", $armour, 9, $this->id);
-		$fighter->displayName = "Shasi Light Fighter";
+		$fighter->displayName = "Shasi";
 		$fighter->imagePath = "img/ships/shasi.png";
 		$fighter->iconPath = "img/ships/shasi_large.png";
 			
