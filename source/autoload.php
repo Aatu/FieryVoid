@@ -7,6 +7,10 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
+                
+                'llorterlorhark' => '/server/model/ships/llort/erlorhark.php',
+                'llortpalaceship' => '/server/model/ships/llort/palace.php',
+                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
