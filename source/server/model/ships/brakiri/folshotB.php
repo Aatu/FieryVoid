@@ -32,7 +32,7 @@ class FolshotB extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter("folshotB", $armour, 7, $this->id);
-            $fighter->displayName = "Folshot B Light Fighter";
+            $fighter->displayName = "Folshot-B";
             $fighter->imagePath = "img/ships/falkosi.png";
             $fighter->iconPath = "img/ships/falkosi_large.png";
 
