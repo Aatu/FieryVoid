@@ -817,7 +817,7 @@ window.shipManager = {
         
         for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
             var othership = gamedata.ships[i];
-                    
+            if (shipManager.isDestroyed(othership)) continue; //no need to list ships already destroyed
             if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue;
 
@@ -842,6 +842,7 @@ window.shipManager = {
 
         for (var i in gamedata.ships) {
             var othership = gamedata.ships[i];
+            /*
             if (othership.flight === true) continue; //can escort only ships
             if (othership.id == ship.id) continue; //self
             if (gamedata.isEnemy(ship, othership)) continue; //no escorting opponent
@@ -850,6 +851,8 @@ window.shipManager = {
             var tPos = shipManager.movement.getPositionAtStartOfTurn(ship);
 
             if (oPos.equals(tPos)){
+            */
+            if (shipManager.isEscorting(ship,othership)){
                 if(resultTxt != '') resultTxt += ', ';
                 resultTxt += othership.name;
             }
