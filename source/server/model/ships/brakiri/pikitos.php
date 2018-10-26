@@ -32,7 +32,7 @@ class Pikitos extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 4, 4);
             $fighter = new Fighter("pikitos", $armour, 15, $this->id);
-            $fighter->displayName = "Pikitos Heavy Fighter";
+            $fighter->displayName = "Pikitos";
             $fighter->imagePath = "img/ships/pikitos.png";
             $fighter->iconPath = "img/ships/pikitos_large.png";
 
