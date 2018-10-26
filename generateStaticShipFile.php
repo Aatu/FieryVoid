@@ -9,9 +9,13 @@ $data = [];
 
 foreach ($ships as $faction) {
     foreach ($faction as $ship) {
-        print(gettype($ship));
+        //print(gettype($ship));
         if ($ship && $ship instanceof BaseShip) {
-            print("hi");
+            print("generating: ");
+			print($ship->faction);
+			print(" ");
+			print($ship->phpclass);
+			print("\n");
             $data[$ship->faction][$ship->phpclass] = $ship;
         }
     }
@@ -19,4 +23,4 @@ foreach ($ships as $faction) {
 
 file_put_contents('./source/public/static/ships.js', 'window.staticShips = ' . json_encode($data));
 
-print("ships generated");
+print("\n ships generated!\n\n");

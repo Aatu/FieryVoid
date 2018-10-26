@@ -1,18 +1,18 @@
 <?php
-class LlortErlorhark extends BaseShip{
+class Erlorhark extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 650;
         $this->faction = "Llort";
-        $this->phpclass = "LlortErlorhark";
+        $this->phpclass = "erlorhark";
         $this->imagePath = "img/ships/LlortErlorhark.png";
         $this->shipClass = "Erlorhark Battle Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
 
-	$this->unofficial = true;     
+		$this->unofficial = true;     
         $this->occurence = "uncommon";
         $this->variantOf = 'Erlorra Raiding Cruiser';
         $this->isd = 2245;
@@ -34,14 +34,14 @@ class LlortErlorhark extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(5, 15, 5, 20));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-	$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 240, 30));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
-	$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 120));
+		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 0, 120));
         
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 360));
-	$this->addAftSystem(new HeavyPlasma(4, 8, 5, 120, 240));
-	$this->addAftSystem(new StdParticleBeamShip(2, 4, 1, 90, 270));
+		$this->addAftSystem(new HeavyPlasma(4, 8, 5, 120, 240));
+		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 90, 270));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
@@ -104,6 +104,7 @@ class LlortErlorhark extends BaseShip{
         				20 => "Primary",
         		),
         );
+	
     }
 }
 
