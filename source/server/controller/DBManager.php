@@ -745,7 +745,7 @@ class DBManager
                 "UPDATE 
                         tac_playeringame
                      SET
-                        waiting = ?, lastactivity = NOW()
+                        waiting = ?
                      WHERE 
                         playerid = ? AND gameid = ?
                      "
@@ -767,7 +767,7 @@ class DBManager
                 "UPDATE 
                         tac_playeringame
                      SET
-                        waiting = ?, lastactivity = NOW()
+                        waiting = ?
                      WHERE 
                         gameid = ?
                      "
