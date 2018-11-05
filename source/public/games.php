@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - October 2018</div>
+    <div id="newsHeader">Latest News - November 2018</div>
     <div id="newsEntry">
         <!-- no longer quite the news?
         <h3>Good news everyone!</h3><br>Our little world is looking awesome, now in <del>hi-def 3d</del> faster 2d!
@@ -61,21 +61,7 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - <b><u>Replay fixed</u></b> - now You can play replay at any moment (...again ;) )
-        <br>
-        - <b>Game Lobby</b> fixes (player count in game, recent games lists, links behavior)
-        <br>
-        - <b>mass mode change</b> (R-clicking on new mode will set ALL UNDECLARED weapons to new mode! All hail Ipsha :) )
-        <br>
-        - <b>movement order</b> displayed correctly, both in classic and simultaneous movement - onmouseover as well as OoB
-        <br>
-        - units on same hex tooltip sorted by Initiative
-        <br>
-        - <b>Fighter ballistic escort</b>: now showing names of potentially escorted ships (as this was repeatedly a source of doubt)
-        <br>
-        - <b>Deployment</b> area validation fix (You can now deploy on the edges deployment area and won't get an error on confirmation)
-        <br>
-        - some <b>Declarations</b> panel fixes.        
+        - <b>Speed 0 units</b> are now correctly highlighted as ready to move (instead of "moved")
         <br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
