@@ -39,14 +39,14 @@ class Koratyl extends StarBaseSixSections{
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
 		//$this->addPrimarySystem(new CnC(5, 15, 0, 0)); 
 		$this->addPrimarySystem(new CnC(6, 30, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
-		$this->addPrimarySystem(new Scanner(20, 50, 4, 8));
-		$this->addPrimarySystem(new Scanner(20, 50, 4, 8));
+		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
+		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
 		$this->addPrimarySystem(new Hangar(5, 4));
 		$this->addPrimarySystem(new CargoBay(5, 25));
 		$this->addPrimarySystem(new HeavyBolter(5, 10, 6, 0, 360));
 		$this->addPrimarySystem(new HeavyBolter(5, 10, 6, 0, 360));
 
-		$this->addPrimarySystem(new Structure( 5, 100));
+		$this->addPrimarySystem(new Structure(5, 100));
 
 
 		for ($i = 0; $i < sizeof($this->locations); $i++){
@@ -66,7 +66,7 @@ class Koratyl extends StarBaseSixSections{
 				new SubReactor(4, 25, 0, 0),
 				new Hangar(4, 6, 6),
 				new CargoBay(4, 25),
-				new Structure( 4, 90)
+				new Structure(4, 90)
 			);
 
 
