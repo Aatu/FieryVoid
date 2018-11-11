@@ -2,6 +2,7 @@ class ShipObject {
 
     constructor(ship, scene) {
 
+        this.shipId = ship.id;
         this.ship = ship;
         this.scene = scene;
         this.mesh = new THREE.Object3D()
@@ -49,7 +50,8 @@ class ShipObject {
         this.shipSideSprite.setOverlayColorAlpha(1)
         this.mesh.add(this.shipSideSprite.mesh);
 
-
+        this.mesh.name = "ship";
+        this.mesh.userData = {icon: this};
         this.scene.add(this.mesh)
     }
 
@@ -92,7 +94,7 @@ class ShipObject {
     }
 
     setOpacity(opacity) {
-        console.log("ShipObject.setOpacity is not yet implemented")
+        
     };
 
     hide() {
@@ -122,7 +124,6 @@ class ShipObject {
     };
 
     setOverlayColorAlpha(alpha) {
-        console.log("ShipObject.setOverlayColorAlpha is not yet implemented")
     };
 
     getMovements(turn) {
@@ -132,7 +133,8 @@ class ShipObject {
     };
 
     setScale(width, height) {
-        console.log("ShipObject.setScale is not yet implemented")
+        //console.log("ShipObject.setScale is not yet implemented")
+        //console.trace();
     };
 
    consumeEW(ship) {
@@ -164,19 +166,19 @@ class ShipObject {
     };
 
     showSideSprite(value) {
-        console.log("ShipObject.showSideSprite is not yet implemented")
+        //console.log("ShipObject.showSideSprite is not yet implemented")
     };
 
     setHighlighted(value) {
-        console.log("ShipObject.showSideSprite is not yet implemented")
+        //console.log("ShipObject.showSideSprite is not yet implemented")
     };
 
     setSelected(value) {
-        console.log("ShipObject.showSideSprite is not yet implemented")
+        //console.log("ShipObject.showSideSprite is not yet implemented")
     };
 
     setNotMoved(value) {
-        console.log("ShipObject.showSideSprite is not yet implemented")
+        //console.log("ShipObject.showSideSprite is not yet implemented")
     };
 
     
@@ -217,7 +219,7 @@ class ShipObject {
             this.addMovementToRegistry(movesByHexAndTurn, movement);
 
             lastMovement = movement;
-        });
+        }, this);
 
         this.movements = movesByHexAndTurn;
     }
@@ -387,5 +389,7 @@ class ShipObject {
     }
 
 }
+
+window.ShipObject = ShipObject;
 
 export default ShipObject

@@ -56,9 +56,6 @@ var Capital = function (_ShipObject) {
 
             window.Loader.loadObject("img/3d/capital/capital.obj", function (object) {
 
-                //object = object.scene;
-                console.log(object);
-
                 window.Loader.loadTexturesAndAssign(object.children[0], { normalScale: new THREE.Vector2(0.5, 0.5), shininess: 10, color: new THREE.Color(1, 1, 1) }, 'img/3d/capital/diffuse.png', 'img/3d/capital/normalEdit.png');
 
                 object.scale.set(3, 3, 3);
@@ -77,7 +74,7 @@ var Capital = function (_ShipObject) {
 exports.default = Capital;
 
 },{"./ShipObject":5}],3:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -87,7 +84,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _ShipObject2 = require("./ShipObject");
+var _ShipObject2 = require('./ShipObject');
 
 var _ShipObject3 = _interopRequireDefault(_ShipObject2);
 
@@ -114,17 +111,14 @@ var Gunship = function (_ShipObject) {
     }
 
     _createClass(Gunship, [{
-        key: "create",
+        key: 'create',
         value: function create() {
             var _this2 = this;
 
-            _get(Gunship.prototype.__proto__ || Object.getPrototypeOf(Gunship.prototype), "create", this).call(this);
+            _get(Gunship.prototype.__proto__ || Object.getPrototypeOf(Gunship.prototype), 'create', this).call(this);
 
             window.Loader.loadObject("img/3d/gunship/gunship.obj", function (object) {
 
-                console.log("loaded");
-                console.log(object);
-                console.log(_this2);
                 window.Loader.loadTexturesAndAssign(object.children[0], {}, null, 'img/3d/gunship/normal.png');
 
                 window.Loader.loadTexturesAndAssign(object.children[1], {}, null, 'img/3d/turretNormal.png');
@@ -151,7 +145,7 @@ var Gunship = function (_ShipObject) {
 exports.default = Gunship;
 
 },{"./ShipObject":5}],4:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -161,7 +155,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _ShipObject2 = require("./ShipObject");
+var _ShipObject2 = require('./ShipObject');
 
 var _ShipObject3 = _interopRequireDefault(_ShipObject2);
 
@@ -187,15 +181,13 @@ var Rhino = function (_ShipObject) {
     }
 
     _createClass(Rhino, [{
-        key: "create",
+        key: 'create',
         value: function create() {
             var _this2 = this;
 
-            _get(Rhino.prototype.__proto__ || Object.getPrototypeOf(Rhino.prototype), "create", this).call(this);
+            _get(Rhino.prototype.__proto__ || Object.getPrototypeOf(Rhino.prototype), 'create', this).call(this);
 
             window.Loader.loadObject("img/3d/rhino/rhino.obj", function (object) {
-                console.log("Rhino");
-                console.log(object);
 
                 window.Loader.loadTexturesAndAssign(object.children[0], { normalScale: new THREE.Vector2(1, 1), shininess: 10, color: new THREE.Color(1, 1, 1) }, 'img/3d/rhino/texture.png', 'img/3d/rhino/sculptNormal.png');
                 window.Loader.loadTexturesAndAssign(object.children[1], {}, 'img/3d/diffuseDoc.png', 'img/3d/normalDoc.png');
@@ -234,6 +226,7 @@ var ShipObject = function () {
     function ShipObject(ship, scene) {
         _classCallCheck(this, ShipObject);
 
+        this.shipId = ship.id;
         this.ship = ship;
         this.scene = scene;
         this.mesh = new THREE.Object3D();
@@ -282,6 +275,8 @@ var ShipObject = function () {
             this.shipSideSprite.setOverlayColorAlpha(1);
             this.mesh.add(this.shipSideSprite.mesh);
 
+            this.mesh.name = "ship";
+            this.mesh.userData = { icon: this };
             this.scene.add(this.mesh);
         }
     }, {
@@ -331,9 +326,7 @@ var ShipObject = function () {
         }
     }, {
         key: "setOpacity",
-        value: function setOpacity(opacity) {
-            console.log("ShipObject.setOpacity is not yet implemented");
-        }
+        value: function setOpacity(opacity) {}
     }, {
         key: "hide",
         value: function hide() {
@@ -366,9 +359,7 @@ var ShipObject = function () {
         }
     }, {
         key: "setOverlayColorAlpha",
-        value: function setOverlayColorAlpha(alpha) {
-            console.log("ShipObject.setOverlayColorAlpha is not yet implemented");
-        }
+        value: function setOverlayColorAlpha(alpha) {}
     }, {
         key: "getMovements",
         value: function getMovements(turn) {
@@ -379,7 +370,8 @@ var ShipObject = function () {
     }, {
         key: "setScale",
         value: function setScale(width, height) {
-            console.log("ShipObject.setScale is not yet implemented");
+            //console.log("ShipObject.setScale is not yet implemented")
+            //console.trace();
         }
     }, {
         key: "consumeEW",
@@ -415,22 +407,22 @@ var ShipObject = function () {
     }, {
         key: "showSideSprite",
         value: function showSideSprite(value) {
-            console.log("ShipObject.showSideSprite is not yet implemented");
+            //console.log("ShipObject.showSideSprite is not yet implemented")
         }
     }, {
         key: "setHighlighted",
         value: function setHighlighted(value) {
-            console.log("ShipObject.showSideSprite is not yet implemented");
+            //console.log("ShipObject.showSideSprite is not yet implemented")
         }
     }, {
         key: "setSelected",
         value: function setSelected(value) {
-            console.log("ShipObject.showSideSprite is not yet implemented");
+            //console.log("ShipObject.showSideSprite is not yet implemented")
         }
     }, {
         key: "setNotMoved",
         value: function setNotMoved(value) {
-            console.log("ShipObject.showSideSprite is not yet implemented");
+            //console.log("ShipObject.showSideSprite is not yet implemented")
         }
     }, {
         key: "consumeMovement",
@@ -471,7 +463,7 @@ var ShipObject = function () {
                 this.addMovementToRegistry(movesByHexAndTurn, movement);
 
                 lastMovement = movement;
-            });
+            }, this);
 
             this.movements = movesByHexAndTurn;
         }
@@ -653,6 +645,8 @@ var ShipObject = function () {
 
     return ShipObject;
 }();
+
+window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 

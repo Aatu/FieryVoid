@@ -41,13 +41,7 @@ window.ShipIconContainer = function () {
 
     ShipIconContainer.prototype.onZoomEvent = function (payload) {
         var zoom = payload.zoom;
-        if (zoom <= 0.5) {
-            var newzoom = 2 * zoom;
-            this.iconsAsArray.forEach(function (icon) {
-                icon.setScale(newzoom, newzoom);
-            });
-        }
-
+   
         var alpha = zoom > 2 ? zoom - 2 : 0;
         if (alpha > 1) {
             alpha = 1;
@@ -137,7 +131,6 @@ window.ShipIconContainer = function () {
         if (ship.flight) {
             return new window.FlightIcon(ship, scene);
         } else {
-            console.log(ship.shipModel)
             return new window.shipObjects[ship.shipModel](ship, scene);
         }
     }

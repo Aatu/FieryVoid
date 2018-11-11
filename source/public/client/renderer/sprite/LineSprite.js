@@ -20,7 +20,7 @@ window.LineSprite = function () {
             transparent: true,
             opacity: this.opacity,
             map: args.texture || null,
-            blending: args.blending || null,
+            blending: args.blending || THREE.NormalBlending,
             depthWrite: false
         });
 

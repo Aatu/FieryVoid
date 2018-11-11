@@ -15,10 +15,7 @@ class Gunship extends ShipObject {
         window.Loader.loadObject( 
             "img/3d/gunship/gunship.obj", 
             (object) => { 
-                
-                console.log("loaded")
-                console.log(object)
-                console.log(this)
+              
                 window.Loader.loadTexturesAndAssign(object.children[0], {}, null,  'img/3d/gunship/normal.png');
                 
                 window.Loader.loadTexturesAndAssign(object.children[1], {}, null, 'img/3d/turretNormal.png');

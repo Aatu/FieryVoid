@@ -33,6 +33,7 @@ window.webglHexGridRenderer = function () {
         this.material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: HEX_OPACITY, depthWrite: false});
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.x += window.HexagonMath.getHexB() / 2;
+        this.mesh.name = "hexgrid";
         scene.add(this.mesh);
 
         drawGameSpace(scene);

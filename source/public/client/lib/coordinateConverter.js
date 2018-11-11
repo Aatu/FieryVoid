@@ -9,23 +9,23 @@ window.coordinateConverter = function () {
         this.width = 0;
         this.height = 0;
 
-        this.cameraPosition = { x: 0, y: 0 };
         this.zoom = 1;
+        this.camera = null;
+        this.scene = null;
+        this.raycaster = new THREE.Raycaster();
     }
 
-    coordinateConverter.prototype.init = function (width, height) {
+    coordinateConverter.prototype.init = function (width, height, camera, scene) {
         this.hexlenght = window.Config.HEX_SIZE;
         this.width = width;
         this.height = height;
+        this.camera = camera;
+        this.scene = scene;
     };
 
     coordinateConverter.prototype.onResize = function (width, height) {
         this.width = width;
         this.height = height;
-    };
-
-    coordinateConverter.prototype.onCameraMoved = function (cameraPosition) {
-        this.cameraPosition = cameraPosition;
     };
 
     coordinateConverter.prototype.onZoom = function (zoom) {
@@ -74,19 +74,66 @@ window.coordinateConverter = function () {
     };
 
     coordinateConverter.prototype.fromViewPortToGame = function (pos) {
-        var cameraPos = this.cameraPosition;
-        var zoom = this.zoom;
-        var windowDimensions = { width: this.width, height: this.height };
 
-        var positionFromCenterOfScreen = { x: pos.x - windowDimensions.width / 2, y: windowDimensions.height / 2 - pos.y };
-        var withZoom = { x: positionFromCenterOfScreen.x * zoom, y: positionFromCenterOfScreen.y * zoom };
+        var result = {
+            x: 0,
+            y: 0,
+            z: 0,
+        };
 
-        var positionFromCamera = { x: withZoom.x + cameraPos.x, y: withZoom.y + cameraPos.y };
-        return positionFromCamera;
+        this.raycaster.setFromCamera( {x: pos.xR, y: pos.yR}, this.camera );
+        var intersects = this.raycaster.intersectObjects( this.scene.children, true );
+
+        intersects.forEach(function(intersected) {
+            if (intersected.object.name === 'hexgrid') {
+                result.x = intersected.point.x;
+                result.y = intersected.point.y;
+                result.z = intersected.point.z;
+            }
+        });
+
+        return result;
+ 
     };
 
+    coordinateConverter.prototype.getEntitiesIntersected = function (pos) {
+
+        var result = [];
+
+        this.raycaster.setFromCamera( {x: pos.xR, y: pos.yR}, this.camera );
+        var intersects = this.raycaster.intersectObjects( this.scene.children, true );
+
+        intersects.forEach(function(intersected) {
+            if (intersected.object.name !== 'hexgrid') {
+                var icon = getShipIcon(intersected.object);
+                icon && !result.includes(icon) && result.push(icon);
+            }
+        });
+
+        return result;
+    };
+
+
     coordinateConverter.prototype.fromGameToViewPort = function (pos) {
-        var cameraPos = this.cameraPosition;
+
+        var vector = new THREE.Vector3();
+        vector.set( pos.x, pos.y, pos.z || 0 );
+
+        // map to normalized device coordinate (NDC) space
+        vector.project( this.camera );
+
+        // map to 2D screen space
+        vector.x = Math.round( (   vector.x + 1 ) * this.width  / 2 );
+        vector.y = Math.round( ( - vector.y + 1 ) * this.height / 2 );
+        vector.z = 0;
+
+        return {
+            x: vector.x,
+            y: vector.y
+        }
+
+        /*
+        var cameraPos = this.camera.position;
         var zoom = this.zoom;
         var windowDimensions = { width: this.width, height: this.height };
 
@@ -95,7 +142,19 @@ window.coordinateConverter = function () {
         var positionFromCenterOfScreen = { x: withZoom.x + windowDimensions.width / 2, y: windowDimensions.height / 2 - withZoom.y };
 
         return positionFromCenterOfScreen;
+        */
     };
+
+    function getShipIcon(object3d) {
+        while(object3d.parent) {
+            if (object3d.name === 'ship') {
+                return object3d.userData.icon;
+            }
+            object3d = object3d.parent;
+        }
+
+        return null;
+    }
 
     return new coordinateConverter();
 }();

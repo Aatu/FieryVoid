@@ -30,6 +30,7 @@ window.webglScene = function () {
 
         this.lastPinchDistance = null;
         this.lastTouchMove = null;
+        this.cameraAngle = -500;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
@@ -42,14 +43,19 @@ window.webglScene = function () {
 
         this.width = jQuery('#pagecontainer').width();
         this.height = jQuery('#pagecontainer').height();
-        this.coordinateConverter.init(this.width, this.height);
-        this.phaseDirector.init(this.coordinateConverter, this.scene);
 
         this.camera = new THREE.OrthographicCamera(this.zoom * this.width / -2, this.zoom * this.width / 2, this.zoom * this.height / 2, this.zoom * this.height / -2, -4000, 30000);
-        this.camera.position.set( 0, -500, 500 )
         
-        this.camera.lookAt(0, 0, 0)
+        
+        this.camera.position.set( 0, this.cameraAngle, 500 );
+        this.camera.lookAt(0, 0, 0);
+        this.setCameraAngle(-250);
 
+
+        this.coordinateConverter.init(this.width, this.height, this.camera, this.scene);
+        this.phaseDirector.init(this.coordinateConverter, this.scene);
+
+        /*
         
         this.ship = new window.shipObjects.Capital({movement: [{
             turn: 0,
@@ -60,6 +66,7 @@ window.webglScene = function () {
             yOffset: 0
         }]}, this.scene);
         
+        */
 
         /*
         var aspect = window.innerWidth / window.innerHeight;
@@ -219,6 +226,28 @@ window.webglScene = function () {
         this.render();
     };
 
+    webglScene.prototype.setCameraAngleRelative = function (newAngle) { 
+        this.setCameraAngle(this.cameraAngle + newAngle);
+    }
+
+    webglScene.prototype.setCameraAngle = function (newAngle) {
+
+        if (newAngle > 0) {
+            newAngle = 0;
+        }
+
+        if (newAngle < -500) {
+            newAngle = -500;
+        }
+
+        var currentLookat = new THREE.Vector3(this.camera.position.x, this.camera.position.y - this.cameraAngle, this.camera.position.z - 500);
+        var delta = this.cameraAngle - newAngle;
+        this.camera.position.set( this.camera.position.x, this.camera.position.y - delta, this.camera.position.z );
+        this.camera.lookAt(currentLookat);
+        this.cameraAngle = newAngle;
+
+    };
+
     webglScene.prototype.receiveGamedata = function (gamedata) {
         if (!this.phaseDirector) {
             return;
@@ -243,7 +272,6 @@ window.webglScene = function () {
         this.camera.position.x -= position.x * this.zoom * this.zoom;
         this.camera.position.y += position.y * this.zoom * this.zoom;
 
-        this.coordinateConverter.onCameraMoved(this.camera.position);
         this.phaseDirector.relayEvent('ScrollEvent', this.camera.position);
     };
 
@@ -256,7 +284,7 @@ window.webglScene = function () {
         this.camera.position.x = position.x;
         this.camera.position.y = position.y;
 
-        this.coordinateConverter.onCameraMoved(this.camera.position);
+
         this.phaseDirector.relayEvent('ScrollEvent', this.camera.position);
     };
 
@@ -298,8 +326,10 @@ window.webglScene = function () {
         animateZoom.call(this);
         this.starField.render();
 
-        time++
-    
+        //time++
+
+        //this.setCameraAngleRelative(time * 0.001);
+        /*
 
         if (this.ship) {
 
@@ -310,6 +340,8 @@ window.webglScene = function () {
 
             this.testObject2.rotation.set(mathlib.degreeToRadian(90 + time/3), mathlib.degreeToRadian(90 + time/3), 0);
         }
+
+        */
 
         //this.testParticleEmitter.render(time, time, 0, 0, 1);
         //this.cube.position.set(0, 0, time)
@@ -470,8 +502,9 @@ window.webglScene = function () {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos);
+        var entities = this.coordinateConverter.getEntitiesIntersected(pos);
 
-        this.phaseDirector.relayEvent('MouseMoveEvent', getPositionObject(pos, gamePos, hexPos));
+        this.phaseDirector.relayEvent('MouseMoveEvent', getPositionObject(pos, gamePos, hexPos, entities));
     };
 
     webglScene.prototype.drag = function (event) {
@@ -508,11 +541,12 @@ window.webglScene = function () {
     webglScene.prototype.click = function (event) {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
+        var entities = this.coordinateConverter.getEntitiesIntersected(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos, true);
-        var payload = getPositionObject.call(this, pos, gamePos, hexPos);
+        var payload = getPositionObject.call(this, pos, gamePos, hexPos, entities);
         payload.button = event.button;
 
-        console.log(payload);
+        console.log(payload.hex);
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }
@@ -592,20 +626,25 @@ window.webglScene = function () {
         if (event.originalEvent.touches) {
             return {
                 x: event.originalEvent.touches[0].pageX - this.element.offset().left,
-                y: event.originalEvent.touches[0].pageY - this.element.offset().top
+                y: event.originalEvent.touches[0].pageY - this.element.offset().top,
+                xR: ((event.originalEvent.touches[0].pageX - this.element.offset().left) / window.innerWidth ) * 2 - 1,
+                yR: - ((event.originalEvent.touches[0].pageY - this.element.offset().top) / window.innerHeight ) * 2 + 1 
             };
         }
 
         return {
             x: event.pageX - this.element.offset().left,
-            y: event.pageY - this.element.offset().top
+            y: event.pageY - this.element.offset().top,
+            xR: ((event.pageX - this.element.offset().left) / window.innerWidth ) * 2 - 1,
+            yR: - ((event.pageY - this.element.offset().top) / window.innerHeight ) * 2 + 1
         };
     }
 
-    function getPositionObject(view, game, hex) {
+    function getPositionObject(view, game, hex, entities) {
         var o = {
             view: view,
-            game: game
+            game: game,
+            entities: entities || []
         };
 
         if (hex) {

@@ -528,6 +528,16 @@ window.PhaseStrategy = function () {
     };
 
     function getInterestingStuffInPosition(payload, turn) {
+        
+        var mouseovered = payload.entities.filter(function (entity) {
+            var turnDestroyed = shipManager.getTurnDestroyed(entity.ship);
+            return entity instanceof window.ShipObject && (turnDestroyed === null || turnDestroyed >= turn);
+        })
+
+        if (mouseovered.length > 0) {
+            return mouseovered;
+        }
+
         return this.shipIconContainer.getIconsInProximity(payload).filter(function (icon) {
             var turnDestroyed = shipManager.getTurnDestroyed(icon.ship);
             return turnDestroyed === null || turnDestroyed >= turn;
