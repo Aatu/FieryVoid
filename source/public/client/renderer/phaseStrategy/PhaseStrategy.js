@@ -8,6 +8,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer = null;
         this.ewIconContainer = null;
         this.ballisticIconContainer = null;
+        this.movementService = null;
         this.shipWindowManager = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
@@ -82,6 +83,7 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.consumeGamedata = function () {
         this.shipIconContainer.consumeGamedata(this.gamedata);
+        this.movementService.update(this.gamedata);
         this.animationStrategy.update(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
@@ -99,16 +101,16 @@ window.PhaseStrategy = function () {
         this.ballisticIconContainer.show();
     };
 
-    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, doneCallback) {
+    PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, movementService) {
         this.shipIconContainer = shipIcons;
         this.ewIconContainer = ewIconContainer;
         this.ballisticIconContainer = ballisticIconContainer;
+        this.movementService = movementService;
         this.gamedata = gamedata;
         this.inactive = false;
         this.consumeGamedata();
         this.shipIconContainer.setAllSelected(false);
         this.ballisticIconContainer.show();
-        this.onDoneCallback = doneCallback;
         this.shipWindowManager = shipWindowManager;
         this.createReplayUI(gamedata);
         this.showAppropriateHighlight();
@@ -147,6 +149,8 @@ window.PhaseStrategy = function () {
             icon.showSideSprite(false);
             icon.setHighlighted(false);
         })
+
+        this.shipIconContainer.hideAllMovementPaths();
 
         return this;
     };
@@ -239,6 +243,7 @@ window.PhaseStrategy = function () {
             this.shipTooltip.update(ship, this.selectedShip);
         }
         
+        this.shipIconContainer.showMovementPath(ship);
         this.uiManager.showWeaponList({ship: ship, gamePhase: gamedata.gamephase});
     };
 
@@ -251,6 +256,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
+        this.shipIconContainer.hideMovementPath(ship);
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -434,8 +440,8 @@ window.PhaseStrategy = function () {
         }
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
-        var heading = mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
-
+        var heading = this.movementUI.icon.getFacing();// mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
+        console.log("UI HEADING IS", heading);
         UI.shipMovement.reposition(pos, heading);
 
         return true;
@@ -577,6 +583,7 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onShipMovementChanged = function (payload) {
         var ship = payload.ship;
         this.shipIconContainer.getByShip(ship).consumeMovement(ship.movement);
+        
         if (this.animationStrategy) {
             this.animationStrategy.shipMovementChanged(ship);
         }

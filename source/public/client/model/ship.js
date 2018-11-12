@@ -14,6 +14,10 @@ var Ship = function Ship(json) {
     for (var i in json) {
         if (i == 'systems') {
             this.systems = SystemFactory.createSystemsFromJson(json[i], this);
+        } else if (i == 'movement') {
+            this.movement = json[i].map(function(move) {
+                return new window.MovementOrder(move.id, move.type, new hexagon.Offset(move.position), new hexagon.Offset(move.target), move.facing, move.turn, move.value, move.requiredThrust, move.assignedThrust);
+            })
         } else {
             this[i] = json[i];
         }

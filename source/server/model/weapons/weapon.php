@@ -639,25 +639,7 @@ class Weapon extends ShipSystem
 		if (($target->shipSizeClass >= 3) && ($shooter->shipSizeClass <3)) $hitChance += 2;//+2 if target is Capital and ramming unit is not
 		if (($shooter->shipSizeClass >= 3) && ($target->shipSizeClass <3)) $hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $hitChance += 4;//+4 for fighter trying to ram a ship
-		$targetSpeed = abs($target->getSpeed()); //I think speed cannot be negative, but just in case ;)
-		switch($targetSpeed) {
-		    case 0: //+5 if the target is not moving.
-			$hitChance += 5;
-			break;
-		    case 1://+3 if the target is moving speed 1.
-			$hitChance += 3;
-			break;
-		    case 2://+2 if the target is moving speed 2 or 3.
-		    case 3:
-			$hitChance += 2;
-			break;
-		    case 4://+1 if the target is moving speed 4 or 5.
-		    case 5:
-			$hitChance += 1;
-			break;
-		    default: //this means >5; ‐1 for every 5 points of speed (or fraction thereof) that the target is moving faster than 5.
-			$hitChance -= ceil(($targetSpeed-5)/5);
-		}
+		
 		//‐1 for every level of jinking the ramming or target unit is using
 		$hitChance -= Movement::getJinking($shooter, $gamedata->turn);
 		$hitChance -= Movement::getJinking($target, $gamedata->turn);

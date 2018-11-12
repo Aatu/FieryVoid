@@ -11,7 +11,7 @@ class MovementGamePhase implements Phase
             }
 
             $lastmove = $ship->getLastMovement();
-            $newMove = new MovementOrder(null, 'end', $lastmove->position, 0, 0, $lastmove->speed, $lastmove->heading, $lastmove->facing, false, $gameData->turn, 0, 0);
+            $newMove = new MovementOrder(null, 'end', $lastmove->position,  $lastmove->target, $lastmove->heading, $gameData->turn);
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
         }
 

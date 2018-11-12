@@ -13,11 +13,12 @@ window.phaseDirector = function () {
         this.phaseStrategy = null;
         this.coordinateConverter = null;
         this.shipWindowManager = null;
+        this.movementService = new window.MovementService();
     }
 
     phaseDirector.prototype.init = function (coordinateConverter, scene) {
         this.coordinateConverter = coordinateConverter;
-        this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene);
+        this.shipIconContainer = new ShipIconContainer(this.coordinateConverter, scene, this.movementService);
         this.ewIconContainer = new EWIconContainer(this.coordinateConverter, scene, this.shipIconContainer);
         this.ballisticIconContainer = new BallisticIconContainer(this.coordinateConverter, scene);
         this.shipWindowManager = new ShipWindowManager(new window.UIManager($("body")[0]));
@@ -78,7 +79,7 @@ window.phaseDirector = function () {
             this.phaseStrategy.deactivate();
         }
 
-        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, this.shipWindowManager, onDoneCallback);
+        this.phaseStrategy = new phaseStrategy(this.coordinateConverter).activate(this.shipIconContainer, this.ewIconContainer, this.ballisticIconContainer, gamedata, scene, this.shipWindowManager, this.movementService);
     }
 
     return phaseDirector;

@@ -1,3 +1,5 @@
+import MovementPath from '../handler/Movement/MovementPath';
+
 class ShipObject {
 
     constructor(ship, scene) {
@@ -15,6 +17,7 @@ class ShipObject {
         this.mine = gamedata.isMyOrTeamOneShip(ship);
         this.sideSpriteSize = 100;
         this.position = {x: 0, y: 0, z: 0}
+        this.movementPath = null;
 
         this.movements = null;
 
@@ -29,6 +32,7 @@ class ShipObject {
     }
 
     consumeShipdata(ship) {
+        console.log("Movement", ship.movement)
         this.ship = ship;
         this.consumeMovement(ship.movement);
         this.consumeEW(ship);
@@ -90,7 +94,7 @@ class ShipObject {
     }
 
     getRotation(x, y, z){
-        return this.rotation.z;
+        return this.rotation;
     }
 
     setOpacity(opacity) {
@@ -115,7 +119,7 @@ class ShipObject {
         this.hidden = false;
     };
 
-    getFacing(facing) {
+    getFacing() {
         return this.getRotation().y
     };
 
@@ -183,139 +187,10 @@ class ShipObject {
 
     
     consumeMovement(movements) {
-
-        var movesByHexAndTurn = [];
-
-        this.defaultPosition = {
-            turn: movements[0].turn,
-            facing: movements[0].facing,
-            heading: movements[0].heading,
-            position: new hexagon.Offset(movements[0].position),
-            offset: { x: movements[0].xOffset, y: movements[0].yOffset }
-        };
-
-        var lastMovement = null;
-
-        movements.filter(function (movement) {
-            return movement.type !== 'start';
-        }).filter(function (movement) {
-            return movement.commit;
-        }).forEach(function (movement) {
-
-            if (lastMovement && movement.turn !== lastMovement.turn) {
-
-                if (movement.type === "move" || movement.type === "slipleft" || movement.type === "slipright") {
-                    this.addMovementToRegistry(movesByHexAndTurn, {
-                        turn: movement.turn,
-                        facing: movement.facing,
-                        heading: movement.heading,
-                        position: new hexagon.Offset(lastMovement.position),
-                        oldFacings: [],
-                        oldHeadings: []
-                    });
-                }
-            }
-
-            this.addMovementToRegistry(movesByHexAndTurn, movement);
-
-            lastMovement = movement;
-        }, this);
-
-        this.movements = movesByHexAndTurn;
-    }
-
-    addMovementToRegistry(movesByHexAndTurn, movement){
-
-        var getPreviousMatchingMove = function(moves, move) {
-            var previousMove = moves[moves.length-1];
-            if (! previousMove) {
-                return null;
-            }
-
-            if (previousMove.turn === move.turn && previousMove.position.q === move.position.q && previousMove.position.r === move.position.r) {
-                return previousMove;
-            }
-            return null;
-        }
-
-        var previousMove = getPreviousMatchingMove(movesByHexAndTurn, movement);
-
-
-        if (previousMove) {
-            var saved = previousMove
-
-            if (saved.facing !== movement.facing) {
-                saved.oldFacings.push(saved.facing);
-            }
-
-            saved.facing = movement.facing;
-
-            if (saved.heading !== movement.heading) {
-                saved.oldHeadings.push(saved.heading);
-            }
-
-            saved.heading = movement.heading;
-
-            saved.position = new hexagon.Offset(movement.position);
-        } else {
-            movesByHexAndTurn.push({
-                //id: movement.id,
-                //type: movement.type,
-                turn: movement.turn,
-                facing: movement.facing,
-                heading: movement.heading,
-                position: new hexagon.Offset(movement.position),
-                oldFacings: [],
-                oldHeadings: []
-            });
-        }
-    }
-
-    movesEqual(move1, move2) {
-        return move1.turn === move2.turn && move1.position.equals(move2.position); // &&
-    }
-
-    getLastMovement() {
-        if (this.movements.length === 0) {
-            return this.defaultPosition;
-        }
-
-        return this.movements[this.movements.length - 1];
-    }
-
-    getFirstMovementOnTurn(turn, ignore) {
-        var movement = this.movements.filter(function (move) {
-            return move.turn === turn;
-        }).shift();
-
-        if (!movement) {
-            return this.getLastMovement();
-        }
-
-        return movement;
-    }
-
-    getMovementBefore(move) {
-        for (var i in this.movements) {
-            if (this.movements[i] === move) {
-                return this.movements[i - 1];
-            }
-        }
-
-        return null;
-    }
-
-    getMovementAfter(move) {
-        for (var i in this.movements) {
-            if (this.movements[i] === move) {
-                if (this.movements[i + 1]) {
-                    return this.movements[i + 1];
-                }
-                return null;
-            }
-        }
-
-        return null;
+        console.log("hi movements", movements)
+        this.movements = movements.filter(function(move) {
+            return !move.isEvade();
+        })
     }
 
     showWeaponArc(ship, weapon) {
@@ -372,8 +247,10 @@ class ShipObject {
         this.BDEWSprite = null;
     }
 
-    positionAndFaceIcon(offset) {
-        var movement = this.getLastMovement();
+    positionAndFaceIcon(offset, movementService) {
+        console.log("REPOSITION", offset);
+        var movement = movementService.getLastMove(this.ship);
+        console.log(movement);
         var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
         if (offset) {
@@ -382,12 +259,21 @@ class ShipObject {
         }
 
         var facing = mathlib.hexFacingToAngle(movement.facing);
-        var heading = mathlib.hexFacingToAngle(movement.heading);
 
         this.setPosition(gamePosition);
         this.setFacing(-facing);
     }
 
+    hideMovementPath(ship) {
+        if (this.movementPath) {
+            this.movementPath.remove(this.scene);
+            this.movementPath = null;
+        }
+    }
+
+    showMovementPath(ship, movementService) {
+        this.movementPath = new MovementPath(ship, movementService, this.scene);
+    }
 }
 
 window.ShipObject = ShipObject;

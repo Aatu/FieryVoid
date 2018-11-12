@@ -884,37 +884,34 @@ class DBManager
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
 
             if ($stmt) {
                 foreach ($moves as $move) {
-                    $preturn = ($move->preturn) ? 1 : 0;
                     $reqThrust = $move->getReqThrustJSON();
                     $assThrust = $move->getAssThrustJSON();
 
-                    $xOffset = (int)$move->xOffset;
-                    $yOffset = (int)$move->yOffset;
+                    $position = $move->position->toCube();
+                    $target = $move->target->toCube();
 
                     $stmt->bind_param(
-                        'iisiiiiiiiissiii',
+                        'iisiiiiiiiissi',
                         $shipid,
                         $gameid,
                         $move->type,
-                        $move->position->q,
-                        $move->position->r,
-                        $xOffset,
-                        $yOffset,
-                        $move->speed,
-                        $move->heading,
+                        $position->x,
+                        $position->y,
+                        $position->z,
+                        $target->x,
+                        $target->y,
+                        $target->z,
                         $move->facing,
-                        $preturn,
+                        $move->value,
                         $reqThrust,
                         $assThrust,
-                        $move->turn,
-                        $move->value,
-                        $move->at_initiative
+                        $move->turn
                     );
                     $stmt->execute();
                 }
@@ -1326,7 +1323,7 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                id, shipid, type, x, y, xOffset, yOffset, speed, heading, facing, preturn, turn, value, requiredthrust, assignedthrust, at_initiative
+                id, shipid, type, x, y, z, dx, dy, dz, facing, turn, value, requiredthrust, assignedthrust
             FROM 
                 tac_shipmovement
             WHERE
@@ -1338,12 +1335,12 @@ class DBManager
         if ($stmt) {
             $lastTurn = $fetchTurn - 1;
             $stmt->bind_param('iii', $gamedata->id, $lastTurn, $fetchTurn);
-            $stmt->bind_result($id, $shipid, $type, $x, $y, $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $requiredthrust, $assignedthrust, $at_initiative);
+            $stmt->bind_result($id, $shipid, $type, $x, $y, $z, $dx, $dy, $dz, $facing, $turn, $value, $requiredthrust, $assignedthrust);
             $stmt->execute();
 
             while ($stmt->fetch()) {
 
-                $move = new MovementOrder($id, $type, new OffsetCoordinate($x, $y), $xOffset, $yOffset, $speed, $heading, $facing, $preturn, $turn, $value, $at_initiative);
+                $move = new MovementOrder($id, $type, (new CubeCoordinate($x, $y, $z))->toOffset(), (new CubeCoordinate($dx, $dy, $dz))->toOffset(), $facing, $turn, $value);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
                 $gamedata->getShipById($shipid)->setMovement($move);

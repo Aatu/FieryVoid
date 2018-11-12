@@ -47,40 +47,7 @@
         }
         
         public static function isPivoting($ship, $turn){
-			if ($ship->agile || $ship instanceof FighterFlight)
-				return 0;
-				
-            $pivoting = 0; // 0: false, 1: left, 2:right
-            foreach ($ship->movement as $move){
-                if ($move->turn != $turn || $turn == null)
-                    continue;
-
-                if ($move->type == "isPivotingLeft")
-                    $pivoting = 1;
-                    
-                if ($move->type == "isPivotingRight")
-                    $pivoting = 2;
-                
-
-                if ($move->type == "pivotright" && !$move->preturn){
-                    if ($pivoting == 1){
-                        $pivoting = 0;
-                    }else if ($pivoting == 0){
-                        $pivoting = 2;
-                    }
-                }
-                
-                if ($move->type == "pivotleft" && !$move->preturn){
-                    if ($pivoting == 2){
-                        $pivoting = 0;
-                    }else if ($pivoting == 0){
-                        $pivoting = 1;
-                    }
-                }
-                
-            }
-            
-            return $pivoting;
+			throw new Exception("no longer used");
         }
         
         public static function hasPivoted($ship, $turn){
@@ -318,36 +285,6 @@
             $reversed = (($back || self::isRolled($ship)) && !($back && self::isRolled($ship)));
             
             return $reversed;
-        }
-        
-        public static function setPreturnMovementStatusForShip($ship, $turn){
-            $turn = $turn -1;
-            $rolled = self::isRolled($ship, $turn);
-            $rolling = self::isRolling($ship, $turn);
-            $pivoting = self::isPivoting($ship, $turn); // 0: false, 1: left, 2:right
-            $lastmove = $ship->getLastMovement();
-            $movements = array();
-            
-            
-            if ($pivoting == 1){
-                $movements[] = new MovementOrder(null, "isPivotingLeft", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, $lastmove->facing, true, ($turn+1), 0, $ship->iniative);
-                //$movements[] = new MovementOrder(null, "pivotleft", $lastmove->x, $lastmove->y, $lastmove->speed, $lastmove->heading, MathLib::addToHexFacing($lastmove->facing , -1), true, ($turn+1));
-            }else if ($pivoting == 2){
-                $movements[] = new MovementOrder(null, "isPivotingRight", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, $lastmove->facing, true, ($turn+1), 0, $ship->iniative);
-                //$movements[] = new MovementOrder(null, "pivotright", $lastmove->x, $lastmove->y, $lastmove->speed, $lastmove->heading, MathLib::addToHexFacing($lastmove->facing , 1), true, ($turn+1));
-            }
-            
-            if ($rolling){
-                $movements[] = new MovementOrder(null, "isRolling", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, $lastmove->facing, true, ($turn+1), 0, $ship->iniative);
-                $rolled = !$rolled;
-            }
-            if ($rolled){
-                $movements[] = new MovementOrder(null, "isRolled", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, $lastmove->facing, true, ($turn+1), 0, $ship->iniative);
-            }
-            
-            
-            return $movements;
-        
         }
         
          public static function isRolled($ship, $turn = -1){

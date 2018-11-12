@@ -279,7 +279,7 @@ CREATE TABLE `tac_game` (
   `name` text,
   `turn` int(11) DEFAULT NULL,
   `phase` int(11) DEFAULT NULL,
-  `activeship` int(11) DEFAULT NULL,
+  `activeship` varchar(4000) DEFAULT '-1',
   `background` varchar(200) DEFAULT NULL,
   `points` int(6) DEFAULT '1000',
   `status` varchar(45) NOT NULL DEFAULT 'LOBBY',
@@ -287,6 +287,7 @@ CREATE TABLE `tac_game` (
   `creator` int(11) DEFAULT NULL,
   `submitLock` datetime DEFAULT NULL,
   `gamespace` varchar(45) DEFAULT NULL,
+  `rules` varchar(400) default '{}',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3670 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -303,6 +304,7 @@ CREATE TABLE `tac_iniative` (
   `shipid` int(11) NOT NULL,
   `turn` int(11) NOT NULL,
   `iniative` int(11) DEFAULT NULL,
+  `unmodified_iniative` int(11) DEFAULT NULL,
   PRIMARY KEY (`gameid`,`turn`,`shipid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -322,7 +324,7 @@ CREATE TABLE `tac_playeringame` (
   `teamid` int(11) DEFAULT '0',
   `lastturn` int(11) DEFAULT '0',
   `lastphase` int(11) DEFAULT '0',
-  `lastactivity` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `lastactivity` datetime DEFAULT NULL,
   `submitLock` datetime DEFAULT NULL,
   `name` varchar(200) DEFAULT NULL,
   `points` int(11) DEFAULT NULL,
@@ -332,6 +334,7 @@ CREATE TABLE `tac_playeringame` (
   `depwidth` int(11) DEFAULT NULL,
   `depheight` int(11) DEFAULT NULL,
   `depavailable` int(11) DEFAULT NULL,
+  `waiting` boolean DEFAULT TRUE,
   PRIMARY KEY (`gameid`,`slot`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -395,20 +398,18 @@ CREATE TABLE `tac_shipmovement` (
   `type` varchar(45) DEFAULT NULL,
   `x` int(11) DEFAULT NULL,
   `y` int(11) DEFAULT NULL,
-  `xOffset` int(11) NOT NULL DEFAULT '0',
-  `yOffset` int(11) NOT NULL DEFAULT '0',
-  `speed` int(11) DEFAULT NULL,
-  `heading` int(11) DEFAULT NULL,
+  `z` int(11) DEFAULT NULL,
+  `dx` int(11) DEFAULT 0,
+  `dy` int(11) DEFAULT 0,
+  `dz` int(11) DEFAULT 0,
   `facing` int(11) DEFAULT NULL,
-  `preturn` int(11) DEFAULT NULL,
+  `value` int(11) DEFAULT NULL,
   `requiredthrust` text,
   `assignedthrust` text,
   `turn` int(11) NOT NULL DEFAULT '1',
-  `value` varchar(100) NOT NULL DEFAULT '0',
-  `at_initiative` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`,`shipid`,`gameid`),
   KEY `gameid` (`gameid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1336799 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

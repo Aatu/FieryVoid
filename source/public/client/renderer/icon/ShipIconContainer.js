@@ -1,11 +1,12 @@
 'use strict';
 
 window.ShipIconContainer = function () {
-    function ShipIconContainer(coordinateConverter, scene) {
+    function ShipIconContainer(coordinateConverter, scene, movementService) {
         this.iconsAsObject = {};
         this.iconsAsArray = [];
         this.coordinateConverter = coordinateConverter;
         this.scene = scene;
+        this.movementService = movementService;
     }
 
     ShipIconContainer.prototype.consumeGamedata = function (gamedata) {
@@ -106,13 +107,13 @@ window.ShipIconContainer = function () {
 
     ShipIconContainer.prototype.positionAndFaceAllIcons = function () {
         this.getArray().forEach(function (icon) {
-            icon.positionAndFaceIcon(this.getHexOffset(icon));
+            icon.positionAndFaceIcon(this.getHexOffset(icon), this.movementService);
         }, this);
     };
 
     ShipIconContainer.prototype.positionAndFaceShip = function (ship) {
         var icon = this.getByShip(ship);
-        icon.positionAndFaceIcon(this.getHexOffset(icon));
+        icon.positionAndFaceIcon(this.getHexOffset(icon), this.movementService);
     };
 
     ShipIconContainer.prototype.setAllSelected = function (selected) {
@@ -136,7 +137,8 @@ window.ShipIconContainer = function () {
     }
 
     ShipIconContainer.prototype.getHexOffset = function (icon) {
-        var lastMove = icon.getLastMovement();
+        /*
+        var lastMove = this.movementService.getLastMovement(icon.ship);
         var hex = lastMove.position;
 
         var iconsInHex = this.getFinalMovementInSameHex(hex).filter(function (otherIcon) {
@@ -165,6 +167,7 @@ window.ShipIconContainer = function () {
         }
         */
 
+        /*
         steps += iconsFromSameHex.length;
 
         if (steps === 0) {
@@ -173,7 +176,23 @@ window.ShipIconContainer = function () {
 
         var angle = mathlib.getCompassHeadingOfPoint(hex, previousHex);
         return mathlib.getPointInDirection(steps * 7, angle, 0, 0);
+        */
+        return {x: 0, y: 0};
     };
+
+    ShipIconContainer.prototype.hideAllMovementPaths = function (ship) {
+        this.icons.forEach(function(icon){
+            icon.hideMovementPath();
+        })
+    }
+
+    ShipIconContainer.prototype.hideMovementPath = function (ship) {
+        this.getByShip(ship).hideMovementPath();
+    }
+
+    ShipIconContainer.prototype.showMovementPath = function (ship) {
+        this.getByShip(ship).showMovementPath(ship, this.movementService);
+    }
 
     return ShipIconContainer;
 }();

@@ -504,11 +504,6 @@ class Manager{
         //}   
                
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        
-        foreach ($servergamedata->ships as $key=>$ship){
-            $movement = Movement::setPreturnMovementStatusForShip($ship, $servergamedata->turn);
-            self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
-        }
     }
 
     private static function generateIniative(TacGamedata $gamedata){
@@ -543,16 +538,11 @@ class Manager{
                     $movement = new MovementOrder(
                         $move["id"],
                         $move["type"],
-                        new OffsetCoordinate($move["position"]),
-                        $move["xOffset"],
-                        $move["yOffset"],
-                        $move["speed"],
-                        $move["heading"],
+                        (new CubeCoordinate($move["x"], $move["y"], $move["z"]))->toOffset(),
+                        (new CubeCoordinate($move["dx"], $move["dy"], $move["dz"]))->toOffset(),
                         $move["facing"],
-                        $move["preturn"],
                         $move["turn"],
-                        $move["value"],
-                        $move["at_initiative"]
+                        $move["value"]
                     );
                     $movement->requiredThrust = $move["requiredThrust"];
                     $movement->assignedThrust = $move["assignedThrust"];

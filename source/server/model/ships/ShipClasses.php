@@ -71,12 +71,8 @@ class BaseShip {
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
-            $speed = $this->getSpeed();
         
             if ( !($this instanceof OSAT) ){
-                if ($speed < 5){
-                    $mod = (5-$speed)*(-10);
-                }
                 $CnC = $this->getSystemByName("CnC");
                 if ($CnC){
 			    $mod += -5*($CnC->hasCritical("CommunicationsDisrupted", $gamedata->turn));
@@ -335,38 +331,6 @@ class BaseShip {
             } 
             
             return $m;
-        }
-        
-        public function getSpeed(){
-            $m = $this->getLastMovement();
-            if ($m == null)
-                return 0;
-                
-            return $m->speed;
-        }
-        
-        public function unanimatePreturnMovements($turn){
-            foreach($this->movement as $elementKey => $move) {
-                if ($move->turn == $turn && $move->type != "start" && $move->preturn){
-                    if ($move->type == "pivotright" || $move->type == "pivotleft"){
-                        $move->animated = false;
-                    }
-                }
-            } 
-        }
-        
-        public function unanimateMovements($turn){
-        
-            if (!is_array($this->movement))
-                return;
-            
-            foreach($this->movement as $elementKey => $move) {
-                if ($move->turn == $turn && $move->type != "start" && !$move->preturn){
-                    if ($move->type == "move" || $move->type == "turnleft" || $move->type == "turnright" || $move->type == "slipright" || $move->type == "slipleft" || $move->type == "pivotright" || $move->type == "pivotleft"){
-                        $move->animated = false;
-                    }
-                }
-            } 
         }
         
         public function getSystemById($id){

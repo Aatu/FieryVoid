@@ -1,16 +1,341 @@
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MovementPath = function () {
+    function MovementPath(ship, movementService, scene) {
+        _classCallCheck(this, MovementPath);
+
+        this.ship = ship;
+        this.movementService = movementService;
+        this.scene = scene;
+
+        this.create();
+    }
+
+    _createClass(MovementPath, [{
+        key: "remove",
+        value: function remove() {}
+    }, {
+        key: "create",
+        value: function create() {
+            var firstMovement = this.movementService.getStartMoveOfTurn(this.ship);
+        }
+    }]);
+
+    return MovementPath;
+}();
+
+exports.default = MovementPath;
+
+},{}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ = require(".");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MovementOrder = function () {
+    function MovementOrder(id, type, position, target, facing, turn) {
+        var value = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
+        var requiredThrust = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
+        var assignedThrust = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
+
+        _classCallCheck(this, MovementOrder);
+
+        if (!(position instanceof hexagon.Offset)) {
+            throw new Error("MovementOrder requires position as offset hexagon");
+        }
+
+        this.id = id;
+        this.type = type;
+        this.position = position;
+        this.target = target;
+        this.facing = facing;
+        this.turn = turn;
+        this.value = value;
+        this.requiredThrust = requiredThrust;
+        this.assignedThrust = assignedThrust;
+    }
+
+    _createClass(MovementOrder, [{
+        key: "isDeploy",
+        value: function isDeploy() {
+            return this.type === _.movementTypes.DEPLOY;
+        }
+    }, {
+        key: "isStart",
+        value: function isStart() {
+            return this.type === _.movementTypes.START;
+        }
+    }, {
+        key: "isEvade",
+        value: function isEvade() {
+            return this.type === _.movementTypes.EVADE;
+        }
+    }, {
+        key: "isEnd",
+        value: function isEnd() {
+            return this.type === _.movementTypes.END;
+        }
+    }]);
+
+    return MovementOrder;
+}();
+
+window.MovementOrder = MovementOrder;
+exports.default = MovementOrder;
+
+},{".":6}],3:[function(require,module,exports){
+arguments[4][1][0].apply(exports,arguments)
+},{"dup":1}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ = require('.');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MovementService = function () {
+    function MovementService() {
+        _classCallCheck(this, MovementService);
+
+        this.gamedata = null;
+    }
+
+    _createClass(MovementService, [{
+        key: 'update',
+        value: function update(gamedata) {
+            this.gamedata = gamedata;
+        }
+    }, {
+        key: 'getShipDeployMove',
+        value: function getShipDeployMove(ship) {
+            return ship.movement.find(function (move) {
+                return move.type === 'deploy';
+            });
+        }
+    }, {
+        key: 'getLastMove',
+        value: function getLastMove(ship) {
+            return ship.movement[ship.movement.length - 1];
+        }
+    }, {
+        key: 'getStartMoveOfTurn',
+        value: function getStartMoveOfTurn(ship) {
+            var _this = this;
+
+            return ship.movement.slice().reverse().find(function (move) {
+                return move.turn === _this.gamedata.turn - 1;
+            });
+        }
+    }, {
+        key: 'getAllMovesOfTurn',
+        value: function getAllMovesOfTurn(ship) {
+            var _this2 = this;
+
+            return ship.movement.filter(function (move) {
+                return move.turn === _this2.gamedata.turn;
+            });
+        }
+    }, {
+        key: 'deploy',
+        value: function deploy(ship, pos) {
+            var deployMove = this.getShipDeployMove(ship);
+
+            if (!deployMove) {
+                var lastMove = this.getLastMove(ship);
+                deployMove = new _.MovementOrder(-1, _.movementTypes.DEPLOY, pos, lastMove.target, lastMove.facing, this.gamedata.turn);
+                ship.movement.push(deployMove);
+            } else {
+                deployMove.position = pos;
+            }
+        }
+    }, {
+        key: 'doDeploymentTurn',
+        value: function doDeploymentTurn(ship, right) {
+
+            var step = 1;
+            if (!right) {
+                step = -1;
+            }
+
+            var deployMove = this.getShipDeployMove(ship);
+            var newfacing = mathlib.addToHexFacing(ship.deploymove.facing, step);
+            deploymove.facing = newfacing;
+        }
+    }, {
+        key: 'canEvade',
+        value: function canEvade(ship) {
+            //TODO: get maunouvering systems, get amount of already evaded. Return true if can still evade
+        }
+    }, {
+        key: 'getEvadeMove',
+        value: function getEvadeMove(ship) {
+            var _this3 = this;
+
+            return ship.movement.find(function (move) {
+                return move.isEvade() && move.turn === _this3.gamedata.turn;
+            });
+        }
+    }, {
+        key: 'getEvade',
+        value: function getEvade(ship) {
+            var evadeMove = this.getEvadeMove(ship);
+            return evadeMove ? evadeMove.value : 0;
+        }
+    }, {
+        key: 'evade',
+        value: function evade(ship) {}
+    }, {
+        key: 'getTotalProducedThrust',
+        value: function getTotalProducedThrust(ship) {
+
+            if (ship.flight) {
+                return ship.freethrust;
+            }
+
+            return ship.systems.filter(function (system) {
+                return system.outputType === 'thrust';
+            }).filter(function (system) {
+                return !system.isDestroyed();
+            }).reduce(function (accumulated, system) {
+                var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
+                return accumulated + system.getOutput() - crits;
+            }, 0);
+        }
+    }, {
+        key: 'getRemainingEngineThrust',
+        value: function getRemainingEngineThrust(ship) {
+            var thrustProduced = this.getTotalProducedThrust(ship);
+            var thrustChanneled = this.getAllMovesOfTurn(ship).reduce(function (accumulator, move) {
+                return move.getThrustChanneled();
+            }, 0);
+
+            return thrustProduced - thrustChanneled;
+        }
+    }, {
+        key: 'getPositionAtStartOfTurn',
+        value: function getPositionAtStartOfTurn(ship, currentTurn) {
+            if (currentTurn === undefined) {
+                currentTurn = this.gamedata.turn;
+            }
+
+            var move = null;
+
+            for (var i = ship.movement.length - 1; i >= 0; i--) {
+                move = ship.movement[i];
+                if (move.turn < currentTurn) {
+                    break;
+                }
+            }
+
+            return new hexagon.Offset(move.position);
+        }
+    }, {
+        key: 'getPreviousLocation',
+        value: function getPreviousLocation(ship) {
+            var oPos = shipManager.getShipPosition(ship);
+            for (var i = ship.movement.length - 1; i >= 0; i--) {
+                var move = ship.movement[i];
+                if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
+            }
+            return oPos;
+        }
+    }]);
+
+    return MovementService;
+}();
+
+window.MovementService = MovementService;
+exports.default = MovementService;
+
+},{".":6}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var movementTypes = {
+    START: 'start',
+    END: 'end',
+    DEPLOY: 'deploy',
+    SPEED: 'speed',
+    PIVOT_LEFT: 'pivot_left',
+    PIVOT_RIGHT: 'pivot_right',
+    EVADE: 'evade'
+};
+
+window.movementTypes = movementTypes;
+exports.default = movementTypes;
+
+},{}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.movementTypes = exports.MovementPath = exports.MovementOrder = exports.MovementService = undefined;
+
+var _MovementService = require('./MovementService');
+
+var _MovementService2 = _interopRequireDefault(_MovementService);
+
+var _MovementOrder = require('./MovementOrder');
+
+var _MovementOrder2 = _interopRequireDefault(_MovementOrder);
+
+var _MovementPath = require('./MovementPath');
+
+var _MovementPath2 = _interopRequireDefault(_MovementPath);
+
+var _MovementTypes = require('./MovementTypes');
+
+var _MovementTypes2 = _interopRequireDefault(_MovementTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.MovementService = _MovementService2.default;
+exports.MovementOrder = _MovementOrder2.default;
+exports.MovementPath = _MovementPath2.default;
+exports.movementTypes = _MovementTypes2.default;
+
+},{"./MovementOrder":2,"./MovementPath":3,"./MovementService":4,"./MovementTypes":5}],7:[function(require,module,exports){
 'use strict';
 
 var _ships = require('./ships');
 
 var _ships2 = _interopRequireDefault(_ships);
 
+var _movement = require('./handler/movement');
+
+var Movement = _interopRequireWildcard(_movement);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-console.log(_ships2.default);
 window.shipObjects = _ships2.default;
 
-},{"./ships":6}],2:[function(require,module,exports){
+},{"./handler/movement":6,"./ships":12}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -73,7 +398,7 @@ var Capital = function (_ShipObject) {
 
 exports.default = Capital;
 
-},{"./ShipObject":5}],3:[function(require,module,exports){
+},{"./ShipObject":11}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -144,7 +469,7 @@ var Gunship = function (_ShipObject) {
 
 exports.default = Gunship;
 
-},{"./ShipObject":5}],4:[function(require,module,exports){
+},{"./ShipObject":11}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -209,7 +534,7 @@ var Rhino = function (_ShipObject) {
 
 exports.default = Rhino;
 
-},{"./ShipObject":5}],5:[function(require,module,exports){
+},{"./ShipObject":11}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -219,6 +544,12 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _MovementPath = require("../handler/Movement/MovementPath");
+
+var _MovementPath2 = _interopRequireDefault(_MovementPath);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -239,6 +570,7 @@ var ShipObject = function () {
         this.mine = gamedata.isMyOrTeamOneShip(ship);
         this.sideSpriteSize = 100;
         this.position = { x: 0, y: 0, z: 0 };
+        this.movementPath = null;
 
         this.movements = null;
 
@@ -254,6 +586,7 @@ var ShipObject = function () {
     _createClass(ShipObject, [{
         key: "consumeShipdata",
         value: function consumeShipdata(ship) {
+            console.log("Movement", ship.movement);
             this.ship = ship;
             this.consumeMovement(ship.movement);
             this.consumeEW(ship);
@@ -322,7 +655,7 @@ var ShipObject = function () {
     }, {
         key: "getRotation",
         value: function getRotation(x, y, z) {
-            return this.rotation.z;
+            return this.rotation;
         }
     }, {
         key: "setOpacity",
@@ -349,7 +682,7 @@ var ShipObject = function () {
         }
     }, {
         key: "getFacing",
-        value: function getFacing(facing) {
+        value: function getFacing() {
             return this.getRotation().y;
         }
     }, {
@@ -427,144 +760,10 @@ var ShipObject = function () {
     }, {
         key: "consumeMovement",
         value: function consumeMovement(movements) {
-
-            var movesByHexAndTurn = [];
-
-            this.defaultPosition = {
-                turn: movements[0].turn,
-                facing: movements[0].facing,
-                heading: movements[0].heading,
-                position: new hexagon.Offset(movements[0].position),
-                offset: { x: movements[0].xOffset, y: movements[0].yOffset }
-            };
-
-            var lastMovement = null;
-
-            movements.filter(function (movement) {
-                return movement.type !== 'start';
-            }).filter(function (movement) {
-                return movement.commit;
-            }).forEach(function (movement) {
-
-                if (lastMovement && movement.turn !== lastMovement.turn) {
-
-                    if (movement.type === "move" || movement.type === "slipleft" || movement.type === "slipright") {
-                        this.addMovementToRegistry(movesByHexAndTurn, {
-                            turn: movement.turn,
-                            facing: movement.facing,
-                            heading: movement.heading,
-                            position: new hexagon.Offset(lastMovement.position),
-                            oldFacings: [],
-                            oldHeadings: []
-                        });
-                    }
-                }
-
-                this.addMovementToRegistry(movesByHexAndTurn, movement);
-
-                lastMovement = movement;
-            }, this);
-
-            this.movements = movesByHexAndTurn;
-        }
-    }, {
-        key: "addMovementToRegistry",
-        value: function addMovementToRegistry(movesByHexAndTurn, movement) {
-
-            var getPreviousMatchingMove = function getPreviousMatchingMove(moves, move) {
-                var previousMove = moves[moves.length - 1];
-                if (!previousMove) {
-                    return null;
-                }
-
-                if (previousMove.turn === move.turn && previousMove.position.q === move.position.q && previousMove.position.r === move.position.r) {
-                    return previousMove;
-                }
-                return null;
-            };
-
-            var previousMove = getPreviousMatchingMove(movesByHexAndTurn, movement);
-
-            if (previousMove) {
-                var saved = previousMove;
-
-                if (saved.facing !== movement.facing) {
-                    saved.oldFacings.push(saved.facing);
-                }
-
-                saved.facing = movement.facing;
-
-                if (saved.heading !== movement.heading) {
-                    saved.oldHeadings.push(saved.heading);
-                }
-
-                saved.heading = movement.heading;
-
-                saved.position = new hexagon.Offset(movement.position);
-            } else {
-                movesByHexAndTurn.push({
-                    //id: movement.id,
-                    //type: movement.type,
-                    turn: movement.turn,
-                    facing: movement.facing,
-                    heading: movement.heading,
-                    position: new hexagon.Offset(movement.position),
-                    oldFacings: [],
-                    oldHeadings: []
-                });
-            }
-        }
-    }, {
-        key: "movesEqual",
-        value: function movesEqual(move1, move2) {
-            return move1.turn === move2.turn && move1.position.equals(move2.position); // &&
-        }
-    }, {
-        key: "getLastMovement",
-        value: function getLastMovement() {
-            if (this.movements.length === 0) {
-                return this.defaultPosition;
-            }
-
-            return this.movements[this.movements.length - 1];
-        }
-    }, {
-        key: "getFirstMovementOnTurn",
-        value: function getFirstMovementOnTurn(turn, ignore) {
-            var movement = this.movements.filter(function (move) {
-                return move.turn === turn;
-            }).shift();
-
-            if (!movement) {
-                return this.getLastMovement();
-            }
-
-            return movement;
-        }
-    }, {
-        key: "getMovementBefore",
-        value: function getMovementBefore(move) {
-            for (var i in this.movements) {
-                if (this.movements[i] === move) {
-                    return this.movements[i - 1];
-                }
-            }
-
-            return null;
-        }
-    }, {
-        key: "getMovementAfter",
-        value: function getMovementAfter(move) {
-            for (var i in this.movements) {
-                if (this.movements[i] === move) {
-                    if (this.movements[i + 1]) {
-                        return this.movements[i + 1];
-                    }
-                    return null;
-                }
-            }
-
-            return null;
+            console.log("hi movements", movements);
+            this.movements = movements.filter(function (move) {
+                return !move.isEvade();
+            });
         }
     }, {
         key: "showWeaponArc",
@@ -626,8 +825,10 @@ var ShipObject = function () {
         }
     }, {
         key: "positionAndFaceIcon",
-        value: function positionAndFaceIcon(offset) {
-            var movement = this.getLastMovement();
+        value: function positionAndFaceIcon(offset, movementService) {
+            console.log("REPOSITION", offset);
+            var movement = movementService.getLastMove(this.ship);
+            console.log(movement);
             var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
             if (offset) {
@@ -636,10 +837,22 @@ var ShipObject = function () {
             }
 
             var facing = mathlib.hexFacingToAngle(movement.facing);
-            var heading = mathlib.hexFacingToAngle(movement.heading);
 
             this.setPosition(gamePosition);
             this.setFacing(-facing);
+        }
+    }, {
+        key: "hideMovementPath",
+        value: function hideMovementPath(ship) {
+            if (this.movementPath) {
+                this.movementPath.remove(this.scene);
+                this.movementPath = null;
+            }
+        }
+    }, {
+        key: "showMovementPath",
+        value: function showMovementPath(ship, movementService) {
+            this.movementPath = new _MovementPath2.default(ship, movementService, this.scene);
         }
     }]);
 
@@ -650,7 +863,7 @@ window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 
-},{}],6:[function(require,module,exports){
+},{"../handler/Movement/MovementPath":1}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -673,4 +886,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = { Gunship: _Gunship2.default, Rhino: _Rhino2.default, Capital: _Capital2.default };
 
-},{"./Capital":2,"./Gunship":3,"./Rhino":4}]},{},[1]);
+},{"./Capital":8,"./Gunship":9,"./Rhino":10}]},{},[7]);

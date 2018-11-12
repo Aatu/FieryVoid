@@ -10,11 +10,11 @@ window.DeploymentPhaseStrategy = function () {
 
     DeploymentPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
-    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
+    DeploymentPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, movementService) {
 
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
+        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, movementService);
 
         this.deploymentSprites = createSlotSprites(gamedata, webglScene.scene);
 
@@ -46,7 +46,7 @@ window.DeploymentPhaseStrategy = function () {
 
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
-                shipManager.movement.deploy(this.selectedShip, hex);
+                this.movementService.deploy(this.selectedShip, hex);
                 this.onShipMovementChanged({ship: this.selectedShip});
                 this.drawMovementUI(this.selectedShip);
 

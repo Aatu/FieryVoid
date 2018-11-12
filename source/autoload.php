@@ -7,8 +7,6 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
-                
-                
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
@@ -226,6 +224,7 @@ spl_autoload_register(
                 'enlightenment1712' => '/server/model/ships/orieni/enlightenment1712.php',
                 'equata' => '/server/model/ships/centauri_old/equata.php',
                 'erlassan' => '/server/model/ships/balosian/erlassan.php',
+                'erlorhark' => '/server/model/ships/llort/erlorhark.php',
                 'erlorra' => '/server/model/ships/llort/erlorra.php',
                 'erlorraearly' => '/server/model/ships/llort/erlorraEarly.php',
                 'erlorraearlypods' => '/server/model/ships/llort/erlorraEarlyPods.php',
@@ -433,10 +432,6 @@ spl_autoload_register(
                 'lightship' => '/server/model/ships/ShipClasses.php',
                 'liner' => '/server/model/ships/civilians/liner.php',
                 'linkedweapon' => '/server/model/weapons/linkedWeapon.php',
-				
-                'erlorhark' => '/server/model/ships/llort/erlorhark.php',
-                'palaceship' => '/server/model/ships/llort/palaceship.php',
-				
                 'lmissilerack' => '/server/model/weapons/missile.php',
                 'lokita' => '/server/model/ships/abbai/lokita.php',
                 'looter' => '/server/model/ships/raiders/looter.php',
@@ -502,7 +497,7 @@ spl_autoload_register(
                 'motenai' => '/server/model/ships/abbai_old/motenai.php',
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
-                'movementorder' => '/server/model/BaseClasses.php',
+                'movementorder' => '/server/model/MovementOrder.php',
                 'nakarsa' => '/server/model/ships/abbai/nakarsa.php',
                 'nalor' => '/server/model/ships/centauri_old/nalor.php',
                 'nashana' => '/server/model/ships/yolu/nashana.php',
@@ -566,6 +561,7 @@ spl_autoload_register(
                 'pairedlightboltcannon' => '/server/model/weapons/pulse.php',
                 'pairedparticlegun' => '/server/model/weapons/particle.php',
                 'pairedplasmablaster' => '/server/model/weapons/plasma.php',
+                'palaceship' => '/server/model/ships/llort/palaceship.php',
                 'paragon' => '/server/model/ships/orieni/paragon.php',
                 'paragon1782' => '/server/model/ships/orieni/paragon1782.php',
                 'pariah' => '/server/model/ships/orieni/pariah.php',

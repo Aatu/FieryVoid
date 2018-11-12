@@ -1,4 +1,4 @@
 import ships from './ships'
+import * as Movement from './handler/movement'
 
-console.log(ships)
 window.shipObjects = ships;
