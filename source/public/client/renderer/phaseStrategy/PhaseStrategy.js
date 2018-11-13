@@ -440,7 +440,7 @@ window.PhaseStrategy = function () {
         }
 
         var pos = this.coordinateConverter.fromGameToViewPort(this.movementUI.icon.getPosition());
-        var heading = this.movementUI.icon.getFacing();// mathlib.hexFacingToAngle(this.movementUI.icon.getLastMovement().heading);
+        var heading = this.movementUI.icon.getFacing();
         console.log("UI HEADING IS", heading);
         UI.shipMovement.reposition(pos, heading);
 

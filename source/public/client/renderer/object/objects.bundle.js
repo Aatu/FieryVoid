@@ -11,22 +11,42 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var MovementPath = function () {
     function MovementPath(ship, movementService, scene) {
+        var moved = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
         _classCallCheck(this, MovementPath);
 
         this.ship = ship;
         this.movementService = movementService;
         this.scene = scene;
+        this.moved = moved;
+
+        this.objects = [];
 
         this.create();
     }
 
     _createClass(MovementPath, [{
         key: "remove",
-        value: function remove() {}
+        value: function remove() {
+            var _this = this;
+
+            this.objects.forEach(function (object3d) {
+                _this.scene.remove(object3d.mesh);object3d.destroy();
+            });
+        }
     }, {
         key: "create",
         value: function create() {
-            var firstMovement = this.movementService.getStartMoveOfTurn(this.ship);
+            var firstMovement = this.movementService.getPreviousTurnLastMove(this.ship);
+            var lastMovement = this.moved && this.movementService.getMostRecentMove(this.ship);
+
+            console.log("creating line", window.coordinateConverter.fromHexToGame(firstMovement.position), window.coordinateConverter.fromHexToGame(firstMovement.target));
+            var line = new window.LineSprite(window.coordinateConverter.fromHexToGame(firstMovement.position), window.coordinateConverter.fromHexToGame(firstMovement.position.add(firstMovement.target)), 10, new THREE.Color(0, 0, 1), 0.5, {
+                blending: THREE.AdditiveBlending
+            });
+
+            this.scene.add(line.mesh);
+            this.objects.push(line);
         }
     }]);
 
@@ -134,26 +154,35 @@ var MovementService = function () {
             });
         }
     }, {
-        key: 'getLastMove',
-        value: function getLastMove(ship) {
+        key: 'getMostRecentMove',
+        value: function getMostRecentMove(ship) {
+            var _this = this;
+
+            var move = ship.movement.slice().reverse().find(function (move) {
+                return move.turn === _this.gamedata.turn;
+            });
+            if (move) {
+                return move;
+            }
+
             return ship.movement[ship.movement.length - 1];
         }
     }, {
-        key: 'getStartMoveOfTurn',
-        value: function getStartMoveOfTurn(ship) {
-            var _this = this;
+        key: 'getPreviousTurnLastMove',
+        value: function getPreviousTurnLastMove(ship) {
+            var _this2 = this;
 
             return ship.movement.slice().reverse().find(function (move) {
-                return move.turn === _this.gamedata.turn - 1;
+                return move.turn === _this2.gamedata.turn - 1;
             });
         }
     }, {
         key: 'getAllMovesOfTurn',
         value: function getAllMovesOfTurn(ship) {
-            var _this2 = this;
+            var _this3 = this;
 
             return ship.movement.filter(function (move) {
-                return move.turn === _this2.gamedata.turn;
+                return move.turn === _this3.gamedata.turn;
             });
         }
     }, {
@@ -162,7 +191,7 @@ var MovementService = function () {
             var deployMove = this.getShipDeployMove(ship);
 
             if (!deployMove) {
-                var lastMove = this.getLastMove(ship);
+                var lastMove = this.getMostRecentMove(ship);
                 deployMove = new _.MovementOrder(-1, _.movementTypes.DEPLOY, pos, lastMove.target, lastMove.facing, this.gamedata.turn);
                 ship.movement.push(deployMove);
             } else {
@@ -190,10 +219,10 @@ var MovementService = function () {
     }, {
         key: 'getEvadeMove',
         value: function getEvadeMove(ship) {
-            var _this3 = this;
+            var _this4 = this;
 
             return ship.movement.find(function (move) {
-                return move.isEvade() && move.turn === _this3.gamedata.turn;
+                return move.isEvade() && move.turn === _this4.gamedata.turn;
             });
         }
     }, {
@@ -827,7 +856,7 @@ var ShipObject = function () {
         key: "positionAndFaceIcon",
         value: function positionAndFaceIcon(offset, movementService) {
             console.log("REPOSITION", offset);
-            var movement = movementService.getLastMove(this.ship);
+            var movement = movementService.getMostRecentMove(this.ship);
             console.log(movement);
             var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 

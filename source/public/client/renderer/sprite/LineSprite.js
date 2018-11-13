@@ -21,83 +21,80 @@ window.LineSprite = function () {
             opacity: this.opacity,
             map: args.texture || null,
             blending: args.blending || THREE.NormalBlending,
-            depthWrite: false
+            depthWrite: false,
+            side: THREE.DoubleSide
         });
 
-        this.geometry = createGeometry(start, end, lineWidth);
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.currentRotationMatrix = null;
+        //this.geometry = createGeometry(start, end, lineWidth);
+        //this.mesh = new THREE.Mesh(this.geometry, this.material);
+        //this.mesh.lookAt(window.webglScene.camera);
+        this.mesh = this.create(this.start, this.end, this.lineWidth, this.material);
     }
 
-    const createGeometry = (start, end, lineWidth) => {
-        const geometry = new THREE.Geometry();
+    LineSprite.prototype.create = function (pointX, pointY, lineWidth, material) {
+        const direction = new THREE.Vector3().subVectors(pointY, pointX);
+        const orientation = new THREE.Matrix4();
+        orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+        orientation.multiply(new THREE.Matrix4().set(
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, -1, 0, 0,
+            0, 0, 0, 1)
+        );
+        const edgeGeometry = new THREE.CylinderGeometry(lineWidth/2, lineWidth/2, direction.length(), 8, 1);
+        //const edgeGeometry = new THREE.PlaneGeometry(lineWidth, direction.length(), 1, 1);
+        const edge = new THREE.Mesh(edgeGeometry, material);
+        edge.applyMatrix(orientation);
+        this.currentRotationMatrix = orientation;
+        // position based on midpoints - there may be a better solution than this
+        edge.position.x = (pointY.x + pointX.x) / 2;
+        edge.position.y = (pointY.y + pointX.y) / 2;
+        edge.position.z = (pointY.z + pointX.z) / 2;
+        return edge;
+    }
 
-        const lineAngle = mathlib.getCompassHeadingOfPoint({x: start.x, y: start.z}, {x: end.x, y: end.z})
-        const startA = offsetPoint(start, lineAngle, -90, lineWidth) 
-        const startB = offsetPoint(start, lineAngle, 90, lineWidth) 
-        const endA = offsetPoint(end, lineAngle, -90, lineWidth)
-        const endB = offsetPoint(end, lineAngle, 90, lineWidth)
-
-        geometry.vertices.push(
-            new THREE.Vector3( startA.x, startA.y, startA.z ),
-            new THREE.Vector3( startB.x, startB.y, startB.z  ),
-            new THREE.Vector3( endA.x, endA.y, endA.z ),
-            new THREE.Vector3( endB.x, endB.y, endB.z )
+    LineSprite.prototype.updateMesh = function (pointX, pointY, lineWidth, edge) {
+        const direction = new THREE.Vector3().subVectors(pointY, pointX);
+        const orientation = new THREE.Matrix4();
+        orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+        orientation.multiply(new THREE.Matrix4().set(
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, -1, 0, 0,
+            0, 0, 0, 1)
         );
 
-        geometry.faces.push( new THREE.Face3( 0, 1, 2, ) );
-        geometry.faces.push( new THREE.Face3( 3, 2, 1 ) );
-        
-        geometry.faceVertexUvs[ 0 ].push( [
-            new THREE.Vector2( 0, 0 ),
-            new THREE.Vector2( 0, 1 ),
-            new THREE.Vector2( 1, 0 ),
-        ]);
-
-        geometry.faceVertexUvs[ 0 ].push( [
-            new THREE.Vector2( 1, 1 ),
-            new THREE.Vector2( 1, 0 ),
-            new THREE.Vector2( 0, 1 ),
-        ]);
-
-        geometry.computeBoundingSphere();
-        geometry.dynamic = true;
-
-        return geometry;
-    }
-
-    const offsetPoint = (point, lineAngle, angle, lineWidth) => {
-        const offset = mathlib.getPointInDirection(lineWidth / 2, mathlib.addToDirection(lineAngle, angle), point.x, point.z, true)
-        return {
-            x: offset.x,
-            y: point.y,
-            z: offset.y
+        /*
+        const scale = new THREE.Matrix4().makeScale(1, 1, 1.5);
+        if (this.currentScaleMatrix) {
+            edge.applyMatrix(new THREE.Matrix4().getInverse(this.currentScaleMatrix));
         }
+        
+        
+        edge.applyMatrix(scale);
+        this.currentScaleMatrix = scale;
+        */
+        edge.applyMatrix(new THREE.Matrix4().getInverse(this.currentRotationMatrix));
+        edge.geometry = new THREE.CylinderGeometry(lineWidth/2, lineWidth/2, direction.length(), 8, 1);
+        //edge.geometry= new THREE.PlaneGeometry(lineWidth, direction.length(), 1, 1);
+
+        edge.applyMatrix(orientation);
+        this.currentRotationMatrix = orientation;
+        // position based on midpoints - there may be a better solution than this
+        edge.position.x = (pointY.x + pointX.x) / 2;
+        edge.position.y = (pointY.y + pointX.y) / 2;
+        edge.position.z = (pointY.z + pointX.z) / 2;
     }
 
     LineSprite.prototype.update = function (start, end, lineWidth) {
-        if (! lineWidth) {
-            lineWidth = this.lineWidth;
-        }
-        this.lineWidth = lineWidth;
+        this.updateMesh(start, end, lineWidth, this.mesh);
+        //this.mesh.rotation.setFromVector3({x: 0, y: 0, z: 0});
         
-        const lineAngle = mathlib.getCompassHeadingOfPoint({x: start.x, y: start.z}, {x: end.x, y: end.z})
-        const startA = offsetPoint(start, lineAngle, 90, lineWidth) 
-        const startB = offsetPoint(start, lineAngle, -90, lineWidth) 
-        const endA = offsetPoint(end, lineAngle, 90, lineWidth)
-        const endB = offsetPoint(end, lineAngle, -90, lineWidth)
-
-        this.geometry.vertices[0] = new THREE.Vector3( startA.x, startA.y, startA.z );
-        this.geometry.vertices[1] = new THREE.Vector3( startB.x, startB.y, startB.z );
-        this.geometry.vertices[2] = new THREE.Vector3( endA.x, endA.y, endA.z );
-        this.geometry.vertices[3] = new THREE.Vector3( endB.x, endB.y, endB.z );
     };
 
     LineSprite.prototype.multiplyOpacity = function (m) {
         this.material.opacity = this.opacity * m;
-    };
-
-    LineSprite.prototype.setLineWidth = function (lineWidth) {
-        this.mesh.scale.y = lineWidth;
     };
 
     LineSprite.prototype.hide = function () {
@@ -110,19 +107,8 @@ window.LineSprite = function () {
         return this;
     };
 
-    LineSprite.prototype.setPosition = function (pos) {
-        this.mesh.position.x = pos.x;
-        this.mesh.position.y = pos.y;
-        this.mesh.position.z = pos.z;
-        return this;
-    };
-
     LineSprite.prototype.destroy = function () {
         this.mesh.material.dispose();
-    };
-
-    LineSprite.prototype.setFacing = function (facing) {
-        this.mesh.rotation.z = mathlib.degreeToRadian(facing);
     };
 
     return LineSprite;

@@ -15,11 +15,16 @@ class MovementService{
         return ship.movement.find(move => move.type === 'deploy');
     }
 
-    getLastMove(ship) {
-        return ship.movement[ship.movement.length-1];
+    getMostRecentMove(ship) {
+        const move = ship.movement.slice().reverse().find(move => move.turn === this.gamedata.turn);
+        if (move) {
+            return move;
+        }
+
+        return ship.movement[ship.movement.length - 1];
     }
 
-    getStartMoveOfTurn(ship) {
+    getPreviousTurnLastMove(ship) {
         return ship.movement.slice().reverse().find(move => move.turn === this.gamedata.turn - 1);
     }
 
@@ -31,7 +36,7 @@ class MovementService{
         let deployMove = this.getShipDeployMove(ship);
 
         if (!deployMove) {
-            const lastMove = this.getLastMove(ship)
+            const lastMove = this.getMostRecentMove(ship)
             deployMove = new MovementOrder(-1, movementTypes.DEPLOY, pos, lastMove.target, lastMove.facing, this.gamedata.turn);
             ship.movement.push(deployMove);
         } else {

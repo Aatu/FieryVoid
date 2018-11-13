@@ -70,7 +70,7 @@ window.coordinateConverter = function () {
         var x = this.hexlenght * Math.sqrt(3) * (offsetHex.q - 0.5 * (offsetHex.r & 1));
         var y = this.hexlenght * 3 / 2 * offsetHex.r;
 
-        return { x: x, y: y };
+        return { x: x, y: y, z: 0 };
     };
 
     coordinateConverter.prototype.fromViewPortToGame = function (pos) {

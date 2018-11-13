@@ -84,6 +84,11 @@ window.mathlib = {
 		return start.distanceTo(end);
 	},
 
+	getClosestAngleBetween: function getAngleBetween(angle1, angle2, right) {
+		const right = mathlib.getAngleBetween(angle1, angle2, true);
+		const left = mathlib.getAngleBetween(angle1, angle2, false);
+	},
+
 	getAngleBetween: function getAngleBetween(angle1, angle2, right) {
 		//console.log(angle1  + " " + angle2);
 		var total;

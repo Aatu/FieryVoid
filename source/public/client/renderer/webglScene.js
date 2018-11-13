@@ -328,6 +328,7 @@ window.webglScene = function () {
 
         //time++
 
+
         //this.setCameraAngleRelative(time * 0.001);
         /*
 

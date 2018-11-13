@@ -249,7 +249,7 @@ class ShipObject {
 
     positionAndFaceIcon(offset, movementService) {
         console.log("REPOSITION", offset);
-        var movement = movementService.getLastMove(this.ship);
+        var movement = movementService.getMostRecentMove(this.ship);
         console.log(movement);
         var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
