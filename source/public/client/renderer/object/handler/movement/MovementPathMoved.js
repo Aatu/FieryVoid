@@ -1,4 +1,4 @@
-class MovementPath {
+class MovementPathMoved {
   constructor(ship, movementService, scene) {
     this.ship = ship;
     this.movementService = movementService;
@@ -30,15 +30,4 @@ class MovementPath {
   }
 }
 
-const createMovementLine = move =>
-  new window.LineSprite(
-    window.coordinateConverter.fromHexToGame(move.position),
-    window.coordinateConverter.fromHexToGame(move.position.add(move.target)),
-    10,
-    new THREE.Color(0, 0, 1),
-    0.5
-  );
-
-export { createMovementLine };
-
-export default MovementPath;
+export default MovementPathMoved;

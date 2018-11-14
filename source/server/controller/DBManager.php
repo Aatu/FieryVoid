@@ -884,7 +884,7 @@ class DBManager
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
 
@@ -897,16 +897,14 @@ class DBManager
                     $target = $move->target->toCube();
 
                     $stmt->bind_param(
-                        'iisiiiiiiiissi',
+                        'iisiiiiiissi',
                         $shipid,
                         $gameid,
                         $move->type,
-                        $position->x,
-                        $position->y,
-                        $position->z,
-                        $target->x,
-                        $target->y,
-                        $target->z,
+                        $position->q,
+                        $position->r,
+                        $target->q,
+                        $target->r,
                         $move->facing,
                         $move->value,
                         $reqThrust,
@@ -1323,7 +1321,7 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                id, shipid, type, x, y, z, dx, dy, dz, facing, turn, value, requiredthrust, assignedthrust
+                id, shipid, type, q, r, dq, dr, facing, turn, value, requiredthrust, assignedthrust
             FROM 
                 tac_shipmovement
             WHERE
@@ -1335,12 +1333,12 @@ class DBManager
         if ($stmt) {
             $lastTurn = $fetchTurn - 1;
             $stmt->bind_param('iii', $gamedata->id, $lastTurn, $fetchTurn);
-            $stmt->bind_result($id, $shipid, $type, $x, $y, $z, $dx, $dy, $dz, $facing, $turn, $value, $requiredthrust, $assignedthrust);
+            $stmt->bind_result($id, $shipid, $type, $q, $r, $dq, $dr, $facing, $turn, $value, $requiredthrust, $assignedthrust);
             $stmt->execute();
 
             while ($stmt->fetch()) {
 
-                $move = new MovementOrder($id, $type, (new CubeCoordinate($x, $y, $z))->toOffset(), (new CubeCoordinate($dx, $dy, $dz))->toOffset(), $facing, $turn, $value);
+                $move = new MovementOrder($id, $type, new OffsetCoordinate($q, $r), new OffsetCoordinate($dq, $dr), $facing, $turn, $value);
                 $move->setReqThrustJSON($requiredthrust);
                 $move->setAssThrustJSON($assignedthrust);
                 $gamedata->getShipById($shipid)->setMovement($move);

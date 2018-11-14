@@ -53,10 +53,7 @@ class OffsetCoordinate
     }
 
     public function add(OffsetCoordinate $position): OffsetCoordinate {
-        return new OffsetCoordinate(
-          $this->q + $position->q,
-          $this->r + $position->r
-        );
+        return $this->toCube()->add($position->toCube())->toOffset();
     }
 
     public function moveToDirection($direction, $steps = 1): OffsetCoordinate {

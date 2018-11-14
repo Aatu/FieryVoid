@@ -538,8 +538,8 @@ class Manager{
                     $movement = new MovementOrder(
                         $move["id"],
                         $move["type"],
-                        (new CubeCoordinate($move["x"], $move["y"], $move["z"]))->toOffset(),
-                        (new CubeCoordinate($move["dx"], $move["dy"], $move["dz"]))->toOffset(),
+                        new OffsetCoordinate($move["q"], $move["r"]),
+                        new OffsetCoordinate($move["dq"], $move["dr"]),
                         $move["facing"],
                         $move["turn"],
                         $move["value"]

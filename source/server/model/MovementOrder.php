@@ -26,7 +26,6 @@ class MovementOrder{
 
     public function getAssThrustJSON(){
         return json_encode($this->assignedThrust);
-        
     }
 
     public function setReqThrustJSON($json){

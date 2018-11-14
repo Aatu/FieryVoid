@@ -1,7 +1,15 @@
+import MovementService from "./MovementService";
+import MovementOrder from "./MovementOrder";
+import MovementPath from "./MovementPath";
+import MovementPathDeployment from "./MovementPathDeployment";
+import movementTypes from "./MovementTypes";
+import MovementPathMoved from "./MovementPathMoved";
 
-import MovementService from './MovementService';
-import MovementOrder from './MovementOrder';
-import MovementPath from './MovementPath';
-import movementTypes from './MovementTypes'
-
-export {MovementService, MovementOrder, MovementPath, movementTypes};
+export {
+  MovementService,
+  MovementOrder,
+  MovementPath,
+  movementTypes,
+  MovementPathDeployment,
+  MovementPathMoved
+};

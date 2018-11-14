@@ -1,4 +1,6 @@
-class MovementPath {
+import { createMovementLine } from "./MovementPath";
+
+class MovementPathDeployment {
   constructor(ship, movementService, scene) {
     this.ship = ship;
     this.movementService = movementService;
@@ -17,28 +19,20 @@ class MovementPath {
   }
 
   create() {
-    const firstMovement = this.movementService.getPreviousTurnLastMove(
-      this.ship
-    );
+    const firstMovement = this.movementService.getDeployMove(this.ship);
+
+    if (!firstMovement) {
+      return;
+    }
 
     const lastMovement =
       this.moved && this.movementService.getMostRecentMove(this.ship);
 
     const line = createMovementLine(firstMovement);
+
     this.scene.add(line.mesh);
     this.objects.push(line);
   }
 }
 
-const createMovementLine = move =>
-  new window.LineSprite(
-    window.coordinateConverter.fromHexToGame(move.position),
-    window.coordinateConverter.fromHexToGame(move.position.add(move.target)),
-    10,
-    new THREE.Color(0, 0, 1),
-    0.5
-  );
-
-export { createMovementLine };
-
-export default MovementPath;
+export default MovementPathDeployment;
