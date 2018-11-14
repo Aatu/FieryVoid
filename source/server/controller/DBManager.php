@@ -893,8 +893,8 @@ class DBManager
                     $reqThrust = $move->getReqThrustJSON();
                     $assThrust = $move->getAssThrustJSON();
 
-                    $position = $move->position->toCube();
-                    $target = $move->target->toCube();
+                    $position = $move->position;
+                    $target = $move->target;
 
                     $stmt->bind_param(
                         'iisiiiiiissi',

@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/trusty64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -86,7 +86,7 @@ Vagrant.configure("2") do |config|
     sudo a2enmod headers
 
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
-    apt-get install -y mysql-server
+    apt-get install -y apt-get install mysql-server-5.5
 
     mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
     mysql -uroot -proot B5CGM < /vagrant/db/addGameRules.sql
