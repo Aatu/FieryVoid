@@ -1,219 +1,267 @@
 "use strict";
 
-window.MovementPhaseStrategy = function () {
+window.MovementPhaseStrategy = (function() {
+  function MovementPhaseStrategy(coordinateConverter) {
+    PhaseStrategy.call(this, coordinateConverter);
 
-    function MovementPhaseStrategy(coordinateConverter) {
-        PhaseStrategy.call(this, coordinateConverter);
+    this.onZoomCallbacks.push(this.repositionThrustUi.bind(this));
+    this.onScrollCallbacks.push(this.repositionThrustUi.bind(this));
+    this.shipThrustUIState = null;
 
-        this.onZoomCallbacks.push(this.repositionThrustUi.bind(this));
-        this.onScrollCallbacks.push(this.repositionThrustUi.bind(this));
-        this.shipThrustUIState = null;
+    this.strategies = [
+      new uiStrategy.MovementPathMouseOver(),
+      new uiStrategy.MovementPathSelectedShip(),
+      new uiStrategy.HighlightSelectedShip(),
+      new uiStrategy.SelectedShipMovementUi()
+    ];
+  }
+
+  MovementPhaseStrategy.prototype = Object.create(
+    window.PhaseStrategy.prototype
+  );
+
+  MovementPhaseStrategy.prototype.update = function(gamedata) {
+    doForcedMovementForActiveShip();
+    PhaseStrategy.prototype.update.call(this, gamedata);
+    this.selectActiveShip();
+
+    if (isMovementReady(gamedata)) {
+      gamedata.showCommitButton();
+    } else {
+      gamedata.hideCommitButton();
+    }
+  };
+
+  MovementPhaseStrategy.prototype.activate = function(
+    shipIcons,
+    ewIconContainer,
+    ballisticIconContainer,
+    gamedata,
+    webglScene,
+    shipWindowManager,
+    movementService
+  ) {
+    this.changeAnimationStrategy(
+      new window.IdleAnimationStrategy(shipIcons, gamedata.turn)
+    );
+
+    doForcedMovementForActiveShip();
+    PhaseStrategy.prototype.activate.call(
+      this,
+      shipIcons,
+      ewIconContainer,
+      ballisticIconContainer,
+      gamedata,
+      webglScene,
+      shipWindowManager,
+      movementService
+    );
+    this.selectActiveShip();
+
+    this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
+
+    if (isMovementReady(gamedata)) {
+      gamedata.showCommitButton();
+    } else {
+      gamedata.hideCommitButton();
     }
 
-    MovementPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
+    this.showAppropriateHighlight();
+    this.showAppropriateEW();
 
-    MovementPhaseStrategy.prototype.update = function (gamedata) {
-        
-        doForcedMovementForActiveShip();
-        PhaseStrategy.prototype.update.call(this, gamedata);
-        this.selectActiveShip();
-
-
-        if (isMovementReady(gamedata)) {
-            gamedata.showCommitButton();
-        } else {
-            gamedata.hideCommitButton();
-        }
-    };
-
-    MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
-        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
-
-        
-        doForcedMovementForActiveShip();
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
-        this.selectActiveShip();
-
-        this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
-
-
-        if (isMovementReady(gamedata)) {
-            gamedata.showCommitButton();
-        } else {
-            gamedata.hideCommitButton();
-        }
-
-        
-        this.showAppropriateHighlight();
-        this.showAppropriateEW();
-
-        gamedata.ships
-            .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
-            .forEach(function (ship) {
-                var icon = this.shipIconContainer.getByShip(ship);
-                icon.setNotMoved(true);
-            }, this);
-
-        return this;
-    };
-
-    MovementPhaseStrategy.prototype.deactivate = function () {
-        PhaseStrategy.prototype.deactivate.call(this, true);
-        this.hideMovementUI();
-        this.uiManager.hideShipThrustUI();
-
-        gamedata.ships.forEach(function(ship) {
-            var icon = this.shipIconContainer.getByShip(ship);
-            icon.showSideSprite(false);
-            icon.setNotMoved(false);
-        }, this);
-
-        return this;
-    };
-
-    MovementPhaseStrategy.prototype.onShipRightClicked = function (ship) {
-        this.shipWindowManager.open(ship);
-    };
-
-    MovementPhaseStrategy.prototype.onHexClicked = function (payload) {};
-
-    MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
-        if (gamedata.getMyActiveShips().includes(ship)) {
-            this.setSelectedShip(ship);
-        }
-
-        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
-    };
-
-    MovementPhaseStrategy.prototype.setSelectedShip = function (ship) {
-        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-        this.drawMovementUI(this.selectedShip);
-    };
-
-    MovementPhaseStrategy.prototype.targetShip = function (ship, payload) {
-        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
-        this.showShipTooltip(ship, payload, menu, false);
-    };
-
-    MovementPhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
-        ships = [].concat(ships);
-
-        if (this.selectedShip && this.shipThrustUIState) {
-            return;
-        } 
-
-        PhaseStrategy.prototype.showShipTooltip.call(this, ships, payload, menu, hide, ballisticsMenu);
-    };
-
-    MovementPhaseStrategy.prototype.onAssignThrust = function(payload) {
-        if (payload === false) {
-            this.uiManager.hideShipThrustUI();
-            this.shipThrustUIState = null;
-            return;
-        }
-
-        var ship = payload.ship;
+    gamedata.ships
+      .filter(window.SimultaneousMovementRule.isNotYetMovedShip)
+      .forEach(function(ship) {
         var icon = this.shipIconContainer.getByShip(ship);
+        icon.setNotMoved(true);
+      }, this);
 
-        this.shipThrustUIState = {
-            ship: ship,
-            position: window.coordinateConverter.fromGameToViewPort(icon.getPosition()),
-            rotation: icon.getFacing(),
-            totalRequired: payload.totalRequired,
-            remainginRequired: payload.remainginRequired,
-            movement: payload.movement
-        };
+    return this;
+  };
 
-        this.uiManager.showShipThrustUI(this.shipThrustUIState);
+  MovementPhaseStrategy.prototype.deactivate = function() {
+    PhaseStrategy.prototype.deactivate.call(this, true);
+    this.hideMovementUI();
+    this.uiManager.hideShipThrustUI();
+
+    gamedata.ships.forEach(function(ship) {
+      var icon = this.shipIconContainer.getByShip(ship);
+      icon.showSideSprite(false);
+      icon.setNotMoved(false);
+    }, this);
+
+    return this;
+  };
+
+  MovementPhaseStrategy.prototype.onShipRightClicked = function(ship) {
+    this.shipWindowManager.open(ship);
+  };
+
+  MovementPhaseStrategy.prototype.onHexClicked = function(payload) {};
+
+  MovementPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    if (gamedata.getMyActiveShips().includes(ship)) {
+      this.setSelectedShip(ship);
     }
 
-    MovementPhaseStrategy.prototype.repositionThrustUi = function() {
-        if (this.shipThrustUIState === null) {
-            return true;
-        }
+    var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+    this.showShipTooltip(ship, payload, menu, false);
+  };
 
-        var icon = this.shipIconContainer.getByShip(this.shipThrustUIState.ship);
-        var position = window.coordinateConverter.fromGameToViewPort(icon.getPosition());
-        jQuery("#thrustUIContainer").css({left: position.x + 'px', top: position.y + 'px'})
+  MovementPhaseStrategy.prototype.setSelectedShip = function(ship) {
+    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+    this.drawMovementUI(this.selectedShip);
+  };
 
-        return true;
+  MovementPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+    this.showShipTooltip(ship, payload, menu, false);
+  };
+
+  MovementPhaseStrategy.prototype.showShipTooltip = function(
+    ships,
+    payload,
+    menu,
+    hide,
+    ballisticsMenu
+  ) {
+    ships = [].concat(ships);
+
+    if (this.selectedShip && this.shipThrustUIState) {
+      return;
     }
 
-    function isMovementReady(gamedata) {
-        return gamedata.getMyActiveShips().every(function(ship) {
-            return shipManager.movement.isMovementReady(ship);
-        });
+    PhaseStrategy.prototype.showShipTooltip.call(
+      this,
+      ships,
+      payload,
+      menu,
+      hide,
+      ballisticsMenu
+    );
+  };
+
+  MovementPhaseStrategy.prototype.onAssignThrust = function(payload) {
+    if (payload === false) {
+      this.uiManager.hideShipThrustUI();
+      this.shipThrustUIState = null;
+      return;
     }
 
+    var ship = payload.ship;
+    var icon = this.shipIconContainer.getByShip(ship);
 
-    function doForcedMovementForActiveShip() {
-        gamedata.getMyActiveShips().forEach(function (ship) {
-            shipManager.movement.doForcedPivot(ship);
-
-            if (ship.base) {
-                shipManager.movement.doRotate(ship);
-    
-                //TODO: Test if this autocommit thing works
-                gamedata.autoCommitOnMovement(ship);
-            }
-        });
-    }
-
-    MovementPhaseStrategy.prototype.onShipMovementChanged = function (payload) {
-        PhaseStrategy.prototype.onShipMovementChanged.call(this, payload);
-        if (isMovementReady(this.gamedata)) {
-            this.gamedata.showCommitButton();
-        } else {
-            this.gamedata.hideCommitButton();
-        }
-
-        this.onClickCallbacks = this.onClickCallbacks.filter(function (callback) {
-            return callback();
-        });
-
-        this.gamedata.drawIniGUI();
+    this.shipThrustUIState = {
+      ship: ship,
+      position: window.coordinateConverter.fromGameToViewPort(
+        icon.getPosition()
+      ),
+      rotation: icon.getFacing(),
+      totalRequired: payload.totalRequired,
+      remainginRequired: payload.remainginRequired,
+      movement: payload.movement
     };
 
-    MovementPhaseStrategy.prototype.showAppropriateEW = function() {
-        this.shipIconContainer.getArray().forEach(icon => {
-            icon.hideEW();
-            icon.hideBDEW();
-        });
-        
-        this.ewIconContainer.hide();
+    this.uiManager.showShipThrustUI(this.shipThrustUIState);
+  };
+
+  MovementPhaseStrategy.prototype.repositionThrustUi = function() {
+    if (this.shipThrustUIState === null) {
+      return true;
     }
 
+    var icon = this.shipIconContainer.getByShip(this.shipThrustUIState.ship);
+    var position = window.coordinateConverter.fromGameToViewPort(
+      icon.getPosition()
+    );
+    jQuery("#thrustUIContainer").css({
+      left: position.x + "px",
+      top: position.y + "px"
+    });
 
-    MovementPhaseStrategy.prototype.showAppropriateHighlight = function () {
-        PhaseStrategy.prototype.showAppropriateHighlight.call(this);
-        this.highlightUnmovedShips();
+    return true;
+  };
+
+  function isMovementReady(gamedata) {
+    return gamedata.getMyActiveShips().every(function(ship) {
+      return shipManager.movement.isMovementReady(ship);
+    });
+  }
+
+  function doForcedMovementForActiveShip() {
+    gamedata.getMyActiveShips().forEach(function(ship) {
+      shipManager.movement.doForcedPivot(ship);
+
+      if (ship.base) {
+        shipManager.movement.doRotate(ship);
+
+        //TODO: Test if this autocommit thing works
+        gamedata.autoCommitOnMovement(ship);
+      }
+    });
+  }
+
+  MovementPhaseStrategy.prototype.onShipMovementChanged = function(payload) {
+    PhaseStrategy.prototype.onShipMovementChanged.call(this, payload);
+    if (isMovementReady(this.gamedata)) {
+      this.gamedata.showCommitButton();
+    } else {
+      this.gamedata.hideCommitButton();
     }
 
-    MovementPhaseStrategy.prototype.selectActiveShip = function () {
+    this.onClickCallbacks = this.onClickCallbacks.filter(function(callback) {
+      return callback();
+    });
 
-        var ship = gamedata.getMyActiveShips().filter(function(ship) {
-            return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
-        }).pop();
+    this.gamedata.drawIniGUI();
+  };
 
-        if (ship) {
-            this.setSelectedShip(ship);
-        } else {
-            this.setSelectedShip(gamedata.getMyActiveShips().pop())
-        }
-    };
+  MovementPhaseStrategy.prototype.showAppropriateEW = function() {
+    this.shipIconContainer.getArray().forEach(icon => {
+      icon.hideEW();
+      icon.hideBDEW();
+    });
 
-    MovementPhaseStrategy.prototype.highlightUnmovedShips = function () {
-        gamedata.ships
-            .filter(window.SimultaneousMovementRule.isActiveMovementShip)
-            .filter(function(ship) {
-                return !shipManager.movement.isMovementReady(ship) || !gamedata.isMyShip(ship);
-            })
-            .forEach(function (ship) {
-                var icon = this.shipIconContainer.getByShip(ship);
-                icon.showSideSprite(true);
-            }, this);            
+    this.ewIconContainer.hide();
+  };
+
+  MovementPhaseStrategy.prototype.showAppropriateHighlight = function() {
+    PhaseStrategy.prototype.showAppropriateHighlight.call(this);
+    this.highlightUnmovedShips();
+  };
+
+  MovementPhaseStrategy.prototype.selectActiveShip = function() {
+    var ship = gamedata
+      .getMyActiveShips()
+      .filter(function(ship) {
+        return (
+          !shipManager.movement.isMovementReady(ship) &&
+          !shipManager.isDestroyed(ship)
+        );
+      })
+      .pop();
+
+    if (ship) {
+      this.setSelectedShip(ship);
+    } else {
+      this.setSelectedShip(gamedata.getMyActiveShips().pop());
     }
+  };
 
-    return MovementPhaseStrategy;
-}();
+  MovementPhaseStrategy.prototype.highlightUnmovedShips = function() {
+    gamedata.ships
+      .filter(window.SimultaneousMovementRule.isActiveMovementShip)
+      .filter(function(ship) {
+        return (
+          !shipManager.movement.isMovementReady(ship) ||
+          !gamedata.isMyShip(ship)
+        );
+      })
+      .forEach(function(ship) {
+        var icon = this.shipIconContainer.getByShip(ship);
+        icon.showSideSprite(true);
+      }, this);
+  };
+
+  return MovementPhaseStrategy;
+})();

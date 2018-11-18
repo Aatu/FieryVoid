@@ -30,11 +30,21 @@ class MovementService {
     return ship.movement
       .slice()
       .reverse()
-      .find(move => move.turn === this.gamedata.turn - 1);
+      .find(move => move.turn === this.gamedata.turn - 1 && move.isEnd());
   }
 
   getAllMovesOfTurn(ship) {
     return ship.movement.filter(move => move.turn === this.gamedata.turn);
+  }
+
+  getShipsInSameHex(ship, hex) {
+    hex = hex && this.getMostRecentMove(ship).position;
+    return this.gamedata.ships.filter(
+      ship2 =>
+        !shipManager.isDestroyed(ship2) &&
+        ship !== ship2 &&
+        this.getMostRecentMove(ship2).position.equals(hex)
+    );
   }
 
   deploy(ship, pos) {

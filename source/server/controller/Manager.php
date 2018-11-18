@@ -538,8 +538,8 @@ class Manager{
                     $movement = new MovementOrder(
                         $move["id"],
                         $move["type"],
-                        new OffsetCoordinate($move["q"], $move["r"]),
-                        new OffsetCoordinate($move["dq"], $move["dr"]),
+                        new OffsetCoordinate($move["position"]["q"], $move["position"]["r"]),
+                        new OffsetCoordinate($move["target"]["q"], $move["target"]["r"]),
                         $move["facing"],
                         $move["turn"],
                         $move["value"]

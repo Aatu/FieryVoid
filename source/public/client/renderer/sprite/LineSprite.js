@@ -25,9 +25,6 @@ window.LineSprite = (function() {
     });
 
     this.currentRotationMatrix = null;
-    //this.geometry = createGeometry(start, end, lineWidth);
-    //this.mesh = new THREE.Mesh(this.geometry, this.material);
-    //this.mesh.lookAt(window.webglScene.camera);
     this.mesh = this.create(
       this.start,
       this.end,
@@ -50,11 +47,10 @@ window.LineSprite = (function() {
       8,
       1
     );
-    //const edgeGeometry = new THREE.PlaneGeometry(lineWidth, direction.length(), 1, 1);
+
     const edge = new THREE.Mesh(edgeGeometry, material);
     edge.applyMatrix(orientation);
     this.currentRotationMatrix = orientation;
-    // position based on midpoints - there may be a better solution than this
     edge.position.x = (pointY.x + pointX.x) / 2;
     edge.position.y = (pointY.y + pointX.y) / 2;
     edge.position.z = (pointY.z + pointX.z) / 2;
@@ -69,16 +65,6 @@ window.LineSprite = (function() {
       new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1)
     );
 
-    /*
-        const scale = new THREE.Matrix4().makeScale(1, 1, 1.5);
-        if (this.currentScaleMatrix) {
-            edge.applyMatrix(new THREE.Matrix4().getInverse(this.currentScaleMatrix));
-        }
-        
-        
-        edge.applyMatrix(scale);
-        this.currentScaleMatrix = scale;
-        */
     edge.applyMatrix(
       new THREE.Matrix4().getInverse(this.currentRotationMatrix)
     );
@@ -89,18 +75,26 @@ window.LineSprite = (function() {
       8,
       1
     );
-    //edge.geometry= new THREE.PlaneGeometry(lineWidth, direction.length(), 1, 1);
 
     edge.applyMatrix(orientation);
     this.currentRotationMatrix = orientation;
-    // position based on midpoints - there may be a better solution than this
     edge.position.x = (pointY.x + pointX.x) / 2;
     edge.position.y = (pointY.y + pointX.y) / 2;
     edge.position.z = (pointY.z + pointX.z) / 2;
   };
 
   LineSprite.prototype.update = function(start, end, lineWidth) {
+    lineWidth = lineWidth || this.lineWidth;
+    this.lineWidth = lineWidth;
+    this.start = start;
+    this.end = end;
     this.updateMesh(start, end, lineWidth, this.mesh);
+    //this.mesh.rotation.setFromVector3({x: 0, y: 0, z: 0});
+  };
+
+  LineSprite.prototype.setLineWidth = function(lineWidth) {
+    this.lineWidth = lineWidth;
+    this.updateMesh(this.start, this.end, this.lineWidth, this.mesh);
     //this.mesh.rotation.setFromVector3({x: 0, y: 0, z: 0});
   };
 

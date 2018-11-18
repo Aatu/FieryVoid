@@ -199,8 +199,8 @@ window.ShipIconContainer = (function() {
     this.getByShip(ship).hideMovementPath();
   };
 
-  ShipIconContainer.prototype.showMovementPath = function(ship, type) {
-    this.getByShip(ship).showMovementPath(ship, this.movementService, type);
+  ShipIconContainer.prototype.showMovementPath = function(ship) {
+    this.getByShip(ship).showMovementPath(ship, this.movementService);
   };
 
   return ShipIconContainer;

@@ -1,117 +1,168 @@
 "use strict";
 
-window.InitialPhaseStrategy = function () {
+window.InitialPhaseStrategy = (function() {
+  function InitialPhaseStrategy(coordinateConverter) {
+    PhaseStrategy.call(this, coordinateConverter);
 
-    function InitialPhaseStrategy(coordinateConverter) {
-        PhaseStrategy.call(this, coordinateConverter);
+    this.strategies = [
+      new uiStrategy.MovementPathMouseOver(),
+      new uiStrategy.MovementPathSelectedShip(),
+      new uiStrategy.HighlightSelectedShip()
+    ];
+  }
+
+  InitialPhaseStrategy.prototype = Object.create(
+    window.PhaseStrategy.prototype
+  );
+
+  InitialPhaseStrategy.prototype.update = function(gamedata) {
+    PhaseStrategy.prototype.update.call(this, gamedata);
+    if (this.selectedShip) {
+      this.ewIconContainer.showForShip(this.selectedShip);
+    }
+  };
+
+  InitialPhaseStrategy.prototype.activate = function(
+    shipIcons,
+    ewIconContainer,
+    ballisticIconContainer,
+    gamedata,
+    webglScene,
+    shipWindowManager,
+    movementService
+  ) {
+    shipManager.power.repeatLastTurnPower();
+    this.changeAnimationStrategy(
+      new window.IdleAnimationStrategy(shipIcons, gamedata.turn)
+    );
+
+    PhaseStrategy.prototype.activate.call(
+      this,
+      shipIcons,
+      ewIconContainer,
+      ballisticIconContainer,
+      gamedata,
+      webglScene,
+      shipWindowManager,
+      movementService
+    );
+
+    infowindow.informPhase(5000, function() {});
+    this.selectFirstOwnShipOrActiveShip();
+    gamedata.showCommitButton();
+    gamedata.showSurrenderButton();
+
+    this.setPhaseHeader("INITIAL ORDERS");
+    return this;
+  };
+
+  InitialPhaseStrategy.prototype.deactivate = function() {
+    PhaseStrategy.prototype.deactivate.call(this, true);
+
+    gamedata.hideSurrenderButton();
+    return this;
+  };
+
+  InitialPhaseStrategy.prototype.onHexClicked = function(payload) {
+    if (!this.selectedShip) {
+      return;
     }
 
-    InitialPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
+    var ballistics = gamedata.selectedSystems.filter(function(system) {
+      return system.ballistic;
+    });
 
-    InitialPhaseStrategy.prototype.update = function (gamedata) {
-        PhaseStrategy.prototype.update.call(this, gamedata);
-        if (this.selectedShip) {
-            this.ewIconContainer.showForShip(this.selectedShip);
-        }
-    };
+    if (ballistics.length > 0) {
+      weaponManager.targetHex(this.selectedShip, payload.hex);
+    }
+  };
 
-    InitialPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
-        shipManager.power.repeatLastTurnPower();
-        this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
+  InitialPhaseStrategy.prototype.selectShip = function(ship, payload) {
+    var position = this.coordinateConverter.fromGameToHex(
+      this.shipIconContainer.getByShip(ship).getPosition()
+    );
 
-        PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
+    if (
+      this.selectedShip &&
+      shipManager.isElint(this.selectedShip) &&
+      ship !== this.selectedShip
+    ) {
+      var menu = new ShipTooltipInitialOrdersMenu(
+        this.selectedShip,
+        ship,
+        this.gamedata.turn,
+        position
+      );
+      menu.addButton(
+        "selectShip",
+        function() {
+          return this.selectedShip !== ship;
+        },
+        function() {
+          PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+          this.showShipEW(this.selectedShip);
+        }.bind(this),
+        "Select ship"
+      );
+    } else if (gamedata.isMyShip(ship)) {
+      PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+      var menu = new ShipTooltipInitialOrdersMenu(
+        this.selectedShip,
+        ship,
+        this.gamedata.turn,
+        position
+      );
+      this.showShipEW(this.selectedShip);
+    }
 
-        infowindow.informPhase(5000, function () {});
-        this.selectFirstOwnShipOrActiveShip();
-        gamedata.showCommitButton();
-        gamedata.showSurrenderButton();
+    this.showShipTooltip(ship, payload, menu, false);
+  };
 
-        this.setPhaseHeader("INITIAL ORDERS");
-        return this;
-    };
+  InitialPhaseStrategy.prototype.deselectShip = function(ship) {
+    PhaseStrategy.prototype.deselectShip.call(this, ship);
+    this.hideShipEW(ship);
+  };
 
-    InitialPhaseStrategy.prototype.deactivate = function () {
-        PhaseStrategy.prototype.deactivate.call(this, true);
-        
-        gamedata.hideSurrenderButton();
-        return this;
-    };
+  InitialPhaseStrategy.prototype.onMouseOutShips = function(ships) {
+    PhaseStrategy.prototype.onMouseOutShips.call(this, ships);
+    if (this.selectedShip) {
+      this.showShipEW(this.selectedShip);
+    }
+  };
 
-    InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
-        if (!this.selectedShip) {
-            return;
-        }
+  InitialPhaseStrategy.prototype.targetShip = function(ship, payload) {
+    //TODO: Targeting ship with ballistic weapons
+    //TODO: Targeting ship with support EW (defensive or offensive)
+    var position = this.coordinateConverter.fromGameToHex(
+      this.shipIconContainer.getByShip(ship).getPosition()
+    );
+    var menu = new ShipTooltipInitialOrdersMenu(
+      this.selectedShip,
+      ship,
+      this.gamedata.turn,
+      position
+    );
+    this.showShipTooltip(ship, payload, menu, false);
+  };
 
-        var ballistics = gamedata.selectedSystems.filter(function (system) {
-            return system.ballistic;
-        });
+  InitialPhaseStrategy.prototype.createReplayUI = function(gamedata) {
+    if (gamedata.turn === 1) {
+      return;
+    }
 
-        if (ballistics.length > 0) {
-            weaponManager.targetHex(this.selectedShip, payload.hex);
-        }
-    };
+    this.replayUI = new ReplayUI().activate();
+  };
 
-    InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
-        
-        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+  InitialPhaseStrategy.prototype.onWeaponSelected = function(payload) {
+    var ship = payload.ship;
+    var weapon = payload.weapon;
 
-        if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip){
-            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
-            menu.addButton("selectShip",
-                function() {
-                    return this.selectedShip !== ship;
-                },
-                function () {
-                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-                    this.showShipEW(this.selectedShip);
-                }.bind(this), "Select ship");
-        } else if (gamedata.isMyShip(ship)) {
-            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
-            this.showShipEW(this.selectedShip);
-        }
+    if (this.selectedShip !== ship) {
+      this.setSelectedShip(ship);
+    }
 
-        this.showShipTooltip(ship, payload, menu, false);
-    };
+    PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
+  };
 
-    InitialPhaseStrategy.prototype.deselectShip = function (ship) {
-        PhaseStrategy.prototype.deselectShip.call(this, ship);
-        this.hideShipEW(ship);
-    };
-
-    InitialPhaseStrategy.prototype.onMouseOutShips = function (ships) {
-        PhaseStrategy.prototype.onMouseOutShips.call(this, ships);
-        if (this.selectedShip) {
-            this.showShipEW(this.selectedShip);
-        }
-    };
-
-    InitialPhaseStrategy.prototype.targetShip = function (ship, payload) {
-        //TODO: Targeting ship with ballistic weapons
-        //TODO: Targeting ship with support EW (defensive or offensive)
-        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
-        var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
-        this.showShipTooltip(ship, payload, menu, false);
-    };
-
-    InitialPhaseStrategy.prototype.createReplayUI = function (gamedata) {
-        if (gamedata.turn === 1) {
-            return;
-        }
-
-        this.replayUI = new ReplayUI().activate();
-    };
-
-    InitialPhaseStrategy.prototype.onWeaponSelected = function (payload) {
-        var ship = payload.ship;
-        var weapon = payload.weapon;
-
-        if (this.selectedShip !== ship) {
-            this.setSelectedShip(ship);
-        }
-
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
-    };
-
-    return InitialPhaseStrategy;
-}();
+  return InitialPhaseStrategy;
+})();

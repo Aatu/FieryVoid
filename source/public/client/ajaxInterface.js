@@ -93,12 +93,9 @@ window.ajaxInterface = {
       newShip.systems = Array();
 
       if (gamedata.isMyShip(ship)) {
-        for (var a = ship.movement.length - 1; a >= 0; a--) {
-          var move = ship.movement[a];
-          if (move.turn == gamedata.turn) {
-            newShip.movement[a] = move;
-          }
-        }
+        newShip.movement = ship.movement.filter(
+          move => move.turn === gamedata.turn
+        );
 
         for (var a = ship.EW.length - 1; a >= 0; a--) {
           var ew = ship.EW[a];

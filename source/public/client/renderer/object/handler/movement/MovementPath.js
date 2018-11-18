@@ -17,27 +17,64 @@ class MovementPath {
   }
 
   create() {
-    const firstMovement = this.movementService.getPreviousTurnLastMove(
-      this.ship
-    );
+    const deployMovement = this.movementService.getDeployMove(this.ship);
 
-    const lastMovement =
-      this.moved && this.movementService.getMostRecentMove(this.ship);
+    if (!deployMovement) {
+      return;
+    }
 
-    const line = createMovementLine(firstMovement);
+    const move = this.movementService.getMostRecentMove(this.ship);
+
+    const line = createMovementLine(move);
     this.scene.add(line.mesh);
     this.objects.push(line);
+
+    const facing = createMovementFacing(move);
+    this.scene.add(facing.mesh);
+    this.objects.push(facing);
   }
 }
 
-const createMovementLine = move =>
-  new window.LineSprite(
-    window.coordinateConverter.fromHexToGame(move.position),
-    window.coordinateConverter.fromHexToGame(move.position.add(move.target)),
+const createMovementLine = move => {
+  const start = window.coordinateConverter.fromHexToGame(move.position);
+  const end = window.coordinateConverter.fromHexToGame(
+    move.position.add(move.target)
+  );
+
+  return new window.LineSprite(
+    mathlib.getPointBetweenInDistance(
+      start,
+      end,
+      window.coordinateConverter.getHexDistance() * 0.45,
+      true
+    ),
+    mathlib.getPointBetweenInDistance(
+      end,
+      start,
+      window.coordinateConverter.getHexDistance() * 0.45,
+      true
+    ),
     10,
     new THREE.Color(0, 0, 1),
     0.5
   );
+};
+
+const createMovementFacing = move => {
+  const size = window.coordinateConverter.getHexDistance() * 1.5;
+  const facing = new window.ShipFacingSprite(
+    { width: size, height: size },
+    0.01,
+    0.8,
+    move.facing
+  );
+  facing.setPosition(
+    window.coordinateConverter.fromHexToGame(move.position.add(move.target))
+  );
+  facing.setFacing(mathlib.hexFacingToAngle(move.facing));
+
+  return facing;
+};
 
 export { createMovementLine };
 

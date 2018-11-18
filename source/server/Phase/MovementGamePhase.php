@@ -46,6 +46,9 @@ class MovementGamePhase implements Phase
             }
             
             //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
+            $lastmove = $ship->getLastMovement();
+            $newMove = new MovementOrder(null, 'end', $lastmove->position->add($lastMove->target), $lastmove->target, $lastmove->heading, $gameData->turn);
+            array_push($ship->movement, $newMove);
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
 
         }

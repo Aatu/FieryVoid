@@ -1,776 +1,731 @@
-
 body {
-    height: 100%;
-    width: 100%;
-    overflow:hidden;
-    -webkit-overflow-scrolling: touch; /* iOS velocity scrolling */
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch; /* iOS velocity scrolling */
 }
 
 body *::-moz-selection {
-background: transparent;
-} 
+  background: transparent;
+}
 
 body *::selection {
-background: transparent;
+  background: transparent;
 }
 
 #background {
-    position:absolute;
-    width:100%;
-    height:100%;
-    top: 0;
-    left: 0;
-    background-size: cover;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-size: cover;
 }
 
-#hexgrid{
-
-    margin:0;
-    padding:0;
-    z-index:1;
+#hexgrid {
+  margin: 0;
+  padding: 0;
+  z-index: 1;
 }
 
-#EWindicators{
-    margin:0;
-    padding:0;
-    z-index:2999;
+#EWindicators {
+  margin: 0;
+  padding: 0;
+  z-index: 2999;
 }
 
-#effects{
-    margin:0;
-    padding:0;
-    z-index:4000;
+#effects {
+  margin: 0;
+  padding: 0;
+  z-index: 4000;
 }
 
-#ships{
-    z-index:200;
-    position:absolute;
-    top:0px;
-    left:0px;
+#ships {
+  z-index: 200;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
-#topUIbar{
-    z-index:500;
-    width:100px;
-    height:25px;
-    padding:5px 5px;
-    background-color:#081d3d;
-    position:absolute;
-    top:0px;
-    right:10px;
-    border-left: 1px solid #486288;
-    border-right: 1px solid #486288;
-    border-bottom: 1px solid #486288;
-    
+#topUIbar {
+  z-index: 500;
+  width: 100px;
+  height: 25px;
+  padding: 5px 5px;
+  background-color: #081d3d;
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  border-left: 1px solid #486288;
+  border-right: 1px solid #486288;
+  border-bottom: 1px solid #486288;
 }
 
-#pagecontainer{
-    position:fixed;
-    z-index:1;
-	overflow:hidden;
-    width:100vw;
-    height:100%;
-    top: 0px;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    background-color: black;
+#pagecontainer {
+  position: fixed;
+  z-index: 1;
+  overflow: hidden;
+  width: 100vw;
+  height: 100%;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: black;
 }
 
-
-#reactUI{
-    position:absolute;
-    z-index:999999;
-    overflow:hidden;
-    top: 0;
-    left: 0;
-}
-
-body{
-	overflow:hidden;
-}
-
-#templatecontainer{
-    display:none;
-}
-
-#pagecontainer .hexship{
-    position:absolute;
-    z-index:200;
-}
-
-.button{
-    cursor:pointer;
+#reactUI {
+  position: absolute;
+  z-index: 999999;
+  overflow: hidden;
+  top: 0;
+  left: 0;
 }
 
 body {
-    padding:0;
-    margin:0;
-    background-color:black;
-    overflow:hidden;
+  overflow: hidden;
 }
 
-.tacticalcanvas{
-    position:absolute;
-    top:0;
-    bottom:0;
-    width:100%;
-    height:100%;
+#templatecontainer {
+  display: none;
 }
 
-#shipMovementUI{
-    display:none;
-    position:absolute;
-    z-index:7000;
-   
+#pagecontainer .hexship {
+  position: absolute;
+  z-index: 200;
 }
 
-#shipMovementUI div{
-    position:absolute;
-    overflow:hidden;
-    cursor:pointer;
+.button {
+  cursor: pointer;
 }
 
-#shipMovementUI div canvas{
-    position:relative;
-}
-.centercontainer{
-    position:absolute !important;
-    left:50% !important;
-    top:50% !important;
-    overflow:visible !important;
+body {
+  padding: 0;
+  margin: 0;
+  background-color: black;
+  overflow: hidden;
 }
 
-.centercontent{
-    left:-50%;
-    overflow:visible !important;
-    position:relative !important;
+.tacticalcanvas {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 }
 
-#shipMovementUI .centercontainer .value{
-    z-index:100;
-    display:inline;
-    color:white;
-    opacity:0.7;
-    top:-10px;
+.centercontainer {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  overflow: visible !important;
 }
 
-.roundedright{
-    border-radius: 0px 0px 30px 0px;
-    -moz-border-radius: 0px 0px 30px 0px;
-    -webkit-border-bottom-right-radius: 30px;
+.centercontent {
+  left: -50%;
+  overflow: visible !important;
+  position: relative !important;
 }
 
-.rounded{
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px;
+.roundedright {
+  border-radius: 0px 0px 30px 0px;
+  -moz-border-radius: 0px 0px 30px 0px;
+  -webkit-border-bottom-right-radius: 30px;
 }
 
-#phaseheader{
-    z-index:10000;
-    border:1px solid #496791;
-    color:#deebff;
-    background-color:#0a3340;
-    position:absolute;
-    top:-3px;
-    left:-3px;
-    height:25px;
-    width:700px;
-    opacity:0.85;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
-    padding-top:10px;
+.rounded {
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px;
 }
 
-.phasecontainer{
-    margin:10px 5px;
+#phaseheader {
+  z-index: 10000;
+  border: 1px solid #496791;
+  color: #deebff;
+  background-color: #0a3340;
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  height: 25px;
+  width: 700px;
+  opacity: 0.85;
+  -moz-box-shadow: 5px 5px 10px black;
+  -webkit-box-shadow: 5px 5px 10px black;
+  box-shadow: 5px 5px 10px black;
+  padding-top: 10px;
 }
 
-#phaseheader .value{
-    font-family:arial;
-    font-size:16px;
-    margin-left:10px;
+.phasecontainer {
+  margin: 10px 5px;
 }
 
-#phaseheader .value.activeship{
-    font-style:italic;
-    color:#496791;
+#phaseheader .value {
+  font-family: arial;
+  font-size: 16px;
+  margin-left: 10px;
 }
 
-.finished{
-	display:none;
-	color:#b34119;
+#phaseheader .value.activeship {
+  font-style: italic;
+  color: #496791;
 }
 
-.notlogged{
-	display:none;
-	color:#b34119;
-
+.finished {
+  display: none;
+  color: #b34119;
 }
 
-.uitable{
-    position:absolute;
-    top:5px;
-    right:10px;
-}
-.uitable td{
-    padding-right:10px;
+.notlogged {
+  display: none;
+  color: #b34119;
 }
 
-.centeredvaluecontainer{
-    position:relative;
-    text-align:center;
+.uitable {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+.uitable td {
+  padding-right: 10px;
 }
 
-.red{
-    color:#b34119 !important;
+.centeredvaluecontainer {
+  position: relative;
+  text-align: center;
 }
 
-.lightred{
-    color:#e3511d !important;
+.red {
+  color: #b34119 !important;
 }
 
-.darkred{
-    color:#491604 !important;
+.lightred {
+  color: #e3511d !important;
 }
 
-.green{
-    color:#2f5123;
+.darkred {
+  color: #491604 !important;
 }
 
-.ok{
-    width:30px;
-    height:30px;
-    background-image:url(../img/ok.png);
-    cursor:pointer;
+.green {
+  color: #2f5123;
 }
 
-.cancel{
-    width:30px;
-    height:30px;
-    background-image:url(../img/cancel.png);
-    cursor:pointer;
+.ok {
+  width: 30px;
+  height: 30px;
+  background-image: url(../img/ok.png);
+  cursor: pointer;
+}
+
+.cancel {
+  width: 30px;
+  height: 30px;
+  background-image: url(../img/cancel.png);
+  cursor: pointer;
 }
 
 #infowindow {
-    width:400px;
-    margin-left:-150px;
-    display:none;
-     /* border:1px solid #496791; */
-    background-color: black; /* #0A3340; */
-    opacity:0.65;
-    color:white;
-    font-family:arial;
-    font-size:10px;
-    z-index:10000;
-    position:absolute;
-    left:50%;
-    top:100px;
+  width: 400px;
+  margin-left: -150px;
+  display: none;
+  /* border:1px solid #496791; */
+  background-color: black; /* #0A3340; */
+  opacity: 0.65;
+  color: white;
+  font-family: arial;
+  font-size: 10px;
+  z-index: 10000;
+  position: absolute;
+  left: 50%;
+  top: 100px;
 
-    border-radius: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
 }
 
-#infowindow h2{
-    color:#deebff;
-    font-family:arial;
-    font-size:20px;
-    margin:3px 0px 3px 0px;
-    font-weight:400;
+#infowindow h2 {
+  color: #deebff;
+  font-family: arial;
+  font-size: 20px;
+  margin: 3px 0px 3px 0px;
+  font-weight: 400;
 
-    text-align:center;
-}   
-
-.shipclickable{
-    position:absolute;
-    width:50px;
-    height:50px;
-    background-color:transparent;
-    opacity:0.5;
-    z-index:2000;
-    top:50%;
-    left:50%;
-    cursor:pointer;
-	/*border:1px solid red;*/
+  text-align: center;
 }
 
-.ballclickable{
-    position:absolute;
-    width:0px;
-    height:0px;
-    background-color:transparent;
-    cursor:pointer;
-	/*border:1px solid red;*/
+.shipclickable {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: transparent;
+  opacity: 0.5;
+  z-index: 2000;
+  top: 50%;
+  left: 50%;
+  cursor: pointer;
+  /*border:1px solid red;*/
 }
 
-.ballisticcanvas{
-	position:absolute;
-	
+.ballclickable {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background-color: transparent;
+  cursor: pointer;
+  /*border:1px solid red;*/
 }
 
-.hexshipcanvas{
-    z-index:201;
+.ballisticcanvas {
+  position: absolute;
 }
 
-#shipNameContainer, .shipNameContainer{
-  
-    z-index:7001;
-    opacity:0.65;
-    position:absolute;
-    display:none;
-    text-align:center;
-    font-family:arial;
-    font-size:12px;
-    color:white;
-	background-color:black;
-	border-radius: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-	padding:3px 15px 3px 15px;
+.hexshipcanvas {
+  z-index: 201;
+}
+
+#shipNameContainer,
+.shipNameContainer {
+  z-index: 7001;
+  opacity: 0.65;
+  position: absolute;
+  display: none;
+  text-align: center;
+  font-family: arial;
+  font-size: 12px;
+  color: white;
+  background-color: black;
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  padding: 3px 15px 3px 15px;
 }
 
 .shipNameContainer .fire {
-    display:none;
+  display: none;
+}
+
+#shipNameContainer span,
+.shipNameContainer span {
+  padding-top: 2px;
 }
 
-#shipNameContainer span, .shipNameContainer span{
-	padding-top:2px;
+#shipNameContainer .name,
+.shipNameContainer .name {
+  font-size: 18px;
+  font-style: italic;
 }
 
-#shipNameContainer .name, .shipNameContainer .name{
-   font-size:18px;
-   font-style:italic;
-
-}
-
-.enemy.name{
-    color:#b34119;
+.enemy.name {
+  color: #b34119;
 }
 
-.ally.name{
-    color:#2f5123;
+.ally.name {
+  color: #2f5123;
 }
 
-#weaponTargetingContainer{
-	display:none;
-	width:200px;
-	z-index:7001;
-    opacity:0.65;
-    position:absolute;
-	font-family:arial;
-    font-size:12px;
-     color:#deebff;
-	background-color:black;
-    padding:4px 10px;
-    border-radius: 7px;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-
-
+#weaponTargetingContainer {
+  display: none;
+  width: 200px;
+  z-index: 7001;
+  opacity: 0.65;
+  position: absolute;
+  font-family: arial;
+  font-size: 12px;
+  color: #deebff;
+  background-color: black;
+  padding: 4px 10px;
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
 }
 
-#weaponTargetingContainer .hitinfo{
-	display:none;
+#weaponTargetingContainer .hitinfo {
+  display: none;
 }
 
-.BPcontainer{
-	width:190px;
-	height:170px;
-	margin: 2px 5px 5px 5px; 
-	display:none;
+.BPcontainer {
+  width: 190px;
+  height: 170px;
+  margin: 2px 5px 5px 5px;
+  display: none;
 }
 
-#logcontainer{
-    width:100%;
-    max-width: 800px;
-	height:150px;
-	opacity:0.85;
-    color: #496791; /* #deebff; */
-    background-color: #04161C;
-    border-top: 1px solid #496791;
-	border-right: 1px solid #496791;
-	border-left: 1px solid #496791;
-	position:fixed;
-	bottom:0px;
-	z-index:2;
-	-moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
-	font-family:arial;
-	font-size:12px;
-    -webkit-transition: all 0.1s linear;
-	-moz-transition: all 0.1s linear;
-	-o-transition: all 0.1s linear;
-	transition: all 0.1s linear;
+#logcontainer {
+  width: 100%;
+  max-width: 800px;
+  height: 150px;
+  opacity: 0.85;
+  color: #496791; /* #deebff; */
+  background-color: #04161c;
+  border-top: 1px solid #496791;
+  border-right: 1px solid #496791;
+  border-left: 1px solid #496791;
+  position: fixed;
+  bottom: 0px;
+  z-index: 2;
+  -moz-box-shadow: 5px 5px 10px black;
+  -webkit-box-shadow: 5px 5px 10px black;
+  box-shadow: 5px 5px 10px black;
+  font-family: arial;
+  font-size: 12px;
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
+  transition: all 0.1s linear;
 }
 
-#logcontainer.large{
-    height: 300px;
+#logcontainer.large {
+  height: 300px;
 }
 
-#logcontainer.mouseover
-{
-    bottom:0px;
+#logcontainer.mouseover {
+  bottom: 0px;
 }
 
-.logUiEntry{
-    position:absolute;
-    top:-26px;
-    border-top: 1px solid #496791;
-	border-right: 1px solid #496791;
-	border-left: 1px solid #496791;
-    border-radius: 5px 5px 0px 0px;
-    -moz-border-radius: 5px 5px 0px 0px;
-    -webkit-border-radius: 5px 5px 0px 0px;
-    width:100px;
-    height:18px;
-    text-align: center;
-    font-size: 10px;
-    padding-top:6px;
-    z-index: 9999;
-    background-color:#020E12;
-    cursor:pointer;
+.logUiEntry {
+  position: absolute;
+  top: -26px;
+  border-top: 1px solid #496791;
+  border-right: 1px solid #496791;
+  border-left: 1px solid #496791;
+  border-radius: 5px 5px 0px 0px;
+  -moz-border-radius: 5px 5px 0px 0px;
+  -webkit-border-radius: 5px 5px 0px 0px;
+  width: 100px;
+  height: 18px;
+  text-align: center;
+  font-size: 10px;
+  padding-top: 6px;
+  z-index: 9999;
+  background-color: #020e12;
+  cursor: pointer;
 }
 
-.logUiEntry span{
+.logUiEntry span {
 }
 
-.logUiEntry.newMessage{
-    color:#DEEBFF;
+.logUiEntry.newMessage {
+  color: #deebff;
 }
 
-
-.logUiEntry.selected{
-    top:-25px;
-    background-color: #04161C;
-    color:#DEEBFF;
+.logUiEntry.selected {
+  top: -25px;
+  background-color: #04161c;
+  color: #deebff;
 }
 
-#logTab.logUiEntry{
-    left:-1px;
+#logTab.logUiEntry {
+  left: -1px;
 }
 
-#infoTab.logUiEntry{
-    left:104px;
+#infoTab.logUiEntry {
+  left: 104px;
 }
 
-#chatTab.logUiEntry{
-    left:208px;
+#chatTab.logUiEntry {
+  left: 208px;
 }
 
-#globalChatTab.logUiEntry{
-    left:312px;
+#globalChatTab.logUiEntry {
+  left: 312px;
 }
 
-#settingsTab.logUiEntry{
-    left:417px;
+#settingsTab.logUiEntry {
+  left: 417px;
 }
-
 
-#declarationsTab.logUiEntry{
-    left:416px;
+#declarationsTab.logUiEntry {
+  left: 416px;
 }
 
-#declarationsContainer{	
-    overflow-y: scroll;
-    position: absolute;
-    padding: 0 5px;
+#declarationsContainer {
+  overflow-y: scroll;
+  position: absolute;
+  padding: 0 5px;
 }
 
-#declarationsButtons{	
-    padding-top: 5px;
+#declarationsButtons {
+  padding-top: 5px;
 }
 
-#declarationsActual{	
-    padding-bottom: 10px;
+#declarationsActual {
+  padding-bottom: 10px;
 }
 
-#expandBotPanel{
-    position:absolute;
-    top:-26px;
-    border-top: 1px solid #496791;
-    border-right: 1px solid #496791;
-    border-left: 1px solid #496791;
-    border-radius: 5px 5px 0px 0px;
-    -moz-border-radius: 5px 5px 0px 0px;
-    -webkit-border-radius: 5px 5px 0px 0px;
-    width:100px;
-    height:18px;
-    text-align: center;
-    font-size: 10px;
-    padding-top:6px;
-    z-index: 9999;
-    background-color:#020E12;
-    cursor:pointer;
-    right:5px;
-    width: 40px;
-    color: white;
-
+#expandBotPanel {
+  position: absolute;
+  top: -26px;
+  border-top: 1px solid #496791;
+  border-right: 1px solid #496791;
+  border-left: 1px solid #496791;
+  border-radius: 5px 5px 0px 0px;
+  -moz-border-radius: 5px 5px 0px 0px;
+  -webkit-border-radius: 5px 5px 0px 0px;
+  width: 100px;
+  height: 18px;
+  text-align: center;
+  font-size: 10px;
+  padding-top: 6px;
+  z-index: 9999;
+  background-color: #020e12;
+  cursor: pointer;
+  right: 5px;
+  width: 40px;
+  color: white;
 }
 
-#gameinfo.logPanelEntry{
-    overflow-x:hidden;
-    overflow-y:scroll;
+#gameinfo.logPanelEntry {
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
-.fleetlistentry{
-    padding-top: 5px;
-    padding-left: 5px;
-    float: left;
-    width: 90%;
+.fleetlistentry {
+  padding-top: 5px;
+  padding-left: 5px;
+  float: left;
+  width: 90%;
 }
 
-.fleetlistentry .destroyed{
-    font-style: italic;
+.fleetlistentry .destroyed {
+  font-style: italic;
 }
 
-.fleetheader .headername{
-	font-weight:bold;
-	color:#b34119;
+.fleetheader .headername {
+  font-weight: bold;
+  color: #b34119;
 }
 
-.fleetheader .playername{
-	color:#deebff;
+.fleetheader .playername {
+  color: #deebff;
 }
 
-.fleetlist{
-    display: block;
+.fleetlist {
+  display: block;
 }
 
-.fleetlist .header{
-    font-weight: bold;
-    text-decoration: underline;
+.fleetlist .header {
+  font-weight: bold;
+  text-decoration: underline;
 }
 
-.fleetlist .shipname{
-    margin-top: 3px;
-    float: left;
-    padding-left: 5px;
-    width:35%;
+.fleetlist .shipname {
+  margin-top: 3px;
+  float: left;
+  padding-left: 5px;
+  width: 35%;
 }
 
-.fleetlist .shipclass{
-    margin-top: 3px;
-    float: left;
-    width:25%;
+.fleetlist .shipclass {
+  margin-top: 3px;
+  float: left;
+  width: 25%;
 }
 
-.fleetlist .shiptype{
-    margin-top: 3px;
-    float: left;
-    width: 15%;
+.fleetlist .shiptype {
+  margin-top: 3px;
+  float: left;
+  width: 15%;
 }
 
-.fleetlist .shipstatus{
-    margin-top: 3px;
-    float: left;
-    width: 10%;
+.fleetlist .shipstatus {
+  margin-top: 3px;
+  float: left;
+  width: 10%;
 }
 
-.fleetlist .initiative{
-	margin-top: 3px;
-	float: left;
-	width: 10%;
+.fleetlist .initiative {
+  margin-top: 3px;
+  float: left;
+  width: 10%;
 }
 
-#logcontainer #gameinfo{
-    height:100%;
-    width:100%;
-    z-index: 10001;
-    
+#logcontainer #gameinfo {
+  height: 100%;
+  width: 100%;
+  z-index: 10001;
 }
 
-#logcontainer #chat{
-    height:100%;
-    width:100%;
-    z-index: 10001;
-    
+#logcontainer #chat {
+  height: 100%;
+  width: 100%;
+  z-index: 10001;
 }
 
-#logcontainer #globalchat{
-    height:100%;
-    width:100%;
-    z-index: 10001;
-    
+#logcontainer #globalchat {
+  height: 100%;
+  width: 100%;
+  z-index: 10001;
 }
 
-#log{
-	width:100%;
-	height:100%;
-	border-right: 1px solid #496791;
-	position:absolute;
-	left:0px;
-	top:0px;
-	z-index:10000;
-	overflow-y:visible;
-	overflow-x:hidden;
-
+#log {
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid #496791;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 10000;
+  overflow-y: visible;
+  overflow-x: hidden;
 }
-
 
-#logContainer.assignThrust #log{
-	display:none;
+#logContainer.assignThrust #log {
+  display: none;
 }
 
-#log .logentry{
-	margin:3px 5px 3px 5px;
-    cursor:pointer;
+#log .logentry {
+  margin: 3px 5px 3px 5px;
+  cursor: pointer;
 }
-#log .logheader{
-	font-weight:bold;
-	color:#b34119;
+#log .logheader {
+  font-weight: bold;
+  color: #b34119;
 }
 
-#log .damage{
-	color:#7c2814;
+#log .damage {
+  color: #7c2814;
 }
 
-#log .shiplink{
-	color:#deebff;
+#log .shiplink {
+  color: #deebff;
 }
 
-#log .notes{
-	display:none;
+#log .notes {
+  display: none;
 }
 
-#log .destroyed{
-	font-weight:bold;
-	color:#b34119;
+#log .destroyed {
+  font-weight: bold;
+  color: #b34119;
 }
 
-#log ul{
-	margin: 5px 0px;
+#log ul {
+  margin: 5px 0px;
 }
 
-
-#logcontainer .assignthrustcontainer{
-	display:none;
-	padding-bottom:10px;
-	z-index:10001;
-	height:132px;
+#logcontainer .assignthrustcontainer {
+  display: none;
+  padding-bottom: 10px;
+  z-index: 10001;
+  height: 132px;
 }
 
-#logcontainer .assignthrustcontainer h2{
-	margin:5px 0px 5px 0px;
+#logcontainer .assignthrustcontainer h2 {
+  margin: 5px 0px 5px 0px;
 }
-#logcontainer .assignthrustcontainer p{
-	font-size:10px;
-	padding: 0px 5px;
-	margin:0px;
+#logcontainer .assignthrustcontainer p {
+  font-size: 10px;
+  padding: 0px 5px;
+  margin: 0px;
 }
 
-#logcontainer .assignThrust.assignthrustcontainer{
-	display:block;
+#logcontainer .assignThrust.assignthrustcontainer {
+  display: block;
 }
 
-#logcontainer .assignthrustcontainer .ok{
-	position:absolute;
-	bottom:15px;
-	left:150px;
+#logcontainer .assignthrustcontainer .ok {
+  position: absolute;
+  bottom: 15px;
+  left: 150px;
 }
 
-#logcontainer .assignthrustcontainer .cancel{
-	position:absolute;
-	bottom:15px;
-	right:150px;
+#logcontainer .assignthrustcontainer .cancel {
+  position: absolute;
+  bottom: 15px;
+  right: 150px;
 }
-
 
-.shipSelectList{
-	position:absolute;
-	display:none;
-	top:200px;
-	left:200px;
-	/*border: 1px solid #496791;*/
-	background-color:black;
-	z-index:20000;
-	padding:5px 0px;
-	margin:0px;
-	color:white;
-	font-family: arial;
-    font-size: 9px;
-	line-height:12px;
-	opacity:0.65;
-	border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px;
-
+.shipSelectList {
+  position: absolute;
+  display: none;
+  top: 200px;
+  left: 200px;
+  /*border: 1px solid #496791;*/
+  background-color: black;
+  z-index: 20000;
+  padding: 5px 0px;
+  margin: 0px;
+  color: white;
+  font-family: arial;
+  font-size: 9px;
+  line-height: 12px;
+  opacity: 0.65;
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px;
 }
 
-.shipSelectList .shiplistentry{
-	margin:3px 20px;
-	cursor:pointer;
+.shipSelectList .shiplistentry {
+  margin: 3px 20px;
+  cursor: pointer;
 }
 
-.shipSelectList .shiplistentry.action{
-	margin:3px 40px;
-	cursor:pointer;
+.shipSelectList .shiplistentry.action {
+  margin: 3px 40px;
+  cursor: pointer;
 }
 
-.shipSelectList .shiplistentry.remark{
-	margin:3px 45px;
-        color:#496791;
+.shipSelectList .shiplistentry.remark {
+  margin: 3px 45px;
+  color: #496791;
 }
 
-.shipSelectList .shiplistentry span{
-	 font-size:14px;
-	 padding-right:5px;
+.shipSelectList .shiplistentry span {
+  font-size: 14px;
+  padding-right: 5px;
 }
-.shipSelectList .shiplistentry.action span{
-	 font-size:12px;
+.shipSelectList .shiplistentry.action span {
+  font-size: 12px;
 }
 
-.shipSelectList .shiplistentry.remark span{
-	 font-size:11px;
+.shipSelectList .shiplistentry.remark span {
+  font-size: 11px;
 }
 
-.shipSelectList .shiplistentry .name{
-   font-style:italic;
+.shipSelectList .shiplistentry .name {
+  font-style: italic;
 }
-
 
-.shipSelectList .shiplistentry .enemy.name{
-    color:#b34119;
+.shipSelectList .shiplistentry .enemy.name {
+  color: #b34119;
 }
 
-.shipSelectList .shiplistentry .ally.name{
-    color:#2f5123;
+.shipSelectList .shiplistentry .ally.name {
+  color: #2f5123;
 }
 
 #iniGui {
-    z-index:9999;
-    border:1px solid #496791;
-    color:#deebff;
-    background-color:#0a3340;
-    margin-top: 50px;
-    width: 250px;
-    height: auto;
-    position: absolute;
-    display: inline-block;
-    opacity: 0.8;
-    box-shadow: 5px 5px 10px black;
-    padding-top:10px;
-    padding-bottom: 10px;
-    border-radius: 0px 10px 10px 0px;
-    max-height: 550px;
-    overflow-y: auto;
+  z-index: 9999;
+  border: 1px solid #496791;
+  color: #deebff;
+  background-color: #0a3340;
+  margin-top: 50px;
+  width: 250px;
+  height: auto;
+  position: absolute;
+  display: inline-block;
+  opacity: 0.8;
+  box-shadow: 5px 5px 10px black;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 0px 10px 10px 0px;
+  max-height: 550px;
+  overflow-y: auto;
 }
 
 #iniTable {
-    background-color: #04161C;
-    position: relative;
-    margin: auto;
-    margin-top: 10px;
-    width: 95%;
-    border-radius: 15px;
-    border: 1px solid #496791;
-    font-family: arial;
-    font-size: 10px;
-    padding-left: 5px;
+  background-color: #04161c;
+  position: relative;
+  margin: auto;
+  margin-top: 10px;
+  width: 95%;
+  border-radius: 15px;
+  border: 1px solid #496791;
+  font-family: arial;
+  font-size: 10px;
+  padding-left: 5px;
 }
 
 .iniTr {
@@ -780,117 +735,115 @@ body {
 }
 
 #iniTopic {
-    font-family: arial;
-    font-size: 16px;
-    color: white;
-    width: 100%;
-    margin-left: 63px;
+  font-family: arial;
+  font-size: 16px;
+  color: white;
+  width: 100%;
+  margin-left: 63px;
 }
 
 .iniActiveMoved {
-    border: 1px solid #84A5CE !important;
-    box-shadow: 0px 0px 15px #09F;
+  border: 1px solid #84a5ce !important;
+  box-shadow: 0px 0px 15px #09f;
 }
 
 .iniActive {
-    border: 1px solid #84A5CE !important;
-    background-color: #254E82 !important;
-    box-shadow: 0px 0px 15px #09F;
+  border: 1px solid #84a5ce !important;
+  background-color: #254e82 !important;
+  box-shadow: 0px 0px 15px #09f;
 }
 
 .iniActiveEnemy {
-    border: 1px solid #ce9184 !important;
-    background-color: #823425 !important;
-    box-shadow: 0px 0px 15px #ff3700;
+  border: 1px solid #ce9184 !important;
+  background-color: #823425 !important;
+  box-shadow: 0px 0px 15px #ff3700;
 }
 
 .redIni {
-    color: red;
+  color: red;
 }
 
 .greenIni {
-    color: green;
+  color: green;
 }
 
 #backDiv {
-    display: inline-block;
-    position: absolute;
-    z-index: 9998;
-    margin-top: 65px;
-    margin-left: 250px;
-    width: 55px;
-    height: 25px;    
-    border:1px solid #496791;
-    color:#deebff;
-    background-color:#0a3340;
-    opacity: 0.8;
-    -moz-box-shadow: 5px 5px 10px black;
-    -webkit-box-shadow: 5px 5px 10px black;
-    box-shadow: 5px 5px 10px black;
-    padding-top:10px;
-    border-radius: 0px 10px 10px 0px;
+  display: inline-block;
+  position: absolute;
+  z-index: 9998;
+  margin-top: 65px;
+  margin-left: 250px;
+  width: 55px;
+  height: 25px;
+  border: 1px solid #496791;
+  color: #deebff;
+  background-color: #0a3340;
+  opacity: 0.8;
+  -moz-box-shadow: 5px 5px 10px black;
+  -webkit-box-shadow: 5px 5px 10px black;
+  box-shadow: 5px 5px 10px black;
+  padding-top: 10px;
+  border-radius: 0px 10px 10px 0px;
 }
 
 #fullScreen {
-
 }
 
-
 @media only screen and (max-width: 1024px) {
-    #phaseheader {
-        max-width: 50%;
-    }
-    
-    #logUI {
-        display: flex;
-        flex-direction: row;
-    }
+  #phaseheader {
+    max-width: 50%;
+  }
 
-    #logcontainer.large #logUI .logUiEntry {
-        width: 15%;
-        display: block;
-    }
+  #logUI {
+    display: flex;
+    flex-direction: row;
+  }
 
-    #logUI .logUiEntry {
-        width: 15%;
-        display: none;
-    }
+  #logcontainer.large #logUI .logUiEntry {
+    width: 15%;
+    display: block;
+  }
 
-    #logUI #infoTab {
-        left: 15%;
-    }
-	
-    #logUI #chatTab {
-        left: 30%;
-	    width: 15%;
-    }
+  #logUI .logUiEntry {
+    width: 15%;
+    display: none;
+  }
 
-    #logUI #globalChatTab {
-        left: 45%;
-	    width: 15%;    
-    }
+  #logUI #infoTab {
+    left: 15%;
+  }
 
-    #logUI #declarationsTab {
-        left: 60%;
-	    width: 15%;    
-    }
+  #logUI #chatTab {
+    left: 30%;
+    width: 15%;
+  }
 
-    #logUI #expandBotPanel {
-        right: 0px;
-        left: auto;
-    }
+  #logUI #globalChatTab {
+    left: 45%;
+    width: 15%;
+  }
 
-    #logcontainer {
-        height: 0;
-        width: 100%;
-        max-width: none;
-    }
+  #logUI #declarationsTab {
+    left: 60%;
+    width: 15%;
+  }
 
-    #logcontainer.large{
-        height: 50vh;
-    }
+  #logUI #expandBotPanel {
+    right: 0px;
+    left: auto;
+  }
 
-    #iniGui {
-        max-height: calc(100vh - 130px);
-    }
+  #logcontainer {
+    height: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  #logcontainer.large {
+    height: 50vh;
+  }
+
+  #iniGui {
+    max-height: calc(100vh - 130px);
+  }
 }

@@ -44,6 +44,7 @@
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
     <script src="client/lib/three.min.js"></script>
+    <script src="client/lib/stats.min.js"></script>
     <script src="client/lib/threeLoaderSupport.js"></script>
     <script src="client/lib/threeObjectLoader.js"></script>
     <script src="client/lib/threeObjectLoader2.js"></script>
@@ -53,7 +54,7 @@
     <script src="static/ships.js"></script>
     <script>
         window.Config = {
-            HEX_SIZE: 50
+            HEX_SIZE: 25
         };
     </script>
 
@@ -112,6 +113,7 @@
     <script src="client/renderer/sprite/HexagonSprite.js"></script>
     <script src="client/renderer/sprite/ShipEWSprite.js"></script>
     <script src="client/renderer/sprite/ShipSelectedSprite.js"></script>
+    <script src="client/renderer/sprite/ShipFacingSprite.js"></script>
     <script src="client/renderer/sprite/BoxSprite.js"></script>
     <script src="client/renderer/sprite/PlainSprite.js"></script>
     <script src="client/renderer/sprite/LineSprite.js"></script>
@@ -174,11 +176,6 @@
     <script src="client/UI/shipTooltipFireMenu.js"></script>
     <script src="client/UI/ShipTooltipBallisticsMenu.js"></script>
 
-
-
-    <script src="client/ShipMovementCallbacks.js"></script>
-
-
     <script src="client/model/hexagon/Cube.js"></script>
     <script src="client/model/hexagon/Offset.js"></script>
     <script src="client/gameRules/SimultaneousMovementRule.js"></script>
@@ -200,7 +197,6 @@
     <script src="client/criticals.js"></script>
     <script src="client/systems.js"></script>
 	<script src="client/power.js"></script>
-    <script src="client/UI/shipMovement.js"></script>
     <script src="client/UI/infowindow.js"></script>
 	<script src="client/UI/systemInfo.js"></script>
     <script src="client/UI/shipwindow.js"></script>
@@ -519,6 +515,8 @@
     
 </div>
 
+
+<div id="movementUiReact"></div>
 <div id="shipWindowsReact"></div>
 <div id="systemInfoReact"></div>
 <div id="weaponList"></div>
@@ -551,95 +549,6 @@
         	include('helper.php');
         ?>
         </div>-->
-    
-    
-    
-    <div id="shipMovementUI">
-        <div id="move">
-            <div class="centercontainer">
-                <span class="speedvalue value centercontent">00</span>
-            </div>
-            <canvas id="movecanvas" width="50" height="50"></canvas>
-        </div>
-        
-        <div id="turnright">
-            <canvas id="turnrightcanvas" width="40" height="40"></canvas>
-        </div>
-        
-        <div id="turnleft">
-            <canvas id="turnleftcanvas" width="40" height="40"></canvas>
-        </div>
-        
-        <div id="turnIntoPivotLeft">
-            <canvas id="turnIntoPivotLeftCanvas" width="40" height="40"></canvas>
-        </div>
-        
-        <div id="turnIntoPivotRight">
-            <canvas id="turnIntoPivotRightCanvas" width="40" height="40"></canvas>
-        </div>
-
-        <div id="slipright">
-            <canvas id="sliprightcanvas" width="30" height="30"></canvas>
-        </div>
-        
-        <div id="slipleft">
-            <canvas id="slipleftcanvas" width="30" height="30"></canvas>
-        </div>
-        
-        <div id="pivotright">
-            <canvas id="pivotrightcanvas" width="40" height="40"></canvas>
-        </div>
-        
-        <div id="pivotleft">
-            <canvas id="pivotleftcanvas" width="40" height="40"></canvas>
-        </div>
-
-
-
-        <div id="rotateleft">
-            <canvas id="rotateleftcanvas" width="40" height="40"></canvas>
-        </div>
-
-        <div id="rotateright">
-            <canvas id="rotaterightcanvas" width="40" height="40"></canvas>
-        </div>
-        
-
-
-        
-        <div id="accelerate">
-            <canvas id="acceleratecanvas" width="16" height="16"></canvas>
-        </div>
-        
-        <div id="deaccelerate">
-            <canvas id="deacceleratecanvas" width="16" height="16"></canvas>
-        </div>
-        
-        <div id="morejink">
-            <canvas id="morejinkcanvas" width="16" height="16"></canvas>
-        </div>
-        
-        <div id="lessjink">
-            <canvas id="lessjinkcanvas" width="16" height="16"></canvas>
-        </div>
-        
-        <div id="roll">
-            <canvas id="rollcanvas" width="40" height="40"></canvas>
-        </div>
-        
-        <div id="jink">
-			<div class="centercontainer">
-                <span class="jinkvalue value centercontent">0</span>
-            </div>
-            <canvas id="jinkcanvas" width="40" height="40"></canvas>
-        </div>
-        
-        
-        <div id="cancel">
-            <canvas id="cancelcanvas" width="30" height="30"></canvas>
-        </div>
-        
-    </div>
 </div>
 <!--
 <div class="scrollelement left" style="left:0px;top:0px;"></div>
@@ -735,7 +644,6 @@
                 </div>
     </div>
     
-        
 </div>
 
 </body>

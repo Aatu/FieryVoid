@@ -4,19 +4,24 @@ import {
   MovementPathMoved
 } from "../handler/Movement";
 
+const COLOR_MINE = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+const COLOR_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
+
 class ShipObject {
   constructor(ship, scene) {
     this.shipId = ship.id;
     this.ship = ship;
+    this.mine = gamedata.isMyOrTeamOneShip(ship);
+
     this.scene = scene;
     this.mesh = new THREE.Object3D();
     this.shipObject = null;
     this.weaponArcs = [];
     this.shipSideSprite = null;
+    this.shipEWSprite = null;
     this.line = null;
 
     this.defaultHeight = 50;
-    this.mine = gamedata.isMyOrTeamOneShip(ship);
     this.sideSpriteSize = 100;
     this.position = { x: 0, y: 0, z: 0 };
     this.movementPath = null;
@@ -28,12 +33,10 @@ class ShipObject {
     this.startRotation = { x: 0, y: 0, z: 0 };
     this.rotation = { x: 0, y: 0, z: 0 };
 
-    console.log("ship", this.ship);
     this.consumeShipdata(this.ship);
   }
 
   consumeShipdata(ship) {
-    console.log("Movement", ship.movement);
     this.ship = ship;
     this.consumeMovement(ship.movement);
     this.consumeEW(ship);
@@ -49,7 +52,7 @@ class ShipObject {
       { x: 0, y: 0, z: 1 },
       { x: 0, y: 0, z: this.position.z },
       1,
-      new THREE.Color(0, 1, 0),
+      this.mine ? COLOR_MINE : COLOR_ENEMY,
       opacity
     );
     this.mesh.add(this.line.mesh);
@@ -59,13 +62,21 @@ class ShipObject {
       0.01,
       opacity
     );
-    this.shipSideSprite.setOverlayColor(new THREE.Color(0, 1, 0));
+    this.shipSideSprite.setOverlayColor(this.mine ? COLOR_MINE : COLOR_ENEMY);
     this.shipSideSprite.setOverlayColorAlpha(1);
     this.mesh.add(this.shipSideSprite.mesh);
+
+    this.shipEWSprite = new window.ShipEWSprite(
+      { width: this.sideSpriteSize, height: this.sideSpriteSize },
+      0.01
+    );
+    this.mesh.add(this.shipEWSprite.mesh);
+    this.shipEWSprite.hide();
 
     this.mesh.name = "ship";
     this.mesh.userData = { icon: this };
     this.scene.add(this.mesh);
+    this.consumeEW(this.ship);
   }
 
   create() {
@@ -187,7 +198,13 @@ class ShipObject {
   }
 
   setSelected(value) {
-    //console.log("ShipObject.showSideSprite is not yet implemented")
+    if (value) {
+      this.shipSideSprite.setOverlayColor(new THREE.Color(1, 1, 1));
+      this.shipSideSprite.setOverlayColorAlpha(1);
+    } else {
+      this.shipSideSprite.setOverlayColor(this.mine ? COLOR_MINE : COLOR_ENEMY);
+      this.shipSideSprite.setOverlayColorAlpha(0.8);
+    }
   }
 
   setNotMoved(value) {
@@ -195,7 +212,6 @@ class ShipObject {
   }
 
   consumeMovement(movements) {
-    console.log("hi movements", movements);
     this.movements = movements.filter(function(move) {
       return !move.isEvade();
     });
@@ -277,9 +293,7 @@ class ShipObject {
   }
 
   positionAndFaceIcon(offset, movementService) {
-    console.log("REPOSITION", offset);
     var movement = movementService.getMostRecentMove(this.ship);
-    console.log(movement);
     var gamePosition = window.coordinateConverter.fromHexToGame(
       movement.position
     );
@@ -302,28 +316,9 @@ class ShipObject {
     }
   }
 
-  showMovementPath(ship, movementService, type) {
-    console.log("show movement path", type);
+  showMovementPath(ship, movementService) {
     this.hideMovementPath(ship);
-    switch (type) {
-      case "deployment":
-        this.movementPath = new MovementPathDeployment(
-          ship,
-          movementService,
-          this.scene
-        );
-        return;
-      case "moved":
-        this.movementPath = new MovementPathMoved(
-          ship,
-          movementService,
-          this.scene
-        );
-        return;
-      default:
-      case "moved":
-        this.movementPath = new MovementPath(ship, movementService, this.scene);
-    }
+    this.movementPath = new MovementPath(ship, movementService, this.scene);
   }
 }
 

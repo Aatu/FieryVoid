@@ -15,8 +15,8 @@
     "build-ships": "watchify source/public/client/renderer/object/objects.js -o source/public/client/renderer/object/objects.bundle.js -t [ babelify --presets [ env react ] ]"
   },
   "dependencies": {
-    "react": "^16.2.0",
+    "react": "^16.6.3",
     "react-dom": "^16.2.0",
-    "styled-components": "^3.1.6"
+    "styled-components": "^4.1.1"
   }
 }

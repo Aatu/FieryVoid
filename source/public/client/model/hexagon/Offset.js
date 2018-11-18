@@ -51,7 +51,7 @@ window.hexagon.Offset = (function() {
     var neighbours = [];
 
     this.neighbours[this.r & 1].forEach(function(neighbour) {
-      neighbours.push(this.add(neighbour));
+      neighbours.push(this.add(new hexagon.Offset(neighbour)));
     }, this);
 
     return neighbours;

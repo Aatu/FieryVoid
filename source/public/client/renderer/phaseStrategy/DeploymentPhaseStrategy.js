@@ -64,14 +64,27 @@ window.DeploymentPhaseStrategy = (function() {
     }
 
     if (
-      validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)
+      validateDeploymentPosition(
+        this.selectedShip,
+        hex,
+        this.deploymentSprites,
+        this.movementService
+      )
     ) {
-      if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
+      if (
+        this.movementService.getShipsInSameHex(this.selectedShip, hex).length ==
+        0
+      ) {
         this.movementService.deploy(this.selectedShip, hex);
         this.onShipMovementChanged({ ship: this.selectedShip });
-        this.drawMovementUI(this.selectedShip);
 
-        if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
+        if (
+          validateAllDeployment(
+            this.gamedata,
+            this.deploymentSprites,
+            this.movementService
+          )
+        ) {
           gamedata.showCommitButton();
         }
       }
@@ -86,9 +99,14 @@ window.DeploymentPhaseStrategy = (function() {
       this.shipIconContainer.getByShip(ship).getPosition()
     );
     if (
-      validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)
+      validateDeploymentPosition(
+        this.selectedShip,
+        hex,
+        this.deploymentSprites,
+        this.movementService
+      )
     ) {
-      this.drawMovementUI(this.selectedShip);
+      //TODO: allow pivotin during movement
     }
   };
 
@@ -215,7 +233,7 @@ window.DeploymentPhaseStrategy = (function() {
     };
   }
 
-  function validateAllDeployment(gamedata, deploymentSprites) {
+  function validateAllDeployment(gamedata, deploymentSprites, movementService) {
     for (var i in gamedata.ships) {
       var ship = gamedata.ships[i];
 
@@ -223,7 +241,15 @@ window.DeploymentPhaseStrategy = (function() {
         continue;
       }
 
-      if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
+      if (
+        !validateDeploymentPosition(
+          ship,
+          null,
+          deploymentSprites,
+          movementService
+        )
+      ) {
+        console.log(ship.name, "has bad deployment");
         return false;
       }
     }
@@ -231,9 +257,14 @@ window.DeploymentPhaseStrategy = (function() {
     return true;
   }
 
-  function validateDeploymentPosition(ship, hex, deploymentSprites) {
+  function validateDeploymentPosition(
+    ship,
+    hex,
+    deploymentSprites,
+    movementService
+  ) {
     if (!hex) {
-      hex = new hexagon.Offset(shipManager.getShipPosition(ship));
+      hex = movementService.getMostRecentMove(ship).position;
     }
 
     var icon = getSlotById(ship.slot, deploymentSprites);
@@ -264,22 +295,6 @@ window.DeploymentPhaseStrategy = (function() {
         return false;
         */
   }
-
-  DeploymentPhaseStrategy.prototype.showMovementPath = function(ship) {
-    if (!ship) {
-      this.shipIconContainer.hideAllMovementPaths();
-      return;
-    }
-
-    this.shipIconContainer.showMovementPath(ship, "deployment");
-  };
-
-  DeploymentPhaseStrategy.prototype.onShipMovementChanged = function(payload) {
-    PhaseStrategy.prototype.onShipMovementChanged.call(this, payload);
-    var ship = payload.ship;
-
-    this.shipIconContainer.showMovementPath(ship, "deployment");
-  };
 
   return DeploymentPhaseStrategy;
 })();
