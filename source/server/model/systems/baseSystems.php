@@ -485,6 +485,7 @@ class CargoBay extends ShipSystem{
 
 class Thruster extends ShipSystem{
     public $name = "thruster";
+    public $thruster = true;
     public $displayName = "Thruster";
     public $direction;
     public $thrustused;

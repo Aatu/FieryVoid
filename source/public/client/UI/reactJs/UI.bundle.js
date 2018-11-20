@@ -33040,8 +33040,11 @@ var UIManager = function () {
     }
   }, {
     key: "repositionMovementUi",
-    value: function repositionMovementUi() {
-      console.log("implement reposition for new movement ui");
+    value: function repositionMovementUi(position) {
+      jQuery("#shipMovementActual").css({
+        left: position.x + "px",
+        top: position.y + "px"
+      });
     }
   }]);
 
@@ -33050,7 +33053,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":69,"./playerSettings/PlayerSettings":70,"./shipThrust/ShipThrust":72,"./shipWindow/ShipWindowsContainer":78,"./system/SystemInfo":85,"./system/SystemInfoButtons":86,"./system/SystemInfoMenu":87,"./system/WeaponList":88,"react":30,"react-dom":24}],64:[function(require,module,exports){
+},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":75,"./playerSettings/PlayerSettings":77,"./shipThrust/ShipThrust":79,"./shipWindow/ShipWindowsContainer":85,"./system/SystemInfo":92,"./system/SystemInfoButtons":93,"./system/SystemInfoMenu":94,"./system/WeaponList":95,"react":30,"react-dom":24}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33358,7 +33361,7 @@ var FEWButton = (0, _styledComponents2.default)(MainButton)(_templateObject4);
 
 exports.default = EwButtons;
 
-},{"../styled":82,"react":30,"styled-components":53}],68:[function(require,module,exports){
+},{"../styled":89,"react":30,"styled-components":53}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33443,7 +33446,7 @@ var FullScreen = function (_React$Component) {
 
 exports.default = FullScreen;
 
-},{"../styled":82,"react":30,"styled-components":53}],69:[function(require,module,exports){
+},{"../styled":89,"react":30,"styled-components":53}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33452,7 +33455,334 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n"], ["\n  position: absolute;\n"]);
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Arrow = function (_React$Component) {
+  _inherits(Arrow, _React$Component);
+
+  function Arrow() {
+    _classCallCheck(this, Arrow);
+
+    return _possibleConstructorReturn(this, (Arrow.__proto__ || Object.getPrototypeOf(Arrow)).apply(this, arguments));
+  }
+
+  _createClass(Arrow, [{
+    key: "render",
+    value: function render() {
+      var _props$color = this.props.color,
+          color = _props$color === undefined ? "#fff" : _props$color;
+
+
+      return React.createElement(
+        "svg",
+        {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "100%",
+          height: "100%",
+          viewBox: "0 0 438.533 438.533"
+        },
+        React.createElement("path", {
+          d: "M409.133,109.203c-19.608-33.592-46.205-60.189-79.798-79.796C295.736,9.801,259.058,0,219.273,0 c-39.781,0-76.47,9.801-110.063,29.407c-33.595,19.604-60.192,46.201-79.8,79.796C9.801,142.8,0,179.489,0,219.267 c0,39.78,9.804,76.463,29.407,110.062c19.607,33.592,46.204,60.189,79.799,79.798c33.597,19.605,70.283,29.407,110.063,29.407 s76.47-9.802,110.065-29.407c33.593-19.602,60.189-46.206,79.795-79.798c19.603-33.596,29.403-70.284,29.403-110.062 C438.533,179.485,428.732,142.795,409.133,109.203z M361.733,232.111l-25.978,25.981l-103.35,103.349 c-3.433,3.43-7.714,5.147-12.852,5.147c-5.137,0-9.419-1.718-12.847-5.147l-25.981-25.98c-3.616-3.607-5.424-7.898-5.424-12.847 c0-4.942,1.809-9.227,5.424-12.847l53.962-53.954H91.363c-4.948,0-9.229-1.813-12.847-5.428c-3.615-3.613-5.424-7.898-5.424-12.847 v-36.547c0-4.948,1.809-9.231,5.424-12.847c3.617-3.617,7.898-5.426,12.847-5.426h143.325l-53.962-53.959 c-3.428-3.428-5.14-7.708-5.14-12.847c0-5.141,1.712-9.42,5.14-12.851l25.981-25.981c3.427-3.425,7.71-5.137,12.847-5.137 c5.145,0,9.419,1.711,12.852,5.137l103.35,103.356l25.978,25.981c3.432,3.427,5.144,7.707,5.144,12.847 C366.877,224.404,365.165,228.686,361.733,232.111z",
+          fill: color
+        })
+      );
+    }
+  }]);
+
+  return Arrow;
+}(React.Component);
+
+exports.default = Arrow;
+
+},{"react":30}],70:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ArrowSmall = function (_React$Component) {
+  _inherits(ArrowSmall, _React$Component);
+
+  function ArrowSmall() {
+    _classCallCheck(this, ArrowSmall);
+
+    return _possibleConstructorReturn(this, (ArrowSmall.__proto__ || Object.getPrototypeOf(ArrowSmall)).apply(this, arguments));
+  }
+
+  _createClass(ArrowSmall, [{
+    key: "render",
+    value: function render() {
+      var _props$color = this.props.color,
+          color = _props$color === undefined ? "#fff" : _props$color;
+
+
+      return React.createElement(
+        "svg",
+        {
+          xmlns: "http://www.w3.org/2000/svg",
+          id: "Capa_1",
+          width: "100%",
+          height: "100%",
+          viewBox: "0 0 438.533 438.533"
+        },
+        React.createElement("path", {
+          d: "M409.133,109.203c-19.608-33.592-46.205-60.189-79.798-79.796C295.736,9.801,259.058,0,219.273,0 c-39.781,0-76.47,9.801-110.063,29.407c-33.595,19.604-60.192,46.201-79.8,79.796C9.801,142.8,0,179.489,0,219.267 c0,39.78,9.804,76.463,29.407,110.062c19.607,33.592,46.204,60.189,79.799,79.798c33.597,19.605,70.283,29.407,110.063,29.407 s76.47-9.802,110.065-29.407c33.593-19.602,60.189-46.206,79.795-79.798c19.603-33.596,29.403-70.284,29.403-110.062 C438.533,179.485,428.732,142.795,409.133,109.203z M334.332,232.111L204.71,361.736c-3.617,3.613-7.896,5.428-12.847,5.428 c-4.952,0-9.235-1.814-12.85-5.428l-29.121-29.13c-3.617-3.613-5.426-7.898-5.426-12.847c0-4.941,1.809-9.232,5.426-12.847 l87.653-87.646l-87.657-87.65c-3.617-3.612-5.426-7.898-5.426-12.845c0-4.949,1.809-9.231,5.426-12.847l29.121-29.13 c3.619-3.615,7.898-5.424,12.85-5.424c4.95,0,9.233,1.809,12.85,5.424l129.622,129.621c3.613,3.614,5.42,7.898,5.42,12.847 C339.752,224.213,337.945,228.498,334.332,232.111z",
+          fill: color
+        })
+      );
+    }
+  }]);
+
+  return ArrowSmall;
+}(React.Component);
+
+exports.default = ArrowSmall;
+
+},{"react":30}],71:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Evade = function (_React$Component) {
+  _inherits(Evade, _React$Component);
+
+  function Evade() {
+    _classCallCheck(this, Evade);
+
+    return _possibleConstructorReturn(this, (Evade.__proto__ || Object.getPrototypeOf(Evade)).apply(this, arguments));
+  }
+
+  _createClass(Evade, [{
+    key: "render",
+    value: function render() {
+      var _props$color = this.props.color,
+          color = _props$color === undefined ? "#fff" : _props$color;
+
+
+      return React.createElement(
+        "svg",
+        {
+          xmlns: "http://www.w3.org/2000/svg",
+          viewBox: "0 0 512 512",
+          width: "100%",
+          height: "100%"
+        },
+        React.createElement("path", {
+          d: "M501.608,384.478L320.497,51.476C291.376,2.451,220.139,2.41,191.21,52.003L10.647,383.951 c-29.706,49.989,6.259,113.291,64.482,113.291h361.689C495.436,497.242,530.688,433.393,501.608,384.478z M331,332.242 c0,22.516-23.688,36.693-43.403,26.836L211,320.787v101.455c0,8.284-6.716,15-15,15h-30c-8.284,0-15-6.716-15-15v-150 c0-22.516,23.69-36.667,43.418-26.836L271,283.698V182.242c0-8.286,6.716-15,15-15h30c8.284,0,15,6.714,15,15V332.242z",
+          fill: color
+        })
+      );
+    }
+  }]);
+
+  return Evade;
+}(React.Component);
+
+exports.default = Evade;
+
+},{"react":30}],72:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Rotate = function (_React$Component) {
+  _inherits(Rotate, _React$Component);
+
+  function Rotate() {
+    _classCallCheck(this, Rotate);
+
+    return _possibleConstructorReturn(this, (Rotate.__proto__ || Object.getPrototypeOf(Rotate)).apply(this, arguments));
+  }
+
+  _createClass(Rotate, [{
+    key: "render",
+    value: function render() {
+      var _props$color = this.props.color,
+          color = _props$color === undefined ? "#fff" : _props$color;
+
+
+      return React.createElement(
+        "svg",
+        {
+          xmlns: "http://www.w3.org/2000/svg",
+          viewBox: "0 0 16 16",
+          width: "100%",
+          height: "100%"
+        },
+        React.createElement("path", {
+          d: "M8,0C3.582,0,0,3.582,0,8s3.582,8,8,8s8-3.582,8-8S12.418,0,8,0z M8,14 c-2.169,0-4.07-1.15-5.124-2.876L2,12V8h2h1h1L4.354,9.646C4.981,11.034,6.378,12,8,12c1.863,0,3.43-1.273,3.874-3h2.043 C13.441,11.838,10.973,14,8,14z M12,8h-1h-1l1.646-1.646C11.02,4.966,9.622,4,8,4C6.136,4,4.57,5.274,4.126,7H2.083 C2.559,4.162,5.027,2,8,2c2.169,0,4.07,1.151,5.124,2.876L14,4v4H12z",
+          fill: color
+        })
+      );
+    }
+  }]);
+
+  return Rotate;
+}(React.Component);
+
+exports.default = Rotate;
+
+},{"react":30}],73:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var X = function (_React$Component) {
+  _inherits(X, _React$Component);
+
+  function X() {
+    _classCallCheck(this, X);
+
+    return _possibleConstructorReturn(this, (X.__proto__ || Object.getPrototypeOf(X)).apply(this, arguments));
+  }
+
+  _createClass(X, [{
+    key: "render",
+    value: function render() {
+      var _props$color = this.props.color,
+          color = _props$color === undefined ? "#fff" : _props$color;
+
+
+      return React.createElement(
+        "svg",
+        {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: "100%",
+          height: "100%",
+          viewBox: "0 0 510 510"
+        },
+        React.createElement("path", {
+          d: "M255,0C114.75,0,0,114.75,0,255s114.75,255,255,255s255-114.75,255-255S395.25,0,255,0z M382.5,346.8l-35.7,35.7 L255,290.7l-91.8,91.8l-35.7-35.7l91.8-91.8l-91.8-91.8l35.7-35.7l91.8,91.8l91.8-91.8l35.7,35.7L290.7,255L382.5,346.8z",
+          fill: color
+        })
+      );
+    }
+  }]);
+
+  return X;
+}(React.Component);
+
+exports.default = X;
+
+},{"react":30}],74:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Evade = exports.X = exports.Rotate = exports.ArrowSmall = exports.Arrow = undefined;
+
+var _Arrow = require("./Arrow");
+
+var _Arrow2 = _interopRequireDefault(_Arrow);
+
+var _ArrowSmall = require("./ArrowSmall");
+
+var _ArrowSmall2 = _interopRequireDefault(_ArrowSmall);
+
+var _Rotate = require("./Rotate");
+
+var _Rotate2 = _interopRequireDefault(_Rotate);
+
+var _X = require("./X");
+
+var _X2 = _interopRequireDefault(_X);
+
+var _Evade = require("./Evade");
+
+var _Evade2 = _interopRequireDefault(_Evade);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.Arrow = _Arrow2.default;
+exports.ArrowSmall = _ArrowSmall2.default;
+exports.Rotate = _Rotate2.default;
+exports.X = _X2.default;
+exports.Evade = _Evade2.default;
+
+},{"./Arrow":69,"./ArrowSmall":70,"./Evade":71,"./Rotate":72,"./X":73}],75:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"], ["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"]);
 
 var _react = require("react");
 
@@ -33463,6 +33793,10 @@ var _styledComponents = require("styled-components");
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
 var _styled = require("../styled");
+
+var _ThrustButton = require("./ThrustButton");
+
+var _ThrustButton2 = _interopRequireDefault(_ThrustButton);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33484,27 +33818,42 @@ var Container = _styledComponents2.default.div.withConfig({
 var Movement = function (_React$Component) {
   _inherits(Movement, _React$Component);
 
-  function Movement(props) {
+  function Movement() {
     _classCallCheck(this, Movement);
 
-    var _this = _possibleConstructorReturn(this, (Movement.__proto__ || Object.getPrototypeOf(Movement)).call(this, props));
-
-    var _this$props = _this.props,
-        movementSevice = _this$props.movementSevice,
-        ship = _this$props.ship;
-
-    _this.movementSevice = movementSevice;
-    _this.ship = ship;
-    return _this;
+    return _possibleConstructorReturn(this, (Movement.__proto__ || Object.getPrototypeOf(Movement)).apply(this, arguments));
   }
 
   _createClass(Movement, [{
+    key: "canThrust",
+    value: function canThrust(direction) {
+      return true;
+    }
+  }, {
+    key: "thrust",
+    value: function thrust(direction) {
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      movementService.thrust(ship, direction);
+    }
+  }, {
     key: "render",
     value: function render() {
       var ship = this.props.ship;
 
 
-      return React.createElement(Container, null);
+      return React.createElement(
+        Container,
+        { id: "shipMovementActual" },
+        this.canThrust(0) && React.createElement(_ThrustButton2.default, { direction: 0, clicked: this.thrust.bind(this, 0) }),
+        this.canThrust(1) && React.createElement(_ThrustButton2.default, { direction: 1, clicked: this.thrust.bind(this, 1) }),
+        this.canThrust(2) && React.createElement(_ThrustButton2.default, { direction: 2, clicked: this.thrust.bind(this, 2) }),
+        this.canThrust(3) && React.createElement(_ThrustButton2.default, { direction: 3, clicked: this.thrust.bind(this, 3) }),
+        this.canThrust(4) && React.createElement(_ThrustButton2.default, { direction: 4, clicked: this.thrust.bind(this, 4) }),
+        this.canThrust(5) && React.createElement(_ThrustButton2.default, { direction: 5, clicked: this.thrust.bind(this, 5) })
+      );
     }
   }]);
 
@@ -33513,7 +33862,101 @@ var Movement = function (_React$Component) {
 
 exports.default = Movement;
 
-},{"../styled":82,"react":30,"styled-components":53}],70:[function(require,module,exports){
+},{"../styled":89,"./ThrustButton":76,"react":30,"styled-components":53}],76:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  ", "\n\n  ", "\n\n  ", "\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  ", "\n\n  ", "\n\n  ", "\n  ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+var _icon = require("../icon");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var Container = _styledComponents2.default.div.withConfig({
+  displayName: "ThrustButton__Container",
+  componentId: "sc-11z3zc7-0"
+})(_templateObject, _styled.Clickable, function (props) {
+  return "transform: rotate(" + props.direction + "deg);";
+}, function (props) {
+  return "left: calc(" + props.x + "px - 25px);";
+}, function (props) {
+  return "top: calc(" + props.y + "px - 25px);";
+});
+
+var ThrustButton = function (_React$Component) {
+  _inherits(ThrustButton, _React$Component);
+
+  function ThrustButton() {
+    _classCallCheck(this, ThrustButton);
+
+    return _possibleConstructorReturn(this, (ThrustButton.__proto__ || Object.getPrototypeOf(ThrustButton)).apply(this, arguments));
+  }
+
+  _createClass(ThrustButton, [{
+    key: "canThrust",
+    value: function canThrust(direction) {}
+  }, {
+    key: "thrust",
+    value: function thrust(direction) {}
+  }, {
+    key: "getPosition",
+    value: function getPosition(direction) {
+      return mathlib.getPointInDirection(150, -mathlib.hexFacingToAngle(direction), 0, 0);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          clicked = _props.clicked,
+          direction = _props.direction;
+
+
+      console.log("D", direction);
+
+      return React.createElement(
+        Container,
+        _extends({
+          direction: mathlib.hexFacingToAngle(direction),
+          onClick: clicked
+        }, this.getPosition(direction)),
+        React.createElement(_icon.Arrow, null)
+      );
+    }
+  }]);
+
+  return ThrustButton;
+}(React.Component);
+
+exports.default = ThrustButton;
+
+},{"../icon":74,"../styled":89,"react":30,"styled-components":53}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33602,7 +34045,7 @@ var PlayerSettings = function (_React$Component) {
 
 exports.default = PlayerSettings;
 
-},{"../styled":82,"./PlayerSettingsForm":71,"react":30,"styled-components":53}],71:[function(require,module,exports){
+},{"../styled":89,"./PlayerSettingsForm":78,"react":30,"styled-components":53}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33841,7 +34284,7 @@ var keyCodes = {
 };
 exports.default = PlayerSettingsForm;
 
-},{"../common":66,"../styled":82,"react":30,"styled-components":53}],72:[function(require,module,exports){
+},{"../common":66,"../styled":89,"react":30,"styled-components":53}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34262,7 +34705,7 @@ setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){
     },
     */
 
-},{"../common":66,"../styled":82,"react":30,"styled-components":53}],73:[function(require,module,exports){
+},{"../common":66,"../styled":89,"react":30,"styled-components":53}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34447,7 +34890,7 @@ var toIcons = function toIcons(ship, fighter, systems, destroyed) {
 
 exports.default = FighterIcon;
 
-},{"../system/SystemIcon":84,"react":30,"styled-components":53}],74:[function(require,module,exports){
+},{"../system/SystemIcon":91,"react":30,"styled-components":53}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34521,7 +34964,7 @@ var getFighters = function getFighters(ship) {
 
 exports.default = FighterList;
 
-},{"./FighterIcon":73,"react":30,"styled-components":53}],75:[function(require,module,exports){
+},{"./FighterIcon":80,"react":30,"styled-components":53}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34852,7 +35295,7 @@ var pick = function pick(systems) {
 
 exports.default = ShipSection;
 
-},{"../system/SystemIcon":84,"react":30,"styled-components":53}],76:[function(require,module,exports){
+},{"../system/SystemIcon":91,"react":30,"styled-components":53}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35144,7 +35587,7 @@ var sortIntoLocations = function sortIntoLocations(ship) {
 
 exports.default = ShipWindow;
 
-},{"../styled":82,"./FighterList":74,"./ShipSection":75,"./ShipWindowEw":77,"react":30,"react-dom":24,"styled-components":53}],77:[function(require,module,exports){
+},{"../styled":89,"./FighterList":81,"./ShipSection":82,"./ShipWindowEw":84,"react":30,"react-dom":24,"styled-components":53}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35317,7 +35760,7 @@ var getAmount = function getAmount(ewEntry, ship) {
 
 exports.default = ShipWindowEw;
 
-},{"../styled":82,"react":30,"styled-components":53}],78:[function(require,module,exports){
+},{"../styled":89,"react":30,"styled-components":53}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35387,7 +35830,7 @@ var ShipWindowsContainer = function (_React$Component) {
 
 exports.default = ShipWindowsContainer;
 
-},{"./ShipWindow":76,"react":30,"styled-components":53}],79:[function(require,module,exports){
+},{"./ShipWindow":83,"react":30,"styled-components":53}],86:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35405,7 +35848,7 @@ var Clickable = (0, _styledComponents.css)(_templateObject);
 
 exports.Clickable = Clickable;
 
-},{"styled-components":53}],80:[function(require,module,exports){
+},{"styled-components":53}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35449,7 +35892,7 @@ exports.Backdrop = Backdrop;
 exports.ContainerRounded = ContainerRounded;
 exports.ContainerRoundedRightSide = ContainerRoundedRightSide;
 
-},{"styled-components":53}],81:[function(require,module,exports){
+},{"styled-components":53}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35478,7 +35921,7 @@ var SubTitle = (0, _styledComponents2.default)(Title)(_templateObject2);
 exports.Title = Title;
 exports.SubTitle = SubTitle;
 
-},{"styled-components":53}],82:[function(require,module,exports){
+},{"styled-components":53}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35542,7 +35985,7 @@ Object.defineProperty(exports, "Clickable", {
   }
 });
 
-},{"./Clickable":79,"./Container":80,"./Title":81}],83:[function(require,module,exports){
+},{"./Clickable":86,"./Container":87,"./Title":88}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35637,7 +36080,7 @@ var ShipInfo = function (_React$Component) {
 
 exports.default = ShipInfo;
 
-},{"./SystemInfo":85,"react":30,"styled-components":53}],84:[function(require,module,exports){
+},{"./SystemInfo":92,"react":30,"styled-components":53}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36157,7 +36600,7 @@ if (shipManager.systems.isDestroyed(ship, system)) {
 */
 exports.default = SystemIcon;
 
-},{"react":30,"styled-components":53}],85:[function(require,module,exports){
+},{"react":30,"styled-components":53}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36426,7 +36869,7 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfo;
 
-},{"../common":66,"./ShipInfo":83,"react":30,"styled-components":53}],86:[function(require,module,exports){
+},{"../common":66,"./ShipInfo":90,"react":30,"styled-components":53}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36792,7 +37235,7 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 
 exports.default = SystemInfoButtons;
 
-},{"../styled":82,"react":30,"styled-components":53}],87:[function(require,module,exports){
+},{"../styled":89,"react":30,"styled-components":53}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36893,7 +37336,7 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfoMenu;
 
-},{"../common":66,"./SystemInfoButtons":86,"react":30,"styled-components":53}],88:[function(require,module,exports){
+},{"../common":66,"./SystemInfoButtons":93,"react":30,"styled-components":53}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36990,4 +37433,4 @@ var WeaponList = function (_React$Component) {
 
 exports.default = WeaponList;
 
-},{"./SystemIcon":84,"react":30,"styled-components":53}]},{},[63]);
+},{"./SystemIcon":91,"react":30,"styled-components":53}]},{},[63]);

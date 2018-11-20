@@ -113,7 +113,7 @@ window.mathlib = {
     return start.distanceTo(end);
   },
 
-  getClosestAngleBetween: function getAngleBetween(angle1, angle2, right) {
+  getClosestAngleBetween: function getAngleBetween(angle1, angle2) {
     const right = mathlib.getAngleBetween(angle1, angle2, true);
     const left = mathlib.getAngleBetween(angle1, angle2, false);
   },
@@ -141,11 +141,11 @@ window.mathlib = {
 
   addToHexFacing: function addToHexFacing(facing, add) {
     if (facing + add > 5) {
-      return mathlib.addToHexFacing(0, facing + add - 6);
+      return window.mathlib.addToHexFacing(0, facing + add - 6);
     }
 
     if (facing + add < 0) {
-      return mathlib.addToHexFacing(6, facing + add);
+      return window.mathlib.addToHexFacing(6, facing + add);
     }
 
     return facing + add;

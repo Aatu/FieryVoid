@@ -113,8 +113,11 @@ class UIManager {
     );
   }
 
-  repositionMovementUi() {
-    console.log("implement reposition for new movement ui");
+  repositionMovementUi(position) {
+    jQuery("#shipMovementActual").css({
+      left: `${position.x}px`,
+      top: `${position.y}px`
+    });
   }
 }
 

@@ -63,6 +63,12 @@ window.hexagon.Offset = (function() {
       .toOffset();
   };
 
+  Offset.prototype.moveToDirection = function(direction) {
+    return this.toCube()
+      .moveToDirection(direction)
+      .toOffset();
+  };
+
   Offset.prototype.equals = function(offset) {
     return this.q === offset.q && this.r === offset.r;
   };

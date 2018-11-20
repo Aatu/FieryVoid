@@ -2,7 +2,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -12,57 +12,62 @@ var _ = require(".");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MovementOrder = function () {
-    function MovementOrder(id, type, position, target, facing, turn) {
-        var value = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
-        var requiredThrust = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
-        var assignedThrust = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
+  function MovementOrder(id, type, position, target, facing, turn) {
+    var value = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
+    var requiredThrust = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
+    var assignedThrust = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
 
-        _classCallCheck(this, MovementOrder);
+    _classCallCheck(this, MovementOrder);
 
-        if (!(position instanceof hexagon.Offset)) {
-            throw new Error("MovementOrder requires position as offset hexagon");
-        }
-
-        this.id = id;
-        this.type = type;
-        this.position = position;
-        this.target = target;
-        this.facing = facing;
-        this.turn = turn;
-        this.value = value;
-        this.requiredThrust = requiredThrust;
-        this.assignedThrust = assignedThrust;
+    if (!(position instanceof window.hexagon.Offset)) {
+      throw new Error("MovementOrder requires position as offset hexagon");
     }
 
-    _createClass(MovementOrder, [{
-        key: "isDeploy",
-        value: function isDeploy() {
-            return this.type === _.movementTypes.DEPLOY;
-        }
-    }, {
-        key: "isStart",
-        value: function isStart() {
-            return this.type === _.movementTypes.START;
-        }
-    }, {
-        key: "isEvade",
-        value: function isEvade() {
-            return this.type === _.movementTypes.EVADE;
-        }
-    }, {
-        key: "isEnd",
-        value: function isEnd() {
-            return this.type === _.movementTypes.END;
-        }
-    }]);
+    this.id = id;
+    this.type = type;
+    this.position = position;
+    this.target = target;
+    this.facing = facing;
+    this.turn = turn;
+    this.value = value;
+    this.requiredThrust = requiredThrust;
+    this.assignedThrust = assignedThrust;
+  }
 
-    return MovementOrder;
+  _createClass(MovementOrder, [{
+    key: "isDeploy",
+    value: function isDeploy() {
+      return this.type === _.movementTypes.DEPLOY;
+    }
+  }, {
+    key: "isStart",
+    value: function isStart() {
+      return this.type === _.movementTypes.START;
+    }
+  }, {
+    key: "isEvade",
+    value: function isEvade() {
+      return this.type === _.movementTypes.EVADE;
+    }
+  }, {
+    key: "isEnd",
+    value: function isEnd() {
+      return this.type === _.movementTypes.END;
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new MovementOrder(this.id, this.type, this.position, this.target, this.facing, this.turn, this.value, this.requiredThrust, this.assignedThrust);
+    }
+  }]);
+
+  return MovementOrder;
 }();
 
 window.MovementOrder = MovementOrder;
 exports.default = MovementOrder;
 
-},{".":5}],2:[function(require,module,exports){
+},{".":9}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -140,6 +145,48 @@ exports.createMovementLine = createMovementLine;
 exports.default = MovementPath;
 
 },{}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ = require(".");
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MovementResolver = function () {
+  function MovementResolver(ship, movementService) {
+    _classCallCheck(this, MovementResolver);
+
+    this.ship = ship;
+    this.movementService = movementService;
+  }
+
+  _createClass(MovementResolver, [{
+    key: "thrust",
+    value: function thrust(direction) {
+      console.log("Thrustage", direction);
+
+      ship.movement;
+      var lastMove = this.movementService.getMostRecentMove(this.ship);
+
+      var thrustMove = new _.MovementOrder(null, _.movementTypes.SPEED, lastMove.position, lastMove.target.moveToDirection(direction), lastMove.facing, lastMove.turn, direction);
+
+      var bill = new _.ThrustBill(ship, this.movementService.getTotalProducedThrust(ship)).pay([].concat(_toConsumableArray(this.movementService.cloneThisTurnMovement(ship)), [thrustMove]));
+    }
+  }]);
+
+  return MovementResolver;
+}();
+
+exports.default = MovementResolver;
+
+},{".":9}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -315,6 +362,22 @@ var MovementService = function () {
       }
       return oPos;
     }
+  }, {
+    key: "cloneThisTurnMovement",
+    value: function cloneThisTurnMovement(ship) {
+      var _this6 = this;
+
+      return ship.movement.filter(function (move) {
+        return move.turn === _this6.gamedata.turn || move.isEnd() && move.turn === _this6.gamedata.turn - 1 || move.isDeploy();
+      }).map(function (move) {
+        return move.clone();
+      });
+    }
+  }, {
+    key: "thrust",
+    value: function thrust(ship, direction) {
+      new _.MovementResolver(ship, this).thrust(direction);
+    }
   }]);
 
   return MovementService;
@@ -323,7 +386,7 @@ var MovementService = function () {
 window.MovementService = MovementService;
 exports.default = MovementService;
 
-},{".":5}],4:[function(require,module,exports){
+},{".":9}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -342,13 +405,466 @@ var movementTypes = {
 window.movementTypes = movementTypes;
 exports.default = movementTypes;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.movementTypes = exports.MovementPath = exports.MovementOrder = exports.MovementService = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ = require(".");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var RequiredThrust = function () {
+  function RequiredThrust(ship, move) {
+    _classCallCheck(this, RequiredThrust);
+
+    this.requirements = {};
+
+    switch (move.type) {
+      case _.movementTypes.SPEED:
+        this.requireSpeed(ship, move);
+        break;
+      default:
+    }
+  }
+
+  _createClass(RequiredThrust, [{
+    key: "requireSpeed",
+    value: function requireSpeed(ship, move) {
+      var facing = move.facing;
+      var direction = move.value;
+      var actualDirection = window.mathlib.addToHexFacing(window.mathlib.addToHexFacing(direction, facing), 3);
+
+      this.requirements[actualDirection] = ship.accelcost;
+    }
+  }, {
+    key: "accumulate",
+    value: function accumulate(total) {
+      var _this = this;
+
+      Object.keys(this.requirements).forEach(function (direction) {
+        total[direction] = total[direction] ? total[direction] + _this.requirements[direction] : _this.requirements[direction];
+      });
+
+      return total;
+    }
+  }]);
+
+  return RequiredThrust;
+}();
+
+exports.default = RequiredThrust;
+
+},{".":9}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ThrustAssignment = function () {
+  function ThrustAssignment(thruster) {
+    _classCallCheck(this, ThrustAssignment);
+
+    this.thruster = thruster;
+
+    this.directions = [].concat(thurster.direction);
+    this.paid = 0;
+    this.channeled = 0;
+    this.capacity = thruster.output;
+
+    this.firstIgnored = window.shipManager.criticals.hasCritical(thruster, "FirstThrustIgnored");
+
+    this.halfEfficiency = window.shipManager.criticals.hasCritical(thruster, "HalfEfficiency");
+
+    this.damaged = this.firstIgnored || this.halfEfficiency;
+  }
+
+  _createClass(ThrustAssignment, [{
+    key: "isMono",
+    value: function isMono(direction) {
+      return this.directions.length === 1 && this.isDirection(direction);
+    }
+  }, {
+    key: "isDirection",
+    value: function isDirection(direction) {
+      return this.directions.includes(direction);
+    }
+  }, {
+    key: "getCost",
+    value: function getCost(direction, amount) {
+      var damageLevel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+      if (!this.isDirection(direction)) {
+        return null;
+      }
+
+      if (damageLevel === 0 && (this.firstIgnored && this.channeled === 0 || this.halfEfficiency)) {
+        return null;
+      }
+
+      if (damageLevel === 1 && this.halfEfficiency) {
+        return null;
+      }
+
+      var extraCost = 0;
+
+      if (this.firstIgnored && this.channeled === 0) {
+        extraCost++;
+      }
+
+      if (this.halfEfficiency) {
+        extraCost += amount;
+      }
+
+      var result = {
+        capacity: this.capacity - this.channeled,
+        overCapacity: 0,
+        extraCost: this.firstIgnored && this.channeled === 0 ? 1 : 0,
+        costMultiplier: this.halfEfficiency ? 1 : 0
+      };
+
+      if (!this.damaged) {
+        result.overCapacity = this.capacity * 2 - this.channeled;
+
+        if (result.overCapacity > this.capacity) {
+          result.overCapacity = this.capacity;
+        }
+      }
+
+      if (result.overCapacity < 0) {
+        result.overCapacity = 0;
+      }
+
+      if (result.capacity < 0) {
+        result.capacity = 0;
+      }
+
+      return result;
+    }
+  }, {
+    key: "channel",
+    value: function channel(direction, amount) {
+      var overthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (!this.isDirection(direction)) {
+        throw new Error("Trying to channel wrong direction");
+      }
+
+      var _getForDirection = this.getForDirection(direction, amount, 2),
+          capacity = _getForDirection.capacity,
+          overCapacity = _getForDirection.overCapacity,
+          extraCost = _getForDirection.extraCost,
+          costMultiplier = _getForDirection.costMultiplier;
+
+      var result = {
+        channeled: 0,
+        overthrusted: 0,
+        extraCost: 0
+      };
+
+      if (capacity >= amount) {
+        result.channeled = amount;
+        amount = 0;
+      } else {
+        result.channeled = capacity;
+        amount -= capacity;
+      }
+
+      if (amount > 0 && overthrust) {
+        if (overCapacity >= amount) {
+          result.overthrusted = amount;
+          amount = 0;
+        } else {
+          result.overthrusted = overCapacity;
+        }
+      }
+
+      result.extraCost = (result.channeled + result.overthrusted) * costMultiplier + extraCost;
+
+      this.channeled += result.channeled + result.overthrusted;
+      return result;
+    }
+  }]);
+
+  return ThrustAssignment;
+}();
+
+exports.default = ThrustAssignment;
+
+},{}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ = require(".");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ThrustBill = function () {
+  function ThrustBill(ship, thrustAvailable, movement) {
+    _classCallCheck(this, ThrustBill);
+
+    this.ship = ship;
+    this.movement = movement;
+    this.thrusters = ship.systems.filter(function (system) {
+      return system.thruster;
+    }).map(function (thruster) {
+      return new _.ThrustAssignment(thruster);
+    });
+
+    this.buildRequiredThrust(movement);
+
+    this.cost = 0;
+    this.thrustAvailable = thrustAvailable;
+    this.totalThrustRequired = this.getTotalThrustRequired(movement);
+    this.directionsRequired = this.getRequiredThrustDirections(movement);
+  }
+
+  _createClass(ThrustBill, [{
+    key: "getRequiredThrustDirections",
+    value: function getRequiredThrustDirections(movement) {
+      var result = movement.reduce(function (accumulator, move) {
+        return move.requiredThrust.accumulate(accumulator);
+      }, {});
+
+      result[0] = result[0] || 0;
+      result[1] = result[1] || 0;
+      result[2] = result[2] || 0;
+      result[3] = result[3] || 0;
+      result[4] = result[4] || 0;
+      result[5] = result[5] || 0;
+
+      return result;
+    }
+  }, {
+    key: "getTotalThrustRequired",
+    value: function getTotalThrustRequired(movement) {
+      var totalRequired = this.getRequiredThrustDirections(movement);
+      return totalRequired[0] + totalRequired[1] + totalRequired[2] + totalRequired[3] + totalRequired[4] + totalRequired[5];
+    }
+  }, {
+    key: "getMonoThrustersForDirection",
+    value: function getMonoThrustersForDirection(direction, amount) {
+      var allowOverthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var damageLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+      return getThrustersForDirection(direction, amount, allowOverthrust, damageLevel).filter(function (thruster) {
+        return thruster.isMono(direction);
+      });
+    }
+  }, {
+    key: "thrusterhasCapacity",
+    value: function thrusterhasCapacity(direction, amount, allowOverthrust, damageLevel, thruster) {
+      var result = this.thrusters.getCost(direction, amount, damageLevel);
+      if (result === null) {
+        return false;
+      }
+
+      var _result = this.result,
+          capacity = _result.capacity,
+          overCapacity = _result.overCapacity,
+          extraCost = _result.extraCost,
+          costMultiplier = _result.costMultiplier;
+
+
+      return capacity > 0 || allowOverthrust && overCapacity > 0;
+    }
+  }, {
+    key: "sortThrusters",
+    value: function sortThrusters(direction, amount, allowOverthrust, damageLevel, a, b) {
+      var _a$getCost = a.getCost(direction, amount, damageLevel),
+          capacityA = _a$getCost.capacity,
+          overCapacityA = _a$getCost.overCapacity;
+
+      var _b$getCost = b.getCost(direction, amount, damageLevel),
+          capacityB = _b$getCost.capacity,
+          overCapacityB = _b$getCost.overCapacity;
+
+      if (allowOverthrust) {
+        return capacityA + overCapacityA > capacityB + overCapacityB;
+      }
+
+      return capacityA > capacityB;
+    }
+  }, {
+    key: "thrusterCanAffordedToBeUsed",
+    value: function thrusterCanAffordedToBeUsed(direction, amount, allowOverthrust, damageLevel, thruster) {
+      var result = this.thrusters.getCost(direction, amount, damageLevel);
+      if (result === null) {
+        return false;
+      }
+
+      var wouldChannel = 0;
+
+      //need and can overthrust
+      if (allowOverthrust && capacity < amount) {
+        //overthrust is not enough
+        if (amount - capacity > overCapacity) {
+          wouldChannel = capacity + overCapacity;
+        } else if (amount > capacity) {
+          //overthrust is enough
+          wouldChannel = amount;
+        }
+      } else if (capacity < amount) {
+        //can't overthrust, not enough capacity
+        wouldChannel = capacity;
+      } else if (capacity > amount) {
+        //capacity is enough;
+        wouldChannel = amount;
+      }
+
+      if (wouldChannel * costMultiplier + extraCost > this.thrustAvailable) {
+        return false;
+      }
+
+      var _result2 = this.result,
+          capacity = _result2.capacity,
+          overCapacity = _result2.overCapacity,
+          extraCost = _result2.extraCost,
+          costMultiplier = _result2.costMultiplier;
+    }
+  }, {
+    key: "getThrustersForDirection",
+    value: function getThrustersForDirection(direction, amount) {
+      var _this = this;
+
+      var allowOverthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var damageLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
+      this.thrusters.filter(function (thruster) {
+        return _this.thrusterhasCapacity.bind(_this, direction, amount, allowOverthrust, damageLevel);
+      }).filter(function (thruster) {
+        return _this.thrusterCanAffordedToBeUsed.bind(_this, direction, amount, allowOverthrust, damageLevel);
+      }).sort(this.sortThrusters.bind(this, direction, amount, allowOverthrust, damageLevel));
+    }
+  }, {
+    key: "errorIfOverBudget",
+    value: function errorIfOverBudget() {
+      if (this.totalThrustRequired > this.thrustAvailable) {
+        throw new Error("over budget");
+      }
+    }
+  }, {
+    key: "pay",
+    value: function pay() {
+      try {
+        this.errorIfOverBudget();
+
+        //assign thrust first to mono direction thrusters
+        this.assignUndamagedMono();
+
+        //overthrust here
+
+        //if paid with overthrust, try to move trust to damaged thrusters
+        //if not enough even with overthrust, try to assign to damaged thrusters and after that move overthrust to damaged
+
+        //move thrust to lvl 1 damage mono
+
+        //move thrust to lvl2 damage mono
+
+        //move thrust to lvl3 damage mono
+
+        //if still not satisfied, not possible
+
+        return true;
+      } catch (e) {
+        if (e.message === "over budget") {
+          return false;
+        }
+
+        throw e;
+      }
+    }
+  }, {
+    key: "assignUndamagedMono",
+    value: function assignUndamagedMono() {
+      Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection);
+    }
+  }, {
+    key: "assignUndamagedMonoDirection",
+    value: function assignUndamagedMonoDirection(direction) {
+      var required = this.directionsRequired[direction];
+      var thrusters = this.getMonoThrustersForDirection(direction, required, false, 0);
+
+      this.useThrusters(direction, required, thrusters, false, 0);
+    }
+  }, {
+    key: "assignDamagedMono",
+    value: function assignDamagedMono(damageLevel) {
+      Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection.bind(this, damageLevel));
+    }
+  }, {
+    key: "assignDamagedMonoDirection",
+    value: function assignDamagedMonoDirection(damageLevel, direction) {
+      var required = this.directionsRequired[direction];
+      var thrusters = this.getMonoThrustersForDirection(direction, required, false, damageLevel);
+
+      this.useThrusters(direction, required, thrusters, false, 0);
+    }
+  }, {
+    key: "useThrusters",
+    value: function useThrusters(direction, required, thrusters) {
+      var _this2 = this;
+
+      var allowOverthrust = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+      var damageLevel = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
+      thrusters.forEach(function (thruster) {
+        if (required <= 0) {
+          return;
+        }
+
+        var _thruster$channel = thruster.channel(direction, required, allowOverthrust),
+            channeled = _thruster$channel.channeled,
+            overthrusted = _thruster$channel.overthrusted,
+            extraCost = _thruster$channel.extraCost;
+
+        _this2.directionsRequired[direction] -= channeled;
+        _this2.directionsRequired[direction] -= overthrusted;
+        _this2.totalThrustRequired += extraCost;
+
+        required -= channeled;
+        required -= overthrusted;
+
+        _this2.errorIfOverBudget();
+      });
+    }
+  }, {
+    key: "buildRequiredThrust",
+    value: function buildRequiredThrust(movement) {
+      var _this3 = this;
+
+      movement.forEach(function (move) {
+        return move.requiredThrust = new _.RequiredThrust(_this3.ship, move);
+      });
+    }
+  }]);
+
+  return ThrustBill;
+}();
+
+exports.default = ThrustBill;
+
+},{".":9}],9:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ThrustAssignment = exports.RequiredThrust = exports.ThrustBill = exports.MovementResolver = exports.movementTypes = exports.MovementPath = exports.MovementOrder = exports.MovementService = undefined;
 
 var _MovementService = require("./MovementService");
 
@@ -366,24 +882,63 @@ var _MovementTypes = require("./MovementTypes");
 
 var _MovementTypes2 = _interopRequireDefault(_MovementTypes);
 
+var _MovementResolver = require("./MovementResolver");
+
+var _MovementResolver2 = _interopRequireDefault(_MovementResolver);
+
+var _ThrustBill = require("./ThrustBill");
+
+var _ThrustBill2 = _interopRequireDefault(_ThrustBill);
+
+var _RequiredThrust = require("./RequiredThrust");
+
+var _RequiredThrust2 = _interopRequireDefault(_RequiredThrust);
+
+var _ThrustAssignment = require("./ThrustAssignment");
+
+var _ThrustAssignment2 = _interopRequireDefault(_ThrustAssignment);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+window.movement = {
+  MovementService: _MovementService2.default,
+  MovementOrder: _MovementOrder2.default,
+  MovementPath: _MovementPath2.default,
+  movementTypes: _MovementTypes2.default,
+  MovementResolver: _MovementResolver2.default,
+  ThrustBill: _ThrustBill2.default,
+  RequiredThrust: _RequiredThrust2.default,
+  ThrustAssignment: _ThrustAssignment2.default
+};
 
 exports.MovementService = _MovementService2.default;
 exports.MovementOrder = _MovementOrder2.default;
 exports.MovementPath = _MovementPath2.default;
 exports.movementTypes = _MovementTypes2.default;
+exports.MovementResolver = _MovementResolver2.default;
+exports.ThrustBill = _ThrustBill2.default;
+exports.RequiredThrust = _RequiredThrust2.default;
+exports.ThrustAssignment = _ThrustAssignment2.default;
 
-},{"./MovementOrder":1,"./MovementPath":2,"./MovementService":3,"./MovementTypes":4}],6:[function(require,module,exports){
+},{"./MovementOrder":1,"./MovementPath":2,"./MovementResolver":3,"./MovementService":4,"./MovementTypes":5,"./RequiredThrust":6,"./ThrustAssignment":7,"./ThrustBill":8}],10:[function(require,module,exports){
 arguments[4][1][0].apply(exports,arguments)
-},{".":10,"dup":1}],7:[function(require,module,exports){
+},{".":18,"dup":1}],11:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],8:[function(require,module,exports){
+},{"dup":2}],12:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
-},{".":10,"dup":3}],9:[function(require,module,exports){
+},{".":18,"dup":3}],13:[function(require,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],10:[function(require,module,exports){
+},{".":18,"dup":4}],14:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
-},{"./MovementOrder":6,"./MovementPath":7,"./MovementService":8,"./MovementTypes":9,"dup":5}],11:[function(require,module,exports){
+},{"dup":5}],15:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{".":18,"dup":6}],16:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"dup":7}],17:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{".":18,"dup":8}],18:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"./MovementOrder":10,"./MovementPath":11,"./MovementResolver":12,"./MovementService":13,"./MovementTypes":14,"./RequiredThrust":15,"./ThrustAssignment":16,"./ThrustBill":17,"dup":9}],19:[function(require,module,exports){
 "use strict";
 
 var _ships = require("./ships");
@@ -404,7 +959,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 window.shipObjects = _ships2.default;
 
-},{"./handler/movement":10,"./ships":16,"./uiStrategy":22}],12:[function(require,module,exports){
+},{"./handler/movement":18,"./ships":24,"./uiStrategy":30}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -460,7 +1015,7 @@ var Capital = function (_ShipObject) {
         _this2.shipObject = object;
         _this2.setRotation(_this2.rotation.x, _this2.rotation.y, _this2.rotation.z);
         _this2.mesh.add(_this2.shipObject);
-        object.position.set(0, 0, _this2.position.z);
+        object.position.set(0, 0, _this2.shipZ);
       });
     }
   }]);
@@ -470,7 +1025,7 @@ var Capital = function (_ShipObject) {
 
 exports.default = Capital;
 
-},{"./ShipObject":15}],13:[function(require,module,exports){
+},{"./ShipObject":23}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -541,7 +1096,7 @@ var Gunship = function (_ShipObject) {
 
 exports.default = Gunship;
 
-},{"./ShipObject":15}],14:[function(require,module,exports){
+},{"./ShipObject":23}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -606,7 +1161,7 @@ var Rhino = function (_ShipObject) {
 
 exports.default = Rhino;
 
-},{"./ShipObject":15}],15:[function(require,module,exports){
+},{"./ShipObject":23}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -644,6 +1199,7 @@ var ShipObject = function () {
     this.sideSpriteSize = 100;
     this.position = { x: 0, y: 0, z: 0 };
     this.movementPath = null;
+    this.shipZ = null;
 
     this.movements = null;
 
@@ -665,12 +1221,12 @@ var ShipObject = function () {
   }, {
     key: "createMesh",
     value: function createMesh() {
-      if (this.position.z === 0) {
-        this.position.z = this.defaultHeight;
+      if (this.shipZ === null) {
+        this.shipZ = this.defaultHeight;
       }
 
       var opacity = 0.5;
-      this.line = new window.LineSprite({ x: 0, y: 0, z: 1 }, { x: 0, y: 0, z: this.position.z }, 1, this.mine ? COLOR_MINE : COLOR_ENEMY, opacity);
+      this.line = new window.LineSprite({ x: 0, y: 0, z: 1 }, { x: 0, y: 0, z: this.defaultHeight }, 1, this.mine ? COLOR_MINE : COLOR_ENEMY, opacity);
       this.mesh.add(this.line.mesh);
 
       this.shipSideSprite = new window.ShipSelectedSprite({ width: this.sideSpriteSize, height: this.sideSpriteSize }, 0.01, opacity);
@@ -695,10 +1251,10 @@ var ShipObject = function () {
   }, {
     key: "setPosition",
     value: function setPosition(x, y) {
-      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.defaultHeight;
+      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
       if ((typeof x === "undefined" ? "undefined" : _typeof(x)) === "object") {
-        z = x.z || this.defaultHeight;
+        z = x.z;
         y = x.y;
         x = x.x;
       }
@@ -947,7 +1503,7 @@ window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 
-},{"../handler/Movement":5}],16:[function(require,module,exports){
+},{"../handler/Movement":9}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -970,7 +1526,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = { Gunship: _Gunship2.default, Rhino: _Rhino2.default, Capital: _Capital2.default };
 
-},{"./Capital":12,"./Gunship":13,"./Rhino":14}],17:[function(require,module,exports){
+},{"./Capital":20,"./Gunship":21,"./Rhino":22}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1026,7 +1582,7 @@ var HighlightSelectedShip = function (_UiStrategy) {
 
 exports.default = HighlightSelectedShip;
 
-},{"./UiStrategy":21}],18:[function(require,module,exports){
+},{"./UiStrategy":29}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1088,7 +1644,7 @@ var MovementPathMouseOver = function (_UiStrategy) {
 
 exports.default = MovementPathMouseOver;
 
-},{"./UiStrategy":21}],19:[function(require,module,exports){
+},{"./UiStrategy":29}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1154,7 +1710,7 @@ var MovementPathSelectedShip = function (_UiStrategy) {
 
 exports.default = MovementPathSelectedShip;
 
-},{"./UiStrategy":21}],20:[function(require,module,exports){
+},{"./UiStrategy":29}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1188,16 +1744,20 @@ var SelectedShipMovementUi = function (_UiStrategy) {
     key: "deactivated",
     value: function deactivated() {
       this.uiManager.hideMovementUi();
+      this.ship = null;
     }
   }, {
     key: "setShipSelected",
     value: function setShipSelected(_ref) {
       var ship = _ref.ship;
 
+      this.ship = ship;
       this.uiManager.showMovementUi({
         ship: ship,
         movementService: this.movementService
       });
+
+      reposition(this.ship, this.shipIconContainer, this.uiManager);
     }
   }, {
     key: "shipDeselected",
@@ -1205,25 +1765,34 @@ var SelectedShipMovementUi = function (_UiStrategy) {
       var ship = _ref2.ship;
 
       this.uiManager.hideMovementUi();
+      this.ship = null;
     }
   }, {
     key: "onScroll",
     value: function onScroll() {
-      this.uiManager.repositionMovementUi();
+      reposition(this.ship, this.shipIconContainer, this.uiManager);
     }
   }, {
     key: "onZoom",
     value: function onZoom() {
-      this.uiManager.repositionMovementUi();
+      reposition(this.ship, this.shipIconContainer, this.uiManager);
     }
   }]);
 
   return SelectedShipMovementUi;
 }(_UiStrategy3.default);
 
+var reposition = function reposition(ship, shipIconContainer, uiManager) {
+  if (!ship) {
+    return;
+  }
+
+  uiManager.repositionMovementUi(window.coordinateConverter.fromGameToViewPort(shipIconContainer.getByShip(ship).getPosition()));
+};
+
 exports.default = SelectedShipMovementUi;
 
-},{"./UiStrategy":21}],21:[function(require,module,exports){
+},{"./UiStrategy":29}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1332,7 +1901,7 @@ var UiStrategy = function () {
 
 exports.default = UiStrategy;
 
-},{}],22:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1368,4 +1937,4 @@ window.uiStrategy = {
 exports.MovementPathSelectedShip = _MovementPathSelectedShip2.default;
 exports.MovementPathMouseOver = _MovementPathMouseOver2.default;
 
-},{"./HighlightSelectedShip":17,"./MovementPathMouseOver":18,"./MovementPathSelectedShip":19,"./SelectedShipMovementUi":20}]},{},[11]);
+},{"./HighlightSelectedShip":25,"./MovementPathMouseOver":26,"./MovementPathSelectedShip":27,"./SelectedShipMovementUi":28}]},{},[19]);

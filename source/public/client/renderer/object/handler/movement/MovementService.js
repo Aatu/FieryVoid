@@ -1,5 +1,6 @@
 import { MovementOrder } from ".";
 import { movementTypes } from ".";
+import { MovementResolver } from ".";
 
 class MovementService {
   constructor() {
@@ -142,6 +143,21 @@ class MovementService {
       if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
     }
     return oPos;
+  }
+
+  cloneThisTurnMovement(ship) {
+    return ship.movement
+      .filter(
+        move =>
+          move.turn === this.gamedata.turn ||
+          (move.isEnd() && move.turn === this.gamedata.turn - 1) ||
+          move.isDeploy()
+      )
+      .map(move => move.clone());
+  }
+
+  thrust(ship, direction) {
+    new MovementResolver(ship, this).thrust(direction);
   }
 }
 

@@ -25,6 +25,7 @@ class ShipObject {
     this.sideSpriteSize = 100;
     this.position = { x: 0, y: 0, z: 0 };
     this.movementPath = null;
+    this.shipZ = null;
 
     this.movements = null;
 
@@ -43,14 +44,14 @@ class ShipObject {
   }
 
   createMesh() {
-    if (this.position.z === 0) {
-      this.position.z = this.defaultHeight;
+    if (this.shipZ === null) {
+      this.shipZ = this.defaultHeight;
     }
 
     const opacity = 0.5;
     this.line = new window.LineSprite(
       { x: 0, y: 0, z: 1 },
-      { x: 0, y: 0, z: this.position.z },
+      { x: 0, y: 0, z: this.defaultHeight },
       1,
       this.mine ? COLOR_MINE : COLOR_ENEMY,
       opacity
@@ -83,9 +84,9 @@ class ShipObject {
     this.createMesh();
   }
 
-  setPosition(x, y, z = this.defaultHeight) {
+  setPosition(x, y, z = 0) {
     if (typeof x === "object") {
-      z = x.z || this.defaultHeight;
+      z = x.z;
       y = x.y;
       x = x.x;
     }

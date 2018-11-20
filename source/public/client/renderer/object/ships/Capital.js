@@ -28,7 +28,7 @@ class Capital extends ShipObject {
       this.shipObject = object;
       this.setRotation(this.rotation.x, this.rotation.y, this.rotation.z);
       this.mesh.add(this.shipObject);
-      object.position.set(0, 0, this.position.z);
+      object.position.set(0, 0, this.shipZ);
     });
   }
 }

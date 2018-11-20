@@ -110,7 +110,6 @@ window.MovementPhaseStrategy = (function() {
 
   MovementPhaseStrategy.prototype.setSelectedShip = function(ship) {
     PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-    this.drawMovementUI(this.selectedShip);
   };
 
   MovementPhaseStrategy.prototype.targetShip = function(ship, payload) {
