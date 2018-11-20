@@ -511,11 +511,11 @@ var ThrustAssignment = function () {
   }, {
     key: "getDamageLevel",
     value: function getDamageLevel() {
-      if (this.firstIgnored && !this.halfEfficiency) {
+      if (this.firstIgnored && !this.halfEfficiency && this.channeled === 0) {
         return 1;
-      } else if (this.halfEfficiency && !this.firstIgnored) {
+      } else if (this.halfEfficiency && (!this.firstIgnored || this.channeled > 0)) {
         return 2;
-      } else if (this.halfEfficiency && this.firstIgnored) {
+      } else if (this.halfEfficiency && this.firstIgnored && this.channeled === 0) {
         return 3;
       } else {
         return 0;
@@ -646,14 +646,13 @@ var ThrustBill = function () {
 
     this.cost = 0;
     this.thrustAvailable = thrustAvailable;
-    this.totalThrustRequired = this.getTotalThrustRequired(movement);
-    this.directionsRequired = this.getRequiredThrustDirections(movement);
+    this.directionsRequired = this.getRequiredThrustDirections();
   }
 
   _createClass(ThrustBill, [{
     key: "getRequiredThrustDirections",
-    value: function getRequiredThrustDirections(movement) {
-      var result = movement.reduce(function (accumulator, move) {
+    value: function getRequiredThrustDirections() {
+      var result = this.movement.reduce(function (accumulator, move) {
         return move.requiredThrust.accumulate(accumulator);
       }, {});
 
@@ -668,65 +667,67 @@ var ThrustBill = function () {
     }
   }, {
     key: "getTotalThrustRequired",
-    value: function getTotalThrustRequired(movement) {
-      var totalRequired = this.getRequiredThrustDirections(movement);
+    value: function getTotalThrustRequired() {
+      var totalRequired = this.getRequiredThrustDirections();
       return totalRequired[0] + totalRequired[1] + totalRequired[2] + totalRequired[3] + totalRequired[4] + totalRequired[5];
     }
-  }, {
-    key: "getMonoThrustersForDirection",
-    value: function getMonoThrustersForDirection(direction, amount) {
-      var allowOverthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var damageLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
-      return getThrustersForDirection(direction, amount, allowOverthrust, damageLevel).filter(function (thruster) {
-        return thruster.isMono(direction);
-      });
+    /*
+    getMonoThrustersForDirection(
+      direction,
+      amount,
+      allowOverthrust = false,
+      damageLevel = 0
+    ) {
+      return getThrustersForDirection(
+        direction,
+        amount,
+        allowOverthrust,
+        damageLevel
+      ).filter(thruster => thruster.isMono(direction));
     }
-  }, {
-    key: "thrusterhasCapacity",
-    value: function thrusterhasCapacity(direction, amount, allowOverthrust, damageLevel, thruster) {
-      var result = this.thrusters.getCost(direction, amount, damageLevel);
+      thrusterhasCapacity(
+      direction,
+      amount,
+      allowOverthrust,
+      damageLevel,
+      thruster
+    ) {
+      const result = this.thrusters.getCost(direction, amount, damageLevel);
       if (result === null) {
         return false;
       }
-
-      var _result = this.result,
-          capacity = _result.capacity,
-          overCapacity = _result.overCapacity,
-          extraCost = _result.extraCost,
-          costMultiplier = _result.costMultiplier;
-
-
-      return capacity > 0 || allowOverthrust && overCapacity > 0;
+        const { capacity, overCapacity, extraCost, costMultiplier } = this.result;
+        return capacity > 0 || (allowOverthrust && overCapacity > 0);
     }
-  }, {
-    key: "sortThrusters",
-    value: function sortThrusters(direction, amount, allowOverthrust, damageLevel, a, b) {
-      var _a$getCost = a.getCost(direction, amount, damageLevel),
-          capacityA = _a$getCost.capacity,
-          overCapacityA = _a$getCost.overCapacity;
-
-      var _b$getCost = b.getCost(direction, amount, damageLevel),
-          capacityB = _b$getCost.capacity,
-          overCapacityB = _b$getCost.overCapacity;
-
-      if (allowOverthrust) {
+      sortThrusters(direction, amount, allowOverthrust, damageLevel, a, b) {
+      const { capacity: capacityA, overCapacity: overCapacityA } = a.getCost(
+        direction,
+        amount,
+        damageLevel
+      );
+      const { capacity: capacityB, overCapacity: overCapacityB } = b.getCost(
+        direction,
+        amount,
+        damageLevel
+      );
+        if (allowOverthrust) {
         return capacityA + overCapacityA > capacityB + overCapacityB;
       }
-
-      return capacityA > capacityB;
+        return capacityA > capacityB;
     }
-  }, {
-    key: "thrusterCanAffordedToBeUsed",
-    value: function thrusterCanAffordedToBeUsed(direction, amount, allowOverthrust, damageLevel, thruster) {
-      var result = this.thrusters.getCost(direction, amount, damageLevel);
+      thrusterCanAffordedToBeUsed(
+      direction,
+      amount,
+      allowOverthrust,
+      damageLevel,
+      thruster
+    ) {
+      const result = this.thrusters.getCost(direction, amount, damageLevel);
       if (result === null) {
         return false;
       }
-
-      var wouldChannel = 0;
-
-      //need and can overthrust
+        let wouldChannel = 0;
+        //need and can overthrust
       if (allowOverthrust && capacity < amount) {
         //overthrust is not enough
         if (amount - capacity > overCapacity) {
@@ -742,46 +743,85 @@ var ThrustBill = function () {
         //capacity is enough;
         wouldChannel = amount;
       }
-
-      if (wouldChannel * costMultiplier + extraCost > this.thrustAvailable) {
+        if (wouldChannel * costMultiplier + extraCost > this.thrustAvailable) {
         return false;
       }
+        const { capacity, overCapacity, extraCost, costMultiplier } = this.result;
+    }
+      getThrustersForDirection(
+      direction,
+      amount,
+      allowOverthrust = false,
+      damageLevel = 0
+    ) {
+      this.thrusters
+        .filter(thruster =>
+          this.thrusterhasCapacity.bind(
+            this,
+            direction,
+            amount,
+            allowOverthrust,
+            damageLevel
+          )
+        )
+        .filter(thruster =>
+          this.thrusterCanAffordedToBeUsed.bind(
+            this,
+            direction,
+            amount,
+            allowOverthrust,
+            damageLevel
+          )
+        )
+        .sort(
+          this.sortThrusters.bind(
+            this,
+            direction,
+            amount,
+            allowOverthrust,
+            damageLevel
+          )
+        );
+    }
+    
+    */
 
-      var _result2 = this.result,
-          capacity = _result2.capacity,
-          overCapacity = _result2.overCapacity,
-          extraCost = _result2.extraCost,
-          costMultiplier = _result2.costMultiplier;
+  }, {
+    key: "isPaid",
+    value: function isPaid() {
+      return this.getTotalThrustRequired() === 0;
     }
   }, {
-    key: "getThrustersForDirection",
-    value: function getThrustersForDirection(direction, amount) {
-      var _this = this;
-
-      var allowOverthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var damageLevel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
-      this.thrusters.filter(function (thruster) {
-        return _this.thrusterhasCapacity.bind(_this, direction, amount, allowOverthrust, damageLevel);
-      }).filter(function (thruster) {
-        return _this.thrusterCanAffordedToBeUsed.bind(_this, direction, amount, allowOverthrust, damageLevel);
-      }).sort(this.sortThrusters.bind(this, direction, amount, allowOverthrust, damageLevel));
+    key: "getUndamagedThrusters",
+    value: function getUndamagedThrusters(direction) {
+      return this.thrusters.filter(function (thruster) {
+        return thruster.getDamageLevel() === 0 && thruster.isDirection(direction);
+      });
     }
   }, {
     key: "errorIfOverBudget",
     value: function errorIfOverBudget() {
-      if (this.totalThrustRequired > this.thrustAvailable) {
+      if (this.cost > this.thrustAvailable) {
         throw new Error("over budget");
       }
     }
   }, {
     key: "pay",
     value: function pay() {
+      var _this = this;
+
       try {
-        this.errorIfOverBudget();
+        if (this.getTotalThrustRequired() > this.thrustAvailable) {
+          throw new Error("over budget");
+        }
+
+        if (this.process(function (direction) {
+          return _this.getUndamagedThrusters(direction);
+        }, false)) {
+          return true;
+        }
 
         //assign thrust first to mono direction thrusters
-        this.assignUndamagedMono();
 
         //overthrust here
 
@@ -796,7 +836,7 @@ var ThrustBill = function () {
 
         //if still not satisfied, not possible
 
-        return true;
+        return false;
       } catch (e) {
         if (e.message === "over budget") {
           return false;
@@ -806,66 +846,89 @@ var ThrustBill = function () {
       }
     }
   }, {
-    key: "assignUndamagedMono",
-    value: function assignUndamagedMono() {
+    key: "process",
+    value: function process(thrusterProvider) {
+      var _this2 = this;
+
+      var overChannel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      return Object.keys(this.directionsRequired).forEach(function (direction) {
+        var thrusters = thrusterProvider(direction);
+        _this2.useThrusters(direction, _this2.directionsRequired[direction], thrusters, overChannel);
+      });
+
+      return this.isPaid();
+    }
+
+    /*
+    assignUndamagedMono() {
       Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection);
     }
-  }, {
-    key: "assignUndamagedMonoDirection",
-    value: function assignUndamagedMonoDirection(direction) {
-      var required = this.directionsRequired[direction];
-      var thrusters = this.getMonoThrustersForDirection(direction, required, false, 0);
+      assignUndamagedMonoDirection(direction) {
+      const required = this.directionsRequired[direction];
+      const thrusters = this.getMonoThrustersForDirection(
+        direction,
+        required,
+        false,
+        0
+      );
+        this.useThrusters(direction, required, thrusters, false, 0);
+    }
+      assignDamagedMono(damageLevel) {
+      Object.keys(this.directionsRequired).forEach(
+        assignUndamagedMonoDirection.bind(this, damageLevel)
+      );
+    }
+      assignDamagedMonoDirection(damageLevel, direction) {
+      const required = this.directionsRequired[direction];
+      const thrusters = this.getMonoThrustersForDirection(
+        direction,
+        required,
+        false,
+        damageLevel
+      );
+        this.useThrusters(direction, required, thrusters, false, 0);
+    }
+    */
 
-      this.useThrusters(direction, required, thrusters, false, 0);
-    }
-  }, {
-    key: "assignDamagedMono",
-    value: function assignDamagedMono(damageLevel) {
-      Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection.bind(this, damageLevel));
-    }
-  }, {
-    key: "assignDamagedMonoDirection",
-    value: function assignDamagedMonoDirection(damageLevel, direction) {
-      var required = this.directionsRequired[direction];
-      var thrusters = this.getMonoThrustersForDirection(direction, required, false, damageLevel);
-
-      this.useThrusters(direction, required, thrusters, false, 0);
-    }
   }, {
     key: "useThrusters",
     value: function useThrusters(direction, required, thrusters) {
-      var _this2 = this;
+      var _this3 = this;
 
-      var allowOverthrust = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-      var damageLevel = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+      var allowOverChannel = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
       thrusters.forEach(function (thruster) {
         if (required <= 0) {
           return;
         }
 
-        var _thruster$channel = thruster.channel(direction, required, allowOverthrust),
-            channeled = _thruster$channel.channeled,
-            overthrusted = _thruster$channel.overthrusted,
-            extraCost = _thruster$channel.extraCost;
+        if (!thruster.isDirection(direction)) {
+          throw new Error("Trying to use thruster to wrong direction");
+        }
 
-        _this2.directionsRequired[direction] -= channeled;
-        _this2.directionsRequired[direction] -= overthrusted;
-        _this2.totalThrustRequired += extraCost;
+        var _thruster$channel = thruster.channel(required, allowOverChannel),
+            channeled = _thruster$channel.channeled,
+            overChanneled = _thruster$channel.overChanneled,
+            cost = _thruster$channel.cost;
+
+        _this3.directionsRequired[direction] -= channeled;
+        _this3.directionsRequired[direction] -= overChanneled;
+        _this3.cost += cost;
 
         required -= channeled;
-        required -= overthrusted;
+        required -= overChanneled;
 
-        _this2.errorIfOverBudget();
+        _this3.errorIfOverBudget();
       });
     }
   }, {
     key: "buildRequiredThrust",
     value: function buildRequiredThrust(movement) {
-      var _this3 = this;
+      var _this4 = this;
 
       movement.forEach(function (move) {
-        return move.requiredThrust = new _.RequiredThrust(_this3.ship, move);
+        return move.requiredThrust = new _.RequiredThrust(_this4.ship, move);
       });
     }
   }]);

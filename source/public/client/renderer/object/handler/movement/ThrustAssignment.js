@@ -38,11 +38,18 @@ class ThrustAssignment {
   }
 
   getDamageLevel() {
-    if (this.firstIgnored && !this.halfEfficiency) {
+    if (this.firstIgnored && !this.halfEfficiency && this.channeled === 0) {
       return 1;
-    } else if (this.halfEfficiency && !this.firstIgnored) {
+    } else if (
+      this.halfEfficiency &&
+      (!this.firstIgnored || this.channeled > 0)
+    ) {
       return 2;
-    } else if (this.halfEfficiency && this.firstIgnored) {
+    } else if (
+      this.halfEfficiency &&
+      this.firstIgnored &&
+      this.channeled === 0
+    ) {
       return 3;
     } else {
       return 0;

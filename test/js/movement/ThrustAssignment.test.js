@@ -28,7 +28,10 @@ test("getDamageLevel", () => {
   const thrustAssignment2 = new ThrustAssignment(
     getThruster(0, 6, ["FirstThrustIgnored"])
   );
+
   expect(thrustAssignment2.getDamageLevel()).toBe(1);
+  thrustAssignment2.channel(1);
+  expect(thrustAssignment2.getDamageLevel()).toBe(0);
 
   const thrustAssignment3 = new ThrustAssignment(
     getThruster(0, 6, ["HalfEfficiency"])
@@ -39,6 +42,8 @@ test("getDamageLevel", () => {
     getThruster(0, 6, ["HalfEfficiency", "FirstThrustIgnored"])
   );
   expect(thrustAssignment4.getDamageLevel()).toBe(3);
+  thrustAssignment4.channel(1);
+  expect(thrustAssignment4.getDamageLevel()).toBe(2);
 });
 
 test("getCost, no damage, no overthrust", () => {

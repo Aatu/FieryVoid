@@ -12,12 +12,11 @@ class ThrustBill {
 
     this.cost = 0;
     this.thrustAvailable = thrustAvailable;
-    this.totalThrustRequired = this.getTotalThrustRequired(movement);
-    this.directionsRequired = this.getRequiredThrustDirections(movement);
+    this.directionsRequired = this.getRequiredThrustDirections();
   }
 
-  getRequiredThrustDirections(movement) {
-    const result = movement.reduce(
+  getRequiredThrustDirections() {
+    const result = this.movement.reduce(
       (accumulator, move) => move.requiredThrust.accumulate(accumulator),
       {}
     );
@@ -32,8 +31,8 @@ class ThrustBill {
     return result;
   }
 
-  getTotalThrustRequired(movement) {
-    const totalRequired = this.getRequiredThrustDirections(movement);
+  getTotalThrustRequired() {
+    const totalRequired = this.getRequiredThrustDirections();
     return (
       totalRequired[0] +
       totalRequired[1] +
@@ -43,7 +42,7 @@ class ThrustBill {
       totalRequired[5]
     );
   }
-
+  /*
   getMonoThrustersForDirection(
     direction,
     amount,
@@ -167,19 +166,39 @@ class ThrustBill {
         )
       );
   }
+  
+  */
+
+  isPaid() {
+    return this.getTotalThrustRequired() === 0;
+  }
+
+  getUndamagedThrusters(direction) {
+    return this.thrusters.filter(
+      thruster =>
+        thruster.getDamageLevel() === 0 && thruster.isDirection(direction)
+    );
+  }
 
   errorIfOverBudget() {
-    if (this.totalThrustRequired > this.thrustAvailable) {
+    if (this.cost > this.thrustAvailable) {
       throw new Error("over budget");
     }
   }
 
   pay() {
     try {
-      this.errorIfOverBudget();
+      if (this.getTotalThrustRequired() > this.thrustAvailable) {
+        throw new Error("over budget");
+      }
+
+      if (
+        this.process(direction => this.getUndamagedThrusters(direction), false)
+      ) {
+        return true;
+      }
 
       //assign thrust first to mono direction thrusters
-      this.assignUndamagedMono();
 
       //overthrust here
 
@@ -194,7 +213,7 @@ class ThrustBill {
 
       //if still not satisfied, not possible
 
-      return true;
+      return false;
     } catch (e) {
       if (e.message === "over budget") {
         return false;
@@ -204,6 +223,21 @@ class ThrustBill {
     }
   }
 
+  process(thrusterProvider, overChannel = false) {
+    return Object.keys(this.directionsRequired).forEach(direction => {
+      const thrusters = thrusterProvider(direction);
+      this.useThrusters(
+        direction,
+        this.directionsRequired[direction],
+        thrusters,
+        overChannel
+      );
+    });
+
+    return this.isPaid();
+  }
+
+  /*
   assignUndamagedMono() {
     Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection);
   }
@@ -237,31 +271,29 @@ class ThrustBill {
 
     this.useThrusters(direction, required, thrusters, false, 0);
   }
+  */
 
-  useThrusters(
-    direction,
-    required,
-    thrusters,
-    allowOverthrust = false,
-    damageLevel = 0
-  ) {
+  useThrusters(direction, required, thrusters, allowOverChannel = false) {
     thrusters.forEach(thruster => {
       if (required <= 0) {
         return;
       }
 
-      const { channeled, overthrusted, extraCost } = thruster.channel(
-        direction,
+      if (!thruster.isDirection(direction)) {
+        throw new Error("Trying to use thruster to wrong direction");
+      }
+
+      const { channeled, overChanneled, cost } = thruster.channel(
         required,
-        allowOverthrust
+        allowOverChannel
       );
 
       this.directionsRequired[direction] -= channeled;
-      this.directionsRequired[direction] -= overthrusted;
-      this.totalThrustRequired += extraCost;
+      this.directionsRequired[direction] -= overChanneled;
+      this.cost += cost;
 
       required -= channeled;
-      required -= overthrusted;
+      required -= overChanneled;
 
       this.errorIfOverBudget();
     });
