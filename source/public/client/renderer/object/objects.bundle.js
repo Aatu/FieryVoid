@@ -476,7 +476,7 @@ var ThrustAssignment = function () {
 
     this.thruster = thruster;
 
-    this.directions = [].concat(thurster.direction);
+    this.directions = [].concat(thruster.direction);
     this.paid = 0;
     this.channeled = 0;
     this.capacity = thruster.output;
@@ -489,59 +489,54 @@ var ThrustAssignment = function () {
   }
 
   _createClass(ThrustAssignment, [{
-    key: "isMono",
-    value: function isMono(direction) {
-      return this.directions.length === 1 && this.isDirection(direction);
-    }
-  }, {
     key: "isDirection",
     value: function isDirection(direction) {
       return this.directions.includes(direction);
     }
   }, {
-    key: "getCost",
-    value: function getCost(direction, amount) {
-      var damageLevel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-      if (!this.isDirection(direction)) {
-        return null;
+    key: "canOverthrust",
+    value: function canOverthrust() {
+      return !this.damaged && this.channeled < this.capacity * 2;
+    }
+  }, {
+    key: "getOverthrust",
+    value: function getOverthrust() {
+      var overThrust = this.channeled - this.capacity;
+      if (overThrust < 0) {
+        overThrust = 0;
       }
 
-      if (damageLevel === 0 && (this.firstIgnored && this.channeled === 0 || this.halfEfficiency)) {
-        return null;
+      return overThrust;
+    }
+  }, {
+    key: "getDamageLevel",
+    value: function getDamageLevel() {
+      if (this.firstIgnored && !this.halfEfficiency) {
+        return 1;
+      } else if (this.halfEfficiency && !this.firstIgnored) {
+        return 2;
+      } else if (this.halfEfficiency && this.firstIgnored) {
+        return 3;
+      } else {
+        return 0;
       }
-
-      if (damageLevel === 1 && this.halfEfficiency) {
-        return null;
-      }
-
-      var extraCost = 0;
-
-      if (this.firstIgnored && this.channeled === 0) {
-        extraCost++;
-      }
-
-      if (this.halfEfficiency) {
-        extraCost += amount;
-      }
-
+    }
+  }, {
+    key: "getThrustCapacity",
+    value: function getThrustCapacity() {
       var result = {
         capacity: this.capacity - this.channeled,
         overCapacity: 0,
         extraCost: this.firstIgnored && this.channeled === 0 ? 1 : 0,
-        costMultiplier: this.halfEfficiency ? 1 : 0
+        costMultiplier: this.halfEfficiency ? 2 : 1
       };
 
       if (!this.damaged) {
-        result.overCapacity = this.capacity * 2 - this.channeled;
-
-        if (result.overCapacity > this.capacity) {
+        if (this.channeled <= this.capacity) {
           result.overCapacity = this.capacity;
+        } else {
+          result.overCapacity = this.capacity - (this.channeled - this.capacity);
         }
-      }
-
-      if (result.overCapacity < 0) {
-        result.overCapacity = 0;
       }
 
       if (result.capacity < 0) {
@@ -551,24 +546,25 @@ var ThrustAssignment = function () {
       return result;
     }
   }, {
+    key: "overChannel",
+    value: function overChannel(amount) {
+      return this.channel(amount, true);
+    }
+  }, {
     key: "channel",
-    value: function channel(direction, amount) {
-      var overthrust = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    value: function channel(amount) {
+      var overthrust = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-      if (!this.isDirection(direction)) {
-        throw new Error("Trying to channel wrong direction");
-      }
-
-      var _getForDirection = this.getForDirection(direction, amount, 2),
-          capacity = _getForDirection.capacity,
-          overCapacity = _getForDirection.overCapacity,
-          extraCost = _getForDirection.extraCost,
-          costMultiplier = _getForDirection.costMultiplier;
+      var _getThrustCapacity = this.getThrustCapacity(),
+          capacity = _getThrustCapacity.capacity,
+          overCapacity = _getThrustCapacity.overCapacity,
+          extraCost = _getThrustCapacity.extraCost,
+          costMultiplier = _getThrustCapacity.costMultiplier;
 
       var result = {
         channeled: 0,
-        overthrusted: 0,
-        extraCost: 0
+        overChanneled: 0,
+        cost: 0
       };
 
       if (capacity >= amount) {
@@ -581,17 +577,38 @@ var ThrustAssignment = function () {
 
       if (amount > 0 && overthrust) {
         if (overCapacity >= amount) {
-          result.overthrusted = amount;
+          result.overChanneled = amount;
           amount = 0;
         } else {
-          result.overthrusted = overCapacity;
+          result.overChanneled = overCapacity;
         }
       }
 
-      result.extraCost = (result.channeled + result.overthrusted) * costMultiplier + extraCost;
+      result.cost = (result.channeled + result.overChanneled) * costMultiplier + extraCost;
 
-      this.channeled += result.channeled + result.overthrusted;
+      this.channeled += result.channeled + result.overChanneled;
       return result;
+    }
+  }, {
+    key: "undoChannel",
+    value: function undoChannel(amount) {
+      if (this.channeled - amount < 0) {
+        throw new Error("Can not undo channel more than channeled");
+      }
+
+      this.channeled = this.channeled - amount;
+
+      var extraRefund = 0;
+
+      if (this.channeled === 0 && this.firstIgnored) {
+        extraRefund = 1;
+      }
+
+      if (this.halfEfficiency) {
+        return { refund: amount * 2 + extraRefund };
+      } else {
+        return { refund: amount + extraRefund };
+      }
     }
   }]);
 
