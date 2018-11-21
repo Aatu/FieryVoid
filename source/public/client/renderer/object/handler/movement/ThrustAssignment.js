@@ -20,15 +20,23 @@ class ThrustAssignment {
     this.damaged = this.firstIgnored || this.halfEfficiency;
   }
 
+  isDamaged() {
+    return this.damaged;
+  }
+
   isDirection(direction) {
     return this.directions.includes(direction);
   }
 
-  canOverthrust() {
+  canChannel() {
+    return this.channeled < this.capacity;
+  }
+
+  canOverChannel() {
     return !this.damaged && this.channeled < this.capacity * 2;
   }
 
-  getOverthrust() {
+  getOverChannel() {
     let overThrust = this.channeled - this.capacity;
     if (overThrust < 0) {
       overThrust = 0;

@@ -346,12 +346,13 @@ test("undoing channel refunds first thrust ignored", () => {
   expect(costMultiplier).toBe(1);
 });
 
-test("undoing channel refunds first thrust ignored", () => {
+test("undoing channel refunds first thrust ignored with damage level 3", () => {
   const thrustAssignment = new ThrustAssignment(
     getThruster(0, 6, ["FirstThrustIgnored", "HalfEfficiency"])
   );
 
-  thrustAssignment.channel(2);
+  const { cost } = thrustAssignment.channel(2);
+  expect(cost).toBe(5);
   const { refund } = thrustAssignment.undoChannel(1);
 
   expect(refund).toBe(2);
@@ -371,4 +372,23 @@ test("undoing channel refunds first thrust ignored", () => {
   expect(overCapacity).toBe(0);
   expect(extraCost).toBe(1);
   expect(costMultiplier).toBe(2);
+});
+
+test("Channel cost should be right", () => {
+  const thrustAssignment1 = new ThrustAssignment(
+    getThruster(0, 6, ["FirstThrustIgnored"])
+  );
+  const thrustAssignment2 = new ThrustAssignment(
+    getThruster(0, 6, ["HalfEfficiency"])
+  );
+  const thrustAssignment3 = new ThrustAssignment(
+    getThruster(0, 6, ["FirstThrustIgnored", "HalfEfficiency"])
+  );
+
+  expect(thrustAssignment1.channel(2).cost).toBe(3);
+  expect(thrustAssignment1.channel(2).cost).toBe(2);
+  expect(thrustAssignment2.channel(2).cost).toBe(4);
+  expect(thrustAssignment2.channel(2).cost).toBe(4);
+  expect(thrustAssignment3.channel(2).cost).toBe(5);
+  expect(thrustAssignment3.channel(2).cost).toBe(4);
 });

@@ -3,6 +3,14 @@ import { movementTypes } from ".";
 class RequiredThrust {
   constructor(ship, move) {
     this.requirements = {};
+    this.fullfilments = {
+      0: [],
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: []
+    };
 
     switch (move.type) {
       case movementTypes.SPEED:
@@ -10,6 +18,28 @@ class RequiredThrust {
         break;
       default:
     }
+  }
+
+  getRequirement(direction) {
+    if (!this.requirements[direction]) {
+      return 0;
+    }
+
+    return this.requirements[direction] - this.getFulfilledAmount(direction);
+  }
+
+  fulfill(direction, amount, thruster) {
+    this.fullfilments[direction].push({ amount, thruster });
+    if (this.requirements[direction] < this.getFulfilledAmount(direction)) {
+      throw new Error("Fulfilled too much!");
+    }
+  }
+
+  getFulfilledAmount(direction) {
+    return this.fullfilments[direction].reduce(
+      (total, entry) => total + entry.amount,
+      0
+    );
   }
 
   requireSpeed(ship, move) {

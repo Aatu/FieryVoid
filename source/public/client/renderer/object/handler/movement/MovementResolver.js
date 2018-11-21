@@ -25,7 +25,7 @@ class MovementResolver {
     const bill = new ThrustBill(
       ship,
       this.movementService.getTotalProducedThrust(ship)
-    ).pay([...this.movementService.cloneThisTurnMovement(ship), thrustMove]);
+    ).pay([...this.movementService.getThisTurnMovement(ship), thrustMove]);
   }
 }
 

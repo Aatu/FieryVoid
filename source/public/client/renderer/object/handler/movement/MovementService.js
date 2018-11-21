@@ -145,15 +145,13 @@ class MovementService {
     return oPos;
   }
 
-  cloneThisTurnMovement(ship) {
-    return ship.movement
-      .filter(
-        move =>
-          move.turn === this.gamedata.turn ||
-          (move.isEnd() && move.turn === this.gamedata.turn - 1) ||
-          move.isDeploy()
-      )
-      .map(move => move.clone());
+  getThisTurnMovement(ship) {
+    return ship.movement.filter(
+      move =>
+        move.turn === this.gamedata.turn ||
+        (move.isEnd() && move.turn === this.gamedata.turn - 1) ||
+        move.isDeploy()
+    );
   }
 
   thrust(ship, direction) {
