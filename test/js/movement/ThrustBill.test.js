@@ -131,3 +131,19 @@ test("It manages to pay a simple manouver", () => {
   const bill = new ThrustBill(ship, 10, moves);
   expect(bill.pay()).toBe(true);
 });
+
+test("It manages to pay a simple manouver with overthrusting", () => {
+    const thrusters = [getThruster(0, 3), getThruster(3, 3)];
+  
+    ship.systems = thrusters;
+  
+    const moves = [
+      getMovementOrder("speed", 0, 0),
+      getMovementOrder("speed", 0, 0),
+      getMovementOrder("speed", 0, 3)
+    ];
+  
+    const bill = new ThrustBill(ship, 10, moves);
+    expect(bill.pay()).toBe(true);
+  });
+  

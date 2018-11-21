@@ -42,141 +42,27 @@ class ThrustBill {
       totalRequired[5]
     );
   }
-  /*
-  getMonoThrustersForDirection(
-    direction,
-    amount,
-    allowOverthrust = false,
-    damageLevel = 0
-  ) {
-    return getThrustersForDirection(
-      direction,
-      amount,
-      allowOverthrust,
-      damageLevel
-    ).filter(thruster => thruster.isMono(direction));
-  }
 
-  thrusterhasCapacity(
-    direction,
-    amount,
-    allowOverthrust,
-    damageLevel,
-    thruster
-  ) {
-    const result = this.thrusters.getCost(direction, amount, damageLevel);
-    if (result === null) {
-      return false;
-    }
-
-    const { capacity, overCapacity, extraCost, costMultiplier } = this.result;
-
-    return capacity > 0 || (allowOverthrust && overCapacity > 0);
-  }
-
-  sortThrusters(direction, amount, allowOverthrust, damageLevel, a, b) {
-    const { capacity: capacityA, overCapacity: overCapacityA } = a.getCost(
-      direction,
-      amount,
-      damageLevel
-    );
-    const { capacity: capacityB, overCapacity: overCapacityB } = b.getCost(
-      direction,
-      amount,
-      damageLevel
-    );
-
-    if (allowOverthrust) {
-      return capacityA + overCapacityA > capacityB + overCapacityB;
-    }
-
-    return capacityA > capacityB;
-  }
-
-  thrusterCanAffordedToBeUsed(
-    direction,
-    amount,
-    allowOverthrust,
-    damageLevel,
-    thruster
-  ) {
-    const result = this.thrusters.getCost(direction, amount, damageLevel);
-    if (result === null) {
-      return false;
-    }
-
-    let wouldChannel = 0;
-
-    //need and can overthrust
-    if (allowOverthrust && capacity < amount) {
-      //overthrust is not enough
-      if (amount - capacity > overCapacity) {
-        wouldChannel = capacity + overCapacity;
-      } else if (amount > capacity) {
-        //overthrust is enough
-        wouldChannel = amount;
-      }
-    } else if (capacity < amount) {
-      //can't overthrust, not enough capacity
-      wouldChannel = capacity;
-    } else if (capacity > amount) {
-      //capacity is enough;
-      wouldChannel = amount;
-    }
-
-    if (wouldChannel * costMultiplier + extraCost > this.thrustAvailable) {
-      return false;
-    }
-
-    const { capacity, overCapacity, extraCost, costMultiplier } = this.result;
-  }
-
-  getThrustersForDirection(
-    direction,
-    amount,
-    allowOverthrust = false,
-    damageLevel = 0
-  ) {
-    this.thrusters
-      .filter(thruster =>
-        this.thrusterhasCapacity.bind(
-          this,
-          direction,
-          amount,
-          allowOverthrust,
-          damageLevel
-        )
-      )
-      .filter(thruster =>
-        this.thrusterCanAffordedToBeUsed.bind(
-          this,
-          direction,
-          amount,
-          allowOverthrust,
-          damageLevel
-        )
-      )
-      .sort(
-        this.sortThrusters.bind(
-          this,
-          direction,
-          amount,
-          allowOverthrust,
-          damageLevel
-        )
+  getCurrentThrustRequired() {
+      return (
+        this.directionsRequired[0] +
+        this.directionsRequired[1] +
+        this.directionsRequired[2] +
+        this.directionsRequired[3] +
+        this.directionsRequired[4] +
+        this.directionsRequired[5]
       );
   }
-  
-  */
 
   isPaid() {
-    return this.getTotalThrustRequired() === 0;
+    return this.getCurrentThrustRequired() === 0;
   }
 
   getUndamagedThrusters(direction) {
     return this.thrusters.filter(
-      thruster =>
-        thruster.getDamageLevel() === 0 && thruster.isDirection(direction)
+      thruster => {
+        return thruster.getDamageLevel() === 0 && thruster.isDirection(direction)
+      }
     );
   }
 
@@ -192,12 +78,16 @@ class ThrustBill {
         throw new Error("over budget");
       }
 
+      //use norma
       if (
         this.process(direction => this.getUndamagedThrusters(direction), false)
       ) {
         return true;
       }
 
+     
+        this.process(direction => this.getUndamagedThrusters(direction), true)
+      
       //assign thrust first to mono direction thrusters
 
       //overthrust here
@@ -212,8 +102,7 @@ class ThrustBill {
       //move thrust to lvl3 damage mono
 
       //if still not satisfied, not possible
-
-      return false;
+      return this.isPaid();
     } catch (e) {
       if (e.message === "over budget") {
         return false;
@@ -224,11 +113,18 @@ class ThrustBill {
   }
 
   process(thrusterProvider, overChannel = false) {
-    return Object.keys(this.directionsRequired).forEach(direction => {
+    Object.keys(this.directionsRequired).forEach(direction => {
+        const required = this.directionsRequired[direction];
+        direction = parseInt(direction, 10);
+        
+        if (required === 0) {
+            return;
+        }
+
       const thrusters = thrusterProvider(direction);
       this.useThrusters(
         direction,
-        this.directionsRequired[direction],
+        required,
         thrusters,
         overChannel
       );
@@ -236,42 +132,6 @@ class ThrustBill {
 
     return this.isPaid();
   }
-
-  /*
-  assignUndamagedMono() {
-    Object.keys(this.directionsRequired).forEach(assignUndamagedMonoDirection);
-  }
-
-  assignUndamagedMonoDirection(direction) {
-    const required = this.directionsRequired[direction];
-    const thrusters = this.getMonoThrustersForDirection(
-      direction,
-      required,
-      false,
-      0
-    );
-
-    this.useThrusters(direction, required, thrusters, false, 0);
-  }
-
-  assignDamagedMono(damageLevel) {
-    Object.keys(this.directionsRequired).forEach(
-      assignUndamagedMonoDirection.bind(this, damageLevel)
-    );
-  }
-
-  assignDamagedMonoDirection(damageLevel, direction) {
-    const required = this.directionsRequired[direction];
-    const thrusters = this.getMonoThrustersForDirection(
-      direction,
-      required,
-      false,
-      damageLevel
-    );
-
-    this.useThrusters(direction, required, thrusters, false, 0);
-  }
-  */
 
   useThrusters(direction, required, thrusters, allowOverChannel = false) {
     thrusters.forEach(thruster => {
@@ -282,6 +142,7 @@ class ThrustBill {
       if (!thruster.isDirection(direction)) {
         throw new Error("Trying to use thruster to wrong direction");
       }
+
 
       const { channeled, overChanneled, cost } = thruster.channel(
         required,
