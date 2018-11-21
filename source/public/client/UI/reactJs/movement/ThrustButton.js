@@ -32,8 +32,6 @@ class ThrustButton extends React.Component {
   render() {
     const { clicked, direction } = this.props;
 
-    console.log("D", direction);
-
     return (
       <Container
         direction={mathlib.hexFacingToAngle(direction)}

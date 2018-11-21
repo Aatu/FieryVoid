@@ -7,8 +7,9 @@ class MovementService {
     this.gamedata = null;
   }
 
-  update(gamedata) {
+  update(gamedata, phaseStrategy) {
     this.gamedata = gamedata;
+    this.phaseStrategy = phaseStrategy;
   }
 
   getDeployMove(ship) {
@@ -105,7 +106,9 @@ class MovementService {
       .filter(system => !system.isDestroyed())
       .reduce((accumulated, system) => {
         var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
-        return accumulated + system.getOutput() - crits;
+        return (
+          accumulated + shipManager.systems.getOutput(ship, system) - crits
+        );
       }, 0);
   }
 
@@ -152,6 +155,14 @@ class MovementService {
         (move.isEnd() && move.turn === this.gamedata.turn - 1) ||
         move.isDeploy()
     );
+  }
+
+  shipMovementChanged(ship) {
+    this.phaseStrategy.onShipMovementChanged({ ship });
+  }
+
+  canThrust(ship, direction) {
+    return new MovementResolver(ship, this).canThrust(direction);
   }
 
   thrust(ship, direction) {

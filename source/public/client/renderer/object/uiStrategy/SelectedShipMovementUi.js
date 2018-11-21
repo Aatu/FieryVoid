@@ -28,6 +28,19 @@ class SelectedShipMovementUi extends UiStrategy {
   onZoom() {
     reposition(this.ship, this.shipIconContainer, this.uiManager);
   }
+
+  shipMovementChanged({ ship }) {
+    if (this.ship !== ship) {
+      return;
+    }
+
+    this.uiManager.showMovementUi({
+      ship,
+      movementService: this.movementService
+    });
+
+    reposition(this.ship, this.shipIconContainer, this.uiManager);
+  }
 }
 
 const reposition = (ship, shipIconContainer, uiManager) => {

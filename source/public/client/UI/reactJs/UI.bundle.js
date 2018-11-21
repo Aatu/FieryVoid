@@ -33827,14 +33827,18 @@ var Movement = function (_React$Component) {
   _createClass(Movement, [{
     key: "canThrust",
     value: function canThrust(direction) {
-      return true;
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      return movementService.canThrust(ship, direction);
     }
   }, {
     key: "thrust",
     value: function thrust(direction) {
-      var _props = this.props,
-          movementService = _props.movementService,
-          ship = _props.ship;
+      var _props2 = this.props,
+          movementService = _props2.movementService,
+          ship = _props2.ship;
 
       movementService.thrust(ship, direction);
     }
@@ -33937,8 +33941,6 @@ var ThrustButton = function (_React$Component) {
           clicked = _props.clicked,
           direction = _props.direction;
 
-
-      console.log("D", direction);
 
       return React.createElement(
         Container,

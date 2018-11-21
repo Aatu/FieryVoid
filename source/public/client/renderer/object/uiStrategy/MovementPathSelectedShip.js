@@ -19,6 +19,12 @@ class MovementPathSelectedShip extends UiStrategy {
       this.shipIconContainer.showMovementPath(this.ship);
     }
   }
+
+  shipMovementChanged({ ship }) {
+    if (this.ship === ship) {
+      this.shipIconContainer.showMovementPath(ship);
+    }
+  }
 }
 
 export default MovementPathSelectedShip;

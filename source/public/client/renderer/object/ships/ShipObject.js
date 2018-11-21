@@ -306,6 +306,7 @@ class ShipObject {
 
     var facing = mathlib.hexFacingToAngle(movement.facing);
 
+    gamePosition.z = this.defaultHeight;
     this.setPosition(gamePosition);
     this.setFacing(-facing);
   }

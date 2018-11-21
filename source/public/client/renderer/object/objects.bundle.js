@@ -168,16 +168,40 @@ var MovementResolver = function () {
   }
 
   _createClass(MovementResolver, [{
+    key: "canThrust",
+    value: function canThrust(direction) {
+      return this.thrust(direction, false);
+    }
+  }, {
     key: "thrust",
     value: function thrust(direction) {
-      console.log("Thrustage", direction);
+      var commit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
-      ship.movement;
+      console.log("Thrustage", direction, commit);
+
       var lastMove = this.movementService.getMostRecentMove(this.ship);
 
       var thrustMove = new _.MovementOrder(null, _.movementTypes.SPEED, lastMove.position, lastMove.target.moveToDirection(direction), lastMove.facing, lastMove.turn, direction);
 
-      var bill = new _.ThrustBill(ship, this.movementService.getTotalProducedThrust(ship)).pay([].concat(_toConsumableArray(this.movementService.getThisTurnMovement(ship)), [thrustMove]));
+      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), [].concat(_toConsumableArray(this.movementService.getThisTurnMovement(this.ship)), [thrustMove]));
+
+      if (bill.pay()) {
+        if (commit) {
+          bill.commit();
+          this.addMove(thrustMove);
+        }
+        return true;
+      } else if (commit) {
+        throw new Error("Tried to commit move that was not legal. Check legality first!");
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: "addMove",
+    value: function addMove(move) {
+      this.ship.movement.push(move);
+      this.movementService.shipMovementChanged(this.ship);
     }
   }]);
 
@@ -208,8 +232,9 @@ var MovementService = function () {
 
   _createClass(MovementService, [{
     key: "update",
-    value: function update(gamedata) {
+    value: function update(gamedata, phaseStrategy) {
       this.gamedata = gamedata;
+      this.phaseStrategy = phaseStrategy;
     }
   }, {
     key: "getDeployMove",
@@ -321,7 +346,7 @@ var MovementService = function () {
         return !system.isDestroyed();
       }).reduce(function (accumulated, system) {
         var crits = shipManager.criticals.hasCritical(system, "swtargetheld");
-        return accumulated + system.getOutput() - crits;
+        return accumulated + shipManager.systems.getOutput(ship, system) - crits;
       }, 0);
     }
   }, {
@@ -370,6 +395,16 @@ var MovementService = function () {
       return ship.movement.filter(function (move) {
         return move.turn === _this6.gamedata.turn || move.isEnd() && move.turn === _this6.gamedata.turn - 1 || move.isDeploy();
       });
+    }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged(ship) {
+      this.phaseStrategy.onShipMovementChanged({ ship: ship });
+    }
+  }, {
+    key: "canThrust",
+    value: function canThrust(ship, direction) {
+      return new _.MovementResolver(ship, this).canThrust(direction);
     }
   }, {
     key: "thrust",
@@ -1172,7 +1207,7 @@ var Capital = function (_ShipObject) {
 
     var _this = _possibleConstructorReturn(this, (Capital.__proto__ || Object.getPrototypeOf(Capital)).call(this, ship, scene));
 
-    _this.defaultHeight = 25;
+    _this.defaultHeight = 50;
     _this.sideSpriteSize = 50;
     _this.create();
     return _this;
@@ -1659,6 +1694,7 @@ var ShipObject = function () {
 
       var facing = mathlib.hexFacingToAngle(movement.facing);
 
+      gamePosition.z = this.defaultHeight;
       this.setPosition(gamePosition);
       this.setFacing(-facing);
     }
@@ -1885,6 +1921,15 @@ var MovementPathSelectedShip = function (_UiStrategy) {
         this.shipIconContainer.showMovementPath(this.ship);
       }
     }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged(_ref4) {
+      var ship = _ref4.ship;
+
+      if (this.ship === ship) {
+        this.shipIconContainer.showMovementPath(ship);
+      }
+    }
   }]);
 
   return MovementPathSelectedShip;
@@ -1957,6 +2002,22 @@ var SelectedShipMovementUi = function (_UiStrategy) {
   }, {
     key: "onZoom",
     value: function onZoom() {
+      reposition(this.ship, this.shipIconContainer, this.uiManager);
+    }
+  }, {
+    key: "shipMovementChanged",
+    value: function shipMovementChanged(_ref3) {
+      var ship = _ref3.ship;
+
+      if (this.ship !== ship) {
+        return;
+      }
+
+      this.uiManager.showMovementUi({
+        ship: ship,
+        movementService: this.movementService
+      });
+
       reposition(this.ship, this.shipIconContainer, this.uiManager);
     }
   }]);

@@ -15,7 +15,8 @@ const Container = styled.div`
 
 class Movement extends React.Component {
   canThrust(direction) {
-    return true;
+    const { movementService, ship } = this.props;
+    return movementService.canThrust(ship, direction);
   }
 
   thrust(direction) {

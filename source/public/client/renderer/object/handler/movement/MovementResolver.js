@@ -6,10 +6,13 @@ class MovementResolver {
     this.movementService = movementService;
   }
 
-  thrust(direction) {
-    console.log("Thrustage", direction);
+  canThrust(direction) {
+    return this.thrust(direction, false);
+  }
 
-    ship.movement;
+  thrust(direction, commit = true) {
+    console.log("Thrustage", direction, commit);
+
     const lastMove = this.movementService.getMostRecentMove(this.ship);
 
     const thrustMove = new MovementOrder(
@@ -23,9 +26,29 @@ class MovementResolver {
     );
 
     const bill = new ThrustBill(
-      ship,
-      this.movementService.getTotalProducedThrust(ship)
-    ).pay([...this.movementService.getThisTurnMovement(ship), thrustMove]);
+      this.ship,
+      this.movementService.getTotalProducedThrust(this.ship),
+      [...this.movementService.getThisTurnMovement(this.ship), thrustMove]
+    );
+
+    if (bill.pay()) {
+      if (commit) {
+        bill.commit();
+        this.addMove(thrustMove);
+      }
+      return true;
+    } else if (commit) {
+      throw new Error(
+        "Tried to commit move that was not legal. Check legality first!"
+      );
+    } else {
+      return false;
+    }
+  }
+
+  addMove(move) {
+    this.ship.movement.push(move);
+    this.movementService.shipMovementChanged(this.ship);
   }
 }
 

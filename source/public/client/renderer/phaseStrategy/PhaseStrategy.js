@@ -125,7 +125,7 @@ window.PhaseStrategy = (function() {
 
   PhaseStrategy.prototype.consumeGamedata = function() {
     this.shipIconContainer.consumeGamedata(this.gamedata);
-    this.movementService.update(this.gamedata);
+    this.movementService.update(this.gamedata, this);
     this.animationStrategy.update(this.gamedata);
     this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     this.ballisticIconContainer.consumeGamedata(

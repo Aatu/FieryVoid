@@ -3,7 +3,7 @@ import ShipObject from "./ShipObject";
 class Capital extends ShipObject {
   constructor(ship, scene) {
     super(ship, scene);
-    this.defaultHeight = 25;
+    this.defaultHeight = 50;
     this.sideSpriteSize = 50;
     this.create();
   }
