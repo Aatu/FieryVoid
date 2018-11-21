@@ -177,8 +177,6 @@ var MovementResolver = function () {
     value: function thrust(direction) {
       var commit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
-      console.log("Thrustage", direction, commit);
-
       var lastMove = this.movementService.getMostRecentMove(this.ship);
 
       var thrustMove = new _.MovementOrder(null, _.movementTypes.SPEED, lastMove.position, lastMove.target.moveToDirection(direction), lastMove.facing, lastMove.turn, direction);
@@ -194,6 +192,7 @@ var MovementResolver = function () {
       } else if (commit) {
         throw new Error("Tried to commit move that was not legal. Check legality first!");
       } else {
+        console.log(bill);
         return false;
       }
     }

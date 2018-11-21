@@ -497,8 +497,8 @@ class Thruster extends ShipSystem{
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
         parent::__construct($armour, $maxhealth, $powerReq, $output );
          
-        $this->thrustused = (int)$thrustused;
-        $this->direction = (int)$direction;
+        $this->thrustused = $thrustused;
+        $this->direction = $direction;
         //arc depends on direction!
 	switch($this->direction){
 		case 1: //retro

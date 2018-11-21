@@ -11,8 +11,6 @@ class MovementResolver {
   }
 
   thrust(direction, commit = true) {
-    console.log("Thrustage", direction, commit);
-
     const lastMove = this.movementService.getMostRecentMove(this.ship);
 
     const thrustMove = new MovementOrder(
@@ -42,6 +40,7 @@ class MovementResolver {
         "Tried to commit move that was not legal. Check legality first!"
       );
     } else {
+      console.log(bill);
       return false;
     }
   }
