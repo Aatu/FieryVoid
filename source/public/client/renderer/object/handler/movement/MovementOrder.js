@@ -47,6 +47,10 @@ class MovementOrder {
     return this.type === movementTypes.END;
   }
 
+  isCancellable() {
+    return this.isSpeed() || this.isEvade();
+  }
+
   clone() {
     return new MovementOrder(
       this.id,
@@ -62,13 +66,13 @@ class MovementOrder {
   }
 
   isOpposite(move) {
-      console.log("is opposite", move.type, movementTypes.SPEED)
-    switch(move.type) {
-        case movementTypes.SPEED:
-            console.log("checking opposite", this, move)
-            return this.isSpeed() && this.facing === mathlib.addToHexFacing(move.facing, 3) && this.value === mathlib.addToHexFacing(move.value);
-        default:
-        return false
+    switch (move.type) {
+      case movementTypes.SPEED:
+        return (
+          this.isSpeed() && this.value === mathlib.addToHexFacing(move.value, 3)
+        );
+      default:
+        return false;
     }
   }
 }

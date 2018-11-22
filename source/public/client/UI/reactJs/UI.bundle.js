@@ -33053,7 +33053,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":75,"./playerSettings/PlayerSettings":77,"./shipThrust/ShipThrust":79,"./shipWindow/ShipWindowsContainer":85,"./system/SystemInfo":92,"./system/SystemInfoButtons":93,"./system/SystemInfoMenu":94,"./system/WeaponList":95,"react":30,"react-dom":24}],64:[function(require,module,exports){
+},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":76,"./playerSettings/PlayerSettings":79,"./shipThrust/ShipThrust":81,"./shipWindow/ShipWindowsContainer":87,"./system/SystemInfo":94,"./system/SystemInfoButtons":95,"./system/SystemInfoMenu":96,"./system/WeaponList":97,"react":30,"react-dom":24}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33361,7 +33361,7 @@ var FEWButton = (0, _styledComponents2.default)(MainButton)(_templateObject4);
 
 exports.default = EwButtons;
 
-},{"../styled":89,"react":30,"styled-components":53}],68:[function(require,module,exports){
+},{"../styled":91,"react":30,"styled-components":53}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33446,7 +33446,7 @@ var FullScreen = function (_React$Component) {
 
 exports.default = FullScreen;
 
-},{"../styled":89,"react":30,"styled-components":53}],69:[function(require,module,exports){
+},{"../styled":91,"react":30,"styled-components":53}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33782,6 +33782,76 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -175px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -175px;\n  top: -153px;\n  ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+var _icon = require("../icon");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var Container = _styledComponents2.default.div.withConfig({
+  displayName: "CancelButton__Container",
+  componentId: "g91bg0-0"
+})(_templateObject, _styled.Clickable);
+
+var CancelButton = function (_React$Component) {
+  _inherits(CancelButton, _React$Component);
+
+  function CancelButton() {
+    _classCallCheck(this, CancelButton);
+
+    return _possibleConstructorReturn(this, (CancelButton.__proto__ || Object.getPrototypeOf(CancelButton)).apply(this, arguments));
+  }
+
+  _createClass(CancelButton, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          clicked = _props.clicked,
+          direction = _props.direction;
+
+
+      return React.createElement(
+        Container,
+        { onClick: clicked },
+        React.createElement(_icon.X, null)
+      );
+    }
+  }]);
+
+  return CancelButton;
+}(React.Component);
+
+exports.default = CancelButton;
+
+},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],76:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"], ["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"]);
 
 var _react = require("react");
@@ -33797,6 +33867,14 @@ var _styled = require("../styled");
 var _ThrustButton = require("./ThrustButton");
 
 var _ThrustButton2 = _interopRequireDefault(_ThrustButton);
+
+var _RevertButton = require("./RevertButton");
+
+var _RevertButton2 = _interopRequireDefault(_RevertButton);
+
+var _CancelButton = require("./CancelButton");
+
+var _CancelButton2 = _interopRequireDefault(_CancelButton);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33843,6 +33921,42 @@ var Movement = function (_React$Component) {
       movementService.thrust(ship, direction);
     }
   }, {
+    key: "canRevert",
+    value: function canRevert() {
+      var _props3 = this.props,
+          movementService = _props3.movementService,
+          ship = _props3.ship;
+
+      return movementService.canRevert(ship);
+    }
+  }, {
+    key: "revert",
+    value: function revert() {
+      var _props4 = this.props,
+          movementService = _props4.movementService,
+          ship = _props4.ship;
+
+      return movementService.revert(ship);
+    }
+  }, {
+    key: "canCancel",
+    value: function canCancel() {
+      var _props5 = this.props,
+          movementService = _props5.movementService,
+          ship = _props5.ship;
+
+      return movementService.canCancel(ship);
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      var _props6 = this.props,
+          movementService = _props6.movementService,
+          ship = _props6.ship;
+
+      return movementService.cancel(ship);
+    }
+  }, {
     key: "render",
     value: function render() {
       var ship = this.props.ship;
@@ -33856,7 +33970,9 @@ var Movement = function (_React$Component) {
         this.canThrust(2) && React.createElement(_ThrustButton2.default, { direction: 2, clicked: this.thrust.bind(this, 2) }),
         this.canThrust(3) && React.createElement(_ThrustButton2.default, { direction: 3, clicked: this.thrust.bind(this, 3) }),
         this.canThrust(4) && React.createElement(_ThrustButton2.default, { direction: 4, clicked: this.thrust.bind(this, 4) }),
-        this.canThrust(5) && React.createElement(_ThrustButton2.default, { direction: 5, clicked: this.thrust.bind(this, 5) })
+        this.canThrust(5) && React.createElement(_ThrustButton2.default, { direction: 5, clicked: this.thrust.bind(this, 5) }),
+        this.canRevert() && React.createElement(_RevertButton2.default, { clicked: this.revert.bind(this) }),
+        this.canCancel() && React.createElement(_CancelButton2.default, { clicked: this.cancel.bind(this) })
       );
     }
   }]);
@@ -33866,7 +33982,77 @@ var Movement = function (_React$Component) {
 
 exports.default = Movement;
 
-},{"../styled":89,"./ThrustButton":76,"react":30,"styled-components":53}],76:[function(require,module,exports){
+},{"../styled":91,"./CancelButton":75,"./RevertButton":77,"./ThrustButton":78,"react":30,"styled-components":53}],77:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+var _icon = require("../icon");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var Container = _styledComponents2.default.div.withConfig({
+  displayName: "RevertButton__Container",
+  componentId: "fvqe46-0"
+})(_templateObject, _styled.Clickable);
+
+var RevertButton = function (_React$Component) {
+  _inherits(RevertButton, _React$Component);
+
+  function RevertButton() {
+    _classCallCheck(this, RevertButton);
+
+    return _possibleConstructorReturn(this, (RevertButton.__proto__ || Object.getPrototypeOf(RevertButton)).apply(this, arguments));
+  }
+
+  _createClass(RevertButton, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          clicked = _props.clicked,
+          direction = _props.direction;
+
+
+      return React.createElement(
+        Container,
+        { onClick: clicked },
+        React.createElement(_icon.X, null)
+      );
+    }
+  }]);
+
+  return RevertButton;
+}(React.Component);
+
+exports.default = RevertButton;
+
+},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33924,12 +34110,6 @@ var ThrustButton = function (_React$Component) {
   }
 
   _createClass(ThrustButton, [{
-    key: "canThrust",
-    value: function canThrust(direction) {}
-  }, {
-    key: "thrust",
-    value: function thrust(direction) {}
-  }, {
     key: "getPosition",
     value: function getPosition(direction) {
       return mathlib.getPointInDirection(150, -mathlib.hexFacingToAngle(direction), 0, 0);
@@ -33958,7 +34138,7 @@ var ThrustButton = function (_React$Component) {
 
 exports.default = ThrustButton;
 
-},{"../icon":74,"../styled":89,"react":30,"styled-components":53}],77:[function(require,module,exports){
+},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34047,7 +34227,7 @@ var PlayerSettings = function (_React$Component) {
 
 exports.default = PlayerSettings;
 
-},{"../styled":89,"./PlayerSettingsForm":78,"react":30,"styled-components":53}],78:[function(require,module,exports){
+},{"../styled":91,"./PlayerSettingsForm":80,"react":30,"styled-components":53}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34286,7 +34466,7 @@ var keyCodes = {
 };
 exports.default = PlayerSettingsForm;
 
-},{"../common":66,"../styled":89,"react":30,"styled-components":53}],79:[function(require,module,exports){
+},{"../common":66,"../styled":91,"react":30,"styled-components":53}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34707,7 +34887,7 @@ setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){
     },
     */
 
-},{"../common":66,"../styled":89,"react":30,"styled-components":53}],80:[function(require,module,exports){
+},{"../common":66,"../styled":91,"react":30,"styled-components":53}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34892,7 +35072,7 @@ var toIcons = function toIcons(ship, fighter, systems, destroyed) {
 
 exports.default = FighterIcon;
 
-},{"../system/SystemIcon":91,"react":30,"styled-components":53}],81:[function(require,module,exports){
+},{"../system/SystemIcon":93,"react":30,"styled-components":53}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34966,7 +35146,7 @@ var getFighters = function getFighters(ship) {
 
 exports.default = FighterList;
 
-},{"./FighterIcon":80,"react":30,"styled-components":53}],82:[function(require,module,exports){
+},{"./FighterIcon":82,"react":30,"styled-components":53}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35297,7 +35477,7 @@ var pick = function pick(systems) {
 
 exports.default = ShipSection;
 
-},{"../system/SystemIcon":91,"react":30,"styled-components":53}],83:[function(require,module,exports){
+},{"../system/SystemIcon":93,"react":30,"styled-components":53}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35589,7 +35769,7 @@ var sortIntoLocations = function sortIntoLocations(ship) {
 
 exports.default = ShipWindow;
 
-},{"../styled":89,"./FighterList":81,"./ShipSection":82,"./ShipWindowEw":84,"react":30,"react-dom":24,"styled-components":53}],84:[function(require,module,exports){
+},{"../styled":91,"./FighterList":83,"./ShipSection":84,"./ShipWindowEw":86,"react":30,"react-dom":24,"styled-components":53}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35762,7 +35942,7 @@ var getAmount = function getAmount(ewEntry, ship) {
 
 exports.default = ShipWindowEw;
 
-},{"../styled":89,"react":30,"styled-components":53}],85:[function(require,module,exports){
+},{"../styled":91,"react":30,"styled-components":53}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35832,7 +36012,7 @@ var ShipWindowsContainer = function (_React$Component) {
 
 exports.default = ShipWindowsContainer;
 
-},{"./ShipWindow":83,"react":30,"styled-components":53}],86:[function(require,module,exports){
+},{"./ShipWindow":85,"react":30,"styled-components":53}],88:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35850,7 +36030,7 @@ var Clickable = (0, _styledComponents.css)(_templateObject);
 
 exports.Clickable = Clickable;
 
-},{"styled-components":53}],87:[function(require,module,exports){
+},{"styled-components":53}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35894,7 +36074,7 @@ exports.Backdrop = Backdrop;
 exports.ContainerRounded = ContainerRounded;
 exports.ContainerRoundedRightSide = ContainerRoundedRightSide;
 
-},{"styled-components":53}],88:[function(require,module,exports){
+},{"styled-components":53}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35923,7 +36103,7 @@ var SubTitle = (0, _styledComponents2.default)(Title)(_templateObject2);
 exports.Title = Title;
 exports.SubTitle = SubTitle;
 
-},{"styled-components":53}],89:[function(require,module,exports){
+},{"styled-components":53}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35987,7 +36167,7 @@ Object.defineProperty(exports, "Clickable", {
   }
 });
 
-},{"./Clickable":86,"./Container":87,"./Title":88}],90:[function(require,module,exports){
+},{"./Clickable":88,"./Container":89,"./Title":90}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36082,7 +36262,7 @@ var ShipInfo = function (_React$Component) {
 
 exports.default = ShipInfo;
 
-},{"./SystemInfo":92,"react":30,"styled-components":53}],91:[function(require,module,exports){
+},{"./SystemInfo":94,"react":30,"styled-components":53}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36602,7 +36782,7 @@ if (shipManager.systems.isDestroyed(ship, system)) {
 */
 exports.default = SystemIcon;
 
-},{"react":30,"styled-components":53}],92:[function(require,module,exports){
+},{"react":30,"styled-components":53}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36871,7 +37051,7 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfo;
 
-},{"../common":66,"./ShipInfo":90,"react":30,"styled-components":53}],93:[function(require,module,exports){
+},{"../common":66,"./ShipInfo":92,"react":30,"styled-components":53}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37237,7 +37417,7 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 
 exports.default = SystemInfoButtons;
 
-},{"../styled":89,"react":30,"styled-components":53}],94:[function(require,module,exports){
+},{"../styled":91,"react":30,"styled-components":53}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37338,7 +37518,7 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfoMenu;
 
-},{"../common":66,"./SystemInfoButtons":93,"react":30,"styled-components":53}],95:[function(require,module,exports){
+},{"../common":66,"./SystemInfoButtons":95,"react":30,"styled-components":53}],97:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37435,4 +37615,4 @@ var WeaponList = function (_React$Component) {
 
 exports.default = WeaponList;
 
-},{"./SystemIcon":91,"react":30,"styled-components":53}]},{},[63]);
+},{"./SystemIcon":93,"react":30,"styled-components":53}]},{},[63]);

@@ -2,6 +2,8 @@ import * as React from "react";
 import styled from "styled-components";
 import { Clickable } from "../styled";
 import ThrustButton from "./ThrustButton";
+import RevertButton from "./RevertButton";
+import CancelButton from "./CancelButton";
 
 const Container = styled.div`
   position: absolute;
@@ -22,6 +24,26 @@ class Movement extends React.Component {
   thrust(direction) {
     const { movementService, ship } = this.props;
     movementService.thrust(ship, direction);
+  }
+
+  canRevert() {
+    const { movementService, ship } = this.props;
+    return movementService.canRevert(ship);
+  }
+
+  revert() {
+    const { movementService, ship } = this.props;
+    return movementService.revert(ship);
+  }
+
+  canCancel() {
+    const { movementService, ship } = this.props;
+    return movementService.canCancel(ship);
+  }
+
+  cancel() {
+    const { movementService, ship } = this.props;
+    return movementService.cancel(ship);
   }
 
   render() {
@@ -47,6 +69,9 @@ class Movement extends React.Component {
         {this.canThrust(5) && (
           <ThrustButton direction={5} clicked={this.thrust.bind(this, 5)} />
         )}
+        {this.canRevert() && <RevertButton clicked={this.revert.bind(this)} />}
+
+        {this.canCancel() && <CancelButton clicked={this.cancel.bind(this)} />}
       </Container>
     );
   }

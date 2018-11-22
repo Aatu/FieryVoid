@@ -8,16 +8,16 @@ class MovementService {
   }
 
   getCurrentMovementVector(ship) {
-      const moves = this.getThisTurnMovement(ship);
-      return moves.reduce((vector, move) => {
-        if (move.isDeploy() || move.isEnd()) {
-            return move.target;
-        } else if (move.isSpeed()) {
-            return vector.add(move.target);
-        }
+    const moves = this.getThisTurnMovement(ship);
+    return moves.reduce((vector, move) => {
+      if (move.isDeploy() || move.isEnd()) {
+        return move.target;
+      } else if (move.isSpeed()) {
+        return vector.add(move.target);
+      }
 
-        return vector;
-      }, new hexagon.Offset(0, 0));
+      return vector;
+    }, new hexagon.Offset(0, 0));
   }
 
   update(gamedata, phaseStrategy) {
@@ -180,6 +180,22 @@ class MovementService {
 
   thrust(ship, direction) {
     new MovementResolver(ship, this).thrust(direction);
+  }
+
+  canCancel(ship) {
+    return new MovementResolver(ship, this).canCancel();
+  }
+
+  canRevert(ship) {
+    return this.canCancel(ship);
+  }
+
+  cancel(ship) {
+    new MovementResolver(ship, this).cancel();
+  }
+
+  revert(ship) {
+    new MovementResolver(ship, this).revert();
   }
 }
 

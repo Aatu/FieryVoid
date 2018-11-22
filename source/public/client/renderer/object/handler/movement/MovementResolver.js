@@ -26,10 +26,10 @@ class MovementResolver {
     const movements = this.movementService.getThisTurnMovement(this.ship);
 
     if (this.getOpposite(movements, thrustMove)) {
-        if (commit) {
-            this.removeOpposite(movements, thrustMove);
-        }
-        return true;
+      if (commit) {
+        this.removeOpposite(movements, thrustMove);
+      }
+      return true;
     }
 
     const bill = new ThrustBill(
@@ -49,9 +49,37 @@ class MovementResolver {
         "Tried to commit move that was not legal. Check legality first!"
       );
     } else {
-      console.log(bill);
       return false;
     }
+  }
+
+  canCancel() {
+    return this.movementService
+      .getThisTurnMovement(this.ship)
+      .some(move => move.isCancellable());
+  }
+
+  cancel() {
+    const toCancel = this.movementService
+      .getThisTurnMovement(this.ship)
+      .reverse()
+      .find(move => move.isCancellable());
+
+    if (!toCancel) {
+      return;
+    }
+
+    this.removeMove(toCancel);
+    this.movementService.shipMovementChanged(this.ship);
+  }
+
+  revert() {
+    this.movementService
+      .getThisTurnMovement(this.ship)
+      .filter(move => move.isCancellable())
+      .forEach(this.removeMove.bind(this));
+
+    this.movementService.shipMovementChanged(this.ship);
   }
 
   addMove(move) {
@@ -60,12 +88,17 @@ class MovementResolver {
   }
 
   getOpposite(movements, move) {
-      return movements.find(other => other.isOpposite(move));
+    return movements.find(other => other.isOpposite(move));
   }
 
   removeOpposite(movements, move) {
-      const opposite = this.getOpposite(movements, move);
-      this.ship.movement = this.ship.movement.filter(other => other === opposite);
+    const opposite = this.getOpposite(movements, move);
+    this.ship.movement = this.ship.movement.filter(other => other !== opposite);
+    this.movementService.shipMovementChanged(this.ship);
+  }
+
+  removeMove(move) {
+    this.ship.movement = this.ship.movement.filter(other => other !== move);
   }
 }
 

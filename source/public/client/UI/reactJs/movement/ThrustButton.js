@@ -16,10 +16,6 @@ const Container = styled.div`
 `;
 
 class ThrustButton extends React.Component {
-  canThrust(direction) {}
-
-  thrust(direction) {}
-
   getPosition(direction) {
     return mathlib.getPointInDirection(
       150,
