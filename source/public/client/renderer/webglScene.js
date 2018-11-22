@@ -30,6 +30,8 @@ window.webglScene = (function() {
     this.lastPinchDistance = null;
     this.lastTouchMove = null;
     this.cameraAngle = -500;
+    this.starFieldScene = null;
+    this.starFieldCamera = null;
   }
 
   webglScene.prototype.init = function(
@@ -70,6 +72,19 @@ window.webglScene = (function() {
       this.scene
     );
     this.phaseDirector.init(this.coordinateConverter, this.scene);
+
+    this.starFieldScene = new THREE.Scene();
+    this.starFieldCamera = new THREE.OrthographicCamera(
+        (this.zoom * this.width) / -2,
+        (this.zoom * this.width) / 2,
+        (this.zoom * this.height) / 2,
+        (this.zoom * this.height) / -2,
+        -4000,
+        30000
+      );
+
+    this.starFieldCamera.position.set(0, 0, 500);
+    this.starFieldCamera.lookAt(0, 0, 0);
 
     this.stats = new Stats();
     this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -232,6 +247,7 @@ window.webglScene = (function() {
     this.scene.add(new THREE.AmbientLight(0x000007));
     this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(this.width, this.height);
+    this.renderer.autoClear = false;
     this.renderer.context.getExtension("OES_standard_derivatives");
 
     jQuery(this.renderer.domElement)
@@ -243,7 +259,7 @@ window.webglScene = (function() {
     this.initialized = true;
     this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
     this.phaseDirector.receiveGamedata(gamedata, this);
-    this.starField = new StarField(this);
+    this.starField = new StarField(this.starFieldScene);
     this.render();
   };
 
@@ -298,6 +314,8 @@ window.webglScene = (function() {
 
     this.camera.position.x -= position.x * this.zoom * this.zoom;
     this.camera.position.y += position.y * this.zoom * this.zoom;
+    this.starFieldCamera.position.x -= position.x * this.zoom * this.zoom * 0.05;
+    this.starFieldCamera.position.y += position.y * this.zoom * this.zoom * 0.05;
 
     this.phaseDirector.relayEvent("ScrollEvent", this.camera.position);
   };
@@ -309,6 +327,8 @@ window.webglScene = (function() {
 
     this.camera.position.x = position.x;
     this.camera.position.y = position.y;
+    this.starFieldCamera.position.x = position.x * 0.1;
+    this.starFieldCamera.position.y = position.y * 0.1;
 
     this.phaseDirector.relayEvent("ScrollEvent", this.camera.position);
   };
@@ -348,7 +368,12 @@ window.webglScene = (function() {
   webglScene.prototype.render = function() {
     this.stats.begin();
     this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
-    this.renderer.render(this.scene, this.camera);
+
+    this.renderer.clear();
+    this.renderer.render( this.starFieldScene, this.starFieldCamera );
+    this.renderer.clearDepth();
+    this.renderer.render( this.scene, this.camera );
+
     animateZoom.call(this);
     this.starField.render();
 

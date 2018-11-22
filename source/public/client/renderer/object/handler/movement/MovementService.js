@@ -7,6 +7,19 @@ class MovementService {
     this.gamedata = null;
   }
 
+  getCurrentMovementVector(ship) {
+      const moves = this.getThisTurnMovement(ship);
+      return moves.reduce((vector, move) => {
+        if (move.isDeploy() || move.isEnd()) {
+            return move.target;
+        } else if (move.isSpeed()) {
+            return vector.add(move.target);
+        }
+
+        return vector;
+      }, new hexagon.Offset(0, 0));
+  }
+
   update(gamedata, phaseStrategy) {
     this.gamedata = gamedata;
     this.phaseStrategy = phaseStrategy;

@@ -27,6 +27,10 @@ class MovementOrder {
     this.assignedThrust = assignedThrust;
   }
 
+  isSpeed() {
+    return this.type === movementTypes.SPEED;
+  }
+
   isDeploy() {
     return this.type === movementTypes.DEPLOY;
   }
@@ -55,6 +59,17 @@ class MovementOrder {
       this.requiredThrust,
       this.assignedThrust
     );
+  }
+
+  isOpposite(move) {
+      console.log("is opposite", move.type, movementTypes.SPEED)
+    switch(move.type) {
+        case movementTypes.SPEED:
+            console.log("checking opposite", this, move)
+            return this.isSpeed() && this.facing === mathlib.addToHexFacing(move.facing, 3) && this.value === mathlib.addToHexFacing(move.value);
+        default:
+        return false
+    }
   }
 }
 

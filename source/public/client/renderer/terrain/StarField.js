@@ -1,10 +1,10 @@
 window.StarField = (function(){
 
-    function StarField(webglScene)
+    function StarField(scene)
     {
         this.starCount = 5000;
         this.emitterContainer = null;
-        this.webglScene = webglScene;
+        this.scene = scene;
         this.lastAnimationTime = null;
         this.totalAnimationTime = 0;
         this.zoomChanged = 0;
@@ -17,15 +17,11 @@ window.StarField = (function(){
 
     StarField.prototype.create = function()
     {
-        //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
-        
-        return;
-
+        this.scene.background = new THREE.Color(10/255, 10/255, 30/255);
+    
         this.cleanUp();
 
-        this.emitterContainer = new ParticleEmitterContainer(this.webglScene.scene, this.starCount, StarParticleEmitter);
-        
-        
+        this.emitterContainer = new ParticleEmitterContainer(this.scene, this.starCount, StarParticleEmitter);
 
         //this.webglScene.scene.background = new THREE.Color(10/255, 10/255, 30/255);
         var width =  3000; //this.webglScene.width * 1.5; 
@@ -65,8 +61,6 @@ window.StarField = (function(){
 
     StarField.prototype.render = function()
     {
-
-        return;
         if (! this.emitterContainer) {
             this.create();
         }
@@ -94,7 +88,7 @@ window.StarField = (function(){
             .setOpacity(this.getRandom() * 0.2 + 0.9)
             .setPosition({x: x, y: y})
             .setColor(new THREE.Color(1, 1, 1))
-            .setParallaxFactor(0.005 + this.getRandom() * 0.005);
+            .setParallaxFactor(0.1 + this.getRandom() * 0.1);
 
         if (this.getRandom() > 0.9) {
             particle
@@ -111,7 +105,7 @@ window.StarField = (function(){
         var y = ((this.getRandom() - 0.5) * height * 1.5);
 
         var size = 6 + this.getRandom() * 6;
-        var parallaxFactor = 0.005 + this.getRandom() * 0.005;
+        var parallaxFactor = 0.1 + this.getRandom() * 0.1;
         var color = new THREE.Color(this.getRandom() * 0.4 + 0.6, this.getRandom() * 0.2 + 0.8, this.getRandom() * 0.4 + 0.6);
 
         particle
@@ -213,7 +207,7 @@ window.StarField = (function(){
             .setTexture(particle.texture.gas)   
             .setAngle(this.getRandom() * 360)
             .setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.001)
-            .setParallaxFactor(0.005 + this.getRandom() * 0.005);
+            .setParallaxFactor(0.1 + this.getRandom() * 0.1);
 
         if (this.getRandom() > 0.9) {
             particle
@@ -225,7 +219,7 @@ window.StarField = (function(){
                 .setTexture(particle.texture.gas)   
                 .setAngle(this.getRandom() * 360)
                 .setAngleChange(baseRotation + (this.getRandom() - 0.5) * 0.01)
-                .setParallaxFactor(0.005 + this.getRandom() * 0.005)
+                .setParallaxFactor(0.1 + this.getRandom() * 0.1)
                 .setSineFrequency(this.getRandom() * 200 + 200)
                 .setSineAmplitude(this.getRandom()*0.02);
         }

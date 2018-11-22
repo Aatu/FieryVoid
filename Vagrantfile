@@ -86,11 +86,9 @@ Vagrant.configure("2") do |config|
     sudo a2enmod headers
 
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
-    apt-get install -y apt-get install mysql-server-5.5
+    apt-get install -y mysql-server
 
     mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
-    mysql -uroot -proot B5CGM < /vagrant/db/addGameRules.sql
-    mysql -uroot -proot B5CGM < /vagrant/db/playerWaiting.sql
 
     add-apt-repository ppa:ondrej/php
     apt-get update -y

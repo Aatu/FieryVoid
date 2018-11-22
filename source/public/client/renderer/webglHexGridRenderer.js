@@ -2,8 +2,8 @@
 
 window.webglHexGridRenderer = function () {
 
-    var HEX_COUNT_WIDTH = 199;
-    var HEX_COUNT_HEIGHT = 199;
+    var HEX_COUNT_WIDTH = 9999;
+    var HEX_COUNT_HEIGHT = 9999;
     var HEX_LINE_COLOR = "rgba(255,255,255,255)";
     var HEX_FILL_COLOR = "rgba(0,0,0,0)";
     var HEX_LINE_WIDTH = 20;

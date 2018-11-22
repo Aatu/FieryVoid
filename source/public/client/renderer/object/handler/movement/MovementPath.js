@@ -24,21 +24,22 @@ class MovementPath {
     }
 
     const move = this.movementService.getMostRecentMove(this.ship);
+    const target = this.movementService.getCurrentMovementVector(this.ship);
 
-    const line = createMovementLine(move);
+    const line = createMovementLine(move, target);
     this.scene.add(line.mesh);
     this.objects.push(line);
 
-    const facing = createMovementFacing(move);
+    const facing = createMovementFacing(move, target);
     this.scene.add(facing.mesh);
     this.objects.push(facing);
   }
 }
 
-const createMovementLine = move => {
+const createMovementLine = (move, target) => {
   const start = window.coordinateConverter.fromHexToGame(move.position);
   const end = window.coordinateConverter.fromHexToGame(
-    move.position.add(move.target)
+    move.position.add(target)
   );
 
   return new window.LineSprite(
@@ -60,7 +61,7 @@ const createMovementLine = move => {
   );
 };
 
-const createMovementFacing = move => {
+const createMovementFacing = (move, target) => {
   const size = window.coordinateConverter.getHexDistance() * 1.5;
   const facing = new window.ShipFacingSprite(
     { width: size, height: size },
@@ -69,7 +70,7 @@ const createMovementFacing = move => {
     move.facing
   );
   facing.setPosition(
-    window.coordinateConverter.fromHexToGame(move.position.add(move.target))
+    window.coordinateConverter.fromHexToGame(move.position.add(target))
   );
   facing.setFacing(mathlib.hexFacingToAngle(move.facing));
 

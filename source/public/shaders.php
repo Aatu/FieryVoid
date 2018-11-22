@@ -189,7 +189,6 @@
     attribute float sineFrequency;
     attribute float sineAmplitude;
     uniform float gameTime;
-    uniform mat4 customMatrix;
     varying vec4  vColor;
     varying float vAngle;
     varying float textureN;
@@ -221,11 +220,11 @@
         vAngle = angle + angleChange * elapsedTime;
         textureN = textureNumber;
 
-        vec3 modPos = vec3( position.x, position.y, position.z );
+        vec3 modPos = vec3( position.x - (cameraPosition.x * parallaxFactor), position.y - (cameraPosition.y * parallaxFactor), position.z );
 
 
         gl_PointSize = clamp(size + (sizeChange * elapsedTime), 0.0, 1024.0);
-        gl_Position = customMatrix * modelViewMatrix * vec4( modPos, 1.0 );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( modPos, 1.0 );
     }
 </script>
 <script id="starFragmentShader" type="x-shader/x-fragment">

@@ -17,16 +17,25 @@ class MovementResolver {
       null,
       movementTypes.SPEED,
       lastMove.position,
-      lastMove.target.moveToDirection(direction),
+      new hexagon.Offset(0, 0).moveToDirection(direction),
       lastMove.facing,
       lastMove.turn,
       direction
     );
 
+    const movements = this.movementService.getThisTurnMovement(this.ship);
+
+    if (this.getOpposite(movements, thrustMove)) {
+        if (commit) {
+            this.removeOpposite(movements, thrustMove);
+        }
+        return true;
+    }
+
     const bill = new ThrustBill(
       this.ship,
       this.movementService.getTotalProducedThrust(this.ship),
-      [...this.movementService.getThisTurnMovement(this.ship), thrustMove]
+      [...movements, thrustMove]
     );
 
     if (bill.pay()) {
@@ -48,6 +57,15 @@ class MovementResolver {
   addMove(move) {
     this.ship.movement.push(move);
     this.movementService.shipMovementChanged(this.ship);
+  }
+
+  getOpposite(movements, move) {
+      return movements.find(other => other.isOpposite(move));
+  }
+
+  removeOpposite(movements, move) {
+      const opposite = this.getOpposite(movements, move);
+      this.ship.movement = this.ship.movement.filter(other => other === opposite);
   }
 }
 
