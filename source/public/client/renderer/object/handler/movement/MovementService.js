@@ -42,10 +42,20 @@ class MovementService {
   }
 
   getPreviousTurnLastMove(ship) {
-    return ship.movement
+    let end = ship.movement
       .slice()
       .reverse()
-      .find(move => move.turn === this.gamedata.turn - 1 && move.isEnd());
+      .find(move => move.isEnd());
+
+      if (!end) {
+          end = this.getDeployMove(ship)
+      }
+
+      if (!end) {
+         end = ship.movement[0];
+    }
+
+    return end;
   }
 
   getAllMovesOfTurn(ship) {

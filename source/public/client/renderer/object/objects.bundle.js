@@ -130,14 +130,19 @@ var MovementPath = function () {
         return;
       }
 
+      var end = this.movementService.getPreviousTurnLastMove(this.ship);
       var move = this.movementService.getMostRecentMove(this.ship);
       var target = this.movementService.getCurrentMovementVector(this.ship);
 
-      var line = createMovementLine(move, target);
+      var line = createMovementLine(end.position, end.position.add(end.target), 0.2);
       this.scene.add(line.mesh);
       this.objects.push(line);
 
-      var facing = createMovementFacing(move, target);
+      var line2 = createMovementLine(end.position.add(end.target), end.position.add(target));
+      this.scene.add(line2.mesh);
+      this.objects.push(line2);
+
+      var facing = createMovementFacing(move.facing, end.position.add(target));
       this.scene.add(facing.mesh);
       this.objects.push(facing);
     }
@@ -146,20 +151,22 @@ var MovementPath = function () {
   return MovementPath;
 }();
 
-var createMovementLine = function createMovementLine(move, target) {
-  var start = window.coordinateConverter.fromHexToGame(move.position);
-  var end = window.coordinateConverter.fromHexToGame(move.position.add(target));
+var createMovementLine = function createMovementLine(position, target) {
+  var opacity = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
 
-  return new window.LineSprite(mathlib.getPointBetweenInDistance(start, end, window.coordinateConverter.getHexDistance() * 0.45, true), mathlib.getPointBetweenInDistance(end, start, window.coordinateConverter.getHexDistance() * 0.45, true), 10, new THREE.Color(0, 0, 1), 0.5);
+  var start = window.coordinateConverter.fromHexToGame(position);
+  var end = window.coordinateConverter.fromHexToGame(target);
+
+  return new window.LineSprite(mathlib.getPointBetweenInDistance(start, end, window.coordinateConverter.getHexDistance() * 0.45, true), mathlib.getPointBetweenInDistance(end, start, window.coordinateConverter.getHexDistance() * 0.45, true), 10, new THREE.Color(0, 0, 1), opacity);
 };
 
-var createMovementFacing = function createMovementFacing(move, target) {
+var createMovementFacing = function createMovementFacing(facing, target) {
   var size = window.coordinateConverter.getHexDistance() * 1.5;
-  var facing = new window.ShipFacingSprite({ width: size, height: size }, 0.01, 0.8, move.facing);
-  facing.setPosition(window.coordinateConverter.fromHexToGame(move.position.add(target)));
-  facing.setFacing(mathlib.hexFacingToAngle(move.facing));
+  var facingSprite = new window.ShipFacingSprite({ width: size, height: size }, 0.01, 0.8, facing);
+  facingSprite.setPosition(window.coordinateConverter.fromHexToGame(target));
+  facingSprite.setFacing(mathlib.hexFacingToAngle(facing));
 
-  return facing;
+  return facingSprite;
 };
 
 exports.createMovementLine = createMovementLine;
@@ -355,29 +362,37 @@ var MovementService = function () {
   }, {
     key: "getPreviousTurnLastMove",
     value: function getPreviousTurnLastMove(ship) {
-      var _this2 = this;
-
-      return ship.movement.slice().reverse().find(function (move) {
-        return move.turn === _this2.gamedata.turn - 1 && move.isEnd();
+      var end = ship.movement.slice().reverse().find(function (move) {
+        return move.isEnd();
       });
+
+      if (!end) {
+        end = this.getDeployMove(ship);
+      }
+
+      if (!end) {
+        end = ship.movement[0];
+      }
+
+      return end;
     }
   }, {
     key: "getAllMovesOfTurn",
     value: function getAllMovesOfTurn(ship) {
-      var _this3 = this;
+      var _this2 = this;
 
       return ship.movement.filter(function (move) {
-        return move.turn === _this3.gamedata.turn;
+        return move.turn === _this2.gamedata.turn;
       });
     }
   }, {
     key: "getShipsInSameHex",
     value: function getShipsInSameHex(ship, hex) {
-      var _this4 = this;
+      var _this3 = this;
 
       hex = hex && this.getMostRecentMove(ship).position;
       return this.gamedata.ships.filter(function (ship2) {
-        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this4.getMostRecentMove(ship2).position.equals(hex);
+        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this3.getMostRecentMove(ship2).position.equals(hex);
       });
     }
   }, {
@@ -413,10 +428,10 @@ var MovementService = function () {
   }, {
     key: "getEvadeMove",
     value: function getEvadeMove(ship) {
-      var _this5 = this;
+      var _this4 = this;
 
       return ship.movement.find(function (move) {
-        return move.isEvade() && move.turn === _this5.gamedata.turn;
+        return move.isEvade() && move.turn === _this4.gamedata.turn;
       });
     }
   }, {
@@ -485,10 +500,10 @@ var MovementService = function () {
   }, {
     key: "getThisTurnMovement",
     value: function getThisTurnMovement(ship) {
-      var _this6 = this;
+      var _this5 = this;
 
       return ship.movement.filter(function (move) {
-        return move.turn === _this6.gamedata.turn || move.isEnd() && move.turn === _this6.gamedata.turn - 1 || move.isDeploy();
+        return move.turn === _this5.gamedata.turn || move.isEnd() && move.turn === _this5.gamedata.turn - 1 || move.isDeploy();
       });
     }
   }, {

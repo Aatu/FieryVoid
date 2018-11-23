@@ -41,9 +41,11 @@ window.StarField = (function(){
 
         var gas = Math.floor(this.getRandom() * 5) + 8; 
         
+        /*
         while(gas--){
             createGasCloud.call(this, width, height)
         }
+        */
 
         this.emitterContainer.start();
         this.lastAnimationTime = new Date().getTime();

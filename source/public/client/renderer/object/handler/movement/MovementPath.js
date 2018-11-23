@@ -23,24 +23,27 @@ class MovementPath {
       return;
     }
 
+    const end = this.movementService.getPreviousTurnLastMove(this.ship);
     const move = this.movementService.getMostRecentMove(this.ship);
     const target = this.movementService.getCurrentMovementVector(this.ship);
 
-    const line = createMovementLine(move, target);
+    const line = createMovementLine(end.position, end.position.add(end.target), 0.2);
     this.scene.add(line.mesh);
     this.objects.push(line);
 
-    const facing = createMovementFacing(move, target);
+    const line2 = createMovementLine(end.position.add(end.target), end.position.add(target));
+    this.scene.add(line2.mesh);
+    this.objects.push(line2);
+
+    const facing = createMovementFacing(move.facing, end.position.add(target));
     this.scene.add(facing.mesh);
     this.objects.push(facing);
   }
 }
 
-const createMovementLine = (move, target) => {
-  const start = window.coordinateConverter.fromHexToGame(move.position);
-  const end = window.coordinateConverter.fromHexToGame(
-    move.position.add(target)
-  );
+const createMovementLine = (position, target, opacity = 0.5) => {
+  const start = window.coordinateConverter.fromHexToGame(position);
+  const end = window.coordinateConverter.fromHexToGame(target);
 
   return new window.LineSprite(
     mathlib.getPointBetweenInDistance(
@@ -57,24 +60,24 @@ const createMovementLine = (move, target) => {
     ),
     10,
     new THREE.Color(0, 0, 1),
-    0.5
+    opacity
   );
 };
 
-const createMovementFacing = (move, target) => {
+const createMovementFacing = (facing, target) => {
   const size = window.coordinateConverter.getHexDistance() * 1.5;
-  const facing = new window.ShipFacingSprite(
+  const facingSprite = new window.ShipFacingSprite(
     { width: size, height: size },
     0.01,
     0.8,
-    move.facing
+    facing
   );
-  facing.setPosition(
-    window.coordinateConverter.fromHexToGame(move.position.add(target))
+  facingSprite.setPosition(
+    window.coordinateConverter.fromHexToGame(target)
   );
-  facing.setFacing(mathlib.hexFacingToAngle(move.facing));
+  facingSprite.setFacing(mathlib.hexFacingToAngle(facing));
 
-  return facing;
+  return facingSprite;
 };
 
 export { createMovementLine };

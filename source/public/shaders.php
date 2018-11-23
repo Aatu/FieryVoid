@@ -203,6 +203,7 @@
             textureN = textureNumber;
             return;
         }
+        
 
         float currentOpacity = opacity;
         if (sineFrequency > 0.0) {
