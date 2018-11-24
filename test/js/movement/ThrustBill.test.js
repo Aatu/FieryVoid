@@ -1,7 +1,6 @@
-import ThrustBill from "../../../source/public/client/renderer/object/handler/movement/ThrustBill.js";
-import MovementOrder from "../../../source/public/client/renderer/object/handler/movement/MovementOrder.js";
-require("../../../source/public/client/model/hexagon/Offset.js");
-require("../../../source/public/client/model/hexagon/Cube.js");
+import ThrustBill from "../../../source/public/client/object/handler/movement/ThrustBill.js";
+import MovementOrder from "../../../source/public/client/object/handler/movement/MovementOrder.js";
+import { Offset, Cube } from "../../../source/public/client/object/model";
 require("../../../source/public/client/mathlib.js");
 
 window.shipManager = {
@@ -248,7 +247,7 @@ test("No budget to reallocate all overthrust", () => {
   expect(bill.thrusters[0].channeled).toBe(5);
   expect(bill.thrusters[1].damaged).toBe(true);
 
-  const newMoves = bill.commit();
+  const newMoves = bill.getMoves();
 
   expectDirectionsEmptyForRequiredThrust([0, 1, 2, 4, 5], newMoves[0]);
   expectDirectionsEqualForRequiredThrust(3, newMoves[0], [3]);

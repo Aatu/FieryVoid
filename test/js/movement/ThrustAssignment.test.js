@@ -1,6 +1,6 @@
-import ThrustAssignment from "../../../source/public/client/renderer/object/handler/movement/ThrustAssignment";
-require("../../../source/public/client/model/hexagon/Offset.js");
-require("../../../source/public/client/model/hexagon/Cube.js");
+import ThrustAssignment from "../../../source/public/client/object/handler/movement/ThrustAssignment";
+import ThrustBill from "../../../source/public/client/object/handler/movement/ThrustBill.js";
+import { Offset, Cube } from "../../../source/public/client/object/model";
 require("../../../source/public/client/mathlib.js");
 
 const getThruster = (direction = 0, output = 3, criticals = []) => ({
