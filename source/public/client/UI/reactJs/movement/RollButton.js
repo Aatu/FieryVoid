@@ -7,7 +7,7 @@ const Container = styled.div`
   position: absolute;
   width: 50px;
   height: 50px;
-  left: 125px;
+  left: -25px;
   top: -153px;
   ${Clickable}
 `;

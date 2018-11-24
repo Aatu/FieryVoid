@@ -4,7 +4,6 @@ import {
   ThrustBill,
   OverChannelResolver
 } from ".";
-import { throws } from "assert";
 
 class MovementResolver {
   constructor(ship, movementService, turn) {
@@ -39,6 +38,7 @@ class MovementResolver {
       if (commit) {
         this.movementService.replaceTurnMovement(this.ship, newMovement);
         this.movementService.shipMovementChanged(this.ship);
+        console.log("BILL", bill);
       }
       return {
         result: true,
@@ -57,10 +57,44 @@ class MovementResolver {
     return this.roll(false);
   }
 
-  roll(commit) {}
+  roll(commit = true) {
+    let rollMove = this.movementService.getRollMove(this.ship);
+
+    const endMove = this.movementService.getLastEndMove(this.ship);
+
+    let movements = this.movementService.getThisTurnMovement(this.ship);
+
+    if (rollMove) {
+      movements = movements.filter(move => move !== rollMove);
+    } else {
+      rollMove = new MovementOrder(
+        null,
+        movementTypes.ROLL,
+        endMove.position,
+        new hexagon.Offset(0, 0),
+        endMove.facing,
+        endMove.rolled,
+        this.turn,
+        endMove.rolled ? false : true
+      );
+
+      const playerAdded = movements.filter(move => move.isPlayerAdded());
+      const nonPlayerAdded = movements.filter(move => !move.isPlayerAdded());
+
+      movements = [...nonPlayerAdded, rollMove, ...playerAdded];
+    }
+
+    const bill = new ThrustBill(
+      this.ship,
+      this.movementService.getTotalProducedThrust(this.ship),
+      movements
+    );
+
+    return this.billAndPay(bill, commit);
+  }
 
   canEvade(step) {
-    return this.evade(stpe, false);
+    return this.evade(step, false);
   }
 
   evade(step, commit = true) {
@@ -69,6 +103,8 @@ class MovementResolver {
     const endMove = this.movementService.getLastEndMove(this.ship);
 
     if (evadeMove) {
+      evadeMove = evadeMove.clone();
+
       if (
         evadeMove.value + step >
         this.movementService.getMaximumEvasion(this.ship)
@@ -99,7 +135,9 @@ class MovementResolver {
 
     const playerAdded = this.movementService
       .getThisTurnMovement(this.ship)
-      .filter(move => move.isPlayerAdded() && !move.isRoll());
+      .filter(
+        move => move.isPlayerAdded() && !move.isRoll() && !move.isEvade()
+      );
     const nonPlayerAdded = this.movementService
       .getThisTurnMovement(this.ship)
       .filter(move => !move.isPlayerAdded() || move.isRoll());
@@ -190,17 +228,24 @@ class MovementResolver {
   canCancel() {
     return this.movementService
       .getThisTurnMovement(this.ship)
-      .some(move => move.isCancellable());
+      .some(move => move.isCancellable() || move.isEvade());
   }
 
   cancel() {
     const toCancel = this.ship.movement[this.ship.movement.length - 1];
 
-    if (!toCancel || !toCancel.isCancellable()) {
+    if (!toCancel || (!toCancel.isCancellable() && !toCancel.isEvade())) {
       return;
     }
 
-    this.removeMove(toCancel);
+    if (toCancel.isEvade()) {
+      toCancel.value--;
+      if (toCancel.value <= 0) {
+        this.removeMove(toCancel);
+      }
+    } else {
+      this.removeMove(toCancel);
+    }
 
     const bill = new ThrustBill(
       this.ship,
@@ -214,7 +259,7 @@ class MovementResolver {
   revert() {
     this.movementService
       .getThisTurnMovement(this.ship)
-      .filter(move => move.isCancellable())
+      .filter(move => move.isCancellable() || move.isEvade())
       .forEach(this.removeMove.bind(this));
 
     this.movementService.shipMovementChanged(this.ship);

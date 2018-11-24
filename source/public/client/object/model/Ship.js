@@ -1,41 +1,39 @@
-"use strict";
+import SystemFactory from "./SystemFactory";
 
-var Ship = function Ship(json) {
-  var staticShip = window.staticShips[json.faction][json.phpclass];
+class Ship {
+  constructor(json) {
+    var staticShip = window.staticShips[json.faction][json.phpclass];
 
-  if (!staticShip) {
-    throw new Error("Static ship not found for " + json.phpclass);
-  }
+    if (!staticShip) {
+      throw new Error("Static ship not found for " + json.phpclass);
+    }
 
-  Object.keys(staticShip).forEach(function(key) {
-    this[key] = staticShip[key];
-  }, this);
+    Object.keys(staticShip).forEach(function(key) {
+      this[key] = staticShip[key];
+    }, this);
 
-  for (var i in json) {
-    if (i == "systems") {
-      this.systems = SystemFactory.createSystemsFromJson(json[i], this);
-    } else if (i == "movement") {
-      this.movement = json[i].map(function(move) {
-        return new window.MovementOrder(
-          move.id,
-          move.type,
-          new hexagon.Offset(move.position),
-          new hexagon.Offset(move.target),
-          move.facing,
-          move.turn,
-          move.value
-        );
-      });
-    } else {
-      this[i] = json[i];
+    for (var i in json) {
+      if (i == "systems") {
+        this.systems = SystemFactory.createSystemsFromJson(json[i], this);
+      } else if (i == "movement") {
+        this.movement = json[i].map(function(move) {
+          return new window.MovementOrder(
+            move.id,
+            move.type,
+            new hexagon.Offset(move.position),
+            new hexagon.Offset(move.target),
+            move.facing,
+            move.turn,
+            move.value
+          );
+        });
+      } else {
+        this[i] = json[i];
+      }
     }
   }
-};
 
-Ship.prototype = {
-  constructor: Ship,
-
-  getHitChangeMod: function getHitChangeMod(shooter) {
+  getHitChangeMod(shooter) {
     var affectingSystems = Array();
     for (var i in this.systems) {
       var system = this.systems[i];
@@ -70,15 +68,12 @@ Ship.prototype = {
       sum += affectingSystems[i];
     }
     return sum;
-  },
+  }
 
   //Marcin Sawicki: this should use shooter, not pos - OR insert pos only if necessary!
   //otherwise serious trouble at range 0
   //checkIsValidAffectingSystem: function(system, pos)
-  checkIsValidAffectingSystem: function checkIsValidAffectingSystem(
-    system,
-    shooter
-  ) {
+  checkIsValidAffectingSystem(system, shooter) {
     if (!system.defensiveType) return false;
 
     //If the system was destroyed last turn continue
@@ -115,9 +110,9 @@ Ship.prototype = {
     }
 
     return true;
-  },
+  }
 
-  checkShieldGenerator: function checkShieldGenerator() {
+  checkShieldGenerator() {
     var shieldCapacity = 0;
     var activeShields = 0;
 
@@ -141,4 +136,7 @@ Ship.prototype = {
 
     return shieldCapacity >= activeShields;
   }
-};
+}
+
+window.Ship = Ship;
+export default Ship;

@@ -115,9 +115,11 @@ class MovementService {
   }
 
   getEvadeMove(ship) {
-    return ship.movement.find(
-      move => move.isEvade() && move.turn === this.gamedata.turn
-    );
+    return this.getThisTurnMovement(ship).find(move => move.isEvade());
+  }
+
+  getRollMove(ship) {
+    return this.getThisTurnMovement(ship).find(move => move.isRoll());
   }
 
   getEvasion(ship) {
@@ -126,12 +128,12 @@ class MovementService {
   }
 
   getMaximumEvasion(ship) {
-    return ship.systems
+    const max = ship.systems
       .filter(system => !system.isDestroyed() && system.maxEvasion > 0)
-      .reduce((total, system) => total + system.maxEvasion);
-  }
+      .reduce((total, system) => total + system.maxEvasion, 0);
 
-  evade(ship) {}
+    return max;
+  }
 
   getTotalProducedThrust(ship) {
     if (ship.flight) {
@@ -170,10 +172,6 @@ class MovementService {
     }
 
     return new hexagon.Offset(move.position);
-  }
-
-  getPreviousLocation(ship) {
-    //TODO
   }
 
   getThisTurnMovement(ship) {

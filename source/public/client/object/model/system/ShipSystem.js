@@ -1,32 +1,33 @@
-"use strict";
+class ShipSystem {
+  constructor(json, ship) {
+    this.ship = ship;
 
-var ShipSystem = function ShipSystem(json, ship) {
-  this.ship = ship;
-
-  for (var i in json) {
-    this[i] = json[i];
+    for (var i in json) {
+      this[i] = json[i];
+    }
   }
-};
 
-ShipSystem.prototype = {
-  constructor: ShipSystem
-};
+  initBoostableInfo() {
+    return this;
+  }
 
-ShipSystem.prototype.initBoostableInfo = function() {
-  return this;
-};
+  hasMaxBoost() {
+    return false;
+  }
 
-ShipSystem.prototype.hasMaxBoost = function() {
-  return false;
-};
+  isScanner() {
+    return false;
+  }
 
-ShipSystem.prototype.isScanner = function() {
-  return false;
-};
+  isDestroyed() {
+    return this.destroyed;
+  }
+}
 
-ShipSystem.prototype.isDestroyed = function() {
-  return this.destroyed;
-};
+window.ShipSystem = ShipSystem;
+export default ShipSystem;
+
+/*
 
 var Fighter = function Fighter(json, staticFighter, ship) {
   Object.keys(staticFighter).forEach(function(key) {
@@ -203,3 +204,4 @@ var Ballistic = function Ballistic(json, ship) {
 
 Ballistic.prototype = Object.create(Weapon.prototype);
 Ballistic.prototype.constructor = Ballistic;
+*/

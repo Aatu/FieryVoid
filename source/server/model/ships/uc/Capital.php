@@ -19,7 +19,7 @@ class Capital extends HeavyCombatVessel{
         $this->rollcost = 4;
         $this->pivotcost = 3;
         $this->iniativebonus = 30;
-        $this->evasionCost = 5;
+        $this->evasioncost = 5;
         
          
         $this->addPrimarySystem(101, new Reactor(5, 20, 0, 0));

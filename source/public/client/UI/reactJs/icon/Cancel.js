@@ -2,7 +2,7 @@ import * as React from "react";
 
 class Cancel extends React.Component {
   render() {
-    const { color = "#fff", size = "100%" } = this.props;
+    const { color = "#fff", size = "90%" } = this.props;
 
     return (
       <svg

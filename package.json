@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build-ui": "watchify source/public/client/UI/reactJs/UI.js -o source/public/client/UI/reactJs/UI.bundle.js -t [ babelify --presets [ env react ] ]",
-    "build-ships": "watchify source/public/client/renderer/object/objects.js -o source/public/client/renderer/object/objects.bundle.js -t [ babelify --presets [ env react ] ]",
+    "build-ships": "watchify source/public/client/object/objects.js -o source/public/client/object/objects.bundle.js -t [ babelify --presets [ env react ] ]",
     "test": "jest"
   },
   "dependencies": {

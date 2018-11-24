@@ -20,7 +20,7 @@ class Vault1Gunship extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
-        $this->evasionCost = 3;
+        $this->evasioncost = 3;
         
          
         $this->addPrimarySystem(101, new Reactor(5, 20, 0, 0));

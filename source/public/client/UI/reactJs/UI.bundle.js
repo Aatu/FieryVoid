@@ -33605,7 +33605,7 @@ var Cancel = function (_React$Component) {
           _props$color = _props.color,
           color = _props$color === undefined ? "#fff" : _props$color,
           _props$size = _props.size,
-          size = _props$size === undefined ? "100%" : _props$size;
+          size = _props$size === undefined ? "90%" : _props$size;
 
 
       return React.createElement(
@@ -34105,32 +34105,32 @@ var EvadeButton = function (_React$Component) {
 
   _createClass(EvadeButton, [{
     key: "canEvade",
-    value: function canEvade() {
+    value: function canEvade(step) {
       var _props = this.props,
           movementService = _props.movementService,
           ship = _props.ship;
 
-      return movementService.canEvade(ship);
+      return movementService.canEvade(ship, step);
     }
   }, {
     key: "evade",
-    value: function evade() {
+    value: function evade(step) {
       var _props2 = this.props,
           movementService = _props2.movementService,
           ship = _props2.ship;
 
-      return movementService.roll(ship);
+      return movementService.evade(ship, step);
     }
   }, {
     key: "render",
     value: function render() {
-      return [React.createElement(
+      return [this.canEvade(1) && React.createElement(
         Container,
-        { key: "evade-more", onClick: this.evade(this) },
+        { key: "evade-more", onClick: this.evade.bind(this, 1) },
         React.createElement(_icon.Evade, null)
-      ), React.createElement(
+      ), this.canEvade(-1) && React.createElement(
         RotatedContainer,
-        { key: "evade-less", onClick: this.evade(this) },
+        { key: "evade-less", onClick: this.evade.bind(this, -1) },
         React.createElement(_icon.Evade, null)
       )];
     }
@@ -34471,7 +34471,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -25px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -25px;\n  top: -153px;\n  ", "\n"]);
 
 var _react = require("react");
 
@@ -35694,6 +35694,8 @@ var _SystemIcon = require("../system/SystemIcon");
 
 var _SystemIcon2 = _interopRequireDefault(_SystemIcon);
 
+var _system = require("../../../object/model/system");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
@@ -35813,13 +35815,13 @@ var hasCriticals = function hasCriticals(system) {
 
 var getStructure = function getStructure(systems) {
   return systems.find(function (system) {
-    return system instanceof Structure;
+    return system instanceof _system.Structure;
   });
 };
 
 var filterStructure = function filterStructure(systems) {
   return systems.filter(function (system) {
-    return !(system instanceof Structure);
+    return !(system instanceof _system.Structure);
   });
 };
 
@@ -36017,7 +36019,7 @@ var pick = function pick(systems) {
 
 exports.default = ShipSection;
 
-},{"../system/SystemIcon":99,"react":30,"styled-components":53}],91:[function(require,module,exports){
+},{"../../../object/model/system":106,"../system/SystemIcon":99,"react":30,"styled-components":53}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36940,7 +36942,6 @@ var SystemIcon = function (_React$Component) {
           system = _props.system,
           ship = _props.ship;
 
-      system = shipManager.systems.initializeSystem(system);
 
       if (gamedata.waiting) return;
 
@@ -36976,7 +36977,6 @@ var SystemIcon = function (_React$Component) {
           system = _props2.system,
           ship = _props2.ship;
 
-      system = shipManager.systems.initializeSystem(system);
 
       webglScene.customEvent("SystemMouseOver", {
         ship: ship,
@@ -37001,7 +37001,6 @@ var SystemIcon = function (_React$Component) {
           system = _props3.system,
           ship = _props3.ship;
 
-      system = shipManager.systems.initializeSystem(system);
 
       if (system.weapon) {
         weaponManager.selectAllWeapons(ship, system);
@@ -37018,8 +37017,6 @@ var SystemIcon = function (_React$Component) {
           destroyed = _props4.destroyed,
           movementService = _props4.movementService;
 
-
-      system = shipManager.systems.initializeSystem(system);
 
       if (getDestroyed(ship, system) || destroyed) {
         return React.createElement(
@@ -37146,236 +37143,7 @@ var getText = function getText(ship, system, movementService) {
     return shipManager.systems.getOutput(ship, system);
   }
 };
-/*
 
-const setSystemData = (ship, system) => {
-    var parentWeapon = null;
-    var parentWindow = null;
-
-    if (system.parentId > 0) {
-        parentWeapon = system;
-
-        while (parentWeapon.parentId > 0) {
-            parentWeapon = shipManager.systems.getSystem(ship, parentWeapon.parentId);
-        }
-
-        system.damage = parentWeapon.damage;
-
-        //parentWindow = shipwindow.find(".parentsystem_" + parentWeapon.id);
-    }
-
-    shipManager.systems.initializeSystem(system);
-
-    if (system.dualWeapon && system.weapons != null) {
-        var weapon = system.weapons[system.firingMode];
-        shipManager.systems.initializeSystem(weapon);
-    }
-
-    //var systemwindow = shipwindow.find(".system_" + system.id);
-
-    if (systemwindow.length == 0 && system.parentId > -1) {
-        //systemwindow = shipwindow.find(".parentsystem_" + system.parentId);
-    }
-
-    var output = shipManager.systems.getOutput(ship, system);
-    var field = systemwindow.find(".efficiency.value");
-
-    /*
-    if (system.name == "structure") {
-        systemwindow.find(".healthvalue ").html(system.maxhealth - damageManager.getDamage(ship, system) + "/" + system.maxhealth + " A" + shipManager.systems.getArmour(ship, system));
-    }
-
-    if (system.parentId > 0) {
-        parentWindow.find(".healthbar").css("width", (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100 + "%");
-    } else {
-        systemwindow.find(".healthbar").css("width", (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100 + "%");
-    }
-
-    if (system.name == "thruster") {
-        systemwindow.data("direction", system.direction);
-        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
-    }
-    */
-
-//shipWindowManager.removeSystemClasses(systemwindow);
-
-/*
-    if (shipManager.systems.isDestroyed(ship, system)) {
-        if (system.parentId > 0) {
-            if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
-                // create an iconMask at the top of the DOM for the system.
-                var iconmask_element = document.createElement('div');
-                iconmask_element.className = "iconmask";
-                parentWindow.find(".iconmask").remove();
-                parentWindow.find(".icon").append(iconmask_element);
-            }
-
-            parentWindow.addClass("destroyed");
-        } else {
-            systemwindow.addClass("destroyed");
-        }
-        return;
-    }
-
-    if (shipManager.criticals.hasCriticals(system)) {
-        if (system.parentId > 0) {
-            parentWindow.addClass("critical");
-        } else {
-            systemwindow.addClass("critical");
-        }
-    }
-
-    */
-/*
-    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
-
-    if (system.weapon) {
-        var firing = weaponManager.hasFiringOrder(ship, system);
-
-        // To avoid double overlay of loading icon mask in case of a
-        // duoWeapon in a dualWeapon
-        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
-            systemwindow.addClass("loading");
-        } else {
-            systemwindow.removeClass("loading");
-        }
-
-        if (weaponManager.isSelectedWeapon(system)) {
-            systemwindow.addClass("selected");
-        } else {
-            systemwindow.removeClass("selected");
-        }
-
-        if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
-            systemwindow.addClass("firing");
-
-            if (system.parentId > -1) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-
-                if (parentSystem.duoWeapon) {
-                    $(".system_" + system.parentId).addClass("duofiring");
-                }
-            }
-        } else if (firing == "self") {
-            systemwindow.addClass("firing");
-            systemwindow.addClass("selfIntercept");
-        } else {
-            firing = false;
-            systemwindow.removeClass("firing");
-            systemwindow.removeClass("selfIntercept");
-        }
-
-        if (system.ballistic) {
-            systemwindow.addClass("ballistic");
-        } else {
-            systemwindow.removeClass("ballistic");
-        }
-
-        if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
-            if (system.parentId >= 0) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-
-                if (parentSystem.parentId >= 0) {
-                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
-                } else {
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", systemwindow);
-                }
-
-                modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
-            } else {
-                systemwindow.addClass("modes");
-
-                var modebutton = $(".mode", systemwindow);
-                modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
-            }
-        }
-
-        if (firing && system.canChangeShots) {
-            var fire = weaponManager.getFiringOrder(ship, system);
-
-            if (fire.shots < system.shots) {
-                systemwindow.addClass("canAddShots");
-            } else {
-                systemwindow.removeClass("canAddShots");
-            }
-
-            if (fire.shots > 1) {
-                systemwindow.addClass("canReduceShots");
-            } else {
-                systemwindow.removeClass("canReduceShots");
-            }
-
-            field.html(fire.shots + "/" + system.shots);
-        } else if (!firing) {
-            if (system.duoWeapon) {
-                var UI_active = systemwindow.find(".UI").hasClass("active");
-
-                shipWindowManager.addDuoSystem(ship, system, systemwindow);
-
-                if (UI_active) {
-                    systemwindow.find(".UI").addClass("active");
-                }
-            } else {
-                if (system.dualWeapon && system.weapons) {
-                    system = system.weapons[system.firingMode];
-                }
-
-                var load = weaponManager.getWeaponCurrentLoading(system);
-                var loadingtime = system.loadingtime;
-
-                if (system.normalload > 0) {
-                    loadingtime = system.normalload;
-                }
-
-                if (load > loadingtime) {
-                    load = loadingtime;
-                }
-
-                var overloadturns = "";
-
-                if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-                    overloadturns = "(" + system.overloadturns + ")";
-                }
-
-                if (system.overloadshots > 0) {
-                    field.html("S" + system.overloadshots);
-                } else {
-                    field.html(load + overloadturns + "/" + loadingtime);
-                }
-            }
-
-            
-        }
-    } else if (system.name == "thruster") {
-        systemwindow.data("direction", system.direction);
-        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
-
-        var channeled = shipManager.movement.getAmountChanneled(ship, system);
-        if (channeled > output) {
-            field.addClass("darkred");
-        } else {
-            field.removeClass("darkred");
-        }
-
-        if (channeled < 0) {
-            channeled = 0;
-        }
-
-        field.html(channeled + "/" + output);
-    } else if (system.name == "engine") {
-        var rem = shipManager.movement.getRemainingEngineThrust(ship);
-
-        field.html(rem + "/" + output);
-    } else if (system.name == "reactor") {
-        field.html(shipManager.power.getReactorPower(ship, system));
-    } else if (system.output > 0) {
-        field.html(output);
-    }
-}
-*/
 exports.default = SystemIcon;
 
 },{"react":30,"styled-components":53}],100:[function(require,module,exports){
@@ -38217,4 +37985,288 @@ var WeaponList = function (_React$Component) {
 
 exports.default = WeaponList;
 
-},{"./SystemIcon":99,"react":30,"styled-components":53}]},{},[63]);
+},{"./SystemIcon":99,"react":30,"styled-components":53}],104:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ShipSystem = function () {
+  function ShipSystem(json, ship) {
+    _classCallCheck(this, ShipSystem);
+
+    this.ship = ship;
+
+    for (var i in json) {
+      this[i] = json[i];
+    }
+  }
+
+  _createClass(ShipSystem, [{
+    key: "initBoostableInfo",
+    value: function initBoostableInfo() {
+      return this;
+    }
+  }, {
+    key: "hasMaxBoost",
+    value: function hasMaxBoost() {
+      return false;
+    }
+  }, {
+    key: "isScanner",
+    value: function isScanner() {
+      return false;
+    }
+  }, {
+    key: "isDestroyed",
+    value: function isDestroyed() {
+      return this.destroyed;
+    }
+  }]);
+
+  return ShipSystem;
+}();
+
+window.ShipSystem = ShipSystem;
+exports.default = ShipSystem;
+
+/*
+
+var Fighter = function Fighter(json, staticFighter, ship) {
+  Object.keys(staticFighter).forEach(function(key) {
+    this[key] = staticFighter[key];
+  }, this);
+
+  for (var i in json) {
+    if (i == "systems") {
+      this.systems = SystemFactory.createSystemsFromJson(json[i], ship, this);
+    } else {
+      this[i] = json[i];
+    }
+  }
+};
+
+Fighter.prototype = Object.create(ShipSystem.prototype);
+Fighter.prototype.constructor = Fighter;
+
+var SuperHeavyFighter = function SuperHeavyFighter(json, ship) {
+  Object.keys(staticFighter).forEach(function(key) {
+    this[key] = staticFighter[key];
+  }, this);
+
+  for (var i in json) {
+    if (i == "systems") {
+      this.systems = SystemFactory.createSystemsFromJson(json[i], ship, this);
+    } else {
+      this[i] = json[i];
+    }
+  }
+};
+
+SuperHeavyFighter.prototype = Object.create(ShipSystem.prototype);
+SuperHeavyFighter.prototype.constructor = SuperHeavyFighter;
+
+var Weapon = function Weapon(json, ship) {
+  ShipSystem.call(this, json, ship);
+  this.targetsShips = true;
+};
+
+Weapon.prototype = Object.create(ShipSystem.prototype);
+Weapon.prototype.constructor = Weapon;
+
+Weapon.prototype.getAmmo = function(fireOrder) {
+  return null;
+};
+
+Weapon.prototype.translateFCtoD100txt = function(fireControl) {
+  var FCtxt = "";
+  var i = 0;
+  var toAdd;
+  for (i = 0; i <= 2; i++) {
+    toAdd = fireControl[i];
+    if (fireControl[i] === null) {
+      toAdd = "-";
+    } else {
+      toAdd = toAdd * 5; //d20 to d100
+    }
+    FCtxt = FCtxt + toAdd;
+    if (i < 2) FCtxt = FCtxt + "/";
+  }
+  return FCtxt;
+}; //endof Weapon.prototype.translateFCtoD100txt
+
+Weapon.prototype.changeFiringMode = function() {
+  var mode = this.firingMode + 1;
+
+  if (this.firingModes[mode]) {
+    this.firingMode = mode;
+  } else {
+    this.firingMode = 1;
+  }
+
+  //set data for that firing mode...
+  //change both attributes (used in various situations) and .data array (used for display)
+  if (!mathlib.arrayIsEmpty(this.maxDamageArray))
+    this.maxDamage = this.maxDamageArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.minDamageArray)) {
+    this.minDamage = this.minDamageArray[this.firingMode];
+    this.data["Damage"] = this.minDamage;
+    if (this.maxDamage > 0)
+      this.data["Damage"] = this.data["Damage"] + "-" + this.maxDamage;
+  }
+  if (!mathlib.arrayIsEmpty(this.priorityArray)) {
+    this.priority = this.priorityArray[this.firingMode];
+    this.data["Resolution Priority"] = this.priority;
+  }
+  if (!mathlib.arrayIsEmpty(this.rangeDamagePenaltyArray))
+    this.rangeDamagePenalty = this.rangeDamagePenaltyArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.rangePenaltyArray)) {
+    this.rangePenalty = this.rangePenaltyArray[this.firingMode];
+    this.data["Range penalty"] = this.rangePenalty + " per hex";
+  }
+  if (!mathlib.arrayIsEmpty(this.rangeArray)) {
+    this.range = this.rangeArray[this.firingMode];
+    this.data["Range"] = this.range;
+  }
+  if (!mathlib.arrayIsEmpty(this.fireControlArray)) {
+    this.fireControl = this.fireControlArray[this.firingMode];
+    this.data["Fire control (fighter/med/cap)"] = this.translateFCtoD100txt(
+      this.fireControl
+    );
+    //this.fireControl[0]+'/'+this.fireControl[1]+'/'+this.fireControl[2];
+  }
+  if (!mathlib.arrayIsEmpty(this.loadingtimeArray))
+    this.loadingtime = this.loadingtimeArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.turnsloadedArray))
+    this.turnsloaded = this.turnsloadedArray[this.firingMode];
+  this.data["Loading"] = this.turnsloaded + "/" + this.loadingtime;
+  if (!mathlib.arrayIsEmpty(this.extraoverloadshotsArray))
+    this.extraoverloadshots = this.extraoverloadshotsArray[this.firingMode];
+
+  if (!mathlib.arrayIsEmpty(this.uninterceptableArray))
+    this.uninterceptable = this.uninterceptableArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.shotsArray))
+    this.shots = this.shotsArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.damageTypeArray)) {
+    this.damageType = this.damageTypeArray[this.firingMode];
+    this.data["Damage type"] = this.damageType;
+  }
+  if (!mathlib.arrayIsEmpty(this.weaponClassArray)) {
+    this.weaponClass = this.weaponClassArray[this.firingMode];
+    this.data["Weapon type"] = this.weaponClass;
+  }
+  if (!mathlib.arrayIsEmpty(this.defaultShotsArray))
+    this.defaultShots = this.defaultShotsArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.groupingArray))
+    this.grouping = this.groupingArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.gunsArray))
+    this.guns = this.gunsArray[this.firingMode];
+
+  //firing animation related...
+  if (!mathlib.arrayIsEmpty(this.animationArray))
+    this.animation = this.animationArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationImgArray))
+    this.animationImg = this.animationImgArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationImgSpriteArray))
+    this.animationImgSprite = this.animationImgSpriteArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationColorArray))
+    this.animationColor = this.animationColorArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationColor2Array))
+    this.animationColor2 = this.animationColor2Array[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationWidthArray))
+    this.animationWidth = this.animationWidthArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray))
+    this.animationExplosionScale = this.animationExplosionScaleArray[
+      this.firingMode
+    ];
+  if (!mathlib.arrayIsEmpty(this.animationExplosionTypeArray))
+    this.animationExplosionType = this.animationExplosionTypeArray[
+      this.firingMode
+    ];
+  if (!mathlib.arrayIsEmpty(this.explosionColorArray))
+    this.explosionColor = this.explosionColorArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.trailLengthArray))
+    this.trailLength = this.trailLengthArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.trailColorArray))
+    this.trailColor = this.trailColorArray[this.firingMode];
+  if (!mathlib.arrayIsEmpty(this.projectilespeedArray))
+    this.projectilespeed = this.projectilespeedArray[this.firingMode];
+}; //end of Weapon.prototype.changeFiringMode
+
+Weapon.prototype.getTurnsloaded = function() {
+  return this.turnsloaded;
+};
+
+Weapon.prototype.getInterceptRating = function() {
+  return this.intercept;
+};
+
+var Ballistic = function Ballistic(json, ship) {
+  Weapon.call(this, json, ship);
+};
+
+Ballistic.prototype = Object.create(Weapon.prototype);
+Ballistic.prototype.constructor = Ballistic;
+*/
+
+},{}],105:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ShipSystem2 = require("./ShipSystem");
+
+var _ShipSystem3 = _interopRequireDefault(_ShipSystem2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Structure = function (_ShipSystem) {
+  _inherits(Structure, _ShipSystem);
+
+  function Structure() {
+    _classCallCheck(this, Structure);
+
+    return _possibleConstructorReturn(this, (Structure.__proto__ || Object.getPrototypeOf(Structure)).apply(this, arguments));
+  }
+
+  return Structure;
+}(_ShipSystem3.default);
+
+window.Structure = Structure;
+exports.default = Structure;
+
+},{"./ShipSystem":104}],106:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Structure = exports.ShipSystem = undefined;
+
+var _ShipSystem = require("./ShipSystem");
+
+var _ShipSystem2 = _interopRequireDefault(_ShipSystem);
+
+var _Structure = require("./Structure");
+
+var _Structure2 = _interopRequireDefault(_Structure);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.ShipSystem = _ShipSystem2.default;
+exports.Structure = _Structure2.default;
+
+},{"./ShipSystem":104,"./Structure":105}]},{},[63]);

@@ -170,55 +170,6 @@ shipManager.systems = {
     return null;
   },
 
-  initializeSystem: function initializeSystem(system) {
-    if (system.dualWeapon && system.weapons == null) {
-      return system;
-    }
-
-    if (system.dualWeapon) {
-      var selectedWeapon = system.weapons[system.firingMode];
-
-      if (selectedWeapon.duoWeapon) {
-        selectedWeapon.damage = system.weapons[1].damage;
-      } else {
-        selectedWeapon.damage = system.damage;
-      }
-
-      selectedWeapon.power = system.power;
-      selectedWeapon.firingMode = system.firingMode;
-      selectedWeapon.firingModes = system.firingModes;
-      selectedWeapon.dualWeapon = true;
-      selectedWeapon.initialized = true;
-
-      selectedWeapon.destroyed = system.destroyed;
-      return selectedWeapon;
-    }
-
-    if (system.boostable) {
-      system = system.initBoostableInfo();
-    }
-
-    if (system.name == "engine") {
-      system.addInfo();
-    }
-
-    // Check the number of elements in missileArray
-    // This has to be done like this, as length doesn't give the correct
-    // return because the elements in the missileArray aren't on consequetive
-    // indices.
-    var cnt = 0;
-    for (var i in system.missileArray) {
-      cnt++;
-    }
-
-    if (system.missileArray !== null && cnt > 0) {
-      system.range =
-        system.missileArray[system.firingMode].range + system.rangeMod;
-    }
-
-    return system;
-  },
-
   getSystemByName: function getSystemByName(ship, name) {
     for (var i in ship.systems) {
       var system = ship.systems[i];

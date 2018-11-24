@@ -19,7 +19,7 @@ class Sx11 extends MediumShip{
         $this->rollcost = 1;
         $this->pivotcost = 1;
 		$this->iniativebonus = 60;
-        $this->evasionCost = 2;
+        $this->evasioncost = 2;
          
         $this->addPrimarySystem(100, new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(101, new CnC(4, 9, 0, 0));

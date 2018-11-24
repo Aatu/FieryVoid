@@ -174,6 +174,7 @@ class ThrustBill {
       if (
         this.process(direction => this.getUndamagedThrusters(direction), false) //do not overthrust
       ) {
+        this.paid = true;
         return true;
       }
 

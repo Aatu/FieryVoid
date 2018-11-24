@@ -1,6 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 import SystemIcon from "../system/SystemIcon";
+import { Structure } from "../../../object/model/system";
 
 const ShipSectionContainer = styled.div`
   display: flex;

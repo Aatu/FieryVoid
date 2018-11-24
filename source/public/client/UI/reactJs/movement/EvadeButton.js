@@ -18,24 +18,28 @@ const RotatedContainer = styled(Container)`
 `;
 
 class EvadeButton extends React.Component {
-  canEvade() {
+  canEvade(step) {
     const { movementService, ship } = this.props;
-    return movementService.canEvade(ship);
+    return movementService.canEvade(ship, step);
   }
 
-  evade() {
+  evade(step) {
     const { movementService, ship } = this.props;
-    return movementService.roll(ship);
+    return movementService.evade(ship, step);
   }
 
   render() {
     return [
-      <Container key="evade-more" onClick={this.evade(this)}>
-        <Evade />
-      </Container>,
-      <RotatedContainer key="evade-less" onClick={this.evade(this)}>
-        <Evade />
-      </RotatedContainer>
+      this.canEvade(1) && (
+        <Container key="evade-more" onClick={this.evade.bind(this, 1)}>
+          <Evade />
+        </Container>
+      ),
+      this.canEvade(-1) && (
+        <RotatedContainer key="evade-less" onClick={this.evade.bind(this, -1)}>
+          <Evade />
+        </RotatedContainer>
+      )
     ];
   }
 }
