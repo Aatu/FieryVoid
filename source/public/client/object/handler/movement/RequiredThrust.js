@@ -58,6 +58,13 @@ class RequiredThrust {
     };
   }
 
+  getTotalAmountRequired() {
+    return Object.keys(this.requirements).reduce((total, direction) => {
+      const required = this.requirements[direction] || 0;
+      return total + required;
+    }, 0);
+  }
+
   getRequirement(direction) {
     if (!this.requirements[direction]) {
       return 0;

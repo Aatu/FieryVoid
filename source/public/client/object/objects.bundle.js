@@ -424,7 +424,7 @@ var MovementResolver = function () {
     key: "canCancel",
     value: function canCancel() {
       return this.movementService.getThisTurnMovement(this.ship).some(function (move) {
-        return move.isCancellable() || move.isEvade();
+        return move.isCancellable();
       });
     }
   }, {
@@ -432,22 +432,22 @@ var MovementResolver = function () {
     value: function cancel() {
       var toCancel = this.ship.movement[this.ship.movement.length - 1];
 
-      if (!toCancel || !toCancel.isCancellable() && !toCancel.isEvade()) {
+      if (!toCancel || !toCancel.isCancellable()) {
         return;
       }
 
-      if (toCancel.isEvade()) {
-        toCancel.value--;
-        if (toCancel.value <= 0) {
-          this.removeMove(toCancel);
-        }
-      } else {
-        this.removeMove(toCancel);
-      }
+      this.removeMove(toCancel);
 
       var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), this.movementService.getThisTurnMovement(this.ship));
 
       return this.billAndPay(bill, true);
+    }
+  }, {
+    key: "canRevert",
+    value: function canRevert() {
+      return this.movementService.getThisTurnMovement(this.ship).some(function (move) {
+        return move.isPlayerAdded();
+      });
     }
   }, {
     key: "revert",
@@ -646,6 +646,11 @@ var MovementService = function () {
       return max;
     }
   }, {
+    key: "getOverChannel",
+    value: function getOverChannel(ship) {
+      return new _.OverChannelResolver(this.getThrusters(ship), this.getThisTurnMovement(ship)).getAmountOverChanneled();
+    }
+  }, {
     key: "getTotalProducedThrust",
     value: function getTotalProducedThrust(ship) {
       if (ship.flight) {
@@ -664,9 +669,16 @@ var MovementService = function () {
   }, {
     key: "getRemainingEngineThrust",
     value: function getRemainingEngineThrust(ship) {
-      //TODO
-
-      return 0;
+      return this.getTotalProducedThrust(ship) - this.getUsedEngineThrust(ship);
+    }
+  }, {
+    key: "getUsedEngineThrust",
+    value: function getUsedEngineThrust(ship) {
+      return this.getThisTurnMovement(ship).filter(function (move) {
+        return move.requiredThrust;
+      }).reduce(function (total, move) {
+        return total + move.requiredThrust.getTotalAmountRequired();
+      }, 0);
     }
   }, {
     key: "getPositionAtStartOfTurn",
@@ -718,7 +730,7 @@ var MovementService = function () {
   }, {
     key: "canRevert",
     value: function canRevert(ship) {
-      return this.canCancel(ship);
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canRevert();
     }
   }, {
     key: "cancel",
@@ -945,6 +957,16 @@ var RequiredThrust = function () {
       };
     }
   }, {
+    key: "getTotalAmountRequired",
+    value: function getTotalAmountRequired() {
+      var _this2 = this;
+
+      return Object.keys(this.requirements).reduce(function (total, direction) {
+        var required = _this2.requirements[direction] || 0;
+        return total + required;
+      }, 0);
+    }
+  }, {
     key: "getRequirement",
     value: function getRequirement(direction) {
       if (!this.requirements[direction]) {
@@ -956,10 +978,10 @@ var RequiredThrust = function () {
   }, {
     key: "isFulfilled",
     value: function isFulfilled() {
-      var _this2 = this;
+      var _this3 = this;
 
       return Object.keys(this.requirements).every(function (direction) {
-        return _this2.getRequirement(direction) === 0;
+        return _this3.getRequirement(direction) === 0;
       });
     }
   }, {
@@ -980,10 +1002,10 @@ var RequiredThrust = function () {
   }, {
     key: "getFulfilments",
     value: function getFulfilments() {
-      var _this3 = this;
+      var _this4 = this;
 
       return Object.keys(this.fullfilments).map(function (key) {
-        return _this3.fullfilments[key];
+        return _this4.fullfilments[key];
       }).filter(function (fulfillment) {
         return fulfillment.length > 0;
       });
@@ -1015,10 +1037,10 @@ var RequiredThrust = function () {
   }, {
     key: "accumulate",
     value: function accumulate(total) {
-      var _this4 = this;
+      var _this5 = this;
 
       Object.keys(this.requirements).forEach(function (direction) {
-        total[direction] = total[direction] ? total[direction] + _this4.requirements[direction] : _this4.requirements[direction];
+        total[direction] = total[direction] ? total[direction] + _this5.requirements[direction] : _this5.requirements[direction];
       });
 
       return total;

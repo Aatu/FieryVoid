@@ -228,24 +228,17 @@ class MovementResolver {
   canCancel() {
     return this.movementService
       .getThisTurnMovement(this.ship)
-      .some(move => move.isCancellable() || move.isEvade());
+      .some(move => move.isCancellable());
   }
 
   cancel() {
     const toCancel = this.ship.movement[this.ship.movement.length - 1];
 
-    if (!toCancel || (!toCancel.isCancellable() && !toCancel.isEvade())) {
+    if (!toCancel || !toCancel.isCancellable()) {
       return;
     }
 
-    if (toCancel.isEvade()) {
-      toCancel.value--;
-      if (toCancel.value <= 0) {
-        this.removeMove(toCancel);
-      }
-    } else {
-      this.removeMove(toCancel);
-    }
+    this.removeMove(toCancel);
 
     const bill = new ThrustBill(
       this.ship,
@@ -254,6 +247,12 @@ class MovementResolver {
     );
 
     return this.billAndPay(bill, true);
+  }
+
+  canRevert() {
+    return this.movementService
+      .getThisTurnMovement(this.ship)
+      .some(move => move.isPlayerAdded());
   }
 
   revert() {

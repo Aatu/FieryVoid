@@ -34150,7 +34150,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"], ["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"], ["\n  position: absolute;\n  width: 0px;\n  height: 0px;\n  left: 1000px;\n  top: 500px;\n  z-index: 99999;\n  opacity: 0.85;\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n    position: absolute\n    color: white;\n    font-family: arial;\n    margin: 0;\n    font-size: 16px;\n    text-transform: uppercase;\n    height: 20px;\n    padding: 2px 0;\n    overflow: hidden;\n     /* background-color: rgba(0, 0, 0, 0.5); */\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    text-shadow: black 0px 0px 13px, black 0px 0px 13px, black 0px 0px 13px;\n    cursor: default;\n"], ["\n    position: absolute\n    color: white;\n    font-family: arial;\n    margin: 0;\n    font-size: 16px;\n    text-transform: uppercase;\n    height: 20px;\n    padding: 2px 0;\n    overflow: hidden;\n     /* background-color: rgba(0, 0, 0, 0.5); */\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    text-shadow: black 0px 0px 13px, black 0px 0px 13px, black 0px 0px 13px;\n    cursor: default;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n  top: -100px;\n  left: -120px;\n  width: 240px;\n"], ["\n  top: -100px;\n  left: -120px;\n  width: 240px;\n"]),
+    _templateObject4 = _taggedTemplateLiteral(["\n  top: 76px;\n  left: -180px;\n  width: 360px;\n  justify-content: space-around;\n"], ["\n  top: 76px;\n  left: -180px;\n  width: 360px;\n  justify-content: space-around;\n"]),
+    _templateObject5 = _taggedTemplateLiteral(["\n  top: -76px;\n  left: -120px;\n  width: 240px;\n  font-size: 14px;\n  text-transform: none;\n  justify-content: space-around;\n  flex-wrap: wrap;\n"], ["\n  top: -76px;\n  left: -120px;\n  width: 240px;\n  font-size: 14px;\n  text-transform: none;\n  justify-content: space-around;\n  flex-wrap: wrap;\n"]),
+    _templateObject6 = _taggedTemplateLiteral(["\n  top: 52px;\n  left: -100px;\n  width: 200px;\n"], ["\n  top: 52px;\n  left: -100px;\n  width: 200px;\n"]);
 
 var _react = require("react");
 
@@ -34201,6 +34206,19 @@ var Container = _styledComponents2.default.div.withConfig({
   componentId: "sc-1jce40-0"
 })(_templateObject);
 
+var TextContainer = _styledComponents2.default.div.withConfig({
+  displayName: "Movement__TextContainer",
+  componentId: "sc-1jce40-1"
+})(_templateObject2);
+
+var EnginePower = (0, _styledComponents2.default)(TextContainer)(_templateObject3);
+
+var Evasion = (0, _styledComponents2.default)(TextContainer)(_templateObject4);
+
+var Stats = (0, _styledComponents2.default)(TextContainer)(_templateObject5);
+
+var OverChannel = (0, _styledComponents2.default)(Stats)(_templateObject6);
+
 var Movement = function (_React$Component) {
   _inherits(Movement, _React$Component);
 
@@ -34221,6 +34239,58 @@ var Movement = function (_React$Component) {
       return React.createElement(
         Container,
         { id: "shipMovementActual" },
+        React.createElement(
+          EnginePower,
+          null,
+          "Engine power: " + movementService.getRemainingEngineThrust(ship) + " / " + movementService.getTotalProducedThrust(ship)
+        ),
+        React.createElement(
+          Stats,
+          null,
+          React.createElement(
+            "div",
+            null,
+            "Acceleration cost: " + ship.accelcost
+          ),
+          React.createElement(
+            "div",
+            null,
+            "Pivot cost: " + ship.pivotcost
+          )
+        ),
+        React.createElement(
+          Evasion,
+          null,
+          React.createElement(
+            "div",
+            null,
+            "Over: " + movementService.getOverChannel(ship)
+          ),
+          React.createElement(
+            "div",
+            null,
+            "Evasion: " + movementService.getEvasion(ship)
+          ),
+          React.createElement(
+            "div",
+            null,
+            "Rolling: " + (movementService.getRollMove(ship) ? "yes" : "no")
+          )
+        ),
+        React.createElement(
+          OverChannel,
+          null,
+          React.createElement(
+            "div",
+            null,
+            "Evasion cost: " + ship.evasioncost
+          ),
+          React.createElement(
+            "div",
+            null,
+            "Roll cost: " + ship.rollcost
+          )
+        ),
         React.createElement(_ThrustButton2.default, {
           ship: ship,
           movementService: movementService,

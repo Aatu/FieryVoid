@@ -1,6 +1,7 @@
 import { MovementOrder } from ".";
 import { movementTypes } from ".";
 import { MovementResolver } from ".";
+import { OverChannelResolver } from ".";
 
 class MovementService {
   constructor() {
@@ -135,6 +136,13 @@ class MovementService {
     return max;
   }
 
+  getOverChannel(ship) {
+    return new OverChannelResolver(
+      this.getThrusters(ship),
+      this.getThisTurnMovement(ship)
+    ).getAmountOverChanneled();
+  }
+
   getTotalProducedThrust(ship) {
     if (ship.flight) {
       return ship.freethrust;
@@ -152,9 +160,16 @@ class MovementService {
   }
 
   getRemainingEngineThrust(ship) {
-    //TODO
+    return this.getTotalProducedThrust(ship) - this.getUsedEngineThrust(ship);
+  }
 
-    return 0;
+  getUsedEngineThrust(ship) {
+    return this.getThisTurnMovement(ship)
+      .filter(move => move.requiredThrust)
+      .reduce(
+        (total, move) => total + move.requiredThrust.getTotalAmountRequired(),
+        0
+      );
   }
 
   getPositionAtStartOfTurn(ship, currentTurn) {
@@ -202,7 +217,7 @@ class MovementService {
   }
 
   canRevert(ship) {
-    return this.canCancel(ship);
+    return new MovementResolver(ship, this, this.gamedata.turn).canRevert();
   }
 
   cancel(ship) {
