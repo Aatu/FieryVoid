@@ -46,11 +46,13 @@
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="client/lib/three.min.js"></script>
         <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
         <script src="static/ships.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
+        <script src="client/object/objects.bundle.js"></script>
 		<script src="client/player.js"></script>
         <script src="client/ships.js"></script>
         <script src="client/criticals.js"></script>
@@ -65,30 +67,6 @@
         <script src="client/UI/gameInfo.js"></script>
         <script src="client/UI/flightwindow.js"></script>
         <script src="client/UI/systemInfo.js"></script>
-        <script src="client/model/ship.js"></script>
-        <script src="client/model/shipSystem.js"></script>
-        <script src="client/model/systemFactory.js"></script>
-        <script src="client/model/system/baseSystems.js"></script>
-        <script src="client/model/system/defensive.js"></script>
-        <script src="client/model/weapon/ammo.js"></script>
-        <script src="client/model/weapon/laser.js"></script>
-        <script src="client/model/weapon/particle.js"></script>
-        <script src="client/model/weapon/matter.js"></script>
-        <script src="client/model/weapon/plasma.js"></script>
-        <script src="client/model/weapon/special.js"></script>
-        <script src="client/model/weapon/torpedo.js"></script>
-        <script src="client/model/weapon/pulse.js"></script>
-        <script src="client/model/weapon/electromagnetic.js"></script>
-        <script src="client/model/weapon/aoe.js"></script>
-        <script src="client/model/weapon/molecular.js"></script>
-        <script src="client/model/weapon/antimatter.js"></script>
-        <script src="client/model/weapon/dualWeapon.js"></script>
-        <script src="client/model/weapon/duoWeapon.js"></script>
-        <script src="client/model/weapon/gravitic.js"></script>
-        <script src="client/model/weapon/missile.js"></script>
-        <script src="client/model/weapon/ion.js"></script>
-    	<script src="client/model/weapon/customs.js"></script>
-	    <script src="client/model/weapon/customSW.js"></script>
 		<script>
 			
             window.weaponManager = 

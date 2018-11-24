@@ -86,7 +86,7 @@ Vagrant.configure("2") do |config|
     sudo a2enmod headers
 
     debconf-set-selections <<< "mysql-server mysql-server/root_password_again password root"
-    apt-get install -y mysql-server
+    apt-get install -y mysql-server-5.5
 
     mysql -uroot -proot < /vagrant/db/emptyDatabase.sql
 

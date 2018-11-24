@@ -884,19 +884,17 @@ class DBManager
                     tac_shipmovement
                 VALUES 
                 ( 
-                    null,?,?,?,?,?,?,?,?,?,?,?,?
+                    null,?,?,?,?,?,?,?,?,?,?,?
                 )"
             );
 
             if ($stmt) {
                 foreach ($moves as $move) {
-                    $reqThrust = $move->requiredThrust->serialize();
-
                     $position = $move->position;
                     $target = $move->target;
 
                     $stmt->bind_param(
-                        'iisiiiiiiisi',
+                        'iisiiiiiiii',
                         $shipid,
                         $gameid,
                         $move->type,
@@ -907,7 +905,6 @@ class DBManager
                         $move->facing,
                         $move->rolled,
                         $move->value,
-                        $reqThrust,
                         $move->turn
                     );
                     $stmt->execute();
@@ -1320,7 +1317,7 @@ class DBManager
 
         $stmt = $this->connection->prepare("
             SELECT 
-                id, shipid, type, q, r, dq, dr, facing, rolled, turn, value, requiredthrust
+                id, shipid, type, q, r, dq, dr, facing, rolled, turn, value
             FROM 
                 tac_shipmovement
             WHERE
@@ -1332,12 +1329,12 @@ class DBManager
         if ($stmt) {
             $lastTurn = $fetchTurn - 1;
             $stmt->bind_param('iii', $gamedata->id, $lastTurn, $fetchTurn);
-            $stmt->bind_result($id, $shipid, $type, $q, $r, $dq, $dr, $facing, $rolled, $turn, $value, $requiredthrust);
+            $stmt->bind_result($id, $shipid, $type, $q, $r, $dq, $dr, $facing, $rolled, $turn, $value);
             $stmt->execute();
 
             while ($stmt->fetch()) {
 
-                $move = new MovementOrder($id, $type, new OffsetCoordinate($q, $r), new OffsetCoordinate($dq, $dr), $facing, $rolled, $turn, $value, new RequiredThrust($requiredthrust));
+                $move = new MovementOrder($id, $type, new OffsetCoordinate($q, $r), new OffsetCoordinate($dq, $dr), $facing, $rolled, $turn, $value);
                 $gamedata->getShipById($shipid)->setMovement($move);
 
             }

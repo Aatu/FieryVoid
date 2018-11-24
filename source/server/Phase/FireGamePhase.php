@@ -25,32 +25,29 @@ class FireGamePhase implements Phase
         // check if adaptive Armour events did happen and submit
         $damagesAA = $servergamedata->getNewDamagesForAA();
 
-        if ($damagesAA){
-            foreach ($damagesAA as $entry){
+        if ($damagesAA) {
+            foreach ($damagesAA as $entry) {
                 $dbManager->submitDamagesForAdaptiveArmour($servergamedata->id, $servergamedata->turn, $entry);
             }
         }
 
         // submit criticals
-        $dbManager->submitCriticals($servergamedata->id,  $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
+        $dbManager->submitCriticals($servergamedata->id, $servergamedata->getUpdatedCriticals(), $servergamedata->turn);
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
     }
 
-    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    public function process(TacGamedata $gameData, DBManager $dbManager, array $ships)
     {
-        foreach ($ships as $ship){
-            if ($ship->userid != $gameData->forPlayer)
+        foreach ($ships as $ship) {
+            if ($ship->userid != $gameData->forPlayer) {
                 continue;
-
-            if ($ship->isDestroyed())
-                continue;
-
-            if (Movement::validateMovement($gameData, $ship)){
-                if (count($ship->movement)>0)
-                    $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
             }
 
-            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gameData)){
+            if ($ship->isDestroyed()) {
+                continue;
+            }
+
+            if (Firing::validateFireOrders($ship->getAllFireOrders(), $gameData)) {
                 $dbManager->submitFireorders($gameData->id, $ship->getAllFireOrders(), $gameData->turn, $gameData->phase);
             }
 
@@ -58,7 +55,7 @@ class FireGamePhase implements Phase
 
         $dbManager->updatePlayerStatus($gameData->id, $gameData->forPlayer, $gameData->phase, $gameData->turn);
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
-        
+
         return true;
     }
 }

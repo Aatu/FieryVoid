@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.20, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.62, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: B5CGM
 -- ------------------------------------------------------
--- Server version	5.7.20-0ubuntu0.16.04.1
+-- Server version	5.5.62-0ubuntu0.14.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,11 +14,7 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-DROP DATABASE IF EXISTS B5CGM;
-CREATE DATABASE B5CGM;
 
-GRANT ALL PRIVILEGES ON B5CGM.* To 'aatu'@'localhost' IDENTIFIED BY 'Kiiski';
-USE B5CGM;
 --
 -- Table structure for table `chat`
 --
@@ -38,6 +34,15 @@ CREATE TABLE `chat` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `chat`
+--
+
+LOCK TABLES `chat` WRITE;
+/*!40000 ALTER TABLE `chat` DISABLE KEYS */;
+/*!40000 ALTER TABLE `chat` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `fx_helpmessages`
 --
 
@@ -55,6 +60,15 @@ CREATE TABLE `fx_helpmessages` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `fx_helpmessages`
+--
+
+LOCK TABLES `fx_helpmessages` WRITE;
+/*!40000 ALTER TABLE `fx_helpmessages` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fx_helpmessages` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `player`
 --
 
@@ -69,7 +83,6 @@ CREATE TABLE `player` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=210 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 
 --
 -- Dumping data for table `player`
@@ -95,6 +108,16 @@ CREATE TABLE `player_chat` (
   PRIMARY KEY (`playerid`,`gameid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `player_chat`
+--
+
+LOCK TABLES `player_chat` WRITE;
+/*!40000 ALTER TABLE `player_chat` DISABLE KEYS */;
+INSERT INTO `player_chat` VALUES (3,0,'2018-11-24 14:43:35'),(3,3670,'2018-11-24 14:43:38');
+/*!40000 ALTER TABLE `player_chat` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_adaptivearmour`
@@ -132,6 +155,15 @@ CREATE TABLE `tac_adaptivearmour` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `tac_adaptivearmour`
+--
+
+LOCK TABLES `tac_adaptivearmour` WRITE;
+/*!40000 ALTER TABLE `tac_adaptivearmour` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_adaptivearmour` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tac_ammo`
 --
 
@@ -144,10 +176,20 @@ CREATE TABLE `tac_ammo` (
   `firingmode` int(11) NOT NULL,
   `gameid` int(11) NOT NULL,
   `ammo` int(11) NOT NULL,
-  `turn` int(11) NOT NULL DEFAULT 0,
+  `turn` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`gameid`,`shipid`,`systemid`,`firingmode`,`turn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_ammo`
+--
+
+LOCK TABLES `tac_ammo` WRITE;
+/*!40000 ALTER TABLE `tac_ammo` DISABLE KEYS */;
+INSERT INTO `tac_ammo` VALUES (28910,301,1,3670,0,0),(28910,302,1,3670,0,0),(28912,301,1,3670,0,0),(28912,302,1,3670,0,0);
+/*!40000 ALTER TABLE `tac_ammo` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_critical`
@@ -169,6 +211,15 @@ CREATE TABLE `tac_critical` (
   KEY `shipid` (`shipid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=44475 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_critical`
+--
+
+LOCK TABLES `tac_critical` WRITE;
+/*!40000 ALTER TABLE `tac_critical` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_critical` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_damage`
@@ -197,6 +248,15 @@ CREATE TABLE `tac_damage` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `tac_damage`
+--
+
+LOCK TABLES `tac_damage` WRITE;
+/*!40000 ALTER TABLE `tac_damage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_damage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tac_ew`
 --
 
@@ -214,8 +274,18 @@ CREATE TABLE `tac_ew` (
   PRIMARY KEY (`id`),
   KEY `gameid` (`gameid`),
   KEY `shipid` (`shipid`)
-) ENGINE=InnoDB AUTO_INCREMENT=309637 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=309642 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_ew`
+--
+
+LOCK TABLES `tac_ew` WRITE;
+/*!40000 ALTER TABLE `tac_ew` DISABLE KEYS */;
+INSERT INTO `tac_ew` VALUES (309637,3670,28910,1,'DEW',7,-1),(309638,3670,28911,1,'DEW',6,-1),(309639,3670,28912,1,'OEW',5,28910),(309640,3670,28912,1,'OEW',2,28911),(309641,3670,28912,1,'DEW',0,-1);
+/*!40000 ALTER TABLE `tac_ew` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_fireorder`
@@ -252,6 +322,15 @@ CREATE TABLE `tac_fireorder` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `tac_fireorder`
+--
+
+LOCK TABLES `tac_fireorder` WRITE;
+/*!40000 ALTER TABLE `tac_fireorder` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_fireorder` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tac_flightsize`
 --
 
@@ -266,6 +345,15 @@ CREATE TABLE `tac_flightsize` (
   PRIMARY KEY (`entry`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2536 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_flightsize`
+--
+
+LOCK TABLES `tac_flightsize` WRITE;
+/*!40000 ALTER TABLE `tac_flightsize` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_flightsize` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_game`
@@ -287,10 +375,20 @@ CREATE TABLE `tac_game` (
   `creator` int(11) DEFAULT NULL,
   `submitLock` datetime DEFAULT NULL,
   `gamespace` varchar(45) DEFAULT NULL,
-  `rules` varchar(400) default '{}',
+  `rules` varchar(400) DEFAULT '{}',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3670 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3672 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_game`
+--
+
+LOCK TABLES `tac_game` WRITE;
+/*!40000 ALTER TABLE `tac_game` DISABLE KEYS */;
+INSERT INTO `tac_game` VALUES (3670,'GAME NAME',1,2,'[28910]','space-picture.jpg',0,'ACTIVE',2,3,NULL,'-1x-1','{\"initiativeCategories\":6}'),(3671,'GAME NAME',0,-2,'-1','space-picture2.jpg',0,'LOBBY',2,3,NULL,'-1x-1','{\"initiativeCategories\":6}');
+/*!40000 ALTER TABLE `tac_game` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_iniative`
@@ -309,6 +407,15 @@ CREATE TABLE `tac_iniative` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `tac_iniative`
+--
+
+LOCK TABLES `tac_iniative` WRITE;
+/*!40000 ALTER TABLE `tac_iniative` DISABLE KEYS */;
+INSERT INTO `tac_iniative` VALUES (3670,28910,1,33,47),(3670,28911,1,66,73),(3670,28912,1,66,99);
+/*!40000 ALTER TABLE `tac_iniative` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_playeringame`
@@ -334,10 +441,20 @@ CREATE TABLE `tac_playeringame` (
   `depwidth` int(11) DEFAULT NULL,
   `depheight` int(11) DEFAULT NULL,
   `depavailable` int(11) DEFAULT NULL,
-  `waiting` boolean DEFAULT TRUE,
+  `waiting` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`gameid`,`slot`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_playeringame`
+--
+
+LOCK TABLES `tac_playeringame` WRITE;
+/*!40000 ALTER TABLE `tac_playeringame` DISABLE KEYS */;
+INSERT INTO `tac_playeringame` VALUES (3670,1,3,1,1,1,'2018-11-24 12:14:02',NULL,'BLUE',3500,-21,0,'box',10,30,0,0),(3670,2,4,2,1,1,'2018-11-24 12:14:07',NULL,'RED',3500,21,0,'box',10,30,0,1),(3671,1,3,1,0,-3,'2018-11-24 18:25:28',NULL,'BLUE',3500,-21,0,'box',10,30,0,0),(3671,2,NULL,2,0,-3,'2018-11-24 18:25:28',NULL,'RED',3500,21,0,'box',10,30,0,0);
+/*!40000 ALTER TABLE `tac_playeringame` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_power`
@@ -361,6 +478,15 @@ CREATE TABLE `tac_power` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `tac_power`
+--
+
+LOCK TABLES `tac_power` WRITE;
+/*!40000 ALTER TABLE `tac_power` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tac_power` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tac_ship`
 --
 
@@ -381,8 +507,18 @@ CREATE TABLE `tac_ship` (
   `slot` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `gameid` (`tacgameid`)
-) ENGINE=InnoDB AUTO_INCREMENT=28910 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=28913 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_ship`
+--
+
+LOCK TABLES `tac_ship` WRITE;
+/*!40000 ALTER TABLE `tac_ship` DISABLE KEYS */;
+INSERT INTO `tac_ship` VALUES (28910,3,3670,'1','Vault1Gunship',0,0,0,0,0,1),(28911,3,3670,'2','Sx11',0,0,0,0,0,1),(28912,4,3670,'Enemy','Capital',0,0,0,0,0,2);
+/*!40000 ALTER TABLE `tac_ship` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_shipmovement`
@@ -398,16 +534,26 @@ CREATE TABLE `tac_shipmovement` (
   `type` varchar(45) DEFAULT NULL,
   `q` int(11) DEFAULT NULL,
   `r` int(11) DEFAULT NULL,
-  `dq` int(11) DEFAULT 0,
-  `dr` int(11) DEFAULT 0,
+  `dq` int(11) DEFAULT '0',
+  `dr` int(11) DEFAULT '0',
   `facing` int(11) DEFAULT NULL,
-  `rolled` boolean DEFAULT FALSE,
+  `rolled` tinyint(1) DEFAULT '0',
   `value` int(11) DEFAULT NULL,
   `turn` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`,`shipid`,`gameid`),
   KEY `gameid` (`gameid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_shipmovement`
+--
+
+LOCK TABLES `tac_shipmovement` WRITE;
+/*!40000 ALTER TABLE `tac_shipmovement` DISABLE KEYS */;
+INSERT INTO `tac_shipmovement` VALUES (1,28910,3670,'start',-30,0,3,2,0,NULL,0,0),(2,28912,3670,'start',30,0,3,2,3,NULL,0,0),(3,28911,3670,'start',-30,1,3,2,0,NULL,0,0),(4,28910,3670,'deploy',-20,-3,3,2,0,NULL,0,1),(5,28911,3670,'deploy',-20,1,3,2,0,NULL,0,1),(6,28912,3670,'deploy',21,0,3,2,3,0,0,1);
+/*!40000 ALTER TABLE `tac_shipmovement` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tac_systemdata`
@@ -422,10 +568,20 @@ CREATE TABLE `tac_systemdata` (
   `gameid` int(11) NOT NULL,
   `shipid` int(11) NOT NULL,
   `data` text,
-  `turn` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`, `turn`)
+  `turn` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`systemid`,`subsystem`,`gameid`,`shipid`,`turn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tac_systemdata`
+--
+
+LOCK TABLES `tac_systemdata` WRITE;
+/*!40000 ALTER TABLE `tac_systemdata` DISABLE KEYS */;
+INSERT INTO `tac_systemdata` VALUES (202,'0',3670,28911,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(202,'0',3670,28911,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(203,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(203,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(203,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(203,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(203,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(203,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(204,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(204,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(204,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(204,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(204,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(204,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(205,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(205,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(205,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(205,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(205,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(205,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(206,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(206,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(206,'0',3670,28911,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(206,'0',3670,28911,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(206,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(206,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(207,'0',3670,28910,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(207,'0',3670,28910,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(207,'0',3670,28912,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(207,'0',3670,28912,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(208,'0',3670,28910,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',0),(208,'0',3670,28910,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',1),(208,'0',3670,28912,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',0),(208,'0',3670,28912,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',1),(300,'0',3670,28910,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',0),(300,'0',3670,28910,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',1),(300,'0',3670,28912,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',0),(300,'0',3670,28912,'{\"loading\":{\"1\":\"3\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"3\",\"6\":\"1\"}}',1),(301,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(301,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(301,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(301,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(302,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(302,'0',3670,28910,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(302,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(302,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(302,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',0),(302,'0',3670,28912,'{\"loading\":{\"1\":\"2\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"2\",\"6\":\"1\"}}',1),(303,'0',3670,28910,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(303,'0',3670,28910,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(303,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(303,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(303,'0',3670,28912,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(303,'0',3670,28912,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1),(304,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',0),(304,'0',3670,28911,'{\"loading\":{\"1\":\"1\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"1\",\"6\":\"1\"}}',1);
+/*!40000 ALTER TABLE `tac_systemdata` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -436,4 +592,4 @@ CREATE TABLE `tac_systemdata` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-01-11 15:13:05
+-- Dump completed on 2018-11-24 18:33:10
