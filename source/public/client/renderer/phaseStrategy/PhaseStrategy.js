@@ -138,6 +138,7 @@ window.PhaseStrategy = (function() {
 
   PhaseStrategy.prototype.render = function(coordinateConverter, scene, zoom) {
     this.animationStrategy.render(coordinateConverter, scene, zoom);
+    this.callStrategies("render", { coordinateConverter, scene, zoom });
   };
 
   PhaseStrategy.prototype.update = function(gamedata) {
@@ -163,7 +164,6 @@ window.PhaseStrategy = (function() {
     this.gamedata = gamedata;
     this.inactive = false;
     this.consumeGamedata();
-    this.shipIconContainer.setAllSelected(false);
     this.ballisticIconContainer.show();
     this.shipWindowManager = shipWindowManager;
     this.createReplayUI(gamedata);
@@ -314,7 +314,8 @@ window.PhaseStrategy = (function() {
 
     this.uiManager.showWeaponList({
       ship: ship,
-      gamePhase: gamedata.gamephase
+      gamePhase: gamedata.gamephase,
+      movementService: this.movementService
     });
 
     this.callStrategies("setShipSelected", { ship });
@@ -725,7 +726,8 @@ window.PhaseStrategy = (function() {
     if (this.selectedShip === ship) {
       this.uiManager.showWeaponList({
         ship: ship,
-        gamePhase: gamedata.gamephase
+        gamePhase: gamedata.gamephase,
+        movementService: this.movementService
       });
     }
 
@@ -770,7 +772,8 @@ window.PhaseStrategy = (function() {
     if (this.selectedShip === payload.shooter) {
       this.uiManager.showWeaponList({
         ship: payload.shooter,
-        gamePhase: gamedata.gamephase
+        gamePhase: gamedata.gamephase,
+        movementService: this.movementService
       });
     }
   };
@@ -790,7 +793,8 @@ window.PhaseStrategy = (function() {
     if (this.selectedShip === payload.shooter) {
       this.uiManager.showWeaponList({
         ship: payload.shooter,
-        gamePhase: gamedata.gamephase
+        gamePhase: gamedata.gamephase,
+        movementService: this.movementService
       });
     }
 

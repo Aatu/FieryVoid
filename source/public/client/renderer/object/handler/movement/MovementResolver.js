@@ -1,9 +1,155 @@
-import { MovementOrder, movementTypes, ThrustBill } from ".";
+import {
+  MovementOrder,
+  movementTypes,
+  ThrustBill,
+  OverChannelResolver
+} from ".";
+import { throws } from "assert";
 
 class MovementResolver {
-  constructor(ship, movementService) {
+  constructor(ship, movementService, turn) {
     this.ship = ship;
     this.movementService = movementService;
+    this.turn = turn;
+  }
+
+  billAndPay(bill, commit = true) {
+    if (bill.pay()) {
+      const newMovement = bill.getMoves();
+
+      const initialOverChannel = new OverChannelResolver(
+        this.movementService.getThrusters(this.ship),
+        this.movementService.getThisTurnMovement(this.ship)
+      ).getAmountOverChanneled();
+
+      const newOverChannel = new OverChannelResolver(
+        this.movementService.getThrusters(this.ship),
+        newMovement
+      ).getAmountOverChanneled();
+
+      /*
+      console.log(
+        "overChannel",
+        initialOverChannel,
+        newOverChannel,
+        newOverChannel - initialOverChannel
+      );
+      */
+
+      if (commit) {
+        this.movementService.replaceTurnMovement(this.ship, newMovement);
+        this.movementService.shipMovementChanged(this.ship);
+      }
+      return {
+        result: true,
+        overChannel: newOverChannel - initialOverChannel > 0
+      };
+    } else if (commit) {
+      throw new Error(
+        "Tried to commit move that was not legal. Check legality first!"
+      );
+    } else {
+      return false;
+    }
+  }
+
+  canRoll() {
+    return this.roll(false);
+  }
+
+  roll(commit) {}
+
+  canEvade(step) {
+    return this.evade(stpe, false);
+  }
+
+  evade(step, commit = true) {
+    let evadeMove = this.movementService.getEvadeMove(this.ship);
+
+    const endMove = this.movementService.getLastEndMove(this.ship);
+
+    if (evadeMove) {
+      if (
+        evadeMove.value + step >
+        this.movementService.getMaximumEvasion(this.ship)
+      ) {
+        return false;
+      }
+
+      if (evadeMove.value + step < 0) {
+        return false;
+      }
+      evadeMove.value += step;
+    } else {
+      if (step < 0) {
+        return false;
+      }
+
+      evadeMove = new MovementOrder(
+        null,
+        movementTypes.EVADE,
+        endMove.position,
+        new hexagon.Offset(0, 0),
+        endMove.facing,
+        endMove.rolled,
+        this.turn,
+        1
+      );
+    }
+
+    const playerAdded = this.movementService
+      .getThisTurnMovement(this.ship)
+      .filter(move => move.isPlayerAdded() && !move.isRoll());
+    const nonPlayerAdded = this.movementService
+      .getThisTurnMovement(this.ship)
+      .filter(move => !move.isPlayerAdded() || move.isRoll());
+
+    const movements =
+      evadeMove.value === 0
+        ? [...nonPlayerAdded, ...playerAdded]
+        : [...nonPlayerAdded, evadeMove, ...playerAdded];
+
+    const bill = new ThrustBill(
+      this.ship,
+      this.movementService.getTotalProducedThrust(this.ship),
+      movements
+    );
+
+    return this.billAndPay(bill, commit);
+  }
+
+  canPivot(pivotDirection) {
+    return this.pivot(pivotDirection, false);
+  }
+
+  pivot(pivotDirection, commit = true) {
+    const lastMove = this.movementService.getMostRecentMove(this.ship);
+    const pivotMove = new MovementOrder(
+      null,
+      movementTypes.PIVOT,
+      lastMove.position,
+      new hexagon.Offset(0, 0),
+      mathlib.addToHexFacing(lastMove.facing, pivotDirection),
+      lastMove.rolled,
+      this.turn,
+      pivotDirection
+    );
+
+    const movements = this.movementService.getThisTurnMovement(this.ship);
+
+    if (lastMove.isPivot() && lastMove.value !== pivotDirection) {
+      movements.pop();
+    } else {
+      movements.push(pivotMove);
+    }
+
+    const bill = new ThrustBill(
+      this.ship,
+      this.movementService.getTotalProducedThrust(this.ship),
+      movements
+    );
+
+    return this.billAndPay(bill, commit);
   }
 
   canThrust(direction) {
@@ -19,38 +165,26 @@ class MovementResolver {
       lastMove.position,
       new hexagon.Offset(0, 0).moveToDirection(direction),
       lastMove.facing,
-      lastMove.turn,
+      lastMove.rolled,
+      this.turn,
       direction
     );
 
-    const movements = this.movementService.getThisTurnMovement(this.ship);
-
-    if (this.getOpposite(movements, thrustMove)) {
-      if (commit) {
-        this.removeOpposite(movements, thrustMove);
-      }
-      return true;
+    let movements = this.movementService.getThisTurnMovement(this.ship);
+    const opposite = this.getOpposite(movements, thrustMove);
+    if (opposite) {
+      movements = movements.filter(move => move !== opposite);
+    } else {
+      movements.push(thrustMove);
     }
 
     const bill = new ThrustBill(
       this.ship,
       this.movementService.getTotalProducedThrust(this.ship),
-      [...movements, thrustMove]
+      movements
     );
 
-    if (bill.pay()) {
-      if (commit) {
-        bill.commit();
-        this.addMove(thrustMove);
-      }
-      return true;
-    } else if (commit) {
-      throw new Error(
-        "Tried to commit move that was not legal. Check legality first!"
-      );
-    } else {
-      return false;
-    }
+    return this.billAndPay(bill, commit);
   }
 
   canCancel() {
@@ -60,17 +194,21 @@ class MovementResolver {
   }
 
   cancel() {
-    const toCancel = this.movementService
-      .getThisTurnMovement(this.ship)
-      .reverse()
-      .find(move => move.isCancellable());
+    const toCancel = this.ship.movement[this.ship.movement.length - 1];
 
-    if (!toCancel) {
+    if (!toCancel || !toCancel.isCancellable()) {
       return;
     }
 
     this.removeMove(toCancel);
-    this.movementService.shipMovementChanged(this.ship);
+
+    const bill = new ThrustBill(
+      this.ship,
+      this.movementService.getTotalProducedThrust(this.ship),
+      this.movementService.getThisTurnMovement(this.ship)
+    );
+
+    return this.billAndPay(bill, true);
   }
 
   revert() {
@@ -82,19 +220,8 @@ class MovementResolver {
     this.movementService.shipMovementChanged(this.ship);
   }
 
-  addMove(move) {
-    this.ship.movement.push(move);
-    this.movementService.shipMovementChanged(this.ship);
-  }
-
   getOpposite(movements, move) {
     return movements.find(other => other.isOpposite(move));
-  }
-
-  removeOpposite(movements, move) {
-    const opposite = this.getOpposite(movements, move);
-    this.ship.movement = this.ship.movement.filter(other => other !== opposite);
-    this.movementService.shipMovementChanged(this.ship);
   }
 
   removeMove(move) {

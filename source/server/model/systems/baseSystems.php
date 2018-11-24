@@ -482,68 +482,6 @@ class CargoBay extends ShipSystem{
     }
 }
 
-
-class Thruster extends ShipSystem{
-    public $name = "thruster";
-    public $thruster = true;
-    public $displayName = "Thruster";
-    public $direction;
-    public $thrustused;
-    public $thrustwasted = 0;
-    public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?	
-    
-    public $possibleCriticals = array(15=>"FirstThrustIgnored", 20=>"HalfEfficiency", 25=>array("FirstThrustIgnored","HalfEfficiency"));
-    
-    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
-        parent::__construct($armour, $maxhealth, $powerReq, $output );
-         
-        $this->thrustused = $thrustused;
-        $this->direction = $direction;
-        //arc depends on direction!
-	switch($this->direction){
-		case 1: //retro
-			$this->startArc = 330;
-            $this->endArc = 30;
-			break;
-		case 2: //main
-			$this->startArc = 150;
-            $this->endArc = 210;
-			break;	
-		case 3://port
-			$this->startArc = 210;
-            $this->endArc = 330;
-			break;
-		case 4://Stbd
-			$this->startArc = 30;
-            $this->endArc = 150;
-			break;
-	}
-    }
-} //endof Thruster
-
-
-
-class InvulnerableThruster extends Thruster{
-	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
-	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
-public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
-	
-    function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
-	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
-    }
-	
-    public function getArmourInvulnerable($target, $shooter, $dmgClass, $pos=null){ //this thruster should be invulnerable to anything...
-	$activeAA = 99;
-	return $activeAA;
-    }
-    
-    public function testCritical($ship, $gamedata, $crits, $add = 0){ //this thruster won't suffer criticals ;)
-	    return $crits;
-    }
-} //endof InvulnerableThruster
-
-
-
 class GraviticThruster extends Thruster{
     
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){

@@ -35,7 +35,7 @@ class BuyingGamePhase implements Phase
                 $x=30;
             }
 
-            $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), new OffsetCoordinate(3, 2), $h, 0);
+            $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), new OffsetCoordinate(3, 2), $h, false, 0);
             $ship->movement = array($move);
 
             foreach ($ship->systems as $system)

@@ -3,13 +3,13 @@ import { RequiredThrust, ThrustAssignment } from ".";
 class ThrustBill {
   constructor(ship, thrustAvailable, movement) {
     this.ship = ship;
-    this.movement = movement;
+    this.movement = movement.map(move => move.clone());
     this.thrusters = ship.systems
       .filter(system => system.thruster)
       .filter(system => !system.isDestroyed())
       .map(thruster => new ThrustAssignment(thruster));
 
-    this.buildRequiredThrust(movement);
+    this.buildRequiredThrust(this.movement);
 
     this.paid = null;
 
@@ -30,6 +30,7 @@ class ThrustBill {
     result[3] = result[3] || 0;
     result[4] = result[4] || 0;
     result[5] = result[5] || 0;
+    result[6] = result[6] || 0;
 
     return result;
   }
@@ -42,7 +43,8 @@ class ThrustBill {
       totalRequired[2] +
       totalRequired[3] +
       totalRequired[4] +
-      totalRequired[5]
+      totalRequired[5] +
+      totalRequired[6]
     );
   }
 
@@ -53,7 +55,8 @@ class ThrustBill {
       this.directionsRequired[2] +
       this.directionsRequired[3] +
       this.directionsRequired[4] +
-      this.directionsRequired[5]
+      this.directionsRequired[5] +
+      this.directionsRequired[6]
     );
   }
 
@@ -85,6 +88,7 @@ class ThrustBill {
 
   getOverChannelers(direction) {
     return this.thrusters
+      .filter(thruster => thruster.isDirection(direction))
       .filter(thruster => thruster.getOverChannel() > 0)
       .filter(thruster => !thruster.isDamaged())
       .sort(this.sortThrusters);
@@ -302,7 +306,7 @@ class ThrustBill {
     );
   }
 
-  commit() {
+  getMoves() {
     this.thrusters.forEach(thruster => {
       let channeled = thruster.channeled;
       this.movement.forEach(move => {
@@ -331,10 +335,12 @@ class ThrustBill {
         });
       });
     });
-  }
 
-  reject() {
-    this.movement.forEach((move = move.requiredThrust = null));
+    if (!this.movement.every(move => move.requiredThrust.isFulfilled())) {
+      throw new Error("Not all moves are fulfilled");
+    }
+
+    return this.movement;
   }
 }
 

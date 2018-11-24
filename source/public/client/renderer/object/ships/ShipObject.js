@@ -68,8 +68,8 @@ class ShipObject {
     this.mesh.add(this.shipSideSprite.mesh);
 
     this.shipEWSprite = new window.ShipEWSprite(
-      { width: this.sideSpriteSize, height: this.sideSpriteSize },
-      0.01
+      { width: this.sideSpriteSize * 1.5, height: this.sideSpriteSize },
+      this.defaultHeight
     );
     this.mesh.add(this.shipEWSprite.mesh);
     this.shipEWSprite.hide();
@@ -91,14 +91,16 @@ class ShipObject {
       x = x.x;
     }
 
-    this.position = { x, y, z };
+    this.position = { x, y, z: 0 };
+
+    this.shipZ = z;
 
     if (this.mesh) {
       this.mesh.position.set(x, y, 0);
     }
 
     if (this.shipObject) {
-      this.shipObject.position.set(0, 0, z);
+      this.shipObject.position.set(0, 0, this.shipZ);
     }
   }
 
@@ -198,14 +200,9 @@ class ShipObject {
     //console.log("ShipObject.showSideSprite is not yet implemented")
   }
 
-  setSelected(value) {
-    if (value) {
-      this.shipSideSprite.setOverlayColor(new THREE.Color(1, 1, 1));
-      this.shipSideSprite.setOverlayColorAlpha(1);
-    } else {
-      this.shipSideSprite.setOverlayColor(this.mine ? COLOR_MINE : COLOR_ENEMY);
-      this.shipSideSprite.setOverlayColorAlpha(0.8);
-    }
+  setSideSpriteOpacity(opacity) {
+    this.shipSideSprite.multiplyOpacity(opacity);
+    this.line.multiplyOpacity(opacity);
   }
 
   setNotMoved(value) {
@@ -294,7 +291,7 @@ class ShipObject {
   }
 
   positionAndFaceIcon(offset, movementService) {
-    var movement = movementService.getMostRecentMove(this.ship);
+    var movement = movementService.getLastEndMove(this.ship);
     var gamePosition = window.coordinateConverter.fromHexToGame(
       movement.position
     );

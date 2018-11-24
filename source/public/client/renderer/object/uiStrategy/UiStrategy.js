@@ -57,6 +57,8 @@ class UiStrategy {
   onScroll() {}
 
   onZoom() {}
+
+  render({ coordinateConverter, scene, zoom }) {}
 }
 
 export default UiStrategy;

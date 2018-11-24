@@ -34,7 +34,6 @@ window.ReplayPhaseStrategy = (function() {
     this.currentTurn = gamedata.turn;
     this.currentPhase = gamedata.gamephase;
     this.setSelectShip(null);
-    this.shipIconContainer.setAllSelected(false);
     this.replayTurn = getInitialReplayTurn.call(this);
 
     this.shipIconContainer.consumeGamedata(this.gamedata);

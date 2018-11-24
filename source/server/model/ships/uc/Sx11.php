@@ -15,63 +15,32 @@ class Sx11 extends MediumShip{
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
         
-        $this->turncost = 0.33;
-        $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
+        $this->accelcost = 1;
         $this->rollcost = 1;
         $this->pivotcost = 1;
 		$this->iniativebonus = 60;
+        $this->evasionCost = 2;
          
-        $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
-        $this->addPrimarySystem(new Engine(4, 11, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(4, 2));
-		$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
-		$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
+        $this->addPrimarySystem(100, new Reactor(4, 13, 0, 0));
+        $this->addPrimarySystem(101, new CnC(4, 9, 0, 0));
+        $this->addPrimarySystem(102, new Scanner(4, 12, 3, 6));
+        $this->addPrimarySystem(103, new Engine(4, 11, 0, 16, 2));
+		$this->addPrimarySystem(104, new Hangar(4, 2));
 		
-        $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(3, 7, 0, 3, 1));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 360));
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        $this->addFrontSystem(new LightPulse(2, 4, 2, 270, 90));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(202,new MediumPulse(3, 6, 3, 240, 360));
+        $this->addFrontSystem(203,new LightPulse(2, 4, 2, 270, 90));
+        $this->addFrontSystem(204,new InterceptorMkI(2, 4, 1, 270, 90));
+        $this->addFrontSystem(205,new LightPulse(2, 4, 2, 270, 90));
+        $this->addFrontSystem(206,new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(207, new ManouveringThruster(3, 8, 0, 3, 3));
 		
-        $this->addAftSystem(new Thruster(4, 8, 0, 4, 2));
-        $this->addAftSystem(new Thruster(4, 8, 0, 4, 2));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 180, 0));
-        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
-        $this->addAftSystem(new LightPulse(2, 4, 2, 0, 180));
+        $this->addAftSystem(300, new Thruster(4, 8, 0, 10, 2));
+        $this->addAftSystem(302, new LightPulse(2, 4, 2, 180, 0));
+        $this->addAftSystem(303, new InterceptorMkI(2, 4, 1, 90, 270));
+        $this->addAftSystem(304, new LightPulse(2, 4, 2, 0, 180));
+        $this->addAftSystem(305, new ManouveringThruster(3, 8, 0, 3, 3));
 	
-        $this->addPrimarySystem(new Structure( 4, 38));
-        
-		$this->hitChart = array(
-                0=> array(
-                        9 => "Thruster",
-                        11 => "Scanner",
-                        14 => "Engine",
-                        16 => "Hangar",
-                        19 => "Reactor",
-                        20 => "C&C",
-                ),
-                1=> array(
-                        6 => "Thruster",
-                        8 => "Medium Pulse Cannon",
-                        10 => "Light Pulse Cannon",
-                        12 => "Interceptor I",
-                        17 => "Structure",
-                        20 => "Primary",
-                ),
-                2=> array(
-                        8 => "Thruster",
-                        10 => "Light Pulse Cannon",
-                        12 => "Interceptor I",
-                        17 => "Structure",
-                        20 => "Primary",
-                ),
-        );
-
+        $this->addPrimarySystem(1, new Structure( 4, 38));
     }
 
 }

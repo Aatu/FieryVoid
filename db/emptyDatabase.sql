@@ -401,9 +401,9 @@ CREATE TABLE `tac_shipmovement` (
   `dq` int(11) DEFAULT 0,
   `dr` int(11) DEFAULT 0,
   `facing` int(11) DEFAULT NULL,
+  `rolled` boolean DEFAULT FALSE,
   `value` int(11) DEFAULT NULL,
   `requiredthrust` text,
-  `assignedthrust` text,
   `turn` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`,`shipid`,`gameid`),
   KEY `gameid` (`gameid`)

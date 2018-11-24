@@ -75,13 +75,13 @@ window.webglScene = (function() {
 
     this.starFieldScene = new THREE.Scene();
     this.starFieldCamera = new THREE.OrthographicCamera(
-        (this.zoom * this.width) / -2,
-        (this.zoom * this.width) / 2,
-        (this.zoom * this.height) / 2,
-        (this.zoom * this.height) / -2,
-        -4000,
-        30000
-      );
+      (this.zoom * this.width) / -2,
+      (this.zoom * this.width) / 2,
+      (this.zoom * this.height) / 2,
+      (this.zoom * this.height) / -2,
+      -4000,
+      30000
+    );
 
     this.starFieldCamera.position.set(0, 0, 500);
     this.starFieldCamera.lookAt(0, 0, 0);
@@ -89,154 +89,7 @@ window.webglScene = (function() {
     this.stats = new Stats();
     this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(this.stats.dom);
-    /*
-        
-        this.ship = new window.shipObjects.Capital({movement: [{
-            turn: 0,
-            facing: 1,
-            heading: 1,
-            position: {x: 0, y: 0},
-            xOffset: 0,
-            yOffset: 0
-        }]}, this.scene);
-        
-        */
 
-    /*
-        var aspect = window.innerWidth / window.innerHeight;
-        var d = 20;
-        camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 1000 );
-
-        camera.position.set( 20, 20, 20 ); // all components equal
-        camera.lookAt( scene.position ); // or the origin
-        method 2 - set the x-component of camera.rotation
-
-        camera.position.set( 20, 20, 20 );
-        camera.rotation.order = 'YXZ';
-        camera.rotation.y = - Math.PI / 4;
-        camera.rotation.x = Math.atan( - 1 / Math.sqrt( 2 ) );
-        */
-
-    /*
-        var geometry = new THREE.PlaneGeometry( 20, 20, 1, 1 );
-        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.5 } );
-        var cube = new THREE.Mesh( geometry, material );
-        this.scene.add( cube );
-          var sprite = new BallisticSprite({x:0, y:0}, 'launch');
-        sprite.show();
-        this.scene.add(sprite.mesh);
-         */
-
-    /*
-        var loader = new THREE.ObjectLoader();
-        var objLoader = new THREE.OBJLoader();
-        this.testObject = null;
-        objLoader.load( "img/3d/rhino/rhino.obj", (object) => {
-
-        
-            var tex = new THREE.TextureLoader().load('img/3d/rhino/sculptNormal.png');
-            var diffuse = new THREE.TextureLoader().load('img/3d/rhino/texture.png');
-            var material = new THREE.MeshPhongMaterial({normalMap: tex, map: diffuse});
-            object.children[0].material = material;
-           
-            
-            var tex2 = new THREE.TextureLoader().load('img/3d/normalDoc.png');
-            var diffuse2 = new THREE.TextureLoader().load('img/3d/diffuseDoc.png');
-            var material2 = new THREE.MeshPhongMaterial({normalMap: tex2, map: diffuse2});
-            object.children[1].material = material2;
-
-            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
-            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
-            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
-            object.children[2].material = material3;
-
-            object.scale.set(2, 2, 2)
-            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
-            object.position.set(0, 0, 0)
-            this.scene.add(object)
-            this.testObject = object;
-        } );
-
-        objLoader.load( "img/3d/gunship/gunship.obj", (object) => {
-
-            
-            console.log(object)
-            
-            var tex = new THREE.TextureLoader().load('img/3d/gunship/normal.png');
-            console.log(tex)
-            //var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
-            var material = new THREE.MeshPhongMaterial({normalMap: tex});
-            object.children[0].material = material;
-
-            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
-            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
-            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
-            object.children[4].material = material3;
-            object.children[5].material = material3;
-
-            object.scale.set(5, 5, 5)
-            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
-            object.position.set(0, 60, 0)
-            object.receiveShadow = true;
-            object.castShadow = true;
-            this.scene.add(object)
-            this.testObject2 = object;
-        } );
-
-        /*
-        loader.load( "img/3d/gunship/gunship.json", (object) => {
-
-            
-            console.log(object)
-            
-            var tex = new THREE.TextureLoader().load('img/3d/gunship/normal.png');
-            console.log(tex)
-            //var diffuse = new THREE.TextureLoader().load('img/3d/texture.png');
-            //var material = new THREE.MeshPhongMaterial({wireframe: true});
-            //object.children[0].material = material;
-
-            var tex3 = new THREE.TextureLoader().load('img/3d/normalThruster.png');
-            var diffuse3 = new THREE.TextureLoader().load('img/3d/diffuseThruster.png');
-            var material3 = new THREE.MeshPhongMaterial({normalMap: tex3, map: diffuse3});
-            object.children[1].material = material3;
-            object.children[2].material = material3;
-
-            object.scale.set(10, 10, 10)
-            object.rotation.set(mathlib.degreeToRadian(90), mathlib.degreeToRadian(90), 0);
-            object.position.set(0, 100, 10)
-            this.scene.add(object)
-        } );
-        */
-
-    /*
-        var geometry = new THREE.BoxGeometry( 100, 100, 100 );
-        var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-        var cube = new THREE.Mesh( geometry, material );
-        cube.position.set(0, 0, 100)
-        this.scene.add( cube );
-       
-        this.cube = cube;
-
-        
-        this.testParticleEmitter = new ParticleEmitter(this.scene);
-        var particle = this.testParticleEmitter.getParticle();
-
-        this.testParticleEmitter.mesh.position.set(0, -400, 100);
-        particle.setPosition({x:0, y: 0}).setActivationTime(0).setOpacity(1).setSize(100).setColor(new THREE.Color(1, 0, 0)).setVelocity(new THREE.Vector3(0, 1, 0));
-        this.testParticleEmitter.start();
-       
-
-
-        /*
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.1 );
-        this.scene.add( directionalLight );
-*/
-
-    /*
-        var directionalLight2 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-        directionalLight2.position.set(0, 500, 500)
-        this.scene.add( directionalLight2 );
-*/
     var directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.9);
     directionalLight3.position.set(500, -500, 500);
     this.scene.add(directionalLight3);
@@ -314,8 +167,10 @@ window.webglScene = (function() {
 
     this.camera.position.x -= position.x * this.zoom * this.zoom;
     this.camera.position.y += position.y * this.zoom * this.zoom;
-    this.starFieldCamera.position.x -= position.x * this.zoom * this.zoom * 0.05;
-    this.starFieldCamera.position.y += position.y * this.zoom * this.zoom * 0.05;
+    this.starFieldCamera.position.x -=
+      position.x * this.zoom * this.zoom * 0.05;
+    this.starFieldCamera.position.y +=
+      position.y * this.zoom * this.zoom * 0.05;
 
     this.phaseDirector.relayEvent("ScrollEvent", this.camera.position);
   };
@@ -370,9 +225,9 @@ window.webglScene = (function() {
     this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
 
     this.renderer.clear();
-    this.renderer.render( this.starFieldScene, this.starFieldCamera );
+    this.renderer.render(this.starFieldScene, this.starFieldCamera);
     this.renderer.clearDepth();
-    this.renderer.render( this.scene, this.camera );
+    this.renderer.render(this.scene, this.camera);
 
     animateZoom.call(this);
     this.starField.render();

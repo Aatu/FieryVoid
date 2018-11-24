@@ -125,12 +125,6 @@ window.ShipIconContainer = (function() {
     icon.positionAndFaceIcon(this.getHexOffset(icon), this.movementService);
   };
 
-  ShipIconContainer.prototype.setAllSelected = function(selected) {
-    this.getArray().forEach(function(icon) {
-      icon.setSelected(selected);
-    }, this);
-  };
-
   function buildShipArray() {
     this.iconsAsArray = Object.keys(this.iconsAsObject).map(function(key) {
       return this.iconsAsObject[key];

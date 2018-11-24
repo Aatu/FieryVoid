@@ -4,17 +4,6 @@ class MovementGamePhase implements Phase
 {
     public function advance(TacGamedata $gameData, DBManager $dbManager)
     {
-        //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
-        foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
-            if ($ship->isDestroyed() || $ship->base || $ship->smallBase)  {
-                continue;
-            }
-
-            $lastmove = $ship->getLastMovement();
-            $newMove = new MovementOrder(null, 'end', $lastmove->position,  $lastmove->target, $lastmove->heading, $gameData->turn);
-            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
-        }
-
         $gameData->setPhase(3);
         $gameData->setActiveship(-1);
         $dbManager->updateGamedata($gameData);
@@ -46,8 +35,9 @@ class MovementGamePhase implements Phase
             }
             
             //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
+
             $lastmove = $ship->getLastMovement();
-            $newMove = new MovementOrder(null, 'end', $lastmove->position->add($lastMove->target), $lastmove->target, $lastmove->heading, $gameData->turn);
+            $newMove = new MovementOrder(null, 'end', $lastmove->position->add($lastMove->target), $lastmove->target, $lastmove->facing, $latsmove->rolled, $gameData->turn);
             array_push($ship->movement, $newMove);
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
 

@@ -1,9 +1,11 @@
 import * as React from "react";
 import styled from "styled-components";
-import { Clickable } from "../styled";
 import ThrustButton from "./ThrustButton";
 import RevertButton from "./RevertButton";
 import CancelButton from "./CancelButton";
+import PivotButton from "./PivotButton";
+import RollButton from "./RollButton";
+import EvadeButton from "./EvadeButton";
 
 const Container = styled.div`
   position: absolute;
@@ -16,62 +18,66 @@ const Container = styled.div`
 `;
 
 class Movement extends React.Component {
-  canThrust(direction) {
-    const { movementService, ship } = this.props;
-    return movementService.canThrust(ship, direction);
-  }
-
-  thrust(direction) {
-    const { movementService, ship } = this.props;
-    movementService.thrust(ship, direction);
-  }
-
-  canRevert() {
-    const { movementService, ship } = this.props;
-    return movementService.canRevert(ship);
-  }
-
-  revert() {
-    const { movementService, ship } = this.props;
-    return movementService.revert(ship);
-  }
-
-  canCancel() {
-    const { movementService, ship } = this.props;
-    return movementService.canCancel(ship);
-  }
-
-  cancel() {
-    const { movementService, ship } = this.props;
-    return movementService.cancel(ship);
-  }
-
   render() {
-    const { ship } = this.props;
+    const { ship, movementService } = this.props;
 
     return (
       <Container id="shipMovementActual">
-        {this.canThrust(0) && (
-          <ThrustButton direction={0} clicked={this.thrust.bind(this, 0)} />
-        )}
-        {this.canThrust(1) && (
-          <ThrustButton direction={1} clicked={this.thrust.bind(this, 1)} />
-        )}
-        {this.canThrust(2) && (
-          <ThrustButton direction={2} clicked={this.thrust.bind(this, 2)} />
-        )}
-        {this.canThrust(3) && (
-          <ThrustButton direction={3} clicked={this.thrust.bind(this, 3)} />
-        )}
-        {this.canThrust(4) && (
-          <ThrustButton direction={4} clicked={this.thrust.bind(this, 4)} />
-        )}
-        {this.canThrust(5) && (
-          <ThrustButton direction={5} clicked={this.thrust.bind(this, 5)} />
-        )}
-        {this.canRevert() && <RevertButton clicked={this.revert.bind(this)} />}
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={0}
+        />
 
-        {this.canCancel() && <CancelButton clicked={this.cancel.bind(this)} />}
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={1}
+        />
+
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={2}
+        />
+
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={3}
+        />
+
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={4}
+        />
+
+        <ThrustButton
+          ship={ship}
+          movementService={movementService}
+          direction={5}
+        />
+
+        <RevertButton ship={ship} movementService={movementService} />
+
+        <CancelButton ship={ship} movementService={movementService} />
+
+        <PivotButton
+          ship={ship}
+          movementService={movementService}
+          pivotDirection={-1}
+        />
+
+        <PivotButton
+          ship={ship}
+          movementService={movementService}
+          pivotDirection={1}
+        />
+
+        <RollButton ship={ship} movementService={movementService} />
+
+        <EvadeButton ship={ship} movementService={movementService} />
       </Container>
     );
   }

@@ -7,10 +7,10 @@ class MovementOrder {
     position,
     target,
     facing,
+    rolled,
     turn,
     value = 0,
-    requiredThrust = null,
-    assignedThrust = null
+    requiredThrust = null
   ) {
     if (!(position instanceof window.hexagon.Offset)) {
       throw new Error("MovementOrder requires position as offset hexagon");
@@ -21,10 +21,26 @@ class MovementOrder {
     this.position = position;
     this.target = target;
     this.facing = facing;
+    this.rolled = rolled;
     this.turn = turn;
     this.value = value;
     this.requiredThrust = requiredThrust;
-    this.assignedThrust = assignedThrust;
+  }
+
+  serialize() {
+    return {
+      id: this.id,
+      type: this.type,
+      position: this.position,
+      target: this.target,
+      facing: this.facing,
+      rolled: this.rolled,
+      turn: this.turn,
+      value: this.value,
+      requiredThrust: this.requiredThrust
+        ? this.requiredThrust.serialize()
+        : null
+    };
   }
 
   isSpeed() {
@@ -43,12 +59,24 @@ class MovementOrder {
     return this.type === movementTypes.EVADE;
   }
 
+  isRoll() {
+    return this.type === movementTypes.ROLL;
+  }
+
   isEnd() {
     return this.type === movementTypes.END;
   }
 
+  isPivot() {
+    return this.type === movementTypes.PIVOT;
+  }
+
   isCancellable() {
-    return this.isSpeed() || this.isEvade();
+    return this.isSpeed() || this.isPivot() || this.isRoll();
+  }
+
+  isPlayerAdded() {
+    return this.isSpeed() || this.isPivot() || this.isEvade() || this.isRoll();
   }
 
   clone() {
@@ -58,10 +86,10 @@ class MovementOrder {
       this.position,
       this.target,
       this.facing,
+      this.rolled,
       this.turn,
       this.value,
-      this.requiredThrust,
-      this.assignedThrust
+      this.requiredThrust
     );
   }
 

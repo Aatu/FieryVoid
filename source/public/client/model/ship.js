@@ -23,9 +23,7 @@ var Ship = function Ship(json) {
           new hexagon.Offset(move.target),
           move.facing,
           move.turn,
-          move.value,
-          move.requiredThrust,
-          move.assignedThrust
+          move.value
         );
       });
     } else {

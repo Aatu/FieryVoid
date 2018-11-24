@@ -1,52 +1,40 @@
 "use strict";
 
-window.ShipSelectedSprite = function () {
+window.ShipSelectedSprite = (function() {
+  let texture = null;
+  const TEXTURE_SIZE = 256;
 
-    let texture = null;
-    const TEXTURE_SIZE = 256;
+  function ShipSelectedSprite(size, z, opacity) {
+    webglSprite.call(this, null, size, z);
+    this.setOpacity(opacity);
 
-    function ShipSelectedSprite(size, z, opacity) {
+    createTexture();
+    this.uniforms.texture.value = texture;
+  }
 
-        webglSprite.call(this, null, size, z);
-        this.setOpacity(opacity);
-
-        createTexture();
-        this.uniforms.texture.value = texture;
+  function createTexture() {
+    if (texture) {
+      return;
     }
 
-    function chooseTexture(type, selected) {
-        if (type == "ally" && selected) {
-            return TEXTURE_ALLY_SELECTED;
-        } else if (type == "ally" && !selected) {
-            return TEXTURE_ALLY;
-        } else if (type == "enemy" && selected) {
-            return TEXTURE_ENEMY_SELECTED;
-        } else if (type == "enemy" && !selected) {
-            return TEXTURE_ENEMY;
-        } else {
-            return TEXTURE_NEUTRAL;
-        }
-    }
+    var canvas = window.AbstractCanvas.create(TEXTURE_SIZE, TEXTURE_SIZE);
+    var context = canvas.getContext("2d");
+    context.strokeStyle = "rgba(78,220,25,1.0)";
+    context.fillStyle = "rgba(78,220,25,0.5)";
 
+    window.graphics.drawCircleAndFill(
+      context,
+      TEXTURE_SIZE / 2,
+      TEXTURE_SIZE / 2,
+      TEXTURE_SIZE * 0.3,
+      4
+    );
 
-    function createTexture() {
-        if (texture) {
-            return;
-        }
+    texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+  }
 
-        var canvas = window.AbstractCanvas.create(TEXTURE_SIZE, TEXTURE_SIZE);
-        var context = canvas.getContext("2d");
-        context.strokeStyle = "rgba(78,220,25,1.0)";
-        context.fillStyle = "rgba(78,220,25,0.5)";
+  ShipSelectedSprite.prototype = Object.create(webglSprite.prototype);
 
-        window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
-
-        texture = new THREE.Texture(canvas);
-        texture.needsUpdate = true;
-    }
-
-
-    ShipSelectedSprite.prototype = Object.create(webglSprite.prototype);
-
-    return ShipSelectedSprite;
-}();
+  return ShipSelectedSprite;
+})();

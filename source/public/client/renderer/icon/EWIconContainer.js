@@ -129,8 +129,8 @@ window.EWIconContainer = (function() {
       })
       .forEach(function(icon) {
         icon.sprite.update(
-          { ...icon.shipIcon.getPosition(), z: 1 },
-          { ...icon.targetIcon.getPosition(), z: 1 }
+          { ...icon.shipIcon.getPosition(), z: icon.shipIcon.shipZ },
+          { ...icon.targetIcon.getPosition(), z: icon.targetIcon.shipZ }
         );
         icon.sprite.show();
       }, this);
@@ -143,8 +143,8 @@ window.EWIconContainer = (function() {
       })
       .forEach(function(icon) {
         icon.sprite.update(
-          { ...icon.shipIcon.getPosition(), z: 1 },
-          { ...icon.targetIcon.getPosition(), z: 1 }
+          { ...icon.shipIcon.getPosition(), z: icon.shipIcon.shipZ },
+          { ...icon.targetIcon.getPosition(), z: icon.targetIcon.shipZ }
         );
         icon.sprite.show();
       }, this);
@@ -213,8 +213,8 @@ window.EWIconContainer = (function() {
       shipIcon: shipIcon,
       targetIcon: targetIcon,
       sprite: new window.LineSprite(
-        { ...shipIcon.getPosition(), z: 1 },
-        { ...targetIcon.getPosition(), z: 1 },
+        { ...shipIcon.getPosition(), z: shipIcon.shipZ },
+        { ...targetIcon.getPosition(), z: targetIcon.shipZ },
         getOEWLineWidth.call(this, amount),
         getColor(ship, type),
         0.5

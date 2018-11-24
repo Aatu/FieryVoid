@@ -1,4 +1,1306 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function (global){
+'use strict';
+
+// compare and isBuffer taken from https://github.com/feross/buffer/blob/680e9e5e488f22aac27599a57dc844a6315928dd/index.js
+// original notice:
+
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+function compare(a, b) {
+  if (a === b) {
+    return 0;
+  }
+
+  var x = a.length;
+  var y = b.length;
+
+  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+    if (a[i] !== b[i]) {
+      x = a[i];
+      y = b[i];
+      break;
+    }
+  }
+
+  if (x < y) {
+    return -1;
+  }
+  if (y < x) {
+    return 1;
+  }
+  return 0;
+}
+function isBuffer(b) {
+  if (global.Buffer && typeof global.Buffer.isBuffer === 'function') {
+    return global.Buffer.isBuffer(b);
+  }
+  return !!(b != null && b._isBuffer);
+}
+
+// based on node assert, original notice:
+
+// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
+//
+// THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
+//
+// Originally from narwhal.js (http://narwhaljs.org)
+// Copyright (c) 2009 Thomas Robinson <280north.com>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the 'Software'), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var util = require('util/');
+var hasOwn = Object.prototype.hasOwnProperty;
+var pSlice = Array.prototype.slice;
+var functionsHaveNames = (function () {
+  return function foo() {}.name === 'foo';
+}());
+function pToString (obj) {
+  return Object.prototype.toString.call(obj);
+}
+function isView(arrbuf) {
+  if (isBuffer(arrbuf)) {
+    return false;
+  }
+  if (typeof global.ArrayBuffer !== 'function') {
+    return false;
+  }
+  if (typeof ArrayBuffer.isView === 'function') {
+    return ArrayBuffer.isView(arrbuf);
+  }
+  if (!arrbuf) {
+    return false;
+  }
+  if (arrbuf instanceof DataView) {
+    return true;
+  }
+  if (arrbuf.buffer && arrbuf.buffer instanceof ArrayBuffer) {
+    return true;
+  }
+  return false;
+}
+// 1. The assert module provides functions that throw
+// AssertionError's when particular conditions are not met. The
+// assert module must conform to the following interface.
+
+var assert = module.exports = ok;
+
+// 2. The AssertionError is defined in assert.
+// new assert.AssertionError({ message: message,
+//                             actual: actual,
+//                             expected: expected })
+
+var regex = /\s*function\s+([^\(\s]*)\s*/;
+// based on https://github.com/ljharb/function.prototype.name/blob/adeeeec8bfcc6068b187d7d9fb3d5bb1d3a30899/implementation.js
+function getName(func) {
+  if (!util.isFunction(func)) {
+    return;
+  }
+  if (functionsHaveNames) {
+    return func.name;
+  }
+  var str = func.toString();
+  var match = str.match(regex);
+  return match && match[1];
+}
+assert.AssertionError = function AssertionError(options) {
+  this.name = 'AssertionError';
+  this.actual = options.actual;
+  this.expected = options.expected;
+  this.operator = options.operator;
+  if (options.message) {
+    this.message = options.message;
+    this.generatedMessage = false;
+  } else {
+    this.message = getMessage(this);
+    this.generatedMessage = true;
+  }
+  var stackStartFunction = options.stackStartFunction || fail;
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, stackStartFunction);
+  } else {
+    // non v8 browsers so we can have a stacktrace
+    var err = new Error();
+    if (err.stack) {
+      var out = err.stack;
+
+      // try to strip useless frames
+      var fn_name = getName(stackStartFunction);
+      var idx = out.indexOf('\n' + fn_name);
+      if (idx >= 0) {
+        // once we have located the function frame
+        // we need to strip out everything before it (and its line)
+        var next_line = out.indexOf('\n', idx + 1);
+        out = out.substring(next_line + 1);
+      }
+
+      this.stack = out;
+    }
+  }
+};
+
+// assert.AssertionError instanceof Error
+util.inherits(assert.AssertionError, Error);
+
+function truncate(s, n) {
+  if (typeof s === 'string') {
+    return s.length < n ? s : s.slice(0, n);
+  } else {
+    return s;
+  }
+}
+function inspect(something) {
+  if (functionsHaveNames || !util.isFunction(something)) {
+    return util.inspect(something);
+  }
+  var rawname = getName(something);
+  var name = rawname ? ': ' + rawname : '';
+  return '[Function' +  name + ']';
+}
+function getMessage(self) {
+  return truncate(inspect(self.actual), 128) + ' ' +
+         self.operator + ' ' +
+         truncate(inspect(self.expected), 128);
+}
+
+// At present only the three keys mentioned above are used and
+// understood by the spec. Implementations or sub modules can pass
+// other keys to the AssertionError's constructor - they will be
+// ignored.
+
+// 3. All of the following functions must throw an AssertionError
+// when a corresponding condition is not met, with a message that
+// may be undefined if not provided.  All assertion methods provide
+// both the actual and expected values to the assertion error for
+// display purposes.
+
+function fail(actual, expected, message, operator, stackStartFunction) {
+  throw new assert.AssertionError({
+    message: message,
+    actual: actual,
+    expected: expected,
+    operator: operator,
+    stackStartFunction: stackStartFunction
+  });
+}
+
+// EXTENSION! allows for well behaved errors defined elsewhere.
+assert.fail = fail;
+
+// 4. Pure assertion tests whether a value is truthy, as determined
+// by !!guard.
+// assert.ok(guard, message_opt);
+// This statement is equivalent to assert.equal(true, !!guard,
+// message_opt);. To test strictly for the value true, use
+// assert.strictEqual(true, guard, message_opt);.
+
+function ok(value, message) {
+  if (!value) fail(value, true, message, '==', assert.ok);
+}
+assert.ok = ok;
+
+// 5. The equality assertion tests shallow, coercive equality with
+// ==.
+// assert.equal(actual, expected, message_opt);
+
+assert.equal = function equal(actual, expected, message) {
+  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
+};
+
+// 6. The non-equality assertion tests for whether two objects are not equal
+// with != assert.notEqual(actual, expected, message_opt);
+
+assert.notEqual = function notEqual(actual, expected, message) {
+  if (actual == expected) {
+    fail(actual, expected, message, '!=', assert.notEqual);
+  }
+};
+
+// 7. The equivalence assertion tests a deep equality relation.
+// assert.deepEqual(actual, expected, message_opt);
+
+assert.deepEqual = function deepEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected, false)) {
+    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
+  }
+};
+
+assert.deepStrictEqual = function deepStrictEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected, true)) {
+    fail(actual, expected, message, 'deepStrictEqual', assert.deepStrictEqual);
+  }
+};
+
+function _deepEqual(actual, expected, strict, memos) {
+  // 7.1. All identical values are equivalent, as determined by ===.
+  if (actual === expected) {
+    return true;
+  } else if (isBuffer(actual) && isBuffer(expected)) {
+    return compare(actual, expected) === 0;
+
+  // 7.2. If the expected value is a Date object, the actual value is
+  // equivalent if it is also a Date object that refers to the same time.
+  } else if (util.isDate(actual) && util.isDate(expected)) {
+    return actual.getTime() === expected.getTime();
+
+  // 7.3 If the expected value is a RegExp object, the actual value is
+  // equivalent if it is also a RegExp object with the same source and
+  // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
+  } else if (util.isRegExp(actual) && util.isRegExp(expected)) {
+    return actual.source === expected.source &&
+           actual.global === expected.global &&
+           actual.multiline === expected.multiline &&
+           actual.lastIndex === expected.lastIndex &&
+           actual.ignoreCase === expected.ignoreCase;
+
+  // 7.4. Other pairs that do not both pass typeof value == 'object',
+  // equivalence is determined by ==.
+  } else if ((actual === null || typeof actual !== 'object') &&
+             (expected === null || typeof expected !== 'object')) {
+    return strict ? actual === expected : actual == expected;
+
+  // If both values are instances of typed arrays, wrap their underlying
+  // ArrayBuffers in a Buffer each to increase performance
+  // This optimization requires the arrays to have the same type as checked by
+  // Object.prototype.toString (aka pToString). Never perform binary
+  // comparisons for Float*Arrays, though, since e.g. +0 === -0 but their
+  // bit patterns are not identical.
+  } else if (isView(actual) && isView(expected) &&
+             pToString(actual) === pToString(expected) &&
+             !(actual instanceof Float32Array ||
+               actual instanceof Float64Array)) {
+    return compare(new Uint8Array(actual.buffer),
+                   new Uint8Array(expected.buffer)) === 0;
+
+  // 7.5 For all other Object pairs, including Array objects, equivalence is
+  // determined by having the same number of owned properties (as verified
+  // with Object.prototype.hasOwnProperty.call), the same set of keys
+  // (although not necessarily the same order), equivalent values for every
+  // corresponding key, and an identical 'prototype' property. Note: this
+  // accounts for both named and indexed properties on Arrays.
+  } else if (isBuffer(actual) !== isBuffer(expected)) {
+    return false;
+  } else {
+    memos = memos || {actual: [], expected: []};
+
+    var actualIndex = memos.actual.indexOf(actual);
+    if (actualIndex !== -1) {
+      if (actualIndex === memos.expected.indexOf(expected)) {
+        return true;
+      }
+    }
+
+    memos.actual.push(actual);
+    memos.expected.push(expected);
+
+    return objEquiv(actual, expected, strict, memos);
+  }
+}
+
+function isArguments(object) {
+  return Object.prototype.toString.call(object) == '[object Arguments]';
+}
+
+function objEquiv(a, b, strict, actualVisitedObjects) {
+  if (a === null || a === undefined || b === null || b === undefined)
+    return false;
+  // if one is a primitive, the other must be same
+  if (util.isPrimitive(a) || util.isPrimitive(b))
+    return a === b;
+  if (strict && Object.getPrototypeOf(a) !== Object.getPrototypeOf(b))
+    return false;
+  var aIsArgs = isArguments(a);
+  var bIsArgs = isArguments(b);
+  if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
+    return false;
+  if (aIsArgs) {
+    a = pSlice.call(a);
+    b = pSlice.call(b);
+    return _deepEqual(a, b, strict);
+  }
+  var ka = objectKeys(a);
+  var kb = objectKeys(b);
+  var key, i;
+  // having the same number of owned properties (keys incorporates
+  // hasOwnProperty)
+  if (ka.length !== kb.length)
+    return false;
+  //the same set of keys (although not necessarily the same order),
+  ka.sort();
+  kb.sort();
+  //~~~cheap key test
+  for (i = ka.length - 1; i >= 0; i--) {
+    if (ka[i] !== kb[i])
+      return false;
+  }
+  //equivalent values for every corresponding key, and
+  //~~~possibly expensive deep test
+  for (i = ka.length - 1; i >= 0; i--) {
+    key = ka[i];
+    if (!_deepEqual(a[key], b[key], strict, actualVisitedObjects))
+      return false;
+  }
+  return true;
+}
+
+// 8. The non-equivalence assertion tests for any deep inequality.
+// assert.notDeepEqual(actual, expected, message_opt);
+
+assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected, false)) {
+    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
+  }
+};
+
+assert.notDeepStrictEqual = notDeepStrictEqual;
+function notDeepStrictEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected, true)) {
+    fail(actual, expected, message, 'notDeepStrictEqual', notDeepStrictEqual);
+  }
+}
+
+
+// 9. The strict equality assertion tests strict equality, as determined by ===.
+// assert.strictEqual(actual, expected, message_opt);
+
+assert.strictEqual = function strictEqual(actual, expected, message) {
+  if (actual !== expected) {
+    fail(actual, expected, message, '===', assert.strictEqual);
+  }
+};
+
+// 10. The strict non-equality assertion tests for strict inequality, as
+// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
+
+assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
+  if (actual === expected) {
+    fail(actual, expected, message, '!==', assert.notStrictEqual);
+  }
+};
+
+function expectedException(actual, expected) {
+  if (!actual || !expected) {
+    return false;
+  }
+
+  if (Object.prototype.toString.call(expected) == '[object RegExp]') {
+    return expected.test(actual);
+  }
+
+  try {
+    if (actual instanceof expected) {
+      return true;
+    }
+  } catch (e) {
+    // Ignore.  The instanceof check doesn't work for arrow functions.
+  }
+
+  if (Error.isPrototypeOf(expected)) {
+    return false;
+  }
+
+  return expected.call({}, actual) === true;
+}
+
+function _tryBlock(block) {
+  var error;
+  try {
+    block();
+  } catch (e) {
+    error = e;
+  }
+  return error;
+}
+
+function _throws(shouldThrow, block, expected, message) {
+  var actual;
+
+  if (typeof block !== 'function') {
+    throw new TypeError('"block" argument must be a function');
+  }
+
+  if (typeof expected === 'string') {
+    message = expected;
+    expected = null;
+  }
+
+  actual = _tryBlock(block);
+
+  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+            (message ? ' ' + message : '.');
+
+  if (shouldThrow && !actual) {
+    fail(actual, expected, 'Missing expected exception' + message);
+  }
+
+  var userProvidedMessage = typeof message === 'string';
+  var isUnwantedException = !shouldThrow && util.isError(actual);
+  var isUnexpectedException = !shouldThrow && actual && !expected;
+
+  if ((isUnwantedException &&
+      userProvidedMessage &&
+      expectedException(actual, expected)) ||
+      isUnexpectedException) {
+    fail(actual, expected, 'Got unwanted exception' + message);
+  }
+
+  if ((shouldThrow && actual && expected &&
+      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+    throw actual;
+  }
+}
+
+// 11. Expected to throw an error:
+// assert.throws(block, Error_opt, message_opt);
+
+assert.throws = function(block, /*optional*/error, /*optional*/message) {
+  _throws(true, block, error, message);
+};
+
+// EXTENSION! This is annoying to write outside this module.
+assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
+  _throws(false, block, error, message);
+};
+
+assert.ifError = function(err) { if (err) throw err; };
+
+var objectKeys = Object.keys || function (obj) {
+  var keys = [];
+  for (var key in obj) {
+    if (hasOwn.call(obj, key)) keys.push(key);
+  }
+  return keys;
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"util/":4}],2:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],3:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+},{}],4:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
+        }
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
+};
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  if (process.noDeprecation === true) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
+      }
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
+        } else {
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
+        }
+      }
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
+    }
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
+  }
+
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
+  }
+
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
+
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = require('./support/isBuffer');
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = require('inherits');
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":3,"_process":5,"inherits":2}],5:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12,10 +1314,9 @@ var _ = require(".");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MovementOrder = function () {
-  function MovementOrder(id, type, position, target, facing, turn) {
-    var value = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : 0;
-    var requiredThrust = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
-    var assignedThrust = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
+  function MovementOrder(id, type, position, target, facing, rolled, turn) {
+    var value = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : 0;
+    var requiredThrust = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : null;
 
     _classCallCheck(this, MovementOrder);
 
@@ -28,13 +1329,28 @@ var MovementOrder = function () {
     this.position = position;
     this.target = target;
     this.facing = facing;
+    this.rolled = rolled;
     this.turn = turn;
     this.value = value;
     this.requiredThrust = requiredThrust;
-    this.assignedThrust = assignedThrust;
   }
 
   _createClass(MovementOrder, [{
+    key: "serialize",
+    value: function serialize() {
+      return {
+        id: this.id,
+        type: this.type,
+        position: this.position,
+        target: this.target,
+        facing: this.facing,
+        rolled: this.rolled,
+        turn: this.turn,
+        value: this.value,
+        requiredThrust: this.requiredThrust ? this.requiredThrust.serialize() : null
+      };
+    }
+  }, {
     key: "isSpeed",
     value: function isSpeed() {
       return this.type === _.movementTypes.SPEED;
@@ -55,19 +1371,34 @@ var MovementOrder = function () {
       return this.type === _.movementTypes.EVADE;
     }
   }, {
+    key: "isRoll",
+    value: function isRoll() {
+      return this.type === _.movementTypes.ROLL;
+    }
+  }, {
     key: "isEnd",
     value: function isEnd() {
       return this.type === _.movementTypes.END;
     }
   }, {
+    key: "isPivot",
+    value: function isPivot() {
+      return this.type === _.movementTypes.PIVOT;
+    }
+  }, {
     key: "isCancellable",
     value: function isCancellable() {
-      return this.isSpeed() || this.isEvade();
+      return this.isSpeed() || this.isPivot() || this.isRoll();
+    }
+  }, {
+    key: "isPlayerAdded",
+    value: function isPlayerAdded() {
+      return this.isSpeed() || this.isPivot() || this.isEvade() || this.isRoll();
     }
   }, {
     key: "clone",
     value: function clone() {
-      return new MovementOrder(this.id, this.type, this.position, this.target, this.facing, this.turn, this.value, this.requiredThrust, this.assignedThrust);
+      return new MovementOrder(this.id, this.type, this.position, this.target, this.facing, this.rolled, this.turn, this.value, this.requiredThrust);
     }
   }, {
     key: "isOpposite",
@@ -87,7 +1418,7 @@ var MovementOrder = function () {
 window.MovementOrder = MovementOrder;
 exports.default = MovementOrder;
 
-},{".":9}],2:[function(require,module,exports){
+},{".":15}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -105,6 +1436,8 @@ var MovementPath = function () {
     this.ship = ship;
     this.movementService = movementService;
     this.scene = scene;
+
+    this.color = new THREE.Color(132 / 255, 165 / 255, 206 / 255);
 
     this.objects = [];
 
@@ -130,19 +1463,29 @@ var MovementPath = function () {
         return;
       }
 
-      var end = this.movementService.getPreviousTurnLastMove(this.ship);
+      var end = this.movementService.getLastEndMove(this.ship);
       var move = this.movementService.getMostRecentMove(this.ship);
       var target = this.movementService.getCurrentMovementVector(this.ship);
 
-      var line = createMovementLine(end.position, end.position.add(end.target), 0.2);
+      var startPosition = end.position;
+      var middlePosition = end.position.add(end.target);
+      var finalPosition = startPosition.add(target);
+
+      var line = createMovementLine(startPosition, middlePosition, this.color, 0.5);
       this.scene.add(line.mesh);
       this.objects.push(line);
 
-      var line2 = createMovementLine(end.position.add(end.target), end.position.add(target));
+      if (!middlePosition.equals(finalPosition)) {
+        var middle = createMovementMiddleStep(middlePosition, this.color);
+        this.scene.add(middle.mesh);
+        this.objects.push(middle);
+      }
+
+      var line2 = createMovementLine(middlePosition, finalPosition, this.color);
       this.scene.add(line2.mesh);
       this.objects.push(line2);
 
-      var facing = createMovementFacing(move.facing, end.position.add(target));
+      var facing = createMovementFacing(move.facing, finalPosition, this.color);
       this.scene.add(facing.mesh);
       this.objects.push(facing);
     }
@@ -151,19 +1494,30 @@ var MovementPath = function () {
   return MovementPath;
 }();
 
-var createMovementLine = function createMovementLine(position, target) {
-  var opacity = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+var createMovementMiddleStep = function createMovementMiddleStep(position, color) {
+  var size = window.coordinateConverter.getHexDistance() * 0.5;
+  var circle = new window.ShipSelectedSprite({ width: size, height: size }, 0.01, 1.6);
+  circle.setPosition(window.coordinateConverter.fromHexToGame(position));
+  circle.setOverlayColor(color);
+  circle.setOverlayColorAlpha(1);
+  return circle;
+};
+
+var createMovementLine = function createMovementLine(position, target, color) {
+  var opacity = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.8;
 
   var start = window.coordinateConverter.fromHexToGame(position);
   var end = window.coordinateConverter.fromHexToGame(target);
 
-  return new window.LineSprite(mathlib.getPointBetweenInDistance(start, end, window.coordinateConverter.getHexDistance() * 0.45, true), mathlib.getPointBetweenInDistance(end, start, window.coordinateConverter.getHexDistance() * 0.45, true), 10, new THREE.Color(0, 0, 1), opacity);
+  return new window.LineSprite(mathlib.getPointBetweenInDistance(start, end, window.coordinateConverter.getHexDistance() * 0.45, true), mathlib.getPointBetweenInDistance(end, start, window.coordinateConverter.getHexDistance() * 0.45, true), 10, color, opacity);
 };
 
-var createMovementFacing = function createMovementFacing(facing, target) {
+var createMovementFacing = function createMovementFacing(facing, target, color) {
   var size = window.coordinateConverter.getHexDistance() * 1.5;
-  var facingSprite = new window.ShipFacingSprite({ width: size, height: size }, 0.01, 0.8, facing);
+  var facingSprite = new window.ShipFacingSprite({ width: size, height: size }, 0.01, 1.6, facing);
   facingSprite.setPosition(window.coordinateConverter.fromHexToGame(target));
+  facingSprite.setOverlayColor(color);
+  facingSprite.setOverlayColorAlpha(1);
   facingSprite.setFacing(mathlib.hexFacingToAngle(facing));
 
   return facingSprite;
@@ -172,7 +1526,7 @@ var createMovementFacing = function createMovementFacing(facing, target) {
 exports.createMovementLine = createMovementLine;
 exports.default = MovementPath;
 
-},{}],3:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -183,19 +1537,134 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _ = require(".");
 
+var _assert = require("assert");
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MovementResolver = function () {
-  function MovementResolver(ship, movementService) {
+  function MovementResolver(ship, movementService, turn) {
     _classCallCheck(this, MovementResolver);
 
     this.ship = ship;
     this.movementService = movementService;
+    this.turn = turn;
   }
 
   _createClass(MovementResolver, [{
+    key: "billAndPay",
+    value: function billAndPay(bill) {
+      var commit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+      if (bill.pay()) {
+        var newMovement = bill.getMoves();
+
+        var initialOverChannel = new _.OverChannelResolver(this.movementService.getThrusters(this.ship), this.movementService.getThisTurnMovement(this.ship)).getAmountOverChanneled();
+
+        var newOverChannel = new _.OverChannelResolver(this.movementService.getThrusters(this.ship), newMovement).getAmountOverChanneled();
+
+        /*
+        console.log(
+          "overChannel",
+          initialOverChannel,
+          newOverChannel,
+          newOverChannel - initialOverChannel
+        );
+        */
+
+        if (commit) {
+          this.movementService.replaceTurnMovement(this.ship, newMovement);
+          this.movementService.shipMovementChanged(this.ship);
+        }
+        return {
+          result: true,
+          overChannel: newOverChannel - initialOverChannel > 0
+        };
+      } else if (commit) {
+        throw new Error("Tried to commit move that was not legal. Check legality first!");
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: "canRoll",
+    value: function canRoll() {
+      return this.roll(false);
+    }
+  }, {
+    key: "roll",
+    value: function roll(commit) {}
+  }, {
+    key: "canEvade",
+    value: function canEvade(step) {
+      return this.evade(stpe, false);
+    }
+  }, {
+    key: "evade",
+    value: function evade(step) {
+      var commit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+      var evadeMove = this.movementService.getEvadeMove(this.ship);
+
+      var endMove = this.movementService.getLastEndMove(this.ship);
+
+      if (evadeMove) {
+        if (evadeMove.value + step > this.movementService.getMaximumEvasion(this.ship)) {
+          return false;
+        }
+
+        if (evadeMove.value + step < 0) {
+          return false;
+        }
+        evadeMove.value += step;
+      } else {
+        if (step < 0) {
+          return false;
+        }
+
+        evadeMove = new _.MovementOrder(null, _.movementTypes.EVADE, endMove.position, new hexagon.Offset(0, 0), endMove.facing, endMove.rolled, this.turn, 1);
+      }
+
+      var playerAdded = this.movementService.getThisTurnMovement(this.ship).filter(function (move) {
+        return move.isPlayerAdded() && !move.isRoll();
+      });
+      var nonPlayerAdded = this.movementService.getThisTurnMovement(this.ship).filter(function (move) {
+        return !move.isPlayerAdded() || move.isRoll();
+      });
+
+      var movements = evadeMove.value === 0 ? [].concat(_toConsumableArray(nonPlayerAdded), _toConsumableArray(playerAdded)) : [].concat(_toConsumableArray(nonPlayerAdded), [evadeMove], _toConsumableArray(playerAdded));
+
+      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), movements);
+
+      return this.billAndPay(bill, commit);
+    }
+  }, {
+    key: "canPivot",
+    value: function canPivot(pivotDirection) {
+      return this.pivot(pivotDirection, false);
+    }
+  }, {
+    key: "pivot",
+    value: function pivot(pivotDirection) {
+      var commit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+      var lastMove = this.movementService.getMostRecentMove(this.ship);
+      var pivotMove = new _.MovementOrder(null, _.movementTypes.PIVOT, lastMove.position, new hexagon.Offset(0, 0), mathlib.addToHexFacing(lastMove.facing, pivotDirection), lastMove.rolled, this.turn, pivotDirection);
+
+      var movements = this.movementService.getThisTurnMovement(this.ship);
+
+      if (lastMove.isPivot() && lastMove.value !== pivotDirection) {
+        movements.pop();
+      } else {
+        movements.push(pivotMove);
+      }
+
+      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), movements);
+
+      return this.billAndPay(bill, commit);
+    }
+  }, {
     key: "canThrust",
     value: function canThrust(direction) {
       return this.thrust(direction, false);
@@ -207,30 +1676,21 @@ var MovementResolver = function () {
 
       var lastMove = this.movementService.getMostRecentMove(this.ship);
 
-      var thrustMove = new _.MovementOrder(null, _.movementTypes.SPEED, lastMove.position, new hexagon.Offset(0, 0).moveToDirection(direction), lastMove.facing, lastMove.turn, direction);
+      var thrustMove = new _.MovementOrder(null, _.movementTypes.SPEED, lastMove.position, new hexagon.Offset(0, 0).moveToDirection(direction), lastMove.facing, lastMove.rolled, this.turn, direction);
 
       var movements = this.movementService.getThisTurnMovement(this.ship);
-
-      if (this.getOpposite(movements, thrustMove)) {
-        if (commit) {
-          this.removeOpposite(movements, thrustMove);
-        }
-        return true;
-      }
-
-      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), [].concat(_toConsumableArray(movements), [thrustMove]));
-
-      if (bill.pay()) {
-        if (commit) {
-          bill.commit();
-          this.addMove(thrustMove);
-        }
-        return true;
-      } else if (commit) {
-        throw new Error("Tried to commit move that was not legal. Check legality first!");
+      var opposite = this.getOpposite(movements, thrustMove);
+      if (opposite) {
+        movements = movements.filter(function (move) {
+          return move !== opposite;
+        });
       } else {
-        return false;
+        movements.push(thrustMove);
       }
+
+      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), movements);
+
+      return this.billAndPay(bill, commit);
     }
   }, {
     key: "canCancel",
@@ -242,16 +1702,17 @@ var MovementResolver = function () {
   }, {
     key: "cancel",
     value: function cancel() {
-      var toCancel = this.movementService.getThisTurnMovement(this.ship).reverse().find(function (move) {
-        return move.isCancellable();
-      });
+      var toCancel = this.ship.movement[this.ship.movement.length - 1];
 
-      if (!toCancel) {
+      if (!toCancel || !toCancel.isCancellable()) {
         return;
       }
 
       this.removeMove(toCancel);
-      this.movementService.shipMovementChanged(this.ship);
+
+      var bill = new _.ThrustBill(this.ship, this.movementService.getTotalProducedThrust(this.ship), this.movementService.getThisTurnMovement(this.ship));
+
+      return this.billAndPay(bill, true);
     }
   }, {
     key: "revert",
@@ -263,26 +1724,11 @@ var MovementResolver = function () {
       this.movementService.shipMovementChanged(this.ship);
     }
   }, {
-    key: "addMove",
-    value: function addMove(move) {
-      this.ship.movement.push(move);
-      this.movementService.shipMovementChanged(this.ship);
-    }
-  }, {
     key: "getOpposite",
     value: function getOpposite(movements, move) {
       return movements.find(function (other) {
         return other.isOpposite(move);
       });
-    }
-  }, {
-    key: "removeOpposite",
-    value: function removeOpposite(movements, move) {
-      var opposite = this.getOpposite(movements, move);
-      this.ship.movement = this.ship.movement.filter(function (other) {
-        return other !== opposite;
-      });
-      this.movementService.shipMovementChanged(this.ship);
     }
   }, {
     key: "removeMove",
@@ -298,7 +1744,7 @@ var MovementResolver = function () {
 
 exports.default = MovementResolver;
 
-},{".":9}],4:[function(require,module,exports){
+},{".":15,"assert":1}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -308,6 +1754,8 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _ = require(".");
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -339,6 +1787,17 @@ var MovementService = function () {
       this.phaseStrategy = phaseStrategy;
     }
   }, {
+    key: "replaceTurnMovement",
+    value: function replaceTurnMovement(ship, newMovement) {
+      var _this = this;
+
+      ship.movement = [].concat(_toConsumableArray(ship.movement.filter(function (move) {
+        return move.turn !== _this.gamedata.turn || move.turn === _this.gamedata.turn && !move.isPlayerAdded();
+      })), _toConsumableArray(newMovement.filter(function (move) {
+        return move.isPlayerAdded();
+      })));
+    }
+  }, {
     key: "getDeployMove",
     value: function getDeployMove(ship) {
       return ship.movement.find(function (move) {
@@ -348,10 +1807,10 @@ var MovementService = function () {
   }, {
     key: "getMostRecentMove",
     value: function getMostRecentMove(ship) {
-      var _this = this;
+      var _this2 = this;
 
       var move = ship.movement.slice().reverse().find(function (move) {
-        return move.turn === _this.gamedata.turn;
+        return move.turn === _this2.gamedata.turn;
       });
       if (move) {
         return move;
@@ -360,8 +1819,8 @@ var MovementService = function () {
       return ship.movement[ship.movement.length - 1];
     }
   }, {
-    key: "getPreviousTurnLastMove",
-    value: function getPreviousTurnLastMove(ship) {
+    key: "getLastEndMove",
+    value: function getLastEndMove(ship) {
       var end = ship.movement.slice().reverse().find(function (move) {
         return move.isEnd();
       });
@@ -379,20 +1838,20 @@ var MovementService = function () {
   }, {
     key: "getAllMovesOfTurn",
     value: function getAllMovesOfTurn(ship) {
-      var _this2 = this;
+      var _this3 = this;
 
       return ship.movement.filter(function (move) {
-        return move.turn === _this2.gamedata.turn;
+        return move.turn === _this3.gamedata.turn;
       });
     }
   }, {
     key: "getShipsInSameHex",
     value: function getShipsInSameHex(ship, hex) {
-      var _this3 = this;
+      var _this4 = this;
 
       hex = hex && this.getMostRecentMove(ship).position;
       return this.gamedata.ships.filter(function (ship2) {
-        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this3.getMostRecentMove(ship2).position.equals(hex);
+        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this4.getMostRecentMove(ship2).position.equals(hex);
       });
     }
   }, {
@@ -402,7 +1861,7 @@ var MovementService = function () {
 
       if (!deployMove) {
         var lastMove = this.getMostRecentMove(ship);
-        deployMove = new _.MovementOrder(-1, _.movementTypes.DEPLOY, pos, lastMove.target, lastMove.facing, this.gamedata.turn);
+        deployMove = new _.MovementOrder(-1, _.movementTypes.DEPLOY, pos, lastMove.target, lastMove.facing, lastMove.rolled, this.gamedata.turn);
         ship.movement.push(deployMove);
       } else {
         deployMove.position = pos;
@@ -417,28 +1876,32 @@ var MovementService = function () {
       }
 
       var deployMove = this.getDeployMove(ship);
-      var newfacing = mathlib.addToHexFacing(ship.deploymove.facing, step);
+      var newfacing = mathlib.addToHexFacing(deploymove.facing, step);
       deploymove.facing = newfacing;
-    }
-  }, {
-    key: "canEvade",
-    value: function canEvade(ship) {
-      //TODO: get maunouvering systems, get amount of already evaded. Return true if can still evade
     }
   }, {
     key: "getEvadeMove",
     value: function getEvadeMove(ship) {
-      var _this4 = this;
+      var _this5 = this;
 
       return ship.movement.find(function (move) {
-        return move.isEvade() && move.turn === _this4.gamedata.turn;
+        return move.isEvade() && move.turn === _this5.gamedata.turn;
       });
     }
   }, {
-    key: "getEvade",
-    value: function getEvade(ship) {
+    key: "getEvasion",
+    value: function getEvasion(ship) {
       var evadeMove = this.getEvadeMove(ship);
       return evadeMove ? evadeMove.value : 0;
+    }
+  }, {
+    key: "getMaximumEvasion",
+    value: function getMaximumEvasion(ship) {
+      return ship.systems.filter(function (system) {
+        return !system.isDestroyed() && system.maxEvasion > 0;
+      }).reduce(function (total, system) {
+        return total + system.maxEvasion;
+      });
     }
   }, {
     key: "evade",
@@ -462,12 +1925,9 @@ var MovementService = function () {
   }, {
     key: "getRemainingEngineThrust",
     value: function getRemainingEngineThrust(ship) {
-      var thrustProduced = this.getTotalProducedThrust(ship);
-      var thrustChanneled = this.getAllMovesOfTurn(ship).reduce(function (accumulator, move) {
-        return move.getThrustChanneled();
-      }, 0);
+      //TODO
 
-      return thrustProduced - thrustChanneled;
+      return 0;
     }
   }, {
     key: "getPositionAtStartOfTurn",
@@ -490,20 +1950,15 @@ var MovementService = function () {
   }, {
     key: "getPreviousLocation",
     value: function getPreviousLocation(ship) {
-      var oPos = shipManager.getShipPosition(ship);
-      for (var i = ship.movement.length - 1; i >= 0; i--) {
-        var move = ship.movement[i];
-        if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
-      }
-      return oPos;
+      //TODO
     }
   }, {
     key: "getThisTurnMovement",
     value: function getThisTurnMovement(ship) {
-      var _this5 = this;
+      var _this6 = this;
 
       return ship.movement.filter(function (move) {
-        return move.turn === _this5.gamedata.turn || move.isEnd() && move.turn === _this5.gamedata.turn - 1 || move.isDeploy();
+        return move.turn === _this6.gamedata.turn || move.isEnd() && move.turn === _this6.gamedata.turn - 1 || move.isDeploy();
       });
     }
   }, {
@@ -514,17 +1969,17 @@ var MovementService = function () {
   }, {
     key: "canThrust",
     value: function canThrust(ship, direction) {
-      return new _.MovementResolver(ship, this).canThrust(direction);
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canThrust(direction);
     }
   }, {
     key: "thrust",
     value: function thrust(ship, direction) {
-      new _.MovementResolver(ship, this).thrust(direction);
+      new _.MovementResolver(ship, this, this.gamedata.turn).thrust(direction);
     }
   }, {
     key: "canCancel",
     value: function canCancel(ship) {
-      return new _.MovementResolver(ship, this).canCancel();
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canCancel();
     }
   }, {
     key: "canRevert",
@@ -534,12 +1989,51 @@ var MovementService = function () {
   }, {
     key: "cancel",
     value: function cancel(ship) {
-      new _.MovementResolver(ship, this).cancel();
+      new _.MovementResolver(ship, this, this.gamedata.turn).cancel();
     }
   }, {
     key: "revert",
     value: function revert(ship) {
-      new _.MovementResolver(ship, this).revert();
+      new _.MovementResolver(ship, this, this.gamedata.turn).revert();
+    }
+  }, {
+    key: "canPivot",
+    value: function canPivot(ship, turnDirection) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canPivot(turnDirection);
+    }
+  }, {
+    key: "pivot",
+    value: function pivot(ship, turnDirection) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).pivot(turnDirection);
+    }
+  }, {
+    key: "canRoll",
+    value: function canRoll(ship) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canRoll();
+    }
+  }, {
+    key: "roll",
+    value: function roll(ship) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).roll();
+    }
+  }, {
+    key: "canEvade",
+    value: function canEvade(ship, step) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).canEvade(step);
+    }
+  }, {
+    key: "evade",
+    value: function evade(ship, step) {
+      return new _.MovementResolver(ship, this, this.gamedata.turn).evade(step);
+    }
+  }, {
+    key: "getThrusters",
+    value: function getThrusters(ship) {
+      return ship.systems.filter(function (system) {
+        return system.thruster;
+      }).filter(function (system) {
+        return !system.isDestroyed();
+      });
     }
   }]);
 
@@ -549,26 +2043,98 @@ var MovementService = function () {
 window.MovementService = MovementService;
 exports.default = MovementService;
 
-},{".":9}],5:[function(require,module,exports){
-'use strict';
+},{".":15}],10:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 var movementTypes = {
-    START: 'start',
-    END: 'end',
-    DEPLOY: 'deploy',
-    SPEED: 'speed',
-    PIVOT_LEFT: 'pivot_left',
-    PIVOT_RIGHT: 'pivot_right',
-    EVADE: 'evade'
+  START: "start",
+  END: "end",
+  DEPLOY: "deploy",
+  SPEED: "speed",
+  PIVOT: "pivot",
+  EVADE: "evade",
+  ROLL: "roll"
 };
 
 window.movementTypes = movementTypes;
 exports.default = movementTypes;
 
-},{}],6:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var OverChannelResolver = function () {
+  function OverChannelResolver(thrusters, movement) {
+    _classCallCheck(this, OverChannelResolver);
+
+    this.thrusters = thrusters.map(function (thruster) {
+      return {
+        channeled: 0,
+        limit: thruster.output,
+        thruster: thruster
+      };
+    });
+
+    this.movement = movement;
+  }
+
+  _createClass(OverChannelResolver, [{
+    key: "getAmountOverChanneled",
+    value: function getAmountOverChanneled() {
+      var _this = this;
+
+      this.movement.filter(function (move) {
+        return move.requiredThrust;
+      }).forEach(function (move) {
+        return move.requiredThrust.getFulfilments().forEach(function (fulfilment) {
+          _this.track(fulfilment);
+        });
+      });
+
+      return this.thrusters.reduce(function (total, thruster) {
+        return total + _this.getThrusterOverChannel(thruster);
+      }, 0);
+    }
+  }, {
+    key: "track",
+    value: function track(fulfilments) {
+      var _this2 = this;
+
+      fulfilments.forEach(function (fulfilment) {
+        var thruster = _this2.thrusters.find(function (thruster) {
+          return thruster.thruster === fulfilment.thruster;
+        });
+
+        thruster.channeled += fulfilment.amount;
+      });
+    }
+  }, {
+    key: "getThrusterOverChannel",
+    value: function getThrusterOverChannel(thruster) {
+      if (thruster.channeled > thruster.limit) {
+        return thruster.channeled - thruster.limit;
+      }
+
+      return 0;
+    }
+  }]);
+
+  return OverChannelResolver;
+}();
+
+exports.default = OverChannelResolver;
+
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -592,18 +2158,59 @@ var RequiredThrust = function () {
       2: [],
       3: [],
       4: [],
-      5: []
+      5: [],
+      6: []
     };
 
     switch (move.type) {
       case _.movementTypes.SPEED:
         this.requireSpeed(ship, move);
         break;
+      case _.movementTypes.PIVOT:
+        this.requirePivot(ship);
+        break;
+      case _.movementTypes.ROLL:
+        this.requireRoll(ship);
+        break;
+      case _.movementTypes.EVADE:
+        this.requireEvade(ship, move);
+        break;
       default:
     }
   }
 
   _createClass(RequiredThrust, [{
+    key: "serialize",
+    value: function serialize() {
+      var _this = this;
+
+      var fullfilments = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: []
+      };
+
+      Object.keys(this.fullfilments).forEach(function (direction) {
+        var entryArray = _this.fullfilments[direction].map(function (fulfilment) {
+          return {
+            amount: fulfilment.amount,
+            thrusterId: fulfilment.thruster.id
+          };
+        });
+
+        fullfilments[direction] = entryArray;
+      });
+
+      return {
+        requirements: this.requirements,
+        fullfilments: fullfilments
+      };
+    }
+  }, {
     key: "getRequirement",
     value: function getRequirement(direction) {
       if (!this.requirements[direction]) {
@@ -611,6 +2218,15 @@ var RequiredThrust = function () {
       }
 
       return this.requirements[direction] - this.getFulfilledAmount(direction);
+    }
+  }, {
+    key: "isFulfilled",
+    value: function isFulfilled() {
+      var _this2 = this;
+
+      return Object.keys(this.requirements).every(function (direction) {
+        return _this2.getRequirement(direction) === 0;
+      });
     }
   }, {
     key: "fulfill",
@@ -628,21 +2244,47 @@ var RequiredThrust = function () {
       }, 0);
     }
   }, {
+    key: "getFulfilments",
+    value: function getFulfilments() {
+      var _this3 = this;
+
+      return Object.keys(this.fullfilments).map(function (key) {
+        return _this3.fullfilments[key];
+      }).filter(function (fulfillment) {
+        return fulfillment.length > 0;
+      });
+    }
+  }, {
+    key: "requireRoll",
+    value: function requireRoll(ship) {
+      this.requirements[6] = ship.rollcost;
+    }
+  }, {
+    key: "requireEvade",
+    value: function requireEvade(ship, move) {
+      this.requirements[6] = ship.evasioncost * move.value;
+    }
+  }, {
+    key: "requirePivot",
+    value: function requirePivot(ship) {
+      this.requirements[6] = ship.pivotcost;
+    }
+  }, {
     key: "requireSpeed",
     value: function requireSpeed(ship, move) {
       var facing = move.facing;
       var direction = move.value;
-      var actualDirection = window.mathlib.addToHexFacing(window.mathlib.addToHexFacing(direction, facing), 3);
+      var actualDirection = window.mathlib.addToHexFacing(window.mathlib.addToHexFacing(direction, -facing), 3);
 
       this.requirements[actualDirection] = ship.accelcost;
     }
   }, {
     key: "accumulate",
     value: function accumulate(total) {
-      var _this = this;
+      var _this4 = this;
 
       Object.keys(this.requirements).forEach(function (direction) {
-        total[direction] = total[direction] ? total[direction] + _this.requirements[direction] : _this.requirements[direction];
+        total[direction] = total[direction] ? total[direction] + _this4.requirements[direction] : _this4.requirements[direction];
       });
 
       return total;
@@ -654,7 +2296,7 @@ var RequiredThrust = function () {
 
 exports.default = RequiredThrust;
 
-},{".":9}],7:[function(require,module,exports){
+},{".":15}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -822,7 +2464,7 @@ var ThrustAssignment = function () {
 
 exports.default = ThrustAssignment;
 
-},{}],8:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -840,7 +2482,9 @@ var ThrustBill = function () {
     _classCallCheck(this, ThrustBill);
 
     this.ship = ship;
-    this.movement = movement;
+    this.movement = movement.map(function (move) {
+      return move.clone();
+    });
     this.thrusters = ship.systems.filter(function (system) {
       return system.thruster;
     }).filter(function (system) {
@@ -849,7 +2493,7 @@ var ThrustBill = function () {
       return new _.ThrustAssignment(thruster);
     });
 
-    this.buildRequiredThrust(movement);
+    this.buildRequiredThrust(this.movement);
 
     this.paid = null;
 
@@ -871,6 +2515,7 @@ var ThrustBill = function () {
       result[3] = result[3] || 0;
       result[4] = result[4] || 0;
       result[5] = result[5] || 0;
+      result[6] = result[6] || 0;
 
       return result;
     }
@@ -878,12 +2523,12 @@ var ThrustBill = function () {
     key: "getTotalThrustRequired",
     value: function getTotalThrustRequired() {
       var totalRequired = this.getRequiredThrustDirections();
-      return totalRequired[0] + totalRequired[1] + totalRequired[2] + totalRequired[3] + totalRequired[4] + totalRequired[5];
+      return totalRequired[0] + totalRequired[1] + totalRequired[2] + totalRequired[3] + totalRequired[4] + totalRequired[5] + totalRequired[6];
     }
   }, {
     key: "getCurrentThrustRequired",
     value: function getCurrentThrustRequired() {
-      return this.directionsRequired[0] + this.directionsRequired[1] + this.directionsRequired[2] + this.directionsRequired[3] + this.directionsRequired[4] + this.directionsRequired[5];
+      return this.directionsRequired[0] + this.directionsRequired[1] + this.directionsRequired[2] + this.directionsRequired[3] + this.directionsRequired[4] + this.directionsRequired[5] + this.directionsRequired[6];
     }
   }, {
     key: "isPaid",
@@ -912,6 +2557,8 @@ var ThrustBill = function () {
     key: "getOverChannelers",
     value: function getOverChannelers(direction) {
       return this.thrusters.filter(function (thruster) {
+        return thruster.isDirection(direction);
+      }).filter(function (thruster) {
         return thruster.getOverChannel() > 0;
       }).filter(function (thruster) {
         return !thruster.isDamaged();
@@ -1164,8 +2811,8 @@ var ThrustBill = function () {
       });
     }
   }, {
-    key: "commit",
-    value: function commit() {
+    key: "getMoves",
+    value: function getMoves() {
       var _this8 = this;
 
       this.thrusters.forEach(function (thruster) {
@@ -1192,11 +2839,14 @@ var ThrustBill = function () {
           });
         });
       });
-    }
-  }, {
-    key: "reject",
-    value: function reject() {
-      this.movement.forEach(move = move.requiredThrust = null);
+
+      if (!this.movement.every(function (move) {
+        return move.requiredThrust.isFulfilled();
+      })) {
+        throw new Error("Not all moves are fulfilled");
+      }
+
+      return this.movement;
     }
   }]);
 
@@ -1205,13 +2855,13 @@ var ThrustBill = function () {
 
 exports.default = ThrustBill;
 
-},{".":9}],9:[function(require,module,exports){
+},{".":15}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ThrustAssignment = exports.RequiredThrust = exports.ThrustBill = exports.MovementResolver = exports.movementTypes = exports.MovementPath = exports.MovementOrder = exports.MovementService = undefined;
+exports.OverChannelResolver = exports.ThrustAssignment = exports.RequiredThrust = exports.ThrustBill = exports.MovementResolver = exports.movementTypes = exports.MovementPath = exports.MovementOrder = exports.MovementService = undefined;
 
 var _MovementService = require("./MovementService");
 
@@ -1245,6 +2895,10 @@ var _ThrustAssignment = require("./ThrustAssignment");
 
 var _ThrustAssignment2 = _interopRequireDefault(_ThrustAssignment);
 
+var _OverChannelResolver = require("./OverChannelResolver");
+
+var _OverChannelResolver2 = _interopRequireDefault(_OverChannelResolver);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 window.movement = {
@@ -1255,7 +2909,8 @@ window.movement = {
   MovementResolver: _MovementResolver2.default,
   ThrustBill: _ThrustBill2.default,
   RequiredThrust: _RequiredThrust2.default,
-  ThrustAssignment: _ThrustAssignment2.default
+  ThrustAssignment: _ThrustAssignment2.default,
+  OverChannelResolver: _OverChannelResolver2.default
 };
 
 exports.MovementService = _MovementService2.default;
@@ -1266,26 +2921,29 @@ exports.MovementResolver = _MovementResolver2.default;
 exports.ThrustBill = _ThrustBill2.default;
 exports.RequiredThrust = _RequiredThrust2.default;
 exports.ThrustAssignment = _ThrustAssignment2.default;
+exports.OverChannelResolver = _OverChannelResolver2.default;
 
-},{"./MovementOrder":1,"./MovementPath":2,"./MovementResolver":3,"./MovementService":4,"./MovementTypes":5,"./RequiredThrust":6,"./ThrustAssignment":7,"./ThrustBill":8}],10:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{".":18,"dup":1}],11:[function(require,module,exports){
-arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],12:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{".":18,"dup":3}],13:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{".":18,"dup":4}],14:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],15:[function(require,module,exports){
+},{"./MovementOrder":6,"./MovementPath":7,"./MovementResolver":8,"./MovementService":9,"./MovementTypes":10,"./OverChannelResolver":11,"./RequiredThrust":12,"./ThrustAssignment":13,"./ThrustBill":14}],16:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{".":18,"dup":6}],16:[function(require,module,exports){
+},{".":25,"dup":6}],17:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],17:[function(require,module,exports){
+},{"dup":7}],18:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
-},{".":18,"dup":8}],18:[function(require,module,exports){
+},{".":25,"assert":1,"dup":8}],19:[function(require,module,exports){
 arguments[4][9][0].apply(exports,arguments)
-},{"./MovementOrder":10,"./MovementPath":11,"./MovementResolver":12,"./MovementService":13,"./MovementTypes":14,"./RequiredThrust":15,"./ThrustAssignment":16,"./ThrustBill":17,"dup":9}],19:[function(require,module,exports){
+},{".":25,"dup":9}],20:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"dup":10}],21:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"dup":11}],22:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{".":25,"dup":12}],23:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13}],24:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{".":25,"dup":14}],25:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"./MovementOrder":16,"./MovementPath":17,"./MovementResolver":18,"./MovementService":19,"./MovementTypes":20,"./OverChannelResolver":21,"./RequiredThrust":22,"./ThrustAssignment":23,"./ThrustBill":24,"dup":15}],26:[function(require,module,exports){
 "use strict";
 
 var _ships = require("./ships");
@@ -1306,7 +2964,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 window.shipObjects = _ships2.default;
 
-},{"./handler/movement":18,"./ships":24,"./uiStrategy":30}],20:[function(require,module,exports){
+},{"./handler/movement":25,"./ships":31,"./uiStrategy":37}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1372,18 +3030,18 @@ var Capital = function (_ShipObject) {
 
 exports.default = Capital;
 
-},{"./ShipObject":23}],21:[function(require,module,exports){
-'use strict';
+},{"./ShipObject":30}],28:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _ShipObject2 = require('./ShipObject');
+var _ShipObject2 = require("./ShipObject");
 
 var _ShipObject3 = _interopRequireDefault(_ShipObject2);
 
@@ -1396,65 +3054,64 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Gunship = function (_ShipObject) {
-    _inherits(Gunship, _ShipObject);
+  _inherits(Gunship, _ShipObject);
 
-    function Gunship(ship, scene) {
-        _classCallCheck(this, Gunship);
+  function Gunship(ship, scene) {
+    _classCallCheck(this, Gunship);
 
-        var _this = _possibleConstructorReturn(this, (Gunship.__proto__ || Object.getPrototypeOf(Gunship)).call(this, ship, scene));
+    var _this = _possibleConstructorReturn(this, (Gunship.__proto__ || Object.getPrototypeOf(Gunship)).call(this, ship, scene));
 
-        _this.defaultHeight = 30;
-        _this.sideSpriteSize = 50;
-        _this.create();
-        return _this;
+    _this.defaultHeight = 30;
+    _this.sideSpriteSize = 50;
+    _this.create();
+    return _this;
+  }
+
+  _createClass(Gunship, [{
+    key: "create",
+    value: function create() {
+      var _this2 = this;
+
+      _get(Gunship.prototype.__proto__ || Object.getPrototypeOf(Gunship.prototype), "create", this).call(this);
+
+      window.Loader.loadObject("img/3d/gunship/gunship.obj", function (object) {
+        window.Loader.loadTexturesAndAssign(object.children[0], {}, null, "img/3d/gunship/normal.png");
+
+        window.Loader.loadTexturesAndAssign(object.children[1], {}, null, "img/3d/turretNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[2], {}, null, "img/3d/turretNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[3], {}, null, "img/3d/turretNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[6], {}, null, "img/3d/turretNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[7], {}, null, "img/3d/turretNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[4], {}, "img/3d/diffuseThruster.png", "img/3d/normalThruster.png");
+        window.Loader.loadTexturesAndAssign(object.children[5], {}, "img/3d/diffuseThruster.png", "img/3d/normalThruster.png");
+
+        object.scale.set(5, 5, 5);
+        _this2.startRotation = { x: 90, y: 90, z: 0 };
+        _this2.shipObject = object;
+        _this2.setRotation(_this2.rotation.x, _this2.rotation.y, _this2.rotation.z);
+        _this2.mesh.add(_this2.shipObject);
+        object.position.set(0, 0, _this2.shipZ);
+      });
     }
+  }]);
 
-    _createClass(Gunship, [{
-        key: 'create',
-        value: function create() {
-            var _this2 = this;
-
-            _get(Gunship.prototype.__proto__ || Object.getPrototypeOf(Gunship.prototype), 'create', this).call(this);
-
-            window.Loader.loadObject("img/3d/gunship/gunship.obj", function (object) {
-
-                window.Loader.loadTexturesAndAssign(object.children[0], {}, null, 'img/3d/gunship/normal.png');
-
-                window.Loader.loadTexturesAndAssign(object.children[1], {}, null, 'img/3d/turretNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[2], {}, null, 'img/3d/turretNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[3], {}, null, 'img/3d/turretNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[6], {}, null, 'img/3d/turretNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[7], {}, null, 'img/3d/turretNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[4], {}, 'img/3d/diffuseThruster.png', 'img/3d/normalThruster.png');
-                window.Loader.loadTexturesAndAssign(object.children[5], {}, 'img/3d/diffuseThruster.png', 'img/3d/normalThruster.png');
-
-                object.scale.set(5, 5, 5);
-                _this2.startRotation = { x: 90, y: 90, z: 0 };
-                _this2.shipObject = object;
-                _this2.setRotation(_this2.rotation.x, _this2.rotation.y, _this2.rotation.z);
-                _this2.mesh.add(_this2.shipObject);
-                object.position.set(0, 0, _this2.position.z);
-            });
-        }
-    }]);
-
-    return Gunship;
+  return Gunship;
 }(_ShipObject3.default);
 
 exports.default = Gunship;
 
-},{"./ShipObject":23}],22:[function(require,module,exports){
-'use strict';
+},{"./ShipObject":30}],29:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _ShipObject2 = require('./ShipObject');
+var _ShipObject2 = require("./ShipObject");
 
 var _ShipObject3 = _interopRequireDefault(_ShipObject2);
 
@@ -1467,48 +3124,51 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var Rhino = function (_ShipObject) {
-    _inherits(Rhino, _ShipObject);
+  _inherits(Rhino, _ShipObject);
 
-    function Rhino(ship, scene) {
-        _classCallCheck(this, Rhino);
+  function Rhino(ship, scene) {
+    _classCallCheck(this, Rhino);
 
-        var _this = _possibleConstructorReturn(this, (Rhino.__proto__ || Object.getPrototypeOf(Rhino)).call(this, ship, scene));
+    var _this = _possibleConstructorReturn(this, (Rhino.__proto__ || Object.getPrototypeOf(Rhino)).call(this, ship, scene));
 
-        _this.sideSpriteSize = 30;
-        _this.create();
-        return _this;
+    _this.sideSpriteSize = 30;
+    _this.create();
+    return _this;
+  }
+
+  _createClass(Rhino, [{
+    key: "create",
+    value: function create() {
+      var _this2 = this;
+
+      _get(Rhino.prototype.__proto__ || Object.getPrototypeOf(Rhino.prototype), "create", this).call(this);
+
+      window.Loader.loadObject("img/3d/rhino/rhino.obj", function (object) {
+        window.Loader.loadTexturesAndAssign(object.children[0], {
+          normalScale: new THREE.Vector2(1, 1),
+          shininess: 10,
+          color: new THREE.Color(1, 1, 1)
+        }, "img/3d/rhino/texture.png", "img/3d/rhino/sculptNormal.png");
+        window.Loader.loadTexturesAndAssign(object.children[1], {}, "img/3d/diffuseDoc.png", "img/3d/normalDoc.png");
+        window.Loader.loadTexturesAndAssign(object.children[2], {}, "img/3d/diffuseThruster.png", "img/3d/normalThruster.png");
+
+        object.scale.set(2, 2, 2);
+        _this2.startRotation = { x: 90, y: 90, z: 0 };
+
+        _this2.shipObject = object;
+        _this2.setRotation(_this2.rotation.x, _this2.rotation.y, _this2.rotation.z);
+        _this2.mesh.add(_this2.shipObject);
+        object.position.set(0, 0, _this2.shipZ);
+      });
     }
+  }]);
 
-    _createClass(Rhino, [{
-        key: 'create',
-        value: function create() {
-            var _this2 = this;
-
-            _get(Rhino.prototype.__proto__ || Object.getPrototypeOf(Rhino.prototype), 'create', this).call(this);
-
-            window.Loader.loadObject("img/3d/rhino/rhino.obj", function (object) {
-
-                window.Loader.loadTexturesAndAssign(object.children[0], { normalScale: new THREE.Vector2(1, 1), shininess: 10, color: new THREE.Color(1, 1, 1) }, 'img/3d/rhino/texture.png', 'img/3d/rhino/sculptNormal.png');
-                window.Loader.loadTexturesAndAssign(object.children[1], {}, 'img/3d/diffuseDoc.png', 'img/3d/normalDoc.png');
-                window.Loader.loadTexturesAndAssign(object.children[2], {}, 'img/3d/diffuseThruster.png', 'img/3d/normalThruster.png');
-
-                object.scale.set(2, 2, 2);
-                _this2.startRotation = { x: 90, y: 90, z: 0 };
-
-                _this2.shipObject = object;
-                _this2.setRotation(_this2.rotation.x, _this2.rotation.y, _this2.rotation.z);
-                _this2.mesh.add(_this2.shipObject);
-                object.position.set(0, 0, _this2.position.z);
-            });
-        }
-    }]);
-
-    return Rhino;
+  return Rhino;
 }(_ShipObject3.default);
 
 exports.default = Rhino;
 
-},{"./ShipObject":23}],23:[function(require,module,exports){
+},{"./ShipObject":30}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1581,7 +3241,7 @@ var ShipObject = function () {
       this.shipSideSprite.setOverlayColorAlpha(1);
       this.mesh.add(this.shipSideSprite.mesh);
 
-      this.shipEWSprite = new window.ShipEWSprite({ width: this.sideSpriteSize, height: this.sideSpriteSize }, 0.01);
+      this.shipEWSprite = new window.ShipEWSprite({ width: this.sideSpriteSize * 1.5, height: this.sideSpriteSize }, this.defaultHeight);
       this.mesh.add(this.shipEWSprite.mesh);
       this.shipEWSprite.hide();
 
@@ -1606,14 +3266,16 @@ var ShipObject = function () {
         x = x.x;
       }
 
-      this.position = { x: x, y: y, z: z };
+      this.position = { x: x, y: y, z: 0 };
+
+      this.shipZ = z;
 
       if (this.mesh) {
         this.mesh.position.set(x, y, 0);
       }
 
       if (this.shipObject) {
-        this.shipObject.position.set(0, 0, z);
+        this.shipObject.position.set(0, 0, this.shipZ);
       }
     }
   }, {
@@ -1725,15 +3387,10 @@ var ShipObject = function () {
       //console.log("ShipObject.showSideSprite is not yet implemented")
     }
   }, {
-    key: "setSelected",
-    value: function setSelected(value) {
-      if (value) {
-        this.shipSideSprite.setOverlayColor(new THREE.Color(1, 1, 1));
-        this.shipSideSprite.setOverlayColorAlpha(1);
-      } else {
-        this.shipSideSprite.setOverlayColor(this.mine ? COLOR_MINE : COLOR_ENEMY);
-        this.shipSideSprite.setOverlayColorAlpha(0.8);
-      }
+    key: "setSideSpriteOpacity",
+    value: function setSideSpriteOpacity(opacity) {
+      this.shipSideSprite.multiplyOpacity(opacity);
+      this.line.multiplyOpacity(opacity);
     }
   }, {
     key: "setNotMoved",
@@ -1814,7 +3471,7 @@ var ShipObject = function () {
   }, {
     key: "positionAndFaceIcon",
     value: function positionAndFaceIcon(offset, movementService) {
-      var movement = movementService.getMostRecentMove(this.ship);
+      var movement = movementService.getLastEndMove(this.ship);
       var gamePosition = window.coordinateConverter.fromHexToGame(movement.position);
 
       if (offset) {
@@ -1851,7 +3508,7 @@ window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 
-},{"../handler/Movement":9}],24:[function(require,module,exports){
+},{"../handler/Movement":15}],31:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1874,7 +3531,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = { Gunship: _Gunship2.default, Rhino: _Rhino2.default, Capital: _Capital2.default };
 
-},{"./Capital":20,"./Gunship":21,"./Rhino":22}],25:[function(require,module,exports){
+},{"./Capital":27,"./Gunship":28,"./Rhino":29}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1901,27 +3558,65 @@ var HighlightSelectedShip = function (_UiStrategy) {
   function HighlightSelectedShip() {
     _classCallCheck(this, HighlightSelectedShip);
 
-    return _possibleConstructorReturn(this, (HighlightSelectedShip.__proto__ || Object.getPrototypeOf(HighlightSelectedShip)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (HighlightSelectedShip.__proto__ || Object.getPrototypeOf(HighlightSelectedShip)).call(this));
+
+    _this.ship = null;
+    _this.lastAnimationTime = null;
+    _this.totalTime = 0;
+
+    _this.amplitude = 1;
+    _this.frequency = 300;
+    return _this;
   }
 
   _createClass(HighlightSelectedShip, [{
     key: "deactivated",
     value: function deactivated() {
-      this.shipIconContainer.hideAllMovementPaths();
+      this.reset();
+      this.ship = null;
     }
   }, {
     key: "setShipSelected",
     value: function setShipSelected(_ref) {
       var ship = _ref.ship;
 
-      this.shipIconContainer.getByShip(ship).setSelected(true);
+      this.ship = ship;
     }
   }, {
     key: "shipDeselected",
     value: function shipDeselected(_ref2) {
       var ship = _ref2.ship;
 
-      this.shipIconContainer.getByShip(ship).setSelected(false);
+      this.reset();
+      this.ship = null;
+    }
+  }, {
+    key: "render",
+    value: function render(_ref3) {
+      var coordinateConverter = _ref3.coordinateConverter,
+          scene = _ref3.scene,
+          zoom = _ref3.zoom;
+
+      var now = new Date().getTime();
+
+      var delta = this.lastAnimationTime !== null ? now - this.lastAnimationTime : 0;
+
+      this.totalTime += delta;
+
+      this.lastAnimationTime = now;
+
+      if (!this.ship) {
+        return;
+      }
+
+      var opacity = this.amplitude * 0.5 * Math.sin(this.totalTime / this.frequency) + this.amplitude;
+
+      this.shipIconContainer.getByShip(this.ship).setSideSpriteOpacity(opacity);
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      if (this.ship) this.shipIconContainer.getByShip(this.ship).setSideSpriteOpacity(1);
     }
   }]);
 
@@ -1930,7 +3625,7 @@ var HighlightSelectedShip = function (_UiStrategy) {
 
 exports.default = HighlightSelectedShip;
 
-},{"./UiStrategy":29}],26:[function(require,module,exports){
+},{"./UiStrategy":36}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1992,7 +3687,7 @@ var MovementPathMouseOver = function (_UiStrategy) {
 
 exports.default = MovementPathMouseOver;
 
-},{"./UiStrategy":29}],27:[function(require,module,exports){
+},{"./UiStrategy":36}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2067,7 +3762,7 @@ var MovementPathSelectedShip = function (_UiStrategy) {
 
 exports.default = MovementPathSelectedShip;
 
-},{"./UiStrategy":29}],28:[function(require,module,exports){
+},{"./UiStrategy":36}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2165,7 +3860,7 @@ var reposition = function reposition(ship, shipIconContainer, uiManager) {
 
 exports.default = SelectedShipMovementUi;
 
-},{"./UiStrategy":29}],29:[function(require,module,exports){
+},{"./UiStrategy":36}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2267,6 +3962,13 @@ var UiStrategy = function () {
   }, {
     key: "onZoom",
     value: function onZoom() {}
+  }, {
+    key: "render",
+    value: function render(_ref7) {
+      var coordinateConverter = _ref7.coordinateConverter,
+          scene = _ref7.scene,
+          zoom = _ref7.zoom;
+    }
   }]);
 
   return UiStrategy;
@@ -2274,7 +3976,7 @@ var UiStrategy = function () {
 
 exports.default = UiStrategy;
 
-},{}],30:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2310,4 +4012,4 @@ window.uiStrategy = {
 exports.MovementPathSelectedShip = _MovementPathSelectedShip2.default;
 exports.MovementPathMouseOver = _MovementPathMouseOver2.default;
 
-},{"./HighlightSelectedShip":25,"./MovementPathMouseOver":26,"./MovementPathSelectedShip":27,"./SelectedShipMovementUi":28}]},{},[19]);
+},{"./HighlightSelectedShip":32,"./MovementPathMouseOver":33,"./MovementPathSelectedShip":34,"./SelectedShipMovementUi":35}]},{},[26]);

@@ -8,7 +8,7 @@ window.ShipFacingSprite = (function() {
     webglSprite.call(this, null, size, z);
     this.setOpacity(opacity);
 
-    createTexture(this.facing);
+    createTexture();
     this.uniforms.texture.value = texture;
   }
 
@@ -26,7 +26,7 @@ window.ShipFacingSprite = (function() {
     }
   }
 
-  function createTexture(facing) {
+  function createTexture() {
     if (texture) {
       return;
     }
@@ -42,7 +42,7 @@ window.ShipFacingSprite = (function() {
       TEXTURE_SIZE / 2,
       0,
       TEXTURE_SIZE / 2,
-      3
+      1
     );
 
     texture = new THREE.Texture(canvas);

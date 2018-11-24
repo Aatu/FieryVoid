@@ -1,15 +1,12 @@
 import * as React from "react";
 import styled from "styled-components";
-import { Clickable } from "../styled";
 import { Arrow } from "../icon";
 
-const Container = styled.div`
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  ${Clickable}
+import Container from "./Container";
 
-  ${props => `transform: rotate(${props.direction}deg);`}
+const ButtonContainer = styled(Container)`
+
+  ${props => `transform: rotate(${props.direction + 90}deg);`}
 
   ${props => `left: calc(${props.x}px - 25px);`}
   ${props => `top: calc(${props.y}px - 25px);`}
@@ -25,17 +22,35 @@ class ThrustButton extends React.Component {
     );
   }
 
+  canThrust() {
+    const { ship, movementService, direction } = this.props;
+    return movementService.canThrust(ship, direction);
+  }
+
+  thrust() {
+    const { ship, movementService, direction } = this.props;
+    return movementService.thrust(ship, direction);
+  }
+
   render() {
-    const { clicked, direction } = this.props;
+    const { direction } = this.props;
+
+    const can = this.canThrust();
+    const { overChannel } = can;
+
+    if (!can) {
+      return null;
+    }
 
     return (
-      <Container
+      <ButtonContainer
+        overChannel={overChannel}
         direction={mathlib.hexFacingToAngle(direction)}
-        onClick={clicked}
+        onClick={this.thrust.bind(this)}
         {...this.getPosition(direction)}
       >
         <Arrow />
-      </Container>
+      </ButtonContainer>
     );
   }
 }

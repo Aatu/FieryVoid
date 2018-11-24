@@ -15,74 +15,46 @@ class Capital extends HeavyCombatVessel{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
-        $this->turndelaycost = 1;
-        $this->accelcost = 2;
-        $this->rollcost = 2;
-        $this->pivotcost = 2;
+        $this->accelcost = 3;
+        $this->rollcost = 4;
+        $this->pivotcost = 3;
         $this->iniativebonus = 30;
+        $this->evasionCost = 5;
         
          
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
-        $this->addPrimarySystem(new Engine(5, 15, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(5, 2));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, [4, 5]));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 5, [1, 2]));        
+        $this->addPrimarySystem(101, new Reactor(5, 20, 0, 0));
+        $this->addPrimarySystem(102, new CnC(6, 16, 0, 0));
+        $this->addPrimarySystem(103, new Scanner(5, 16, 4, 7));
+        $this->addPrimarySystem(104, new Engine(5, 15, 0, 12, 2));
+        $this->addPrimarySystem(105, new Hangar(5, 2));
+        $this->addPrimarySystem(106, new Thruster(3, 13, 0, 5, [4, 5]));
+        $this->addPrimarySystem(107, new Thruster(3, 13, 0, 5, [1, 2]));        
         
         
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 0));
-        $this->addFrontSystem(new Thruster(3, 8, 0, 3, 0));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
-        $this->addFrontSystem(new MediumPulse(3, 6, 3, 0, 120));
-        $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 270, 90));
-        $this->addFrontSystem(new RailGun(4, 9, 6, 0, 0));
+        $this->addFrontSystem(200, new Thruster(3, 8, 0, 3, 0));
+        $this->addFrontSystem(201, new Thruster(3, 8, 0, 3, 0));
+        $this->addFrontSystem(202, new ManouveringThruster(3, 8, 0, 3, 1));
+        $this->addFrontSystem(203, new MediumPulse(3, 6, 3, 240, 0));
+        $this->addFrontSystem(204, new MediumPulse(3, 6, 3, 240, 0));
+        $this->addFrontSystem(205, new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(206, new MediumPulse(3, 6, 3, 0, 120));
+        $this->addFrontSystem(207, new InterceptorMkI(2, 4, 1, 270, 90));
+        $this->addFrontSystem(208, new RailGun(4, 9, 6, 0, 0));
 		
-        $this->addAftSystem(new RailGun(4, 9, 6, 0, 0));
-        $this->addAftSystem(new SMissileRack(3, 6, 0, 240, 0));
-        $this->addAftSystem(new SMissileRack(3, 6, 0, 0, 120));        
-        $this->addAftSystem(new InterceptorMkI(2, 4, 1, 90, 270));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 3));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 3));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 3));
-        $this->addAftSystem(new Thruster(4, 7, 0, 2, 3));
+        $this->addAftSystem(300, new RailGun(4, 9, 6, 0, 0));
+        $this->addAftSystem(301, new SMissileRack(3, 6, 0, 240, 0));
+        $this->addAftSystem(302, new SMissileRack(3, 6, 0, 0, 120));        
+        $this->addAftSystem(303, new InterceptorMkI(2, 4, 1, 90, 270));
+        $this->addAftSystem(304, new Thruster(4, 7, 0, 2, 3));
+        $this->addAftSystem(305, new Thruster(4, 7, 0, 2, 3));
+        $this->addAftSystem(306, new Thruster(4, 7, 0, 2, 3));
+        $this->addAftSystem(307, new Thruster(4, 7, 0, 2, 3));
+        $this->addAftSystem(308, new ManouveringThruster(3, 8, 0, 3, 1));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 5, 48));
-        $this->addAftSystem(new Structure( 4, 42));
-        $this->addPrimarySystem(new Structure( 5, 50));
-        
-        
-        $this->hitChart = array(
-                0=> array(
-                        8 => "Structure",
-                        11 => "Thruster",
-                        13 => "Scanner",
-                        15 => "Engine",
-                        16 => "Hangar",
-                        19 => "Reactor",
-                        20 => "C&C",
-                ),
-                1=> array(
-                        3 => "Thruster",
-                        5 => "Medium Pulse Cannon",
-                        7 => "Railgun",
-                        9 => "Interceptor MK I",
-                        18 => "Structure",
-                        20 => "Primary",
-                ),
-                2=> array(
-                        6 => "Thruster",
-                        8 => "Class-S Missile Rack",
-                        10 => "Railgun",
-                        12 => "Interceptor MK I",
-                        18 => "Structure",
-                        20 => "Primary",
-                ),
-        );
+        $this->addFrontSystem(1, new Structure( 5, 48));
+        $this->addAftSystem(2, new Structure( 4, 42));
+        $this->addPrimarySystem(3, new Structure( 5, 50));
     }
 
 }

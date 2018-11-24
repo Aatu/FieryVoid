@@ -9,15 +9,53 @@ class RequiredThrust {
       2: [],
       3: [],
       4: [],
-      5: []
+      5: [],
+      6: []
     };
 
     switch (move.type) {
       case movementTypes.SPEED:
         this.requireSpeed(ship, move);
         break;
+      case movementTypes.PIVOT:
+        this.requirePivot(ship);
+        break;
+      case movementTypes.ROLL:
+        this.requireRoll(ship);
+        break;
+      case movementTypes.EVADE:
+        this.requireEvade(ship, move);
+        break;
       default:
     }
+  }
+
+  serialize() {
+    const fullfilments = {
+      0: [],
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      6: []
+    };
+
+    Object.keys(this.fullfilments).forEach(direction => {
+      const entryArray = this.fullfilments[direction].map(fulfilment => {
+        return {
+          amount: fulfilment.amount,
+          thrusterId: fulfilment.thruster.id
+        };
+      });
+
+      fullfilments[direction] = entryArray;
+    });
+
+    return {
+      requirements: this.requirements,
+      fullfilments
+    };
   }
 
   getRequirement(direction) {
@@ -26,6 +64,12 @@ class RequiredThrust {
     }
 
     return this.requirements[direction] - this.getFulfilledAmount(direction);
+  }
+
+  isFulfilled() {
+    return Object.keys(this.requirements).every(
+      direction => this.getRequirement(direction) === 0
+    );
   }
 
   fulfill(direction, amount, thruster) {
@@ -42,11 +86,29 @@ class RequiredThrust {
     );
   }
 
+  getFulfilments() {
+    return Object.keys(this.fullfilments)
+      .map(key => this.fullfilments[key])
+      .filter(fulfillment => fulfillment.length > 0);
+  }
+
+  requireRoll(ship) {
+    this.requirements[6] = ship.rollcost;
+  }
+
+  requireEvade(ship, move) {
+    this.requirements[6] = ship.evasioncost * move.value;
+  }
+
+  requirePivot(ship) {
+    this.requirements[6] = ship.pivotcost;
+  }
+
   requireSpeed(ship, move) {
     const facing = move.facing;
     const direction = move.value;
     const actualDirection = window.mathlib.addToHexFacing(
-      window.mathlib.addToHexFacing(direction, facing),
+      window.mathlib.addToHexFacing(direction, -facing),
       3
     );
 

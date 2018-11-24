@@ -123,7 +123,7 @@ class ShipWindow extends React.Component {
   }
 
   render() {
-    const { ship } = this.props;
+    const { ship, movementService } = this.props;
 
     if (ship.flight) {
       return (
@@ -170,6 +170,7 @@ class ShipWindow extends React.Component {
               location={1}
               ship={ship}
               systems={systemsByLocation[1]}
+              movementService={movementService}
             />
           )}
           <ShipWindowEw ship={ship} />
@@ -181,6 +182,7 @@ class ShipWindow extends React.Component {
               location={3}
               ship={ship}
               systems={systemsByLocation[3]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[31].length > 0 && (
@@ -188,6 +190,7 @@ class ShipWindow extends React.Component {
               location={31}
               ship={ship}
               systems={systemsByLocation[31]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[0].length > 0 && (
@@ -195,6 +198,7 @@ class ShipWindow extends React.Component {
               location={0}
               ship={ship}
               systems={systemsByLocation[0]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[4].length > 0 && (
@@ -202,6 +206,7 @@ class ShipWindow extends React.Component {
               location={4}
               ship={ship}
               systems={systemsByLocation[4]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[41].length > 0 && (
@@ -209,6 +214,7 @@ class ShipWindow extends React.Component {
               location={41}
               ship={ship}
               systems={systemsByLocation[41]}
+              movementService={movementService}
             />
           )}
         </Column>
@@ -218,6 +224,7 @@ class ShipWindow extends React.Component {
               location={32}
               ship={ship}
               systems={systemsByLocation[32]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[2].length > 0 && (
@@ -225,6 +232,7 @@ class ShipWindow extends React.Component {
               location={2}
               ship={ship}
               systems={systemsByLocation[2]}
+              movementService={movementService}
             />
           )}
           {systemsByLocation[42].length > 0 && (
@@ -232,6 +240,7 @@ class ShipWindow extends React.Component {
               location={42}
               ship={ship}
               systems={systemsByLocation[42]}
+              movementService={movementService}
             />
           )}
         </Column>

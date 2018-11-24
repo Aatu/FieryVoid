@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 import { Clickable } from "../styled";
-import { X } from "../icon";
+import { Cancel } from "../icon";
 
 const Container = styled.div`
   position: absolute;
@@ -13,12 +13,24 @@ const Container = styled.div`
 `;
 
 class RevertButton extends React.Component {
+  canRevert() {
+    const { movementService, ship } = this.props;
+    return movementService.canRevert(ship);
+  }
+
+  revert() {
+    const { movementService, ship } = this.props;
+    return movementService.revert(ship);
+  }
+
   render() {
-    const { clicked, direction } = this.props;
+    if (!this.canRevert()) {
+      return null;
+    }
 
     return (
-      <Container onClick={clicked}>
-        <X />
+      <Container onClick={this.revert.bind(this)}>
+        <Cancel />
       </Container>
     );
   }

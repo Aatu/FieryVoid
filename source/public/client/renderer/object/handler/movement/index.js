@@ -6,6 +6,7 @@ import MovementResolver from "./MovementResolver";
 import ThrustBill from "./ThrustBill";
 import RequiredThrust from "./RequiredThrust";
 import ThrustAssignment from "./ThrustAssignment";
+import OverChannelResolver from "./OverChannelResolver";
 
 window.movement = {
   MovementService,
@@ -15,7 +16,8 @@ window.movement = {
   MovementResolver,
   ThrustBill,
   RequiredThrust,
-  ThrustAssignment
+  ThrustAssignment,
+  OverChannelResolver
 };
 
 export {
@@ -26,5 +28,6 @@ export {
   MovementResolver,
   ThrustBill,
   RequiredThrust,
-  ThrustAssignment
+  ThrustAssignment,
+  OverChannelResolver
 };

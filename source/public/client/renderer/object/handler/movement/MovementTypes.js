@@ -1,11 +1,11 @@
 const movementTypes = {
-    START: 'start',
-    END: 'end',
-    DEPLOY: 'deploy',
-    SPEED: 'speed',   
-    PIVOT_LEFT: 'pivot_left',
-    PIVOT_RIGHT: 'pivot_right',
-    EVADE: 'evade',
+  START: "start",
+  END: "end",
+  DEPLOY: "deploy",
+  SPEED: "speed",
+  PIVOT: "pivot",
+  EVADE: "evade",
+  ROLL: "roll"
 };
 
 window.movementTypes = movementTypes;

@@ -113,7 +113,6 @@ window.DeploymentPhaseStrategy = (function() {
   DeploymentPhaseStrategy.prototype.deselectShip = function(ship) {
     PhaseStrategy.prototype.deselectShip.call(this, ship);
     hideDeploymentArea(ship, this.deploymentSprites, this.gamedata);
-    this.hideMovementUI();
   };
 
   DeploymentPhaseStrategy.prototype.createReplayUI = function(gamedata) {};

@@ -33053,7 +33053,7 @@ var UIManager = function () {
 
 window.UIManager = UIManager;
 
-},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":76,"./playerSettings/PlayerSettings":79,"./shipThrust/ShipThrust":81,"./shipWindow/ShipWindowsContainer":87,"./system/SystemInfo":94,"./system/SystemInfoButtons":95,"./system/SystemInfoMenu":96,"./system/WeaponList":97,"react":30,"react-dom":24}],64:[function(require,module,exports){
+},{"./ewButtons/EwButtons":67,"./fullScreen/FullScreen":68,"./movement/Movement":80,"./playerSettings/PlayerSettings":85,"./shipThrust/ShipThrust":87,"./shipWindow/ShipWindowsContainer":93,"./system/SystemInfo":100,"./system/SystemInfoButtons":101,"./system/SystemInfoMenu":102,"./system/WeaponList":103,"react":30,"react-dom":24}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33361,7 +33361,7 @@ var FEWButton = (0, _styledComponents2.default)(MainButton)(_templateObject4);
 
 exports.default = EwButtons;
 
-},{"../styled":91,"react":30,"styled-components":53}],68:[function(require,module,exports){
+},{"../styled":97,"react":30,"styled-components":53}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33446,7 +33446,7 @@ var FullScreen = function (_React$Component) {
 
 exports.default = FullScreen;
 
-},{"../styled":91,"react":30,"styled-components":53}],69:[function(require,module,exports){
+},{"../styled":97,"react":30,"styled-components":53}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33479,21 +33479,22 @@ var Arrow = function (_React$Component) {
   _createClass(Arrow, [{
     key: "render",
     value: function render() {
-      var _props$color = this.props.color,
-          color = _props$color === undefined ? "#fff" : _props$color;
+      var _props$size = this.props.size,
+          size = _props$size === undefined ? "90%" : _props$size;
 
 
       return React.createElement(
         "svg",
         {
+          id: "arrow",
           xmlns: "http://www.w3.org/2000/svg",
-          width: "100%",
-          height: "100%",
-          viewBox: "0 0 438.533 438.533"
+          width: size,
+          height: size,
+          viewBox: "0 0 32.75 32.75"
         },
         React.createElement("path", {
-          d: "M409.133,109.203c-19.608-33.592-46.205-60.189-79.798-79.796C295.736,9.801,259.058,0,219.273,0 c-39.781,0-76.47,9.801-110.063,29.407c-33.595,19.604-60.192,46.201-79.8,79.796C9.801,142.8,0,179.489,0,219.267 c0,39.78,9.804,76.463,29.407,110.062c19.607,33.592,46.204,60.189,79.799,79.798c33.597,19.605,70.283,29.407,110.063,29.407 s76.47-9.802,110.065-29.407c33.593-19.602,60.189-46.206,79.795-79.798c19.603-33.596,29.403-70.284,29.403-110.062 C438.533,179.485,428.732,142.795,409.133,109.203z M361.733,232.111l-25.978,25.981l-103.35,103.349 c-3.433,3.43-7.714,5.147-12.852,5.147c-5.137,0-9.419-1.718-12.847-5.147l-25.981-25.98c-3.616-3.607-5.424-7.898-5.424-12.847 c0-4.942,1.809-9.227,5.424-12.847l53.962-53.954H91.363c-4.948,0-9.229-1.813-12.847-5.428c-3.615-3.613-5.424-7.898-5.424-12.847 v-36.547c0-4.948,1.809-9.231,5.424-12.847c3.617-3.617,7.898-5.426,12.847-5.426h143.325l-53.962-53.959 c-3.428-3.428-5.14-7.708-5.14-12.847c0-5.141,1.712-9.42,5.14-12.851l25.981-25.981c3.427-3.425,7.71-5.137,12.847-5.137 c5.145,0,9.419,1.711,12.852,5.137l103.35,103.356l25.978,25.981c3.432,3.427,5.144,7.707,5.144,12.847 C366.877,224.404,365.165,228.686,361.733,232.111z",
-          fill: color
+          id: "svg-path",
+          d: "M30.434,15.938c-0.791,0.933-1.917,1.411-3.052,1.411c-0.913,0-1.834-0.312-2.587-0.951l-4.421-3.753V28.75 c0,2.209-1.791,4-4,4c-2.209,0-4-1.791-4-4V12.646l-4.42,3.754c-1.683,1.431-4.208,1.226-5.639-0.459 c-1.43-1.684-1.224-4.208,0.46-5.638l11.01-9.351c1.493-1.27,3.686-1.27,5.178,0l11.011,9.351 C31.658,11.73,31.863,14.255,30.434,15.938z"
         })
       );
     }
@@ -33537,8 +33538,11 @@ var ArrowSmall = function (_React$Component) {
   _createClass(ArrowSmall, [{
     key: "render",
     value: function render() {
-      var _props$color = this.props.color,
-          color = _props$color === undefined ? "#fff" : _props$color;
+      var _props = this.props,
+          _props$color = _props.color,
+          color = _props$color === undefined ? "#fff" : _props$color,
+          _props$size = _props.size,
+          size = _props$size === undefined ? "100%" : _props$size;
 
 
       return React.createElement(
@@ -33546,11 +33550,12 @@ var ArrowSmall = function (_React$Component) {
         {
           xmlns: "http://www.w3.org/2000/svg",
           id: "Capa_1",
-          width: "100%",
-          height: "100%",
+          width: size,
+          height: size,
           viewBox: "0 0 438.533 438.533"
         },
         React.createElement("path", {
+          id: "svg-path",
           d: "M409.133,109.203c-19.608-33.592-46.205-60.189-79.798-79.796C295.736,9.801,259.058,0,219.273,0 c-39.781,0-76.47,9.801-110.063,29.407c-33.595,19.604-60.192,46.201-79.8,79.796C9.801,142.8,0,179.489,0,219.267 c0,39.78,9.804,76.463,29.407,110.062c19.607,33.592,46.204,60.189,79.799,79.798c33.597,19.605,70.283,29.407,110.063,29.407 s76.47-9.802,110.065-29.407c33.593-19.602,60.189-46.206,79.795-79.798c19.603-33.596,29.403-70.284,29.403-110.062 C438.533,179.485,428.732,142.795,409.133,109.203z M334.332,232.111L204.71,361.736c-3.617,3.613-7.896,5.428-12.847,5.428 c-4.952,0-9.235-1.814-12.85-5.428l-29.121-29.13c-3.617-3.613-5.426-7.898-5.426-12.847c0-4.941,1.809-9.232,5.426-12.847 l87.653-87.646l-87.657-87.65c-3.617-3.612-5.426-7.898-5.426-12.845c0-4.949,1.809-9.231,5.426-12.847l29.121-29.13 c3.619-3.615,7.898-5.424,12.85-5.424c4.95,0,9.233,1.809,12.85,5.424l129.622,129.621c3.613,3.614,5.42,7.898,5.42,12.847 C339.752,224.213,337.945,228.498,334.332,232.111z",
           fill: color
         })
@@ -33584,42 +33589,47 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Evade = function (_React$Component) {
-  _inherits(Evade, _React$Component);
+var Cancel = function (_React$Component) {
+  _inherits(Cancel, _React$Component);
 
-  function Evade() {
-    _classCallCheck(this, Evade);
+  function Cancel() {
+    _classCallCheck(this, Cancel);
 
-    return _possibleConstructorReturn(this, (Evade.__proto__ || Object.getPrototypeOf(Evade)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (Cancel.__proto__ || Object.getPrototypeOf(Cancel)).apply(this, arguments));
   }
 
-  _createClass(Evade, [{
+  _createClass(Cancel, [{
     key: "render",
     value: function render() {
-      var _props$color = this.props.color,
-          color = _props$color === undefined ? "#fff" : _props$color;
+      var _props = this.props,
+          _props$color = _props.color,
+          color = _props$color === undefined ? "#fff" : _props$color,
+          _props$size = _props.size,
+          size = _props$size === undefined ? "100%" : _props$size;
 
 
       return React.createElement(
         "svg",
         {
           xmlns: "http://www.w3.org/2000/svg",
+          id: "cancel",
           viewBox: "0 0 512 512",
-          width: "100%",
-          height: "100%"
+          width: size,
+          height: size
         },
         React.createElement("path", {
-          d: "M501.608,384.478L320.497,51.476C291.376,2.451,220.139,2.41,191.21,52.003L10.647,383.951 c-29.706,49.989,6.259,113.291,64.482,113.291h361.689C495.436,497.242,530.688,433.393,501.608,384.478z M331,332.242 c0,22.516-23.688,36.693-43.403,26.836L211,320.787v101.455c0,8.284-6.716,15-15,15h-30c-8.284,0-15-6.716-15-15v-150 c0-22.516,23.69-36.667,43.418-26.836L271,283.698V182.242c0-8.286,6.716-15,15-15h30c8.284,0,15,6.714,15,15V332.242z",
+          id: "svg-path",
+          d: "M256,0C114.833,0,0,114.844,0,256s114.833,256,256,256s256-114.844,256-256S397.167,0,256,0z M256,426.667 c-94.104,0-170.667-76.563-170.667-170.667c0-31.596,8.785-61.112,23.814-86.52L342.52,402.853 C317.112,417.882,287.596,426.667,256,426.667z M402.853,342.52L169.48,109.147c25.408-15.029,54.923-23.814,86.52-23.814 c94.104,0,170.667,76.563,170.667,170.667C426.667,287.596,417.882,317.112,402.853,342.52z",
           fill: color
         })
       );
     }
   }]);
 
-  return Evade;
+  return Cancel;
 }(React.Component);
 
-exports.default = Evade;
+exports.default = Cancel;
 
 },{"react":30}],72:[function(require,module,exports){
 "use strict";
@@ -33642,44 +33652,187 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Rotate = function (_React$Component) {
-  _inherits(Rotate, _React$Component);
+var Evade = function (_React$Component) {
+  _inherits(Evade, _React$Component);
 
-  function Rotate() {
-    _classCallCheck(this, Rotate);
+  function Evade() {
+    _classCallCheck(this, Evade);
 
-    return _possibleConstructorReturn(this, (Rotate.__proto__ || Object.getPrototypeOf(Rotate)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (Evade.__proto__ || Object.getPrototypeOf(Evade)).apply(this, arguments));
   }
 
-  _createClass(Rotate, [{
+  _createClass(Evade, [{
     key: "render",
     value: function render() {
-      var _props$color = this.props.color,
-          color = _props$color === undefined ? "#fff" : _props$color;
+      var _props = this.props,
+          _props$color = _props.color,
+          color = _props$color === undefined ? "#fff" : _props$color,
+          _props$size = _props.size,
+          size = _props$size === undefined ? "100%" : _props$size;
 
 
       return React.createElement(
         "svg",
         {
           xmlns: "http://www.w3.org/2000/svg",
-          viewBox: "0 0 16 16",
-          width: "100%",
-          height: "100%"
+          viewBox: "0 0 512 512",
+          width: size,
+          height: size
         },
         React.createElement("path", {
-          d: "M8,0C3.582,0,0,3.582,0,8s3.582,8,8,8s8-3.582,8-8S12.418,0,8,0z M8,14 c-2.169,0-4.07-1.15-5.124-2.876L2,12V8h2h1h1L4.354,9.646C4.981,11.034,6.378,12,8,12c1.863,0,3.43-1.273,3.874-3h2.043 C13.441,11.838,10.973,14,8,14z M12,8h-1h-1l1.646-1.646C11.02,4.966,9.622,4,8,4C6.136,4,4.57,5.274,4.126,7H2.083 C2.559,4.162,5.027,2,8,2c2.169,0,4.07,1.151,5.124,2.876L14,4v4H12z",
+          id: "svg-path",
+          d: "M501.608,384.478L320.497,51.476C291.376,2.451,220.139,2.41,191.21,52.003L10.647,383.951 c-29.706,49.989,6.259,113.291,64.482,113.291h361.689C495.436,497.242,530.688,433.393,501.608,384.478z M331,332.242 c0,22.516-23.688,36.693-43.403,26.836L211,320.787v101.455c0,8.284-6.716,15-15,15h-30c-8.284,0-15-6.716-15-15v-150 c0-22.516,23.69-36.667,43.418-26.836L271,283.698V182.242c0-8.286,6.716-15,15-15h30c8.284,0,15,6.714,15,15V332.242z",
           fill: color
         })
       );
     }
   }]);
 
-  return Rotate;
+  return Evade;
 }(React.Component);
 
-exports.default = Rotate;
+exports.default = Evade;
+
+/*
+<svg xmlns='http://www.w3.org/2000/svg' id='Capa_1' viewBox='0 0 214.32 214.32'
+width='512' height='512'>
+    <path d='M183.673,128.681c-8.297,9.305-19.722,14.821-32.169,15.534c-12.432,0.712-24.425-3.466-33.73-11.764L81.312,99.937 c-8.919-7.954-22.649-7.17-30.603,1.751l-1.404,1.574c-7.953,8.919-7.167,22.647,1.752,30.602l35.191,31.382l5.02-5.532 c2.399-2.645,6.031-3.81,9.521-3.054c3.492,0.756,6.315,3.317,7.406,6.72l11.951,37.267c0.449,1.137,0.696,2.377,0.696,3.675 c0,5.488-4.421,9.943-9.896,9.999c-0.041,0.001-0.082,0.001-0.124,0.001c-0.704,0-1.413-0.074-2.116-0.227l-38.887-8.422 c-3.492-0.756-6.315-3.317-7.406-6.72s-0.284-7.128,2.117-9.773l4.917-5.419l-35.031-31.238 c-19.208-17.129-20.899-46.691-3.771-65.899l1.404-1.574c17.127-19.207,46.688-20.899,65.898-3.77l36.462,32.515 c8.92,7.954,22.648,7.17,30.603-1.751c7.954-8.92,7.168-22.647-1.751-30.602L126.96,49.067l-5.027,5.54 c-1.916,2.112-4.617,3.28-7.405,3.28c-0.704,0-1.413-0.074-2.117-0.227c-3.491-0.756-6.314-3.317-7.405-6.72L92.856,13.054 c-1.091-3.402-0.284-7.128,2.117-9.773c2.399-2.645,6.032-3.81,9.521-3.054l38.887,8.421c3.492,0.756,6.315,3.317,7.406,6.72 s0.284,7.128-2.117,9.773l-4.911,5.412l36.142,32.23C199.11,79.911,200.802,109.474,183.673,128.681z'
+    fill='#D80027' />
+</svg>
+*/
 
 },{"react":30}],73:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Pivot = function (_React$Component) {
+  _inherits(Pivot, _React$Component);
+
+  function Pivot() {
+    _classCallCheck(this, Pivot);
+
+    return _possibleConstructorReturn(this, (Pivot.__proto__ || Object.getPrototypeOf(Pivot)).apply(this, arguments));
+  }
+
+  _createClass(Pivot, [{
+    key: "render",
+    value: function render() {
+      var _props$size = this.props.size,
+          size = _props$size === undefined ? "100%" : _props$size;
+
+
+      return React.createElement(
+        "svg",
+        {
+          id: "pivot",
+          xmlns: "http://www.w3.org/2000/svg",
+          width: size,
+          height: size,
+          viewBox: "0 0 511.612 511.612"
+        },
+        React.createElement("path", {
+          id: "svg-path",
+          d: "M433.822,126.876l-113.28-113.28c-18.048-18.112-49.632-18.144-67.744,0c-18.752,18.752-18.752,49.312,0,68.064 l29.984,29.952h-18.976c-110.272,0-200,89.728-200,200s89.728,200,200,200h8c8.832,0,16-7.168,16-16v-64c0-8.832-7.168-16-16-16 h-8c-57.344,0-104-46.656-104-104s46.656-104,104-104h21.216l-32.224,32.192c-18.752,18.784-18.752,49.312,0,68.064 c17.984,17.952,50.304,17.536,67.744,0l113.312-113.28c8.864-8.896,13.952-21.152,13.952-33.696 C447.806,148.444,442.974,136.476,433.822,126.876z"
+        })
+      );
+    }
+  }]);
+
+  return Pivot;
+}(React.Component);
+
+exports.default = Pivot;
+
+},{"react":30}],74:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Roll = function (_React$Component) {
+  _inherits(Roll, _React$Component);
+
+  function Roll() {
+    _classCallCheck(this, Roll);
+
+    return _possibleConstructorReturn(this, (Roll.__proto__ || Object.getPrototypeOf(Roll)).apply(this, arguments));
+  }
+
+  _createClass(Roll, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          _props$color = _props.color,
+          color = _props$color === undefined ? "#fff" : _props$color,
+          _props$size = _props.size,
+          size = _props$size === undefined ? "100%" : _props$size;
+
+
+      return React.createElement(
+        "svg",
+        {
+          id: "roll",
+          xmlns: "http://www.w3.org/2000/svg",
+          viewBox: "0 0 420.995 420.995",
+          width: size,
+          height: size
+        },
+        React.createElement(
+          "g",
+          { fill: "#010002" },
+          React.createElement("path", {
+            id: "svg-path",
+            d: "M127.505,196.313c22.15,0,27.45-12.827,11.77-28.458l-31.165-31.197 c4.406-6.194,9.234-12.006,14.599-17.257c1.878-1.788,3.796-3.512,5.763-5.17c2.3-2.008,4.715-3.861,7.145-5.698 c2.146-1.561,4.292-3.146,6.487-4.593c3.65-2.341,7.364-4.511,11.226-6.454c1.723-0.87,3.438-1.626,5.194-2.439 c4.04-1.837,8.202-3.471,12.494-4.926c0.845-0.236,1.626-0.602,2.463-0.845c5.194-1.561,10.478-2.707,15.875-3.617 c1.39-0.244,2.78-0.455,4.17-0.634c5.601-0.764,11.25-1.301,17.013-1.301c0.179,0,0.358,0.065,0.536,0.065 c4.113,0,8.096,0.171,12.103,0.593c1.967,0.187,3.861,0.585,5.763,0.862c2.292,0.358,4.552,0.593,6.755,1.024 c1.626,0.366,3.195,0.813,4.771,1.203c2.552,0.602,5.154,1.211,7.657,2.016c1.138,0.333,2.235,0.813,3.349,1.179 c2.991,1.032,5.918,2.057,8.787,3.325c14.534,6.218,27.946,15.2,39.464,26.735c12.372,12.315,21.85,26.784,28.182,42.927 c6.942,17.607,26.776,26.223,44.358,19.313c17.623-6.901,26.255-26.751,19.305-44.317c-9.779-24.987-24.435-47.325-43.447-66.329 c-17.322-17.289-37.416-30.775-59.143-40.399c-0.301-0.154-0.536-0.333-0.845-0.455c-0.252-0.122-0.488-0.187-0.732-0.301 c-4.885-2.089-9.868-3.894-14.932-5.584c-1.211-0.423-2.382-0.935-3.617-1.292c-4.804-1.52-9.665-2.731-14.55-3.812 c-1.544-0.366-3.073-0.87-4.617-1.171c-4.885-0.992-9.836-1.65-14.81-2.252c-1.544-0.187-3.048-0.553-4.625-0.732 c-6.519-0.634-13.152-0.975-19.785-0.975c-0.358,0-0.788,0.065-1.179,0.065c-5.462,0-10.835,0.309-16.151,0.788 c-1.861,0.13-3.739,0.366-5.601,0.602c-4.081,0.488-8.12,1.097-12.128,1.821c-1.813,0.301-3.585,0.626-5.373,0.992 c-5.064,1.057-10.136,2.325-15.054,3.78c-0.463,0.146-0.943,0.236-1.423,0.382c-5.796,1.756-11.469,3.837-17.013,6.096 c-0.585,0.219-1.089,0.488-1.634,0.699c-5.259,2.227-10.437,4.674-15.452,7.332c-0.333,0.154-0.658,0.325-1.016,0.504 C95.69,50.6,75.409,67.191,58.997,87.602l-30.539-30.58C12.803,41.391,0,46.674,0,68.825v87.211 c0,22.183,18.102,40.277,40.228,40.277C40.228,196.313,127.505,196.313,127.505,196.313z",
+            fill: color
+          }),
+          React.createElement("path", {
+            id: "svg-path",
+            d: "M380.783,224.706h-87.268c-22.118,0-27.393,12.786-11.77,28.45l31.197,31.206 c-4.406,6.121-9.161,11.86-14.542,17.111c-1.902,1.861-3.894,3.642-5.918,5.357c-2.235,1.935-4.536,3.715-6.844,5.43 c-2.3,1.691-4.593,3.406-6.999,4.926c-3.536,2.252-7.153,4.373-10.9,6.235c-1.74,0.894-3.495,1.723-5.267,2.536 c-4.024,1.821-8.12,3.438-12.282,4.828c-0.91,0.301-1.756,0.658-2.658,0.91c-5.162,1.593-10.445,2.715-15.843,3.617 c-1.39,0.236-2.812,0.423-4.202,0.658c-5.568,0.699-11.217,1.203-16.948,1.203c-4.284,0-8.511-0.179-12.729-0.602 c-1.788-0.179-3.56-0.536-5.316-0.788c-2.406-0.301-4.82-0.658-7.243-1.122c-1.504-0.26-3.016-0.788-4.519-1.105 c-2.626-0.675-5.251-1.276-7.852-2.065c-1.146-0.366-2.268-0.845-3.438-1.203c-2.894-1.024-5.763-2.048-8.633-3.284 c-14.534-6.243-27.97-15.2-39.489-26.702c-12.404-12.429-21.874-26.881-28.214-42.96c-6.877-17.623-26.767-26.255-44.358-19.346 c-17.566,6.917-26.263,26.767-19.313,44.39c9.803,24.857,24.435,47.186,43.504,66.248c17.322,17.33,37.391,30.848,59.144,40.383 c0.301,0.171,0.545,0.358,0.813,0.455c0.236,0.146,0.496,0.203,0.707,0.293c4.999,2.187,10.136,4.056,15.314,5.771 c1.097,0.358,2.113,0.813,3.211,1.154c4.975,1.561,10.047,2.772,15.135,3.95c1.333,0.317,2.658,0.723,4.048,0.992 c5.121,1.089,10.405,1.813,15.688,2.414c1.26,0.179,2.463,0.455,3.707,0.569c6.544,0.634,13.12,1.032,19.793,1.032 c0.358,0,0.691-0.073,1.049-0.073c5.527-0.033,10.99-0.325,16.387-0.813c1.788-0.154,3.601-0.366,5.406-0.577 c4.17-0.504,8.299-1.105,12.396-1.845c1.723-0.293,3.406-0.626,5.105-0.984c5.243-1.065,10.437-2.357,15.509-3.894 c0.358-0.057,0.658-0.163,1.024-0.236c5.82-1.756,11.591-3.869,17.2-6.153l1.325-0.585c5.373-2.219,10.616-4.731,15.753-7.446 c0.268-0.154,0.545-0.301,0.845-0.455c22.809-12.193,43.09-28.783,59.509-49.21l30.539,30.531 c15.664,15.696,28.45,10.372,28.45-11.762v-87.187C421.011,242.801,402.901,224.706,380.783,224.706z",
+            fill: color
+          })
+        )
+      );
+    }
+  }]);
+
+  return Roll;
+}(React.Component);
+
+exports.default = Roll;
+
+},{"react":30}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33712,21 +33865,22 @@ var X = function (_React$Component) {
   _createClass(X, [{
     key: "render",
     value: function render() {
-      var _props$color = this.props.color,
-          color = _props$color === undefined ? "#fff" : _props$color;
+      var _props$size = this.props.size,
+          size = _props$size === undefined ? "80%" : _props$size;
 
 
       return React.createElement(
         "svg",
         {
           xmlns: "http://www.w3.org/2000/svg",
-          width: "100%",
-          height: "100%",
-          viewBox: "0 0 510 510"
+          id: "Capa_1",
+          width: size,
+          height: size,
+          viewBox: "0 0 348.333 348.334"
         },
         React.createElement("path", {
-          d: "M255,0C114.75,0,0,114.75,0,255s114.75,255,255,255s255-114.75,255-255S395.25,0,255,0z M382.5,346.8l-35.7,35.7 L255,290.7l-91.8,91.8l-35.7-35.7l91.8-91.8l-91.8-91.8l35.7-35.7l91.8,91.8l91.8-91.8l35.7,35.7L290.7,255L382.5,346.8z",
-          fill: color
+          id: "svg-path",
+          d: "M336.559,68.611L231.016,174.165l105.543,105.549c15.699,15.705,15.699,41.145,0,56.85 c-7.844,7.844-18.128,11.769-28.407,11.769c-10.296,0-20.581-3.919-28.419-11.769L174.167,231.003L68.609,336.563 c-7.843,7.844-18.128,11.769-28.416,11.769c-10.285,0-20.563-3.919-28.413-11.769c-15.699-15.698-15.699-41.139,0-56.85 l105.54-105.549L11.774,68.611c-15.699-15.699-15.699-41.145,0-56.844c15.696-15.687,41.127-15.687,56.829,0l105.563,105.554 L279.721,11.767c15.705-15.687,41.139-15.687,56.832,0C352.258,27.466,352.258,52.912,336.559,68.611z"
         })
       );
     }
@@ -33737,13 +33891,13 @@ var X = function (_React$Component) {
 
 exports.default = X;
 
-},{"react":30}],74:[function(require,module,exports){
+},{"react":30}],76:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Evade = exports.X = exports.Rotate = exports.ArrowSmall = exports.Arrow = undefined;
+exports.Cancel = exports.Pivot = exports.Evade = exports.X = exports.Roll = exports.ArrowSmall = exports.Arrow = undefined;
 
 var _Arrow = require("./Arrow");
 
@@ -33753,9 +33907,9 @@ var _ArrowSmall = require("./ArrowSmall");
 
 var _ArrowSmall2 = _interopRequireDefault(_ArrowSmall);
 
-var _Rotate = require("./Rotate");
+var _Roll = require("./Roll");
 
-var _Rotate2 = _interopRequireDefault(_Rotate);
+var _Roll2 = _interopRequireDefault(_Roll);
 
 var _X = require("./X");
 
@@ -33765,15 +33919,25 @@ var _Evade = require("./Evade");
 
 var _Evade2 = _interopRequireDefault(_Evade);
 
+var _Pivot = require("./Pivot");
+
+var _Pivot2 = _interopRequireDefault(_Pivot);
+
+var _Cancel = require("./Cancel");
+
+var _Cancel2 = _interopRequireDefault(_Cancel);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.Arrow = _Arrow2.default;
 exports.ArrowSmall = _ArrowSmall2.default;
-exports.Rotate = _Rotate2.default;
+exports.Roll = _Roll2.default;
 exports.X = _X2.default;
 exports.Evade = _Evade2.default;
+exports.Pivot = _Pivot2.default;
+exports.Cancel = _Cancel2.default;
 
-},{"./Arrow":69,"./ArrowSmall":70,"./Evade":71,"./Rotate":72,"./X":73}],75:[function(require,module,exports){
+},{"./Arrow":69,"./ArrowSmall":70,"./Cancel":71,"./Evade":72,"./Pivot":73,"./Roll":74,"./X":75}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33782,7 +33946,122 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -175px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: -175px;\n  top: -153px;\n  ", "\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  left: -175px;\n  top: -153px;\n"], ["\n  left: -175px;\n  top: -153px;\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _icon = require("../icon");
+
+var _Container = require("./Container");
+
+var _Container2 = _interopRequireDefault(_Container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var ButtonContainer = (0, _styledComponents2.default)(_Container2.default)(_templateObject);
+
+var CancelButton = function (_React$Component) {
+  _inherits(CancelButton, _React$Component);
+
+  function CancelButton() {
+    _classCallCheck(this, CancelButton);
+
+    return _possibleConstructorReturn(this, (CancelButton.__proto__ || Object.getPrototypeOf(CancelButton)).apply(this, arguments));
+  }
+
+  _createClass(CancelButton, [{
+    key: "canCancel",
+    value: function canCancel() {
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      return movementService.canCancel(ship);
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      var _props2 = this.props,
+          movementService = _props2.movementService,
+          ship = _props2.ship;
+
+      return movementService.cancel(ship);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (!this.canCancel()) {
+        return null;
+      }
+
+      return React.createElement(
+        ButtonContainer,
+        { onClick: this.cancel.bind(this) },
+        React.createElement(_icon.X, null)
+      );
+    }
+  }]);
+
+  return CancelButton;
+}(React.Component);
+
+exports.default = CancelButton;
+
+},{"../icon":76,"./Container":78,"react":30,"styled-components":53}],78:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  svg #svg-path {\n    fill: white;\n    ", "\n  }\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  svg #svg-path {\n    fill: white;\n    ", "\n  }\n  ", "\n"]);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _styled = require("../styled");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var Container = _styledComponents2.default.div.withConfig({
+  displayName: "Container",
+  componentId: "sc-129umzc-0"
+})(_templateObject, function (props) {
+  return props.overChannel && "fill:#ffad3a;";
+}, _styled.Clickable);
+
+exports.default = Container;
+
+},{"../styled":97,"styled-components":53}],79:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 40px;\n  height: 40px;\n  left: -20px;\n  top: 103px;\n  ", "\n"], ["\n  position: absolute;\n  width: 40px;\n  height: 40px;\n  left: -20px;\n  top: 103px;\n  ", "\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n  transform: rotate(180deg);\n  top: 153px;\n"], ["\n  transform: rotate(180deg);\n  top: 153px;\n"]);
 
 var _react = require("react");
 
@@ -33809,41 +34088,60 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var Container = _styledComponents2.default.div.withConfig({
-  displayName: "CancelButton__Container",
-  componentId: "g91bg0-0"
+  displayName: "EvadeButton__Container",
+  componentId: "sc-1g3hbtt-0"
 })(_templateObject, _styled.Clickable);
 
-var CancelButton = function (_React$Component) {
-  _inherits(CancelButton, _React$Component);
+var RotatedContainer = (0, _styledComponents2.default)(Container)(_templateObject2);
 
-  function CancelButton() {
-    _classCallCheck(this, CancelButton);
+var EvadeButton = function (_React$Component) {
+  _inherits(EvadeButton, _React$Component);
 
-    return _possibleConstructorReturn(this, (CancelButton.__proto__ || Object.getPrototypeOf(CancelButton)).apply(this, arguments));
+  function EvadeButton() {
+    _classCallCheck(this, EvadeButton);
+
+    return _possibleConstructorReturn(this, (EvadeButton.__proto__ || Object.getPrototypeOf(EvadeButton)).apply(this, arguments));
   }
 
-  _createClass(CancelButton, [{
+  _createClass(EvadeButton, [{
+    key: "canEvade",
+    value: function canEvade() {
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      return movementService.canEvade(ship);
+    }
+  }, {
+    key: "evade",
+    value: function evade() {
+      var _props2 = this.props,
+          movementService = _props2.movementService,
+          ship = _props2.ship;
+
+      return movementService.roll(ship);
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _props = this.props,
-          clicked = _props.clicked,
-          direction = _props.direction;
-
-
-      return React.createElement(
+      return [React.createElement(
         Container,
-        { onClick: clicked },
-        React.createElement(_icon.X, null)
-      );
+        { key: "evade-more", onClick: this.evade(this) },
+        React.createElement(_icon.Evade, null)
+      ), React.createElement(
+        RotatedContainer,
+        { key: "evade-less", onClick: this.evade(this) },
+        React.createElement(_icon.Evade, null)
+      )];
     }
   }]);
 
-  return CancelButton;
+  return EvadeButton;
 }(React.Component);
 
-exports.default = CancelButton;
+exports.default = EvadeButton;
 
-},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],76:[function(require,module,exports){
+},{"../icon":76,"../styled":97,"react":30,"styled-components":53}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33862,8 +34160,6 @@ var _styledComponents = require("styled-components");
 
 var _styledComponents2 = _interopRequireDefault(_styledComponents);
 
-var _styled = require("../styled");
-
 var _ThrustButton = require("./ThrustButton");
 
 var _ThrustButton2 = _interopRequireDefault(_ThrustButton);
@@ -33875,6 +34171,18 @@ var _RevertButton2 = _interopRequireDefault(_RevertButton);
 var _CancelButton = require("./CancelButton");
 
 var _CancelButton2 = _interopRequireDefault(_CancelButton);
+
+var _PivotButton = require("./PivotButton");
+
+var _PivotButton2 = _interopRequireDefault(_PivotButton);
+
+var _RollButton = require("./RollButton");
+
+var _RollButton2 = _interopRequireDefault(_RollButton);
+
+var _EvadeButton = require("./EvadeButton");
+
+var _EvadeButton2 = _interopRequireDefault(_EvadeButton);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33903,76 +34211,60 @@ var Movement = function (_React$Component) {
   }
 
   _createClass(Movement, [{
-    key: "canThrust",
-    value: function canThrust(direction) {
-      var _props = this.props,
-          movementService = _props.movementService,
-          ship = _props.ship;
-
-      return movementService.canThrust(ship, direction);
-    }
-  }, {
-    key: "thrust",
-    value: function thrust(direction) {
-      var _props2 = this.props,
-          movementService = _props2.movementService,
-          ship = _props2.ship;
-
-      movementService.thrust(ship, direction);
-    }
-  }, {
-    key: "canRevert",
-    value: function canRevert() {
-      var _props3 = this.props,
-          movementService = _props3.movementService,
-          ship = _props3.ship;
-
-      return movementService.canRevert(ship);
-    }
-  }, {
-    key: "revert",
-    value: function revert() {
-      var _props4 = this.props,
-          movementService = _props4.movementService,
-          ship = _props4.ship;
-
-      return movementService.revert(ship);
-    }
-  }, {
-    key: "canCancel",
-    value: function canCancel() {
-      var _props5 = this.props,
-          movementService = _props5.movementService,
-          ship = _props5.ship;
-
-      return movementService.canCancel(ship);
-    }
-  }, {
-    key: "cancel",
-    value: function cancel() {
-      var _props6 = this.props,
-          movementService = _props6.movementService,
-          ship = _props6.ship;
-
-      return movementService.cancel(ship);
-    }
-  }, {
     key: "render",
     value: function render() {
-      var ship = this.props.ship;
+      var _props = this.props,
+          ship = _props.ship,
+          movementService = _props.movementService;
 
 
       return React.createElement(
         Container,
         { id: "shipMovementActual" },
-        this.canThrust(0) && React.createElement(_ThrustButton2.default, { direction: 0, clicked: this.thrust.bind(this, 0) }),
-        this.canThrust(1) && React.createElement(_ThrustButton2.default, { direction: 1, clicked: this.thrust.bind(this, 1) }),
-        this.canThrust(2) && React.createElement(_ThrustButton2.default, { direction: 2, clicked: this.thrust.bind(this, 2) }),
-        this.canThrust(3) && React.createElement(_ThrustButton2.default, { direction: 3, clicked: this.thrust.bind(this, 3) }),
-        this.canThrust(4) && React.createElement(_ThrustButton2.default, { direction: 4, clicked: this.thrust.bind(this, 4) }),
-        this.canThrust(5) && React.createElement(_ThrustButton2.default, { direction: 5, clicked: this.thrust.bind(this, 5) }),
-        this.canRevert() && React.createElement(_RevertButton2.default, { clicked: this.revert.bind(this) }),
-        this.canCancel() && React.createElement(_CancelButton2.default, { clicked: this.cancel.bind(this) })
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 0
+        }),
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 1
+        }),
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 2
+        }),
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 3
+        }),
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 4
+        }),
+        React.createElement(_ThrustButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          direction: 5
+        }),
+        React.createElement(_RevertButton2.default, { ship: ship, movementService: movementService }),
+        React.createElement(_CancelButton2.default, { ship: ship, movementService: movementService }),
+        React.createElement(_PivotButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          pivotDirection: -1
+        }),
+        React.createElement(_PivotButton2.default, {
+          ship: ship,
+          movementService: movementService,
+          pivotDirection: 1
+        }),
+        React.createElement(_RollButton2.default, { ship: ship, movementService: movementService }),
+        React.createElement(_EvadeButton2.default, { ship: ship, movementService: movementService })
       );
     }
   }]);
@@ -33982,7 +34274,108 @@ var Movement = function (_React$Component) {
 
 exports.default = Movement;
 
-},{"../styled":91,"./CancelButton":75,"./RevertButton":77,"./ThrustButton":78,"react":30,"styled-components":53}],77:[function(require,module,exports){
+},{"./CancelButton":77,"./EvadeButton":79,"./PivotButton":81,"./RevertButton":82,"./RollButton":83,"./ThrustButton":84,"react":30,"styled-components":53}],81:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n  left: 125px;\n  top: 103px;\n\n  ", "\n"], ["\n  left: 125px;\n  top: 103px;\n\n  ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _icon = require("../icon");
+
+var _Container = require("./Container");
+
+var _Container2 = _interopRequireDefault(_Container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var ButtonContainer = (0, _styledComponents2.default)(_Container2.default)(_templateObject, function (props) {
+  return props.pivotDirection === 1 ? "left: -175px; transform: rotate(-90deg);" : "transform: rotate(-90deg) scaleY(-1);";
+});
+
+var PivotButton = function (_React$Component) {
+  _inherits(PivotButton, _React$Component);
+
+  function PivotButton() {
+    _classCallCheck(this, PivotButton);
+
+    return _possibleConstructorReturn(this, (PivotButton.__proto__ || Object.getPrototypeOf(PivotButton)).apply(this, arguments));
+  }
+
+  _createClass(PivotButton, [{
+    key: "canPivot",
+    value: function canPivot() {
+      var _props = this.props,
+          ship = _props.ship,
+          movementService = _props.movementService,
+          pivotDirection = _props.pivotDirection;
+
+      return movementService.canPivot(ship, pivotDirection);
+    }
+  }, {
+    key: "pivot",
+    value: function pivot() {
+      var _props2 = this.props,
+          ship = _props2.ship,
+          movementService = _props2.movementService,
+          pivotDirection = _props2.pivotDirection;
+
+      return movementService.pivot(ship, pivotDirection);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var pivotDirection = this.props.pivotDirection;
+
+
+      var can = this.canPivot();
+      var overChannel = can.overChannel;
+
+
+      if (!can) {
+        return null;
+      }
+
+      return React.createElement(
+        ButtonContainer,
+        {
+          overChannel: overChannel,
+          pivotDirection: pivotDirection,
+          onClick: this.pivot.bind(this)
+        },
+        React.createElement(_icon.Pivot, null)
+      );
+    }
+  }]);
+
+  return PivotButton;
+}(React.Component);
+
+exports.default = PivotButton;
+
+},{"../icon":76,"./Container":78,"react":30,"styled-components":53}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34032,17 +34425,34 @@ var RevertButton = function (_React$Component) {
   }
 
   _createClass(RevertButton, [{
+    key: "canRevert",
+    value: function canRevert() {
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      return movementService.canRevert(ship);
+    }
+  }, {
+    key: "revert",
+    value: function revert() {
+      var _props2 = this.props,
+          movementService = _props2.movementService,
+          ship = _props2.ship;
+
+      return movementService.revert(ship);
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _props = this.props,
-          clicked = _props.clicked,
-          direction = _props.direction;
-
+      if (!this.canRevert()) {
+        return null;
+      }
 
       return React.createElement(
         Container,
-        { onClick: clicked },
-        React.createElement(_icon.X, null)
+        { onClick: this.revert.bind(this) },
+        React.createElement(_icon.Cancel, null)
       );
     }
   }]);
@@ -34052,18 +34462,16 @@ var RevertButton = function (_React$Component) {
 
 exports.default = RevertButton;
 
-},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],78:[function(require,module,exports){
+},{"../icon":76,"../styled":97,"react":30,"styled-components":53}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  ", "\n\n  ", "\n\n  ", "\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  ", "\n\n  ", "\n\n  ", "\n  ", "\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"], ["\n  position: absolute;\n  width: 50px;\n  height: 50px;\n  left: 125px;\n  top: -153px;\n  ", "\n"]);
 
 var _react = require("react");
 
@@ -34090,10 +34498,98 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var Container = _styledComponents2.default.div.withConfig({
-  displayName: "ThrustButton__Container",
-  componentId: "sc-11z3zc7-0"
-})(_templateObject, _styled.Clickable, function (props) {
-  return "transform: rotate(" + props.direction + "deg);";
+  displayName: "RollButton__Container",
+  componentId: "sc-1g7k4pe-0"
+})(_templateObject, _styled.Clickable);
+
+var RollButton = function (_React$Component) {
+  _inherits(RollButton, _React$Component);
+
+  function RollButton() {
+    _classCallCheck(this, RollButton);
+
+    return _possibleConstructorReturn(this, (RollButton.__proto__ || Object.getPrototypeOf(RollButton)).apply(this, arguments));
+  }
+
+  _createClass(RollButton, [{
+    key: "canRoll",
+    value: function canRoll() {
+      var _props = this.props,
+          movementService = _props.movementService,
+          ship = _props.ship;
+
+      return movementService.canRoll(ship);
+    }
+  }, {
+    key: "roll",
+    value: function roll() {
+      var _props2 = this.props,
+          movementService = _props2.movementService,
+          ship = _props2.ship;
+
+      return movementService.roll(ship);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      if (!this.canRoll()) {
+        return null;
+      }
+
+      return React.createElement(
+        Container,
+        { onClick: this.roll.bind(this) },
+        React.createElement(_icon.Roll, null)
+      );
+    }
+  }]);
+
+  return RollButton;
+}(React.Component);
+
+exports.default = RollButton;
+
+},{"../icon":76,"../styled":97,"react":30,"styled-components":53}],84:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(["\n\n  ", "\n\n  ", "\n  ", "\n"], ["\n\n  ", "\n\n  ", "\n  ", "\n"]);
+
+var _react = require("react");
+
+var React = _interopRequireWildcard(_react);
+
+var _styledComponents = require("styled-components");
+
+var _styledComponents2 = _interopRequireDefault(_styledComponents);
+
+var _icon = require("../icon");
+
+var _Container = require("./Container");
+
+var _Container2 = _interopRequireDefault(_Container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+var ButtonContainer = (0, _styledComponents2.default)(_Container2.default)(_templateObject, function (props) {
+  return "transform: rotate(" + (props.direction + 90) + "deg);";
 }, function (props) {
   return "left: calc(" + props.x + "px - 25px);";
 }, function (props) {
@@ -34115,18 +34611,45 @@ var ThrustButton = function (_React$Component) {
       return mathlib.getPointInDirection(150, -mathlib.hexFacingToAngle(direction), 0, 0);
     }
   }, {
-    key: "render",
-    value: function render() {
+    key: "canThrust",
+    value: function canThrust() {
       var _props = this.props,
-          clicked = _props.clicked,
+          ship = _props.ship,
+          movementService = _props.movementService,
           direction = _props.direction;
 
+      return movementService.canThrust(ship, direction);
+    }
+  }, {
+    key: "thrust",
+    value: function thrust() {
+      var _props2 = this.props,
+          ship = _props2.ship,
+          movementService = _props2.movementService,
+          direction = _props2.direction;
+
+      return movementService.thrust(ship, direction);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var direction = this.props.direction;
+
+
+      var can = this.canThrust();
+      var overChannel = can.overChannel;
+
+
+      if (!can) {
+        return null;
+      }
 
       return React.createElement(
-        Container,
+        ButtonContainer,
         _extends({
+          overChannel: overChannel,
           direction: mathlib.hexFacingToAngle(direction),
-          onClick: clicked
+          onClick: this.thrust.bind(this)
         }, this.getPosition(direction)),
         React.createElement(_icon.Arrow, null)
       );
@@ -34138,7 +34661,7 @@ var ThrustButton = function (_React$Component) {
 
 exports.default = ThrustButton;
 
-},{"../icon":74,"../styled":91,"react":30,"styled-components":53}],79:[function(require,module,exports){
+},{"../icon":76,"./Container":78,"react":30,"styled-components":53}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34227,7 +34750,7 @@ var PlayerSettings = function (_React$Component) {
 
 exports.default = PlayerSettings;
 
-},{"../styled":91,"./PlayerSettingsForm":80,"react":30,"styled-components":53}],80:[function(require,module,exports){
+},{"../styled":97,"./PlayerSettingsForm":86,"react":30,"styled-components":53}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34466,7 +34989,7 @@ var keyCodes = {
 };
 exports.default = PlayerSettingsForm;
 
-},{"../common":66,"../styled":91,"react":30,"styled-components":53}],81:[function(require,module,exports){
+},{"../common":66,"../styled":97,"react":30,"styled-components":53}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34887,7 +35410,7 @@ setSystemsForAssignThrust: function(ship, requiredThrust, stillReq){
     },
     */
 
-},{"../common":66,"../styled":91,"react":30,"styled-components":53}],82:[function(require,module,exports){
+},{"../common":66,"../styled":97,"react":30,"styled-components":53}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35072,7 +35595,7 @@ var toIcons = function toIcons(ship, fighter, systems, destroyed) {
 
 exports.default = FighterIcon;
 
-},{"../system/SystemIcon":93,"react":30,"styled-components":53}],83:[function(require,module,exports){
+},{"../system/SystemIcon":99,"react":30,"styled-components":53}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35146,18 +35669,18 @@ var getFighters = function getFighters(ship) {
 
 exports.default = FighterList;
 
-},{"./FighterIcon":82,"react":30,"styled-components":53}],84:[function(require,module,exports){
+},{"./FighterIcon":88,"react":30,"styled-components":53}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    display: flex;\n    flex-wrap: wrap-reverse;\n    width: ", ";\n    align-items: end;\n    justify-content: space-around;\n    overflow: hidden;\n    box-sizing: border-box;\n    margin: 2px;\n\n    border: ", ";\n"], ["\n    display: flex;\n    flex-wrap: wrap-reverse;\n    width: ", ";\n    align-items: end;\n    justify-content: space-around;\n    overflow: hidden;\n    box-sizing: border-box;\n    margin: 2px;\n\n    border: ", ";\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    z-index: 1;\n"], ["\n    z-index: 1;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    position: relative;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-sizing: border-box;\n    width: calc(100% - 4px);\n    height: 16px;\n    box-sizing: border-box;\n    background-color: black;\n    color: ", ";\n    font-family: arial;\n    font-size: 11px;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n    border: 1px solid #496791;\n    margin: 2px;\n    filter: ", ";\n\n    :before {\n        box-sizing: border-box;\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        z-index: 0;\n        background-color: ", ";\n        border: 1px solid black;\n    }\n\n"], ["\n    position: relative;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-sizing: border-box;\n    width: calc(100% - 4px);\n    height: 16px;\n    box-sizing: border-box;\n    background-color: black;\n    color: ", ";\n    font-family: arial;\n    font-size: 11px;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n    border: 1px solid #496791;\n    margin: 2px;\n    filter: ", ";\n\n    :before {\n        box-sizing: border-box;\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        z-index: 0;\n        background-color: ", ";\n        border: 1px solid black;\n    }\n\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  display: flex;\n  flex-wrap: wrap-reverse;\n  width: ", ";\n  align-items: end;\n  justify-content: space-around;\n  overflow: hidden;\n  box-sizing: border-box;\n  margin: 2px;\n\n  border: ", ";\n"], ["\n  display: flex;\n  flex-wrap: wrap-reverse;\n  width: ", ";\n  align-items: end;\n  justify-content: space-around;\n  overflow: hidden;\n  box-sizing: border-box;\n  margin: 2px;\n\n  border: ", ";\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n  z-index: 1;\n"], ["\n  z-index: 1;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n  position: relative;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-sizing: border-box;\n  width: calc(100% - 4px);\n  height: 16px;\n  box-sizing: border-box;\n  background-color: black;\n  color: ", ";\n  font-family: arial;\n  font-size: 11px;\n  text-shadow: black 0 0 6px, black 0 0 6px;\n  border: 1px solid #496791;\n  margin: 2px;\n  filter: ", ";\n\n  :before {\n    box-sizing: border-box;\n    content: \"\";\n    position: absolute;\n    width: ", ";\n    height: 100%;\n    left: 0;\n    bottom: 0;\n    z-index: 0;\n    background-color: ", ";\n    border: 1px solid black;\n  }\n"], ["\n  position: relative;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-sizing: border-box;\n  width: calc(100% - 4px);\n  height: 16px;\n  box-sizing: border-box;\n  background-color: black;\n  color: ", ";\n  font-family: arial;\n  font-size: 11px;\n  text-shadow: black 0 0 6px, black 0 0 6px;\n  border: 1px solid #496791;\n  margin: 2px;\n  filter: ", ";\n\n  :before {\n    box-sizing: border-box;\n    content: \"\";\n    position: absolute;\n    width: ", ";\n    height: 100%;\n    left: 0;\n    bottom: 0;\n    z-index: 0;\n    background-color: ", ";\n    border: 1px solid black;\n  }\n"]);
 
 var _react = require("react");
 
@@ -35184,300 +35707,317 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var ShipSectionContainer = _styledComponents2.default.div.withConfig({
-    displayName: "ShipSection__ShipSectionContainer",
-    componentId: "sc-1svhdey-0"
+  displayName: "ShipSection__ShipSectionContainer",
+  componentId: "sc-1svhdey-0"
 })(_templateObject, function (props) {
-    switch (props.location) {
-        case 1:
-        case 0:
-        case 2:
-            return '40%';
-        default:
-            return '30%';
-    }
+  switch (props.location) {
+    case 1:
+    case 0:
+    case 2:
+      return "40%";
+    default:
+      return "30%";
+  }
 }, function (props) {
-    switch (props.location) {
-        case 0:
-            return '2px solid #6089c1';
-        default:
-            return '2px dotted #496791';
-    }
+  switch (props.location) {
+    case 0:
+      return "2px solid #6089c1";
+    default:
+      return "2px dotted #496791";
+  }
 });
 
 var StructureText = _styledComponents2.default.div.withConfig({
-    displayName: "ShipSection__StructureText",
-    componentId: "sc-1svhdey-1"
+  displayName: "ShipSection__StructureText",
+  componentId: "sc-1svhdey-1"
 })(_templateObject2);
 
 var StructureContainer = _styledComponents2.default.div.withConfig({
-    displayName: "ShipSection__StructureContainer",
-    componentId: "sc-1svhdey-2"
+  displayName: "ShipSection__StructureContainer",
+  componentId: "sc-1svhdey-2"
 })(_templateObject3, function (props) {
-    return props.health === 0 ? 'transparent' : 'white';
+  return props.health === 0 ? "transparent" : "white";
 }, function (props) {
-    return props.health === 0 ? 'blur(1px)' : 'none';
+  return props.health === 0 ? "blur(1px)" : "none";
 }, function (props) {
-    return props.health + "%";
+  return props.health + "%";
 }, function (props) {
-    return props.criticals ? '#ed6738' : '#427231';
+  return props.criticals ? "#ed6738" : "#427231";
 });
 
 var ShipSection = function (_React$Component) {
-    _inherits(ShipSection, _React$Component);
+  _inherits(ShipSection, _React$Component);
 
-    function ShipSection() {
-        _classCallCheck(this, ShipSection);
+  function ShipSection() {
+    _classCallCheck(this, ShipSection);
 
-        return _possibleConstructorReturn(this, (ShipSection.__proto__ || Object.getPrototypeOf(ShipSection)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (ShipSection.__proto__ || Object.getPrototypeOf(ShipSection)).apply(this, arguments));
+  }
+
+  _createClass(ShipSection, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          ship = _props.ship,
+          systems = _props.systems,
+          location = _props.location,
+          movementService = _props.movementService;
+
+
+      var structure = getStructure(systems);
+
+      return React.createElement(
+        ShipSectionContainer,
+        { location: location },
+        orderSystems(systems, location).map(function (system) {
+          return React.createElement(_SystemIcon2.default, {
+            scs: true,
+            key: "system-scs-" + location + "-" + ship.id + "-" + system.id,
+            system: system,
+            ship: ship,
+            movementService: movementService
+          });
+        }),
+        structure && React.createElement(
+          StructureContainer,
+          {
+            health: getStructureLeft(ship, structure),
+            criticals: hasCriticals(structure)
+          },
+          React.createElement(
+            StructureText,
+            null,
+            structure.maxhealth - damageManager.getDamage(ship, structure),
+            " /",
+            " ",
+            structure.maxhealth,
+            " A",
+            " ",
+            shipManager.systems.getArmour(ship, structure)
+          )
+        )
+      );
     }
+  }]);
 
-    _createClass(ShipSection, [{
-        key: "render",
-        value: function render() {
-            var _props = this.props,
-                ship = _props.ship,
-                systems = _props.systems,
-                location = _props.location;
-
-
-            var structure = getStructure(systems);
-
-            return React.createElement(
-                ShipSectionContainer,
-                { location: location },
-                orderSystems(systems, location).map(function (system) {
-                    return React.createElement(_SystemIcon2.default, { scs: true, key: "system-scs-" + location + "-" + ship.id + "-" + system.id, system: system, ship: ship });
-                }),
-                structure && React.createElement(
-                    StructureContainer,
-                    { health: getStructureLeft(ship, structure), criticals: hasCriticals(structure) },
-                    React.createElement(
-                        StructureText,
-                        null,
-                        structure.maxhealth - damageManager.getDamage(ship, structure),
-                        " / ",
-                        structure.maxhealth,
-                        " A ",
-                        shipManager.systems.getArmour(ship, structure)
-                    )
-                )
-            );
-        }
-    }]);
-
-    return ShipSection;
+  return ShipSection;
 }(React.Component);
 
 var getStructureLeft = function getStructureLeft(ship, system) {
-    return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
+  return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
 };
 
 var hasCriticals = function hasCriticals(system) {
-    return shipManager.criticals.hasCriticals(system);
+  return shipManager.criticals.hasCriticals(system);
 };
 
 var getStructure = function getStructure(systems) {
-    return systems.find(function (system) {
-        return system instanceof Structure;
-    });
+  return systems.find(function (system) {
+    return system instanceof Structure;
+  });
 };
 
 var filterStructure = function filterStructure(systems) {
-    return systems.filter(function (system) {
-        return !(system instanceof Structure);
-    });
+  return systems.filter(function (system) {
+    return !(system instanceof Structure);
+  });
 };
 
 var orderSystems = function orderSystems(systems, location) {
-    systems = filterStructure(systems);
+  systems = filterStructure(systems);
 
-    if ([4, 41, 41].includes(location)) {
-        return orderSystemsThreeWide(systems);
-    } else if ([3, 31, 32].includes(location)) {
-        return reverseRowsOfThree(orderSystemsThreeWide(systems));
-    } else if ([1, 2, 0].includes(location)) {
-        return orderSystemsFourWide(systems);
-    } else {
-        return orderWide(systems);
-    }
+  if ([4, 41, 41].includes(location)) {
+    return orderSystemsThreeWide(systems);
+  } else if ([3, 31, 32].includes(location)) {
+    return reverseRowsOfThree(orderSystemsThreeWide(systems));
+  } else if ([1, 2, 0].includes(location)) {
+    return orderSystemsFourWide(systems);
+  } else {
+    return orderWide(systems);
+  }
 };
 
 var reverseRowsOfThree = function reverseRowsOfThree(systems) {
-    var list = [];
+  var list = [];
 
-    systems.forEach(function (system, i) {
-        var j = i % 3;
-        if (j === 0) {
-            list[i + 2] = system;
-        } else if (j === 1) {
-            list[i] = system;
-        } else {
-            list[i - 2] = system;
-        }
-    });
+  systems.forEach(function (system, i) {
+    var j = i % 3;
+    if (j === 0) {
+      list[i + 2] = system;
+    } else if (j === 1) {
+      list[i] = system;
+    } else {
+      list[i - 2] = system;
+    }
+  });
 
-    return list;
+  return list;
 };
 
 var orderWide = function orderWide(systems) {
-    systems = filterStructure(systems);
+  systems = filterStructure(systems);
 
-    var list = [];
+  var list = [];
 
-    if (systems.length === 3) {
-        return orderSystemsThreeWide(systems);
-    } else if (systems.length === 4) {
-        return orderSystemsFourWide(systems);
-    } else {
-        return systems;
-    }
+  if (systems.length === 3) {
+    return orderSystemsThreeWide(systems);
+  } else if (systems.length === 4) {
+    return orderSystemsFourWide(systems);
+  } else {
+    return systems;
+  }
 };
 
 var orderSystemsFourWide = function orderSystemsFourWide(systems) {
-    systems = filterStructure(systems);
+  systems = filterStructure(systems);
 
-    var list = [];
+  var list = [];
 
-    while (true) {
-        var _pick = pick(systems, 4),
-            picked = _pick.picked,
-            remaining = _pick.remaining;
+  while (true) {
+    var _pick = pick(systems, 4),
+        picked = _pick.picked,
+        remaining = _pick.remaining;
 
-        if (picked.length === 0) {
-            break;
-        }
-
-        systems = remaining;
-
-        list = list.concat(picked);
+    if (picked.length === 0) {
+      break;
     }
 
-    while (true) {
-        var _pick2 = pick(systems, 2),
-            _picked = _pick2.picked,
-            _remaining = _pick2.remaining;
+    systems = remaining;
 
-        if (_picked.length === 0) {
-            break;
-        }
+    list = list.concat(picked);
+  }
 
-        systems = _remaining;
+  while (true) {
+    var _pick2 = pick(systems, 2),
+        _picked = _pick2.picked,
+        _remaining = _pick2.remaining;
 
-        var secondPick = pick(systems, 2);
-
-        if (secondPick.picked.length > 0) {
-            systems = secondPick.remaining;
-            list = list.concat([_picked[0], secondPick.picked[0], secondPick.picked[1], _picked[1]]);
-        } else {
-            list = list.concat([_picked[0], systems.pop(), systems.pop(), _picked[1]]);
-            list = list.filter(function (system) {
-                return system;
-            });
-        }
+    if (_picked.length === 0) {
+      break;
     }
 
-    list = list.concat(systems);
+    systems = _remaining;
 
-    return list;
+    var secondPick = pick(systems, 2);
+
+    if (secondPick.picked.length > 0) {
+      systems = secondPick.remaining;
+      list = list.concat([_picked[0], secondPick.picked[0], secondPick.picked[1], _picked[1]]);
+    } else {
+      list = list.concat([_picked[0], systems.pop(), systems.pop(), _picked[1]]);
+      list = list.filter(function (system) {
+        return system;
+      });
+    }
+  }
+
+  list = list.concat(systems);
+
+  return list;
 };
 
 var orderSystemsThreeWide = function orderSystemsThreeWide(systems) {
-    systems = filterStructure(systems);
+  systems = filterStructure(systems);
 
-    var list = [];
+  var list = [];
 
-    while (true) {
-        var _pick3 = pick(systems, 3),
-            picked = _pick3.picked,
-            remaining = _pick3.remaining;
+  while (true) {
+    var _pick3 = pick(systems, 3),
+        picked = _pick3.picked,
+        remaining = _pick3.remaining;
 
-        if (picked.length === 0) {
-            break;
-        }
-
-        systems = remaining;
-
-        list = list.concat(picked);
+    if (picked.length === 0) {
+      break;
     }
 
-    while (true) {
-        var _pick4 = pick(systems, 2),
-            _picked2 = _pick4.picked,
-            _remaining2 = _pick4.remaining;
+    systems = remaining;
 
-        if (_picked2.length === 0) {
-            break;
-        }
+    list = list.concat(picked);
+  }
 
-        var _findFriendForTwo = findFriendForTwo(_picked2, _remaining2),
-            three = _findFriendForTwo.three,
-            remainingSystems = _findFriendForTwo.remainingSystems;
+  while (true) {
+    var _pick4 = pick(systems, 2),
+        _picked2 = _pick4.picked,
+        _remaining2 = _pick4.remaining;
 
-        systems = remainingSystems;
-
-        list = list.concat(three);
+    if (_picked2.length === 0) {
+      break;
     }
 
-    list = list.concat(systems);
+    var _findFriendForTwo = findFriendForTwo(_picked2, _remaining2),
+        three = _findFriendForTwo.three,
+        remainingSystems = _findFriendForTwo.remainingSystems;
 
-    return list;
+    systems = remainingSystems;
+
+    list = list.concat(three);
+  }
+
+  list = list.concat(systems);
+
+  return list;
 };
 
 var findFriendForTwo = function findFriendForTwo(two, systems) {
+  var onePick = pick(systems, 1);
 
-    var onePick = pick(systems, 1);
+  if (onePick.picked.length === 1) {
+    return {
+      three: [two[0], onePick.picked[0], two[1]],
+      remainingSystems: onePick.remaining
+    };
+  }
 
-    if (onePick.picked.length === 1) {
-        return { three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining };
-    }
+  if (systems.length > 0) {
+    return {
+      three: [two[0], systems.pop(), two[1]],
+      remainingSystems: systems
+    };
+  }
 
-    if (systems.length > 0) {
-        return { three: [two[0], systems.pop(), two[1]], remainingSystems: systems };
-    }
-
-    return { three: [two[0], two[1]], remainingSystems: systems };
+  return { three: [two[0], two[1]], remainingSystems: systems };
 };
 
 var pick = function pick(systems) {
-    var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+  var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
 
-    var one = systems.find(function (system) {
-        var count = systems.reduce(function (all, otherSystem) {
-            if (otherSystem.name === system.name) {
-                return all + 1;
-            }
+  var one = systems.find(function (system) {
+    var count = systems.reduce(function (all, otherSystem) {
+      if (otherSystem.name === system.name) {
+        return all + 1;
+      }
 
-            return all;
-        }, 0);
+      return all;
+    }, 0);
 
-        if (amount === 1) {
-            return count === amount;
-        } else {
-            return count >= amount;
-        }
-    });
+    if (amount === 1) {
+      return count === amount;
+    } else {
+      return count >= amount;
+    }
+  });
 
-    if (!one) {
-        return { picked: [], remaining: systems };
+  if (!one) {
+    return { picked: [], remaining: systems };
+  }
+
+  var picked = [];
+  var remaining = systems.filter(function (otherSystem) {
+    if (otherSystem.name === one.name && amount > 0) {
+      amount--;
+      picked.push(otherSystem);
+      return false;
     }
 
-    var picked = [];
-    var remaining = systems.filter(function (otherSystem) {
-        if (otherSystem.name === one.name && amount > 0) {
-            amount--;
-            picked.push(otherSystem);
-            return false;
-        }
+    return true;
+  });
 
-        return true;
-    });
-
-    return { picked: picked, remaining: remaining };
+  return { picked: picked, remaining: remaining };
 };
 
 exports.default = ShipSection;
 
-},{"../system/SystemIcon":93,"react":30,"styled-components":53}],85:[function(require,module,exports){
+},{"../system/SystemIcon":99,"react":30,"styled-components":53}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35611,7 +36151,9 @@ var ShipWindow = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var ship = this.props.ship;
+      var _props = this.props,
+          ship = _props.ship,
+          movementService = _props.movementService;
 
 
       if (ship.flight) {
@@ -35684,7 +36226,8 @@ var ShipWindow = function (_React$Component) {
           systemsByLocation[1].length > 0 && React.createElement(_ShipSection2.default, {
             location: 1,
             ship: ship,
-            systems: systemsByLocation[1]
+            systems: systemsByLocation[1],
+            movementService: movementService
           }),
           React.createElement(_ShipWindowEw2.default, { ship: ship })
         ),
@@ -35694,27 +36237,32 @@ var ShipWindow = function (_React$Component) {
           systemsByLocation[3].length > 0 && React.createElement(_ShipSection2.default, {
             location: 3,
             ship: ship,
-            systems: systemsByLocation[3]
+            systems: systemsByLocation[3],
+            movementService: movementService
           }),
           systemsByLocation[31].length > 0 && React.createElement(_ShipSection2.default, {
             location: 31,
             ship: ship,
-            systems: systemsByLocation[31]
+            systems: systemsByLocation[31],
+            movementService: movementService
           }),
           systemsByLocation[0].length > 0 && React.createElement(_ShipSection2.default, {
             location: 0,
             ship: ship,
-            systems: systemsByLocation[0]
+            systems: systemsByLocation[0],
+            movementService: movementService
           }),
           systemsByLocation[4].length > 0 && React.createElement(_ShipSection2.default, {
             location: 4,
             ship: ship,
-            systems: systemsByLocation[4]
+            systems: systemsByLocation[4],
+            movementService: movementService
           }),
           systemsByLocation[41].length > 0 && React.createElement(_ShipSection2.default, {
             location: 41,
             ship: ship,
-            systems: systemsByLocation[41]
+            systems: systemsByLocation[41],
+            movementService: movementService
           })
         ),
         React.createElement(
@@ -35723,17 +36271,20 @@ var ShipWindow = function (_React$Component) {
           systemsByLocation[32].length > 0 && React.createElement(_ShipSection2.default, {
             location: 32,
             ship: ship,
-            systems: systemsByLocation[32]
+            systems: systemsByLocation[32],
+            movementService: movementService
           }),
           systemsByLocation[2].length > 0 && React.createElement(_ShipSection2.default, {
             location: 2,
             ship: ship,
-            systems: systemsByLocation[2]
+            systems: systemsByLocation[2],
+            movementService: movementService
           }),
           systemsByLocation[42].length > 0 && React.createElement(_ShipSection2.default, {
             location: 42,
             ship: ship,
-            systems: systemsByLocation[42]
+            systems: systemsByLocation[42],
+            movementService: movementService
           })
         )
       );
@@ -35769,7 +36320,7 @@ var sortIntoLocations = function sortIntoLocations(ship) {
 
 exports.default = ShipWindow;
 
-},{"../styled":91,"./FighterList":83,"./ShipSection":84,"./ShipWindowEw":86,"react":30,"react-dom":24,"styled-components":53}],86:[function(require,module,exports){
+},{"../styled":97,"./FighterList":89,"./ShipSection":90,"./ShipWindowEw":92,"react":30,"react-dom":24,"styled-components":53}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35942,16 +36493,16 @@ var getAmount = function getAmount(ewEntry, ship) {
 
 exports.default = ShipWindowEw;
 
-},{"../styled":91,"react":30,"styled-components":53}],87:[function(require,module,exports){
+},{"../styled":97,"react":30,"styled-components":53}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n\n"], ["\n\n"]);
+var _templateObject = _taggedTemplateLiteral([""], [""]);
 
 var _react = require("react");
 
@@ -35978,41 +36529,47 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var ShipWindows = _styledComponents2.default.div.withConfig({
-    displayName: "ShipWindowsContainer__ShipWindows",
-    componentId: "sc-8caxeu-0"
+  displayName: "ShipWindowsContainer__ShipWindows",
+  componentId: "sc-8caxeu-0"
 })(_templateObject);
 
 var ShipWindowsContainer = function (_React$Component) {
-    _inherits(ShipWindowsContainer, _React$Component);
+  _inherits(ShipWindowsContainer, _React$Component);
 
-    function ShipWindowsContainer() {
-        _classCallCheck(this, ShipWindowsContainer);
+  function ShipWindowsContainer() {
+    _classCallCheck(this, ShipWindowsContainer);
 
-        return _possibleConstructorReturn(this, (ShipWindowsContainer.__proto__ || Object.getPrototypeOf(ShipWindowsContainer)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (ShipWindowsContainer.__proto__ || Object.getPrototypeOf(ShipWindowsContainer)).apply(this, arguments));
+  }
+
+  _createClass(ShipWindowsContainer, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          ships = _props.ships,
+          movementService = _props.movementService;
+
+
+      return React.createElement(
+        ShipWindows,
+        null,
+        ships.map(function (ship) {
+          return React.createElement(_ShipWindow2.default, {
+            key: "shipwindow-" + ship.id,
+            ship: ship,
+            movementService: movementService
+          });
+        })
+      );
     }
+  }]);
 
-    _createClass(ShipWindowsContainer, [{
-        key: "render",
-        value: function render() {
-            var ships = this.props.ships;
-
-
-            return React.createElement(
-                ShipWindows,
-                null,
-                ships.map(function (ship) {
-                    return React.createElement(_ShipWindow2.default, { key: "shipwindow-" + ship.id, ship: ship });
-                })
-            );
-        }
-    }]);
-
-    return ShipWindowsContainer;
+  return ShipWindowsContainer;
 }(React.Component);
 
 exports.default = ShipWindowsContainer;
 
-},{"./ShipWindow":85,"react":30,"styled-components":53}],88:[function(require,module,exports){
+},{"./ShipWindow":91,"react":30,"styled-components":53}],94:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -36030,7 +36587,7 @@ var Clickable = (0, _styledComponents.css)(_templateObject);
 
 exports.Clickable = Clickable;
 
-},{"styled-components":53}],89:[function(require,module,exports){
+},{"styled-components":53}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36074,7 +36631,7 @@ exports.Backdrop = Backdrop;
 exports.ContainerRounded = ContainerRounded;
 exports.ContainerRoundedRightSide = ContainerRoundedRightSide;
 
-},{"styled-components":53}],90:[function(require,module,exports){
+},{"styled-components":53}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36103,7 +36660,7 @@ var SubTitle = (0, _styledComponents2.default)(Title)(_templateObject2);
 exports.Title = Title;
 exports.SubTitle = SubTitle;
 
-},{"styled-components":53}],91:[function(require,module,exports){
+},{"styled-components":53}],97:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36167,7 +36724,7 @@ Object.defineProperty(exports, "Clickable", {
   }
 });
 
-},{"./Clickable":88,"./Container":89,"./Title":90}],92:[function(require,module,exports){
+},{"./Clickable":94,"./Container":95,"./Title":96}],98:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36262,18 +36819,18 @@ var ShipInfo = function (_React$Component) {
 
 exports.default = ShipInfo;
 
-},{"./SystemInfo":94,"react":30,"styled-components":53}],93:[function(require,module,exports){
+},{"./SystemInfo":100,"react":30,"styled-components":53}],99:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 7px;\n    border: 2px solid black;\n    box-sizing: border-box;\n    \n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"], ["\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    height: 7px;\n    border: 2px solid black;\n    box-sizing: border-box;\n    \n    background-color: black;\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width:  ", ";\n        height: 100%;\n        left: 0;\n        bottom: 0;\n        background-color: ", ";\n    }\n"]),
-    _templateObject2 = _taggedTemplateLiteral(["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"], ["\n    width:100%;\n    height: calc(100% - 5px);\n    color: white;\n    font-family: arial;\n    font-size: 10px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n    text-shadow: black 0 0 6px, black 0 0 6px;\n"]),
-    _templateObject3 = _taggedTemplateLiteral(["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"], ["\n    position: relative;\n    box-sizing: border-box;\n    width: 32px;\n    height: 32px;\n    margin: ", ";\n    border: ", ";\n    background-color:  ", ";\n    box-shadow: ", ";\n    background-image: ", ";\n    background-size: cover;\n    filter: ", ";\n    cursor: pointer;\n    \n    ", " {\n        display: ", ";\n    }\n\n\n    :before {\n        content: \"\";\n        position:absolute;\n        width: 100%;\n        height: 100%;\n        opacity: ", ";\n\n        background-color: ", ";\n\n        background-image: ", ";\n    }\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  width: 100%;\n  height: 7px;\n  border: 2px solid black;\n  box-sizing: border-box;\n\n  background-color: black;\n\n  :before {\n    content: \"\";\n    position: absolute;\n    width: ", ";\n    height: 100%;\n    left: 0;\n    bottom: 0;\n    background-color: ", ";\n  }\n"], ["\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  width: 100%;\n  height: 7px;\n  border: 2px solid black;\n  box-sizing: border-box;\n\n  background-color: black;\n\n  :before {\n    content: \"\";\n    position: absolute;\n    width: ", ";\n    height: 100%;\n    left: 0;\n    bottom: 0;\n    background-color: ", ";\n  }\n"]),
+    _templateObject2 = _taggedTemplateLiteral(["\n  width: 100%;\n  height: calc(100% - 5px);\n  color: white;\n  font-family: arial;\n  font-size: 10px;\n  display: flex;\n  align-items: flex-end;\n  justify-content: center;\n  text-shadow: black 0 0 6px, black 0 0 6px;\n"], ["\n  width: 100%;\n  height: calc(100% - 5px);\n  color: white;\n  font-family: arial;\n  font-size: 10px;\n  display: flex;\n  align-items: flex-end;\n  justify-content: center;\n  text-shadow: black 0 0 6px, black 0 0 6px;\n"]),
+    _templateObject3 = _taggedTemplateLiteral(["\n  position: relative;\n  box-sizing: border-box;\n  width: 32px;\n  height: 32px;\n  margin: ", ";\n  border: ", ";\n  background-color: ", ";\n  box-shadow: ", ";\n  background-image: ", ";\n  background-size: cover;\n  filter: ", ";\n  cursor: pointer;\n\n  ", " {\n    display: ", ";\n  }\n\n  :before {\n    content: \"\";\n    position: absolute;\n    width: 100%;\n    height: 100%;\n    opacity: ", ";\n\n    background-color: ", ";\n\n    background-image: ", ";\n  }\n"], ["\n  position: relative;\n  box-sizing: border-box;\n  width: 32px;\n  height: 32px;\n  margin: ", ";\n  border: ", ";\n  background-color: ", ";\n  box-shadow: ", ";\n  background-image: ", ";\n  background-size: cover;\n  filter: ", ";\n  cursor: pointer;\n\n  ", " {\n    display: ", ";\n  }\n\n  :before {\n    content: \"\";\n    position: absolute;\n    width: 100%;\n    height: 100%;\n    opacity: ", ";\n\n    background-color: ", ";\n\n    background-image: ", ";\n  }\n"]);
 
 var _react = require("react");
 
@@ -36296,252 +36853,260 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var HealthBar = _styledComponents2.default.div.withConfig({
-    displayName: "SystemIcon__HealthBar",
-    componentId: "hirlnl-0"
+  displayName: "SystemIcon__HealthBar",
+  componentId: "hirlnl-0"
 })(_templateObject, function (props) {
-    return props.health + "%";
+  return props.health + "%";
 }, function (props) {
-    return props.criticals ? '#ed6738' : '#427231';
+  return props.criticals ? "#ed6738" : "#427231";
 });
 
 var SystemText = _styledComponents2.default.div.withConfig({
-    displayName: "SystemIcon__SystemText",
-    componentId: "hirlnl-1"
+  displayName: "SystemIcon__SystemText",
+  componentId: "hirlnl-1"
 })(_templateObject2);
 
 var System = _styledComponents2.default.div.withConfig({
-    displayName: "SystemIcon__System",
-    componentId: "hirlnl-2"
+  displayName: "SystemIcon__System",
+  componentId: "hirlnl-2"
 })(_templateObject3, function (props) {
-    return props.scs ? '3px 0' : '2px';
+  return props.scs ? "3px 0" : "2px";
 }, function (props) {
-    if (props.firing) {
-        return '1px solid #eb5c15';
-    } else {
-        return '1px solid #496791';
-    }
+  if (props.firing) {
+    return "1px solid #eb5c15";
+  } else {
+    return "1px solid #496791";
+  }
 }, function (props) {
-    if (props.selected) {
-        return '#4e6c91';
-    } else if (props.firing) {
-        return '#e06f01';
-    } else {
-        return 'black';
-    }
+  if (props.selected) {
+    return "#4e6c91";
+  } else if (props.firing) {
+    return "#e06f01";
+  } else {
+    return "black";
+  }
 }, function (props) {
-    if (props.selected) {
-        return '0px 0px 15px #0099ff';
-    } else if (props.firing) {
-        return 'box-shadow: 0px 0px 15px #eb5c15';
-    } else {
-        return 'none';
-    }
+  if (props.selected) {
+    return "0px 0px 15px #0099ff";
+  } else if (props.firing) {
+    return "box-shadow: 0px 0px 15px #eb5c15";
+  } else {
+    return "none";
+  }
 }, function (props) {
-    return "url(" + props.background + ")";
+  return "url(" + props.background + ")";
 }, function (props) {
-    return props.destroyed ? 'blur(1px)' : 'none';
+  return props.destroyed ? "blur(1px)" : "none";
 }, SystemText, function (props) {
-    return props.offline ? 'none' : 'flex';
+  return props.offline ? "none" : "flex";
 }, function (props) {
-    if (props.destroyed || props.offline || props.loading) {
-        return '0.5';
-    }
+  if (props.destroyed || props.offline || props.loading) {
+    return "0.5";
+  }
 
-    return '0';
+  return "0";
 }, function (props) {
-    if (props.destroyed || props.offline) {
-        return 'black';
-    } else if (props.loading) {
-        return 'orange';
-    }
+  if (props.destroyed || props.offline) {
+    return "black";
+  } else if (props.loading) {
+    return "orange";
+  }
 
-    return 'transparent';
+  return "transparent";
 }, function (props) {
-    if (props.offline) {
-        return 'url(./img/offline.png)';
-    }
+  if (props.offline) {
+    return "url(./img/offline.png)";
+  }
 
-    return 'none';
+  return "none";
 });
 
 var SystemIcon = function (_React$Component) {
-    _inherits(SystemIcon, _React$Component);
+  _inherits(SystemIcon, _React$Component);
 
-    function SystemIcon(props) {
-        _classCallCheck(this, SystemIcon);
+  function SystemIcon(props) {
+    _classCallCheck(this, SystemIcon);
 
-        return _possibleConstructorReturn(this, (SystemIcon.__proto__ || Object.getPrototypeOf(SystemIcon)).call(this, props));
+    return _possibleConstructorReturn(this, (SystemIcon.__proto__ || Object.getPrototypeOf(SystemIcon)).call(this, props));
+  }
+
+  _createClass(SystemIcon, [{
+    key: "clickSystem",
+    value: function clickSystem(e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      var _props = this.props,
+          system = _props.system,
+          ship = _props.ship;
+
+      system = shipManager.systems.initializeSystem(system);
+
+      if (gamedata.waiting) return;
+
+      if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+
+      if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
+        if (gamedata.isMyShip(ship)) {
+          if (weaponManager.isSelectedWeapon(system)) {
+            weaponManager.unSelectWeapon(ship, system);
+          } else {
+            weaponManager.selectWeapon(ship, system);
+          }
+        }
+      }
+
+      if (gamedata.isMyShip(ship)) {
+        webglScene.customEvent("SystemClicked", {
+          ship: ship,
+          system: system,
+          element: e.target
+        });
+      } else {
+        webglScene.customEvent("SystemTargeted", { ship: ship, system: system });
+      }
     }
+  }, {
+    key: "onSystemMouseOver",
+    value: function onSystemMouseOver(event) {
+      event.stopPropagation();
+      event.preventDefault();
 
-    _createClass(SystemIcon, [{
-        key: "clickSystem",
-        value: function clickSystem(e) {
-            e.stopPropagation();
-            e.preventDefault();
+      var _props2 = this.props,
+          system = _props2.system,
+          ship = _props2.ship;
 
-            var _props = this.props,
-                system = _props.system,
-                ship = _props.ship;
+      system = shipManager.systems.initializeSystem(system);
 
-            system = shipManager.systems.initializeSystem(system);
+      webglScene.customEvent("SystemMouseOver", {
+        ship: ship,
+        system: system,
+        element: event.target
+      });
+    }
+  }, {
+    key: "onSystemMouseOut",
+    value: function onSystemMouseOut(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      webglScene.customEvent("SystemMouseOut");
+    }
+  }, {
+    key: "onContextMenu",
+    value: function onContextMenu(e) {
+      e.stopPropagation();
+      e.preventDefault();
 
-            if (gamedata.waiting) return;
+      var _props3 = this.props,
+          system = _props3.system,
+          ship = _props3.ship;
 
-            if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+      system = shipManager.systems.initializeSystem(system);
 
-            if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
-                if (gamedata.isMyShip(ship)) {
-                    if (weaponManager.isSelectedWeapon(system)) {
-                        weaponManager.unSelectWeapon(ship, system);
-                    } else {
-                        weaponManager.selectWeapon(ship, system);
-                    }
-                }
-            }
-
-            if (gamedata.isMyShip(ship)) {
-                webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.target });
-            } else {
-                webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
-            }
-        }
-    }, {
-        key: "onSystemMouseOver",
-        value: function onSystemMouseOver(event) {
-            event.stopPropagation();
-            event.preventDefault();
-
-            var _props2 = this.props,
-                system = _props2.system,
-                ship = _props2.ship;
-
-            system = shipManager.systems.initializeSystem(system);
-
-            webglScene.customEvent('SystemMouseOver', {
-                ship: ship,
-                system: system,
-                element: event.target
-            });
-        }
-    }, {
-        key: "onSystemMouseOut",
-        value: function onSystemMouseOut(event) {
-            event.stopPropagation();
-            event.preventDefault();
-            webglScene.customEvent('SystemMouseOut');
-        }
-    }, {
-        key: "onContextMenu",
-        value: function onContextMenu(e) {
-            e.stopPropagation();
-            e.preventDefault();
-
-            var _props3 = this.props,
-                system = _props3.system,
-                ship = _props3.ship;
-
-            system = shipManager.systems.initializeSystem(system);
-
-            if (system.weapon) {
-                weaponManager.selectAllWeapons(ship, system);
-            }
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            var _props4 = this.props,
-                system = _props4.system,
-                ship = _props4.ship,
-                scs = _props4.scs,
-                fighter = _props4.fighter,
-                destroyed = _props4.destroyed;
+      if (system.weapon) {
+        weaponManager.selectAllWeapons(ship, system);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _props4 = this.props,
+          system = _props4.system,
+          ship = _props4.ship,
+          scs = _props4.scs,
+          fighter = _props4.fighter,
+          destroyed = _props4.destroyed,
+          movementService = _props4.movementService;
 
 
-            system = shipManager.systems.initializeSystem(system);
+      system = shipManager.systems.initializeSystem(system);
 
-            if (getDestroyed(ship, system) || destroyed) {
-                return React.createElement(
-                    System,
-                    { background: getBackgroundImage(system), destroyed: true },
-                    React.createElement(HealthBar, { health: "0" })
-                );
-            }
+      if (getDestroyed(ship, system) || destroyed) {
+        return React.createElement(
+          System,
+          { background: getBackgroundImage(system), destroyed: true },
+          React.createElement(HealthBar, { health: "0" })
+        );
+      }
 
-            return React.createElement(
-                System,
-                {
-                    scs: scs,
-                    onClick: this.clickSystem.bind(this),
-                    onMouseOver: this.onSystemMouseOver.bind(this),
-                    onMouseOut: this.onSystemMouseOut.bind(this),
-                    onContextMenu: this.onContextMenu.bind(this),
-                    background: getBackgroundImage(system),
-                    offline: isOffline(ship, system),
-                    loading: isLoading(system),
-                    selected: isSelected(system),
-                    firing: isFiring(ship, system)
-                },
-                React.createElement(
-                    SystemText,
-                    null,
-                    getText(ship, system)
-                ),
-                !fighter && React.createElement(HealthBar, { scs: scs, health: getStructureLeft(ship, system), criticals: hasCriticals(system) })
-            );
-        }
-    }]);
+      return React.createElement(
+        System,
+        {
+          scs: scs,
+          onClick: this.clickSystem.bind(this),
+          onMouseOver: this.onSystemMouseOver.bind(this),
+          onMouseOut: this.onSystemMouseOut.bind(this),
+          onContextMenu: this.onContextMenu.bind(this),
+          background: getBackgroundImage(system),
+          offline: isOffline(ship, system),
+          loading: isLoading(system),
+          selected: isSelected(system),
+          firing: isFiring(ship, system)
+        },
+        React.createElement(
+          SystemText,
+          null,
+          getText(ship, system, movementService)
+        ),
+        !fighter && React.createElement(HealthBar, {
+          scs: scs,
+          health: getStructureLeft(ship, system),
+          criticals: hasCriticals(system)
+        })
+      );
+    }
+  }]);
 
-    return SystemIcon;
+  return SystemIcon;
 }(React.Component);
 
 var isFiring = function isFiring(ship, system) {
-    return weaponManager.hasFiringOrder(ship, system);
+  return weaponManager.hasFiringOrder(ship, system);
 };
 
 var isLoading = function isLoading(system) {
-    return system.weapon && !weaponManager.isLoaded(system);
+  return system.weapon && !weaponManager.isLoaded(system);
 };
 
 var isOffline = function isOffline(ship, system) {
-    return shipManager.power.isOffline(ship, system);
+  return shipManager.power.isOffline(ship, system);
 };
 
 var getStructureLeft = function getStructureLeft(ship, system) {
-    return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
+  return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
 };
 
 var getDestroyed = function getDestroyed(ship, system) {
-    return shipManager.systems.isDestroyed(ship, system);
+  return shipManager.systems.isDestroyed(ship, system);
 };
 
 var getBackgroundImage = function getBackgroundImage(system) {
-    if (system.name == "thruster") {
-        return './img/systemicons/thruster' + system.direction + '.png';
-    } else if (system.iconPath) {
-        return "./img/systemicons/" + system.iconPath;
-    } else {
-        return "./img/systemicons/" + system.name + ".png";
-    }
+  if (system.name == "thruster") {
+    return "./img/systemicons/thruster" + system.direction + ".png";
+  } else if (system.iconPath) {
+    return "./img/systemicons/" + system.iconPath;
+  } else {
+    return "./img/systemicons/" + system.name + ".png";
+  }
 };
 
 var hasCriticals = function hasCriticals(system) {
-    return shipManager.criticals.hasCriticals(system);
+  return shipManager.criticals.hasCriticals(system);
 };
 
 var isSelected = function isSelected(system) {
-    return weaponManager.isSelectedWeapon(system);
+  return weaponManager.isSelectedWeapon(system);
 };
 
-var getText = function getText(ship, system) {
-    if (system.weapon) {
+var getText = function getText(ship, system, movementService) {
+  if (system.weapon) {
+    var firing = weaponManager.hasFiringOrder(ship, system);
 
-        var firing = weaponManager.hasFiringOrder(ship, system);
-
-        if (firing && system.canChangeShots) {
-            var fire = weaponManager.getFiringOrder(ship, system);
-            return fire.shots + "/" + system.shots;
-        } else if (!firing) {
-            /*
+    if (firing && system.canChangeShots) {
+      var fire = weaponManager.getFiringOrder(ship, system);
+      return fire.shots + "/" + system.shots;
+    } else if (!firing) {
+      /*
             if (system.duoWeapon) {
                 var UI_active = systemwindow.find(".UI").hasClass("active");
                  shipWindowManager.addDuoSystem(ship, system, systemwindow);
@@ -36550,36 +37115,36 @@ var getText = function getText(ship, system) {
                 }
             }*/
 
-            var load = weaponManager.getWeaponCurrentLoading(system);
-            var loadingtime = system.loadingtime;
+      var load = weaponManager.getWeaponCurrentLoading(system);
+      var loadingtime = system.loadingtime;
 
-            if (system.normalload > 0) {
-                loadingtime = system.normalload;
-            }
+      if (system.normalload > 0) {
+        loadingtime = system.normalload;
+      }
 
-            if (load > loadingtime) {
-                load = loadingtime;
-            }
+      if (load > loadingtime) {
+        load = loadingtime;
+      }
 
-            var overloadturns = "";
+      var overloadturns = "";
 
-            if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-                overloadturns = "(" + system.overloadturns + ")";
-            }
+      if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+        overloadturns = "(" + system.overloadturns + ")";
+      }
 
-            if (system.overloadshots > 0) {
-                return "S" + system.overloadshots;
-            } else {
-                return load + overloadturns + "/" + loadingtime;
-            }
-        }
-    } else if (system.outputType === "thrust") {
-        return shipManager.movement.getRemainingEngineThrust(ship);
-    } else if (system.outputType === "power") {
-        return shipManager.power.getReactorPower(ship, system);
-    } else {
-        return shipManager.systems.getOutput(ship, system);
+      if (system.overloadshots > 0) {
+        return "S" + system.overloadshots;
+      } else {
+        return load + overloadturns + "/" + loadingtime;
+      }
     }
+  } else if (system.outputType === "thrust") {
+    return movementService.getRemainingEngineThrust(ship);
+  } else if (system.outputType === "power") {
+    return shipManager.power.getReactorPower(ship, system);
+  } else {
+    return shipManager.systems.getOutput(ship, system);
+  }
 };
 /*
 
@@ -36635,154 +37200,185 @@ const setSystemData = (ship, system) => {
 //shipWindowManager.removeSystemClasses(systemwindow);
 
 /*
-if (shipManager.systems.isDestroyed(ship, system)) {
-    if (system.parentId > 0) {
-        if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
-            // create an iconMask at the top of the DOM for the system.
-            var iconmask_element = document.createElement('div');
-            iconmask_element.className = "iconmask";
-            parentWindow.find(".iconmask").remove();
-            parentWindow.find(".icon").append(iconmask_element);
+    if (shipManager.systems.isDestroyed(ship, system)) {
+        if (system.parentId > 0) {
+            if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
+                // create an iconMask at the top of the DOM for the system.
+                var iconmask_element = document.createElement('div');
+                iconmask_element.className = "iconmask";
+                parentWindow.find(".iconmask").remove();
+                parentWindow.find(".icon").append(iconmask_element);
+            }
+
+            parentWindow.addClass("destroyed");
+        } else {
+            systemwindow.addClass("destroyed");
         }
-         parentWindow.addClass("destroyed");
-    } else {
-        systemwindow.addClass("destroyed");
+        return;
     }
-    return;
-}
- if (shipManager.criticals.hasCriticals(system)) {
-    if (system.parentId > 0) {
-        parentWindow.addClass("critical");
-    } else {
-        systemwindow.addClass("critical");
+
+    if (shipManager.criticals.hasCriticals(system)) {
+        if (system.parentId > 0) {
+            parentWindow.addClass("critical");
+        } else {
+            systemwindow.addClass("critical");
+        }
     }
-}
- */
+
+    */
 /*
-   if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
+    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
+
     if (system.weapon) {
-       var firing = weaponManager.hasFiringOrder(ship, system);
+        var firing = weaponManager.hasFiringOrder(ship, system);
+
         // To avoid double overlay of loading icon mask in case of a
-       // duoWeapon in a dualWeapon
-       if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
-           systemwindow.addClass("loading");
-       } else {
-           systemwindow.removeClass("loading");
-       }
+        // duoWeapon in a dualWeapon
+        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
+            systemwindow.addClass("loading");
+        } else {
+            systemwindow.removeClass("loading");
+        }
+
         if (weaponManager.isSelectedWeapon(system)) {
-           systemwindow.addClass("selected");
-       } else {
-           systemwindow.removeClass("selected");
-       }
+            systemwindow.addClass("selected");
+        } else {
+            systemwindow.removeClass("selected");
+        }
+
         if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
-           systemwindow.addClass("firing");
+            systemwindow.addClass("firing");
+
             if (system.parentId > -1) {
-               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+
                 if (parentSystem.duoWeapon) {
-                   $(".system_" + system.parentId).addClass("duofiring");
-               }
-           }
-       } else if (firing == "self") {
-           systemwindow.addClass("firing");
-           systemwindow.addClass("selfIntercept");
-       } else {
-           firing = false;
-           systemwindow.removeClass("firing");
-           systemwindow.removeClass("selfIntercept");
-       }
+                    $(".system_" + system.parentId).addClass("duofiring");
+                }
+            }
+        } else if (firing == "self") {
+            systemwindow.addClass("firing");
+            systemwindow.addClass("selfIntercept");
+        } else {
+            firing = false;
+            systemwindow.removeClass("firing");
+            systemwindow.removeClass("selfIntercept");
+        }
+
         if (system.ballistic) {
-           systemwindow.addClass("ballistic");
-       } else {
-           systemwindow.removeClass("ballistic");
-       }
+            systemwindow.addClass("ballistic");
+        } else {
+            systemwindow.removeClass("ballistic");
+        }
+
         if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
-           if (system.parentId >= 0) {
-               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+            if (system.parentId >= 0) {
+                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+
                 if (parentSystem.parentId >= 0) {
-                   parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
-                   $(".parentsystem_" + parentSystem.id).addClass("modes");
-                   var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
-               } else {
-                   $(".parentsystem_" + parentSystem.id).addClass("modes");
-                   var modebutton = $(".mode", systemwindow);
-               }
+                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+                    $(".parentsystem_" + parentSystem.id).addClass("modes");
+                    var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
+                } else {
+                    $(".parentsystem_" + parentSystem.id).addClass("modes");
+                    var modebutton = $(".mode", systemwindow);
+                }
+
                 modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
-           } else {
-               systemwindow.addClass("modes");
+            } else {
+                systemwindow.addClass("modes");
+
                 var modebutton = $(".mode", systemwindow);
-               modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
-           }
-       }
+                modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
+            }
+        }
+
         if (firing && system.canChangeShots) {
-           var fire = weaponManager.getFiringOrder(ship, system);
+            var fire = weaponManager.getFiringOrder(ship, system);
+
             if (fire.shots < system.shots) {
-               systemwindow.addClass("canAddShots");
-           } else {
-               systemwindow.removeClass("canAddShots");
-           }
+                systemwindow.addClass("canAddShots");
+            } else {
+                systemwindow.removeClass("canAddShots");
+            }
+
             if (fire.shots > 1) {
-               systemwindow.addClass("canReduceShots");
-           } else {
-               systemwindow.removeClass("canReduceShots");
-           }
+                systemwindow.addClass("canReduceShots");
+            } else {
+                systemwindow.removeClass("canReduceShots");
+            }
+
             field.html(fire.shots + "/" + system.shots);
-       } else if (!firing) {
-           if (system.duoWeapon) {
-               var UI_active = systemwindow.find(".UI").hasClass("active");
+        } else if (!firing) {
+            if (system.duoWeapon) {
+                var UI_active = systemwindow.find(".UI").hasClass("active");
+
                 shipWindowManager.addDuoSystem(ship, system, systemwindow);
+
                 if (UI_active) {
-                   systemwindow.find(".UI").addClass("active");
-               }
-           } else {
-               if (system.dualWeapon && system.weapons) {
-                   system = system.weapons[system.firingMode];
-               }
+                    systemwindow.find(".UI").addClass("active");
+                }
+            } else {
+                if (system.dualWeapon && system.weapons) {
+                    system = system.weapons[system.firingMode];
+                }
+
                 var load = weaponManager.getWeaponCurrentLoading(system);
-               var loadingtime = system.loadingtime;
+                var loadingtime = system.loadingtime;
+
                 if (system.normalload > 0) {
-                   loadingtime = system.normalload;
-               }
+                    loadingtime = system.normalload;
+                }
+
                 if (load > loadingtime) {
-                   load = loadingtime;
-               }
+                    load = loadingtime;
+                }
+
                 var overloadturns = "";
+
                 if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-                   overloadturns = "(" + system.overloadturns + ")";
-               }
+                    overloadturns = "(" + system.overloadturns + ")";
+                }
+
                 if (system.overloadshots > 0) {
-                   field.html("S" + system.overloadshots);
-               } else {
-                   field.html(load + overloadturns + "/" + loadingtime);
-               }
-           }
+                    field.html("S" + system.overloadshots);
+                } else {
+                    field.html(load + overloadturns + "/" + loadingtime);
+                }
+            }
+
             
-       }
-   } else if (system.name == "thruster") {
-       systemwindow.data("direction", system.direction);
-       systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+        }
+    } else if (system.name == "thruster") {
+        systemwindow.data("direction", system.direction);
+        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+
         var channeled = shipManager.movement.getAmountChanneled(ship, system);
-       if (channeled > output) {
-           field.addClass("darkred");
-       } else {
-           field.removeClass("darkred");
-       }
+        if (channeled > output) {
+            field.addClass("darkred");
+        } else {
+            field.removeClass("darkred");
+        }
+
         if (channeled < 0) {
-           channeled = 0;
-       }
+            channeled = 0;
+        }
+
         field.html(channeled + "/" + output);
-   } else if (system.name == "engine") {
-       var rem = shipManager.movement.getRemainingEngineThrust(ship);
+    } else if (system.name == "engine") {
+        var rem = shipManager.movement.getRemainingEngineThrust(ship);
+
         field.html(rem + "/" + output);
-   } else if (system.name == "reactor") {
-       field.html(shipManager.power.getReactorPower(ship, system));
-   } else if (system.output > 0) {
-       field.html(output);
-   }
+    } else if (system.name == "reactor") {
+        field.html(shipManager.power.getReactorPower(ship, system));
+    } else if (system.output > 0) {
+        field.html(output);
+    }
 }
 */
 exports.default = SystemIcon;
 
-},{"react":30,"styled-components":53}],94:[function(require,module,exports){
+},{"react":30,"styled-components":53}],100:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37051,7 +37647,7 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfo;
 
-},{"../common":66,"./ShipInfo":92,"react":30,"styled-components":53}],95:[function(require,module,exports){
+},{"../common":66,"./ShipInfo":98,"react":30,"styled-components":53}],101:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37417,7 +38013,7 @@ var getFiringModes = function getFiringModes(ship, system, changeFiringMode, all
 
 exports.default = SystemInfoButtons;
 
-},{"../styled":91,"react":30,"styled-components":53}],96:[function(require,module,exports){
+},{"../styled":97,"react":30,"styled-components":53}],102:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37518,16 +38114,16 @@ var getPosition = function getPosition(boundingBox) {
 
 exports.default = SystemInfoMenu;
 
-},{"../common":66,"./SystemInfoButtons":95,"react":30,"styled-components":53}],97:[function(require,module,exports){
+},{"../common":66,"./SystemInfoButtons":101,"react":30,"styled-components":53}],103:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(["\n    display:flex;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100% - 810px);\n    bottom: 0;\n    flex-wrap: wrap-reverse;\n\n    @media (max-width: 1024px) {\n        left: 0;\n        width: calc(100% - 50px);\n    }\n"], ["\n    display:flex;\n    z-index: 2;\n    position:fixed;\n    left: 805px;\n    width: calc(100% - 810px);\n    bottom: 0;\n    flex-wrap: wrap-reverse;\n\n    @media (max-width: 1024px) {\n        left: 0;\n        width: calc(100% - 50px);\n    }\n"]);
+var _templateObject = _taggedTemplateLiteral(["\n  display: flex;\n  z-index: 2;\n  position: fixed;\n  left: 805px;\n  width: calc(100% - 810px);\n  bottom: 0;\n  flex-wrap: wrap-reverse;\n\n  @media (max-width: 1024px) {\n    left: 0;\n    width: calc(100% - 50px);\n  }\n"], ["\n  display: flex;\n  z-index: 2;\n  position: fixed;\n  left: 805px;\n  width: calc(100% - 810px);\n  bottom: 0;\n  flex-wrap: wrap-reverse;\n\n  @media (max-width: 1024px) {\n    left: 0;\n    width: calc(100% - 50px);\n  }\n"]);
 
 var _react = require("react");
 
@@ -37554,65 +38150,71 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var WeaponListContainer = _styledComponents2.default.div.withConfig({
-    displayName: "WeaponList__WeaponListContainer",
-    componentId: "sc-1uzzpni-0"
+  displayName: "WeaponList__WeaponListContainer",
+  componentId: "sc-1uzzpni-0"
 })(_templateObject);
 
 var WeaponList = function (_React$Component) {
-    _inherits(WeaponList, _React$Component);
+  _inherits(WeaponList, _React$Component);
 
-    function WeaponList(props) {
-        _classCallCheck(this, WeaponList);
+  function WeaponList(props) {
+    _classCallCheck(this, WeaponList);
 
-        return _possibleConstructorReturn(this, (WeaponList.__proto__ || Object.getPrototypeOf(WeaponList)).call(this, props));
+    return _possibleConstructorReturn(this, (WeaponList.__proto__ || Object.getPrototypeOf(WeaponList)).call(this, props));
+  }
+
+  _createClass(WeaponList, [{
+    key: "getWeapons",
+    value: function getWeapons(ship, gamePhase) {
+      if (ship.flight) {
+        return ship.systems.map(function (fighter) {
+          return fighter.systems;
+        }).reduce(function (all, weapons) {
+          return all.concat(weapons);
+        }, []).filter(function (system) {
+          return system.weapon;
+        });
+      }
+
+      return ship.systems.filter(function (system) {
+        return system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power";
+      });
+      //.filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
     }
-
-    _createClass(WeaponList, [{
-        key: "getWeapons",
-        value: function getWeapons(ship, gamePhase) {
-
-            if (ship.flight) {
-                return ship.systems.map(function (fighter) {
-                    return fighter.systems;
-                }).reduce(function (all, weapons) {
-                    return all.concat(weapons);
-                }, []).filter(function (system) {
-                    return system.weapon;
-                });
-            }
-
-            return ship.systems.filter(function (system) {
-                return system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power";
-            });
-            //.filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            var _props = this.props,
-                ship = _props.ship,
-                gamePhase = _props.gamePhase;
+  }, {
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          ship = _props.ship,
+          gamePhase = _props.gamePhase,
+          movementService = _props.movementService;
 
 
-            if (!ship) {
-                return null;
-            }
+      if (!ship) {
+        return null;
+      }
 
-            var weapons = this.getWeapons(ship, gamePhase);
+      var weapons = this.getWeapons(ship, gamePhase);
 
-            return React.createElement(
-                WeaponListContainer,
-                null,
-                weapons.map(function (weapon, index) {
-                    return React.createElement(_SystemIcon2.default, { fighter: ship.flight, key: "system-" + index, system: weapon, ship: ship });
-                })
-            );
-        }
-    }]);
+      return React.createElement(
+        WeaponListContainer,
+        null,
+        weapons.map(function (weapon, index) {
+          return React.createElement(_SystemIcon2.default, {
+            fighter: ship.flight,
+            key: "system-" + index,
+            system: weapon,
+            ship: ship,
+            movementService: movementService
+          });
+        })
+      );
+    }
+  }]);
 
-    return WeaponList;
+  return WeaponList;
 }(React.Component);
 
 exports.default = WeaponList;
 
-},{"./SystemIcon":93,"react":30,"styled-components":53}]},{},[63]);
+},{"./SystemIcon":99,"react":30,"styled-components":53}]},{},[63]);

@@ -22,9 +22,9 @@ class DeploymentGamePhase implements Phase
         $dbManager->setPlayerWaitingStatus($gameData->forPlayer, $gameData->id, true);
     }
 
-    private static function validateDeploymentArea($gamedata, $ship, $move){
+    private static function validateDeploymentArea($gameData, $ship, $move){
 
-        $slot = $gamedata->slots[$ship->slot];
+        $slot = $gameData->slots[$ship->slot];
         $hexpos = Mathlib::hexCoToPixel($move->position);
 
         $deppos = Mathlib::hexCoToPixel(new OffsetCoordinate($slot->depx, $slot->depy));
@@ -74,12 +74,12 @@ class DeploymentGamePhase implements Phase
 
     }
 
-    private static function validateDeployment(TacGamedata $gamedata, $ships)
+    private static function validateDeployment(TacGamedata $gameData, $ships)
     {
         $shipIdMoves = array();
         foreach ($ships as $ship)
         {
-            if ($ship->userid !== $gamedata->forPlayer)
+            if ($ship->userid !== $gameData->forPlayer)
                 continue;
 
             $moves = array();
@@ -91,9 +91,14 @@ class DeploymentGamePhase implements Phase
 
                 if ($move->type == "deploy")
                 {
+                    
+                    if ($move->turn != $gameData->turn) {
+                        throw new Exception("Found deployment movement entry, but not for correct turn. Expected: " . $gameData->turn . " got: " . $move->turn);
+                    };
+
                     $found = true;
-                    $servership = $gamedata->getShipById($ship->id);
-                    if (self::validateDeploymentArea($gamedata, $servership, $move))
+                    $servership = $gameData->getShipById($ship->id);
+                    if (self::validateDeploymentArea($gameData, $servership, $move))
                     {
                         $moves[] = $move;
                         $servership->movement[] = $move;

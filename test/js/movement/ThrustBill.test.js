@@ -36,6 +36,7 @@ const getMovementOrder = (type = "speed", facing = 0, value = 0) =>
     new window.hexagon.Offset(0, 0),
     facing,
     0,
+    false,
     value,
     null,
     null
@@ -50,7 +51,8 @@ test("simple speed move", () => {
     "1": 0,
     "2": 0,
     "4": 0,
-    "5": 0
+    "5": 0,
+    "6": 0
   });
 });
 
@@ -71,7 +73,8 @@ test("multiple speed moves", () => {
     "1": 6,
     "2": 3,
     "4": 3,
-    "5": 3
+    "5": 3,
+    "6": 0
   });
 });
 
@@ -245,16 +248,16 @@ test("No budget to reallocate all overthrust", () => {
   expect(bill.thrusters[0].channeled).toBe(5);
   expect(bill.thrusters[1].damaged).toBe(true);
 
-  bill.commit();
+  const newMoves = bill.commit();
 
-  expectDirectionsEmptyForRequiredThrust([0, 1, 2, 4, 5], moves[0]);
-  expectDirectionsEqualForRequiredThrust(3, moves[0], [3]);
+  expectDirectionsEmptyForRequiredThrust([0, 1, 2, 4, 5], newMoves[0]);
+  expectDirectionsEqualForRequiredThrust(3, newMoves[0], [3]);
 
-  expectDirectionsEmptyForRequiredThrust([3, 1, 2, 4, 5], moves[1]);
-  expectDirectionsEqualForRequiredThrust(0, moves[1], [3]);
+  expectDirectionsEmptyForRequiredThrust([3, 1, 2, 4, 5], newMoves[1]);
+  expectDirectionsEqualForRequiredThrust(0, newMoves[1], [3]);
 
-  expectDirectionsEmptyForRequiredThrust([3, 1, 2, 4, 5], moves[2]);
-  expectDirectionsEqualForRequiredThrust(0, moves[2], [2, 1]);
+  expectDirectionsEmptyForRequiredThrust([3, 1, 2, 4, 5], newMoves[2]);
+  expectDirectionsEqualForRequiredThrust(0, newMoves[2], [2, 1]);
 });
 
 const expectDirectionsEmptyForRequiredThrust = (directions, move) => {

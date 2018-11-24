@@ -1,25 +1,33 @@
 import * as React from "react";
 import styled from "styled-components";
-import { Clickable } from "../styled";
 import { X } from "../icon";
+import Container from "./Container";
 
-const Container = styled.div`
-  position: absolute;
-  width: 50px;
-  height: 50px;
+const ButtonContainer = styled(Container)`
   left: -175px;
   top: -153px;
-  ${Clickable}
 `;
 
 class CancelButton extends React.Component {
+  canCancel() {
+    const { movementService, ship } = this.props;
+    return movementService.canCancel(ship);
+  }
+
+  cancel() {
+    const { movementService, ship } = this.props;
+    return movementService.cancel(ship);
+  }
+
   render() {
-    const { clicked, direction } = this.props;
+    if (!this.canCancel()) {
+      return null;
+    }
 
     return (
-      <Container onClick={clicked}>
+      <ButtonContainer onClick={this.cancel.bind(this)}>
         <X />
-      </Container>
+      </ButtonContainer>
     );
   }
 }

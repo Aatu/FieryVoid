@@ -14,7 +14,7 @@ class BaseShip {
     public $variantOf = ''; //variant of what? - MUST be the same as $shipClass of base unit, or this unit will not be displayed on fleet selection screen!
     public $limited = 0;
     public $agile = false;
-    public $turncost, $turndelaycost, $accelcost, $rollcost, $pivotcost;
+    public $accelcost, $rollcost, $pivotcost, $evasioncost;
     public $currentturndelay = 0;
     public $iniative = "N/A";
     public $unmodifiedIniative = null;
@@ -31,7 +31,7 @@ class BaseShip {
     public $minesweeperbonus = 0;
     public $base = false;
     public $smallBase = false;
-    public $critRollMod = 0; //penalty tu critical damage roll: positive means crit is more likely, negative less likely (for all systems)
+    public $critRollMod = 0; //penalty to critical damage roll: positive means crit is more likely, negative less likely (for all systems)
 
     public $jinkinglimit = 0; //just in case there will be a ship actually able to jink; NOT SUPPORTED!
 
@@ -243,55 +243,39 @@ class BaseShip {
         return $this->getSpecialAbilityValue("ELINT");
     }
 
-    protected function addSystem($system, $loc){
-        $i = sizeof($this->systems);
-        $system->setId($i);
+    protected function addSystem($id, $system, $loc){
+
+        if (!$id) {
+            throw new Exception("Adding system requires an id");
+        }
+
+        $system->setId($id);
         $system->location = $loc;
         $system->setUnit($this);
 
-
-            $this->systems[$i] = $system;
+        array_push ($this->systems, $system);
             
             if ($system instanceof Structure)
                 $this->structures[$loc] = $system->id;
         
         }
         
-        protected function addFrontSystem($system){
-            $this->addSystem($system, 1);
+        protected function addFrontSystem($id, $system){
+            $this->addSystem($id, $system, 1);
         }
-        protected function addAftSystem($system){
-            $this->addSystem($system, 2);
+        protected function addAftSystem($id, $system){
+            $this->addSystem($id, $system, 2);
         }
-        protected function addPrimarySystem($system){
-		//if system is Structure - first add Ramming Attack! assume we're nearing the end...
-	   if($system instanceof Structure){
-		//check whether ramming attack already exists (do not add another)
-		$rammingExists = false;
-		foreach($this->systems as $sys)  if ($sys instanceof RammingAttack){
-			$rammingExists = true;
-		}
-		if(!$rammingExists){
-			//add ramming attack
-			//check whether game id is safe (can be safely be deleted lin May 2018 or so)
-			///already safe enough, commenting out!
-			//if ((TacGamedata::$currentGameID >= TacGamedata::$safeGameID) || (TacGamedata::$currentGameID<1)){
-				//if ship is specifically designed to ram, so be it - there will be two ramming attacks... this isn't necessary, but easiest.
-				if((!($this instanceof FighterFlight)) && (!($this instanceof OSAT)) && (!$this->base) && (!$this->smallBase) ){
-					$this->addPrimarySystem(new RammingAttack(0, 0, 360, 0, 0));
-				}
-			//}
-		}
-	   }
-            $this->addSystem($system, 0);
+        protected function addPrimarySystem($id, $system){
+            $this->addSystem($id, $system, 0);
+        }
 
+        protected function addLeftSystem($id, $system){
+            $this->addSystem($id, $system, 3);
+        }
 
-        }
-        protected function addLeftSystem($system){
-            $this->addSystem($system, 3);
-        }
-        protected function addRightSystem($system){
-            $this->addSystem($system, 4);
+        protected function addRightSystem($id, $system){
+            $this->addSystem($id, $system, 4);
         }
         
         public function addDamageEntry($damage){
@@ -333,30 +317,13 @@ class BaseShip {
             return $m;
         }
         
-        public function getSystemById($id){
-            if (isset($this->systems[$id])){
-                return $this->systems[$id];
+    public function getSystemById($id){
+        foreach ($this->systems as $system){
+            if ($system->id === $id) {
+                return $system;
             }
-            else{
-                foreach($this->systems as $system){
-                    if($system instanceof Weapon && ($system->duoWeapon || $system->dualWeapon)){
-                        foreach($system->weapons as $weapon){
-                            if($weapon->id == $id){
-                                return $weapon;
-                            }else{
-                                if($weapon->duoWeapon){
-                                    foreach($weapon->weapons as $subweapon){
-                                        if($subweapon->id == $id){
-                                            return $subweapon;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
+        }
+        
         return null;
     }
 

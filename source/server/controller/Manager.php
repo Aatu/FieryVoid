@@ -541,11 +541,11 @@ class Manager{
                         new OffsetCoordinate($move["position"]["q"], $move["position"]["r"]),
                         new OffsetCoordinate($move["target"]["q"], $move["target"]["r"]),
                         $move["facing"],
+                        $move["rolled"],
                         $move["turn"],
-                        $move["value"]
+                        $move["value"],
+                        new RequiredThrust($move["requiredThrust"])
                     );
-                    $movement->requiredThrust = $move["requiredThrust"];
-                    $movement->assignedThrust = $move["assignedThrust"];
                     
                     $movements[$i] = $movement;
                 }
@@ -576,9 +576,7 @@ class Manager{
 
             $systems = isset($value["systems"]) ? $value["systems"] : [];
             foreach($systems as $i=>$system){
-                //$sys = $ship->getSystemById($system['id']);
-                $sys = $ship->getSystemById($i);
-
+                $sys = $ship->getSystemById($system['id']);
                 
                 if (isset($system["power"]) &&is_array($system["power"]))
                 {
@@ -591,7 +589,7 @@ class Manager{
                     }
                 }
                 
-                if (isset($system["fireOrders"]) &&is_array($system["fireOrders"]))
+                if (isset($system["fireOrders"]) && is_array($system["fireOrders"]))
                 {
                     $fires = Array();
                     foreach($system["fireOrders"] as $i=>$fo){

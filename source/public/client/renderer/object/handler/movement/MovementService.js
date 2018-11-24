@@ -25,6 +25,17 @@ class MovementService {
     this.phaseStrategy = phaseStrategy;
   }
 
+  replaceTurnMovement(ship, newMovement) {
+    ship.movement = [
+      ...ship.movement.filter(
+        move =>
+          move.turn !== this.gamedata.turn ||
+          (move.turn === this.gamedata.turn && !move.isPlayerAdded())
+      ),
+      ...newMovement.filter(move => move.isPlayerAdded())
+    ];
+  }
+
   getDeployMove(ship) {
     return ship.movement.find(move => move.type === "deploy");
   }
@@ -41,18 +52,18 @@ class MovementService {
     return ship.movement[ship.movement.length - 1];
   }
 
-  getPreviousTurnLastMove(ship) {
+  getLastEndMove(ship) {
     let end = ship.movement
       .slice()
       .reverse()
       .find(move => move.isEnd());
 
-      if (!end) {
-          end = this.getDeployMove(ship)
-      }
+    if (!end) {
+      end = this.getDeployMove(ship);
+    }
 
-      if (!end) {
-         end = ship.movement[0];
+    if (!end) {
+      end = ship.movement[0];
     }
 
     return end;
@@ -83,6 +94,7 @@ class MovementService {
         pos,
         lastMove.target,
         lastMove.facing,
+        lastMove.rolled,
         this.gamedata.turn
       );
       ship.movement.push(deployMove);
@@ -98,12 +110,8 @@ class MovementService {
     }
 
     const deployMove = this.getDeployMove(ship);
-    const newfacing = mathlib.addToHexFacing(ship.deploymove.facing, step);
+    const newfacing = mathlib.addToHexFacing(deploymove.facing, step);
     deploymove.facing = newfacing;
-  }
-
-  canEvade(ship) {
-    //TODO: get maunouvering systems, get amount of already evaded. Return true if can still evade
   }
 
   getEvadeMove(ship) {
@@ -112,9 +120,15 @@ class MovementService {
     );
   }
 
-  getEvade(ship) {
+  getEvasion(ship) {
     const evadeMove = this.getEvadeMove(ship);
     return evadeMove ? evadeMove.value : 0;
+  }
+
+  getMaximumEvasion(ship) {
+    return ship.systems
+      .filter(system => !system.isDestroyed() && system.maxEvasion > 0)
+      .reduce((total, system) => total + system.maxEvasion);
   }
 
   evade(ship) {}
@@ -136,13 +150,9 @@ class MovementService {
   }
 
   getRemainingEngineThrust(ship) {
-    const thrustProduced = this.getTotalProducedThrust(ship);
-    const thrustChanneled = this.getAllMovesOfTurn(ship).reduce(
-      (accumulator, move) => move.getThrustChanneled(),
-      0
-    );
+    //TODO
 
-    return thrustProduced - thrustChanneled;
+    return 0;
   }
 
   getPositionAtStartOfTurn(ship, currentTurn) {
@@ -163,12 +173,7 @@ class MovementService {
   }
 
   getPreviousLocation(ship) {
-    var oPos = shipManager.getShipPosition(ship);
-    for (var i = ship.movement.length - 1; i >= 0; i--) {
-      var move = ship.movement[i];
-      if (!oPos.equals(new hexagon.Offset(move.position))) return move.position;
-    }
-    return oPos;
+    //TODO
   }
 
   getThisTurnMovement(ship) {
@@ -185,15 +190,17 @@ class MovementService {
   }
 
   canThrust(ship, direction) {
-    return new MovementResolver(ship, this).canThrust(direction);
+    return new MovementResolver(ship, this, this.gamedata.turn).canThrust(
+      direction
+    );
   }
 
   thrust(ship, direction) {
-    new MovementResolver(ship, this).thrust(direction);
+    new MovementResolver(ship, this, this.gamedata.turn).thrust(direction);
   }
 
   canCancel(ship) {
-    return new MovementResolver(ship, this).canCancel();
+    return new MovementResolver(ship, this, this.gamedata.turn).canCancel();
   }
 
   canRevert(ship) {
@@ -201,11 +208,45 @@ class MovementService {
   }
 
   cancel(ship) {
-    new MovementResolver(ship, this).cancel();
+    new MovementResolver(ship, this, this.gamedata.turn).cancel();
   }
 
   revert(ship) {
-    new MovementResolver(ship, this).revert();
+    new MovementResolver(ship, this, this.gamedata.turn).revert();
+  }
+
+  canPivot(ship, turnDirection) {
+    return new MovementResolver(ship, this, this.gamedata.turn).canPivot(
+      turnDirection
+    );
+  }
+
+  pivot(ship, turnDirection) {
+    return new MovementResolver(ship, this, this.gamedata.turn).pivot(
+      turnDirection
+    );
+  }
+
+  canRoll(ship) {
+    return new MovementResolver(ship, this, this.gamedata.turn).canRoll();
+  }
+
+  roll(ship) {
+    return new MovementResolver(ship, this, this.gamedata.turn).roll();
+  }
+
+  canEvade(ship, step) {
+    return new MovementResolver(ship, this, this.gamedata.turn).canEvade(step);
+  }
+
+  evade(ship, step) {
+    return new MovementResolver(ship, this, this.gamedata.turn).evade(step);
+  }
+
+  getThrusters(ship) {
+    return ship.systems
+      .filter(system => system.thruster)
+      .filter(system => !system.isDestroyed());
   }
 }
 

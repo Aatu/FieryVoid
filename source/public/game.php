@@ -525,7 +525,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background"></div>
+    <div id="background" style="background-image: url(img/maps/space-picture2.jpg)"></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 

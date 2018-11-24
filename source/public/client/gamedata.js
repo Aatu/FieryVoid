@@ -450,8 +450,6 @@ window.gamedata = {
   },
 
   doCommit: function doCommit() {
-    UI.shipMovement.hide();
-
     if (gamedata.gamephase == 1) {
       //        	ajaxInterface.fastpolling=true;
       var shipNames = shipManager.power.getShipsNegativePower();

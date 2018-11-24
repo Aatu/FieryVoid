@@ -4,6 +4,8 @@ class MovementPath {
     this.movementService = movementService;
     this.scene = scene;
 
+    this.color = new THREE.Color(132 / 255, 165 / 255, 206 / 255);
+
     this.objects = [];
 
     this.create();
@@ -23,25 +25,53 @@ class MovementPath {
       return;
     }
 
-    const end = this.movementService.getPreviousTurnLastMove(this.ship);
+    const end = this.movementService.getLastEndMove(this.ship);
     const move = this.movementService.getMostRecentMove(this.ship);
     const target = this.movementService.getCurrentMovementVector(this.ship);
 
-    const line = createMovementLine(end.position, end.position.add(end.target), 0.2);
+    const startPosition = end.position;
+    const middlePosition = end.position.add(end.target);
+    const finalPosition = startPosition.add(target);
+
+    const line = createMovementLine(
+      startPosition,
+      middlePosition,
+      this.color,
+      0.5
+    );
     this.scene.add(line.mesh);
     this.objects.push(line);
 
-    const line2 = createMovementLine(end.position.add(end.target), end.position.add(target));
+    if (!middlePosition.equals(finalPosition)) {
+      const middle = createMovementMiddleStep(middlePosition, this.color);
+      this.scene.add(middle.mesh);
+      this.objects.push(middle);
+    }
+
+    const line2 = createMovementLine(middlePosition, finalPosition, this.color);
     this.scene.add(line2.mesh);
     this.objects.push(line2);
 
-    const facing = createMovementFacing(move.facing, end.position.add(target));
+    const facing = createMovementFacing(move.facing, finalPosition, this.color);
     this.scene.add(facing.mesh);
     this.objects.push(facing);
   }
 }
 
-const createMovementLine = (position, target, opacity = 0.5) => {
+const createMovementMiddleStep = (position, color) => {
+  const size = window.coordinateConverter.getHexDistance() * 0.5;
+  const circle = new window.ShipSelectedSprite(
+    { width: size, height: size },
+    0.01,
+    1.6
+  );
+  circle.setPosition(window.coordinateConverter.fromHexToGame(position));
+  circle.setOverlayColor(color);
+  circle.setOverlayColorAlpha(1);
+  return circle;
+};
+
+const createMovementLine = (position, target, color, opacity = 0.8) => {
   const start = window.coordinateConverter.fromHexToGame(position);
   const end = window.coordinateConverter.fromHexToGame(target);
 
@@ -59,22 +89,22 @@ const createMovementLine = (position, target, opacity = 0.5) => {
       true
     ),
     10,
-    new THREE.Color(0, 0, 1),
+    color,
     opacity
   );
 };
 
-const createMovementFacing = (facing, target) => {
+const createMovementFacing = (facing, target, color) => {
   const size = window.coordinateConverter.getHexDistance() * 1.5;
   const facingSprite = new window.ShipFacingSprite(
     { width: size, height: size },
     0.01,
-    0.8,
+    1.6,
     facing
   );
-  facingSprite.setPosition(
-    window.coordinateConverter.fromHexToGame(target)
-  );
+  facingSprite.setPosition(window.coordinateConverter.fromHexToGame(target));
+  facingSprite.setOverlayColor(color);
+  facingSprite.setOverlayColorAlpha(1);
   facingSprite.setFacing(mathlib.hexFacingToAngle(facing));
 
   return facingSprite;
