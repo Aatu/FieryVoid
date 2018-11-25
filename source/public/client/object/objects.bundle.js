@@ -1713,6 +1713,8 @@ var _SystemFactory = require("./SystemFactory");
 
 var _SystemFactory2 = _interopRequireDefault(_SystemFactory);
 
+var _movement = require("../handler/movement");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1736,7 +1738,7 @@ var Ship = function () {
         this.systems = _SystemFactory2.default.createSystemsFromJson(json[i], this);
       } else if (i == "movement") {
         this.movement = json[i].map(function (move) {
-          return new window.MovementOrder(move.id, move.type, new hexagon.Offset(move.position), new hexagon.Offset(move.target), move.facing, move.turn, move.value);
+          return new _movement.MovementOrder(move.id, move.type, new hexagon.Offset(move.position), new hexagon.Offset(move.target), move.facing, move.rolled, move.turn, move.value);
         });
       } else {
         this[i] = json[i];
@@ -1842,7 +1844,7 @@ var Ship = function () {
 window.Ship = Ship;
 exports.default = Ship;
 
-},{"./SystemFactory":22}],22:[function(require,module,exports){
+},{"../handler/movement":20,"./SystemFactory":22}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

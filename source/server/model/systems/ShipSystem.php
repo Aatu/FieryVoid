@@ -11,7 +11,6 @@ class ShipSystem
     public $specialAbilities = array();
 
     public $damage = array();
-    public $outputMod = 0;
     public $boostable = false;
     public $boostEfficiency = null;
     public $maxBoostLevel = null;
@@ -58,8 +57,8 @@ class ShipSystem
         $strippedSystem->power = $this->power;
         $strippedSystem->specialAbilities = $this->specialAbilities;
         $strippedSystem->output = $this->output;
-        $strippedSystem->outputMod = $this->outputMod;
-        $strippedSystem->destroyed = $this->destroyed;
+        $strippedSystem->outputMod = $this->getOutputMod();
+        $strippedSystem->destroyed = $this->isDestroyed();
 
         return $strippedSystem;
     }
@@ -71,7 +70,6 @@ class ShipSystem
             $this->advancedArmor = true;
         }
         $this->structureSystem = $ship->getStructureSystem($this->location);
-        $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
     }
 
@@ -116,28 +114,7 @@ class ShipSystem
     }
 
     public function setDamage($damage)
-    { //$damage object
-        //let's try to reduce amount of data transferred - don't note every hit, just total damage and Destroyed status... at least for past turns!
-        /* WORKS BUT NOT WITHOUT ISSUES< REVERTING TO ORIGINAL
-        $count = count($this->damage);
-        $currTurn = TacGamedata::$currentTurn -1; //let's say current AND PREVIOUS turn damage will be fully transferred...
-        $currPhase = TacGamedata::$currentPhase;
-        if (($count == 0) || ($damage->turn >= $currTurn) || ($currPhase ==3) ) { //no entries yet, or damage is current, or phase = 3 (we're dealing damage atm)
-        $this->damage[] = $damage;
-        }else{ //modify existing entry... unless damage is from current turn!
-        foreach( $this->damage as $key=>$oldDmg ){
-        if($oldDmg->turn < $currTurn){
-        $oldDmg->damage += $damage->damage; //shields and armour absorbtion irrelevant
-        $oldDmg->armour += $damage->armour;
-        $oldDmg->shields += $damage->shields;
-        if ($damage->destroyed == true) $oldDmg->destroyed = true;
-        return; //nothing else to do
-        }
-        }
-        $this->damage[] = $damage; //no eligible entry found! behave as usual
-        }
-         */
-        //original code was just this:
+    {
         $this->damage[] = $damage;
     }
 
@@ -285,16 +262,17 @@ class ShipSystem
 
     }
 
-    public function testCritical($ship, $gamedata, $crits, $add = 0)
+    public function testCritical($ship, $add = 0)
     {
+        $crits = [];
         //use additional value to critical!
         $bonusCrit = $this->critRollMod + $ship->critRollMod;
-        foreach ($crits as $key => $value) {
+        foreach ($this->criticals as $key => $value) {
             if ($value instanceof NastierCrit) {
                 $bonusCrit += 1;
-                //unset($crits[$key]); //no need, it'll go out on its own
             }
         }
+
         $crits = array_values($crits); //in case some criticals were deleted!
 
         $damageMulti = 1;
@@ -302,7 +280,7 @@ class ShipSystem
         if ($ship instanceof OSAT) {
             if ($this->displayName == "Thruster" && sizeof($this->criticals) == 0) {
                 if ($this->getTotalDamage() + $bonusCrit > ($this->maxhealth / 2)) {
-                    $crit = $this->addCritical($ship->id, "OSatThrusterCrit", $gamedata);
+                    $crit = $this->addCritical($ship, "OSatThrusterCrit");
                     $crits[] = $crit;
                 }
             }
@@ -330,14 +308,14 @@ class ShipSystem
         if ($criticalTypes != -1) {
             if (is_array($criticalTypes)) {
                 foreach ($criticalTypes as $phpclass) {
-                    $crit = $this->addCritical($ship->id, $phpclass, $gamedata);
+                    $crit = $this->addCritical($ship, $phpclass);
                     if ($crit) {
                         $crits[] = $crit;
                     }
 
                 }
             } else {
-                $crit = $this->addCritical($ship->id, $criticalTypes, $gamedata);
+                $crit = $this->addCritical($ship, $criticalTypes);
                 if ($crit) {
                     $crits[] = $crit;
                 }
@@ -347,9 +325,9 @@ class ShipSystem
         return $crits;
     }
 
-    public function addCritical($shipid, $phpclass, $gamedata)
+    public function addCritical($ship, $phpclass)
     {
-        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit = new $phpclass(-1, $ship->id, $this->id, $phpclass, null);
         $crit->updated = true;
         $this->criticals[] = $crit;
         return $crit;
@@ -370,6 +348,23 @@ class ShipSystem
         return $count;
     }
 
+    public function getOutputMod()
+    {
+        $percentageMod = 0;
+        $outputMod = 0;
+
+        foreach ($this->criticals as $crit) {
+            $outputMod += $crit->outputMod;
+            $percentageMod += $crit->outputModPercentage;
+        }
+        //convert percentage mod to absolute value...
+        if ($percentageMod != 0) {
+            $outputMod += round($percentageMod * $this->output / 100);
+        }
+
+        return $outputMod;
+    }
+
     public function getOutput()
     {
 
@@ -382,22 +377,9 @@ class ShipSystem
         }
 
         $output = $this->output;
-        $output -= $this->outputMod;
+        $output -= $this->getOutputMod();
         $output = max(0, $output); //don't let output be negative!
         return $output;
-    }
-
-    public function effectCriticals()
-    {
-        $percentageMod = 0;
-        foreach ($this->criticals as $crit) {
-            $this->outputMod += $crit->outputMod;
-            $percentageMod += $crit->outputModPercentage;
-        }
-        //convert percentage mod to absolute value...
-        if ($percentageMod != 0) {
-            $this->outputMod += round($percentageMod * $this->output / 100);
-        }
     }
 
     public function getTotalDamage($turn = false)
@@ -419,28 +401,15 @@ class ShipSystem
 
     public function isDestroyed($turn = false)
     {
-        /*system is destroyed if it was destroyed directly, up to indicated turn*/
-        /*or if it's Structure system is destroyed AT LEAST ONE TURN EARLIER*/
-        $currTurn = TacGamedata::$currentTurn;
-        if ($turn !== false) {
-            $currTurn = $turn;
-        }
-
-        $prevTurn = $currTurn - 1;
-
-        foreach ($this->damage as $damage) { //was actually destroyed up to indicated turn
-            if (($damage->turn <= $currTurn) && $damage->destroyed) {
+        foreach ($this->damage as $damage) {
+            if ($turn !== false && $damage->turn <= $currTurn && $damage->destroyed) {
+                return true;
+            } else if ($turn === false && $damage->destroyed) {
                 return true;
             }
-
-        }
-
-        if (!($this instanceof Structure) && $this->structureSystem && $this->structureSystem->isDestroyed($prevTurn)) {
-            return true;
         }
 
         return false;
-
     }
 
     public function wasDestroyedThisTurn($turn)

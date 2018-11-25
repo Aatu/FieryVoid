@@ -307,7 +307,7 @@ class BaseShip
     {
         $turn = 0;
         foreach ($this->movement as $elementKey => $move) {
-            if (!$move->preturn && $move->type != "deploy") {
+            if (!$move->isDeploy()) {
                 $turn = $move->turn;
             }
 
@@ -670,7 +670,9 @@ class BaseShip
 
     public function isDestroyed($turn = false)
     {
+
         foreach ($this->systems as $system) {
+            //TODO: Support multiple reactors
             if ($system instanceof Reactor && $system->isDestroyed($turn)) {
                 return true;
             }
@@ -707,7 +709,7 @@ class BaseShip
             }
 
             if ($system instanceof Reactor) {
-                $output += $system->outputMod;
+                $output += $system->getOutputMod();
             } else if ($system->powerReq > 0) {
                 $output += $system->powerReq;
             }
@@ -1355,5 +1357,16 @@ class BaseShip
         $dmg = ceil($structuretotal * $multiplier);
         return $dmg;
     } //endof function getRammingFactor
+
+    public function getThrusters()
+    {
+        $thrusters = [];
+        foreach ($this->systems as $system) {
+            if ($system instanceof Thruster) {
+                $thrusters[] = $system;
+            }
+        }
+        return $thrusters;
+    }
 
 } //endof class BaseShip

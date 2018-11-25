@@ -13,21 +13,21 @@ class OffsetCoordinate
 
     private const NEIGHBOURS = [
         [
-            ["q"=> 1, "r"=> 0],
-            ["q"=> 1, "r"=> -1],
-            ["q"=> 0, "r"=> -1],
-            ["q"=> -1, "r"=> 0],
-            ["q"=> 0, "r"=> 1],
-            ["q"=> 1, "r"=> 1]
+            ["q" => 1, "r" => 0],
+            ["q" => 1, "r" => -1],
+            ["q" => 0, "r" => -1],
+            ["q" => -1, "r" => 0],
+            ["q" => 0, "r" => 1],
+            ["q" => 1, "r" => 1],
         ],
         [
-            ["q"=> 1, "r"=> 0],
-            ["q"=> 0, "r"=> -1],
-            ["q"=> -1, "r"=> -1],
-            ["q"=> -1, "r"=> 0],
-            ["q"=> -1, "r"=> 1],
-            ["q"=> 0, "r"=> 1]
-        ]
+            ["q" => 1, "r" => 0],
+            ["q" => 0, "r" => -1],
+            ["q" => -1, "r" => -1],
+            ["q" => -1, "r" => 0],
+            ["q" => -1, "r" => 1],
+            ["q" => 0, "r" => 1],
+        ],
     ];
 
     public function __construct($q, $r = null)
@@ -36,42 +36,47 @@ class OffsetCoordinate
             $this->q = $q->q;
             $this->r = $q->r;
         } else if (isset($q["q"]) && isset($q["r"])) {
-            $this->q = (int)$q["q"];
-            $this->r = (int)$q["r"];
-        }else {
-            $this->q = (int)$q;
-            $this->r = (int)$r;
+            $this->q = (int) $q["q"];
+            $this->r = (int) $q["r"];
+        } else {
+            $this->q = (int) $q;
+            $this->r = (int) $r;
         }
-        
+
     }
 
-    public function getNeighbours() {
+    public function getNeighbours()
+    {
         $neighbours = [];
         foreach (self::NEIGHBOURS[$this->r & 1] as $neighbor) {
             $neighbours[] = $this->add(new OffsetCoordinate($neighbor));
         }
     }
 
-    public function add(OffsetCoordinate $position): OffsetCoordinate {
+    public function add(OffsetCoordinate $position): OffsetCoordinate
+    {
         return $this->toCube()->add($position->toCube())->toOffset();
     }
 
-    public function moveToDirection($direction, $steps = 1): OffsetCoordinate {
+    public function moveToDirection($direction, $steps = 1): OffsetCoordinate
+    {
         $asCube = $this->toCube();
 
-        while($steps--) {
+        while ($steps--) {
             $asCube = $asCube->moveToDirection($direction);
         }
 
         return $asCube->toOffset();
     }
 
-    public function distanceTo(OffsetCoordinate $position) {
+    public function distanceTo(OffsetCoordinate $position)
+    {
         return $this->toCube()->distanceTo($position->toCube());
     }
 
-    public function equals(OffsetCoordinate $position): bool {
-        return $this->q === $position->q && $this->r = $position->r;
+    public function equals(OffsetCoordinate $position): bool
+    {
+        return (int) $this->q === (int) $position->q && (int) $this->r === (int) $position->r;
     }
 
     public function toCube(): CubeCoordinate

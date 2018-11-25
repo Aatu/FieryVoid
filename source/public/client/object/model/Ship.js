@@ -1,4 +1,5 @@
 import SystemFactory from "./SystemFactory";
+import { MovementOrder } from "../handler/movement";
 
 class Ship {
   constructor(json) {
@@ -17,12 +18,13 @@ class Ship {
         this.systems = SystemFactory.createSystemsFromJson(json[i], this);
       } else if (i == "movement") {
         this.movement = json[i].map(function(move) {
-          return new window.MovementOrder(
+          return new MovementOrder(
             move.id,
             move.type,
             new hexagon.Offset(move.position),
             new hexagon.Offset(move.target),
             move.facing,
+            move.rolled,
             move.turn,
             move.value
           );

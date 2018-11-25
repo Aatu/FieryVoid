@@ -16,10 +16,29 @@ class RequiredThrust
         $this->requirements = $data['requirements'];
     }
 
+    public function validatePaid()
+    {
+        foreach ($this->requirements as $direction => $required) {
+            foreach ($this->fullfilments[$direction] as $amountAndThruster) {
+                $amount = $amountAndThruster['amount'];
+
+                $required -= $amount;
+            }
+
+            if ($required !== 0) {
+                throw new MovementValidationException("Thrust is not paid. Unpaid thrust: $required");
+            }
+        }
+
+        return true;
+    }
+
     public function setThrusters($thrusters)
     {
-        foreach ($this->fullfilments as $fulfilment) {
-            $fulfilment["thruster"] = $this->getThrusterById($fulfilment["thrusterId"], $thrusters);
+        foreach ($this->fullfilments as $direction => &$fulfilment) {
+            foreach ($fulfilment as &$entry) {
+                $entry["thruster"] = $this->getThrusterById($entry["thrusterId"], $direction, $thrusters);
+            }
         }
     }
 
@@ -28,8 +47,13 @@ class RequiredThrust
         $validReqs = $this->requireMove($ship, $move);
 
         foreach ($validReqs as $direction => $req) {
-            if ($this->requirements[$direction] != $req) {
-                throw new Exception("Movement validation failed: Expected move to require $req, but instead got " . $this->requirements[$direction]);
+
+            if (!isset($this->requirements[$direction])) {
+                throw new MovementValidationException("Movement validation failed: Expected move to require direction '$direction', but got 0");
+            }
+
+            if ((int) $this->requirements[$direction] !== (int) $req) {
+                throw new MovementValidationException("Movement validation failed: Expected move to require $req, but instead got " . $this->requirements[$direction]);
             }
         }
 
@@ -39,8 +63,10 @@ class RequiredThrust
     public function getThrustChanneledBy($thruster)
     {
         foreach ($this->fullfilments as $fulfilment) {
-            if ($fulfilment["thruster"] == $thruster) {
-                return $fulfilment["amount"];
+            foreach ($fulfilment as $entry) {
+                if ($entry["thruster"] == $thruster) {
+                    return $entry["amount"];
+                }
             }
         }
     }
@@ -62,7 +88,7 @@ class RequiredThrust
             case "evade":
                 return $this->requireEvade($ship, $move);
             default:
-                throw new Exception("Movement validation failed: Unrecognized movement type '$move->type'");
+                throw new MovementValidationException("Movement validation failed: Unrecognized movement type '$move->type'");
         }
     }
 
@@ -97,23 +123,27 @@ class RequiredThrust
         return $require;
     }
 
-    private function getThrusterById($id, $thrusters)
+    private function getThrusterById($id, $direction, $thrusters)
     {
-
         $selectedThruster = null;
 
         foreach ($thrusters as $thruster) {
             if ($thruster->id == $id) {
-                return $selectedThruster;
+                $selectedThruster = $thruster;
+                break;
             }
         }
 
         if (!$selectedThruster) {
-            throw new Exception("Movement validation failed: Thruster not found");
+            throw new MovementValidationException("Movement validation failed: Thruster not found");
         }
 
         if ($selectedThruster->isDestroyed()) {
-            throw new Exception("Movement validation failed: Thruster is destroyed");
+            throw new MovementValidationException("Movement validation failed: Thruster is destroyed");
+        }
+
+        if (!$selectedThruster->isDirection($direction)) {
+            throw new MovementValidationException("Movement validation failed: Thruster is not for correct direction");
         }
 
         return $selectedThruster;

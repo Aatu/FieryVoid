@@ -202,63 +202,6 @@ class Weapon extends ShipSystem
         return $avg;
     }
 
-
-    public function effectCriticals()
-    {
-        $this->dp = 0;
-        $this->rp = 0;
-        parent::effectCriticals();
-
-        foreach ($this->criticals as $crit) {
-            if ($crit instanceof ReducedRange) $this->rp++;
-            if ($crit instanceof ReducedDamage) $this->dp++;
-        }
-        $rp = $this->rp;
-        $dp = $this->dp;
-        //min/max damage arrays are created automatically, so they will always be present
-        if ($dp > 0) {
-            //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all
-            foreach ($this->firingModes as $dmgMode => $modeName) {
-                $mod = $dp * max(2, 0.2 * ($this->maxDamageArray[$dmgMode] - $this->minDamageArray[$dmgMode]));//2 or 20% of variability, whichever is higher
-                $avgDmg = ($this->maxDamageArray[$dmgMode] + $this->minDamageArray[$dmgMode]) / 2;
-                if ($avgDmg > 0) {
-                    $this->dpArray[$dmgMode] = $mod / $avgDmg;//convert to fraction -  of average result
-                } else {
-                    $this->dpArray[$dmgMode] = 1; //100% reduction
-                }
-                $this->dpArray[$dmgMode] = min(0.9, $this->dpArray[$dmgMode]); //let's not allow to reduce below something ;) - say, max damage reduction is 90%
-                $this->minDamageArray[$dmgMode] = floor($this->minDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-                $this->maxDamageArray[$dmgMode] = floor($this->maxDamageArray[$dmgMode] * (1 - $this->dpArray[$dmgMode]));
-            }
-        }
-
-        //range doesn't have to be an array, but may be
-        while ($rp > 0) {
-            if ($this->rangePenalty >= 1) {
-                $this->rangePenalty += 1;
-            } else if ($this->rangePenalty > 0) {
-                $this->rangePenalty = 1 / (round(1 / $this->rangePenalty) - 1);
-            } else { //no range penalty - range itself will be reduced!
-                //no calculations needed
-            }
-            foreach ($this->rangePenaltyArray As $dmgMode => $penaltyV) {
-                if ($this->rangePenaltyArray[$dmgMode] >= 1) { //long range
-                    $this->rangePenaltyArray[$dmgMode] += 1;
-                } else if ($this->rangePenalty > 0) { //short range
-                    $this->rangePenaltyArray[$dmgMode] = 1 / (round(1 / $this->rangePenaltyArray[$dmgMode]) - 1);
-                } else { //no range penalty - affect range itself
-                    if (!isset($this->rangeArray[$dmgMode])) $this->rangeArray[$dmgMode] = $this->range;
-                    $this->rangeArray[$dmgMode] = floor($this->rangeArray[$dmgMode] * 0.8); //loss 20% range for very crit
-                }
-            }
-            $rp--;
-        }
-
-        //make sure data from table is transferred to current variables
-        $this->changeFiringMode($this->firingMode);
-    } //endof function effectCriticals
-
-
     public function getNormalLoad()
     {
         if ($this->normalload == 0) {

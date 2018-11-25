@@ -7,10 +7,10 @@ class MovementGamePhase implements Phase
         $gameData->setPhase(3);
         $gameData->setActiveship(-1);
         $dbManager->updateGamedata($gameData);
-        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);        
+        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
     }
 
-    public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
+    public function process(TacGamedata $gameData, DBManager $dbManager, array $ships)
     {
         foreach ($gameData->getMyActiveShips() as $ship) {
             $turn = $ship->getLastTurnMoved();
@@ -18,7 +18,6 @@ class MovementGamePhase implements Phase
                 throw new Exception("The ship has already moved");
             }
         }
-
 
         $activeShips = $gameData->getMyActiveShips();
         foreach ($ships as $ship) {
@@ -33,14 +32,17 @@ class MovementGamePhase implements Phase
             if (!$found) {
                 continue;
             }
-            
-            //TODO: Validate movement: Make sure that all ships of current player have moved and the moves are legal
 
-            $lastmove = $ship->getLastMovement();
-            $newMove = new MovementOrder(null, 'end', $lastmove->position->add($lastMove->target), $lastmove->target, $lastmove->facing, $latsmove->rolled, $gameData->turn);
-            array_push($ship->movement, $newMove);
+            $validator = new MovementValidator($ship, $gameData->turn, Movement::getStartMove($gameData->getShipById($ship->id)));
+            $validator->validate();
+            $criticals = $validator->getCriticals();
+
+            $endMove = $validator->getNewEndMove();
+            $ship->movement[] = $endMove;
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
-
+            if (count($criticals) > 0) {
+                $dbManager->submitCriticals($gameData->id, $criticals, $gameData->turn);
+            }
         }
 
         if ($gameData->rules->hasRule("processMovement")) {
@@ -50,31 +52,35 @@ class MovementGamePhase implements Phase
         }
     }
 
-    private function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager) {
+    private function setNextActiveShip(TacGamedata $gameData, DBManager $dbManager)
+    {
         $next = false;
         $nextship = null;
         $firstship = null;
-        foreach ($gameData->ships as $ship){
+        foreach ($gameData->ships as $ship) {
 
-            if ($firstship == null)
+            if ($firstship == null) {
                 $firstship = $ship;
+            }
 
-            if ($next && !$ship->isDestroyed() && !$ship->unavailable){
+            if ($next && !$ship->isDestroyed() && !$ship->unavailable) {
                 $nextship = $ship;
                 break;
             }
 
-            if ($ship->id == $gameData->activeship)
+            if ($ship->id == $gameData->activeship) {
                 $next = true;
+            }
+
         }
 
-        if ($nextship){
+        if ($nextship) {
             $gameData->setActiveship($nextship->id);
             $dbManager->updateGamedata($gameData);
             $dbManager->setPlayersWaitingStatusInGame($gameData->id, true);
             $dbManager->setPlayerWaitingStatus($nextship->userid, $gameData->id, false);
-        }else{
-          $this->advance($gameData, $dbManager);
+        } else {
+            $this->advance($gameData, $dbManager);
         }
 
         return true;

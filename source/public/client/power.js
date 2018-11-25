@@ -1,358 +1,404 @@
 "use strict";
 
 shipManager.power = {
+  repeatLastTurnPower: function repeatLastTurnPower() {
+    for (var i in gamedata.ships) {
+      var ship = gamedata.ships[i];
 
-	repeatLastTurnPower: function repeatLastTurnPower() {
+      if (ship.userid != gamedata.thisplayer) continue;
 
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
+      for (var a in ship.systems) {
+        shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
+      }
+    }
+  },
 
-			if (ship.userid != gamedata.thisplayer) continue;
+  copyLastTurnPower: function copyLastTurnPower(ship, system) {
+    if (shipManager.systems.isDestroyed(ship, system)) return;
 
-			for (var a in ship.systems) {
-				shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
-			}
-		}
-	},
+    var powers = Array();
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn == gamedata.turn - 1) {
+        var newPower = jQuery.extend({}, power);
+        newPower.turn = gamedata.turn;
+        powers.push(newPower);
+      }
+    }
 
-	copyLastTurnPower: function copyLastTurnPower(ship, system) {
-		if (shipManager.systems.isDestroyed(ship, system)) return;
+    system.power = system.power.concat(powers);
+  },
 
-		var powers = Array();
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn == gamedata.turn - 1) {
-				var newPower = jQuery.extend({}, power);
-				newPower.turn = gamedata.turn;
-				powers.push(newPower);
-			}
-		}
+  setPowerClasses: function setPowerClasses(ship, system, systemwindow) {
+    var off = shipManager.power.isOffline(ship, system);
 
-		system.power = system.power.concat(powers);
-	},
+    if (shipManager.criticals.hasCritical(system, "OutputReducedOneTurn")) {
+      for (var j = 0; j < system.criticals.length; j++) {
+        if (system.criticals[j].phpclass == "OutputReducedOneTurn") {
+          if (
+            system.criticals[j].turn == gamedata.turn - 1 ||
+            system.criticals[j].turn == gamedata.turn
+          ) {
+            systemwindow.addClass("forcedoffline");
+          }
+        }
+      }
+    } else if (
+      shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn") ||
+      shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")
+    ) {
+      systemwindow.addClass("forcedoffline");
 
-	setPowerClasses: function setPowerClasses(ship, system, systemwindow) {
-		var off = shipManager.power.isOffline(ship, system);
+      // Because of the crit, add a power entry to the power array
+      // of this system.
+      // A bit of code is necessary to make sure this only happens once.
+      var isOnline = true;
 
-		if (shipManager.criticals.hasCritical(system, "OutputReducedOneTurn")) {
-			for (var j = 0; j < system.criticals.length; j++) {
-				if (system.criticals[j].phpclass == "OutputReducedOneTurn") {
-					if (system.criticals[j].turn == gamedata.turn - 1 || system.criticals[j].turn == gamedata.turn) {
-						systemwindow.addClass("forcedoffline");
-					}
-				}
-			}
-		} else if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn") || shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
-			systemwindow.addClass("forcedoffline");
+      //for Jammer, copy last turn's power - it's important for opponent!
+      //induces trouble AND does not work as intended
+      //if (system.name == "jammer"){
+      //	copyLastTurnPower(ship, system);
+      //}
 
-			// Because of the crit, add a power entry to the power array
-			// of this system.
-			// A bit of code is necessary to make sure this only happens once.
-			var isOnline = true;
+      for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
 
-			//for Jammer, copy last turn's power - it's important for opponent!
-			//induces trouble AND does not work as intended
-			//if (system.name == "jammer"){
-			//	copyLastTurnPower(ship, system);
-			//}
+        if (power.type == 1) {
+          isOnline = false;
+          break;
+        }
+      }
 
-			for (var i in system.power) {
-				var power = system.power[i];
-				if (power.turn != gamedata.turn) continue;
+      if (system.name == "engine") {
+        system.power = [];
+      }
 
-				if (power.type == 1) {
-					isOnline = false;
-					break;
-				}
-			}
+      if (isOnline) {
+        system.power.push({
+          id: null,
+          shipid: ship.id,
+          systemid: system.id,
+          type: 1,
+          turn: gamedata.turn,
+          amount: 0
+        });
+        shipManager.power.stopOverloading(ship, system);
+      }
 
-			if (system.name == "engine") {
-				system.power = [];
-			}
+      return true;
+    }
 
-			if (isOnline) {
-				system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
-				shipManager.power.stopOverloading(ship, system);
-			}
+    if (off) {
+      if (system.name == "reactor") {
+        // This is the reactor. It has recovered from a ForcedOffline crit
+        // (If it still had one, it would have entered the previous if-statement)
+        // Remove class offline and give user feedback.
+        shipManager.power.setOnline(ship, system);
+        systemwindow.removeClass("offline");
 
-			return true;
-		}
+        //    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
+        //    userMessage += "Power up all necessary systems.";
+        //    window.confirm.error(userMessage, function(){});
 
-		if (off) {
-			if (system.name == "reactor") {
-				// This is the reactor. It has recovered from a ForcedOffline crit
-				// (If it still had one, it would have entered the previous if-statement)
-				// Remove class offline and give user feedback.
-				shipManager.power.setOnline(ship, system);
-				systemwindow.removeClass("offline");
+        return;
+      } else {
+        systemwindow.addClass("offline");
+        return true;
+      }
+    }
 
-				//    var userMessage = "The reactor of the " + ship.name +" has recovered from a forced shutdown.<br>";
-				//    userMessage += "Power up all necessary systems.";
-				//    window.confirm.error(userMessage, function(){});
+    if (shipManager.power.isOverloading(ship, system)) {
+      systemwindow.addClass("overload");
+    }
 
-				return;
-			} else {
-				systemwindow.addClass("offline");
-				return true;
-			}
-		}
+    if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer) return;
 
-		if (shipManager.power.isOverloading(ship, system)) {
-			systemwindow.addClass("overload");
-		}
+    if (
+      system.weapon &&
+      system.overloadable &&
+      !shipManager.power.isOverloading(ship, system)
+    ) {
+      systemwindow.addClass("canoverload");
+    }
 
-		if (gamedata.gamephase != 1 || ship.userid != gamedata.thisplayer) return;
+    var boost = shipManager.power.getBoost(system);
 
-		if (system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system)) {
-			systemwindow.addClass("canoverload");
-		}
+    if (system.boostable && !boost) {
+      //if(system.name == "scanner" || system.name == "elintScanner"){
+      if (system.isScanner()) {
+        if (system.id == shipManager.power.getHighestSensorsId(ship)) {
+          // You can only boost the highest sensor rating
+          // if multiple sensors are present on one ship
+          systemwindow.addClass("canboost");
+        }
+      } else {
+        systemwindow.addClass("canboost");
+      }
+    } else if (boost) {
+      systemwindow.addClass("boosted");
+    }
 
-		var boost = shipManager.power.getBoost(system);
+    if (
+      system.canOffLine ||
+      (system.powerReq > 0 &&
+        !off &&
+        !boost &&
+        !weaponManager.hasFiringOrder(ship, system))
+    ) {
+      systemwindow.addClass("canoffline");
+    }
 
-		if (system.boostable && !boost) {
-			//if(system.name == "scanner" || system.name == "elintScanner"){
-			if (system.isScanner()) {
-				if (system.id == shipManager.power.getHighestSensorsId(ship)) {
-					// You can only boost the highest sensor rating
-					// if multiple sensors are present on one ship
-					systemwindow.addClass("canboost");
-				}
-			} else {
-				systemwindow.addClass("canboost");
-			}
-		} else if (boost) {
-			systemwindow.addClass("boosted");
-		}
+    return false;
+  },
 
-		if (system.canOffLine || system.powerReq > 0 && !off && !boost && !weaponManager.hasFiringOrder(ship, system)) {
-			systemwindow.addClass("canoffline");
-		}
+  getHighestSensorsId: function getHighestSensorsId(ship) {
+    var highestRating = -1;
+    var highestId = -1;
 
-		return false;
-	},
+    for (var i in ship.systems) {
+      var system = ship.systems[i];
 
-	getHighestSensorsId: function getHighestSensorsId(ship) {
-		var highestRating = -1;
-		var highestId = -1;
+      //if(system.name == "scanner" || system.name == "elintScanner"){
+      if (system.isScanner()) {
+        if (!shipManager.power.isOffline(ship, system)) {
+          var rating = shipManager.systems.getOutput(ship, system);
+          if (rating > highestRating) {
+            highestId = system.id;
+            highestRating = rating;
+          }
+        }
+      }
+    }
 
-		for (var i in ship.systems) {
-			var system = ship.systems[i];
+    return highestId;
+  },
 
-			//if(system.name == "scanner" || system.name == "elintScanner"){
-			if (system.isScanner()) {
-				if (!shipManager.power.isOffline(ship, system)) {
-					var rating = shipManager.systems.getOutput(ship, system);
-					if (rating > highestRating) {
-						highestId = system.id;
-						highestRating = rating;
-					}
-				}
-			}
-		}
+  getShipsGraviticShield: function getShipsGraviticShield() {
+    var shipNames = new Array();
+    var counter = 0;
 
-		return highestId;
-	},
+    for (var i in gamedata.ships) {
+      var ship = gamedata.ships[i];
 
-	getShipsGraviticShield: function getShipsGraviticShield() {
-		var shipNames = new Array();
-		var counter = 0;
+      if (ship.unavailable) continue;
 
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
+      if (ship.flight) continue;
 
-			if (ship.unavailable) continue;
+      if (ship.userid != gamedata.thisplayer) continue;
 
-			if (ship.flight) continue;
+      if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
+        continue;
 
-			if (ship.userid != gamedata.thisplayer) continue;
+      if (!ship.checkShieldGenerator()) {
+        shipNames[counter] = ship.name;
+        counter++;
+      }
+    }
 
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+    return shipNames;
+  },
 
-			if (!ship.checkShieldGenerator()) {
-				shipNames[counter] = ship.name;
-				counter++;
-			}
-		}
+  getShipsNegativePower: function getShipsNegativePower() {
+    var shipNames = new Array();
+    var counter = 0;
 
-		return shipNames;
-	},
+    for (var i in gamedata.ships) {
+      var ship = gamedata.ships[i];
 
-	getShipsNegativePower: function getShipsNegativePower() {
-		var shipNames = new Array();
-		var counter = 0;
+      if (ship.unavailable) continue;
 
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
+      if (ship.flight) continue;
 
-			if (ship.unavailable) continue;
+      if (ship.userid != gamedata.thisplayer) continue;
 
-			if (ship.flight) continue;
+      if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship))
+        continue;
 
-			if (ship.userid != gamedata.thisplayer) continue;
+      if (
+        shipManager.power.getReactorPower(
+          ship,
+          shipManager.systems.getSystemByName(ship, "reactor")
+        ) < 0
+      ) {
+        shipNames[counter] = ship.name;
+        counter++;
+      }
+    }
 
-			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+    return shipNames;
+  },
 
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-				shipNames[counter] = ship.name;
-				counter++;
-			}
-		}
+  getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
+    var power = 0;
 
-		return shipNames;
-	},
+    for (var i = 0; i < ship.systems.length; i++) {
+      if (ship.systems[i].location == loc) {
+        if (!ship.systems[i].destroyed) {
+          power += ship.systems[i].powerReq;
+        }
+      }
+    }
 
-	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
-		var power = 0;
+    return power;
+  },
 
-		for (var i = 0; i < ship.systems.length; i++) {
-			if (ship.systems[i].location == loc) {
-				if (!ship.systems[i].destroyed) {
-					power += ship.systems[i].powerReq;
-				}
-			}
-		}
+  getAllReactors: function getAllReactors(ship) {
+    var array = [];
 
-		return power;
-	},
+    for (var i in ship.systems) {
+      if (ship.systems[i].name == "reactor") {
+        array.push(ship.systems[i]);
+      }
+    }
 
-	getAllReactors: function getAllReactors(ship) {
-		var array = [];
+    array.sort(function(a, b) {
+      if (a.location < b.location) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
 
-		for (var i in ship.systems) {
-			if (ship.systems[i].name == "reactor") {
-				array.push(ship.systems[i]);
-			}
-		}
+    return array;
+  },
 
-		array.sort(function (a, b) {
-			if (a.location < b.location) {
-				return -1;
-			} else {
-				return 1;
-			}
-		});
+  getReactorPower: function getReactorPower(ship, system) {
+    var fixedPower = false;
+    var output;
 
-		return array;
-	},
+    if (ship.base) {
+      var reactors = shipManager.power.getAllReactors(ship);
 
-	getReactorPower: function getReactorPower(ship, system) {
-		var fixedPower = false;
-		var output;
+      output = reactors[0].output;
 
-		if (ship.base) {
-			var reactors = shipManager.power.getAllReactors(ship);
+      for (var i = 0; i < reactors.length; i++) {
+        var reactor = reactors[i];
+        if (!reactor.destroyed) {
+          output += reactors[i].outputMod;
+          fixedPower = fixedPower || reactors[i].fixedPower; //assume fixed power if ANY reactor gives fixed power
 
-			output = reactors[0].output;
+          if (reactor.criticals.length > 0) {
+            for (var j = 0; j < reactor.criticals.length; j++) {
+              if (reactor.criticals[j].phpclass == "OutputReducedOneTurn") {
+                if (
+                  reactor.criticals[j].turn == gamedata.turn - 1 ||
+                  reactor.criticals[j].turn == gamedata.turn
+                ) {
+                  output -= shipManager.power.getPowerNeedForSection(
+                    ship,
+                    reactor.location
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      var reactor = shipManager.systems.getSystemByName(ship, "reactor");
+      output = reactor.output + reactor.outputMod;
+      fixedPower = reactor.fixedPower;
+    }
 
-			for (var i = 0; i < reactors.length; i++) {
-				var reactor = reactors[i];
-				if (!reactor.destroyed) {
-					output += reactors[i].outputMod;
-					fixedPower = fixedPower || reactors[i].fixedPower; //assume fixed power if ANY reactor gives fixed power
+    for (var s in ship.systems) {
+      var system = ship.systems[s];
+      if (system.parentId > 0) {
+        // This is a subsystem of a dual/duo weapon. Ignore
+        continue;
+      }
 
-					if (reactor.criticals.length > 0) {
-						for (var j = 0; j < reactor.criticals.length; j++) {
-							if (reactor.criticals[j].phpclass == "OutputReducedOneTurn") {
-								if (reactor.criticals[j].turn == gamedata.turn - 1 || reactor.criticals[j].turn == gamedata.turn) {
-									output -= shipManager.power.getPowerNeedForSection(ship, reactor.location);
-								}
-							}
-						}
-					}
-				}
-			}
-		} else {
-			var reactor = shipManager.systems.getSystemByName(ship, "reactor");
-			output = reactor.output + reactor.outputMod;
-			fixedPower = reactor.fixedPower;
-		}
-
-		for (var s in ship.systems) {
-			var system = ship.systems[s];
-			if (system.parentId > 0) {
-				// This is a subsystem of a dual/duo weapon. Ignore
-				continue;
-			}
-                        
-			/*standard: add power for every system powered off
+      /*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if (!system.destroyed){ //destroyed system gets no power either way...
-				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
-					output -= system.powerReq;
-				}
-				var isOff = false;
-				for (var i in system.power){
-					var power = system.power[i];
-					if (power.turn != gamedata.turn) continue;
-					//types: 1:offline 2:boost, 3:overload
-					if (power.type == 1) isOff = true; //just note the fact, so multiple disables do not count multiple times!
-					if (power.type == 2){
-						output -= shipManager.power.countBoostPowerUsed(ship, system);
-					}
-					if (power.type == 3) output -= system.powerReq;
-				}
-				if (isOff == true){
-					output += system.powerReq; //power off = increase available power
-				}
-			}
-		}
+      if (!system.destroyed) {
+        //destroyed system gets no power either way...
+        if (fixedPower == true) {
+          //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
+          output -= system.powerReq;
+        }
+        var isOff = false;
+        for (var i in system.power) {
+          var power = system.power[i];
+          if (power.turn != gamedata.turn) continue;
+          //types: 1:offline 2:boost, 3:overload
+          if (power.type == 1) isOff = true; //just note the fact, so multiple disables do not count multiple times!
+          if (power.type == 2) {
+            output -= shipManager.power.countBoostPowerUsed(ship, system);
+          }
+          if (power.type == 3) output -= system.powerReq;
+        }
+        if (isOff == true) {
+          output += system.powerReq; //power off = increase available power
+        }
+      }
+    }
 
-		return output;
-	},
+    return output;
+  },
 
-	isPowerless: function isPowerless(ship) {
-		var reactor = shipManager.systems.getSystemByName(ship, "reactor");
+  isPowerless: function isPowerless(ship) {
+    var reactor = shipManager.systems.getSystemByName(ship, "reactor");
 
-		if (shipManager.systems.isReactorDestroyed(ship) || shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn")) return true;
+    if (
+      shipManager.systems.isReactorDestroyed(ship) ||
+      shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn")
+    )
+      return true;
 
-		var power = shipManager.power.getReactorPower(ship, reactor);
+    var power = shipManager.power.getReactorPower(ship, reactor);
 
-		if (this.countPossiblePower(ship) + power > 0) return false;
+    if (this.countPossiblePower(ship) + power > 0) return false;
 
-		return true;
-	},
+    return true;
+  },
 
-	countPossiblePower: function countPossiblePower(ship) {
+  countPossiblePower: function countPossiblePower(ship) {
+    var power = 0;
 
-		var power = 0;
+    for (var i in ship.systems) {
+      var system = ship.systems[i];
 
-		for (var i in ship.systems) {
-			var system = ship.systems[i];
+      if (!shipManager.systems.isDestroyed(ship, system))
+        power += system.powerReq;
+    }
+    //console.log(ship.name + " possible power: " + power);
+    return power;
+  },
 
-			if (!shipManager.systems.isDestroyed(ship, system)) power += system.powerReq;
-		}
-		//console.log(ship.name + " possible power: " + power);
-		return power;
-	
-	},
-	
-	isOfflineOnTurn: function(ship, system, turn){
-		
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
-			return true;
-		}
-		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
-			return true;
-		}
+  isOfflineOnTurn: function(ship, system, turn) {
+    if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) {
+      return true;
+    }
+    if (
+      shipManager.criticals.hasCriticalOnTurn(
+        system,
+        "ForcedOfflineOneTurn",
+        turn
+      )
+    ) {
+      return true;
+    }
 
-		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
-			return true;
-		}
+    if (
+      (system.powerReq > 0 || system.name == "reactor") &&
+      this.isPowerless(ship)
+    ) {
+      return true;
+    }
 
-		for (var i in system.power){
-			var power = system.power[i];
-			if (power.turn != turn) continue;
-			if (power.type == 1) return true;
-		}
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != turn) continue;
+      if (power.type == 1) return true;
+    }
 
-		return false;
-	},
+    return false;
+  },
 
-
-	isOffline: function(ship, system){
-		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
-		/*
+  isOffline: function(ship, system) {
+    return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
+    /*
 		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
 			return true;		
 		}
@@ -377,329 +423,372 @@ shipManager.power = {
 
 		return false;
 		*/
-	},
-
-	setOnline: function setOnline(ship, system) {
-		if (system.name == "graviticShield") {
-			if (ship.checkShieldGenerator()) {
-				for (var i in ship.systems) {
-					var syst = ship.systems[i];
-
-					if (syst.name == "shieldGenerator") {
-						if (syst.destroyed) {
-							window.confirm.error("You cannot activate shields. Your shield generator has been destroyed.");
-							return;
-						}
-
-						if (shipManager.power.isOffline(ship, syst)) {
-							window.confirm.error("You cannot activate shields. Power up your shield generator first.");
-							return;
-						}
-					}
-				}
-			}
-		}
-
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 1) {
-				system.power.splice(i, 1);
-				//				return;
-			}
-		}
-	},
-
-	getBoost: function getBoost(system) {
-		var boost = 0;
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 2) {
-				boost += power.amount;
-			}
-		}
-
-		return boost;
-	},
-
-	countTotalEffectiveEW: function countTotalEffectiveEW(ship) {
-		var scanner = [];
-
-		for (var i = 0; i < ship.systems.length; i++) {
-			var sys = ship.systems[i];
-
-			//if (sys.name == "scanner" || sys.name == "elintScanner"){
-			if (sys.isScanner()) {
-				var online = true;
-				for (var j in sys.power) {
-					var power = sys.power[j];
-
-					if (power.turn != gamedata.turn) {
-						continue;
-					}
-
-					if (power.type == 1) {
-						online = false;
-					}
-				}
-
-				if (online) {
-					scanner.push(sys);
-				} else {
-					continue;
-				}
-			}
-		}
-
-		scanner.sort(function (a, b) {
-			if (a.id > b.id) {
-				return 1;
-			} else return -1;
-		});
-
-		var prim = scanner[0];
-
-		var output = scanner.length * prim.output;
-		var boost = 0;
-
-		for (var i = 0; i < prim.power.length; i++) {
-			var power = prim.power[i];
-
-			if (power.turn != gamedata.turn) {
-				continue;
-			}
-
-			if (power.type == 2) {
-				boost += power.amount;
-			}
-		}
-
-		var effective = output + boost;
-		return effective;
-	},
-
-	countBoostReqPower: function countBoostReqPower(ship, system) {
-
-		if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
-			return system.boostEfficiency;
-		} else if (system.boostEfficiency == "output+1") {
-			if (ship.base) {
-				var ew = shipManager.power.countTotalEffectiveEW(ship);
-				return ew + 1;
-			} else {
-				return system.output + shipManager.power.getBoost(system) + 1;
-			}
-		}
-	},
-
-	countBoostPowerUsed: function countBoostPowerUsed(ship, system) {
-		var boost = shipManager.power.getBoost(system);2;
-
-		if (boost == 0 || shipManager.systems.isDestroyed(ship, system)) return 0;
-
-		if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
-			return system.boostEfficiency * boost;
-		} else if (system.boostEfficiency == "output+1") {
-			var power = 0;
-
-			if (ship.base) {
-				var ew = shipManager.power.countTotalEffectiveEW(ship);
-
-				for (var i = 1; i <= boost; i++) {
-					power += ew;
-					ew--;
-				}
-			} else {
-				for (var i = 1; i <= boost; i++) {
-					power += system.output + i;
-				}
-			}
-
-			return power;
-		}
-		return 0;
-	},
-
-	canBoost: function canBoost(ship, system) {
-
-		//can always boost reactor (to overload)!
-		if (system.name == 'reactor') {
-			return shipManager.power.getBoost(system) === 0;
-		}
-
-		var has = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-		var need = shipManager.power.countBoostReqPower(ship, system);
-
-		if (has >= need) {
-			return true;
-		} else {
-			return false;
-		}
-	},
-
-	canOverload: function canOverload(ship, system) {
-		if (!system.overloadable) return false;
-		return shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) >= system.powerReq;
-	},
-
-	unsetBoost: function unsetBoost(ship, system) {
-
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 2) {
-				power.amount--;
-
-				if (power.amount == 0) system.power.splice(i, 1);
-
-				return;
-			}
-		}
-	},
-
-	setBoost: function setBoost(ship, system) {
-		if (!shipManager.power.canBoost(ship, system)) {
-			window.confirm.error("You do not have sufficient energy to boost this system.", function () {});
-			return;
-		}
-
-		for (var i in system.power) {
-			var power = system.power[i];
-
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 2) {
-				power.amount++;
-				return;
-			}
-		}
-
-		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 2, turn: gamedata.turn, amount: 1 });
-	},
-
-	setOverloading: function setOverloading(ship, system) {
-
-		if (shipManager.power.isOverloading(ship, system)) return;
-
-		if (!shipManager.power.canOverload(ship, system)) return;
-
-		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 3, turn: gamedata.turn, amount: 0 });
-	},
-
-	stopOverloading: function stopOverloading(ship, system) {
-		if (system.alwaysoverloading) {
-			return;
-		}
-
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 3) {
-				system.power.splice(i, 1);
-				return;
-			}
-		}
-	},
-
-	isOverloading: function isOverloading(ship, system) {
-		if (system.alwaysoverloading) {
-			return true;
-		}
-
-		for (var i in system.power) {
-			var power = system.power[i];
-			if (power.turn != gamedata.turn) continue;
-
-			if (power.type == 3) {
-				return true;
-			}
-		}
-
-		return false;
-	},
-
-	clickPlus: function clickPlus(ship, system) {
-
-		if (gamedata.gamephase !== 1) return;
-
-		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
-		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-			return;
-		}
-
-		if (system.hasMaxBoost()) {
-			if (system.maxBoostLevel <= shipManager.power.getBoost(system)) {
-				confirm.error("You can not boost this weapon any further.");
-				return;
-			}
-		}
-
-		shipManager.power.setBoost(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	},
-
-	clickMinus: function clickMinus(ship, system) {
-
-		if (gamedata.gamephase !== 1) return;
-		
-		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
-		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
-
-			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
-
-			return;
-		}
-
-		shipManager.power.unsetBoost(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	},
-
-	offlineAll: function offlineAll(ship, system) {
-		var array = [];
-
-		if (system.duoWeapon || system.dualWeapon) {
-			return;
-		}
-
-		for (var i = 0; i < ship.systems.length; i++) {
-			if (system.displayName === ship.systems[i].displayName) {
-				if (system.weapon) {
-					array.push(ship.systems[i]);
-				}
-			}
-		}
-
-		for (var i = 0; i < array.length; i++) {
-			if (gamedata.gamephase != 1) continue;
-
-			if (shipManager.systems.isDestroyed(ship, array[i])) continue;
-
-			if (ship.userid != gamedata.thisplayer) continue;
-
-			if (shipManager.power.isOffline(ship, array[i])) continue;
-
-			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
-
-			shipManager.power.stopOverloading(ship, array[i]);
-			shipWindowManager.setDataForSystem(ship, array[i]);
-			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-		}
-
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
-	},
-
-	onOfflineClicked: function onOfflineClicked(ship, system) {
-		/*
+  },
+
+  setOnline: function setOnline(ship, system) {
+    if (system.name == "graviticShield") {
+      if (ship.checkShieldGenerator()) {
+        for (var i in ship.systems) {
+          var syst = ship.systems[i];
+
+          if (syst.name == "shieldGenerator") {
+            if (syst.destroyed) {
+              window.confirm.error(
+                "You cannot activate shields. Your shield generator has been destroyed."
+              );
+              return;
+            }
+
+            if (shipManager.power.isOffline(ship, syst)) {
+              window.confirm.error(
+                "You cannot activate shields. Power up your shield generator first."
+              );
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 1) {
+        system.power.splice(i, 1);
+        //				return;
+      }
+    }
+  },
+
+  getBoost: function getBoost(system) {
+    var boost = 0;
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 2) {
+        boost += power.amount;
+      }
+    }
+
+    return boost;
+  },
+
+  countTotalEffectiveEW: function countTotalEffectiveEW(ship) {
+    var scanner = [];
+
+    for (var i = 0; i < ship.systems.length; i++) {
+      var sys = ship.systems[i];
+
+      //if (sys.name == "scanner" || sys.name == "elintScanner"){
+      if (sys.isScanner()) {
+        var online = true;
+        for (var j in sys.power) {
+          var power = sys.power[j];
+
+          if (power.turn != gamedata.turn) {
+            continue;
+          }
+
+          if (power.type == 1) {
+            online = false;
+          }
+        }
+
+        if (online) {
+          scanner.push(sys);
+        } else {
+          continue;
+        }
+      }
+    }
+
+    scanner.sort(function(a, b) {
+      if (a.id > b.id) {
+        return 1;
+      } else return -1;
+    });
+
+    var prim = scanner[0];
+
+    var output = scanner.length * prim.output;
+    var boost = 0;
+
+    for (var i = 0; i < prim.power.length; i++) {
+      var power = prim.power[i];
+
+      if (power.turn != gamedata.turn) {
+        continue;
+      }
+
+      if (power.type == 2) {
+        boost += power.amount;
+      }
+    }
+
+    var effective = output + boost;
+    return effective;
+  },
+
+  countBoostReqPower: function countBoostReqPower(ship, system) {
+    if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
+      return system.boostEfficiency;
+    } else if (system.boostEfficiency == "output+1") {
+      if (ship.base) {
+        var ew = shipManager.power.countTotalEffectiveEW(ship);
+        return ew + 1;
+      } else {
+        return system.output + shipManager.power.getBoost(system) + 1;
+      }
+    }
+  },
+
+  countBoostPowerUsed: function countBoostPowerUsed(ship, system) {
+    var boost = shipManager.power.getBoost(system);
+    2;
+
+    if (boost == 0 || shipManager.systems.isDestroyed(ship, system)) return 0;
+
+    if (system.boostEfficiency.toString().search(/^[0-9]+$/) == 0) {
+      return system.boostEfficiency * boost;
+    } else if (system.boostEfficiency == "output+1") {
+      var power = 0;
+
+      if (ship.base) {
+        var ew = shipManager.power.countTotalEffectiveEW(ship);
+
+        for (var i = 1; i <= boost; i++) {
+          power += ew;
+          ew--;
+        }
+      } else {
+        for (var i = 1; i <= boost; i++) {
+          power += system.output + i;
+        }
+      }
+
+      return power;
+    }
+    return 0;
+  },
+
+  canBoost: function canBoost(ship, system) {
+    //can always boost reactor (to overload)!
+    if (system.name == "reactor") {
+      return shipManager.power.getBoost(system) === 0;
+    }
+
+    var has = shipManager.power.getReactorPower(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    var need = shipManager.power.countBoostReqPower(ship, system);
+
+    if (has >= need) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+
+  canOverload: function canOverload(ship, system) {
+    if (!system.overloadable) return false;
+    return (
+      shipManager.power.getReactorPower(
+        ship,
+        shipManager.systems.getSystemByName(ship, "reactor")
+      ) >= system.powerReq
+    );
+  },
+
+  unsetBoost: function unsetBoost(ship, system) {
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 2) {
+        power.amount--;
+
+        if (power.amount == 0) system.power.splice(i, 1);
+
+        return;
+      }
+    }
+  },
+
+  setBoost: function setBoost(ship, system) {
+    if (!shipManager.power.canBoost(ship, system)) {
+      window.confirm.error(
+        "You do not have sufficient energy to boost this system.",
+        function() {}
+      );
+      return;
+    }
+
+    for (var i in system.power) {
+      var power = system.power[i];
+
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 2) {
+        power.amount++;
+        return;
+      }
+    }
+
+    system.power.push({
+      id: null,
+      shipid: ship.id,
+      systemid: system.id,
+      type: 2,
+      turn: gamedata.turn,
+      amount: 1
+    });
+  },
+
+  setOverloading: function setOverloading(ship, system) {
+    if (shipManager.power.isOverloading(ship, system)) return;
+
+    if (!shipManager.power.canOverload(ship, system)) return;
+
+    system.power.push({
+      id: null,
+      shipid: ship.id,
+      systemid: system.id,
+      type: 3,
+      turn: gamedata.turn,
+      amount: 0
+    });
+  },
+
+  stopOverloading: function stopOverloading(ship, system) {
+    if (system.alwaysoverloading) {
+      return;
+    }
+
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 3) {
+        system.power.splice(i, 1);
+        return;
+      }
+    }
+  },
+
+  isOverloading: function isOverloading(ship, system) {
+    if (system.alwaysoverloading) {
+      return true;
+    }
+
+    for (var i in system.power) {
+      var power = system.power[i];
+      if (power.turn != gamedata.turn) continue;
+
+      if (power.type == 3) {
+        return true;
+      }
+    }
+
+    return false;
+  },
+
+  clickPlus: function clickPlus(ship, system) {
+    if (gamedata.gamephase !== 1) return;
+
+    //if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+    if (system.isScanner() && ew.getUsedEW(ship) > 0) {
+      confirm.error(
+        "You need to unassign all electronic warfare before changing scanner power management."
+      );
+      return;
+    }
+
+    if (system.hasMaxBoost()) {
+      if (system.maxBoostLevel <= shipManager.power.getBoost(system)) {
+        confirm.error("You can not boost this weapon any further.");
+        return;
+      }
+    }
+
+    shipManager.power.setBoost(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  },
+
+  clickMinus: function clickMinus(ship, system) {
+    if (gamedata.gamephase !== 1) return;
+
+    //if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+    if (system.isScanner() && ew.getUsedEW(ship) > 0) {
+      confirm.error(
+        "You need to unassign all electronic warfare before changing scanner power management."
+      );
+
+      return;
+    }
+
+    shipManager.power.unsetBoost(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  },
+
+  offlineAll: function offlineAll(ship, system) {
+    var array = [];
+
+    if (system.duoWeapon || system.dualWeapon) {
+      return;
+    }
+
+    for (var i = 0; i < ship.systems.length; i++) {
+      if (system.displayName === ship.systems[i].displayName) {
+        if (system.weapon) {
+          array.push(ship.systems[i]);
+        }
+      }
+    }
+
+    for (var i = 0; i < array.length; i++) {
+      if (gamedata.gamephase != 1) continue;
+
+      if (shipManager.systems.isDestroyed(ship, array[i])) continue;
+
+      if (ship.userid != gamedata.thisplayer) continue;
+
+      if (shipManager.power.isOffline(ship, array[i])) continue;
+
+      array[i].power.push({
+        id: null,
+        shipid: ship.id,
+        systemid: array[i].id,
+        type: 1,
+        turn: gamedata.turn,
+        amount: 0
+      });
+
+      shipManager.power.stopOverloading(ship, array[i]);
+      shipWindowManager.setDataForSystem(ship, array[i]);
+      shipWindowManager.setDataForSystem(
+        ship,
+        shipManager.systems.getSystemByName(ship, "reactor")
+      );
+    }
+
+    webglScene.customEvent("SystemDataChanged", { ship: ship });
+  },
+
+  onOfflineClicked: function onOfflineClicked(ship, system) {
+    /*
 		if (system.duoWeapon) {
 			// create an iconMask at the top of the DOM for the system.
 			var iconmask_element = document.createElement('div');
@@ -708,147 +797,182 @@ shipManager.power = {
 		}
 		*/
 
-		if (system.parentId > 0) {
-			system = shipManager.systems.getSystem(ship, system.parentId);
-		}
+    if (system.parentId > 0) {
+      system = shipManager.systems.getSystem(ship, system.parentId);
+    }
 
-		if (gamedata.gamephase != 1) return;
+    if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+    if (
+      shipManager.isDestroyed(ship) ||
+      shipManager.systems.isDestroyed(ship, system)
+    )
+      return;
 
-		if (!gamedata.isMyShip(ship)) return;
+    if (!gamedata.isMyShip(ship)) return;
 
-		if (shipManager.power.isOffline(ship, system)) return;
+    if (shipManager.power.isOffline(ship, system)) return;
 
-		system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
+    system.power.push({
+      id: null,
+      shipid: ship.id,
+      systemid: system.id,
+      type: 1,
+      turn: gamedata.turn,
+      amount: 0
+    });
 
-		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
-		if (system.isScanner() && ew.getUsedEW(ship) > 0) {
+    //if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
+    if (system.isScanner() && ew.getUsedEW(ship) > 0) {
+      confirm.error(
+        "You need to unassign all electronic warfare before changing scanner power management."
+      );
 
-			confirm.error("You need to unassign all electronic warfare before changing scanner power management.");
+      return;
+    }
 
-			return;
-		}
+    if (system.name == "shieldGenerator") {
+      system.onTurnOff(ship);
+    }
 
-		if (system.name == "shieldGenerator") {
-			system.onTurnOff(ship);
-		}
+    shipManager.power.stopOverloading(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
 
-		shipManager.power.stopOverloading(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+    if (system.weapon) {
+      weaponManager.unSelectWeapon(ship, system);
+    }
 
-		if (system.weapon) {
-			weaponManager.unSelectWeapon(ship, system);
-		}
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  },
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	},
+  onlineAll: function onlineAll(ship, system) {
+    var array = [];
 
-	onlineAll: function onlineAll(ship, system) {
-		var array = [];
+    if (system.duoWeapon || system.dualWeapon) {
+      return;
+    }
 
+    for (var i = 0; i < ship.systems.length; i++) {
+      if (system.displayName === ship.systems[i].displayName) {
+        if (system.weapon) {
+          array.push(ship.systems[i]);
+        }
+      }
+    }
 
-		if (system.duoWeapon || system.dualWeapon) {
-			return;
-		}
+    for (var i = 0; i < array.length; i++) {
+      if (shipManager.systems.isDestroyed(ship, array[i])) {
+        continue;
+      } else if (shipManager.power.isOffline(ship, array[i])) {
+        shipManager.power.setOnline(ship, array[i]);
+        shipWindowManager.setDataForSystem(ship, array[i]);
+        shipWindowManager.setDataForSystem(
+          ship,
+          shipManager.systems.getSystemByName(ship, "reactor")
+        );
+      }
+    }
 
-		for (var i = 0; i < ship.systems.length; i++) {
-			if (system.displayName === ship.systems[i].displayName) {
-				if (system.weapon) {
-					array.push(ship.systems[i]);
-				}
-			}
-		}
+    webglScene.customEvent("SystemDataChanged", { ship: ship });
+  },
 
-		for (var i = 0; i < array.length; i++) {
+  onOnlineClicked: function onOnlineClicked(ship, system) {
+    if (system.parentId > 0) {
+      system = shipManager.systems.getSystem(ship, system.parentId);
+    }
 
-			if (shipManager.systems.isDestroyed(ship, array[i])) {
-				continue;
-			} else if (shipManager.power.isOffline(ship, array[i])) {
-				shipManager.power.setOnline(ship, array[i]);
-				shipWindowManager.setDataForSystem(ship, array[i]);
-				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-			}
-		}
-		
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
-	},
+    if (gamedata.gamephase != 1) return;
 
-	onOnlineClicked: function onOnlineClicked(ship, system) {
+    if (
+      shipManager.isDestroyed(ship) ||
+      shipManager.systems.isDestroyed(ship, system)
+    )
+      return;
 
-		if (system.parentId > 0) {
-			system = shipManager.systems.getSystem(ship, system.parentId);
-		}
+    if (ship.userid != gamedata.thisplayer) return;
 
-		if (gamedata.gamephase != 1) return;
+    if (!shipManager.power.isOffline(ship, system)) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+    shipManager.power.setOnline(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
 
-		if (ship.userid != gamedata.thisplayer) return;
+    if (system.name == "shieldGenerator") {
+      system.onTurnOn(ship);
+    }
 
-		if (!shipManager.power.isOffline(ship, system)) return;
+    if (system.dualWeapon || system.duoWeapon) {
+      for (var i in system.weapons) {
+        var weapon = system.weapons[i];
 
-		shipManager.power.setOnline(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
+        if (weapon.duoWeapon) {
+          for (var index in weapon.weapons) {
+            var subweapon = weapon.weapons[index];
 
-		if (system.name == "shieldGenerator") {
-			system.onTurnOn(ship);
-		}
+            shipManager.power.setOnline(ship, subweapon);
+            shipWindowManager.setDataForSystem(ship, subweapon);
+          }
+        } else {
+          shipManager.power.setOnline(ship, weapon);
+          shipWindowManager.setDataForSystem(ship, weapon);
+        }
+      }
+    }
 
-		if (system.dualWeapon || system.duoWeapon) {
-			for (var i in system.weapons) {
-				var weapon = system.weapons[i];
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  },
 
-				if (weapon.duoWeapon) {
-					for (var index in weapon.weapons) {
-						var subweapon = weapon.weapons[index];
+  onOverloadClicked: function onOverloadClicked(ship, system) {
+    if (gamedata.gamephase != 1) return;
 
-						shipManager.power.setOnline(ship, subweapon);
-						shipWindowManager.setDataForSystem(ship, subweapon);
-					}
-				} else {
-					shipManager.power.setOnline(ship, weapon);
-					shipWindowManager.setDataForSystem(ship, weapon);
-				}
-			}
-		}
+    if (
+      shipManager.isDestroyed(ship) ||
+      shipManager.systems.isDestroyed(ship, system)
+    )
+      return;
 
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	},
+    if (ship.userid != gamedata.thisplayer) return;
 
-	onOverloadClicked: function onOverloadClicked(ship, system) {
-		if (gamedata.gamephase != 1) return;
+    if (shipManager.power.isOffline(ship, system)) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
+    console.log("I am boosting!");
 
-		if (ship.userid != gamedata.thisplayer) return;
+    shipManager.power.setOverloading(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  },
 
-		if (shipManager.power.isOffline(ship, system)) return;
+  onStopOverloadClicked: function onStopOverloadClicked(ship, system) {
+    if (gamedata.gamephase != 1) return;
 
-		console.log("I am boosting!")
+    if (
+      shipManager.isDestroyed(ship) ||
+      shipManager.isDestroyed(ship, system) ||
+      shipManager.isAdrift(ship)
+    )
+      return;
 
-		shipManager.power.setOverloading(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	},
+    if (ship.userid != gamedata.thisplayer) return;
 
-	onStopOverloadClicked: function onStopOverloadClicked(ship, system) {
+    if (shipManager.power.isOffline(ship, system)) return;
 
-		if (gamedata.gamephase != 1) return;
-
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
-
-		if (ship.userid != gamedata.thisplayer) return;
-
-		if (shipManager.power.isOffline(ship, system)) return;
-
-		shipManager.power.stopOverloading(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}
-
+    shipManager.power.stopOverloading(ship, system);
+    shipWindowManager.setDataForSystem(ship, system);
+    shipWindowManager.setDataForSystem(
+      ship,
+      shipManager.systems.getSystemByName(ship, "reactor")
+    );
+    webglScene.customEvent("SystemDataChanged", { ship: ship, system: system });
+  }
 };

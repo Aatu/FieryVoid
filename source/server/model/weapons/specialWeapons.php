@@ -180,7 +180,7 @@ class BurstBeam extends Weapon{
 				$crit->updated = true;
 				$reactor->criticals[] =  $crit;
 			}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+				$system->addCritical($ship, "ForcedOfflineOneTurn");
 			} else { //force critical roll at +4
 				$system->forceCriticalRoll = true;
 				$system->critRollMod += 4;
@@ -531,7 +531,7 @@ class StunBeam extends Weapon{
 				$system->criticals[] =  $crit;
 				$fireOrder->pubnotes .= " DROPOUT! ";
             		}else if ($system->powerReq > 0 || $system->canOffLine ){
-				$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
+				$system->addCritical($ship, "ForcedOfflineOneTurn");
 			}
 		}
 		

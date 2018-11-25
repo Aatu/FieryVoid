@@ -73,11 +73,6 @@ window.FirePhaseStrategy = (function() {
     this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
   };
 
-  FirePhaseStrategy.prototype.deselectShip = function(ship) {
-    PhaseStrategy.prototype.deselectShip.call(this, ship);
-    this.hideMovementUI();
-  };
-
   FirePhaseStrategy.prototype.targetShip = function(ship, payload) {
     var menu = new ShipTooltipFireMenu(
       this.selectedShip,

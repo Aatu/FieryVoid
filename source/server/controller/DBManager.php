@@ -401,7 +401,7 @@ class DBManager
 
             //print(var_dump($criticals));
             foreach ($criticals as $critical) {
-                if ((!$critical->newCrit) && ($critical->turn != $turn))
+                if ((!$critical->newCrit))
                     continue;
 
                 $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "', $turn, '" . $critical->param . "')";
@@ -916,7 +916,7 @@ class DBManager
         }
     }
 
-    public function submitMovement($gameid, $shipid, $turn, $movements, $acceptPreturn = false)
+    public function submitMovement($gameid, $shipid, $turn, $movements)
     {
         try {
 
@@ -925,10 +925,6 @@ class DBManager
                 if ($movement->type == "start" || $movement->turn != $turn)
                     continue;
 
-                $preturn = ($movement->preturn) ? 1 : 0;
-
-                if ($acceptPreturn == false && $preturn)
-                    continue;
                 $this->insertMovement($gameid, $shipid, $movement);
             }
 
@@ -1506,13 +1502,12 @@ class DBManager
             FROM
                 tac_power
             WHERE 
-                gameid = ? AND (turn = ? OR turn = ?)
+                gameid = ? AND turn = ?
             "
         );
 
         if ($powerStmt) {
-            $lastTurn = $fetchTurn - 1;
-            $powerStmt->bind_param('iii', $gamedata->id, $lastTurn, $fetchTurn);
+            $powerStmt->bind_param('ii', $gamedata->id, $fetchTurn);
             $powerStmt->bind_result($id, $shipid, $systemid, $type, $turn, $amount);
             $powerStmt->execute();
             while ($powerStmt->fetch()) {

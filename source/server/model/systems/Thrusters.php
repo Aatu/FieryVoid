@@ -14,8 +14,56 @@ class Thruster extends ShipSystem
     {
         parent::__construct($armour, $maxhealth, $powerReq, $output);
 
-        $this->direction = $direction;
+        if (is_array($direction)) {
+            $this->direction = $direction;
+        } else {
+            $this->direction = [$direction];
+        }
+
     }
+
+    public function canChannelAmount($amount)
+    {
+        if ($this->hasCritical("FirstThrustIgnored") || $this->hasCritical("HalfEfficiency")) {
+            return $amount <= $this->output;
+        } else {
+            return $amount <= $this->output * 2;
+        }
+    }
+
+    public function getChannelCost($amount)
+    {
+        $cost = 0;
+
+        if ($this->hasCritical("FirstThrustIgnored")) {
+            $cost += 1;
+        }
+
+        if ($this->hasCritical("HalfEfficiency")) {
+            $cost += $amount * 2;
+        } else {
+            $cost += $amount;
+        }
+
+        return $cost;
+    }
+
+    public function getOverChannel($amount)
+    {
+        if ($this->hasCritical("FirstThrustIgnored") || $this->hasCritical("HalfEfficiency")) {
+            return 0;
+        } else if ($amount < $this->output) {
+            return 0;
+        } else {
+            return $amount - $this->output;
+        }
+    }
+
+    public function isDirection($direction)
+    {
+        return in_array($direction, $this->direction);
+    }
+
 } //endof Thruster
 
 class ManouveringThruster extends Thruster
@@ -49,8 +97,8 @@ class InvulnerableThruster extends Thruster
         return $activeAA;
     }
 
-    public function testCritical($ship, $gamedata, $crits, $add = 0)
+    public function testCritical($ship, $add = 0)
     { //this thruster won't suffer criticals ;)
-        return $crits;
+        return [];
     }
 } //endof InvulnerableThruster

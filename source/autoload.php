@@ -200,6 +200,7 @@ spl_autoload_register(
                 'movement' => '/server/handlers/movement.php',
                 'movementgamephase' => '/server/Phase/MovementGamePhase.php',
                 'movementorder' => '/server/model/movement/MovementOrder.php',
+                'movementvalidationexception' => '/server/model/movement/MovementValidationException.php',
                 'movementvalidator' => '/server/model/movement/MovementValidator.php',
                 'nastiercrit' => '/server/model/cricialClasses.php',
                 'neutronlaser' => '/server/model/weapons/lasers.php',

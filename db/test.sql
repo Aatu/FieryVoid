@@ -115,7 +115,7 @@ CREATE TABLE `player_chat` (
 
 LOCK TABLES `player_chat` WRITE;
 /*!40000 ALTER TABLE `player_chat` DISABLE KEYS */;
-INSERT INTO `player_chat` VALUES (3,0,'2018-11-24 14:43:35'),(3,3670,'2018-11-24 14:43:38');
+INSERT INTO `player_chat` VALUES (3,0,'2018-11-25 13:04:07'),(3,3670,'2018-11-25 13:04:07');
 /*!40000 ALTER TABLE `player_chat` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -377,7 +377,7 @@ CREATE TABLE `tac_game` (
   `gamespace` varchar(45) DEFAULT NULL,
   `rules` varchar(400) DEFAULT '{}',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3672 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3689 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -592,4 +592,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-24 18:33:10
+-- Dump completed on 2018-11-25 19:36:58

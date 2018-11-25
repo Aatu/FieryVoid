@@ -322,8 +322,6 @@ window.PhaseStrategy = (function() {
   };
 
   PhaseStrategy.prototype.deselectShip = function(ship) {
-    this.shipIconContainer.getById(ship.id).setSelected(false);
-
     gamedata.selectedSystems.slice(0).forEach(function(selected) {
       weaponManager.unSelectWeapon(this.selectedShip, selected);
     }, this);
