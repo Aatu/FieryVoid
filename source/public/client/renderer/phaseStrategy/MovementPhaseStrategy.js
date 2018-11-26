@@ -32,7 +32,12 @@ window.MovementPhaseStrategy = (function() {
     movementService
   ) {
     this.changeAnimationStrategy(
-      new window.IdleAnimationStrategy(shipIcons, gamedata.turn)
+      new window.IdleAnimationStrategy(
+        shipIcons,
+        gamedata.turn,
+        movementService,
+        this.coordinateConverter
+      )
     );
 
     doForcedMovementForActiveShip();

@@ -84,16 +84,14 @@ class ShipObject {
     this.createMesh();
   }
 
-  setPosition(x, y, z = 0) {
+  setPosition(x, y) {
+    const z = 0;
     if (typeof x === "object") {
-      z = x.z;
       y = x.y;
       x = x.x;
     }
 
     this.position = { x, y, z: 0 };
-
-    this.shipZ = z;
 
     if (this.mesh) {
       this.mesh.position.set(x, y, 0);

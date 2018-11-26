@@ -571,22 +571,37 @@ var MovementService = function () {
       return end;
     }
   }, {
-    key: "getAllMovesOfTurn",
-    value: function getAllMovesOfTurn(ship) {
+    key: "getLastTurnEndMove",
+    value: function getLastTurnEndMove(ship) {
       var _this3 = this;
 
+      var end = ship.movement.slice().reverse().find(function (move) {
+        return move.isEnd() && move.turn === _this3.turn - 1;
+      });
+
+      if (!end) {
+        end = this.getDeployMove(ship);
+      }
+
+      return end;
+    }
+  }, {
+    key: "getAllMovesOfTurn",
+    value: function getAllMovesOfTurn(ship) {
+      var _this4 = this;
+
       return ship.movement.filter(function (move) {
-        return move.turn === _this3.gamedata.turn;
+        return move.turn === _this4.gamedata.turn;
       });
     }
   }, {
     key: "getShipsInSameHex",
     value: function getShipsInSameHex(ship, hex) {
-      var _this4 = this;
+      var _this5 = this;
 
       hex = hex && this.getMostRecentMove(ship).position;
       return this.gamedata.ships.filter(function (ship2) {
-        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this4.getMostRecentMove(ship2).position.equals(hex);
+        return !shipManager.isDestroyed(ship2) && ship !== ship2 && _this5.getMostRecentMove(ship2).position.equals(hex);
       });
     }
   }, {
@@ -701,10 +716,10 @@ var MovementService = function () {
   }, {
     key: "getThisTurnMovement",
     value: function getThisTurnMovement(ship) {
-      var _this5 = this;
+      var _this6 = this;
 
       return ship.movement.filter(function (move) {
-        return move.turn === _this5.gamedata.turn || move.isEnd() && move.turn === _this5.gamedata.turn - 1 || move.isDeploy();
+        return move.turn === _this6.gamedata.turn || move.isEnd() && move.turn === _this6.gamedata.turn - 1 || move.isDeploy();
       });
     }
   }, {
@@ -1932,7 +1947,226 @@ window.SystemFactory = SystemFactory;
 
 exports.default = new SystemFactory();
 
-},{"./":26}],23:[function(require,module,exports){
+},{"./":29}],23:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Animation = function () {
+  function Animation() {
+    _classCallCheck(this, Animation);
+
+    this.active = false;
+  }
+
+  _createClass(Animation, [{
+    key: "start",
+    value: function start() {
+      this.active = true;
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.active = false;
+    }
+  }, {
+    key: "reset",
+    value: function reset() {}
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {}
+  }, {
+    key: "update",
+    value: function update(gameData) {}
+  }, {
+    key: "render",
+    value: function render(now, total, last, delta, goingBack) {}
+  }]);
+
+  return Animation;
+}();
+
+window.Animation = Animation;
+
+exports.default = Animation;
+
+},{}],24:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _Animation2 = require("./Animation");
+
+var _Animation3 = _interopRequireDefault(_Animation2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ShipMovementAnimationNew = function (_Animation) {
+  _inherits(ShipMovementAnimationNew, _Animation);
+
+  function ShipMovementAnimationNew(shipIcon, movementService, coordinateConverter) {
+    var continious = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    _classCallCheck(this, ShipMovementAnimationNew);
+
+    var _this = _possibleConstructorReturn(this, (ShipMovementAnimationNew.__proto__ || Object.getPrototypeOf(ShipMovementAnimationNew)).call(this));
+
+    _this.shipIcon = shipIcon;
+    _this.ship = shipIcon.ship;
+    _this.movementService = movementService;
+    _this.coordinateConverter = coordinateConverter;
+    _this.continious = continious;
+
+    _this.duration = 5000;
+    _this.time = 0;
+
+    _this.positionCurve = _this.buildPositionCurve();
+
+    /*
+    this.turnCurve = new THREE.CubicBezierCurve(
+      new THREE.Vector2(0, 0),
+      new THREE.Vector2(0.75, 0),
+      new THREE.Vector2(0, 0.75),
+      new THREE.Vector2(1, 1)
+    );
+      this.turnCurve = new THREE.CubicBezierCurve(
+      new THREE.Vector2(0, 0),
+      new THREE.Vector2(0.25, 0.25),
+      new THREE.Vector2(0.75, 0.75),
+      new THREE.Vector2(1, 1)
+    );
+      */
+
+    /*
+    this.hexAnimations.forEach(function (animation) {
+        animation.debugCurve = drawRoute(animation.curve);
+    });
+    */
+
+    _this.endPause = 0;
+
+    _Animation3.default.call(_this);
+    return _this;
+  }
+
+  _createClass(ShipMovementAnimationNew, [{
+    key: "update",
+    value: function update(gameData) {}
+  }, {
+    key: "stop",
+    value: function stop() {
+      _get(ShipMovementAnimationNew.prototype.__proto__ || Object.getPrototypeOf(ShipMovementAnimationNew.prototype), "stop", this).call(this);
+    }
+  }, {
+    key: "cleanUp",
+    value: function cleanUp() {}
+  }, {
+    key: "render",
+    value: function render(now, total, last, delta, zoom, back, paused) {
+      var _getPositionAndFacing = this.getPositionAndFacingAtTime(total),
+          position = _getPositionAndFacing.position,
+          facing = _getPositionAndFacing.facing;
+
+      this.shipIcon.setPosition(position);
+      //this.shipIcon.setFacing(-positionAndFacing.facing);
+
+      /*
+      if (
+        total > this.time &&
+        total < this.time + this.duration + this.endPause &&
+        !paused
+      ) {
+        window.webglScene.moveCameraTo(positionAndFacing.position);
+      }
+      */
+    }
+  }, {
+    key: "getPositionAndFacingAtTime",
+    value: function getPositionAndFacingAtTime(time) {
+      var totalDone = (time - this.time) / this.duration;
+
+      if (totalDone > 1) {
+        totalDone = 1;
+      }
+
+      return {
+        position: this.positionCurve.getPoint(totalDone),
+        facing: 0
+      };
+    }
+  }, {
+    key: "buildPositionCurve",
+    value: function buildPositionCurve() {
+      var start = this.movementService.getLastTurnEndMove(this.ship);
+      var end = this.movementService.getLastEndMove(this.ship);
+
+      if (!end || end === start) {
+        console.log("Should not have end!");
+        var position = this.coordinateConverter.fromHexToGame(start.position);
+        return new THREE.CubicBezierCurve3(new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z), new THREE.Vector3(position.x, position.y, position.z));
+      }
+
+      var point1 = this.coordinateConverter.fromHexToGame(start.position);
+
+      var control1 = this.coordinateConverter.fromHexToGame(start.position.add(start.target.scale(0.5)));
+
+      var control2 = this.coordinateConverter.fromHexToGame(this.continious ? end.position.subtract(end.target.scale(0.5)) : end.position);
+
+      var point2 = this.coordinateConverter.fromHexToGame(end.position);
+
+      console.log(point1, control1, control2, point2);
+
+      return new THREE.CubicBezierCurve3(new THREE.Vector3(point1.x, point1.y, point1.z), new THREE.Vector3(control1.x, control1.y, control1.z), new THREE.Vector3(control2.x, control2.y, control2.z), new THREE.Vector3(point2.x, point2.y, point2.z));
+    }
+  }]);
+
+  return ShipMovementAnimationNew;
+}(_Animation3.default);
+
+window.ShipMovementAnimationNew = ShipMovementAnimationNew;
+
+exports.default = ShipMovementAnimationNew;
+
+},{"./Animation":23}],25:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Animation = exports.ShipMovementAnimationNew = undefined;
+
+var _ShipMovementAnimationNew = require("./ShipMovementAnimationNew");
+
+var _ShipMovementAnimationNew2 = _interopRequireDefault(_ShipMovementAnimationNew);
+
+var _Animation = require("./Animation");
+
+var _Animation2 = _interopRequireDefault(_Animation);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.ShipMovementAnimationNew = _ShipMovementAnimationNew2.default;
+exports.Animation = _Animation2.default;
+
+},{"./Animation":23,"./ShipMovementAnimationNew":24}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2099,7 +2333,7 @@ window.hexagon.Cube = Cube;
 
 exports.default = window.hexagon.Cube;
 
-},{"./Offset":24}],24:[function(require,module,exports){
+},{"./Offset":27}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2147,6 +2381,16 @@ var Offset = function () {
     key: "add",
     value: function add(offset) {
       return this.toCube().add(offset.toCube()).toOffset();
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(offset) {
+      return this.toCube().subtract(offset.toCube()).toOffset();
+    }
+  }, {
+    key: "scale",
+    value: function scale(_scale) {
+      return this.toCube().scale(_scale).toOffset();
     }
   }, {
     key: "moveToDirection",
@@ -2205,7 +2449,7 @@ window.hexagon.Offset = Offset;
 
 exports.default = Offset;
 
-},{"./Cube":23}],25:[function(require,module,exports){
+},{"./Cube":26}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2226,13 +2470,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.Cube = _Cube2.default;
 exports.Offset = _Offset2.default;
 
-},{"./Cube":23,"./Offset":24}],26:[function(require,module,exports){
+},{"./Cube":26,"./Offset":27}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.hexagon = exports.SystemFactory = exports.ShipSystem = exports.Ship = undefined;
+exports.animation = exports.hexagon = exports.SystemFactory = exports.ShipSystem = exports.Ship = undefined;
 
 var _Ship = require("./Ship");
 
@@ -2250,6 +2494,10 @@ var _hexagon = require("./hexagon/");
 
 var hexagon = _interopRequireWildcard(_hexagon);
 
+var _animation = require("./animation");
+
+var animation = _interopRequireWildcard(_animation);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -2258,8 +2506,9 @@ exports.Ship = _Ship2.default;
 exports.ShipSystem = _ShipSystem2.default;
 exports.SystemFactory = _SystemFactory2.default;
 exports.hexagon = hexagon;
+exports.animation = animation;
 
-},{"./Ship":21,"./SystemFactory":22,"./hexagon/":25,"./system/ShipSystem":27}],27:[function(require,module,exports){
+},{"./Ship":21,"./SystemFactory":22,"./animation":25,"./hexagon/":28,"./system/ShipSystem":30}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2488,7 +2737,7 @@ Ballistic.prototype = Object.create(Weapon.prototype);
 Ballistic.prototype.constructor = Ballistic;
 */
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 
 var _ships = require("./ships");
@@ -2513,7 +2762,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 window.shipObjects = _ships2.default;
 
-},{"./handler/movement":20,"./model/":26,"./ships":33,"./uiStrategy":39}],29:[function(require,module,exports){
+},{"./handler/movement":20,"./model/":29,"./ships":36,"./uiStrategy":42}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2579,7 +2828,7 @@ var Capital = function (_ShipObject) {
 
 exports.default = Capital;
 
-},{"./ShipObject":32}],30:[function(require,module,exports){
+},{"./ShipObject":35}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2649,7 +2898,7 @@ var Gunship = function (_ShipObject) {
 
 exports.default = Gunship;
 
-},{"./ShipObject":32}],31:[function(require,module,exports){
+},{"./ShipObject":35}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2717,7 +2966,7 @@ var Rhino = function (_ShipObject) {
 
 exports.default = Rhino;
 
-},{"./ShipObject":32}],32:[function(require,module,exports){
+},{"./ShipObject":35}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2807,17 +3056,13 @@ var ShipObject = function () {
   }, {
     key: "setPosition",
     value: function setPosition(x, y) {
-      var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
+      var z = 0;
       if ((typeof x === "undefined" ? "undefined" : _typeof(x)) === "object") {
-        z = x.z;
         y = x.y;
         x = x.x;
       }
 
       this.position = { x: x, y: y, z: 0 };
-
-      this.shipZ = z;
 
       if (this.mesh) {
         this.mesh.position.set(x, y, 0);
@@ -3057,7 +3302,7 @@ window.ShipObject = ShipObject;
 
 exports.default = ShipObject;
 
-},{"../handler/Movement":10}],33:[function(require,module,exports){
+},{"../handler/Movement":10}],36:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3080,7 +3325,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = { Gunship: _Gunship2.default, Rhino: _Rhino2.default, Capital: _Capital2.default };
 
-},{"./Capital":29,"./Gunship":30,"./Rhino":31}],34:[function(require,module,exports){
+},{"./Capital":32,"./Gunship":33,"./Rhino":34}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3174,7 +3419,7 @@ var HighlightSelectedShip = function (_UiStrategy) {
 
 exports.default = HighlightSelectedShip;
 
-},{"./UiStrategy":38}],35:[function(require,module,exports){
+},{"./UiStrategy":41}],38:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3236,7 +3481,7 @@ var MovementPathMouseOver = function (_UiStrategy) {
 
 exports.default = MovementPathMouseOver;
 
-},{"./UiStrategy":38}],36:[function(require,module,exports){
+},{"./UiStrategy":41}],39:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3311,7 +3556,7 @@ var MovementPathSelectedShip = function (_UiStrategy) {
 
 exports.default = MovementPathSelectedShip;
 
-},{"./UiStrategy":38}],37:[function(require,module,exports){
+},{"./UiStrategy":41}],40:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3409,7 +3654,7 @@ var reposition = function reposition(ship, shipIconContainer, uiManager) {
 
 exports.default = SelectedShipMovementUi;
 
-},{"./UiStrategy":38}],38:[function(require,module,exports){
+},{"./UiStrategy":41}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3525,7 +3770,7 @@ var UiStrategy = function () {
 
 exports.default = UiStrategy;
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3561,4 +3806,4 @@ window.uiStrategy = {
 exports.MovementPathSelectedShip = _MovementPathSelectedShip2.default;
 exports.MovementPathMouseOver = _MovementPathMouseOver2.default;
 
-},{"./HighlightSelectedShip":34,"./MovementPathMouseOver":35,"./MovementPathSelectedShip":36,"./SelectedShipMovementUi":37}]},{},[28]);
+},{"./HighlightSelectedShip":37,"./MovementPathMouseOver":38,"./MovementPathSelectedShip":39,"./SelectedShipMovementUi":40}]},{},[31]);

@@ -70,6 +70,19 @@ class MovementService {
     return end;
   }
 
+  getLastTurnEndMove(ship) {
+    let end = ship.movement
+      .slice()
+      .reverse()
+      .find(move => move.isEnd() && move.turn === this.turn - 1);
+
+    if (!end) {
+      end = this.getDeployMove(ship);
+    }
+
+    return end;
+  }
+
   getAllMovesOfTurn(ship) {
     return ship.movement.filter(move => move.turn === this.gamedata.turn);
   }

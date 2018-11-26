@@ -47,6 +47,18 @@ class Offset {
       .toOffset();
   }
 
+  subtract(offset) {
+    return this.toCube()
+      .subtract(offset.toCube())
+      .toOffset();
+  }
+
+  scale(scale) {
+    return this.toCube()
+      .scale(scale)
+      .toOffset();
+  }
+
   moveToDirection(direction) {
     return this.toCube()
       .moveToDirection(direction)
