@@ -5,6 +5,7 @@ class ShipMovementAnimationNew extends Animation {
     shipIcon,
     movementService,
     coordinateConverter,
+    time = 0,
     continious = false
   ) {
     super();
@@ -16,7 +17,7 @@ class ShipMovementAnimationNew extends Animation {
     this.continious = continious;
 
     this.duration = 5000;
-    this.time = 0;
+    this.time = time;
 
     this.positionCurve = this.buildPositionCurve();
 
@@ -78,6 +79,8 @@ class ShipMovementAnimationNew extends Animation {
 
     if (totalDone > 1) {
       totalDone = 1;
+    } else if (totalDone < 0) {
+      totalDone = 0;
     }
 
     return {

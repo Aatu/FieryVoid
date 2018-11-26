@@ -34,7 +34,8 @@ window.IdleAnimationStrategy = (function() {
           new ShipMovementAnimationNew(
             icon,
             this.movementService,
-            this.coordinateConverter
+            this.coordinateConverter,
+            this.animations.length * 5000
           )
         );
       }

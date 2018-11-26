@@ -2023,7 +2023,8 @@ var ShipMovementAnimationNew = function (_Animation) {
   _inherits(ShipMovementAnimationNew, _Animation);
 
   function ShipMovementAnimationNew(shipIcon, movementService, coordinateConverter) {
-    var continious = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    var time = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    var continious = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
     _classCallCheck(this, ShipMovementAnimationNew);
 
@@ -2036,7 +2037,7 @@ var ShipMovementAnimationNew = function (_Animation) {
     _this.continious = continious;
 
     _this.duration = 5000;
-    _this.time = 0;
+    _this.time = time;
 
     _this.positionCurve = _this.buildPositionCurve();
 
@@ -2105,6 +2106,8 @@ var ShipMovementAnimationNew = function (_Animation) {
 
       if (totalDone > 1) {
         totalDone = 1;
+      } else if (totalDone < 0) {
+        totalDone = 0;
       }
 
       return {
