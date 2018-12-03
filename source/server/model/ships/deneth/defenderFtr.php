@@ -29,7 +29,7 @@ class DefenderFtr extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 1, 2, 2);
             $fighter = new Fighter("defenderftr", $armour, 9, $this->id);
-            $fighter->displayName = "Defender Medium Fighter";
+            $fighter->displayName = "Defender";
             $fighter->imagePath = "img/ships/dragon.png";
             $fighter->iconPath = "img/ships/dragon_large.png";
             

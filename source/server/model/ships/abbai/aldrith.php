@@ -33,16 +33,16 @@ class Aldrith extends BaseShip{
         $this->addPrimarySystem(new ShieldGenerator(4, 14, 4, 3));
    
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));
-        $this->addFrontSystem(new TwinArray(3, 0, 0, 240, 60));
-        $this->addFrontSystem(new TwinArray(3, 0, 0, 300, 120));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 60));
+        $this->addFrontSystem(new TwinArray(3, 6, 2, 300, 120));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 300, 360));
         $this->addFrontSystem(new GraviticShield(0, 6, 0, 2, 0, 60));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
 
         $this->addAftSystem(new AssaultLaser(3, 6, 4, 120, 240));
-        $this->addAftSystem(new TwinArray(3, 0, 0, 120, 240));
-        $this->addAftSystem(new TwinArray(3, 0, 0, 120, 240));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 120, 240));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 180, 240));
         $this->addAftSystem(new GraviticShield(0, 6, 0, 2, 120, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));

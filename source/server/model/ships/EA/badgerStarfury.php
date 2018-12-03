@@ -41,7 +41,7 @@ class BadgerStarfury extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(3, 3, 2, 2);
             $fighter = new Fighter("badgerStarfury", $armour, 15, $this->id);
-            $fighter->displayName = "Badger Long-Range Fighter";
+            $fighter->displayName = "Badger";
             $fighter->imagePath = "img/ships/badgerStarfury.png";
             $fighter->iconPath = "img/ships/badgerStarfury_large.png";
 

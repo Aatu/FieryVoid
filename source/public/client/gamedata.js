@@ -615,7 +615,8 @@ window.gamedata = {
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
-                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i])) {
+                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i])  && shipManager.movement.hasDeletableMovements(ships[i]) ) {
+                    //hasDeletableMovements means player actually did _something_ with this ship! otherwise speed 0 units are immediately shown as moved and are easily skipped
                     td.className = "iniActiveMoved";
                 }else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.className = "iniActive";

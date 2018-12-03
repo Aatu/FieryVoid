@@ -31,7 +31,7 @@ class DoubleV_Nav extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(3, 0, 2, 2);
 		$fighter = new Fighter("doubleV", $armour, 10, $this->id);
-		$fighter->displayName = "Double-V Medium Fighter";
+		$fighter->displayName = "Double-V";
 		$fighter->imagePath = "img/ships/doubleV.png";
 		$fighter->iconPath = "img/ships/doubleV_large.png";
 			

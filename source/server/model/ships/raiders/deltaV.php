@@ -6,8 +6,8 @@ class DeltaV extends FighterFlight{
         
 	$this->pointCost = 192;
 	$this->faction = "Raiders";
-      $this->phpclass = "DeltaV";
-       $this->shipClass = "Delta-V Light Fighters";
+        $this->phpclass = "DeltaV";
+        $this->shipClass = "Delta-V Light Fighters";
 	$this->imagePath = "img/ships/deltaV.png";
         
         $this->forwardDefense = 5;
@@ -30,7 +30,7 @@ class DeltaV extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
 		$armour = array(2, 0, 1, 1);
 		$fighter = new Fighter("deltaV", $armour, 7, $this->id);
-		$fighter->displayName = "Delta-V Light Fighter";
+		$fighter->displayName = "Delta-V";
 		$fighter->imagePath = "img/ships/deltaV.png";
 		$fighter->iconPath = "img/ships/deltaV_large.png";
 			
