@@ -31,7 +31,9 @@ class DrakhDreadnought extends BaseShip{
 	    
 	$this->addPrimarySystem(new CnC(7, 25, 0, 0));
         $this->addPrimarySystem(new Reactor(6, 30, 0, 12));
-        $this->addPrimarySystem(new Scanner(6, 24, 7, 11));
+		$sensors = new Scanner(6, 24, 7, 11);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(6, 25, 0, 12, 3));
         $this->addPrimarySystem(new SWTractorBeam(5, 0, 360, 1));
         $this->addPrimarySystem(new JumpEngine(6, 20, 5, 36));
