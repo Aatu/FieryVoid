@@ -1357,12 +1357,19 @@ window.weaponManager = {
         if (range === 0) return true;
 
         var jammer = shipManager.systems.getSystemByName(target, "jammer");
-
 		if (jammer)
 		{
 			//check whether it was enabled last turn... if so, allow missile launch :)
 			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
-				range = range / (shipManager.systems.getOutput(target, jammer)+1);
+				/*Improved/Advanced Sensors effect*/
+				var jammerValue = shipManager.systems.getOutput(target, jammer);
+				if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+					$jammerValue = 0; //negated
+				} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+					$jammerValue = $jammerValue * 0.5; //halved
+				}
+				range = range / (1+jammerValue);
+				//range = range / (shipManager.systems.getOutput(target, jammer)+1);
 			}
 		}
 
