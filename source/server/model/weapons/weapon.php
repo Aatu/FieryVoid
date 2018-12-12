@@ -813,12 +813,15 @@ class Weapon extends ShipSystem
         } elseif ($shooter->faction != $target->faction) {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
 	    /*Improved/Advanced Sensors*/
-	    $jammerCut = $shooter->getSpecialAbilityValue("AdvancedSensors", array("shooter" => $shooter, "target" => $target));
-            if($jammerCut == 0){ //no Advanced Sensors, check for Improved!
-		$jammerCut = $shooter->getSpecialAbilityValue("ImprovedSensors", array("shooter" => $shooter, "target" => $target));
-	    }		
-	    //$jammerCut limits Jammer effectiveness, from 0 (full Jammer effect) to 1 (Jammer negated)
-            $jammermod = $rangePenalty * $jammerValue * (1-$jammerCut);
+	    if ($jammerValue > 0){ //else no point
+		if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+			$jammerValue = 0; //negated
+		} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+			$jammerValue = $jammerValue * 0.5; //halved
+		}
+	    }
+	   
+            $jammermod = $rangePenalty * $jammerValue;
         }
 
         if (!($shooter instanceof FighterFlight) && !($shooter instanceof OSAT)) {
