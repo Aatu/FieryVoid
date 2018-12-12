@@ -370,11 +370,13 @@ window.ew = {
     },
 
     getSupportedOEW: function getSupportedOEW(ship, target) {
-        var jammer = shipManager.systems.getSystemByName(target, "jammer");
+        if(!shipManager.hasSpecialAbility(ship, "AdvancedSensors")){ //Advanced Sensors negate Jammer
+            var jammer = shipManager.systems.getSystemByName(target, "jammer");
 
-        if (jammer != null && shipManager.systems.getOutput(target, jammer) > 0 && !shipManager.systems.isDestroyed(target, jammer) && !shipManager.power.isOffline(target, jammer)) {
-            // Ships with active jammers are immune to SOEW
-            return 0;
+            if (jammer != null && shipManager.systems.getOutput(target, jammer) > 0 && !shipManager.systems.isDestroyed(target, jammer) && !shipManager.power.isOffline(target, jammer)) {
+                // Ships with active jammers are immune to SOEW
+                return 0;
+            }
         }
 
         var amount = 0;
