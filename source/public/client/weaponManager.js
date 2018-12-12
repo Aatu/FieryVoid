@@ -35,11 +35,8 @@ window.weaponManager = {
                 var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
                 parentSystem.changeFiringMode();
                 shipWindowManager.setDataForSystem(ship, parentSystem);
-
                 /*
-                var newSystem = parentSystem.weapons[parentSystem.firingMode];
-
-                
+                var newSystem = parentSystem.weapons[parentSystem.firingMode];                
                 var parentwindow = shipwindow.find(".parentsystem_" + newSystem.parentId);
                 parentwindow.removeClass("system_" + system.id);
                 parentwindow.addClass("modes");
@@ -268,7 +265,6 @@ window.weaponManager = {
     },
 
     selectWeapon: function selectWeapon(ship, weapon) {
-
         if (weaponManager.checkOutOfAmmo(ship, weapon)) {
             return;
         }
@@ -416,20 +412,6 @@ window.weaponManager = {
                         html += "-OTHER-";
                         break;
                 }
-                /*
-                if (section[i] == 1){
-                    html += "-FRONT-";
-                }
-                if (section[i] == 2){
-                    html += "-AFT-";
-                }
-                if (section[i] == 3){
-                    html += "-PORT-";
-                }
-                if (section[i] == 4){
-                    html += "-STARBORD-";
-                }
-                */
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
@@ -497,86 +479,10 @@ window.weaponManager = {
         return false;
     }, //endof function canCalledshot
 
+	
+/*old version of canCalledshot deleted! - Marcin Sawicki, 12.2018*/
 
-    canCalledshotOld: function canCalledshotOld(target, system) {
-        /*Marcin Sawicki, October 2017 - let's disable this function, and use new $outerSections-based*/
-        var shooter = gamedata.getSelectedShip();
-
-        if (!shooter) return false;
-
-        var loc = weaponManager.getShipHittingSide(shooter, target);
-        if (target.flight) {
-            return false;
-        } else if (target.base) {
-            return true;
-        }
-
-        if (target.shipSizeClass == 3) {
-            if (system.location == 0 && system.weapon) {
-                return true;
-            }
-            for (var i = 0; i < loc.length; i++) {
-                if (system.location == loc[i]) {
-                    return true;
-                }
-            }
-            if (target.draziCap && system.name == "thruster" && system.location == 2) {
-                for (var i = 0; i < loc.length; i++) {
-                    if (loc[i] == 2) {
-                        return true;
-                    }
-                }
-            }
-        } else if (target.draziHCV) {
-            for (var i = 0; i < loc.length; i++) {
-                if (system.location == loc[i]) {
-                    return true;
-                }
-            }
-            if (system.location == 0 && system.weapon) {
-                return true;
-            }
-            if (system.name == "thruster" && system.location == 0) {
-                var thruster = weaponManager.getTargetableThruster(shooter, target);
-                if (system.direction == thruster) {
-                    return true;
-                }
-            }
-        } else if ( /*target.shipSizeClass == 1 ||*/target.shipSizeClass == 2 && system.name == "thruster" && system.location == 0) {
-            var thruster = weaponManager.getTargetableThruster(shooter, target);
-            if (system.direction == thruster) {
-                return true;
-            }
-        }
-        if ( /*target.shipSizeClass == 1 ||*/target.shipSizeClass == 2) {
-            if (system.location == 0 && system.weapon) {
-                return true;
-            }
-            for (var i = 0; i < loc.length; i++) {
-                if (system.location == loc[i]) {
-                    return true;
-                }
-            }
-        }
-
-        //treat MCVs as one huge PRIMARY section!
-        if (target.shipSizeClass == 1) {
-            if (system.weapon) {
-                return true; //all weapons are targetable if in arc
-            }
-            if (system.name == "thruster") {
-                //all thrusters are targetable if in arc
-                var thruster = weaponManager.getTargetableThruster(shooter, target);
-                if (system.direction == thruster) {
-                    return true;
-                }
-            }
-            return false; //other systems on MCVs are not targetable at all
-        }
-
-        return false;
-    },
-
+	
     getTargetableThruster: function getTargetableThruster(shooter, target) {
         var targetFacing = shipManager.getShipHeadingAngle(target);
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
@@ -598,7 +504,6 @@ window.weaponManager = {
     },
 
     isPosOnWeaponArc: function isPosOnWeaponArc(shooter, position, weapon) {
-
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(shooter), position);
 
@@ -873,9 +778,18 @@ window.weaponManager = {
             var stealth = shipManager.systems.getSystemByName(target, "stealth");
 
             if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);
-
+		
             if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
 
+	   if (jammermod > 0){	 //else Improved Sensors do nothing
+		/*Improved/Advanced Sensors bonus*/	
+		if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")){
+			jammermod = 0; //Advanced Sensors negate Jammer
+		} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors")){
+			jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
+		}
+	   }
+		
             if (target.flight) {
                 var jinking = shipManager.movement.getJinking(target);
                 if (jinking > jammermod) {
