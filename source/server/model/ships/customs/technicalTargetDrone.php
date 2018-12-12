@@ -25,12 +25,15 @@ class technicalTargetDrone extends BaseShip{
 		$this->addPrimarySystem(new Particleimpeder(2, 0, 0, 0, 180));
 		$this->addPrimarySystem(new Reactor(6, 35, 0, 0));
 		$this->addFrontSystem(new CnC(1, 1, 0, 0));
-		$this->addFrontSystem(new Scanner(6, 23, 4, 20));
+		$sensors = new Scanner(6, 23, 4, 20);
+		$sensors->markAdvanced();
+		$this->addFrontSystem($sensors);
 		$this->addPrimarySystem(new Engine(5, 20, 0, 20, 3));
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
-		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));
-		
+		$this->addPrimarySystem(new ImperialLaser(2, 12, 5, 0, 360));		
+		$this->addPrimarySystem(new IonTorpedo(4, 5, 4, 0, 360));
+        	$this->addPrimarySystem(new RMissileRack(4, 6, 0, 0, 360));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		//$this->addFrontSystem(new Hangar(4, 6));
