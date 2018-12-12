@@ -1,26 +1,6 @@
 <?php
 
-/*no longer needed - superseded by ElintScanner
-class ElintArray extends ShipSystem implements SpecialAbility{
-    public $name = "elintArray";
-    public $displayName = "ELINT array";
-    public $specialAbilities = array("ELINT");
-    public $primary = true;
-    
-    function __construct($armour, $maxhealth, $powerReq){
-        parent::__construct($armour, $maxhealth, $powerReq, 0);
-    }
-    
-    public function getSpecialAbilityValue($args)
-    {
-        return true;
-    }
-    
-}
-*/
-
-class Jammer extends ShipSystem implements SpecialAbility{
-    
+class Jammer extends ShipSystem implements SpecialAbility{    
     public $name = "jammer";
     public $displayName = "Jammer";
     public $specialAbilities = array("Jammer");
@@ -54,11 +34,9 @@ class Jammer extends ShipSystem implements SpecialAbility{
         $this->data["Ability:"] = "Denies a hostile OEW-lock versus this ship.";
 	    $this->data["Special"] = "Disabled Jammer won't affect enemy missile launches on NEXT turn!";	     
     }
+} //endof Jammer
 
-}
-
-class Stealth extends ShipSystem implements SpecialAbility{
-    
+class Stealth extends ShipSystem implements SpecialAbility{    
     public $name = "stealth";
     public $displayName = "Stealth systems";
     public $specialAbilities = array("Jammer");
@@ -88,14 +66,11 @@ class Stealth extends ShipSystem implements SpecialAbility{
         if (Mathlib::getDistanceOfShipInHex($shooter, $target) > 5)
         {
             return 1;
-        }
-            
+        }            
         
-        return 0;
-        
-    }
-     
-}
+        return 0;        
+    }     
+} //endof Stealth
 
 interface SpecialAbility{
     public function getSpecialAbilityValue($args);
@@ -220,7 +195,6 @@ class ShieldGenerator extends ShipSystem{
 }
 
 class Reactor extends ShipSystem{
-
     public $name = "reactor";
     public $displayName = "Reactor";
     public $primary = true;
@@ -340,7 +314,6 @@ class SubReactor extends ShipSystem{
 }
 
 class Engine extends ShipSystem{
-
     public $name = "engine";
     public $displayName = "Engine";
     public $thrustused;
@@ -380,7 +353,6 @@ class Scanner extends ShipSystem{
         
         $this->boostEfficiency = "output+1";
     }
-
     
     public function getOutput(){
         $output = parent::getOutput();
@@ -390,15 +362,32 @@ class Scanner extends ShipSystem{
         foreach ($this->power as $power){
             if ($power->turn == TacGamedata::$currentTurn && $power->type == 2){
                 $output += $power->amount;
-            }
-        
-        }
-        
-        return $output;
-        
-    }
-    
-}
+            }        
+        }        
+        return $output;        
+    }    
+	
+	/*functions adding Advanced/Improved Sensors trait*/
+	public function markImproved(){		
+    		public $specialAbilities[] = array("ImprovedSensors");
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty).';
+	}
+	public function markAdvanced(){		
+    		public $specialAbilities[] = array("AdvancedSensors");
+		$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'Advanced Sensors - negate Jammer, flat 14 boost cost.';
+	}	
+} //endof Scanner
 
 class ElintScanner extends Scanner implements SpecialAbility{
     public $name = "elintScanner";
@@ -448,7 +437,7 @@ class SWScanner extends Scanner {
 	}
 	$this->data["Special"] .= "Boostability limited to +".$boostability.".";	     
     }
-} //end of swScanner
+} //end of SWScanner
 
 
 class CnC extends ShipSystem{
@@ -525,7 +514,7 @@ class Thruster extends ShipSystem{
 class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
-public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
 	    parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused );
@@ -539,6 +528,18 @@ public $isPrimaryTargetable = false; //can this system be targeted by called sho
     public function testCritical($ship, $gamedata, $crits, $add = 0){ //this thruster won't suffer criticals ;)
 	    return $crits;
     }
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);     
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= 'This system is here for technical purposes only. Cannot be damaged in any way, and has unlimited thrust allowance.';
+	}
+
+	
 } //endof InvulnerableThruster
 
 
