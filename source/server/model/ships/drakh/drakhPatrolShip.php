@@ -29,7 +29,10 @@ class DrakhPatrolShip extends MediumShip{
 	    
 	$this->addPrimarySystem(new CnC(5, 9, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 15, 0, 8));
-        $this->addPrimarySystem(new Scanner(5, 12, 4, 7));
+		$sensors = new Scanner(5, 12, 4, 7);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
+        //$this->addPrimarySystem(new Scanner(5, 12, 4, 7));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 	$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 5, 3));
