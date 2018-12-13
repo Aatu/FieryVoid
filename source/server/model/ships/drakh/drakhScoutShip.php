@@ -31,7 +31,10 @@ class DrakhScoutShip extends MediumShip{
 	    
 	$this->addPrimarySystem(new CnC(5, 9, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 15, 0, 4));
-        $this->addPrimarySystem(new ElintScanner(5, 18, 4, 12));
+		$sensors = new ElintScanner(5, 18, 4, 12);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
+        //$this->addPrimarySystem(new ElintScanner(5, 18, 4, 12));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 	$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 5, 3));
