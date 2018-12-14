@@ -812,6 +812,14 @@ class Weapon extends ShipSystem
             $rangePenalty = $rangePenalty * 2;
         } elseif ($shooter->faction != $target->faction) {
             $jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $shooter, "target" => $target));
+			/*Improved/Advanced Sensors*/
+			if ($jammerValue > 0){ //else no point
+				if ($shooter->hasSpecialAbility("AdvancedSensors")) {
+					$jammerValue = 0; //negated
+				} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
+					$jammerValue = $jammerValue * 0.5; //halved
+				}
+			}  
             $jammermod = $rangePenalty * $jammerValue;
         }
 
@@ -834,6 +842,7 @@ class Weapon extends ShipSystem
         }
         $goal = $defence + $hitBonuses - $hitPenalties;
 
+		
         $change = round($goal * 5); //d20 to d100: ($goal/20)*100
         $target->setExpectedDamage($hitLoc, $change, $this);
 

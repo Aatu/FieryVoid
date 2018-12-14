@@ -25,8 +25,11 @@ class DrakhRaiderFlt extends FighterFlight{
 		$this->hangarRequired = 'Raiders'; //for fleet check
     	$this->iniativebonus = 14 *5; 
 	    $this->advancedArmor = true; 
-        
+		
+		
         $this->populate();
+		
+
     }
     
     
@@ -54,7 +57,10 @@ class DrakhRaiderFlt extends FighterFlight{
             
        		//Absorbtion Shield, 1 points
         	$fighter->addAftSystem(new AbsorbtionShield(0, 1, 0, 1, 0, 360));
-            
+			
+			//Improved Sensors
+            $fighter->addAftSystem(new Fighterimprsensors(0, 1, 0));
+			
         	$this->addSystem($fighter);
        }
     }

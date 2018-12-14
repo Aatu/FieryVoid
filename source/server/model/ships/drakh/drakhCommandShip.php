@@ -32,7 +32,9 @@ class DrakhCommandShip extends HeavyCombatVessel{
 	    
 	$this->addPrimarySystem(new CnC(6, 18, 0, 0));
         $this->addPrimarySystem(new Reactor(6, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 16, 6, 10));
+		$sensors = new Scanner(5, 16, 6, 10);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 36));
 	$this->addPrimarySystem(new Hangar(4, 4, 1));

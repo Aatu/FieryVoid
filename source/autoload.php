@@ -747,6 +747,11 @@ spl_autoload_register(
                 'steadfast' => '/server/model/ships/orieni/steadfast.php',
                 'steadfast1780' => '/server/model/ships/orieni/steadfast1780.php',
                 'stealth' => '/server/model/systems/baseSystems.php',
+				
+				
+                'fighteradvsensors' => '/server/model/systems/baseSystems.php',
+                'fighterimprsensors' => '/server/model/systems/baseSystems.php',
+				
                 'stormfalcon' => '/server/model/ships/drazi/stormfalcon.php',
                 'stormfront' => '/server/model/ships/orieni/stormfront.php',
                 'stormfront1874' => '/server/model/ships/orieni/stormfront1874.php',

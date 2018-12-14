@@ -66,7 +66,7 @@ class BaseShip {
             $this->userid = (int)$userid;
             $this->name = $name;
             $this->slot = $slot;
-	    $this->fillLocationsGUI();//so called shots work properly
+			$this->fillLocationsGUI();//so called shots work properly
         }
         
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals

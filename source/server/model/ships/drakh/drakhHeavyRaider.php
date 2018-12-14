@@ -34,7 +34,10 @@ class DrakhHeavyRaider extends MediumShip{
 	    
 	$this->addPrimarySystem(new Reactor(4, 10, 0, 7));
 	$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
-	$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
+		$sensors = new Scanner(4, 12, 4, 6);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
+	//$this->addPrimarySystem(new Scanner(4, 12, 4, 6));
 	$this->addPrimarySystem(new Engine(4, 12, 0, 7, 2));
 	$this->addPrimarySystem(new customPhaseDisruptor(3, 0, 0, 300, 60));
 	$this->addPrimarySystem(new AbsorbtionShield(2,6,4,1,0,360));

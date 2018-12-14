@@ -32,8 +32,11 @@ class DrakhTanker extends BaseShip{
 	    
 	    
 	$this->addPrimarySystem(new CnC(5, 9, 0, 0));
-        $this->addPrimarySystem(new Reactor(5, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
+        $this->addPrimarySystem(new Reactor(5, 12, 0, 0));	    
+		$sensors = new Scanner(5, 12, 4, 6);
+		$sensors->markImproved();
+		$this->addPrimarySystem($sensors);
+        //$this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 8, 4));
         $this->addPrimarySystem(new CargoBay(4, 18));
         //$this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));

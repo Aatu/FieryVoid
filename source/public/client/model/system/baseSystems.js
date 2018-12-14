@@ -124,11 +124,17 @@ var Stealth = function Stealth(json, ship) {
 Stealth.prototype = Object.create(ShipSystem.prototype);
 Stealth.prototype.constructor = Stealth;
 
-var Stealth = function Stealth(json, ship) {
+var Fighteradvsensors = function Fighteradvsensors(json, ship) {
     ShipSystem.call(this, json, ship);
 };
-Stealth.prototype = Object.create(ShipSystem.prototype);
-Stealth.prototype.constructor = Stealth;
+Fighteradvsensors.prototype = Object.create(ShipSystem.prototype);
+Fighteradvsensors.prototype.constructor = Fighteradvsensors;
+
+var Fighterimprsensors = function Fighterimprsensors(json, ship) {
+    ShipSystem.call(this, json, ship);
+};
+Fighterimprsensors.prototype = Object.create(ShipSystem.prototype);
+Fighterimprsensors.prototype.constructor = Fighterimprsensors;
 
 var HkControlNode = function HkControlNode(json, ship) {
     ShipSystem.call(this, json, ship);

@@ -61,7 +61,9 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - <b>Speed 0 units</b> are now correctly highlighted as ready to move (instead of "moved")
+        - <b>Drakh Improved Sensors</b> - they now do halve Jammer effectiveness, putting em on ner(er) footing with Minbari
+        <br>
+        - <b>Streib weapon</b> corrected typo giving them insane FC
         <br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
