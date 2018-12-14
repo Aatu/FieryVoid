@@ -132,8 +132,8 @@
                     var t = weaponManager.mouseoverSystem;
 
                     var id = t.data("shipid");
-
                     var ship = gamedata.getShip(id);
+					
                     var system = null;
 
                     if (t.hasClass("fightersystem")){

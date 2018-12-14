@@ -72,6 +72,48 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }     
 } //endof Stealth
 
+class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
+    public $name = "fighterimprsensors";
+    public $displayName = "Improved Sensors";
+    public $iconPath = "scanner.png";
+    public $specialAbilities = array("ImprovedSensors");
+    public $primary = true;
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
+    }
+    
+    public function setSystemDataWindow($turn){
+            $this->data["Special"] = "Halves effectiveness of enemy Jammer.";
+        }
+    
+    public function getSpecialAbilityValue($args)
+    {     
+        return 1; //Improved Sensors just are       
+    }     
+} //endof Improved Sensors
+
+class Fighteradvsensors extends ShipSystem implements SpecialAbility{    
+    public $name = "Fighteradvsensors";
+    public $displayName = "Advanced Sensors";
+    public $iconPath = "scanner.png";
+    public $specialAbilities = array("AdvancedSensors");
+    public $primary = true;
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
+    }
+    
+    public function setSystemDataWindow($turn){
+            $this->data["Special"] = "Negates enemy Jammer.";
+        }
+    
+    public function getSpecialAbilityValue($args)
+    {     
+        return 1; //Improved Sensors just are       
+    }     
+} //endof Advanced Sensors
+
 interface SpecialAbility{
     public function getSpecialAbilityValue($args);
 }
@@ -369,16 +411,21 @@ class Scanner extends ShipSystem{
 	
 	/*functions adding Advanced/Improved Sensors trait*/
 	public function markImproved(){		
-    		public $specialAbilities[] = array("ImprovedSensors");
+    		$this->specialAbilities[] = "ImprovedSensors";
+			
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
 		}
 		$this->data["Special"] .= 'Improved Sensors - halve Jammer effectiveness (to hit penalty and launch range penalty).';
+		
 	}
+	/*note: as there are no actual Advanced Sensors unit yet, this feature is not complete;
+		at the moment Advanced Sensors do have flat boost cost and do ignore Jammer, but do NOT yet ignore SDEW/BDEW as they should
+	*/
 	public function markAdvanced(){		
-    		public $specialAbilities[] = array("AdvancedSensors");
+    		$this->specialAbilities[] = "AdvancedSensors";
 		$this->boostEfficiency = 14; //Advanced Sensors are rarely lower than 13, so flat 14 boost cost is advantageous to output+1!
 		if (!isset($this->data["Special"])) {
 			$this->data["Special"] = '';
@@ -413,7 +460,10 @@ class ElintScanner extends Scanner implements SpecialAbility{
         $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated.";		     
         $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW by 1 per 3 points allocated (split evenly between enemy locks). If all locks are broken, CCEW lock is also broken.";	
     }
-	
+	/*
+	public function markImproved(){	parent::markImproved();   }
+	public function markAdvanced(){	parent::markImproved();	}
+	*/
     public function getSpecialAbilityValue($args)
     {
         return true;

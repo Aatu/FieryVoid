@@ -782,10 +782,10 @@ window.weaponManager = {
             if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
 
 	   if (jammermod > 0){	 //else Improved Sensors do nothing
-		/*Improved/Advanced Sensors bonus*/	
-		if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")){
+		/*Improved/Advanced Sensors bonus*/	/*hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction*/
+		if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")){
 			jammermod = 0; //Advanced Sensors negate Jammer
-		} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors")){
+		} else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")){
 			jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
 		}
 	   }
@@ -1363,10 +1363,10 @@ window.weaponManager = {
 			if (!shipManager.power.isOfflineOnTurn(target, jammer, (gamedata.turn-1) )){
 				/*Improved/Advanced Sensors effect*/
 				var jammerValue = shipManager.systems.getOutput(target, jammer);
-				if ($shooter->hasSpecialAbility("AdvancedSensors")) {
-					$jammerValue = 0; //negated
-				} else if ($shooter->hasSpecialAbility("ImprovedSensors")) {
-					$jammerValue = $jammerValue * 0.5; //halved
+				if (shipManager.hasSpecialAbility(shooter,"AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")) {
+					jammerValue = 0; //negated
+				} else if (shipManager.hasSpecialAbility(shooter,"ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")) {
+					jammerValue = jammerValue * 0.5; //halved
 				}
 				range = range / (1+jammerValue);
 				//range = range / (shipManager.systems.getOutput(target, jammer)+1);

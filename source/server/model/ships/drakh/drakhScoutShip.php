@@ -55,6 +55,7 @@ class DrakhScoutShip extends MediumShip{
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure( 5, 50));
 	    
+		
 	    
         $this->hitChart = array(
             0=> array(
@@ -82,7 +83,9 @@ class DrakhScoutShip extends MediumShip{
             ),
        );
 	    
-	    
     }
+	
+	
+	
 }
 ?>
