@@ -120,6 +120,7 @@ spl_autoload_register(
                 'civiliantanker' => '/server/model/ships/civilians/civilianTanker.php',
                 'cnc' => '/server/model/systems/baseSystems.php',
                 'cobra' => '/server/model/ships/raiders/cobra.php',
+                'adjudicator' => '/server/model/ships/streib/adjudicator.php',
                 'collector' => '/server/model/ships/streib/collector.php',
                 'combatlaser' => '/server/model/weapons/lasers.php',
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
