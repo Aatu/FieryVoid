@@ -32,7 +32,7 @@ class Collector extends BaseShip{
         $this->addFrontSystem(new BurstPulseCannon(7, 6, 6, 300, 60));
         $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 120));
 
-        $this->addAftSystem(new Thruster(9, 8, 0, 7, 2));
+        $this->addAftSystem(new Thruster(9, 5, 0, 3, 2)); //reduced size to match thrust
         $this->addAftSystem(new Thruster(9, 8, 0, 7, 2));
         $this->addAftSystem(new MediumBurstBeam(6, 7, 6, 60, 240));
         $this->addAftSystem(new ImprovedBlastLaser(7, 10, 8, 120, 240));
