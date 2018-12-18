@@ -1433,31 +1433,18 @@ class SurgeLaser extends Raking{
                 2 => "Combined",
             );
         public $rangePenalty = 2; //-2 hex in single mode
-            public $rangePenaltyArray = array( 1=>2, 2=>1, 3=>0.5, 4=>0.33, 5=>0.25 ); //Raking and Piercing mode
-        public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
-            public $fireControlArray = array( 1=>array(2, 2, 2), 2=>array(1,3,3), 3=>array(0,4,4), 4=>array(-2,4,4), 5=>array(-4,4,4) ); //Raking and Piercing mode
-	
-	
-	
+            public $rangePenaltyArray = array( 1=>2, 2=>2); //-2/hex in both modes
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
+			
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
-
 	
-	public $isCombined = false; //is being combined with other weapon
-	public $alreadyConsidered = false; //already considered - either being fired or combined
 	
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Surge Cannons into a single shot with increased range and damage (and cooldown):";  
-		      $this->data["Special"] .= "<br> - 2 SC: 5-23 dmg, -5/hex"; 
-		      $this->data["Special"] .= "<br> - 3 SC: 9-36 dmg, -2.5/hex"; 
-		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1.65/hex"; 
-		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1.25/hex"; 
-		      $this->data["Special"] .= "<br>If You allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in single mode instead.";  
-		      $this->data["Special"] .= "<br>Cooldown period: 1 less than number of weapons combining.";  
-		      $this->data["Special"] .= "<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
+		      $this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
 	    }	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
@@ -1466,68 +1453,6 @@ class SurgeLaser extends Raking{
 		if ($system->advancedArmor) return; //no effect on Advanced Armor
 		$system->critRollMod+=2; 
 	} //endof function onDamagedSystem
-	
-	
-        public function fire($gamedata, $fireOrder){
-            // If fired, this weapon needs 2 turns cooldown period (=forced shutdown)
-	    if ($this->isCombined) $fireOrder->shots = 0; //no actual shots from weapon that's firing as part of combined shot!
-            parent::fire($gamedata, $fireOrder);
-	    for($i = 1; $i<$this->firingMode;$i++){
-		$trgtTurn = $gamedata->turn+$i-1;
-                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $trgtTurn);
-                $crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-                $this->criticals[] =  $crit;
-	    }
-        } //endof function fire
-	
-	
-	
-	//if fired in higher mode - combine with other weapons that are so fired!
-	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
-	public function calculateHitBase($gamedata, $fireOrder){
-		$this->alreadyConsidered = true;
-		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
-			$notes = "technical fire order - weapon combined into another shot";
-			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
-			$fireOrder->needed = 0;
-			$fireOrder->notes = $notes;
-			$fireOrder->updated = true;
-			$this->changeFiringMode($fireOrder->firingMode);
-			return;
-		}
-		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
-			$firingShip = $gamedata->getShipById($fireOrder->shooterid);
-			$subordinateOrders = array();
-			$subordinateOrdersNo = 0;
-			//look for firing orders from same ship at same target (and same called id as well) in same mode - and make sure it's same type of weapon
-			$allOrders = $firingShip->getAllFireOrders($gamedata->turn);
-			foreach($allOrders as $subOrder) {
-				if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
-					//order data fits - is weapon another Surge Cannon?...
-					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
-					if ($subWeapon instanceof SurgeCannon){
-						if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
-							$subordinateOrdersNo++;
-							$subordinateOrders[] = $subOrder;
-						}
-					}
-				}
-				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
-			}						
-			if ($subordinateOrdersNo == ($fireOrder->firingMode-1)){ //combining - set other combining weapons/fire orders to technical status!
-				foreach($subordinateOrders as $subOrder){
-					$subWeapon = $firingShip->getSystemById($subOrder->weaponid);
-					$subWeapon->isCombined = true;
-					$subWeapon->alreadyConsidered = true;
-					$subWeapon->doNotIntercept = true;
-				}
-			}else{//not enough weapons to combine in this mode - set self to single fire
-				$fireOrder->firingMode = 1;
-			}
-		}
-		parent::calculateHitBase($gamedata, $fireOrder);
-	}//endof function calculateHitBase
 	
 	
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -1546,19 +1471,10 @@ class SurgeLaser extends Raking{
         public function getDamage($fireOrder){
 		switch($this->firingMode){
 			case 1:
-				return Dice::d(10, 1)+1; //1 SC
+				return Dice::d(10, 1)+2; //rapid fire
 				break;
 			case 2:
-				return Dice::d(10, 2)+3; //2 SC
-				break;
-			case 3:
-				return Dice::d(10, 3)+6; //3 SC
-				break;
-			case 4:
-				return Dice::d(10, 4)+10; //4 SC
-				break;
-			case 5:
-				return Dice::d(10, 5)+15; //5 SC
+				return Dice::d(10, 2)+3; //combined fire
 				break;
 		}
 	}
@@ -1570,34 +1486,16 @@ class SurgeLaser extends Raking{
 			case 2:
 				$this->minDamage = 5;
 				break;	
-			case 3:
-				$this->minDamage = 9;
-				break;	
-			case 4:
-				$this->minDamage = 14;
-				break;	
-			case 5:
-				$this->minDamage = 20;
-				break;	
 		}
 		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
         public function setMaxDamage(){
 		switch($this->firingMode){
 			case 1:
-				$this->maxDamage = 11;
+				$this->maxDamage = 12;
 				break;
 			case 2:
 				$this->maxDamage = 23;
-				break;	
-			case 3:
-				$this->maxDamage = 36;
-				break;	
-			case 4:
-				$this->maxDamage = 50;
-				break;	
-			case 5:
-				$this->maxDamage = 65;
 				break;	
 		}
 		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
