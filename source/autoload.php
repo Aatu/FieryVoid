@@ -767,6 +767,7 @@ spl_autoload_register(
                 'superheavyfighter' => '/server/model/ships/FighterFlight.php',
                 'surgeblaster' => '/server/model/weapons/specialWeapons.php',
                 'surgecannon' => '/server/model/weapons/specialWeapons.php',
+                'surgelaser' => '/server/model/weapons/specialWeapons.php',
                 'sussha' => '/server/model/ships/balosian/sussha.php',
                 'swallow' => '/server/model/ships/drazi_old/swallow.php',
                 'swassaultfrigate' => '/server/model/ships/starwars_centauri/swAssaultFrigate.php',
