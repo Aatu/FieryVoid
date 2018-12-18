@@ -4,8 +4,8 @@ class Adjudicator extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 1250;
-		$this->faction = "Streib";
+	$this->pointCost = 1250;
+	$this->faction = "Streib";
         $this->phpclass = "Adjudicator";
         $this->imagePath = "img/ships/collector.png";
         $this->shipClass = "Collector";
@@ -28,10 +28,12 @@ class Adjudicator extends BaseShip{
         $this->addPrimarySystem(new TractorBeam(7, 4, 0, 0));
         $this->addPrimarySystem(new Hangar(7, 2, 0));
         
-        $this->addFrontSystem(new Thruster(9, 7, 0, 6, 1));
-        $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 240, 60));
-        $this->addFrontSystem(new BurstPulseCannon(7, 6, 6, 300, 60));
-        $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 120));
+        $this->addFrontSystem(new Thruster(9, 7, 0, 6, 1));	
+        $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
+        $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));	
+        $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 60));
+        $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 60));
+        $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));
         
         
         $this->addAftSystem(new Engine(9, 11, 0, 9, 2)); 
