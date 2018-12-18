@@ -94,6 +94,12 @@ var SurgeCannon = function(json, ship)
 SurgeCannon.prototype = Object.create( Weapon.prototype );
 SurgeCannon.prototype.constructor = SurgeCannon;
 
+var SurgeLaser = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+SurgeLaser.prototype = Object.create( Weapon.prototype );
+SurgeLaser.prototype.constructor = SurgeLaser;
 
 var LtSurgeBlaster = function(json, ship)
 {
