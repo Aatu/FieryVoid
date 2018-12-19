@@ -55,17 +55,19 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <div id="newsHeader">Latest News - December 2018</div>
     <div id="newsEntry">
-        <h3> *** Merry Christmas and a Happy New Year! *** </h3><br>
+        <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
-        <br><br>
+        <br>
 
         The latest update includes:
         <br><br>
         - <b>Drakh Improved Sensors</b> - they now do halve Jammer effectiveness, putting em on ner(er) footing with Minbari
         <br>
-        - <b>Streib weapon</b> corrected typo giving them insane FC
+        - <b>Reactor overload</b> is now possible even on a derelict ship (system shutdown too!)  
         <br>
-        - <b>Streib</b> number of ships doubled :)
+        - <b>Ipsha weapons</b> fixed forced shutdown bug        
+        <br>
+        - <b>Streib</b> number of ships tripled :)
         <br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
