@@ -1436,6 +1436,8 @@ class SurgeLaser extends Raking{
             public $rangePenaltyArray = array( 1=>2, 2=>2); //-2/hex in both modes
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
             public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
+			public $guns = 2;
+			public $gunsArray = array(1=>2,2=>1);//basic 2 shots, combined 1 shot
 			
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
@@ -1445,6 +1447,7 @@ class SurgeLaser extends Raking{
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
 		      $this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
+			  $this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10, combined 1 shot with FC 10/10/20.";  //original rule is more fancy
 	    }	
 	
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 

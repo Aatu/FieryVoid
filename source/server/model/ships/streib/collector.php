@@ -20,6 +20,8 @@ class Collector extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->gravitic = true;	
+		
+		$this->unofficial = true;
         
          
         $this->addPrimarySystem(new Reactor(9, 16, 0, 0));

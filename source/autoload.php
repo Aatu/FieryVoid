@@ -122,6 +122,7 @@ spl_autoload_register(
                 'cobra' => '/server/model/ships/raiders/cobra.php',
                 'adjudicator' => '/server/model/ships/streib/adjudicator.php',
                 'collector' => '/server/model/ships/streib/collector.php',
+                'streibintruder' => '/server/model/ships/streib/streibIntruder.php',
                 'combatlaser' => '/server/model/weapons/lasers.php',
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
                 'commjammer' => '/server/model/weapons/specialWeapons.php',

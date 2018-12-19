@@ -8,10 +8,11 @@ class Adjudicator extends BaseShip{
 	$this->faction = "Streib";
         $this->phpclass = "Adjudicator";
         $this->imagePath = "img/ships/collector.png";
-        $this->shipClass = "Collector";
+        $this->shipClass = "Adjudicator";
         $this->shipSizeClass = 3;
         
         $this->isd = 2205;
+		$this->unofficial = true;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
