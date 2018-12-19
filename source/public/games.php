@@ -53,17 +53,21 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - November 2018</div>
+    <div id="newsHeader">Latest News - December 2018</div>
     <div id="newsEntry">
-        <!-- no longer quite the news?
-        <h3>Good news everyone!</h3><br>Our little world is looking awesome, now in <del>hi-def 3d</del> faster 2d!
-        <br><br>
-        -->
+        <h3> *** Merry Christmas and a Happy New Year! *** </h3>
+        <h4>   may our games be fiery and our lives peaceful</h4>
+        <br>
+
         The latest update includes:
         <br><br>
         - <b>Drakh Improved Sensors</b> - they now do halve Jammer effectiveness, putting em on ner(er) footing with Minbari
         <br>
-        - <b>Streib weapon</b> corrected typo giving them insane FC
+        - <b>Reactor overload</b> is now possible even on a derelict ship (system shutdown too!)  
+        <br>
+        - <b>Ipsha weapons</b> fixed forced shutdown bug        
+        <br>
+        - <b>Streib</b> number of ships tripled :)
         <br>
         - last but not least - brand new collection of BUGS!;
         <br><br>

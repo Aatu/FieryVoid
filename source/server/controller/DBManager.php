@@ -403,8 +403,9 @@ class DBManager
             foreach ($criticals as $critical) {
                 if ((!$critical->newCrit) && ($critical->turn != $turn))
                     continue;
-
-                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "', $turn, '" . $critical->param . "')";
+				//important to use $critical->turn: critical does NOT need to have turn equal to current! 
+				//this is importnat for criticals that need to have limited time window yet last longer than 1 turn (go out 1 turn after issuing - so issue must be later)
+                $sql = "INSERT INTO `B5CGM`.`tac_critical` VALUES(null, $gameid, " . $critical->shipid . ", " . $critical->systemid . ",'" . $critical->phpclass . "'," . $critical->turn . ",'" . $critical->param . "')";
 
                 $this->update($sql);
             }

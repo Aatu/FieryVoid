@@ -839,7 +839,7 @@ shipManager.power = {
 
 		if (gamedata.gamephase != 1) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
 		if (ship.userid != gamedata.thisplayer) return;
 

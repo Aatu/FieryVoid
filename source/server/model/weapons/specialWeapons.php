@@ -1405,6 +1405,109 @@ class SurgeCannon extends Raking{
 } //endof class SurgeCannon
 
 
+
+
+class SurgeLaser extends Raking{
+    /*Surge Laser - Streib weapon*/
+        public $name = "SurgeLaser";
+        public $displayName = "Surge Laser";
+	public $iconPath = "SurgeCannon.png";
+	
+	public $animation = "laser";
+	public $animationColor = array(165, 165, 255);
+	public $animationWidth = 2;
+	public $animationWidthArray = array(1=>2, 2=>3);
+	public $animationWidth2 = 0.4;
+	public $animationExplosionScaleArray = array(1=>0.1, 2=>0.2);
+
+      
+        public $loadingtime = 1;
+	public $intercept = 1; //intercept rating -1
+        
+	
+	
+        public $priority = 3; //technically it's Raking weapon, but so light it's essentially light Standard
+	public $firingMode = 1;	
+            public $firingModes = array(
+                1 => "Rapid",
+                2 => "Combined",
+            );
+        public $rangePenalty = 2; //-2 hex in single mode
+            public $rangePenaltyArray = array( 1=>2, 2=>2); //-2/hex in both modes
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+            public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
+			public $guns = 2;
+			public $gunsArray = array(1=>2,2=>1);//basic 2 shots, combined 1 shot
+			
+	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+	
+	
+	
+	    public function setSystemDataWindow($turn){
+		      parent::setSystemDataWindow($turn);  
+		      $this->data["Special"] = "+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
+			  $this->data["Special"] .= "Basic firing mode is 2 shots with FC 20/10/10, combined 1 shot with FC 10/10/20.";  //original rule is more fancy
+	    }	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ 
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		//each rake causes +2 mod on critical roll for hit system! 
+		if ($system->advancedArmor) return; //no effect on Advanced Armor
+		$system->critRollMod+=2; 
+	} //endof function onDamagedSystem
+	
+	
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+        {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 3;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	
+	
+        public function getDamage($fireOrder){
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(10, 1)+2; //rapid fire
+				break;
+			case 2:
+				return Dice::d(10, 2)+3; //combined fire
+				break;
+		}
+	}
+        public function setMinDamage(){    
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 2;
+				break;
+			case 2:
+				$this->minDamage = 5;
+				break;	
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 12;
+				break;
+			case 2:
+				$this->maxDamage = 23;
+				break;	
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;  
+	}
+} //endof class SurgeLaser
+
+
+
+
    class LtSurgeBlaster extends LinkedWeapon{
 	   /*Ipsha fighter weapon*/
         public $trailColor = array(50, 50, 200);

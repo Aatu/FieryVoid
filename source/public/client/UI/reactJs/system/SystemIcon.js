@@ -124,14 +124,17 @@ class SystemIcon extends React.Component{
 
 		if (gamedata.waiting) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
-
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+		
 		if (system.weapon && (gamedata.gamephase === 3 && !system.ballistic) || (gamedata.gamephase === 1 && system.ballistic)) {
-			if (gamedata.isMyShip(ship)) {
-				if (weaponManager.isSelectedWeapon(system)) {
-					weaponManager.unSelectWeapon(ship, system);
-				} else {
-					weaponManager.selectWeapon(ship, system);
+			//cannoct SELECT weapon when unit is adrift though!
+			if(!shipManager.isAdrift(ship)){
+				if (gamedata.isMyShip(ship)) {
+					if (weaponManager.isSelectedWeapon(system)) {
+						weaponManager.unSelectWeapon(ship, system);
+					} else {
+						weaponManager.selectWeapon(ship, system);
+					}
 				}
 			}
         }

@@ -30311,14 +30311,17 @@ var SystemIcon = function (_React$Component) {
 
             if (gamedata.waiting) return;
 
-            if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+            if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
             if (system.weapon && gamedata.gamephase === 3 && !system.ballistic || gamedata.gamephase === 1 && system.ballistic) {
-                if (gamedata.isMyShip(ship)) {
-                    if (weaponManager.isSelectedWeapon(system)) {
-                        weaponManager.unSelectWeapon(ship, system);
-                    } else {
-                        weaponManager.selectWeapon(ship, system);
+                //cannoct SELECT weapon when unit is adrift though!
+                if (!shipManager.isAdrift(ship)) {
+                    if (gamedata.isMyShip(ship)) {
+                        if (weaponManager.isSelectedWeapon(system)) {
+                            weaponManager.unSelectWeapon(ship, system);
+                        } else {
+                            weaponManager.selectWeapon(ship, system);
+                        }
                     }
                 }
             }
@@ -30973,7 +30976,7 @@ exports.default = SystemInfo;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+	value: true
 });
 exports.canDoAnything = undefined;
 
@@ -31007,282 +31010,324 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 var Container = /*#__PURE__*/_styledComponents2.default.div(_templateObject);
 
 var Button = /*#__PURE__*/_styledComponents2.default.div(_templateObject2, function (props) {
-    return props.img;
+	return props.img;
 }, _styled.Clickable);
 
 var SystemInfoButtons = function (_React$Component) {
-    _inherits(SystemInfoButtons, _React$Component);
+	_inherits(SystemInfoButtons, _React$Component);
 
-    function SystemInfoButtons() {
-        _classCallCheck(this, SystemInfoButtons);
+	function SystemInfoButtons() {
+		_classCallCheck(this, SystemInfoButtons);
 
-        return _possibleConstructorReturn(this, (SystemInfoButtons.__proto__ || Object.getPrototypeOf(SystemInfoButtons)).apply(this, arguments));
-    }
+		return _possibleConstructorReturn(this, (SystemInfoButtons.__proto__ || Object.getPrototypeOf(SystemInfoButtons)).apply(this, arguments));
+	}
 
-    _createClass(SystemInfoButtons, [{
-        key: "online",
-        value: function online(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props = this.props,
-                ship = _props.ship,
-                system = _props.system;
+	_createClass(SystemInfoButtons, [{
+		key: "online",
+		value: function online(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props = this.props,
+			    ship = _props.ship,
+			    system = _props.system;
 
-            shipManager.power.onOnlineClicked(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "offline",
-        value: function offline(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props2 = this.props,
-                ship = _props2.ship,
-                system = _props2.system;
+			shipManager.power.onOnlineClicked(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "offline",
+		value: function offline(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props2 = this.props,
+			    ship = _props2.ship,
+			    system = _props2.system;
 
-            if (!canOffline(ship, system)) {
-                return;
-            }
+			if (!canOffline(ship, system)) {
+				return;
+			}
 
-            shipManager.power.onOfflineClicked(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "allOnline",
-        value: function allOnline(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props3 = this.props,
-                ship = _props3.ship,
-                system = _props3.system;
+			shipManager.power.onOfflineClicked(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "allOnline",
+		value: function allOnline(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props3 = this.props,
+			    ship = _props3.ship,
+			    system = _props3.system;
 
-            shipManager.power.onlineAll(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "allOffline",
-        value: function allOffline(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props4 = this.props,
-                ship = _props4.ship,
-                system = _props4.system;
+			shipManager.power.onlineAll(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "allOffline",
+		value: function allOffline(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props4 = this.props,
+			    ship = _props4.ship,
+			    system = _props4.system;
 
-            if (!canOffline(ship, system)) {
-                return;
-            }
+			if (!canOffline(ship, system)) {
+				return;
+			}
 
-            shipManager.power.offlineAll(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "overload",
-        value: function overload(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props5 = this.props,
-                ship = _props5.ship,
-                system = _props5.system;
+			shipManager.power.offlineAll(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "overload",
+		value: function overload(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props5 = this.props,
+			    ship = _props5.ship,
+			    system = _props5.system;
 
-            shipManager.power.onOverloadClicked(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "stopOverload",
-        value: function stopOverload(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props6 = this.props,
-                ship = _props6.ship,
-                system = _props6.system;
+			shipManager.power.onOverloadClicked(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "stopOverload",
+		value: function stopOverload(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props6 = this.props,
+			    ship = _props6.ship,
+			    system = _props6.system;
 
-            shipManager.power.onStopOverloadClicked(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "boost",
-        value: function boost(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props7 = this.props,
-                ship = _props7.ship,
-                system = _props7.system;
+			shipManager.power.onStopOverloadClicked(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "boost",
+		value: function boost(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props7 = this.props,
+			    ship = _props7.ship,
+			    system = _props7.system;
 
-            shipManager.power.clickPlus(ship, system);
-        }
-    }, {
-        key: "deboost",
-        value: function deboost(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props8 = this.props,
-                ship = _props8.ship,
-                system = _props8.system;
+			shipManager.power.clickPlus(ship, system);
+		}
+	}, {
+		key: "deboost",
+		value: function deboost(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props8 = this.props,
+			    ship = _props8.ship,
+			    system = _props8.system;
 
-            shipManager.power.clickMinus(ship, system);
-        }
-    }, {
-        key: "addShots",
-        value: function addShots(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props9 = this.props,
-                ship = _props9.ship,
-                system = _props9.system;
+			shipManager.power.clickMinus(ship, system);
+		}
+	}, {
+		key: "addShots",
+		value: function addShots(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props9 = this.props,
+			    ship = _props9.ship,
+			    system = _props9.system;
 
-            if (!canAddShots(ship, system)) {
-                return;
-            }
+			if (!canAddShots(ship, system)) {
+				return;
+			}
 
-            weaponManager.changeShots(ship, system, 1);
-        }
-    }, {
-        key: "reduceShots",
-        value: function reduceShots(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props10 = this.props,
-                ship = _props10.ship,
-                system = _props10.system;
+			weaponManager.changeShots(ship, system, 1);
+		}
+	}, {
+		key: "reduceShots",
+		value: function reduceShots(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props10 = this.props,
+			    ship = _props10.ship,
+			    system = _props10.system;
 
-            if (!canReduceShots(ship, system)) {
-                return;
-            }
+			if (!canReduceShots(ship, system)) {
+				return;
+			}
 
-            weaponManager.changeShots(ship, system, -1);
-        }
-    }, {
-        key: "removeFireOrder",
-        value: function removeFireOrder(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props11 = this.props,
-                ship = _props11.ship,
-                system = _props11.system;
+			weaponManager.changeShots(ship, system, -1);
+		}
+	}, {
+		key: "removeFireOrder",
+		value: function removeFireOrder(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props11 = this.props,
+			    ship = _props11.ship,
+			    system = _props11.system;
 
-            if (!canRemoveFireOrder(ship, system)) {
-                return;
-            }
+			if (!canRemoveFireOrder(ship, system)) {
+				return;
+			}
 
-            weaponManager.removeFiringOrder(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "changeFiringMode",
-        value: function changeFiringMode(e) {
-            e.stopPropagation();e.preventDefault();
-            var _props12 = this.props,
-                ship = _props12.ship,
-                system = _props12.system;
+			weaponManager.removeFiringOrder(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "allChangeFiringMode",
+		value: function allChangeFiringMode(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props12 = this.props,
+			    ship = _props12.ship,
+			    system = _props12.system;
 
-            if (!canChangeFiringMode(ship, system)) {
-                return;
-            }
+			if (!canChangeFiringMode(ship, system)) {
+				return;
+			}
+			//change firing mode of self
+			weaponManager.onModeClicked(ship, system);
+			//check which mode was set
+			var modeSet = system.firingMode;
+			//set this mode on ALL similar weapons that aren't declared and can change firing mode
+			var similarWeapons = new Array();
+			for (var i = 0; i < ship.systems.length; i++) {
+				if (system.displayName === ship.systems[i].displayName) {
+					if (system.weapon) {
+						similarWeapons.push(ship.systems[i]);
+					}
+				}
+			}
+			for (var i = 0; i < similarWeapons.length; i++) {
+				var weapon = similarWeapons[i];
+				if (weapon.firingMode == modeSet) continue;
+				if (!canChangeFiringMode(ship, weapon)) continue;
+				var originalMode = weapon.firingMode; //so mode is properly reset for weapon that cannot have desired mode set for some reason!
+				var iterations = 0;
+				while (weapon.firingMode != modeSet && iterations < 2) {
+					weaponManager.onModeClicked(ship, weapon);
+					if (weapon.firingMode == 1) {
+						iterations++; //if an entire iteration oassed and mode wasn't found, then mode cannot be reached	
+					}
+				}
+				//reset mode back if necessary! (this one is guaranteed to be available)
+				if (weapon.firingMode != modeSet) while (weapon.firingMode != originalMode) {
+					weaponManager.onModeClicked(ship, weapon);
+				}
+			}
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "changeFiringMode",
+		value: function changeFiringMode(e) {
+			e.stopPropagation();e.preventDefault();
+			var _props13 = this.props,
+			    ship = _props13.ship,
+			    system = _props13.system;
 
-            weaponManager.onModeClicked(ship, system);
-            webglScene.customEvent('CloseSystemInfo');
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            var _props13 = this.props,
-                ship = _props13.ship,
-                selectedShip = _props13.selectedShip,
-                system = _props13.system;
+			if (!canChangeFiringMode(ship, system)) {
+				return;
+			}
+			weaponManager.onModeClicked(ship, system);
+			webglScene.customEvent('CloseSystemInfo');
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			var _props14 = this.props,
+			    ship = _props14.ship,
+			    selectedShip = _props14.selectedShip,
+			    system = _props14.system;
 
 
-            if (!canDoAnything) {
-                return null;
-            }
+			if (!canDoAnything) {
+				return null;
+			}
 
-            return React.createElement(
-                Container,
-                null,
-                canOnline(ship, system) && React.createElement(Button, { onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
-                canOffline(ship, system) && React.createElement(Button, { onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
-                canOverload(ship, system) && React.createElement(Button, { onClick: this.overload.bind(this), img: "./img/overload.png" }),
-                canStopOverload(ship, system) && React.createElement(Button, { onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
-                canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
-                canDeBoost(ship, system) && React.createElement(Button, { onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
-                canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
-                canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
-                canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
-                canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this))
-            );
-        }
-    }]);
+			return React.createElement(
+				Container,
+				null,
+				canOnline(ship, system) && React.createElement(Button, { onClick: this.online.bind(this), onContextMenu: this.allOnline.bind(this), img: "./img/on.png" }),
+				canOffline(ship, system) && React.createElement(Button, { onClick: this.offline.bind(this), onContextMenu: this.allOffline.bind(this), img: "./img/off.png" }),
+				canOverload(ship, system) && React.createElement(Button, { onClick: this.overload.bind(this), img: "./img/overload.png" }),
+				canStopOverload(ship, system) && React.createElement(Button, { onClick: this.stopOverload.bind(this), img: "./img/overloading.png" }),
+				canBoost(ship, system) && React.createElement(Button, { onClick: this.boost.bind(this), img: "./img/plussquare.png" }),
+				canDeBoost(ship, system) && React.createElement(Button, { onClick: this.deboost.bind(this), img: "./img/minussquare.png" }),
+				canAddShots(ship, system) && React.createElement(Button, { onClick: this.addShots.bind(this), img: "./img/plussquare.png" }),
+				canReduceShots(ship, system) && React.createElement(Button, { onClick: this.reduceShots.bind(this), img: "./img/minussquare.png" }),
+				canRemoveFireOrder(ship, system) && React.createElement(Button, { onClick: this.removeFireOrder.bind(this), img: "./img/firing.png" }),
+				canChangeFiringMode(ship, system) && getFiringModes(ship, system, this.changeFiringMode.bind(this), this.allChangeFiringMode.bind(this))
+			);
+		}
+	}]);
 
-    return SystemInfoButtons;
+	return SystemInfoButtons;
 }(React.Component);
 
 var canDoAnything = exports.canDoAnything = function canDoAnything(ship, system) {
-    return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
+	return canOffline(ship, system) || canOnline(ship, system) || canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system) || canDeBoost(ship, system) || canAddShots(ship, system) || canReduceShots(ship, system) || canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system);
 };
 
 var canOffline = function canOffline(ship, system) {
-    return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
+	return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 };
 
 var canOnline = function canOnline(ship, system) {
-    return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
+	return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
 };
 
 var canOverload = function canOverload(ship, system) {
-    return !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) && shipManager.power.canOverload(ship, system);
+	return !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) && shipManager.power.canOverload(ship, system);
 };
 
 var canStopOverload = function canStopOverload(ship, system) {
-    return system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
+	return system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system);
 };
 
 var canBoost = function canBoost(ship, system) {
-    return system.boostable && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
+	return system.boostable && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 };
 
 var canDeBoost = function canDeBoost(ship, system) {
-    return Boolean(shipManager.power.getBoost(system));
+	return Boolean(shipManager.power.getBoost(system));
 };
 
 var canAddShots = function canAddShots(ship, system) {
-    return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
+	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.shots;
 };
 
 var canReduceShots = function canReduceShots(ship, system) {
-    return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
+	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
 };
 
 var canRemoveFireOrder = function canRemoveFireOrder(ship, system) {
-    return system.weapon && weaponManager.hasFiringOrder(ship, system);
+	return system.weapon && weaponManager.hasFiringOrder(ship, system);
 };
 
 var canChangeFiringMode = function canChangeFiringMode(ship, system) {
-    return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
+	return system.weapon && (gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 3 && !system.ballistic) && !weaponManager.hasFiringOrder(ship, system) && (Object.keys(system.firingModes).length > 1 || system.dualWeapon);
 };
 
-var getFiringModes = function getFiringModes(ship, system, changeFiringMode) {
-    if (system.parentId >= 0) {
-        var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+var getFiringModes = function getFiringModes(ship, system, changeFiringMode, allChangeFiringMode) {
+	if (system.parentId >= 0) {
+		var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
-        if (parentSystem.parentId >= 0) {
-            parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
-            //$(".parentsystem_" + parentSystem.id).addClass("modes");
-            //let modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
-        } else {
-                //$(".parentsystem_" + parentSystem.id).addClass("modes");
-                //let modebutton = $(".mode", systemwindow);
-            }
+		if (parentSystem.parentId >= 0) {
+			parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+			//$(".parentsystem_" + parentSystem.id).addClass("modes");
+			//let modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
+		} else {
+				//$(".parentsystem_" + parentSystem.id).addClass("modes");
+				//let modebutton = $(".mode", systemwindow);
+			}
 
-        console.log(parentSystem.firingModes[parentSystem.firingMode]);
-        //modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
-    } else {
+		console.log(parentSystem.firingModes[parentSystem.firingMode]);
+		//modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
+	} else {
 
-        console.log(system.firingModes, system.firingMode);
+		console.log(system.firingModes, system.firingMode);
 
-        var firingMode = system.firingModes[system.firingMode + 1] ? system.firingModes[system.firingMode + 1] : system.firingModes[1];
+		var firingMode = system.firingModes[system.firingMode + 1] ? system.firingModes[system.firingMode + 1] : system.firingModes[1];
 
-        var img = '';
+		var img = '';
 
-        if (system.iconPath) {
-            img = "./img/systemicons/" + system.iconPath;
-        } else {
-            img = "./img/systemicons/" + system.name + ".png";
-        }
+		if (system.iconPath) {
+			img = "./img/systemicons/" + system.iconPath;
+		} else {
+			img = "./img/systemicons/" + system.name + ".png";
+		}
 
-        return React.createElement(
-            Button,
-            { onClick: changeFiringMode, img: img },
-            firingMode.substring(0, 1)
-        );
-    }
+		return React.createElement(
+			Button,
+			{ onClick: changeFiringMode, onContextMenu: allChangeFiringMode, img: img },
+			firingMode.substring(0, 1)
+		);
+	}
 };
 
 exports.default = SystemInfoButtons;

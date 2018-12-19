@@ -1542,7 +1542,7 @@ window.shipWindowManager = {
 
 		if (gamedata.waiting) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) || shipManager.isAdrift(ship)) return;
+		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
 
 		if (system.weapon) {
 
