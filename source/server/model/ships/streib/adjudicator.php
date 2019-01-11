@@ -16,6 +16,7 @@ class Adjudicator extends BaseShip{
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;
+	$this->fighters = array("shuttles" => 2); 
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
