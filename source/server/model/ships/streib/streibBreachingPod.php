@@ -7,7 +7,7 @@ class StreibBreachingPod extends FighterFlight{
 	$this->pointCost = 50*6;
 	$this->faction = "Streib";
         $this->phpclass = "StreibBreachingPod";
-        $this->shipClass = "Armed Shuttles";
+        $this->shipClass = "Breaching Pods";
 	 $this->imagePath = "img/ships/streibbreachingpod.png";
         
         $this->forwardDefense = 8;
