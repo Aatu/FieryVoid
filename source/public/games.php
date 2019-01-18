@@ -55,11 +55,11 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <div id="newsHeader">Latest News - December 2018</div>
     <div id="newsEntry">
-        /*
+        <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
-        */
+        -->
         The latest update includes:
         <br><br>
         - <b>Boostable weapon bugfix</b> - a serious bug was detected, making boostable weapons able to fire every turn. This is now corrected.
