@@ -16,149 +16,8 @@
     } //endof class Gravitic
 
 
-/*Marcin Sawicki: UNSUCCESSFUL attempt to remake GravPulsar according with different (more literal!) rules interpretation*/
-/*
-    class GravitonPulsar extends Pulse
-    {
-        public $name = "gravitonPulsar";
-        public $displayName = "Graviton Pulsar";
-        public $animation = "trail";
-        public $trailColor = array(99, 255, 00);
-        public $animationColor = array(99, 255, 00);
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $animationExplosionScale = 0.15;
-        public $boostable = true;
-        public $boostEfficiency = 2;
-        public $maxBoostLevel = 2;
-        public $loadingtime = 1;
-        public $maxpulses = 3;
-        public $priority = 4;
-		
-        public $rangePenalty = 1;
-        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
-        public $intercept = 1;
-	    
-        public $grouping = 20;
-
-
-	    //private $useDie = 3; //die used for base number of hits
-	public $damageType = 'Pulse'; 
-    	public $weaponClass = "Gravitic"; 
-        
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setSystemDataWindow($turn){
-	    $this->setTimes();
-            parent::setSystemDataWindow($turn);
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
-            //$this->data["REMARK"] = "Max. power might cause<br> crits on this system";
-	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
-	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
-	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
-		
-        }
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-		$this->intercept = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-	        $this->maxpulses = 3 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-        }
-        
-        protected function getPulses($turn)
-        {
-            switch($this->getBoostLevel($turn)){
-                case 0:
-                    return Dice::d(2);
-                    break;
-                case 1:
-                    return (Dice::d(3)+1);
-                    break;
-                case 2:
-                    return (Dice::d(3)+2);
-                    break;
-            }            
-        }
-
-        public function calculateHitBase($gamedata, $fireOrder){
-            $this->setTimes();
-            parent::calculateHitBase($gamedata, $fireOrder);
-	}
     
-        public function fire($gamedata, $fireOrder){
-            //$this->maxpulses = $this->getMaxPulses($gamedata->turn);
-            //$this->setTimes();
-                        
-            parent::fire($gamedata, $fireOrder);
-		
-            // If fully boosted: force critical roll.
-            if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
-            	$this->forceCriticalRoll = true;
-            }
-        }
-
-
-        public function getNormalLoad(){
-            return $this->loadingtime + $this->maxBoostLevel;
-        }
-        
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn)
-                            continue;
-
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
-            return $boostLevel;
-        }
-
-        private function getMaxPulses($turn){
-            return 3 + $this->getBoostLevel($turn);
-        }
-
-        public function getInterceptRating($turn){
-            return 1 + $this->getBoostLevel($turn);            
-        }
-        
-        public function getDamage($fireOrder){        return 10;   }
-        public function setMinDamage(){     $this->minDamage = 10 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
-    } //endof class GravitonPulsar
-*/
-    
-/*Marcin Sawicki: original GravPulsar*/
+/*Marcin Sawicki: as longer recharge time was highly troublesome, I have thrown in cooldown periods instead (but +1 turn)*/
     class GravitonPulsar extends Pulse
     {
         public $name = "gravitonPulsar";
@@ -194,12 +53,9 @@
 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
-            //$this->data["REMARK"] = "Max. power might cause<br> crits on this system";
 	    $this->data["Special"] = "Standard power: D2 pulses, +1/20%, max 3; intercept 1; 1/turn";
-	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; 1/2 turns";
-	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; 1/3 turns and forced critical";
+	    $this->data["Special"] .= "<br>Double power: D3+1 pulses, +1/20%, max 4; intercept 2; cooldown 2 turns";
+	    $this->data["Special"] .= "<br>Triple power: D3+2 pulses, +1/20%, max 5; intercept 3; cooldown 3 turns and forced critical";
             $this->defaultShots = $this->getMaxPulses($turn);
             $this->normalload = $this->loadingtime;
 
@@ -220,6 +76,8 @@
         }
         
         public function getLoadingTime(){
+		 return $this->loadingtime;
+	    /* original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
@@ -227,9 +85,12 @@
             else{
                 return $this->loadingtime;
             }
+	    */
         }
 
         public function getTurnsloaded(){
+		return $this->turnsloaded;
+		/*original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
@@ -237,15 +98,21 @@
             else{
                 return $this->turnsloaded;
             }
+	    */
         }
         
         public function setTimes(){
+                $this->loadingtime = 1;
+                $this->turnsloaded = 1;
+                $this->normalload = 1;
+		/*original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
                 $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
                 $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
             }
+	    */
         }
         
         protected function getPulses($turn)
@@ -266,16 +133,33 @@
         
     
         public function fire($gamedata, $fireOrder){
+	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
             $this->maxpulses = $this->getMaxPulses($gamedata->turn);
             $this->setTimes();
                         
             parent::fire($gamedata, $fireOrder);
             // If fully boosted: test for possible crit.
-            if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
+            if($currBoostlevel === $this->maxBoostLevel){
             	$crits = array();
                 $shooter = $gamedata->getShipById($fireOrder->shooterid);
                 $crits = $this->testCritical($shooter, $gamedata, $crits);
             }
+	    //if boosted, cooldown (2 or 3 tuns)
+	     if($currBoostlevel > 0){ //2 turns forced shutdown
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;
+	     }
+	     if($currBoostlevel > 1){ //additional turn forced shutdown
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;
+	     }
         }
 
 
@@ -311,119 +195,7 @@
     } //endof class GravitonPulsar
 
 
-/*Marcin Sawicki: UNSUCCESSFUL remake using more literal rules interpretation*/
-/*
-    class GraviticBolt extends Gravitic
-    {
-        public $name = "graviticBolt";
-        public $displayName = "Gravitic Bolt";
-        public $animation = "trail";
-        public $trailColor = array(99, 255, 00);
-        public $animationColor = array(99, 255, 00);
-        public $projectilespeed = 12;
-        public $animationWidth = 3;
-        public $animationExplosionScale = 0.20;
-        public $boostable = true;
-        public $boostEfficiency = 2;
-        public $maxBoostLevel = 2;
-        public $loadingtime = 1;
-        public $curDamage = 9;
-        public $priority = 4;
-		
-        public $rangePenalty = 1;
-        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
-        public $intercept = 1;
-        
-	public $damageType = 'Standard'; 
-    	public $weaponClass = "Gravitic"; 
-	    
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
-        {
-            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-        }
-
-        public function setTimes(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-		$this->intercept = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-                $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-	        $this->damage = 9+(3* $this->getBoostLevel(TacGamedata::$currentTurn) ) ;
-            }
-        }
-	    
-        public function setSystemDataWindow($turn){
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
-            $this->setTimes( );
-            parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = "Standard power: damage 9, RoF 1/turn";
-	    $this->data["Special"] .= "<br>Double power: damage 12, RoF 1/2 turns";
-	    $this->data["Special"] .= "<br>Triple power:damage 15, RoF 1/3 turns, forced critical";
-        }
-
-        private function getBoostLevel($turn){
-            $boostLevel = 0;
-            foreach ($this->power as $i){
-                    if ($i->turn != $turn)  continue;
-                    if ($i->type == 2){
-                            $boostLevel += $i->amount;
-                    }
-            }
-            return $boostLevel;
-        }
-               
-        public function getNormalLoad(){
-            return $this->loadingtime + $this->maxBoostLevel;
-        }
-        
-        public function getLoadingTime(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->loadingtime;
-            }
-        }
-
-        public function getTurnsloaded(){
-            if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
-                // In any other case, check the current boost.
-                return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
-            }
-            else{
-                return $this->turnsloaded;
-            }
-        }
-        
-        public function calculateHitBase($gamedata, $fireOrder){
-            $this->setTimes();
-            parent::calculateHitBase($gamedata, $fireOrder);
-	}
-	    
-        public function fire($gamedata, $fireOrder){
-            //$this->setTimes();                        
-            parent::fire($gamedata, $fireOrder);
-		
-            // If fully boosted: test for possible crit.
-            if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
-            	$crits = array();
-                $shooter = $gamedata->getShipById($fireOrder->shooterid);
-                $crits = $this->testCritical($shooter, $gamedata, $crits);
-            }
-        }
-	    
-        
-        public function getDamage($fireOrder){        return $this->getCurDamage($fireOrder->turn);   }
-        public function setMinDamage(){  $this->minDamage = $this->curDamage ;      }
-        public function setMaxDamage(){  $this->maxDamage = $this->curDamage ;      }
-    } //endof GraviticBolt
-*/
-
-    
-/*Marcin Sawicki: original Gravitic Bolt*/
+/*Marcin Sawicki: as longer recharge time was highly troublesome, I have thrown in cooldown periods instead (but +1 turn)*/
 class GraviticBolt extends Gravitic
     {
         public $name = "graviticBolt";
@@ -454,8 +226,9 @@ class GraviticBolt extends Gravitic
         }
 
         public function setSystemDataWindow($turn){
-            // Keep this consistent with the gravitic.js implementation.
-            // Yeah, I know: dirty.
+	    $this->data["Special"] = "Standard power: 9 damage, intercept 1,  no cooldown";
+	    $this->data["Special"] .= "<br>Double power: 12 damage, intercept 2, cooldown 2 turns";
+	    $this->data["Special"] .= "<br>Triple power: 15 damage, intercept 3, cooldown 3 turns and forced critical";
 
         
             switch($this->getBoostLevel($turn)){
@@ -518,6 +291,8 @@ class GraviticBolt extends Gravitic
         }
         
         public function getLoadingTime(){
+		return $this->loadingtime;
+		/* original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
@@ -525,9 +300,12 @@ class GraviticBolt extends Gravitic
             else{
                 return $this->loadingtime;
             }
+	    */
         }
 
         public function getTurnsloaded(){
+		return $this->turnsloaded;
+		/*original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 return 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
@@ -535,34 +313,59 @@ class GraviticBolt extends Gravitic
             else{
                 return $this->turnsloaded;
             }
+	    */
         }
         
 	    
         public function fire($gamedata, $fireOrder){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
             $this->setTimes();
                         
             parent::fire($gamedata, $fireOrder);
 		
             // If fully boosted: test for possible crit.
-            if($this->getBoostLevel($gamedata->turn) === $this->maxBoostLevel){
+            if($currBoostlevel === $this->maxBoostLevel){
             	$this->forceCriticalRoll = true;
             }
+		
+		
+	    //if boosted, cooldown (2 or 3 tuns)
+	     if($currBoostlevel > 0){ //2 turns forced shutdown
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn);
+                $crit->updated = true;
+                $this->criticals[] =  $crit;
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;
+	     }
+	     if($currBoostlevel > 1){ //additional turn forced shutdown
+                $crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+2);
+                $crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+                $this->criticals[] =  $crit;
+	     }
         }
 	    
 
-        public function setTimes(){
+        public function setTimes(){		
+                $this->loadingtime = 1;
+                $this->turnsloaded = 1;
+                $this->normalload = 1;
+		/*original
             if(!(TacGamedata::$currentPhase == 1 || ($this->turnsloaded < $this->loadingtime ))){
                 // In any other case, check the current boost.
                 $this->loadingtime = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
                 $this->turnsloaded = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
                 $this->normalload = 1 + $this->getBoostLevel(TacGamedata::$currentTurn);
             }
+	    */
         }
         
         public function getDamage($fireOrder){        return $this->getCurDamage($fireOrder->turn);   }
         public function setMinDamage(){  $this->minDamage = $this->curDamage ;      }
         public function setMaxDamage(){  $this->maxDamage = $this->curDamage ;      }
-    }
+    }//endof GraviticBolt
     
 
 
