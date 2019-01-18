@@ -447,12 +447,16 @@ class Weapon extends ShipSystem
 
         $this->overloadturns = $loading->overloading;
         $this->overloadshots = $loading->extrashots;
-
+	   
+	  
         // turnsloaded is set by boostable weapons that are ready.
         // Keep your hands of in that case.
         if (!($this->boostable && ($this->loadingtime <= $this->getTurnsloaded()))) {
             $this->turnsloaded = $loading->loading;
-        }
+        }else{ //Marcin Sawicki, January 2019: phase 4 loading is now skipped, moved to calculateLoadingFromLastTurn - was just called... so there should be no difference?
+	  //so - boostable weapons... behaving the same!
+	  $this->turnsloaded = $loading->loading;	
+	}	
 
         $this->loadingtime = $loading->loadingtime;
         $this->firingMode = $loading->firingmode;
