@@ -133,7 +133,7 @@
         
     
         public function fire($gamedata, $fireOrder){
-	    $currBoostlevel = $this->getBoostLevel($gamedata->turn)
+	    $currBoostlevel = $this->getBoostLevel($gamedata->turn);
             $this->maxpulses = $this->getMaxPulses($gamedata->turn);
             $this->setTimes();
                         
@@ -318,7 +318,7 @@ class GraviticBolt extends Gravitic
         
 	    
         public function fire($gamedata, $fireOrder){
-		$currBoostlevel = $this->getBoostLevel($gamedata->turn)
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
             $this->setTimes();
                         
             parent::fire($gamedata, $fireOrder);
