@@ -129,6 +129,7 @@ spl_autoload_register(
 		'streibarmedbreachingpod' => '/server/model/ships/streib/streibArmedBreachingPod.php',
 		'streibcombatpod' => '/server/model/ships/streib/streibCombatPod.php',
                 'combatlaser' => '/server/model/weapons/lasers.php',
+                'ltemwavedisruptor' => '/server/model/weapons/specialWeapons.php',
                 'commdisruptor' => '/server/model/weapons/specialWeapons.php',
                 'commjammer' => '/server/model/weapons/specialWeapons.php',
                 'commune' => '/server/model/ships/orieni/commune.php',
