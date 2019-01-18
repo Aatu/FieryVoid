@@ -324,7 +324,7 @@ class GraviticBolt extends Gravitic
             parent::fire($gamedata, $fireOrder);
 		
             // If fully boosted: test for possible crit.
-            if( === $this->maxBoostLevel){
+            if($currBoostlevel === $this->maxBoostLevel){
             	$this->forceCriticalRoll = true;
             }
 		
