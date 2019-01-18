@@ -139,3 +139,10 @@ var RammingAttack = function(json, ship)
 }
 RammingAttack.prototype = Object.create( Weapon.prototype );
 RammingAttack.prototype.constructor = RammingAttack;
+
+var LtEMWaveDisruptor = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+LtEMWaveDisruptor.prototype = Object.create( Weapon.prototype );
+LtEMWaveDisruptor.prototype.constructor = LtEMWaveDisruptor;
