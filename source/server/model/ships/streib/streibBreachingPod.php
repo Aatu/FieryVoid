@@ -40,7 +40,7 @@ class StreibBreachingPod extends FighterFlight{
         $fighter->iconPath = "img/ships/streibbreachingpod_Large.png";
 		
 			
-		$fighter->addFrontSystem(new LightEMWaveDisruptor(240, 120, 0, 1));
+		$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
 
 			
 		$this->addSystem($fighter);
