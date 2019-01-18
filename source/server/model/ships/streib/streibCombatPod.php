@@ -44,7 +44,7 @@ class StreibCombatPod extends FighterFlight{
 
             $frontGun = new LtSurgeBlaster(330, 30, 2); //2 guns - dmg bonus not selectable
             $fighter->addFrontSystem($frontGun);			
-		$fighter->addFrontSystem(new LightEMWaveDisruptor(240, 120, 0, 1));
+		$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
 
 
 			
