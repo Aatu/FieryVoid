@@ -55,19 +55,18 @@ if (isset($_SESSION["user"])) {
 <div class="panel news">
     <div id="newsHeader">Latest News - December 2018</div>
     <div id="newsEntry">
+        /*
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
         <h4>   may our games be fiery and our lives peaceful</h4>
         <br>
-
+        */
         The latest update includes:
         <br><br>
-        - <b>Drakh Improved Sensors</b> - they now do halve Jammer effectiveness, putting em on ner(er) footing with Minbari
+        - <b>Boostable weapon bugfix</b> - a serious bug was detected, making boostable weapons able to fire every turn. This is now corrected.
         <br>
-        - <b>Reactor overload</b> is now possible even on a derelict ship (system shutdown too!)  
-        <br>
-        - <b>Ipsha weapons</b> fixed forced shutdown bug        
-        <br>
-        - <b>Streib</b> number of ships tripled :)
+        - <b>Brakiri light weapons remake</b> - increasing recharge time after boosted shot became highly problematic in new game version. And it wasn't fully correct either.
+        <br>This was replaced by forced cooldown period. To make up for increased flexibility (power is available on cooldown...), perios is one turn longer (so 2 turns cooldown instead of 1 turn recharge, 3 instead of 2)
+        
         <br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
