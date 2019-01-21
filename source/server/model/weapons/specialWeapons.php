@@ -1432,8 +1432,8 @@ class SurgeLaser extends Raking{
                 1 => "Rapid",
                 2 => "Combined",
             );
-        public $rangePenalty = 2; //-2 hex in single mode
-            public $rangePenaltyArray = array( 1=>2, 2=>2); //-2/hex in both modes
+        public $rangePenalty = 1; //-1 hex in single mode
+            public $rangePenaltyArray = array( 1=>1, 2=>1); //-1/hex in both modes
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
             public $fireControlArray = array( 1=>array(4, 2, 2), 2=>array(2,2,4) ); 
 			public $guns = 2;
