@@ -13,7 +13,7 @@ class StreibIntruder extends MediumShip{
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;
-        $this->fighters = array("Breaching Pods" => 2);
+        $this->fighters = array("shuttles" => 2);
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.33;

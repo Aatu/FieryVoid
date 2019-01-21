@@ -13,6 +13,7 @@ class Collector extends BaseShip{
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
+	$this->fighters = array("shuttles" => 6); 
         
         $this->turncost = 0.66;
         $this->turndelaycost = 0.66;
