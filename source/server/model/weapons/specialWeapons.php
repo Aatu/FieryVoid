@@ -1984,46 +1984,47 @@ class RammingAttack extends Weapon{
 
 /*LtEMWaveDisruptor - Streib fighter defensive weapon*/
 class LtEMWaveDisruptor extends LinkedWeapon{
-        public $trailColor = array(50, 50, 200);
-        public $name = "LtEMWaveDisruptor";
-        public $displayName = "Light EM Wave Disruptor";
-	   public  $iconPath = "lightParticleBeam.png";
-        public $animation = "trail";
-        public $animationColor =  array(145, 145, 245);
-        public $animationExplosionScale = 0.10;
-        public $projectilespeed = 10;
-        public $animationWidth = 2;
-        public $trailLength = 10;
-        public $intercept = 3; //very good interception
-        public $loadingtime = 1;
-        public $shots = 2;
-        public $defaultShots = 2;
-        public $rangePenalty = 2;
-        public $fireControl = array(null, null, null); //no offensive mode
-	    public $priority = 4; 
-        
-        public $damageType = "Standard"; 
-        public $weaponClass = "Electromagnetic"; 
-	    
-        
-     function __construct($startArc, $endArc, $nrOfShots = 2){
-            $this->defaultShots = $nrOfShots;
-            $this->shots = $nrOfShots;
-            $this->intercept = $nrOfShots;
-            parent::__construct(0, 1, 0, $startArc, $endArc);
-        }
+	public $trailColor = array(50, 50, 200);
+	public $name = "LtEMWaveDisruptor";
+	public $displayName = "Light EM Wave Disruptor";
+	public $iconPath = "lightParticleBeam.png";
+	public $animation = "trail";
+	public $animationColor =  array(145, 145, 245);
+	public $animationExplosionScale = 0.10;
+	public $projectilespeed = 10;
+	public $animationWidth = 2;
+	public $trailLength = 10;
+	public $intercept = 3; //very good interception
+	public $loadingtime = 1;
+	public $shots = 2;
+	public $defaultShots = 2;
+	public $rangePenalty = 2;
+	public $fireControl = array(0, 0, 0); //no offensive mode
+	public $priority = 4; 
+
+	
+	public $damageType = "Standard"; 
+	public $weaponClass = "Electromagnetic"; 
 	
 	
-        public function setSystemDataWindow($turn){
-            parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "No offensive mode.";
-        }
-	   
-	    
-        public function getDamage($fireOrder){        return 0;   }
-        public function setMinDamage(){     $this->minDamage = 0 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-    } //endof class LtEMWaveDisruptor
+	function __construct($startArc, $endArc, $nrOfShots = 1){
+		$this->defaultShots = $nrOfShots;
+		$this->shots = $nrOfShots;
+		$this->intercept = $nrOfShots *3;
+		parent::__construct(0, 1, 0, $startArc, $endArc);
+	}
+
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "No offensive mode.";
+	}
+   
+	
+	public function getDamage($fireOrder){        return 0;   }
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+} //endof class LtEMWaveDisruptor
 
 
 	

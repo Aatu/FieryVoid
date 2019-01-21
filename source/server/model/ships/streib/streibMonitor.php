@@ -36,7 +36,7 @@ class StreibMonitor extends HeavyCombatVessel{
         $this->addFrontSystem(new Scanner(7, 10, 5, 10));
         $this->addFrontSystem(new Hangar(6, 2, 0));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
-        $this->addFronSystem(new EMWaveDisruptor(6, 8, 5, 270, 90));
+        $this->addFrontSystem(new EMWaveDisruptor(6, 8, 5, 270, 90));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new BurstPulseCannon(7, 6, 6, 300, 60));
@@ -45,7 +45,7 @@ class StreibMonitor extends HeavyCombatVessel{
         
         $this->addAftSystem(new Thruster(8, 4, 0, 3, 2));
         $this->addAftSystem(new Thruster(8, 8, 0, 6, 2));
-	$this->addAftSystem(new TractorBeam(6, 4, 0, 0));
+		$this->addAftSystem(new TractorBeam(6, 4, 0, 0));
         $this->addAftSystem(new CargoBay(7, 50));
  
 

@@ -31,11 +31,11 @@ class Mothership extends BaseShip{
         $this->addPrimarySystem(new DualBurstBeam(5, 8, 5, 0, 360));
         $this->addPrimarySystem(new CargoBay(7, 12));
 
-	$this->addFrontSystem(new TractorBeam(6, 4, 0, 0));
+		$this->addFrontSystem(new TractorBeam(6, 4, 0, 0));
         $this->addFrontSystem(new Hangar(7, 9, 0));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));	
-        $this->addFronSystem(new EMWaveDisruptor(6, 8, 5, 240, 60));
+        $this->addFrontSystem(new EMWaveDisruptor(6, 8, 5, 240, 60));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 300, 120));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 300, 120));
@@ -54,7 +54,7 @@ class Mothership extends BaseShip{
         $this->addAftSystem(new Hangar(7, 7, 0));        
 
         $this->addLeftSystem(new Thruster(8, 13, 0, 5, 4));
-	$this->addLeftSystem(new TractorBeam(6, 4, 0, 0));
+		$this->addLeftSystem(new TractorBeam(6, 4, 0, 0));
         $this->addLeftSystem(new CargoBay(7, 15));
         $this->addLeftSystem(new Hangar(7, 9, 0));
         $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));

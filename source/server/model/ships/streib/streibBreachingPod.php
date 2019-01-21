@@ -20,8 +20,8 @@ class StreibBreachingPod extends FighterFlight{
         $this->turncost = 0.33;
         $this->turndelaycost = 0.33;
         
-	$this->hangarRequired = 'shuttles'; //for fleet check
-	$this->iniativebonus = 8*5;
+		$this->hangarRequired = 'shuttles'; //for fleet check
+		$this->iniativebonus = 8*5;
       
         $this->populate();
     }
@@ -33,19 +33,19 @@ class StreibBreachingPod extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 			
-        $armour = array(6, 6, 6, 6);
-        $fighter = new Fighter("StreibBreachingPod", $armour, 10, $this->id);
-        $fighter->displayName = "Breaching Pod";
-        $fighter->imagePath = "img/ships/streibbreachingpod.png";
-        $fighter->iconPath = "img/ships/streibbreachingpod_Large.png";
-		
+			$armour = array(6, 6, 6, 6);
+			$fighter = new Fighter("StreibBreachingPod", $armour, 10, $this->id);
+			$fighter->displayName = "Breaching Pod";
+			$fighter->imagePath = "img/ships/streibbreachingpod.png";
+			$fighter->iconPath = "img/ships/streibbreachingpod_Large.png";
 			
-		$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
+				
+			$fighter->addFrontSystem(new LtEMWaveDisruptor(240, 120, 1));
 
-			
-		$this->addSystem($fighter);
-			
-	}
+				
+			$this->addSystem($fighter);
+				
+		}
 		
 		
     }
