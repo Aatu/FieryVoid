@@ -23,6 +23,7 @@ class StreibIntruder extends MediumShip{
         $this->gravitic = true;	
 		$this->unofficial = true;
         
+	$this->iniativebonus = 60;
          
         $this->addPrimarySystem(new Reactor(8, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 6, 4, 9));
