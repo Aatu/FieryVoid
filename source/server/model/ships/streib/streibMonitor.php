@@ -25,6 +25,9 @@ class StreibMonitor extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->gravitic = true;	
 
+	    
+	$this->iniativebonus = 30;
+	    
         $this->addPrimarySystem(new Thruster(8, 8, 0, 5, 3)); 
         $this->addPrimarySystem(new Thruster(8, 8, 0, 5, 4));         
         $this->addPrimarySystem(new DualBurstBeam(5, 8, 5, 120, 360));
