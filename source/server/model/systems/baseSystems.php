@@ -602,6 +602,8 @@ class GraviticThruster extends Thruster{
     
     public $firstCriticalIgnored = false;
     
+	/* Marcin Sawicki - no longer needed? new crit added immediately... */
+	/*
     public function onAdvancingGamedata($ship, $gamedata)
     {
         SystemData::addDataForSystem(
@@ -610,7 +612,9 @@ class GraviticThruster extends Thruster{
         
         parent::onAdvancingGamedata($ship, $gamedata);
     }
+	*/
     
+	/* Marcin Sawicki - no longer necessary
     public function setSystemData($data, $subsystem)
     {
         $array = json_decode($data, true);
@@ -626,16 +630,40 @@ class GraviticThruster extends Thruster{
         
         parent::setSystemData($data, $subsystem);
     }
+    */
     
     public function addCritical($shipid, $phpclass, $gamedata)
     {
+	    /*approach changed
         if (! $this->firstCriticalIgnored)
         {
             $this->firstCriticalIgnored = true;
             //Debug::log("Gravitic thruster ignored first critical (shipid: $shipid systemid: $this->id");
+		
             return null;
         }
-        
+	    */
+	    
+	    //new approach: does GravThrusterCritIgnored exist? if yes, go ahead. If not, ignore critical and add GravThrusterCritIgnored instead.
+	    //should affect only basic thrust-related crits!
+	    $alreadyIgnored = false;
+	    foreach($this->criticals as $preexisting){
+		    if ($preexisting instanceof GravThrusterCritIgnored){
+			$alreadyIgnored = true;    
+		    }
+	    }
+	    
+	    if (!$alreadyIgnored) {
+		    
+		    
+	    }
+	    
+	/*
+		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
+		$crit->updated = true;
+		$crit->newCrit = true; //force save even if crit is not for current turn
+		$this->criticals[] =  $crit;
+        */
         //Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
             
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
