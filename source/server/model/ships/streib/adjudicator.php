@@ -30,7 +30,7 @@ class Adjudicator extends BaseShip{
         $this->addPrimarySystem(new TractorBeam(7, 4, 0, 0));
         $this->addPrimarySystem(new Hangar(7, 2, 0));
         
-        $this->addFrontSystem(new Thruster(9, 7, 0, 6, 1));	
+        $this->addFrontSystem(new GraviticThruster(9, 7, 0, 6, 1));	
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));	
         $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 60));
@@ -40,8 +40,8 @@ class Adjudicator extends BaseShip{
         
         $this->addAftSystem(new Engine(9, 11, 0, 9, 2)); 
         $this->addAftSystem(new JumpEngine(9, 10, 4, 10));
-        $this->addAftSystem(new Thruster(9, 3, 0, 2, 2));
-        $this->addAftSystem(new Thruster(9, 8, 0, 7, 2));
+        $this->addAftSystem(new GraviticThruster(9, 3, 0, 2, 2));
+        $this->addAftSystem(new GraviticThruster(9, 8, 0, 7, 2));
         $this->addAftSystem(new ImprovedBlastLaser(7, 10, 8, 120, 240));
         $this->addAftSystem(new DualBurstBeam(6, 8, 5, 90, 270));
         
@@ -51,7 +51,7 @@ class Adjudicator extends BaseShip{
         $this->addLeftSystem(new BurstPulseCannon(6, 6, 7, 180, 360));
         $this->addLeftSystem(new SurgeLaser(6, 0, 0, 120, 360));
 	            
-        $this->addRightSystem(new Thruster(8, 10, 0, 5, 3));
+        $this->addRightSystem(new GraviticThruster(8, 10, 0, 5, 3));
         $this->addRightSystem(new Scanner(8, 8, 5, 12));
         $this->addRightSystem(new ImprovedBlastLaser(7, 10, 8, 120, 240));
         $this->addRightSystem(new SurgeLaser(6, 0, 0, 300, 120));
