@@ -40,12 +40,12 @@ class Mothership extends BaseShip{
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 300, 120));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 300, 120));
         $this->addFrontSystem(new CargoBay(7, 15));
-        $this->addFrontSystem(new Thruster(8, 8, 0, 5, 1));
-        $this->addFrontSystem(new Thruster(8, 8, 0, 5, 1));	        
+        $this->addFrontSystem(new GraviticThruster(8, 8, 0, 5, 1));
+        $this->addFrontSystem(new GraviticThruster(8, 8, 0, 5, 1));	        
         
         $this->addAftSystem(new Engine(8, 13, 0, 10, 3)); 
-        $this->addAftSystem(new Thruster(8, 6, 0, 4, 2));
-        $this->addAftSystem(new Thruster(8, 8, 0, 6, 2));
+        $this->addAftSystem(new GraviticThruster(8, 6, 0, 4, 2));
+        $this->addAftSystem(new GraviticThruster(8, 8, 0, 6, 2));
         $this->addAftSystem(new DualBurstBeam(5, 8, 5, 90, 270));
         $this->addAftSystem(new SurgeLaser(5, 0, 0, 120, 300));
         $this->addAftSystem(new SurgeLaser(5, 0, 0, 120, 300));
@@ -53,14 +53,14 @@ class Mothership extends BaseShip{
         $this->addAftSystem(new CargoBay(7, 10));
         $this->addAftSystem(new Hangar(7, 7, 0));        
 
-        $this->addLeftSystem(new Thruster(8, 13, 0, 5, 4));
+        $this->addLeftSystem(new GraviticThruster(8, 13, 0, 5, 4));
 		$this->addLeftSystem(new TractorBeam(6, 4, 0, 0));
         $this->addLeftSystem(new CargoBay(7, 15));
         $this->addLeftSystem(new Hangar(7, 9, 0));
         $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));
         $this->addLeftSystem(new HeavyBurstBeam(7, 9, 8, 240, 360)); 
 	            
-        $this->addRightSystem(new Thruster(8, 13, 0, 5, 3));
+        $this->addRightSystem(new GraviticThruster(8, 13, 0, 5, 3));
         $this->addRightSystem(new Scanner(8, 10, 5, 12));
         $this->addRightSystem(new CargoBay(7, 9));
         $this->addRightSystem(new CargoBay(7, 9));
