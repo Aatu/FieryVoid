@@ -8,7 +8,7 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 
-                
+                  
                 'abrithi' => '/server/model/ships/dilgar/abrithi.php',
                 'abrithib' => '/server/model/ships/dilgar/abrithiB.php',
                 'absorbtionshield' => '/server/model/weapons/customs.php',
