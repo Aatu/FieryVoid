@@ -43,11 +43,11 @@ class StreibMonitor extends HeavyCombatVessel{
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new BurstPulseCannon(7, 6, 6, 300, 60));
-        $this->addFrontSystem(new Thruster(7, 5, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(7, 5, 0, 4, 1));	        
+        $this->addFrontSystem(new GraviticThruster(7, 5, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(7, 5, 0, 4, 1));	        
         
-        $this->addAftSystem(new Thruster(8, 4, 0, 3, 2));
-        $this->addAftSystem(new Thruster(8, 8, 0, 6, 2));
+        $this->addAftSystem(new GraviticThruster(8, 4, 0, 3, 2));
+        $this->addAftSystem(new GraviticThruster(8, 8, 0, 6, 2));
 		$this->addAftSystem(new TractorBeam(6, 4, 0, 0));
         $this->addAftSystem(new CargoBay(7, 50));
  
