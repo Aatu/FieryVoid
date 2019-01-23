@@ -32,11 +32,11 @@ class StreibIntruder extends MediumShip{
         $this->addPrimarySystem(new Hangar(6, 2, 0));
         $this->addPrimarySystem(new CargoBay(6, 9));
         $this->addPrimarySystem(new CargoBay(7, 6));
-        $this->addPrimarySystem(new Thruster(7, 8, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(7, 8, 0, 4, 4));
+        $this->addPrimarySystem(new GraviticThruster(7, 8, 0, 4, 3));
+        $this->addPrimarySystem(new GraviticThruster(7, 8, 0, 4, 4));
 
-        $this->addFrontSystem(new Thruster(7, 5, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(7, 3, 0, 2, 1));
+        $this->addFrontSystem(new GraviticThruster(7, 5, 0, 4, 1));
+        $this->addFrontSystem(new GraviticThruster(7, 3, 0, 2, 1));
         $this->addFrontSystem(new TractorBeam(6, 4, 0, 0));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 240, 60));
         $this->addFrontSystem(new SurgeLaser(5, 0, 0, 300, 120));
@@ -44,7 +44,7 @@ class StreibIntruder extends MediumShip{
         $this->addFrontSystem(new CnC(8, 9, 0, 0));
 
         $this->addAftSystem(new Engine(7, 10, 0, 9, 2));
-        $this->addAftSystem(new Thruster(8, 10, 0, 8, 2));
+        $this->addAftSystem(new GraviticThruster(8, 10, 0, 8, 2));
         $this->addAftSystem(new SurgeLaser(5, 6, 3, 180, 360));
   
         $this->addPrimarySystem(new Structure(8, 46));
