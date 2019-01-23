@@ -644,22 +644,23 @@ class GraviticThruster extends Thruster{
         }
 	    */
 	    
-	    //new approach: does GravThrusterCritIgnored exist? if yes, go ahead. If not, ignore critical and add GravThrusterCritIgnored instead.
-	    //should affect only basic thrust-related crits!
-	    $alreadyIgnored = false;
-	    foreach($this->criticals as $preexisting){
-		    if ($preexisting instanceof GravThrusterCritIgnored){
-			$alreadyIgnored = true;    
-		    }
-	    }
 	    
-	    if (!$alreadyIgnored ) {//nothing was negated yet
-		if (($phpclass == 'FirstThrustIgnored') || ($phpclass == 'HalfEfficiency')) { //such crit can be ignored - do so!
+	    //new approach: does GravThrusterCritIgnored exist? if yes, go ahead. If not, ignore critical and add GravThrusterCritIgnored instead.
+	    //should affect only HalfEfficiency crit!
+	    if ($phpclass == 'HalfEfficiency') { //such crit can be ignored - should it?!
+		    $alreadyIgnored = false;
+		    foreach($this->criticals as $preexisting){
+			    if ($preexisting instanceof GravThrusterCritIgnored){
+				$alreadyIgnored = true;    
+			    }
+		    }
+
+		    if (!$alreadyIgnored ) {//nothing was negated yet		
 			$crit = new GravThrusterCritIgnored(-1, $shipid, $this->id, 'GravThrusterCritIgnored', $gamedata->turn);
 			$crit->updated = true;
 			$this->criticals[] =  $crit;
 			return $crit;
-		}
+		    }
 	    }
 	  
             
@@ -671,8 +672,35 @@ class GraviticThruster extends Thruster{
 }
 
 
-class MagGraviticThruster extends Thruster{ //mag-gravitic thrusters can only get HalfEfficiency crit! So they don't need fancy GraviticThruster logic
+class MagGraviticThruster extends Thruster{ 
 	public $possibleCriticals = array(20=>"HalfEfficiency");
+	
+	//Mag-Grav Thrusters are considerd Gravitic, complete with first crit ignored effect:
+	public function addCritical($shipid, $phpclass, $gamedata)
+    {
+	    //does GravThrusterCritIgnored exist? if yes, go ahead. If not, ignore critical and add GravThrusterCritIgnored instead.
+	    //should affect only HalfEfficiency crit!
+	    if ($phpclass == 'HalfEfficiency') { //such crit can be ignored - should it?!
+		    $alreadyIgnored = false;
+		    foreach($this->criticals as $preexisting){
+			    if ($preexisting instanceof GravThrusterCritIgnored){
+				$alreadyIgnored = true;    
+			    }
+		    }
+
+		    if (!$alreadyIgnored ) {//nothing was negated yet		
+			$crit = new GravThrusterCritIgnored(-1, $shipid, $this->id, 'GravThrusterCritIgnored', $gamedata->turn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+			return $crit;
+		    }
+	    }
+            
+        $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
+        $crit->updated = true;
+        $this->criticals[] =  $crit;
+        return $crit;
+    }
 }
 
 class Hangar extends ShipSystem{
