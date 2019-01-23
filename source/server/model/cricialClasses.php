@@ -313,6 +313,15 @@ class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Rea
 }
 
 
+class GravThrusterCritIgnored extends Critical{ /*Gravitic Thruster - first critical is ignored*/
+    public $description = "Critical damage negated.";
+
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $param=null){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $param);
+    }
+}
+
+
 class swtargetheld extends Critical{ /*next turn target is being held by tractor beam!*/
     public $description = "Held by tractor beam! Reduced Initiative (-20/hit) and remaining thrust (-1/hit).";
     public $oneturn = true;	
