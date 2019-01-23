@@ -600,7 +600,7 @@ class GraviticThruster extends Thruster{
         parent::__construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused);
     }
     
-    public $firstCriticalIgnored = false;
+    public $firstCriticalIgnored = false; //not needed any more
     
 	/* Marcin Sawicki - no longer needed? new crit added immediately... */
 	/*
@@ -653,18 +653,15 @@ class GraviticThruster extends Thruster{
 		    }
 	    }
 	    
-	    if (!$alreadyIgnored) {
-		    
-		    
+	    if (!$alreadyIgnored ) {//nothing was negated yet
+		if (($phpclass == 'FirstThrustIgnored') || ($phpclass == 'HalfEfficiency')) { //such crit can be ignored - do so!
+			$crit = new GravThrusterCritIgnored(-1, $shipid, $this->id, 'GravThrusterCritIgnored', $gamedata->turn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+			return $crit;
+		}
 	    }
-	    
-	/*
-		$crit = new ForcedOfflineOneTurn(-1, $fireOrder->shooterid, $this->id, "ForcedOfflineOneTurn", $gamedata->turn+1);
-		$crit->updated = true;
-		$crit->newCrit = true; //force save even if crit is not for current turn
-		$this->criticals[] =  $crit;
-        */
-        //Debug::log("Gravitic thruster got critical (shipid: $shipid systemid: $this->id");
+	  
             
         $crit = new $phpclass(-1, $shipid, $this->id, $phpclass, $gamedata->turn);
         $crit->updated = true;
