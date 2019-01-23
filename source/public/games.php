@@ -67,7 +67,9 @@ if (isset($_SESSION["user"])) {
         - <b>Brakiri light weapons remake</b> - increasing recharge time after boosted shot became highly problematic in new game version. And it wasn't fully correct either.
         <br>This was replaced by forced cooldown period. To make up for increased flexibility (power is available on cooldown...), perios is one turn longer (so 2 turns cooldown instead of 1 turn recharge, 3 instead of 2)
         <br>
-        - <b>Streib</b> fleet expanded.
+        - <b>Streib</b> fleet expanded.        
+        <br>
+        - <b>Gravitic Thrusters</b> modified - now the fact that a crit was ignored should be clearly stated.
         <br><br>
         - last but not least - brand new collection of BUGS!;
         <br><br>
