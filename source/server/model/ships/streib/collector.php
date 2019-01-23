@@ -29,19 +29,19 @@ class Collector extends BaseShip{
         $this->addPrimarySystem(new Engine(9, 12, 0, 10, 2));
         $this->addPrimarySystem(new TractorBeam(8, 4, 0, 0));
 
-        $this->addFrontSystem(new Thruster(8, 6, 0, 5, 1));
-        $this->addFrontSystem(new Thruster(8, 6, 0, 5, 1));
+        $this->addFrontSystem(new GraviticThruster(8, 6, 0, 5, 1));
+        $this->addFrontSystem(new GraviticThruster(8, 6, 0, 5, 1));
         $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 240, 60));
         $this->addFrontSystem(new BurstPulseCannon(7, 6, 6, 300, 60));
         $this->addFrontSystem(new MediumBurstBeam(6, 7, 6, 300, 120));
 
-        $this->addAftSystem(new Thruster(9, 5, 0, 3, 2)); //reduced size to match engine thrust
-        $this->addAftSystem(new Thruster(9, 8, 0, 7, 2));
+        $this->addAftSystem(new GraviticThruster(9, 5, 0, 3, 2)); //reduced size to match engine thrust
+        $this->addAftSystem(new GraviticThruster(9, 8, 0, 7, 2));
         $this->addAftSystem(new MediumBurstBeam(6, 7, 6, 60, 240));
         $this->addAftSystem(new ImprovedBlastLaser(7, 10, 8, 120, 240));
         $this->addAftSystem(new MediumBurstBeam(6, 7, 6, 120, 300));
 
-        $this->addLeftSystem(new Thruster(8, 10, 0, 5, 4));//changed 3-13 to more Streib-like 8-10
+        $this->addLeftSystem(new GraviticThruster(8, 10, 0, 5, 4));//changed 3-13 to more Streib-like 8-10
         $this->addLeftSystem(new JumpEngine(9, 10, 4, 10));
         $this->addLeftSystem(new CargoBay(9, 9));
         $this->addLeftSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
@@ -49,7 +49,7 @@ class Collector extends BaseShip{
         $this->addLeftSystem(new DualBurstBeam(5, 8, 5, 180, 60));
         $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));
 
-        $this->addRightSystem(new Thruster(8, 10, 0, 5, 3));  //changed 3-13 to more Streib-like 8-10
+        $this->addRightSystem(new GraviticThruster(8, 10, 0, 5, 3));  //changed 3-13 to more Streib-like 8-10
         $this->addRightSystem(new Hangar(8, 6, 0));
         $this->addRightSystem(new CnC(9, 12, 0, 0));
         $this->addRightSystem(new Scanner(9, 8, 5, 12));

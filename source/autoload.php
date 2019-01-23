@@ -315,6 +315,7 @@ spl_autoload_register(
                 'guardhawk' => '/server/model/ships/drazi/guardhawk.php',
                 'guardianarray' => '/server/model/weapons/defensive.php',
                 'halfefficiency' => '/server/model/cricialClasses.php',
+		    'gravthrustercritignored' => '/server/model/cricialClasses.php',		    
                 'halik' => '/server/model/ships/brakiri/halik.php',
                 'halos' => '/server/model/ships/brakiri/halos.php',
                 'haltona' => '/server/model/ships/brakiri/haltona.php',
