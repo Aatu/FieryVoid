@@ -30,23 +30,21 @@ class Navask extends HeavyCombatVessel{
         $this->addPrimarySystem(new Thruster(4, 10, 0, 5, 4));        
         
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));        
-        
-
-        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));
+        $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1)); 
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+        $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));        
         $this->addFrontSystem(new SentinelPointDefense(1, 4, 1, 240, 60));
-        $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 270, 90));
         $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 300, 120));
+        $this->addFrontSystem(new SentinelPointDefense(1, 4, 2, 270, 90));
         
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
 
-        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 240, 360));
+        $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 120, 360));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 240));
         
         
