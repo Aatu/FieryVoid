@@ -206,7 +206,7 @@ class BurstPulseCannon extends Pulse {
         public $displayName = "Burst Pulse Cannon";
 
         public $animationColor = array(158, 240, 255);
-		public $trailColor = array(158, 240, 255);
+	public $trailColor = array(158, 240, 255);
 
         public $animation = "trail";
         public $trailLength = 2;
@@ -217,11 +217,11 @@ class BurstPulseCannon extends Pulse {
         public $grouping = 25;
         public $maxpulses = 6;
 		        
-	    public $loadingtime = 1;
+	public $loadingtime = 2;
         public $priority = 9;
         
-    public $damageType = "Pulse"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
-    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	    public $damageType = "Pulse"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	    public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
 			
         public $rangePenalty = 0.5;
         public $fireControl = array(2, 3, 4); // fighters, <=mediums, <=capitals 
