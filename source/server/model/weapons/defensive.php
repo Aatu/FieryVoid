@@ -292,8 +292,7 @@
 
 
     class EMWaveDisruptor extends Weapon{
-        public $trailColor = array(30, 170, 255);
-        
+        public $trailColor = array(30, 170, 255);        
         public $name = "eMWaveDisruptor";
         public $displayName = "EM-Wave Disruptor";
         public $animation = "laser";
@@ -337,6 +336,21 @@
             }
             return $boostLevel;
         }
+	    
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		/*causes fighter hit to drop out*/
+		$crit = null;
+		
+		if (!$system->advancedArmor){
+			if ($system instanceof Fighter && !($ship instanceof SuperHeavyFighter)){
+				$crit = new DisengagedFighter(-1, $ship->id, $system->id, "DisengagedFighter", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true;
+				$system->criticals[] =  $crit;
+				$fireOrder->pubnotes .= " DROPOUT! ";
+			}
+		}
+	}		
 
         public function getBonusCharges($turn){
             return $this->getBoostLevel($turn);
