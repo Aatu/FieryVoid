@@ -65,6 +65,8 @@ if (isset($_SESSION["user"])) {
         - <b>System description on fleet selection</b> - FIXED, shows up again.
         <br>
         - <b>Power usage</b> - shown in system data.
+        <br>
+        - <b>Game description</b> modified to include rules options used.
         
         <br><br>
         - last but not least - brand new collection of BUGS!;
