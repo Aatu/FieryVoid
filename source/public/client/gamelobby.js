@@ -1,7 +1,6 @@
 'use strict';
 
 window.gamedata = {
-
     thisplayer: 0,
     slots: null,
     ships: [],
@@ -14,6 +13,8 @@ window.gamedata = {
     status: "LOBBY",
     selectedSlot: null,
     allShips: null,
+ 	displayedShip: '',
+ 	displayedFaction: '',
 
     canAfford: function canAfford(ship) {
 
@@ -1064,11 +1065,23 @@ window.gamedata = {
     },
 
     getShip: function getShip(phpclass, faction) {
-        if (! gamedata.allShips[faction]) {
-            throw new Error("Unable to find faction " + faction)
+    	var actPhpclass;
+    	var actFaction;
+    	if (faction != null ){ //faftion provided
+			actPhpclass = phpclass;
+			actFaction = faction;
+			gamedata.displayedShip = phpclass;
+			gamedata.displayedFaction = faction;
+    	}else{ //recall last opened!
+ 			actPhpclass = gamedata.displayedShip;
+			actFaction =  gamedata.displayedFaction;
+    	}
+	    
+        if (! gamedata.allShips[actFaction]) {
+            throw new Error("Unable to find faction " + actFaction)
         }
 
-        return gamedata.allShips[faction].find(ship => ship.phpclass == phpclass);
+        return gamedata.allShips[actFaction].find(ship => ship.phpclass == actPhpclass);
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {
