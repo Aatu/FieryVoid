@@ -62,6 +62,8 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
+        - <b>System description on fleet selection</b> - FIXED, shows up again.
+        <br>
         - <b>Power usage</b> - shown in system data.
         
         <br><br>
