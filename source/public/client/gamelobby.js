@@ -1,7 +1,6 @@
 'use strict';
 
 window.gamedata = {
-
     thisplayer: 0,
     slots: null,
     ships: [],
@@ -14,6 +13,8 @@ window.gamedata = {
     status: "LOBBY",
     selectedSlot: null,
     allShips: null,
+ 	displayedShip: '',
+ 	displayedFaction: '',
 
     canAfford: function canAfford(ship) {
 
@@ -263,7 +264,14 @@ window.gamedata = {
 	    checkResult += "<br>";
 	    
 	    checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
-	    var capsRequired = Math.floor(selectedSlot.points/3000);
+	    //var capsRequired = Math.floor(selectedSlot.points/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
+	    //let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 3000, 2 at 6500, 3 at 10500, 10 at 42500
+	    var capsRequired = 0;
+	    if (selectedSlot.points >= 3000){
+		    capsRequired = Math.ceil((selectedSlot.points-2499)/4000);
+	    }    
+	    
+	   
 	    if (capitalShips >= capsRequired){ //tournament rules: at least 1; changed for scalability
 		    checkResult += " OK";
 	    }else{		    
@@ -1057,11 +1065,23 @@ window.gamedata = {
     },
 
     getShip: function getShip(phpclass, faction) {
-        if (! gamedata.allShips[faction]) {
-            throw new Error("Unable to find faction " + faction)
+    	var actPhpclass;
+    	var actFaction;
+    	if (faction != null ){ //faftion provided
+			actPhpclass = phpclass;
+			actFaction = faction;
+			gamedata.displayedShip = phpclass;
+			gamedata.displayedFaction = faction;
+    	}else{ //recall last opened!
+ 			actPhpclass = gamedata.displayedShip;
+			actFaction =  gamedata.displayedFaction;
+    	}
+	    
+        if (! gamedata.allShips[actFaction]) {
+            throw new Error("Unable to find faction " + actFaction)
         }
 
-        return gamedata.allShips[faction].find(ship => ship.phpclass == phpclass);
+        return gamedata.allShips[actFaction].find(ship => ship.phpclass == actPhpclass);
     },
 
     setShipsFromFaction: function setShipsFromFaction(faction, jsonShips) {

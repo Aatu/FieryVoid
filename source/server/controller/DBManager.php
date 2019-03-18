@@ -998,35 +998,68 @@ class DBManager
     }
 
     public function getPlayerGames($playerid) {
-
-        $stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+        //$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+		//enhance to include game rules:
+		$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting, g.gamespace, g.rules from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+		    	    
         $games = [];
-
+		$nm = '';
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
-            $stmt->bind_result($id, $gameName, $waiting);
+            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules);
             $stmt->execute();
-            while ($stmt->fetch()) {
-                $games[] = ["id" => $id, "name" => $gameName, "waiting" => $waiting, "status" => "ACTIVE"];
+			while ($stmt->fetch()) {
+				$nm = $gameName;
+				$nm .= ' (';
+			//gamespace and rules: add to name!    
+				if ($gamespace == '-1x-1'){ //open map
+					$nm .= 'open';
+				}else{ //fixed map
+					$nm .= $gamespace;
+				}
+				if (strpos($rules, 'initiativeCategories')!=false){//simultaneous movement
+					$nm  .= ', sim mv';
+				}else{//standard movement
+					$nm  .= ', std mv';
+				}		    
+				$nm  .= ')';
+                $games[] = ["id" => $id, "name" => $nm, "waiting" => $waiting, "status" => "ACTIVE"];
             }
             $stmt->close();
         }
         return $games;
-
     }
 
     public function getLobbyGames() {
-
         //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
-	//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
-	$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
+		//$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		//enhance to include game rules
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		
         $games = [];
+		$nm = '';
 
         if ($stmt) {
-            $stmt->bind_result($id, $gameName, $slots, $playerCount);
+            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount );
+			//$stmt->bind_result($id, $gameName, $slots, $playerCount );
             $stmt->execute();
             while ($stmt->fetch()) {
-                $games[] = ["id" => $id, "name" => $gameName, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY"];
+				$nm = $gameName;
+				$nm .= ' (';
+			//gamespace and rules: add to name!    
+				if ($gamespace == '-1x-1'){ //open map
+					$nm .= 'open';
+				}else{ //fixed map
+					$nm .= $gamespace;
+				}
+				if (strpos($rules, 'initiativeCategories')!=false){//simultaneous movement
+					$nm  .= ', sim mv';
+				}else{//standard movement
+					$nm  .= ', std mv';
+				}		    
+				$nm  .= ')';
+                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY"];
             }
             $stmt->close();
         }

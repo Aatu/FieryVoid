@@ -53,7 +53,7 @@ if (isset($_SESSION["user"])) {
         <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
         </div>-->
 <div class="panel news">
-    <div id="newsHeader">Latest News - January 2019</div>
+    <div id="newsHeader">Latest News - March 2019</div>
     <div id="newsEntry">
         <!--
         <h3> *** Merry Christmas and a Happy New Year! *** </h3>
@@ -62,14 +62,12 @@ if (isset($_SESSION["user"])) {
         -->
         The latest update includes:
         <br><br>
-        - <b>Boostable weapon bugfix</b> - a serious bug was detected, making boostable weapons able to fire every turn. This is now corrected.
+        - <b>System description on fleet selection</b> - FIXED, shows up again.
         <br>
-        - <b>Brakiri light weapons remake</b> - increasing recharge time after boosted shot became highly problematic in new game version. And it wasn't fully correct either.
-        <br>This was replaced by forced cooldown period. To make up for increased flexibility (power is available on cooldown...), perios is one turn longer (so 2 turns cooldown instead of 1 turn recharge, 3 instead of 2)
+        - <b>Power usage</b> - shown in system data.
         <br>
-        - <b>Streib</b> fleet expanded.        
-        <br>
-        - <b>Gravitic Thrusters</b> modified - now the fact that a crit was ignored should be clearly stated.
+        - <b>Game description</b> modified to include rules options used.
+        
         <br><br>
         - last but not least - brand new collection of BUGS!;
         <br><br>

@@ -242,6 +242,13 @@ class ShipSystem {
 		$this->data["Arc"] = $this->startArc . ".." . $this->endArc;
 	}
 	    
+	if($this->powerReq > 0){
+		$this->data["Power used"] = $this->powerReq;
+	} else {
+		$this->data["Power used"] = 'none';
+	}
+	    
+	    
 	if($this->advancedArmor == true){
 		$this->data["Others"] = "Advanced Armor";
 	}
