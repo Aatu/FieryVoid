@@ -998,15 +998,31 @@ class DBManager
     }
 
     public function getPlayerGames($playerid) {
-
-        $stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+        //$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+	//enhance to include game rules:
+	$stmt = $this->connection->prepare("select g.id, g.name, pg.waiting, g.gamespace, g.rules from tac_playeringame pg join tac_game g on pg.gameid = g.id where g.status = 'ACTIVE' AND pg.playerid = ?");
+		    
+	    
         $games = [];
 
         if ($stmt) {
             $stmt->bind_param('i', $playerid);
-            $stmt->bind_result($id, $gameName, $waiting);
+            $stmt->bind_result($id, $gameName, $waiting, $gamespace, $rules);
             $stmt->execute();
             while ($stmt->fetch()) {
+		$gameName += ' (';
+		//gamespace and rules: add to name!    
+		if ($gamespace == '-1x-1'){ //open map
+			$gameName += 'open, ';
+		}else{ //fixed map
+			$gameName += $gamespace+', ';
+		}
+		if (strpos($rules, 'initiativeCategories')!=false){//simultaneous movement
+			$gameName += 'sim mv, ';
+		}else{//standard movement
+			$gameName += 'std mv, ';
+		}		    
+		$gameName += ')';
                 $games[] = ["id" => $id, "name" => $gameName, "waiting" => $waiting, "status" => "ACTIVE"];
             }
             $stmt->close();
