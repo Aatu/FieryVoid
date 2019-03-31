@@ -312,7 +312,7 @@ class MLPA extends Weapon{
 	
         public $loadingtimeArray = array(1=>3, 2=>2); //mode 1 should be the one with longest loading time
         public $rangePenaltyArray = array(1=>0.5, 2=>1); //-1/2 hexes and -1/hex, for Laser and Pulse respectably
-        public $fireControlArray = array( 1=>array(-4, 2, 3), 2=>array(1,3,4) ); // fighters, <mediums, <capitals 
+        public $fireControlArray = array( 1=>array(-3, 2, 3), 2=>array(1,3,4) ); // fighters, <mediums, <capitals 
 	
 	public $firingModes = array(1=>'Laser', 2=>'Pulse');
 	public $damageTypeArray = array(1=>'Raking', 2=>'Pulse'); //indicates that this weapon does damage in Pulse mode
